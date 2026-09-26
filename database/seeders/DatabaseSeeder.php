@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             AdrenalineForteProviderSeeder::class,
             RevOpsMasterSeeder::class,
             LogisticsSeeder::class,
+            AlliesSeeder::class,
         ]);
     }
 }

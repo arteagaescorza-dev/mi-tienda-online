@@ -2,200 +2,189 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ally;
+use App\Models\AllyCampaignDirA;
+use App\Models\AllyClearingSettlement;
+use App\Models\AllyCouponDirB;
+use App\Models\AllyLeadCapture;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PortalAlliesController extends Controller
 {
+    /**
+     * Display the Allies Directory, Campaigns Dir A, Attribution Dir B and Clearing House.
+     */
     public function index(Request $request)
     {
-        $alliesList = [
-            [
-                'id' => 1,
-                'code' => 'ALLY-PARADISO',
-                'name' => 'Paradiso Circuit CDMX',
-                'category' => 'circuit_party',
-                'categoryLabel' => 'Festival Circuit & Eventos',
-                'universe' => 'marte',
-                'contactName' => 'Rodrigo Silva (Promotor)',
-                'contactWhatsapp' => '+525544332211',
-                'contactEmail' => 'contacto@paradisocircuit.mx',
-                'socialHandle' => '@paradisocdmx',
-                'portalToken' => 'tok_paradiso_2026',
-                'commissionType' => 'percentage',
-                'commissionRate' => 12.0,
-                'leadAcquisitionCost' => 20.0,
-                'bankClabe' => '012180015678901234',
-                'bankName' => 'BBVA México',
-                'clearingBalance' => -4280.00,
-                'status' => 'active',
-                'notes' => 'Festival Circuit mensual en Frontón México. Convenio de 20% OFF en cover a cambio de registro CAPI.',
-                'stats' => ['leadsReceived' => 142, 'ordersAttributed' => 58, 'gmvAttributed' => 39400, 'commissionEarned' => 4728]
-            ],
-            [
-                'id' => 2,
-                'code' => 'ALLY-ALEX-OF',
-                'name' => 'Alex Rivera (Creator & Model)',
-                'category' => 'onlyfans_creator',
-                'categoryLabel' => 'Creador OnlyFans',
-                'universe' => 'marte',
-                'contactName' => 'Alex Rivera',
-                'contactWhatsapp' => '+525533221100',
-                'contactEmail' => 'alex.of@riveramodels.com',
-                'socialHandle' => '@alexriverafit',
-                'portalToken' => 'tok_alex_of_2026',
-                'commissionType' => 'percentage',
-                'commissionRate' => 15.0,
-                'leadAcquisitionCost' => 25.0,
-                'bankClabe' => '072180002345678901',
-                'bankName' => 'Banorte',
-                'clearingBalance' => -2150.00,
-                'status' => 'active',
-                'notes' => 'Top Creator OnlyFans y embajador de jocks y arneses Marte.',
-                'stats' => ['leadsReceived' => 45, 'ordersAttributed' => 32, 'gmvAttributed' => 21800, 'commissionEarned' => 3270]
-            ],
-            [
-                'id' => 3,
-                'code' => 'ALLY-SODOME',
-                'name' => 'Sodome Spa & Club CDMX',
-                'category' => 'sauna',
-                'categoryLabel' => 'Sauna & Wellness',
-                'universe' => 'marte',
-                'contactName' => 'Gerencia Sodome',
-                'contactWhatsapp' => '+525555112233',
-                'contactEmail' => 'eventos@sodomespa.mx',
-                'socialHandle' => '@sodomeclub',
-                'portalToken' => 'tok_sodome_2026',
-                'commissionType' => 'percentage',
-                'commissionRate' => 10.0,
-                'leadAcquisitionCost' => 18.0,
-                'bankClabe' => '002180098765432109',
-                'bankName' => 'Citibanamex',
-                'clearingBalance' => 1450.00,
-                'status' => 'active',
-                'notes' => 'Sauna premium en Zona Rosa. Trago de cortesía en taquilla para clientes de Marte.',
-                'stats' => ['leadsReceived' => 62, 'ordersAttributed' => 14, 'gmvAttributed' => 9800, 'commissionEarned' => 980]
-            ],
-            [
-                'id' => 4,
-                'code' => 'ALLY-KIKI-BALL',
-                'name' => 'House of Kiki Ballroom',
-                'category' => 'drag_ballroom',
-                'categoryLabel' => 'Ballroom & Drag House',
-                'universe' => 'tiresias',
-                'contactName' => 'Mother Kiki',
-                'contactWhatsapp' => '+525599887766',
-                'contactEmail' => 'kiki@ballroomcdmx.org',
-                'socialHandle' => '@houseofkiki_cdmx',
-                'portalToken' => 'tok_kiki_2026',
-                'commissionType' => 'percentage',
-                'commissionRate' => 14.0,
-                'leadAcquisitionCost' => 22.0,
-                'bankClabe' => '014180054321098765',
-                'bankName' => 'Santander',
-                'clearingBalance' => -1890.00,
-                'status' => 'active',
-                'notes' => 'Colectivo ballroom y comunidad trans. Promoción de binders afirmativos y patrocinios de categorías.',
-                'stats' => ['leadsReceived' => 35, 'ordersAttributed' => 20, 'gmvAttributed' => 13320, 'commissionEarned' => 1864]
-            ],
-            [
-                'id' => 5,
-                'code' => 'ALLY-BELLA',
-                'name' => 'Bella Donna Spa & Boutique',
-                'category' => 'beauty_spa',
-                'categoryLabel' => 'Boutique & Spa',
-                'universe' => 'venus',
-                'contactName' => 'Valeria Rossi',
-                'contactWhatsapp' => '+525566778899',
-                'contactEmail' => 'valeria@belladonnaboutique.mx',
-                'socialHandle' => '@belladonnaroma',
-                'portalToken' => 'tok_bella_2026',
-                'commissionType' => 'percentage',
-                'commissionRate' => 12.0,
-                'leadAcquisitionCost' => 20.0,
-                'bankClabe' => '127180011223344556',
-                'bankName' => 'Banco Azteca',
-                'clearingBalance' => -3100.00,
-                'status' => 'active',
-                'notes' => 'Spa facial y boutique de lencería de autor en Roma Norte.',
-                'stats' => ['leadsReceived' => 28, 'ordersAttributed' => 18, 'gmvAttributed' => 14200, 'commissionEarned' => 1704]
-            ]
-        ];
+        if (Ally::count() === 0) {
+            (new \Database\Seeders\AlliesSeeder())->run();
+        }
 
-        $campaignsDirA = [
-            [
-                'id' => 1,
-                'allyId' => 1,
-                'allyName' => 'Paradiso Circuit CDMX',
-                'title' => '20% OFF en Cover Paradiso Circuit Mayo',
-                'slug' => 'cover-paradiso-mayo-2026',
-                'universe' => 'marte',
-                'benefit' => '20% de descuento en taquilla para el festival de Mayo',
-                'instructions' => 'Muestra tu código de voucher en taquilla para acceder al precio preferencial.',
-                'displayFormat' => 'popup_modal',
-                'leadsCount' => 142,
-                'status' => 'active',
-                'startDate' => '2026-05-01',
-                'endDate' => '2026-05-31',
-                'bannerImage' => 'paradiso_cover_banner.webp'
-            ],
-            [
-                'id' => 2,
-                'allyId' => 3,
-                'allyName' => 'Sodome Spa & Club CDMX',
-                'title' => 'Trago de Bienvenida de Cortesía en Sodome',
-                'slug' => 'trago-cortesia-sodome',
-                'universe' => 'marte',
-                'benefit' => '1 bebida de cortesía (vodka, ron o cerveza artesanal) en recepción',
-                'instructions' => 'Presenta tu voucher digital al momento de registrar tu casillero en caja.',
-                'displayFormat' => 'top_marquee',
-                'leadsCount' => 62,
-                'status' => 'active',
-                'startDate' => '2026-05-01',
-                'endDate' => '2026-06-30',
-                'bannerImage' => 'sodome_welcome_banner.webp'
-            ],
-            [
-                'id' => 3,
-                'allyId' => 4,
-                'allyName' => 'House of Kiki Ballroom',
-                'title' => 'Pase 2x1 Kiki Ball: Categoría Affirmative Realness',
-                'slug' => '2x1-kiki-ball-affirmative',
-                'universe' => 'tiresias',
-                'benefit' => 'Pase 2x1 para espectador en el Ball de Verano',
-                'instructions' => 'Código válido en taquilla física hasta las 22:00 hrs el día del Ball.',
-                'displayFormat' => 'pdp_inline_banner',
-                'leadsCount' => 35,
-                'status' => 'active',
-                'startDate' => '2026-05-15',
-                'endDate' => '2026-06-15',
-                'bannerImage' => 'kiki_ball_banner.webp'
-            ]
-        ];
+        $allies = Ally::with(['campaignsDirA', 'couponsDirB', 'leadCaptures', 'settlements'])->get();
 
-        $leadCaptures = [
-            ['id' => 101, 'voucherCode' => 'PAR-7821', 'campaignId' => 1, 'allyId' => 1, 'leadName' => 'David Morales', 'leadWhatsapp' => '+52 55 4190 8812', 'leadEmail' => 'david.m@gmail.com', 'universe' => 'marte', 'isRedeemed' => true, 'redeemedAt' => '14:22 hrs', 'redeemedBy' => 'Staff Puerta Taquilla #1', 'capiScore' => 9.80, 'date' => '2026-05-12'],
-            ['id' => 102, 'voucherCode' => 'PAR-7822', 'campaignId' => 1, 'allyId' => 1, 'leadName' => 'Carlos Santillán', 'leadWhatsapp' => '+52 55 1122 3344', 'leadEmail' => 'carlos.s@outlook.com', 'universe' => 'marte', 'isRedeemed' => false, 'redeemedAt' => null, 'redeemedBy' => null, 'capiScore' => 9.65, 'date' => '2026-05-13'],
-            ['id' => 103, 'voucherCode' => 'SOD-4412', 'campaignId' => 2, 'allyId' => 3, 'leadName' => 'Eduardo Vera', 'leadWhatsapp' => '+52 55 9988 7711', 'leadEmail' => 'eduardo.v@gmail.com', 'universe' => 'marte', 'isRedeemed' => true, 'redeemedAt' => '18:45 hrs', 'redeemedBy' => 'Caja Sodome', 'capiScore' => 9.90, 'date' => '2026-05-14'],
-            ['id' => 104, 'voucherCode' => 'KIK-9901', 'campaignId' => 3, 'allyId' => 4, 'leadName' => 'Sasha Mendoza', 'leadWhatsapp' => '+52 55 7766 5544', 'leadEmail' => 'sasha.m@ballroom.org', 'universe' => 'tiresias', 'isRedeemed' => false, 'redeemedAt' => null, 'redeemedBy' => null, 'capiScore' => 9.75, 'date' => '2026-05-14'],
-            ['id' => 105, 'voucherCode' => 'BEL-3321', 'campaignId' => 1, 'allyId' => 5, 'leadName' => 'Fernanda Ortiz', 'leadWhatsapp' => '+52 55 8877 6655', 'leadEmail' => 'fer.ortiz@yahoo.com', 'universe' => 'venus', 'isRedeemed' => true, 'redeemedAt' => '12:10 hrs', 'redeemedBy' => 'Recepción Bella Donna', 'capiScore' => 9.50, 'date' => '2026-05-15']
-        ];
+        $alliesList = $allies->map(function ($a) {
+            $leadsReceived = $a->leadCaptures->count() ?: (int)$a->campaignsDirA->sum('leads_count');
+            $ordersAttributed = (int)$a->couponsDirB->sum('orders_count');
+            $gmvAttributed = (float)$a->couponsDirB->sum('revenue_attributed');
+            $commissionEarned = (float)$a->couponsDirB->sum('commission_earned');
 
-        $couponsDirB = [
-            ['id' => 1, 'allyId' => 1, 'couponCode' => 'PARADISO15', 'discountPct' => 15.0, 'commissionRate' => 12.0, 'universe' => 'marte', 'utmSource' => 'paradiso', 'utmCampaign' => 'circuit_mayo', 'clicks' => 680, 'orders' => 58, 'revenue' => 39400, 'commissionEarned' => 4728.00, 'status' => 'active'],
-            ['id' => 2, 'allyId' => 2, 'couponCode' => 'ALEXRIVERA', 'discountPct' => 15.0, 'commissionRate' => 15.0, 'universe' => 'marte', 'utmSource' => 'alex_of', 'utmCampaign' => 'jock_campaign', 'clicks' => 420, 'orders' => 32, 'revenue' => 21800, 'commissionEarned' => 3270.00, 'status' => 'active'],
-            ['id' => 3, 'allyId' => 3, 'couponCode' => 'SODOME10', 'discountPct' => 10.0, 'commissionRate' => 10.0, 'universe' => 'marte', 'utmSource' => 'sodome', 'utmCampaign' => 'wellness_spa', 'clicks' => 190, 'orders' => 14, 'revenue' => 9800, 'commissionEarned' => 980.00, 'status' => 'active'],
-            ['id' => 4, 'allyId' => 4, 'couponCode' => 'KIKIBIND15', 'discountPct' => 15.0, 'commissionRate' => 14.0, 'universe' => 'tiresias', 'utmSource' => 'kiki_ball', 'utmCampaign' => 'binders_affirm', 'clicks' => 230, 'orders' => 20, 'revenue' => 13320, 'commissionEarned' => 1864.80, 'status' => 'active'],
-            ['id' => 5, 'allyId' => 5, 'couponCode' => 'BELLA20', 'discountPct' => 20.0, 'commissionRate' => 12.0, 'universe' => 'venus', 'utmSource' => 'bella_donna', 'utmCampaign' => 'lingerie_season', 'clicks' => 210, 'orders' => 18, 'revenue' => 14200, 'commissionEarned' => 1704.00, 'status' => 'active']
-        ];
+            return [
+                'id' => $a->id,
+                'code' => $a->code,
+                'name' => $a->name,
+                'category' => $a->category,
+                'categoryLabel' => $a->category_label ?? ucfirst(str_replace('_', ' ', $a->category)),
+                'universe' => $a->universe,
+                'contactName' => $a->contact_name,
+                'contactWhatsapp' => $a->contact_whatsapp,
+                'contactEmail' => $a->contact_email,
+                'socialHandle' => $a->social_handle,
+                'portalToken' => $a->portal_token,
+                'commissionType' => $a->commission_type,
+                'commissionRate' => (float)$a->commission_rate,
+                'leadAcquisitionCost' => (float)$a->lead_acquisition_cost,
+                'bankClabe' => $a->bank_clabe,
+                'bankName' => $a->bank_name,
+                'clearingBalance' => (float)$a->clearing_balance,
+                'status' => $a->status,
+                'notes' => $a->notes,
+                'stats' => [
+                    'leadsReceived' => $leadsReceived,
+                    'ordersAttributed' => $ordersAttributed,
+                    'gmvAttributed' => $gmvAttributed,
+                    'commissionEarned' => $commissionEarned,
+                ]
+            ];
+        })->toArray();
 
-        $clearingSettlements = [
-            ['id' => 1, 'code' => 'SETTL-202604-01', 'allyId' => 1, 'allyName' => 'Paradiso Circuit CDMX', 'period' => '01/04/2026 - 30/04/2026', 'leadsCredit' => 2400.00, 'commissionsDebit' => 5200.00, 'netBalance' => -2800.00, 'settlementType' => 'spei_transfer', 'typeLabel' => 'Transferencia SPEI', 'status' => 'executed', 'reference' => 'SPEI-BNX-99882211', 'settledAt' => '2026-05-02 11:30'],
-            ['id' => 2, 'code' => 'SETTL-202604-02', 'allyId' => 2, 'allyName' => 'Alex Rivera (Creator & Model)', 'period' => '01/04/2026 - 30/04/2026', 'leadsCredit' => 800.00, 'commissionsDebit' => 3100.00, 'netBalance' => -2300.00, 'settlementType' => 'in_kind_apparel', 'typeLabel' => 'Canje en Especie', 'status' => 'executed', 'reference' => 'SALIDA_CONVENIO_ALIADO #OC-KARDEX-881', 'settledAt' => '2026-05-03 16:15']
-        ];
+        $campaignsDirA = AllyCampaignDirA::with('ally')->get()->map(function ($c) {
+            return [
+                'id' => $c->id,
+                'allyId' => $c->ally_id,
+                'allyName' => $c->ally?->name ?? 'Aliado',
+                'title' => $c->title,
+                'slug' => $c->slug,
+                'universe' => $c->universe,
+                'benefit' => $c->benefit,
+                'instructions' => $c->instructions,
+                'displayFormat' => $c->display_format,
+                'leadsCount' => (int)$c->leads_count,
+                'status' => $c->status,
+                'startDate' => $c->start_date ? Carbon::parse($c->start_date)->toDateString() : null,
+                'endDate' => $c->end_date ? Carbon::parse($c->end_date)->toDateString() : null,
+                'bannerImage' => $c->banner_image ?? 'default_campaign.webp',
+            ];
+        })->toArray();
+
+        $leadCaptures = AllyLeadCapture::with(['ally', 'campaign'])->latest()->get()->map(function ($l) {
+            return [
+                'id' => $l->id,
+                'voucherCode' => $l->voucher_code,
+                'campaignId' => $l->campaign_id,
+                'allyId' => $l->ally_id,
+                'leadName' => $l->lead_name,
+                'leadWhatsapp' => $l->lead_whatsapp,
+                'leadEmail' => $l->lead_email,
+                'universe' => $l->universe,
+                'isRedeemed' => (bool)$l->is_redeemed,
+                'redeemedAt' => $l->redeemed_at ? Carbon::parse($l->redeemed_at)->format('H:i \h\r\s') : null,
+                'redeemedBy' => $l->redeemed_by,
+                'capiScore' => (float)$l->capi_match_score,
+                'date' => $l->created_at ? Carbon::parse($l->created_at)->toDateString() : null,
+            ];
+        })->toArray();
+
+        $couponsDirB = AllyCouponDirB::with('ally')->get()->map(function ($cp) {
+            return [
+                'id' => $cp->id,
+                'allyId' => $cp->ally_id,
+                'couponCode' => $cp->coupon_code,
+                'discountPct' => (float)$cp->discount_pct,
+                'commissionRate' => (float)$cp->commission_rate,
+                'universe' => $cp->universe,
+                'utmSource' => $cp->utm_source,
+                'utmCampaign' => $cp->utm_campaign,
+                'clicks' => (int)$cp->clicks_count,
+                'orders' => (int)$cp->orders_count,
+                'revenue' => (float)$cp->revenue_attributed,
+                'commissionEarned' => (float)$cp->commission_earned,
+                'status' => $cp->status,
+            ];
+        })->toArray();
+
+        $clearingSettlements = AllyClearingSettlement::with('ally')->latest()->get()->map(function ($s) {
+            $typeLabel = match ($s->settlement_type) {
+                'spei_transfer' => 'Transferencia SPEI',
+                'in_kind_apparel' => 'Canje en Especie',
+                'sponsorship_vip' => 'Patrocinio VIP',
+                default => 'Liquidación'
+            };
+
+            return [
+                'id' => $s->id,
+                'code' => $s->code,
+                'allyId' => $s->ally_id,
+                'allyName' => $s->ally?->name ?? 'Aliado',
+                'period' => $s->period_label,
+                'leadsCredit' => (float)$s->leads_credit,
+                'commissionsDebit' => (float)$s->commissions_debit,
+                'netBalance' => (float)$s->net_balance,
+                'settlementType' => $s->settlement_type,
+                'typeLabel' => $typeLabel,
+                'status' => $s->status,
+                'reference' => $s->accounting_reference,
+                'settledAt' => $s->settled_at ? Carbon::parse($s->settled_at)->format('Y-m-d H:i') : null,
+            ];
+        })->toArray();
 
         $totalLeadsCredit = array_sum(array_map(fn($a) => $a['stats']['leadsReceived'] * $a['leadAcquisitionCost'], $alliesList));
         $totalCommissionsDebit = array_sum(array_column(array_column($alliesList, 'stats'), 'commissionEarned'));
         $totalNetBalance = $totalLeadsCredit - $totalCommissionsDebit;
+
+        $selectedAllyId = $request->query('ally_id');
+        $selectedAlly = null;
+        if ($selectedAllyId) {
+            foreach ($alliesList as $ally) {
+                if ($ally['id'] == $selectedAllyId) {
+                    $selectedAlly = $ally;
+                    break;
+                }
+            }
+        }
+        if (!$selectedAlly && count($alliesList) > 0) {
+            $selectedAlly = $alliesList[0];
+        }
+
+        if (!$selectedAlly) {
+            $selectedAlly = [
+                'id' => 1,
+                'code' => 'ALLY-GENERAL',
+                'name' => 'Aliado Comercial General',
+                'category' => 'general',
+                'categoryLabel' => 'General',
+                'universe' => 'marte',
+                'contactName' => 'Coordinación Comercial',
+                'contactWhatsapp' => '+525500000000',
+                'contactEmail' => 'aliados@mitienda.com',
+                'socialHandle' => '@mitienda',
+                'portalToken' => 'tok_general_2026',
+                'commissionType' => 'percentage',
+                'commissionRate' => 10.0,
+                'leadAcquisitionCost' => 20.0,
+                'bankClabe' => '000000000000000000',
+                'bankName' => 'Banco General',
+                'clearingBalance' => 0.0,
+                'status' => 'active',
+                'notes' => 'Registro base',
+                'stats' => [
+                    'leadsReceived' => 0,
+                    'ordersAttributed' => 0,
+                    'gmvAttributed' => 0.0,
+                    'commissionEarned' => 0.0,
+                ],
+            ];
+        }
 
         return view('portal.allies', [
             'alliesList' => $alliesList,
@@ -206,30 +195,214 @@ class PortalAlliesController extends Controller
             'totalLeadsCredit' => $totalLeadsCredit,
             'totalCommissionsDebit' => $totalCommissionsDebit,
             'totalNetBalance' => $totalNetBalance,
-            'selectedAlly' => $alliesList[0],
+            'selectedAlly' => $selectedAlly,
             'initialMode' => 'admin',
         ]);
     }
 
+    /**
+     * Extranet for Commercial Partners (Partner Portal via cryptographic token).
+     */
     public function partnerPortal(Request $request, $token = null)
     {
-        $indexData = $this->index($request)->getData();
-        $alliesList = $indexData['alliesList'];
-        $selectedAlly = $alliesList[0];
+        $allies = Ally::with(['campaignsDirA', 'couponsDirB', 'leadCaptures', 'settlements'])->get();
+        $selectedAllyModel = null;
 
         if ($token) {
-            foreach ($alliesList as $ally) {
-                if ($ally['portalToken'] === $token) {
-                    $selectedAlly = $ally;
+            $selectedAllyModel = Ally::where('portal_token', $token)->first();
+        }
+
+        if (!$selectedAllyModel && $allies->isNotEmpty()) {
+            $selectedAllyModel = $allies->first();
+        }
+
+        $indexResponse = $this->index($request);
+        $indexData = $indexResponse->getData();
+
+        if ($selectedAllyModel) {
+            foreach ($indexData['alliesList'] as $a) {
+                if ($a['id'] == $selectedAllyModel->id) {
+                    $indexData['selectedAlly'] = $a;
                     break;
                 }
             }
         }
 
         return view('portal.allies', array_merge($indexData, [
-            'selectedAlly' => $selectedAlly,
             'initialMode' => 'partner',
             'partnerToken' => $token,
         ]));
+    }
+
+    /**
+     * Validate and redeem a voucher at door / box office (TASK-ALY-05).
+     */
+    public function validateTicket(Request $request)
+    {
+        $request->validate([
+            'voucher_code' => 'required|string|max:50',
+        ]);
+
+        $code = strtoupper(trim($request->input('voucher_code')));
+        $lead = AllyLeadCapture::where('voucher_code', $code)->first();
+
+        if (!$lead) {
+            return response()->json([
+                'success' => false,
+                'message' => "Folio de voucher {$code} no existe en la base de datos.",
+            ], 404);
+        }
+
+        if ($lead->is_redeemed) {
+            $time = $lead->redeemed_at ? Carbon::parse($lead->redeemed_at)->format('d/m/Y H:i') : 'previamente';
+            return response()->json([
+                'success' => false,
+                'already_redeemed' => true,
+                'message' => "Este voucher ({$code}) ya fue canjeado el {$time} por {$lead->redeemed_by}.",
+                'lead_name' => $lead->lead_name,
+                'redeemed_at' => $lead->redeemed_at,
+                'redeemed_by' => $lead->redeemed_by,
+            ], 422);
+        }
+
+        $redeemedBy = auth()->user()?->name ?? 'Taquilla RevOps';
+        $lead->update([
+            'is_redeemed' => true,
+            'redeemed_at' => Carbon::now(),
+            'redeemed_by' => $redeemedBy,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Acceso autorizado. Voucher {$code} canjeado exitosamente.",
+            'lead_name' => $lead->lead_name,
+            'voucher_code' => $lead->voucher_code,
+            'universe' => $lead->universe,
+            'redeemed_at' => Carbon::now()->format('H:i \h\r\s'),
+            'redeemed_by' => $redeemedBy,
+        ]);
+    }
+
+    /**
+     * Execute a clearing settlement for an ally (SPEI or in-kind apparel) (TASK-ALY-04).
+     */
+    public function executeSettlement(Request $request, Ally $ally)
+    {
+        $validated = $request->validate([
+            'settlement_type' => 'nullable|string|in:spei_transfer,in_kind_apparel,sponsorship_vip',
+        ]);
+
+        $type = $validated['settlement_type'] ?? 'spei_transfer';
+
+        $leadsCount = $ally->leadCaptures()->count() ?: (int)$ally->campaignsDirA()->sum('leads_count');
+        $leadsCredit = $leadsCount * (float)$ally->lead_acquisition_cost;
+        $commissionsDebit = (float)$ally->couponsDirB()->sum('commission_earned');
+        $netBalance = $leadsCredit - $commissionsDebit;
+
+        $code = 'SETTL-' . date('Ym') . '-' . sprintf('%02d', $ally->id) . '-' . rand(10, 99);
+        $reference = match ($type) {
+            'in_kind_apparel' => 'SALIDA_CONVENIO_ALIADO #OC-KARDEX-' . rand(100, 999),
+            'sponsorship_vip' => 'CONVENIO_PATROCINIO #PAT-' . rand(100, 999),
+            default => 'SPEI-BNX-' . rand(10000000, 99999999),
+        };
+
+        $settlement = AllyClearingSettlement::create([
+            'code' => $code,
+            'ally_id' => $ally->id,
+            'period_label' => Carbon::now()->startOfMonth()->format('d/m/Y') . ' - ' . Carbon::now()->format('d/m/Y'),
+            'leads_credit' => $leadsCredit,
+            'commissions_debit' => $commissionsDebit,
+            'net_balance' => $netBalance,
+            'settlement_type' => $type,
+            'status' => 'executed',
+            'accounting_reference' => $reference,
+            'settled_at' => Carbon::now(),
+        ]);
+
+        $ally->update([
+            'clearing_balance' => 0.00,
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Liquidación {$code} ejecutada exitosamente.",
+                'settlement' => $settlement,
+            ]);
+        }
+
+        return back()->with('success', "Liquidación {$code} ({$type}) ejecutada y conciliada exitosamente.");
+    }
+
+    /**
+     * Export door list as CSV for door staff validation with masked phones (TASK-ALY-05).
+     */
+    public function exportDoorListCsv(Ally $ally)
+    {
+        return $this->generateCsvForAlly($ally);
+    }
+
+    /**
+     * Export door list as CSV by partner token.
+     */
+    public function exportDoorListCsvByToken($token)
+    {
+        $ally = Ally::where('portal_token', $token)->firstOrFail();
+        return $this->generateCsvForAlly($ally);
+    }
+
+    /**
+     * Helper to stream CSV with UTF-8 BOM.
+     */
+    protected function generateCsvForAlly(Ally $ally)
+    {
+        $leads = $ally->leadCaptures()->latest()->get();
+        $filename = "lista_taquilla_{$ally->code}_" . date('Ymd_His') . ".csv";
+
+        return response()->streamDownload(function () use ($leads) {
+            // UTF-8 BOM
+            echo "\xEF\xBB\xBF";
+            $handle = fopen('php://output', 'w');
+
+            // Header row
+            fputcsv($handle, [
+                'Folio Voucher',
+                'Nombre Asistente',
+                'WhatsApp Enmascarado',
+                'Email',
+                'Universo',
+                'Canjeado',
+                'Fecha Canje',
+                'Validado Por',
+                'Score CAPI'
+            ]);
+
+            foreach ($leads as $l) {
+                // Mask phone: 55 **** 1234
+                $phone = $l->lead_whatsapp ?? '';
+                $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+                if (strlen($cleanPhone) >= 8) {
+                    $maskedPhone = substr($cleanPhone, 0, 2) . ' **** ' . substr($cleanPhone, -4);
+                } else {
+                    $maskedPhone = $phone;
+                }
+
+                fputcsv($handle, [
+                    $l->voucher_code,
+                    $l->lead_name,
+                    $maskedPhone,
+                    $l->lead_email,
+                    $l->universe,
+                    $l->is_redeemed ? 'SI' : 'NO',
+                    $l->redeemed_at ? Carbon::parse($l->redeemed_at)->format('Y-m-d H:i:s') : '',
+                    $l->redeemed_by ?? '',
+                    $l->capi_match_score ?? ''
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }

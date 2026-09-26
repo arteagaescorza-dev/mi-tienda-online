@@ -63,9 +63,22 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/logistica/rma/{rmaRequest}/inspeccionar', [PortalLogisticsController::class, 'inspectRma'])->name('portal.logistics.rma.inspect');
 	Route::post('/admin/logistica/cajas/{packageType}/stock', [PortalLogisticsController::class, 'updatePackageStock'])->name('portal.logistics.packages.stock');
 	Route::post('/admin/logistica/envios/{shipment}/status', [PortalLogisticsController::class, 'updateShipmentStatus'])->name('portal.logistics.shipments.status');
+
+	// Hub 2: Tienda & CMS Multiverso
+	Route::post('/admin/tienda-cms/fletes', [PortalStoreController::class, 'updateShippingRule'])->name('portal.store.shipping.update');
+	Route::post('/admin/tienda-cms/banners/{bannerId}/toggle', [PortalStoreController::class, 'toggleBanner'])->name('portal.store.banners.toggle');
+	Route::post('/admin/tienda-cms/marquesina/toggle', [PortalStoreController::class, 'toggleAnnouncement'])->name('portal.store.announcement.toggle');
+	Route::post('/admin/tienda-cms/vitrinas/{universe}', [PortalStoreController::class, 'updateStorefront'])->name('portal.store.vitrinas.update');
+
+	// Hub 7: Convenios & Aliados
+	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');
+	Route::post('/admin/convenios/aliados/{ally}/liquidar', [PortalAlliesController::class, 'executeSettlement'])->name('portal.allies.settlement.execute');
+	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv');
 });
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');
+Route::post('/portal/aliado/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.ally.extranet.validate');
+Route::get('/portal/aliado/{token}/export-csv', [PortalAlliesController::class, 'exportDoorListCsvByToken'])->name('portal.ally.extranet.export.csv');
 
 Route::get('/login', [PortalAccessController::class, 'userLogin'])->name('login');
 Route::get('/ingreso/usuario', [PortalAccessController::class, 'userLogin'])->name('portal.user.login');

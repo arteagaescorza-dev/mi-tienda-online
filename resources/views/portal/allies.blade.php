@@ -7,6 +7,25 @@
 
 @section('content')
 <div id="alliesAppRoot" class="w-full text-slate-800 font-sans antialiased" data-screen="allies">
+    @if(session('success'))
+        <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span class="text-sm font-semibold">{{ session('success') }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 text-xs font-bold px-2 py-1 cursor-pointer">Cerrar</button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <span class="text-sm font-semibold">{{ session('error') }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-900 text-xs font-bold px-2 py-1 cursor-pointer">Cerrar</button>
+        </div>
+    @endif
+
     {{-- ========================================================================= --}}
     {{-- CONMUTADOR DE MODO: CONSOLA REVOPS vs EXTRANET SOCIO                     --}}
     {{-- ========================================================================= --}}
@@ -154,7 +173,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($alliesList as $ally)
-                    <div class="ally-card bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-300 transition-all">
+                    <div class="ally-card bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-300 transition-all" data-ally-universe="{{ $ally['universe'] }}">
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="ally-category-badge px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ str_contains($ally['category'], 'circuit') ? 'bg-indigo-100 text-indigo-800' : (str_contains($ally['category'], 'onlyfans') ? 'bg-sky-100 text-sky-800' : (str_contains($ally['category'], 'sauna') ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800')) }}">
@@ -432,16 +451,16 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded">Partner Portal</span>
-                        <h3 class="text-base font-bold text-slate-900">{{ $selectedAlly['name'] }}</h3>
+                        <h3 class="text-base font-bold text-slate-900">{{ $selectedAlly['name'] ?? 'Aliado Comercial' }}</h3>
                     </div>
-                    <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ $selectedAlly['portalToken'] }}</p>
+                    <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ $selectedAlly['portalToken'] ?? 'tok_demo' }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer" data-action="export-door-list-csv" data-ally-id="{{ $selectedAlly['id'] }}" type="button">
+                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer" data-action="export-door-list-csv" data-ally-id="{{ $selectedAlly['id'] ?? 1 }}" type="button">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <span>Descargar CSV Taquilla</span>
                     </button>
-                    <button class="button button-quiet text-xs py-1.5 px-3 bg-slate-900 text-white rounded-lg cursor-pointer" data-action="open-qr-modal" data-ally-id="{{ $selectedAlly['id'] }}" type="button">
+                    <button class="button button-quiet text-xs py-1.5 px-3 bg-slate-900 text-white rounded-lg cursor-pointer" data-action="open-qr-modal" data-ally-id="{{ $selectedAlly['id'] ?? 1 }}" type="button">
                         Generar QR Flyer
                     </button>
                 </div>
@@ -469,7 +488,7 @@
             <div class="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div>
                     <span class="font-bold text-indigo-950 block">Enlace de Difusión con Atribución Automática:</span>
-                    <code class="text-indigo-800 font-mono text-[11px]">https://mitienda.com/?utm_source={{ $selectedAlly['code'] }}&amp;coupon={{ $couponsDirB[0]['couponCode'] }}</code>
+                    <code class="text-indigo-800 font-mono text-[11px]">https://mitienda.com/?utm_source={{ $selectedAlly['code'] ?? 'GENERAL' }}&amp;coupon={{ !empty($couponsDirB) && isset($couponsDirB[0]['couponCode']) ? $couponsDirB[0]['couponCode'] : 'PARADISO15' }}</code>
                 </div>
                 <button class="button button-light text-xs py-1.5 px-3 bg-white text-indigo-900 border-indigo-200 rounded-lg shrink-0 cursor-pointer" data-action="copy-ally-link" type="button">
                     Copiar Enlace
@@ -477,5 +496,229 @@
             </div>
         </div>
     </div>
+
+    {{-- Formulario oculto para ejecucion de liquidaciones --}}
+    <form id="settlementActionForm" method="POST" style="display:none;">
+        @csrf
+        <input type="hidden" name="settlement_type" id="settlementTypeInput" value="spei_transfer">
+    </form>
 </div>
+
+{{-- SCRIPT REACTIVO OPERATIVO PARA CONVENIOS Y ALIADOS (VANILLA JS LIGERO) --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const panels = {
+        'directory': document.getElementById('alliesDirectoryPanel'),
+        'campaigns_a': document.getElementById('alliesCampaignsPanel'),
+        'attribution_b': document.getElementById('alliesAttributionPanel'),
+        'clearing': document.getElementById('alliesClearingPanel'),
+        'partner_portal': document.getElementById('alliesPartnerPortalPanel')
+    };
+
+    const tabButtons = document.querySelectorAll('[data-action="switch-allies-tab"]');
+    const modeButtons = document.querySelectorAll('[data-action="switch-allies-mode"]');
+    const modeLabel = document.getElementById('alliesActiveModeLabel');
+
+    function switchTab(targetTab) {
+        Object.keys(panels).forEach(tabKey => {
+            const panel = panels[tabKey];
+            if (!panel) return;
+            if (tabKey === targetTab) {
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+            }
+        });
+
+        tabButtons.forEach(btn => {
+            if (btn.getAttribute('data-tab') === targetTab) {
+                btn.classList.add('active', 'border-indigo-600', 'text-indigo-600');
+                btn.classList.remove('border-transparent', 'text-slate-500');
+            } else {
+                btn.classList.remove('active', 'border-indigo-600', 'text-indigo-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            }
+        });
+
+        const url = new URL(window.location);
+        url.searchParams.set('tab', targetTab);
+        window.history.replaceState({}, '', url);
+    }
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            if (e.target.classList.contains('section-help-btn')) return;
+            const tab = this.getAttribute('data-tab');
+            if (tab) switchTab(tab);
+        });
+    });
+
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const mode = this.getAttribute('data-mode');
+            modeButtons.forEach(b => b.classList.remove('active', 'bg-white', 'shadow-xs', 'text-slate-900'));
+            this.classList.add('active', 'bg-white', 'shadow-xs', 'text-slate-900');
+
+            if (mode === 'partner') {
+                if (modeLabel) modeLabel.textContent = 'Extranet Aliado';
+                switchTab('partner_portal');
+            } else {
+                if (modeLabel) modeLabel.textContent = 'Control RevOps';
+                switchTab('directory');
+            }
+        });
+    });
+
+    // Check initial tab from URL or query
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlParams.get('tab') || '{{ $initialMode === "partner" ? "partner_portal" : "directory" }}';
+    if (initialTab && panels[initialTab]) {
+        switchTab(initialTab);
+    }
+
+    // Direct open extranet button for specific ally
+    document.querySelectorAll('[data-action="open-partner-portal-for-ally"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const allyId = this.getAttribute('data-ally-id');
+            const url = new URL(window.location);
+            url.searchParams.set('ally_id', allyId);
+            url.searchParams.set('tab', 'partner_portal');
+            window.location.href = url.toString();
+        });
+    });
+
+    // Settlement Actions (SPEI & Especie)
+    const settlementForm = document.getElementById('settlementActionForm');
+    const settlementTypeInput = document.getElementById('settlementTypeInput');
+
+    document.querySelectorAll('[data-action="settle-spei-btn"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const allyId = this.getAttribute('data-ally-id');
+            if (confirm('Deseas registrar y conciliar la liquidacion SPEI para este socio comercial?')) {
+                settlementForm.action = `/admin/convenios/aliados/${allyId}/liquidar`;
+                settlementTypeInput.value = 'spei_transfer';
+                settlementForm.submit();
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-action="settle-inkind-btn"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const allyId = this.getAttribute('data-ally-id');
+            if (confirm('Deseas registrar el canje de prendas en especie con asiento inmutable en Kardex?')) {
+                settlementForm.action = `/admin/convenios/aliados/${allyId}/liquidar`;
+                settlementTypeInput.value = 'in_kind_apparel';
+                settlementForm.submit();
+            }
+        });
+    });
+
+    // Door List CSV Export
+    document.querySelectorAll('[data-action="export-door-list-csv"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const allyId = this.getAttribute('data-ally-id');
+            window.location.href = `/admin/convenios/aliados/${allyId}/export-csv`;
+        });
+    });
+
+    // Copy Diffusion Link
+    document.querySelectorAll('[data-action="copy-ally-link"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeEl = this.parentElement.querySelector('code');
+            if (codeEl) {
+                navigator.clipboard.writeText(codeEl.textContent.trim()).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copiado!';
+                    setTimeout(() => { this.textContent = originalText; }, 2000);
+                });
+            }
+        });
+    });
+
+    // Ticket Voucher Validation in Taquilla
+    const validateBtn = document.querySelector('[data-action="validate-ticket-btn"]');
+    const voucherInput = document.getElementById('alliesTicketVoucherInput');
+    const validationResult = document.getElementById('alliesTicketValidationResult');
+
+    function performTicketValidation() {
+        if (!voucherInput || !validationResult) return;
+        const code = voucherInput.value.trim();
+        if (!code) {
+            voucherInput.focus();
+            return;
+        }
+
+        validationResult.classList.remove('hidden');
+        validationResult.className = 'mt-3 p-3 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-mono';
+        validationResult.innerHTML = 'Consultando sistema de taquilla anti-duplicados...';
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+        fetch('{{ route("portal.allies.ticket.validate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ voucher_code: code })
+        })
+        .then(res => res.json().then(data => ({ status: res.status, body: data })))
+        .then(({ status, body }) => {
+            if (status === 200 && body.success) {
+                validationResult.className = 'mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs';
+                validationResult.innerHTML = `<strong>Acceso Autorizado:</strong> ${body.message}<br><span class="text-[11px] text-emerald-700 font-mono mt-1 block">Asistente: ${body.lead_name} &bull; Folio: ${body.voucher_code} &bull; Hora: ${body.redeemed_at} &bull; ${body.redeemed_by}</span>`;
+                voucherInput.value = '';
+            } else if (status === 422 || body.already_redeemed) {
+                validationResult.className = 'mt-3 p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs';
+                validationResult.innerHTML = `<strong>Atencion - Voucher Ya Canjeado:</strong> ${body.message}`;
+            } else {
+                validationResult.className = 'mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs';
+                validationResult.innerHTML = `<strong>Error de Validacion:</strong> ${body.message || 'Folio invalido o no encontrado.'}`;
+            }
+        })
+        .catch(() => {
+            validationResult.className = 'mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs';
+            validationResult.innerHTML = '<strong>Error de Conexion:</strong> No se pudo conectar con el servicio de validacion.';
+        });
+    }
+
+    if (validateBtn) {
+        validateBtn.addEventListener('click', performTicketValidation);
+    }
+    if (voucherInput) {
+        voucherInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performTicketValidation();
+            }
+        });
+    }
+
+    // Filter Allies by Universe in Directory Tab
+    const universeFilterBtns = document.querySelectorAll('[data-action="filter-allies-universe"]');
+    const allyCards = document.querySelectorAll('.ally-card');
+
+    universeFilterBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const universe = this.getAttribute('data-universe');
+            universeFilterBtns.forEach(b => {
+                b.classList.remove('bg-slate-900', 'text-white');
+                b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            });
+            this.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            this.classList.add('bg-slate-900', 'text-white');
+
+            allyCards.forEach(card => {
+                const cardUniverse = card.getAttribute('data-ally-universe');
+                if (universe === 'all' || cardUniverse === universe) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    });
+});
+</script>
 @endsection
