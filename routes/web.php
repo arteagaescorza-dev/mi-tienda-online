@@ -50,6 +50,9 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/proveedores/{supplier}/sincronizar', [SupplierSyncController::class, 'store'])->name('portal.suppliers.sync');
 	Route::post('/admin/proveedores/{supplier}/colores', [SupplierColorMappingController::class, 'store'])->name('portal.suppliers.colors.store');
 	Route::get('/admin/finanzas', [StorefrontController::class, 'portalFinance'])->name('portal.finance');
+	Route::post('/admin/finanzas/payouts/{payoutBatch}/conciliar', [StorefrontController::class, 'reconcilePayoutBatch'])->name('portal.finance.payouts.reconcile');
+	Route::post('/admin/finanzas/suscripciones/{subscription}/reintentar', [StorefrontController::class, 'retrySubscriptionDunning'])->name('portal.finance.subscriptions.retry');
+	Route::post('/admin/finanzas/cuentas/{vendorBill}/pagar', [StorefrontController::class, 'payVendorBill'])->name('portal.finance.vendor_bills.pay');
 });
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');

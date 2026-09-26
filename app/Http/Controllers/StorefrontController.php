@@ -14,6 +14,11 @@ use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseKardex;
 use App\Models\Supplier;
 use App\Models\SupplierSyncRun;
+use App\Models\OrderFinancialMargin;
+use App\Models\PayoutBatch;
+use App\Models\CustomerSubscription;
+use App\Models\DunningRetryLog;
+use App\Models\VendorBill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -438,21 +443,187 @@ class StorefrontController extends Controller
         ])) ?: ['No hay alertas operativas pendientes.'];
     }
 
-    public function portalFinance()
+    public function portalFinance(Request $request)
     {
+        $ordersCount = OrderFinancialMargin::count();
+        $ordersGross = (float) OrderFinancialMargin::sum('gross_revenue');
+        $mrrActive = (float) CustomerSubscription::where('status', 'active')->sum('monthly_amount');
+        $facturacionBruta = $ordersGross + $mrrActive;
+
+        $totalCogs = (float) OrderFinancialMargin::sum('cogs_total');
+        $totalGatewayFees = (float) OrderFinancialMargin::sum('gateway_fee');
+        $totalPackaging = (float) OrderFinancialMargin::sum('packaging_cost');
+        $totalShipping = (float) OrderFinancialMargin::sum('shipping_courier_cost');
+        $adsSpend = (float) (VendorBill::where('vendor_name', 'like', '%Meta Ads%')->value('amount') ?? 14300.00);
+
+        $totalEgresos = $totalCogs + $totalGatewayFees + $totalPackaging + $totalShipping + $adsSpend;
+        $netProfit = max(0, $facturacionBruta - $totalEgresos);
+        $netMarginPercent = $facturacionBruta > 0 ? round(($netProfit / $facturacionBruta) * 100, 1) : 0;
+
+        // Top 4 KPI Cards
+        $cards = [
+            [
+                'label' => 'Facturación del mes',
+                'value' => 'MXN $' . number_format($facturacionBruta, 2),
+                'note' => 'Ventas D2C + Membresías MRR',
+                'change' => '+14.2%',
+            ],
+            [
+                'label' => 'Egresos operativos',
+                'value' => 'MXN $' . number_format($totalEgresos, 2),
+                'note' => 'COGS, pasarelas, empaque y fletes',
+                'change' => 'Deducciones',
+            ],
+            [
+                'label' => 'Margen neto real',
+                'value' => $netMarginPercent . '%',
+                'note' => 'Rentabilidad líquida (EBITDA)',
+                'change' => 'EBITDA',
+            ],
+            [
+                'label' => 'MRR Recurrente Activo',
+                'value' => 'MXN $' . number_format($mrrActive, 2),
+                'note' => CustomerSubscription::where('status', 'active')->count() . ' miembros vigentes',
+                'change' => 'MRR',
+            ],
+        ];
+
+        // Cascada P&L
+        $waterfall = [
+            'gross_revenue' => $facturacionBruta,
+            'cogs' => $totalCogs,
+            'cogs_percent' => $facturacionBruta > 0 ? round(($totalCogs / $facturacionBruta) * 100, 1) : 0,
+            'gateway_fees' => $totalGatewayFees,
+            'gateway_percent' => $facturacionBruta > 0 ? round(($totalGatewayFees / $facturacionBruta) * 100, 1) : 0,
+            'packaging' => $totalPackaging,
+            'packaging_percent' => $facturacionBruta > 0 ? round(($totalPackaging / $facturacionBruta) * 100, 1) : 0,
+            'shipping' => $totalShipping,
+            'shipping_percent' => $facturacionBruta > 0 ? round(($totalShipping / $facturacionBruta) * 100, 1) : 0,
+            'ads_spend' => $adsSpend,
+            'ads_percent' => $facturacionBruta > 0 ? round(($adsSpend / $facturacionBruta) * 100, 1) : 0,
+            'net_profit' => $netProfit,
+            'net_margin_percent' => $netMarginPercent,
+        ];
+
+        // Lotes Bancarios (Payout Batches)
+        $payoutBatches = PayoutBatch::orderByDesc('id')->get();
+        $payoutKpis = [
+            'gross_captured' => (float) PayoutBatch::sum('gross_amount'),
+            'fees_retained' => (float) PayoutBatch::sum('fee_amount') + (float) PayoutBatch::sum('tax_withheld'),
+            'reconciled_amount' => (float) PayoutBatch::where('status', 'reconciled')->sum('net_deposited'),
+            'pending_amount' => (float) PayoutBatch::where('status', 'pending')->sum('net_deposited'),
+        ];
+
+        // Suscripciones y Dunning
+        $subscriptions = CustomerSubscription::with('dunningLogs')->orderByDesc('id')->get();
+        $subscriptionKpis = [
+            'mrr_active' => $mrrActive,
+            'active_subscribers' => CustomerSubscription::where('status', 'active')->count(),
+            'churn_rate' => '2.1%',
+            'recovered_dunning' => (float) DunningRetryLog::where('was_recovered', true)->sum('amount_recovered'),
+        ];
+        $dunningLogs = DunningRetryLog::with('subscription')->latest()->limit(10)->get();
+
+        // Margen Neto por Pedido
+        $orderMargins = OrderFinancialMargin::with(['order.items.variant.product'])->latest()->limit(25)->get();
+        $marginKpis = [
+            'avg_ticket' => $ordersCount > 0 ? round((float) OrderFinancialMargin::avg('gross_revenue'), 2) : 0,
+            'avg_margin' => $ordersCount > 0 ? round((float) OrderFinancialMargin::avg('net_margin_percent'), 1) : 0,
+            'avg_packaging' => $ordersCount > 0 ? round((float) OrderFinancialMargin::avg('packaging_cost'), 2) : 0,
+            'avg_shipping' => $ordersCount > 0 ? round((float) OrderFinancialMargin::avg('shipping_courier_cost'), 2) : 0,
+        ];
+
+        // Cuentas por Pagar (Vendor Bills)
+        $vendorBills = VendorBill::orderByDesc('id')->get();
+        $vendorBillKpis = [
+            'pending_week' => (float) VendorBill::whereIn('status', ['pending', 'scheduled'])->sum('amount'),
+            'workshops_pending' => (float) VendorBill::where('vendor_type', 'apparel_workshop')->whereIn('status', ['pending', 'scheduled'])->sum('amount'),
+            'ads_invoiced' => $adsSpend,
+            'avg_payment_days' => '14 días',
+        ];
+
+        // Movimientos recientes reales (de orders y vendor_bills)
+        $latestOrders = Order::latest()->limit(5)->get();
+        $latestBills = VendorBill::latest()->limit(5)->get();
+        $movements = collect();
+        foreach ($latestOrders as $ord) {
+            $movements->push([
+                'type' => 'Ingreso',
+                'concept' => 'Venta Orden #' . $ord->order_number . ' (' . strtoupper($ord->payment_method ?? 'WEB') . ')',
+                'amount' => '+MXN $' . number_format((float) $ord->total, 2),
+                'date' => $ord->created_at?->diffForHumans() ?? 'Hoy',
+            ]);
+        }
+        foreach ($latestBills as $vb) {
+            $movements->push([
+                'type' => 'Egreso',
+                'concept' => $vb->bill_number . ' - ' . $vb->vendor_name,
+                'amount' => '-MXN $' . number_format((float) $vb->amount, 2),
+                'date' => $vb->due_date?->format('d M, Y') ?? 'Próximo',
+            ]);
+        }
+
+        $activeTab = $request->query('tab', 'cashflow');
+
         return view('portal.finance', [
-            'cards' => [
-                ['label' => 'Ingresos del mes', 'value' => 'MXN $418,200'],
-                ['label' => 'Egresos del mes', 'value' => 'MXN $263,990'],
-                ['label' => 'Margen estimado', 'value' => '36.9%'],
-                ['label' => 'Reembolsos', 'value' => 'MXN $12,480'],
-            ],
-            'movements' => [
-                ['type' => 'Ingreso', 'concept' => 'Ventas ecommerce', 'amount' => 'MXN $24,810'],
-                ['type' => 'Egreso', 'concept' => 'Compra proveedor dropship', 'amount' => 'MXN $9,640'],
-                ['type' => 'Egreso', 'concept' => 'Costo envios nacionales', 'amount' => 'MXN $2,130'],
-            ],
+            'activeTab' => $activeTab,
+            'cards' => $cards,
+            'waterfall' => $waterfall,
+            'payoutBatches' => $payoutBatches,
+            'payoutKpis' => $payoutKpis,
+            'subscriptions' => $subscriptions,
+            'subscriptionKpis' => $subscriptionKpis,
+            'dunningLogs' => $dunningLogs,
+            'orderMargins' => $orderMargins,
+            'marginKpis' => $marginKpis,
+            'vendorBills' => $vendorBills,
+            'vendorBillKpis' => $vendorBillKpis,
+            'movements' => $movements->take(6)->values(),
         ]);
+    }
+
+    public function reconcilePayoutBatch(PayoutBatch $payoutBatch)
+    {
+        $payoutBatch->update([
+            'status' => 'reconciled',
+            'deposit_date' => now(),
+        ]);
+
+        return redirect()->route('portal.finance', ['tab' => 'reconciliation'])
+            ->with('success', "Lote {$payoutBatch->payout_id_external} conciliado exitosamente.");
+    }
+
+    public function retrySubscriptionDunning(CustomerSubscription $subscription)
+    {
+        $subscription->dunningLogs()->create([
+            'attempt_number' => $subscription->dunningLogs()->count() + 1,
+            'decline_code' => 'card_retry_manual',
+            'action_taken' => 'automated_charge_retry',
+            'was_recovered' => true,
+            'amount_recovered' => $subscription->monthly_amount,
+            'scheduled_retry_at' => now(),
+        ]);
+
+        $subscription->update([
+            'status' => 'active',
+            'failed_attempts_count' => 0,
+            'next_billing_at' => now()->addMonth(),
+        ]);
+
+        return redirect()->route('portal.finance', ['tab' => 'subscriptions'])
+            ->with('success', "Cobro reintentado y membresía {$subscription->subscription_folio} rescatada.");
+    }
+
+    public function payVendorBill(VendorBill $vendorBill)
+    {
+        $vendorBill->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'payment_reference' => 'SPEI-AUTO-' . rand(100000, 999999),
+        ]);
+
+        return redirect()->route('portal.finance', ['tab' => 'expenses'])
+            ->with('success', "Cuenta por pagar {$vendorBill->bill_number} liquidada por SPEI.");
     }
 
     public function portalModule(string $module)

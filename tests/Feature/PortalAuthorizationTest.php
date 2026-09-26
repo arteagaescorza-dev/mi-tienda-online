@@ -87,7 +87,8 @@ class PortalAuthorizationTest extends TestCase
             ->assertOk()
             ->assertSee('Flujo de Caja')
             ->assertSee('P&L Waterfall', false)
-            ->assertSee('MXN $418,200');
+            ->assertSee('Facturación')
+            ->assertSee('MXN $');
     }
 
     public function test_customer_cannot_access_the_finance_hub(): void

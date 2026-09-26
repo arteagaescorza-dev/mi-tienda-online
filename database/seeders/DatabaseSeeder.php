@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             TorzoProviderSeeder::class,
             AdrenalineForteProviderSeeder::class,
             RevOpsMasterSeeder::class,
-            PurchaseOrderSeeder::class,
+            FinanceSeeder::class,
         ]);
     }
 }
