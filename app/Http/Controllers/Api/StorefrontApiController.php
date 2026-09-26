@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\OrderProcessingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,10 +13,12 @@ use Illuminate\Support\Str;
 class StorefrontApiController extends Controller
 {
     protected CartService $cartService;
+    protected OrderProcessingService $orderProcessingService;
 
-    public function __construct(CartService $cartService)
+    public function __construct(CartService $cartService, OrderProcessingService $orderProcessingService)
     {
         $this->cartService = $cartService;
+        $this->orderProcessingService = $orderProcessingService;
     }
 
     /**
@@ -269,5 +272,69 @@ class StorefrontApiController extends Controller
         $cartDetails = $this->cartService->releaseCartLocks($cartSessionId);
 
         return response()->json($cartDetails);
+    }
+
+    /**
+     * Valida codigo postal y calcula costos de envio con Sepomex.
+     */
+    public function validatePostalCode(Request $request): JsonResponse
+    {
+        $zip = (string) $request->input('postal_code', '');
+        $subtotal = (float) $request->input('subtotal', 0.0);
+        $result = $this->orderProcessingService->validatePostalCode($zip, $subtotal);
+
+        return response()->json($result);
+    }
+
+    /**
+     * Valida cupon de descuento (estandar o aliado B2B).
+     */
+    public function validateCoupon(Request $request): JsonResponse
+    {
+        $code = (string) $request->input('code', '');
+        $subtotal = (float) $request->input('subtotal', 0.0);
+        $result = $this->orderProcessingService->validateCoupon($code, $subtotal);
+
+        return response()->json($result);
+    }
+
+    /**
+     * Procesa la transaccion de compra integral con creacion de Orden y Kardex.
+     */
+    public function checkout(Request $request): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $payload = $request->all();
+        $payload['cart_id'] = $cartSessionId;
+
+        try {
+            $order = $this->orderProcessingService->processCheckout($payload, auth()->id());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Compra formalizada con exito.',
+                'order' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'total' => (float) $order->total,
+                    'total_formatted' => 'MXN $' . number_format((float) $order->total, 2),
+                    'status' => $order->status,
+                    'payment_status' => $order->payment_status,
+                    'payment_method' => $order->payment_method,
+                    'shipping_address' => $order->shipping_address,
+                    'created_at' => $order->created_at->toIso8601String(),
+                    'tracking_number' => $order->shipment ? $order->shipment->tracking_number : null,
+                    'financial_margin' => $order->financialMargin ? [
+                        'net_profit' => (float) $order->financialMargin->net_profit,
+                        'margin_health' => $order->financialMargin->margin_health_level,
+                    ] : null,
+                ],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }

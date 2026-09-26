@@ -1458,25 +1458,65 @@
       return { success: false, message: 'Código vacío' };
     }
     const code = rawCode.trim().toUpperCase();
-    if (!VALID_COUPONS[code]) {
+
+    // Si ya existe en memoria local
+    if (VALID_COUPONS[code]) {
+      const cData = VALID_COUPONS[code];
+      couponState.appliedCoupon = code;
+      couponState.discountPct = cData.discountPct;
+      couponState.attributedAlly = cData.ally;
+
+      updateCheckoutSummary();
+      renderCartSheetContent();
+      renderCouponBoxes();
+      if (checkoutState && checkoutState.step === 3) {
+        renderCheckoutStep3Review();
+      }
+
+      showToastNotification(`Cupón ${code} aplicado: ${cData.discountPct}% de descuento`);
+      return { success: true, coupon: cData };
+    }
+
+    // Validar asincronamente contra la API del backend (Hub 7 / Cupones de BD)
+    const rawSubtotal = storeState.cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+    fetch('/api/v1/store/coupons/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ code: code, subtotal: rawSubtotal })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.valid) {
+        const cData = {
+          code: res.code,
+          discountPct: res.discount_pct,
+          ally: res.type === 'ally_b2b' ? (res.utm_source || 'Aliado B2B') : 'Promoción Oficial'
+        };
+        VALID_COUPONS[code] = cData;
+        couponState.appliedCoupon = res.code;
+        couponState.discountPct = res.discount_pct;
+        couponState.discountAmount = res.discount_amount;
+        couponState.attributedAlly = cData.ally;
+
+        updateCheckoutSummary();
+        renderCartSheetContent();
+        renderCouponBoxes();
+        if (checkoutState && checkoutState.step === 3) {
+          renderCheckoutStep3Review();
+        }
+        showToastNotification(`Cupón ${res.code} aplicado: ${res.discount_pct}% de descuento`);
+      } else {
+        showToastNotification(res.message || `El cupón "${code}" no es válido o ha expirado`);
+      }
+    })
+    .catch(() => {
       showToastNotification(`El cupón "${code}" no es válido o ha expirado`);
-      return { success: false, message: 'Cupón no válido' };
-    }
+    });
 
-    const cData = VALID_COUPONS[code];
-    couponState.appliedCoupon = code;
-    couponState.discountPct = cData.discountPct;
-    couponState.attributedAlly = cData.ally;
-
-    updateCheckoutSummary();
-    renderCartSheetContent();
-    renderCouponBoxes();
-    if (checkoutState && checkoutState.step === 3) {
-      renderCheckoutStep3Review();
-    }
-
-    showToastNotification(`Cupón ${code} aplicado: ${cData.discountPct}% de descuento`);
-    return { success: true, coupon: cData };
+    return { success: false, message: 'Validando cupón...' };
   }
 
   function removeDiscountCoupon() {
@@ -2215,6 +2255,44 @@
     };
 
     checkoutState.lastConfirmedOrder = order;
+
+    // Conectar con backend RESTful de checkout (TASK-INT-06 / TASK-FIN-01)
+    fetch('/api/v1/store/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Cart-Session-Id': getCartSessionId(),
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        cart_id: getCartSessionId(),
+        customer: { ...checkoutState.customer },
+        shipping: { ...checkoutState.shipping },
+        payment_method: checkoutState.paymentMethod,
+        coupon_code: couponState.appliedCoupon || null,
+        universe: storeState.activeUniverse,
+        dispatch_strategy: checkoutState.dispatchStrategy || 'standard'
+      })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.success && res.order) {
+        order.folio = res.order.order_number;
+        order.trackingNumber = res.order.tracking_number;
+        const folioBadge = document.getElementById('orderConfirmedFolio');
+        if (folioBadge) folioBadge.textContent = res.order.order_number;
+      }
+    })
+    .catch(() => {});
+
+    // Limpiar carrito local
+    storeState.cart = [];
+    try {
+      localStorage.setItem('multiverse_store_cart', JSON.stringify([]));
+      localStorage.removeItem('multiverse_stock_lock_expires_at');
+    } catch (e) {}
+    updateCartBadges();
+    renderCartSheetContent();
 
     // 6. Guardar en localStorage de pedidos del cliente
     try {

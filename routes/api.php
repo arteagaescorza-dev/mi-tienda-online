@@ -90,5 +90,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/cart/clear', [StorefrontApiController::class, 'clearCart']);
         Route::post('/cart/lock', [StorefrontApiController::class, 'lockCart']);
         Route::post('/cart/release', [StorefrontApiController::class, 'releaseCartLock']);
+
+        // Checkout Transaccional, Cupones y Sepomex (Slice 1.4 / TASK-STR-03 / TASK-FIN-01)
+        Route::post('/postal-code/lookup', [StorefrontApiController::class, 'validatePostalCode']);
+        Route::post('/coupons/validate', [StorefrontApiController::class, 'validateCoupon']);
+        Route::post('/checkout', [StorefrontApiController::class, 'checkout']);
     });
 });

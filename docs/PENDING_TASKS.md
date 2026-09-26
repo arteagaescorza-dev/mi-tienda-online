@@ -120,6 +120,7 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Slice 1.1: Shell Base PWA, Conmutador Multiverso y Catálogo Real de BD:** [COMPLETADO] (113/113 pruebas pasando, 528 aserciones, 0 emojis).
 * **Slice 1.2: Ficha Anatómica PDP, Matriz de 6 Tallas y Guía de Medidas Torzo en cm:** [COMPLETADO] (119/119 pruebas pasando, 563 aserciones, 0 emojis).
 * **Slice 1.3: Carrito Deslizable y Motor de Reserva Temporal de Stock (`TASK-INT-06`):** [COMPLETADO] (127/127 pruebas pasando, 593 aserciones, 0 emojis).
+* **Slice 1.4: Checkout Transaccional, Cupones del Hub 7, Fletes del Hub 6 y Liquidación:** [COMPLETADO] (134/134 pruebas pasando, 623 aserciones, 0 emojis).
 * **Backend:**
   - Scopes multiverso en `Product` (`marte`, `venus`, `tiresias`, `terra`) con cálculo en vivo de stock disponible ($\text{Disponible} = \text{Cantidad} - \text{Apartados}$).
   - `StockReservationService`: Candado de stock temporal (`stock_locks`) con TTL de 300 segundos, bloqueo pesimista en MySQL y liberación automática.

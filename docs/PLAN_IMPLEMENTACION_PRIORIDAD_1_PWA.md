@@ -105,21 +105,28 @@ flowchart TD
 
 ---
 
-### Slice 4: Checkout Transaccional, Cupones del Hub 7, Fletes del Hub 6 y Liquidación
+### Slice 4: Checkout Transaccional, Cupones del Hub 7, Fletes del Hub 6 y Liquidación [COMPLETADO]
+* **Estado:** Completado y verificado (134/134 pruebas verdes en PHPUnit, 623 aserciones, 0 emojis).
 * **Backend:**
-  - `OrderProcessingService`:
-    - Validación de código postal con API Sepomex y aplicación de flete (\$149 MXN o \$0 si subtotal $\ge \$999$ MXN).
-    - Validación de cupón contra `AllyCouponDirB` y `Coupon`, deduciendo el porcentaje correspondiente y vinculando el `ally_id` para comisiones del Hub 7.
+  - `OrderProcessingService` (`app/Services/OrderProcessingService.php`):
+    - Validación y cotización de código postal Sepomex con regla de flete (\$149 MXN si subtotal < \$999 MXN, o \$0 si subtotal $\ge \$999$ MXN).
+    - Motor de cupones con soporte dual para cupones estándar (`Coupon`) y convenios B2B (`AllyCouponDirB` de Hub 7), deduciendo montos/porcentajes y vinculando atribución unívoca (`Attribution`).
     - Transacción ACID de checkout:
-      1. Transmuta `stock_locks` a estado `purchased`.
-      2. Descuenta el inventario físico (`inventories.quantity -= qty`, `inventories.reserved -= qty`).
-      3. Asienta el movimiento inmutable en Kardex (`InventoryMovement::create(['type' => 'SALIDA_VENTA_ONLINE'])`).
-      4. Crea la `Order` con folio unívoco (`#ORD-2026-XXXX` o `#MIX-2026-XXXX`).
-      5. Genera la orden financiera en `order_financial_margins` deduciendo comisión de pasarela y flete real.
+      1. Transmuta candados `stock_locks` a estado `'purchased'`.
+      2. Descuenta inventario físico en bodega `warehouse-1` (`quantity -= qty`, `reserved -= qty`).
+      3. Asienta el movimiento inmutable en Kardex (`InventoryMovement::create(['reason' => 'SALIDA_VENTA_ONLINE - Pedido ...', 'quantity' => -$qty])`).
+      4. Crea la `Order` con folio unívoco inmutable (`#ORD-2026-XXXX` para carritos estándar o `#MIX-2026-XXXX` para carritos mixtos Línea A + Línea B).
+      5. Genera el registro contable en `order_financial_margins` calculando COGS, comisiones de pasarela, costos de empaque y flete real courier con semáforo de margen saludable.
+      6. Emite guía courier DHL Express en `shipments` (`label_created`).
+    - Endpoints RESTful en `StorefrontApiController` y registrados en `routes/api.php`:
+      - `POST /api/v1/store/postal-code/lookup`: validación Sepomex y cotización de flete.
+      - `POST /api/v1/store/coupons/validate`: validación de cupón y porcentaje de descuento.
+      - `POST /api/v1/store/checkout`: formalización transaccional integral del pedido.
 * **Frontend:**
-  - Stepper en drawer de checkout (Paso 1: Resumen y cupón; Paso 2: Dirección y flete; Paso 3: Pago).
-  - Selector de pago: Transferencia SPEI directa BBVA (con CLABE y copiado en 1 clic) o pasarela con tarjeta.
-* **Verificación:** Completar una compra genera la orden en `orders`, el asiento en `inventory_movements`, y descuenta las existencias físicas en el Hub 4 de Inventario.
+  - Stepper de checkout interactivo en modal PWA (Paso 1: Datos de comprador y dirección; Paso 2: Método de pago; Paso 3: Revisión final; Paso 4: Confirmación con folio real y CLABE copiable).
+  - Selector de pago: Transferencia SPEI directa BBVA (con CLABE `012180004708283787` y copiado en 1 clic) o pasarela con tarjeta.
+  - Sincronización asíncrona que envía la compra a la API, actualiza el folio inmutable `#ORD`/`#MIX` y vacía el carrito local.
+* **Verificación:** Suite `tests/Feature/StorefrontPwaCheckoutTest.php` creada y pasando al 100% (7 pruebas, 30 aserciones, 0 emojis). Suite global al 100% (134 pruebas, 623 aserciones).
 
 ---
 
