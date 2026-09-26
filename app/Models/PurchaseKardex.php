@@ -14,6 +14,10 @@ class PurchaseKardex extends Model
     protected $table = 'purchase_kardex';
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);

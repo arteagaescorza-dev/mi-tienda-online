@@ -10,8 +10,15 @@ class EnsureUserHasRole
 {
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        abort_unless($request->user()?->role === $role, 403);
+        $user = $request->user();
+        if (!$user) {
+            abort(403);
+        }
 
-        return $next($request);
+        if ($user->role === $role || ($role === 'portal' && in_array($user->role, ['portal', 'admin'], true))) {
+            return $next($request);
+        }
+
+        abort(403);
     }
 }

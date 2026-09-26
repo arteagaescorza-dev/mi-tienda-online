@@ -401,7 +401,7 @@ class StorefrontController extends Controller
             ->get()
             ->map(fn ($k) => [
                 'id' => 'KDX-PUR-' . str_pad((string) $k->id, 4, '0', STR_PAD_LEFT),
-                'timestamp' => $k->created_at->format('d M, Y H:i'),
+                'timestamp' => $k->created_at ? \Carbon\Carbon::parse($k->created_at)->format('d M, Y H:i') : now()->format('d M, Y H:i'),
                 'type' => $k->movement_type,
                 'typeLabel' => match ($k->movement_type) {
                     'PO_CREATED' => 'Emisión de PO',

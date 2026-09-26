@@ -67,6 +67,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');
 
+Route::get('/login', [PortalAccessController::class, 'userLogin'])->name('login');
 Route::get('/ingreso/usuario', [PortalAccessController::class, 'userLogin'])->name('portal.user.login');
 Route::get('/ingreso/cliente', [PortalAccessController::class, 'clientLogin'])->name('portal.client.login');
 
