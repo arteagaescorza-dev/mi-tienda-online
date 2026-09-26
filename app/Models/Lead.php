@@ -57,4 +57,14 @@ class Lead extends Model
     {
         return self::STATUS_CLASSES[$this->status] ?? 'status-new';
     }
+
+    public function interactions()
+    {
+        return $this->hasMany(LeadInteraction::class);
+    }
+
+    public function conversations()
+    {
+        return $this->hasMany(ChatbotConversation::class);
+    }
 }

@@ -53,6 +53,12 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/finanzas/payouts/{payoutBatch}/conciliar', [StorefrontController::class, 'reconcilePayoutBatch'])->name('portal.finance.payouts.reconcile');
 	Route::post('/admin/finanzas/suscripciones/{subscription}/reintentar', [StorefrontController::class, 'retrySubscriptionDunning'])->name('portal.finance.subscriptions.retry');
 	Route::post('/admin/finanzas/cuentas/{vendorBill}/pagar', [StorefrontController::class, 'payVendorBill'])->name('portal.finance.vendor_bills.pay');
+	Route::post('/admin/marketing/cupones', [PortalMarketingController::class, 'storeCoupon'])->name('portal.marketing.coupons.store');
+	Route::post('/admin/marketing/cupones/{coupon}/toggle', [PortalMarketingController::class, 'toggleCoupon'])->name('portal.marketing.coupons.toggle');
+	Route::post('/admin/marketing/campanas/{adCampaign}/escalar', [PortalMarketingController::class, 'scaleCampaign'])->name('portal.marketing.campaigns.scale');
+	Route::post('/admin/marketing/campanas/{adCampaign}/toggle', [PortalMarketingController::class, 'pauseCampaign'])->name('portal.marketing.campaigns.pause');
+	Route::post('/admin/marketing/conversaciones/{conversation}/intervenir', [PortalMarketingController::class, 'takeoverConversation'])->name('portal.marketing.conversations.takeover');
+	Route::post('/admin/marketing/email-automations/{emailAutomation}/toggle', [PortalMarketingController::class, 'toggleEmailAutomation'])->name('portal.marketing.automations.toggle');
 });
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');

@@ -180,17 +180,29 @@ class StorefrontController extends Controller
 
     public function portalScoring()
     {
+        $dbLeads = Lead::all();
+        $topLeads = $dbLeads->map(function (Lead $l) {
+            $score = (int) (data_get($l->metadata, 'score') ?: ($l->status === 'won' ? 90 : ($l->status === 'qualified' ? 80 : 60)));
+            $segment = $score >= 85 ? 'Muy caliente' : ($score >= 70 ? 'Caliente' : 'Nurturing');
+            return [
+                'name' => $l->name ?? 'Lead #' . $l->id,
+                'score' => $score,
+                'segment' => $segment,
+            ];
+        })->sortByDesc('score')->take(5)->values()->toArray();
+
         return view('portal.scoring', [
             'rules' => [
                 ['event' => 'Visita producto premium', 'score' => '+10'],
                 ['event' => 'Agrega al carrito', 'score' => '+20'],
                 ['event' => 'Abandona checkout', 'score' => '-8'],
                 ['event' => 'Responde por WhatsApp', 'score' => '+15'],
+                ['event' => 'Compra recurrente completada', 'score' => '+30'],
             ],
-            'topLeads' => [
-                ['name' => 'Andrea Ruiz', 'score' => 92, 'segment' => 'Muy caliente'],
-                ['name' => 'Luis Cabrera', 'score' => 84, 'segment' => 'Caliente'],
-                ['name' => 'Monica Perez', 'score' => 73, 'segment' => 'Nurturing'],
+            'topLeads' => $topLeads ?: [
+                ['name' => 'Carlos Mendoza', 'score' => 95, 'segment' => 'Muy caliente'],
+                ['name' => 'Andrea Ruiz', 'score' => 89, 'segment' => 'Muy caliente'],
+                ['name' => 'Valeria Gómez', 'score' => 88, 'segment' => 'Caliente'],
             ],
         ]);
     }
