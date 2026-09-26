@@ -95,5 +95,14 @@ Route::prefix('v1')->group(function () {
         Route::post('/postal-code/lookup', [StorefrontApiController::class, 'validatePostalCode']);
         Route::post('/coupons/validate', [StorefrontApiController::class, 'validateCoupon']);
         Route::post('/checkout', [StorefrontApiController::class, 'checkout']);
+
+        // Portal del Comprador, Tracking Courier y Suscripciones MRR (Slice 1.5 / TASK-STR-04 / TASK-STR-05)
+        Route::get('/account/orders', [StorefrontApiController::class, 'orders']);
+        Route::get('/account/tracking/{folio}', [StorefrontApiController::class, 'tracking']);
+        Route::get('/account/subscriptions', [StorefrontApiController::class, 'subscriptions']);
+        Route::post('/account/subscriptions/{id}/pause', [StorefrontApiController::class, 'pauseSubscription']);
+        Route::post('/account/subscriptions/{id}/resume', [StorefrontApiController::class, 'resumeSubscription']);
+        Route::post('/account/subscriptions/subscribe', [StorefrontApiController::class, 'subscribe']);
+        Route::post('/account/profile', [StorefrontApiController::class, 'updateProfile']);
     });
 });

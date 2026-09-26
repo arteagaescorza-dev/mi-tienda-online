@@ -93,7 +93,7 @@
 | `TASK-STR-02` | Catálogo Público de Productos & Ficha Anatómica Torzo (Ref: `pop/catalogo.html`) | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/catalogo.html`, Torzo 244 SKUs |
 | `TASK-STR-03` | Carrito Deslizable & Checkout en 3 Pasos con Logística de Carritos Mixtos | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/carrito.html`, Checkout Multimodal |
 | `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (UI)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01` |
-| `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR) |
+| `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR) |
 | `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (UI)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5 |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Modal Ajustes Inventario, Catálogo Operativo, ROLES_AND_WORKFLOWS_SPEC |
@@ -1461,7 +1461,11 @@ graph TD
 * **Impacto en Backend:** Subsección KK, Paso 39, servicio `StoreAffiliationService`, middleware de referidos y modelos de cupones y leads en Laravel.
 
 ### `TASK-STR-05`: Portal del Comprador D2C: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Implementación Fullstack:**
+  - Servicio de dominio `CustomerAccountService` y 7 endpoints RESTful en `StorefrontApiController` (`GET /orders`, `GET /tracking/{folio}`, `GET /subscriptions`, `POST /subscriptions/{id}/pause`, `POST /subscriptions/{id}/resume`, `POST /subscriptions/subscribe`, `POST /profile`).
+  - Drawer PWA interconectado reactivamente con persistencia real en base de datos (`orders`, `shipments`, `customer_subscriptions`).
+  - Suite de pruebas de integración `tests/Feature/StorefrontPwaAccountTest.php` al 100% verde (9 pruebas, 52 aserciones).
 * **Punto Ciego Resuelto:** El botón "Cuenta" del Bottom Navigation Dock de la tienda pública anteriormente abría un drawer básico de consulta sin pantallas dedicadas de gestión de comprador. Los clientes no podían consultar su historial de compras, ver el estado en vivo de sus paquetes con enlace al courier, gestionar su suscripción de caja mensual (MRR), guardar sus direcciones de entrega ni configurar su Perfil Anatómico para que la tienda recomiende su talla automáticamente.
 * **Solución de UI/UX Mobile-First (Vistas Dedicadas en Storefront):**
   - **1. Pantalla de Bienvenida & Acceso Seguro con Google OAuth2:**

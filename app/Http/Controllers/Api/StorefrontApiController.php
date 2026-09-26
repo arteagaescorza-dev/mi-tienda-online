@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\CustomerAccountService;
 use App\Services\OrderProcessingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,11 +15,16 @@ class StorefrontApiController extends Controller
 {
     protected CartService $cartService;
     protected OrderProcessingService $orderProcessingService;
+    protected CustomerAccountService $customerAccountService;
 
-    public function __construct(CartService $cartService, OrderProcessingService $orderProcessingService)
-    {
+    public function __construct(
+        CartService $cartService,
+        OrderProcessingService $orderProcessingService,
+        CustomerAccountService $customerAccountService
+    ) {
         $this->cartService = $cartService;
         $this->orderProcessingService = $orderProcessingService;
+        $this->customerAccountService = $customerAccountService;
     }
 
     /**
@@ -336,5 +342,135 @@ class StorefrontApiController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Consulta pedidos para el portal del comprador (por sesion/email o folio).
+     */
+    public function orders(Request $request): JsonResponse
+    {
+        $userId = auth()->id();
+        $email = $request->query('email');
+        $folio = $request->query('folio');
+
+        $orders = $this->customerAccountService->getOrders($userId, $email, $folio);
+
+        return response()->json([
+            'success' => true,
+            'orders' => $orders,
+        ]);
+    }
+
+    /**
+     * Consulta telemetria de envio y tracking logistico DHL en tiempo real.
+     */
+    public function tracking(string $folio): JsonResponse
+    {
+        $tracking = $this->customerAccountService->getTracking($folio);
+
+        if (!$tracking['found']) {
+            return response()->json([
+                'success' => false,
+                'message' => $tracking['message'],
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'tracking' => $tracking,
+        ]);
+    }
+
+    /**
+     * Consulta suscripciones recurrentes y planes disponibles MRR.
+     */
+    public function subscriptions(Request $request): JsonResponse
+    {
+        $userId = auth()->id();
+        $email = $request->query('email');
+
+        $data = $this->customerAccountService->getSubscriptions($userId, $email);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Pausa una suscripcion mensual activa.
+     */
+    public function pauseSubscription(int $id): JsonResponse
+    {
+        try {
+            $subscription = $this->customerAccountService->pauseSubscription($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Suscripcion pausada correctamente.',
+                'subscription' => $subscription,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 404);
+        }
+    }
+
+    /**
+     * Reactiva una suscripcion mensual previamente pausada.
+     */
+    public function resumeSubscription(int $id): JsonResponse
+    {
+        try {
+            $subscription = $this->customerAccountService->resumeSubscription($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Suscripcion reactivada correctamente. Proxima entrega programada.',
+                'subscription' => $subscription,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 404);
+        }
+    }
+
+    /**
+     * Formaliza una nueva suscripcion mensual MRR.
+     */
+    public function subscribe(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'tier_name' => 'nullable|string',
+            'monthly_amount' => 'nullable|numeric|min:0',
+            'universe' => 'nullable|string',
+            'card_last4' => 'nullable|string|max:4',
+            'card_brand' => 'nullable|string',
+        ]);
+
+        $subscription = $this->customerAccountService->subscribe($validated, auth()->id());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Suscripcion MRR activada exitosamente.',
+            'subscription' => $subscription,
+        ], 201);
+    }
+
+    /**
+     * Actualiza el perfil anatomico del comprador.
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'waist_cm' => 'required|integer|min:50|max:160',
+            'preferred_cut' => 'nullable|string',
+            'silhouettes' => 'nullable|array',
+        ]);
+
+        $result = $this->customerAccountService->updateProfile($validated, auth()->id());
+
+        return response()->json($result);
     }
 }

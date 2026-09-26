@@ -130,15 +130,23 @@ flowchart TD
 
 ---
 
-### Slice 5: Portal del Comprador D2C ("Mi Cuenta", Tracking y Suscripciones MRR)
+### Slice 5: Portal del Comprador D2C ("Mi Cuenta", Tracking y Suscripciones MRR) [COMPLETADO]
 * **Backend:**
-  - `CustomerAccountController`:
-    - Consulta de pedidos del comprador por sesión autenticada o token seguro de consulta por folio/email.
-    - Consulta y actualización de suscripciones en `customer_subscriptions` (pausar, reactivar o cambiar fecha de entrega de Cajas Nivel 1, 2 o VIP).
-    - Actualización de perfil anatómico en `users` o metadatos de cliente.
+  - `CustomerAccountService` y endpoints en `StorefrontApiController` (`routes/api.php`):
+    - `GET /api/v1/store/account/orders`: Consulta de historial de pedidos por usuario autenticado, email o folio con desglose dual (#MIX vs #ORD).
+    - `GET /api/v1/store/account/tracking/{folio}`: Telemetria en tiempo real con 4 etapas logísticas DHL Express y desglose de pedidos mixtos.
+    - `GET /api/v1/store/account/subscriptions`: Consulta de membresias activas y tiers disponibles (Nivel 1 $399, Nivel 2 $599, Nivel 3 VIP $899).
+    - `POST /api/v1/store/account/subscriptions/{id}/pause`: Pausa inmediata de suscripción mensual en BD (`status = 'paused'`).
+    - `POST /api/v1/store/account/subscriptions/{id}/resume`: Reactivación de suscripción mensual con ajuste de próxima fecha de cobro.
+    - `POST /api/v1/store/account/subscriptions/subscribe`: Formalización de nueva membresía MRR con folio `#SUB-2026-XXXX`.
+    - `POST /api/v1/store/account/profile`: Actualización del perfil anatómico del comprador (cintura en cm, corte favorito, siluetas).
 * **Frontend:**
-  - Bottom-sheet y panel desktop `#accountSheet` con 4 pestañas: *Mis Pedidos* (con estatus courier y guía), *Perfil Anatómico* (slider de cintura 70-102 cm), *Direcciones* y *Membresías MRR*.
-* **Verificación:** El comprador puede consultar su historial y pausar su suscripción con persistencia inmediata en la tabla `customer_subscriptions`.
+  - Drawer PWA y panel desktop `#accountSheet` con 4 pestañas interconectadas:
+    - *Mis Pedidos*: Carga en vivo desde API con botón de rastreo DHL y badges por tipo de despacho.
+    - *Rastreo en Vivo*: Formulario de consulta que renderiza el timeline courier interactivo de 4 pasos.
+    - *Perfil Anatómico*: Slider de cintura 50-160 cm con cálculo instantáneo de talla y sincronización asíncrona a la API.
+    - *Membresías MRR*: Visualización de estado actual con botones de pausar/reanudar y catálogo de tiers con suscripción en 1 clic.
+* **Verificación:** Suite `tests/Feature/StorefrontPwaAccountTest.php` creada y pasando al 100% (9 pruebas, 52 aserciones, 0 emojis). Suite global al 100% (143 pruebas, 675 aserciones).
 
 ---
 

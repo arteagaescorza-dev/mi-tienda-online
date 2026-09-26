@@ -2807,13 +2807,41 @@
     const listEl = document.getElementById('accountOrdersList');
     if (!listEl) return;
 
+    let session = null;
+    try {
+      session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}');
+    } catch (e) {}
+
+    const emailQuery = (session && session.email) ? `?email=${encodeURIComponent(session.email)}` : '';
+
+    fetch(`/api/v1/store/account/orders${emailQuery}`)
+      .then(res => res.json())
+      .then(data => {
+        let combined = [];
+        if (data && data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+          combined = data.orders;
+        } else if (orders && orders.length > 0) {
+          combined = orders;
+        }
+
+        const badgeEl = document.getElementById('accountOrdersBadge');
+        if (badgeEl) badgeEl.textContent = combined.length;
+
+        renderOrdersListHtml(listEl, combined);
+      })
+      .catch(() => {
+        renderOrdersListHtml(listEl, orders || []);
+      });
+  }
+
+  function renderOrdersListHtml(listEl, orders) {
     if (!orders || orders.length === 0) {
       listEl.innerHTML = `
         <div class="account-empty-state">
           <div style="font-weight: 700; font-size: 0.85rem; color: #050505; margin-bottom: 4px;">Sin pedidos registrados</div>
-          <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 12px;">Aún no has realizado compras con esta cuenta.</p>
+          <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 12px;">Aun no has realizado compras con esta cuenta.</p>
           <button type="button" class="btn-account-primary" data-action="switch-dock-tab" data-dock-tab="catalog">
-            Explorar Catálogo
+            Explorar Catalogo
           </button>
         </div>
       `;
@@ -2821,62 +2849,68 @@
     }
 
     listEl.innerHTML = orders.map(order => {
-      const isMixed = (order.orderType === 'mixed');
-      const isSplit = (isMixed && order.dispatchStrategy === 'split');
-      const dateFormatted = new Date(order.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+      const folio = order.folio || order.order_number;
+      const isMixed = (order.order_type === 'mixed' || order.orderType === 'mixed' || order.is_mixed);
+      const dateFormatted = order.created_at_formatted || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Reciente');
+      const totalNum = typeof order.total === 'number' ? order.total : parseFloat(order.total || 0);
+      const isApproved = (order.status === 'completed' || order.status === 'approved' || order.payment_status === 'paid');
+      const readyItems = order.ready_items || order.readyItems || [];
+      const onDemandItems = order.on_demand_items || order.onDemandItems || [];
+      const items = order.items || [];
+      const trackingNumber = order.tracking_number || (order.shipment ? order.shipment.tracking_number : null);
 
       return `
         <div class="order-history-card">
           <div class="order-history-header">
             <div>
-              <div class="order-history-folio">${order.folio}</div>
+              <div class="order-history-folio">${folio}</div>
               <div class="order-history-date">${dateFormatted}</div>
             </div>
             <div style="text-align: right;">
-              <span class="order-status-badge ${order.status === 'approved' ? 'status-approved' : 'status-pending'}">
-                ${order.status === 'approved' ? 'PAGO APROBADO' : 'PENDIENTE DE PAGO'}
+              <span class="order-status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
+                ${isApproved ? 'PAGO APROBADO' : 'PENDIENTE DE PAGO'}
               </span>
-              <div class="order-history-total">MXN $${(order.total || 0).toFixed(2)}</div>
+              <div class="order-history-total">MXN $${totalNum.toFixed(2)}</div>
             </div>
           </div>
 
           ${isMixed ? `
             <div class="order-mixed-dual-badge">
               <span class="badge-branch-ready">[LINEA A] Bodega Salida 24-48h</span>
-              <span class="badge-branch-demand">[LINEA B] Taller Confección 3-5d</span>
+              <span class="badge-branch-demand">[LINEA B] Taller Confeccion 3-5d</span>
             </div>
             <div class="order-tracking-timeline">
               <div class="timeline-row">
                 <span class="timeline-dot dot-ready"></span>
                 <div class="timeline-info">
-                  <strong>Línea A (Stock Físico):</strong> Apartado en bodega central. ${(order.readyItems || []).length} prenda(s).
+                  <strong>Linea A (Stock Fisico):</strong> Apartado en bodega central. ${readyItems.length} prenda(s).
                 </div>
               </div>
               <div class="timeline-row">
                 <span class="timeline-dot dot-demand"></span>
                 <div class="timeline-info">
-                  <strong>Línea B (On-Demand):</strong> En cola de patronaje y corte. ${(order.onDemandItems || []).length} prenda(s).
+                  <strong>Linea B (On-Demand):</strong> En cola de patronaje y corte. ${onDemandItems.length} prenda(s).
                 </div>
               </div>
             </div>
           ` : `
             <div style="font-size: 0.72rem; color: var(--text-secondary); margin: 6px 0;">
-              Tipo de despacho: <strong>${order.orderType === 'on_demand' ? 'Confección Bajo Pedido' : 'Stock Físico Inmediato'}</strong>
+              Tipo de despacho: <strong>${order.order_type === 'on_demand' ? 'Confeccion Bajo Pedido' : 'Stock Fisico Inmediato'}</strong>
             </div>
           `}
 
           <div class="order-history-items">
-            ${(order.items || []).map(it => `
+            ${items.map(it => `
               <div class="order-history-item-line">
-                <span>${it.quantity}x ${it.name} (${it.size})</span>
-                <span>MXN $${(it.price * it.quantity).toFixed(2)}</span>
+                <span>${it.quantity}x ${it.name || it.product_name} ${it.size ? '(' + it.size + ')' : ''}</span>
+                <span>MXN $${((it.price || it.unit_price || 0) * it.quantity).toFixed(2)}</span>
               </div>
             `).join('')}
           </div>
 
           <div class="order-history-footer">
-            <span class="order-carrier-tag">${order.carrier || 'Courier Express Nacional'}</span>
-            <span style="font-size: 0.7rem; color: var(--text-muted);">${order.paymentMethod === 'spei_bbva' ? 'SPEI BBVA' : (order.paymentMethod === 'oxxo_pay' ? 'OXXO Pay' : 'Tarjeta')}</span>
+            <span class="order-carrier-tag">${order.carrier || 'DHL Express Nacional'}${trackingNumber ? ' (' + trackingNumber + ')' : ''}</span>
+            <button type="button" class="btn-account-action" style="padding: 2px 8px; font-size: 0.68rem;" onclick="lookupOrderByFolio('${folio}')">Rastrear Guia</button>
           </div>
         </div>
       `;
@@ -2893,43 +2927,105 @@
       return;
     }
 
-    let orders = [];
-    try {
-      orders = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]');
-    } catch (e) {}
-
-    const found = orders.find(o => o.folio && o.folio.toUpperCase().includes(clean));
     resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+      <div style="padding: 10px; font-size: 0.74rem; color: var(--text-secondary);">
+        Consultando telemetria en vivo para ${clean}...
+      </div>
+    `;
 
-    if (!found) {
-      resultBox.innerHTML = `
-        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.74rem; color: #991b1b;">
-          No se encontró ningún pedido registrado con el folio "<strong>${clean}</strong>".
-        </div>
-      `;
-    } else {
-      const isMixed = (found.orderType === 'mixed');
-      resultBox.innerHTML = `
-        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <strong style="color: #166534; font-size: 0.82rem;">Folio: ${found.folio}</strong>
-            <span class="order-status-badge ${found.status === 'approved' ? 'status-approved' : 'status-pending'}">
-              ${found.status === 'approved' ? 'PAGO APROBADO' : 'PENDIENTE'}
-            </span>
-          </div>
-          <div style="font-size: 0.74rem; color: #166534; margin-bottom: 6px;">
-            Total: <strong>MXN $${(found.total || 0).toFixed(2)}</strong> | Método: ${found.paymentMethod}
-          </div>
-          ${isMixed ? `
-            <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; font-size: 0.7rem; color: #166534;">
-              <strong>Rastreo Dual de Carrito Mixto:</strong>
-              <div>- Línea A (Bodega): Despacho express 24-48h</div>
-              <div>- Línea B (Taller): Confección artesanal 3-5 días hábiles</div>
+    fetch(`/api/v1/store/account/tracking/${encodeURIComponent(clean)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.tracking) {
+          const t = data.tracking;
+          resultBox.innerHTML = `
+            <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <strong style="color: #166534; font-size: 0.82rem;">Folio: ${t.order_number}</strong>
+                <span class="order-status-badge status-approved">
+                  ${(t.status || 'APROBADO').toUpperCase()}
+                </span>
+              </div>
+              <div style="font-size: 0.74rem; color: #166534; margin-bottom: 8px;">
+                Total: <strong>MXN $${(t.total || 0).toFixed(2)}</strong> | Carrier: <strong>${t.carrier}</strong> | Guia: <strong>${t.tracking_number}</strong>
+              </div>
+              ${t.is_mixed ? `
+                <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; font-size: 0.7rem; color: #166534; margin-bottom: 8px;">
+                  <strong>Rastreo Dual de Carrito Mixto:</strong>
+                  <div>- Linea A (Bodega): Despacho express 24-48h</div>
+                  <div>- Linea B (Taller): Confeccion artesanal 3-5 dias habiles</div>
+                </div>
+              ` : ''}
+              <div class="order-tracking-timeline" style="margin-top: 8px;">
+                ${(t.timeline || []).map(st => `
+                  <div class="timeline-row" style="opacity: ${st.completed ? '1' : '0.45'};">
+                    <span class="timeline-dot ${st.completed ? 'dot-ready' : ''}"></span>
+                    <div class="timeline-info">
+                      <strong>Paso ${st.step}: ${st.title}</strong>
+                      <div>${st.desc}</div>
+                      ${st.timestamp ? `<small style="color: var(--text-muted);">${st.timestamp}</small>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
             </div>
-          ` : ''}
+          `;
+        } else {
+          let orders = [];
+          try { orders = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]'); } catch (e) {}
+          const found = orders.find(o => (o.folio && o.folio.toUpperCase().includes(clean)) || (o.order_number && o.order_number.toUpperCase().includes(clean)));
+
+          if (found) {
+            renderLocalTrackingResult(resultBox, found);
+          } else {
+            resultBox.innerHTML = `
+              <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.74rem; color: #991b1b;">
+                No se encontro ningun pedido registrado con el folio "<strong>${clean}</strong>".
+              </div>
+            `;
+          }
+        }
+      })
+      .catch(() => {
+        let orders = [];
+        try { orders = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]'); } catch (e) {}
+        const found = orders.find(o => (o.folio && o.folio.toUpperCase().includes(clean)) || (o.order_number && o.order_number.toUpperCase().includes(clean)));
+
+        if (found) {
+          renderLocalTrackingResult(resultBox, found);
+        } else {
+          resultBox.innerHTML = `
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.74rem; color: #991b1b;">
+              Error al consultar servidor de tracking. Folio no hallado: "<strong>${clean}</strong>".
+            </div>
+          `;
+        }
+      });
+  }
+
+  function renderLocalTrackingResult(resultBox, found) {
+    const isMixed = (found.orderType === 'mixed' || found.is_mixed);
+    resultBox.innerHTML = `
+      <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #166534; font-size: 0.82rem;">Folio: ${found.folio || found.order_number}</strong>
+          <span class="order-status-badge ${found.status === 'approved' || found.status === 'completed' ? 'status-approved' : 'status-pending'}">
+            ${(found.status || 'PENDIENTE').toUpperCase()}
+          </span>
         </div>
-      `;
-    }
+        <div style="font-size: 0.74rem; color: #166534; margin-bottom: 6px;">
+          Total: <strong>MXN $${(found.total || 0).toFixed(2)}</strong> | Metodo: ${found.paymentMethod || found.payment_method || 'Tarjeta'}
+        </div>
+        ${isMixed ? `
+          <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; font-size: 0.7rem; color: #166534;">
+            <strong>Rastreo Dual de Carrito Mixto:</strong>
+            <div>- Linea A (Bodega): Despacho express 24-48h</div>
+            <div>- Linea B (Taller): Confeccion artesanal 3-5 dias habiles</div>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   function renderAccountAnatomy(session) {
@@ -3002,7 +3098,20 @@
       localStorage.setItem('multiverse_customer_session', JSON.stringify(session));
     } catch (e) {}
 
-    showToastNotification('Perfil Anatómico guardado exitosamente.');
+    fetch('/api/v1/store/account/profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        waist_cm: waistCm,
+        preferred_cut: calc ? calc.size : 'M',
+        silhouettes: silhouettes
+      })
+    }).catch(e => console.warn('Error sincronizando perfil anatomico con backend:', e));
+
+    showToastNotification('Perfil Anatomico guardado exitosamente.');
   }
 
   function renderAccountAddress(session) {
@@ -3016,12 +3125,12 @@
       summaryEl.innerHTML = `
         <div class="address-edit-form">
           <div class="acc-form-group">
-            <label class="acc-label">Calle y Número *</label>
-            <input type="text" id="accInputStreet" class="account-input" value="${shipping?.street || ''}" placeholder="Ej: Av. Juárez 14, Depto 402">
+            <label class="acc-label">Calle y Numero *</label>
+            <input type="text" id="accInputStreet" class="account-input" value="${shipping?.street || ''}" placeholder="Ej: Av. Juarez 14, Depto 402">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div class="acc-form-group">
-              <label class="acc-label">Código Postal *</label>
+              <label class="acc-label">Codigo Postal *</label>
               <div style="display: flex; gap: 4px;">
                 <input type="text" id="accInputZip" class="account-input" maxlength="5" value="${shipping?.postalCode || ''}" placeholder="06000">
                 <button type="button" class="btn-account-action" data-action="acc-lookup-postal-code" style="padding: 4px 8px; font-size: 0.7rem;">CP</button>
@@ -3034,12 +3143,12 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div class="acc-form-group">
-              <label class="acc-label">Alcaldía / Municipio *</label>
-              <input type="text" id="accInputCity" class="account-input" value="${shipping?.city || ''}" placeholder="Cuauhtémoc">
+              <label class="acc-label">Alcaldia / Municipio *</label>
+              <input type="text" id="accInputCity" class="account-input" value="${shipping?.city || ''}" placeholder="Cuauhtemoc">
             </div>
             <div class="acc-form-group">
               <label class="acc-label">Estado *</label>
-              <input type="text" id="accInputState" class="account-input" value="${shipping?.state || ''}" placeholder="Ciudad de México">
+              <input type="text" id="accInputState" class="account-input" value="${shipping?.state || ''}" placeholder="Ciudad de Mexico">
             </div>
           </div>
           <div class="acc-form-group">
@@ -3048,7 +3157,7 @@
           </div>
           <div style="display: flex; gap: 8px; margin-top: 10px;">
             <button type="button" class="btn-account-primary" data-action="save-acc-address" style="flex: 1;">
-              GUARDAR DIRECCIÓN
+              GUARDAR DIRECCION
             </button>
             ${hasAddress ? `
               <button type="button" class="btn-account-secondary" data-action="cancel-acc-address" style="padding: 8px 12px; font-size: 0.72rem;">
@@ -3061,7 +3170,7 @@
     } else {
       summaryEl.innerHTML = `
         <div class="address-display-box">
-          <div style="font-weight: 700; font-size: 0.82rem; color: #050505; margin-bottom: 4px;">Dirección Predeterminada de Entrega</div>
+          <div style="font-weight: 700; font-size: 0.82rem; color: #050505; margin-bottom: 4px;">Direccion Predeterminada de Entrega</div>
           <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; margin: 0 0 10px;">
             ${shipping.street}<br>
             Col. ${shipping.colony}, ${shipping.city}, ${shipping.state}<br>
@@ -3069,7 +3178,7 @@
             ${shipping.references ? `<br><small style="color: var(--text-muted);">Ref: ${shipping.references}</small>` : ''}
           </p>
           <button type="button" class="btn-account-action" data-action="edit-acc-address">
-            Editar Dirección
+            Editar Direccion
           </button>
         </div>
       `;
@@ -3085,7 +3194,7 @@
     const references = (document.getElementById('accInputRefs')?.value || '').trim();
 
     if (!street || postalCode.length !== 5 || !colony || !city || !state) {
-      showToastNotification('Por favor completa todos los campos requeridos de la dirección.');
+      showToastNotification('Por favor completa todos los campos requeridos de la direccion.');
       return;
     }
 
@@ -3104,7 +3213,7 @@
 
     accountState.editingAddress = false;
     renderAccountAddress(session);
-    showToastNotification('Dirección guardada correctamente.');
+    showToastNotification('Direccion guardada correctamente.');
   }
 
   function renderAccountSubscription() {
@@ -3113,39 +3222,182 @@
 
     panel.innerHTML = `
       <div class="subscription-panel-content">
-        <div class="sub-plan-card">
-          <div class="sub-plan-header">
-            <div>
-              <span class="sub-badge-mrr">MEMBRESIA VIP D2C</span>
-              <h4 class="sub-plan-title">MARTE Club MRR</h4>
-            </div>
-            <div class="sub-plan-price">
-              <strong>$399</strong>
-              <span>MXN / mes</span>
-            </div>
-          </div>
-          <p class="sub-plan-desc">
-            Recibe 1 prenda curada mensual adaptada a tu perfil anatómico, 15% de descuento permanente y envíos gratis sin mínimo de compra.
-          </p>
-          <ul class="sub-benefits-list">
-            <li>1 Prenda mensual exclusiva seleccionada para ti</li>
-            <li>15% OFF automático en todas las colecciones</li>
-            <li>Envío express nacional gratis en todos tus pedidos</li>
-            <li>Acceso prioritario a lanzamientos limitados</li>
-          </ul>
-          <button type="button" class="btn-account-primary" style="width: 100%;" onclick="alert('Membresía Club MARTE disponible próximamente en integración Stripe Billing.');">
-            UNIRME AL CLUB MARTE ($399/mes)
-          </button>
+        <div id="accountSubStatusBox" style="margin-bottom: 12px;">
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">Cargando estado de suscripcion...</div>
         </div>
-
         <div class="push-notifications-card" id="accountPushCenter">
-          <!-- Renderizado dinámico desde renderAccountPushPreferences() -->
+          <!-- Renderizado dinamico desde renderAccountPushPreferences() -->
         </div>
       </div>
     `;
 
     renderAccountPushPreferences();
+
+    fetch('/api/v1/store/account/subscriptions')
+      .then(res => res.json())
+      .then(data => {
+        const box = document.getElementById('accountSubStatusBox');
+        if (!box) return;
+
+        if (data.subscriptions && data.subscriptions.length > 0) {
+          const sub = data.subscriptions[0];
+          box.innerHTML = `
+            <div class="sub-plan-card">
+              <div class="sub-plan-header">
+                <div>
+                  <span class="sub-badge-mrr">MEMBRESIA MRR</span>
+                  <h4 class="sub-plan-title">${sub.tier_name}</h4>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Folio: ${sub.folio}</div>
+                </div>
+                <div class="sub-plan-price">
+                  <strong>$${sub.monthly_amount}</strong>
+                  <span>MXN / mes</span>
+                </div>
+              </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin: 10px 0; font-size: 0.75rem;">
+                <div>Estado: <strong style="color: ${sub.status === 'active' ? '#166534' : '#b45309'};">${sub.status_label.toUpperCase()}</strong></div>
+                <div>Metodo de Pago: <strong>${sub.card_brand} **** ${sub.card_last4}</strong></div>
+                <div>Proximo Cobro: <strong>${sub.next_billing_formatted}</strong></div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                ${sub.status === 'active' ? `
+                  <button type="button" class="btn-account-secondary" style="flex: 1; padding: 8px;" onclick="handlePauseSubscription(${sub.id})">
+                    Pausar Membresia
+                  </button>
+                ` : `
+                  <button type="button" class="btn-account-primary" style="flex: 1; padding: 8px;" onclick="handleResumeSubscription(${sub.id})">
+                    Reanudar Membresia
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        } else {
+          const tiers = data.available_tiers || [];
+          box.innerHTML = `
+            <div class="sub-plan-card">
+              <div class="sub-plan-header">
+                <div>
+                  <span class="sub-badge-mrr">CLUB MRR MARTE</span>
+                  <h4 class="sub-plan-title">Elige tu Nivel de Experiencia</h4>
+                </div>
+              </div>
+              <p class="sub-plan-desc">
+                Recibe prendas exclusivas curadas mes con mes con descuento permanente y envios gratis sin minimo de compra.
+              </p>
+              <div class="tiers-selection-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+                ${tiers.map(t => `
+                  <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; background: #fff;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                      <strong style="font-size: 0.8rem; color: #0f172a;">${t.tier_name}</strong>
+                      <span style="font-weight: 700; color: #0284c7; font-size: 0.85rem;">${t.price_formatted}</span>
+                    </div>
+                    <ul style="margin: 6px 0; padding-left: 18px; font-size: 0.7rem; color: var(--text-secondary); line-height: 1.4;">
+                      ${t.benefits.map(b => `<li>${b}</li>`).join('')}
+                    </ul>
+                    <button type="button" class="btn-account-primary" style="width: 100%; padding: 6px; font-size: 0.72rem; margin-top: 4px;" onclick="handleSubscribeToTier('${t.tier_name}', ${t.price}, '${t.universe}')">
+                      Activar este Plan
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      })
+      .catch(() => {
+        const box = document.getElementById('accountSubStatusBox');
+        if (box) {
+          box.innerHTML = `
+            <div class="sub-plan-card">
+              <div class="sub-plan-header">
+                <div>
+                  <span class="sub-badge-mrr">MEMBRESIA VIP D2C</span>
+                  <h4 class="sub-plan-title">MARTE Club MRR</h4>
+                </div>
+                <div class="sub-plan-price">
+                  <strong>$399</strong>
+                  <span>MXN / mes</span>
+                </div>
+              </div>
+              <p class="sub-plan-desc">
+                Recibe 1 prenda curada mensual adaptada a tu perfil anatomico, 15% de descuento permanente y envios gratis sin minimo de compra.
+              </p>
+              <button type="button" class="btn-account-primary" style="width: 100%;" onclick="handleSubscribeToTier('Caja Marte Nivel 1 (Basico)', 399, 'marte')">
+                UNIRME AL CLUB MARTE ($399/mes)
+              </button>
+            </div>
+          `;
+        }
+      });
   }
+
+  window.handlePauseSubscription = function(subId) {
+    fetch(`/api/v1/store/account/subscriptions/${subId}/pause`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showToastNotification('Suscripcion pausada correctamente.');
+        renderAccountSubscription();
+      } else {
+        showToastNotification(data.message || 'No se pudo pausar la suscripcion.');
+      }
+    })
+    .catch(() => showToastNotification('Error de conexion al pausar suscripcion.'));
+  };
+
+  window.handleResumeSubscription = function(subId) {
+    fetch(`/api/v1/store/account/subscriptions/${subId}/resume`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showToastNotification('Suscripcion reactivada correctamente.');
+        renderAccountSubscription();
+      } else {
+        showToastNotification(data.message || 'No se pudo reactivar la suscripcion.');
+      }
+    })
+    .catch(() => showToastNotification('Error de conexion al reactivar suscripcion.'));
+  };
+
+  window.handleSubscribeToTier = function(tierName, price, universe) {
+    fetch('/api/v1/store/account/subscriptions/subscribe', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        tier_name: tierName,
+        monthly_amount: price,
+        universe: universe,
+        card_last4: '4242',
+        card_brand: 'Visa'
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showToastNotification('Bienvenido al club!');
+        renderAccountSubscription();
+      } else {
+        showToastNotification(data.message || 'Error al procesar suscripcion.');
+      }
+    })
+    .catch(() => showToastNotification('Error de conexion al formalizar suscripcion.'));
+  };
 
   // ============================================================================
   // MOTOR DE NOTIFICACIONES WEB PUSH PWA (TASK-STR-06)
