@@ -33,6 +33,11 @@ class ProductVariant extends Model
         return $this->hasMany(Inventory::class, 'variant_id');
     }
 
+    public function inventory()
+    {
+        return $this->hasOne(Inventory::class, 'variant_id')->where('location', 'warehouse-1');
+    }
+
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class, 'variant_id');
