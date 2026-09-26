@@ -1,0 +1,3319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Manual de Capacitacion Operativa y Normativa de Roles - RevOps Multiverso</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 12mm 10mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    font-size: 9pt;
+    line-height: 1.4;
+  }
+  .page-break { page-break-before: always; break-before: page; }
+  .avoid-break { page-break-inside: avoid; break-inside: avoid; }
+  
+  /* Portada */
+  .cover-container {
+    height: 96vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 35px 25px;
+    border: 1px solid #e2e8f0;
+    background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 6px;
+  }
+  .cover-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    background: rgba(99, 102, 241, 0.25);
+    border: 1px solid #818cf8;
+    color: #c7d2fe;
+    border-radius: 20px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .cover-title {
+    font-size: 24pt;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 16px 0 10px 0;
+  }
+  .cover-subtitle {
+    font-size: 11.5pt;
+    color: #94a3b8;
+    font-weight: 400;
+    line-height: 1.4;
+    max-width: 620px;
+  }
+  .cover-meta {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: #cbd5e1;
+  }
+
+  /* Titulos */
+  h1.chapter-title {
+    font-size: 15pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .role-tag {
+    font-size: 7.5pt;
+    font-family: monospace;
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  h2.func-title {
+    font-size: 10pt;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 8px 0 3px 0;
+  }
+  p { margin-bottom: 6px; color: #334155; text-align: justify; }
+
+  /* Frame de Funcion */
+  .function-container {
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .function-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+  .func-code-badge {
+    background: #312e81;
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    font-weight: 800;
+  }
+
+  /* Mockup Frame */
+  .ui-mockup-frame {
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .ui-mockup-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7pt;
+    font-weight: 700;
+    color: #475569;
+  }
+  .ui-mockup-body { padding: 6px 8px; background: #ffffff; }
+
+  /* Puntos Ciegos */
+  .blindspot-card {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-right: 1px solid #fde68a;
+    border-top: 1px solid #fde68a;
+    border-bottom: 1px solid #fde68a;
+    border-radius: 3px;
+    padding: 6px 8px;
+    margin: 6px 0;
+    font-size: 7.5pt;
+  }
+  .blindspot-card .title { font-weight: 800; color: #92400e; margin-bottom: 2px; }
+  .blindspot-card .risk { color: #b45309; margin-bottom: 2px; }
+  .blindspot-card .mitigation { color: #1e3a8a; background: #eff6ff; padding: 2px 6px; border-radius: 3px; border-left: 2px solid #3b82f6; }
+
+  /* Diagramas */
+  .diagram-container {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 6px;
+    margin: 6px 0;
+    text-align: center;
+  }
+  .diagram-caption { font-size: 7pt; font-weight: 700; color: #475569; margin-top: 4px; text-align: center; }
+
+  /* Chips */
+  .kpi-chip { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 7pt; font-weight: 700; }
+  .kpi-chip-emerald { background: #dcfce7; color: #166534; }
+  .kpi-chip-amber { background: #fef3c7; color: #92400e; }
+  .kpi-chip-rose { background: #ffe4e6; color: #9f1239; }
+  .kpi-chip-indigo { background: #e0e7ff; color: #3730a3; }
+  .kpi-chip-slate { background: #f1f5f9; color: #334155; }
+</style>
+</head>
+<body>
+
+  <!-- PORTADA -->
+  <div class="cover-container">
+    <div>
+      <span class="cover-badge">Documento Normativo & Manual de Capacitacion</span>
+      <h1 class="cover-title">Manual Operativo de Roles, Procesos Diarios y Mitigacion de Puntos Ciegos</h1>
+      <p class="cover-subtitle">
+        Guia oficial de entrenamiento e induccion exhaustiva para la Plataforma RevOps E-Commerce Multiverso (Mi Tienda Online). Comprende las 36 funciones operativas, mockups fidedignos de pantallas y 36 diagramas de decision sin ambiguedad.
+      </p>
+    </div>
+
+    <div>
+      <div style="background: rgba(255,255,255,0.06); padding: 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 20px;">
+        <h4 style="font-size: 9pt; color: #818cf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Roles y Funciones Cubiertas al 100%</h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 7.5pt; color: #cbd5e1;">
+          <div>[1] Almacenista (Funciones A1 - A6)</div>
+          <div>[3] Compras & ROP (Funciones C1 - C6)</div>
+          <div>[5] Direccion RevOps (Funciones D1 - D6)</div>
+          <div>[2] Empaque & Picking (Funciones E1 - E6)</div>
+          <div>[4] Ana Atencion (Funciones V1 - V6)</div>
+          <div>[6] Operador Integral (Funciones M1 - M6)</div>
+        </div>
+      </div>
+
+      <div class="cover-meta">
+        <div><strong>Plataforma:</strong> RevOps Mi Tienda Online</div>
+        <div><strong>Edicion:</strong> 2026 • 36 Funciones Integrales</div>
+        <div><strong>Politica:</strong> Cero Emojis / Paridad 100% Blade-JS</div>
+        <div><strong>Aprobado:</strong> Direccion General de Operaciones</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      1. Rol: Almacenista / Jefe de Almacen
+      <span class="role-tag">ID: warehouse • 6 Funciones Clave</span>
+    </h1>
+    <p style="margin-bottom: 10px;">
+      El siguiente modulo formaliza las 6 responsabilidades operativas que estructuran la labor de <strong>Almacenista / Jefe de Almacen</strong>, detallando para cada una el objetivo, la pantalla del sistema donde ocurre la accion, el diagrama de decision aplicable y el mecanismo de software que mitiga el error humano.
+    </p>
+  
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion A1</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Recepcion Inbound, Descarga en Rampa & Cotejo de OCs</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">warehouse</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Validar mercancia fisica recibida contra la Orden de Compra (PO) y recalcular CPP en caliente.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: DASHBOARD OPERATIVO > BANDEJA DE ACCIONES > RAMPA DE RECEPCION</span>
+          <span style="color: #4f46e5;">Cotejo individual por talla e ingreso formal a Kardex</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:7.5pt;">
+            <span><strong>Remision:</strong> #REM-2026-904 • Taller Torzo Confeccion</span>
+            <span class="kpi-chip kpi-chip-amber">Pendiente de Conteo</span>
+          </div>
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:3px; padding:4px; font-size:7pt;">
+            [PO-8912] Boxer Modal Negro: 120 uds solicitadas | 120 contadas fisicamente en rampa [CONFORME]
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Llegada a Rampa</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a1)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Coincide con PO?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_a1)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Control de Calidad</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Cotejo de costuras</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a1)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Kardex Inbound</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">ENTRADA_COMPRA</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a1)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Acta Discrepancia</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Reportar faltante</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a1)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion A1 (Recepcion Inbound, Descarga en Rampa & Cotejo de OCs)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Pérdida de Garantía por Recepción a Ciegas</div>
+        <div class="risk">Riesgo: Aceptar cajas cerradas sin contar piezas individuales, asumiendo faltantes semanas después.</div>
+        <div class="mitigation">Mitigacion en Software: El modal de rampa bloquea el ingreso a inventario hasta confirmar el conteo por talla individual.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion A2</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Zonificacion y Slotting Fisico en Anaqueles (Pasillo - Rack - Nivel/Gaveta)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">warehouse</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Asignar y auditar la ubicacion fisica normalizada de cada SKU para reducir tiempos de picking.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: CATALOGO OPERATIVO > COLUMNA UBICACION & MODAL DE REUBICACION</span>
+          <span style="color: #4f46e5;">Nomenclatura estandar: Pasillo (A-D), Rack (01-10), Nivel/Gaveta (A-C)</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px; font-size:7.5pt; text-align:center;">
+            <div style="background:#f1f5f9; padding:4px; border-radius:3px;"><strong>SKU:</strong> BX-MOD-001</div>
+            <div style="background:#f1f5f9; padding:4px; border-radius:3px;"><strong>Talla:</strong> M</div>
+            <div style="background:#e0e7ff; padding:4px; border-radius:3px; color:#3730a3;"><strong>Ubicacion:</strong> A-01-A</div>
+            <div style="background:#f0fdf4; padding:4px; border-radius:3px; color:#166534;"><strong>Capacidad:</strong> 150 uds</div>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_a2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Nueva Prenda/Acomodo</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a2)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Clase Pareto A?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_a2)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Pasillo A (Frontal)</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Cerca de mesa picking</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a2)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Actualizar Slot</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Reflejar en Checklist</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a2)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Pasillos B/C/D</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Racks superiores</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a2)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion A2 (Zonificacion y Slotting Fisico en Anaqueles (Pasillo - Rack - Nivel/Gaveta))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Prendas Huérfanas por Reubicación Informal</div>
+        <div class="risk">Riesgo: Mover cajas de lugar sin actualizar el sistema, causando demoras críticas en mesa de empaque.</div>
+        <div class="mitigation">Mitigacion en Software: Toda reubicación exige escaneo de código de anaquel y actualiza en vivo la hoja de ruta de picking.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion A3</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Configuracion y Gestion de Recetas BOM & Combos Virtuales (TASK-INV-17)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">warehouse</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Definir y supervisar que prendas componen cada caja mensual o pack promo y su capacidad armable.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: INVENTARIO > AJUSTES DEL MODULO > PESTAÑA 8: RECETAS BOM & COMBOS</span>
+          <span style="color: #4f46e5;">Constructor dynamic bundleEditor con decision directa del almacenista</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:7.5pt;">
+            <span><strong>Receta:</strong> BND-SUB-01 • Caja Nivel 1: Refill</span>
+            <span class="kpi-chip kpi-chip-emerald">Capacidad Inmediata: 35 Cajas</span>
+          </div>
+          <div style="font-size:7pt; color:#475569; margin-top:2px;">
+            Insumos: 2x BX-MOD-001 (A-01-A, Stock 70) + 1x TG-SLK-004 (B-02-B, Stock 48). Cuello de botella: Boxer (35 max).
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_a3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Auditoria de Cajas</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a3)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Stock >= Demanda?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_a3)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Mesa de Ensamble</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Picking por slotting</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a3)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Liquidar Kardex</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">SALIDA_COMBO</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a3)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">bundleEditor Tab 8</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Sustituir variante</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a3)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion A3 (Configuracion y Gestion de Recetas BOM & Combos Virtuales (TASK-INV-17))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Desabasto Oculto en Combos Publicados</div>
+        <div class="risk">Riesgo: Vender cajas mensuales cuando 1 de sus 3 prendas está agotada físicamente en bodega.</div>
+        <div class="mitigation">Mitigacion en Software: Cálculo reactivo de la capacidad inmediata gobernado estrictamente por el insumo cuello de botella.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion A4</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Conteo Ciclico a Ciegas (Blind Cycle Counting - 3 SKUs Diarios)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">warehouse</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Auditar diariamente 3 productos aleatorios sin mostrar el stock teórico para evitar sesgos.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: INVENTARIO > MODAL AUDITORIA CICLICA A CIEGAS (blindAuditModal)</span>
+          <span style="color: #4f46e5;">Captura forzada de conteo real antes de revelar diferencias teóricas</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fafafa; border:1px solid #e2e8f0; padding:6px; border-radius:3px; font-size:7.5pt;">
+            <div><strong>SKU Auditado:</strong> JK-ATH-002 • Talla G • Anaquel B-03-B</div>
+            <div style="color:#64748b; margin:2px 0;">Stock Teórico en Sistema: [OCULTO HASTA CAPTURAR]</div>
+            <div style="font-weight:bold; color:#1d4ed8;">Piezas Fisicas Contadas: [ 24 ] -> Diferencia: 0 piezas [AUDITORIA CONFORME]</div>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_a4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Conteo a Ciegas</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a4)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Conteo == Teorico?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_a4)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Validar Auditoria</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Sellar sin diferencias</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a4)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Asiento Kardex</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">AJUSTE_AUDITORIA</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a4)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Re-conteo Fisico</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Verificar estantes</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a4)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion A4 (Conteo Ciclico a Ciegas (Blind Cycle Counting - 3 SKUs Diarios))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Aprobación Rutinaria sin Conteo Físico</div>
+        <div class="risk">Riesgo: Confirmar cantidades teóricas en pantalla sin verificar físicamente las gavetas.</div>
+        <div class="mitigation">Mitigacion en Software: La interfaz oculta por completo las existencias del sistema hasta registrar el conteo real en gaveta.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion A5</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Control Sanitario, Lotes y Caducidades / PAO Cosmetica</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">warehouse</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Monitorear fechas de vencimiento y periodo tras apertura (PAO) en fragancias y sueros intimos.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: CATALOGO OPERATIVO > CONTROL SANITARIO & FEFO</span>
+          <span style="color: #4f46e5;">Semaforo de vida util y asignacion obligatoria de lote</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="display:flex; justify-content:space-between; font-size:7.5pt;">
+            <span><strong>Lote:</strong> LOT-2026-COSM-08 • Suero Hidratante Intimo</span>
+            <span class="kpi-chip kpi-chip-emerald">PAO: 12 Meses | Caducidad: Oct 2027</span>
+          </div>
+          <div style="font-size:7pt; color:#166534; margin-top:2px;">Regla FEFO Activa: 45 unidades asignadas prioritariamente para despacho.</div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_a5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Llegada Cosmetica</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a5)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Caducidad > 6M?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_a5)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Ingreso a FEFO</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Prioridad despacho</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a5)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Despacho Normal</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Rotacion garantizada</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a5)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Cuarentena</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Bloquear venta</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a5)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion A5 (Control Sanitario, Lotes y Caducidades / PAO Cosmetica)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Despacho Inadvertido de Cosméticos Expirados</div>
+        <div class="risk">Riesgo: Entregar lociones con fecha vencida o PAO rebasado, derivando en sanciones sanitarias.</div>
+        <div class="mitigation">Mitigacion en Software: Semáforo automático que bloquea la selección de lotes con menos de 60 días de vida útil restante.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion A6</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Generacion e Impresion de Etiquetas Termicas de Anaquel y Prenda</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">warehouse</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Imprimir etiquetas autoadheribles en 50x30mm con codigo de barras Code128 y QR vectorial.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: CATALOGO OPERATIVO > BOTON ETIQUETA TERMICA EN 1 CLIC</span>
+          <span style="color: #4f46e5;">Vector SVG nitido a 203/300 DPI inmune a distorsiones</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="border:1px dashed #475569; padding:4px; text-align:center; font-family:monospace; font-size:7pt; background:#ffffff;">
+            <div style="font-weight:bold;">TORZO UNDERWEAR • BX-MOD-001</div>
+            <div style="font-size:10pt; letter-spacing:2px; margin:2px 0;">||||| | |||| ||| |||||||</div>
+            <div>TALLA: M • COLOR: NEGRO • ANAQUEL: A-01-A</div>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_a6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Prenda sin Etiqueta</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a6)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Datos en Catalogo?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_a6)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Generar SVG 50x30</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Code128 + QR</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_a6)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Impresion Termica</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Pegar en empaque</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a6)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Completar Ficha</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Asignar SKU/Slot</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_a6)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion A6 (Generacion e Impresion de Etiquetas Termicas de Anaquel y Prenda)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Lectura Errónea por Código Térmico Borroso</div>
+        <div class="risk">Riesgo: Usar etiquetas en mapa de bits pixeladas que atascan el escáner láser en mesa de empaque.</div>
+        <div class="mitigation">Mitigacion en Software: Generación nativa en vectores SVG con líneas y espacios calibrados al milímetro para impresoras térmicas.</div>
+      </div>
+    </div>
+    </div>
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      2. Rol: Operador de Empaque, Surtido & Picking
+      <span class="role-tag">ID: packer • 6 Funciones Clave</span>
+    </h1>
+    <p style="margin-bottom: 10px;">
+      El siguiente modulo formaliza las 6 responsabilidades operativas que estructuran la labor de <strong>Operador de Empaque, Surtido & Picking</strong>, detallando para cada una el objetivo, la pantalla del sistema donde ocurre la accion, el diagrama de decision aplicable y el mecanismo de software que mitiga el error humano.
+    </p>
+  
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion E1</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Picking por Ruta Optima de Pasillo & Secuencia de Slotting</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">packer</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Recolectar las prendas ordenadas secuencialmente por pasillo para minimizar tiempos de traslado.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: DASHBOARD OPERATIVO > KANBAN PISO > HOJA DE RUTA DE RECOLECCION</span>
+          <span style="color: #4f46e5;">Trayectoria secuencial A-01 -> A-02 -> B-01 -> C-03</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>Lote de Recoleccion #WAVE-14:</strong> 12 pedidos agrupados.<br>
+            Ruta: Pasillo A (8 prendas) -> Pasillo B (6 prendas) -> Pasillo C (2 prendas). Tiempo estimado: 14 min.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_e1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Lote de Picking</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e1)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Ruta por Pasillo?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_e1)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Surtir Secuencia</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Minimizar traslados</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e1)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Traslado a Mesa</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Checklist listo</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e1)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Reordenar Lista</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Agrupar por pasillo</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e1)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion E1 (Picking por Ruta Optima de Pasillo & Secuencia de Slotting)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Fatiga y Retraso por Rutas Cruzadas</div>
+        <div class="risk">Riesgo: Caminar erráticamente por los pasillos buscando pedidos individuales sin consolidación.</div>
+        <div class="mitigation">Mitigacion en Software: La hoja de ruta agrupa los artículos ordenados estrictamente por secuencia física de anaqueles.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion E2</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Checklist Fisico y Verificacion de Calidad en Mesa de Empaque</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">packer</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Validar interactivamente que las prendas en mesa coincidan en SKU, talla y costuras.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1 / HUB 6: MESA DE EMPAQUE > MODAL CHECKLIST INTERACTIVO</span>
+          <span style="color: #4f46e5;">Validacion obligatoria casilla por casilla para desbloquear la guia termica</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="font-size:7pt;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+              <span>[X] BX-MOD-001 Boxer Modal Negro Talla M</span> <span class="kpi-chip kpi-chip-emerald">Validado</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>[X] JK-ATH-002 Jockstrap Carbon Talla G</span> <span class="kpi-chip kpi-chip-emerald">Validado</span>
+            </div>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_e2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Prendas en Mesa</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e2)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Checklist al 100%?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_e2)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Desbloquear Envio</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Prendas verificadas</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e2)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Paso de Embalaje</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Listo para caja</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e2)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Pausar Orden</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Corregir pieza</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e2)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion E2 (Checklist Fisico y Verificacion de Calidad en Mesa de Empaque)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Envío de Talla Incorrecta por Distracción</div>
+        <div class="risk">Riesgo: Empacar talla CH en lugar de G por apresuramiento ante la hora de corte de la paquetería.</div>
+        <div class="mitigation">Mitigacion en Software: El botón de impresión de guía permanece deshabilitado hasta validar interactivamente cada ítem.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion E3</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Seleccion de Caja Volumetrica y Protocolo de Embalaje Seguro</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">packer</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Elegir la caja optima y aplicar proteccion impermeable a liquidos y papel seda con sello intimo.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 6: LOGISTICA > GESTOR DE CAJAS Y CUBICAJE VOLUMETRICO</span>
+          <span style="color: #4f46e5;">Caja Chica (18x12x6cm), Mediana (24x18x8cm), Grande (32x22x10cm)</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fefce8; border:1px solid #fef08a; padding:4px; font-size:7pt; color:#854d0e;">
+            <strong>Sugerencia Algoritmica:</strong> Caja Mediana (24x18x8cm) • Peso estimado: 480g.<br>
+            Protocolo Activo: Envoltura seda negro + Sello de privacidad + Muestra de regalo.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_e3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Seleccion de Caja</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e3)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Incluye Liquidos?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_e3)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Bolsa Termosellada</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Evitar derrames</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e3)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Cerrar Caja</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Lista para guia</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e3)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Envoltura Seda</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Sello de privacidad</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e3)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion E3 (Seleccion de Caja Volumetrica y Protocolo de Embalaje Seguro)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Sobrecargos Courier por Caja Excesiva</div>
+        <div class="risk">Riesgo: Usar una caja grande para una sola prenda íntima, pagando el triple de flete volumétrico.</div>
+        <div class="mitigation">Mitigacion en Software: Cálculo en vivo del volumen total del pedido sugiriendo el tamaño exacto de caja estándar.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion E4</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Emision de Guias Termicas (100x150mm) con Remitente Neutro</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">packer</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Generar la etiqueta de despacho con nombre corporativo neutro protegiendo la privacidad del cliente.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1 / HUB 6: BOTON EMITIR GUIA TERMICA (100x150mm)</span>
+          <span style="color: #4f46e5;">Remitente: 'Operaciones Logisticas' sin alusion a ropa interior</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="border:1px solid #cbd5e1; padding:4px; font-size:7pt; font-family:monospace;">
+            <strong>REMITENTE:</strong> Operaciones Logisticas • CDMX<br>
+            <strong>DESTINO:</strong> Juan Perez • Guadalajara, JAL (CP 44100)<br>
+            <strong>TRACKING:</strong> DHL Express #5491-0021-99 [CODE128 SVG]
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_e4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Caja Sellada</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e4)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Riesgo Fraude?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_e4)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Detener Guia</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Revisar con ventas</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e4)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Pegar Etiqueta</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">A cola embarque</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e4)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Emitir 100x150mm</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Remitente neutro</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e4)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion E4 (Emision de Guias Termicas (100x150mm) con Remitente Neutro)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Violación de Privacidad del Comprador</div>
+        <div class="risk">Riesgo: Rotular paquetes con nombres explícitos de lencería íntima que incomodan al cliente al recibirlo.</div>
+        <div class="mitigation">Mitigacion en Software: Generación forzada de remitente corporativo neutro ('Operaciones Logísticas') en todas las etiquetas.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion E5</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Cierre de Manifiesto Diario y Entrega al Courier (Corte DHL 14:00 hrs)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">packer</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Consolidar los paquetes del dia en un manifiesto maestro sellado por el chofer recolector.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: BANNER CUENTA REGRESIVA SLA & HUB 6: MANIFIESTOS</span>
+          <span style="color: #4f46e5;">Semaforo de alerta critica para pedidos mayores a 5 horas</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:4px; font-size:7pt; color:#1e40af;">
+            <strong>Corte DHL 14:00 hrs:</strong> 26 pedidos consolidados en Manifiesto #MNF-2026-0917.<br>
+            Estatus: Firmado digitalmente por chofer DHL Unidad #402. Manifiesto archivado.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_e5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">13:30 hrs Revision</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e5)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Cola Completa?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_e5)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Generar Manifiesto</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Codigo consolidado</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e5)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Entrega Courier</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Firma y salida</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e5)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Acelerar Empaque</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Alerta SLA 15 min</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e5)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion E5 (Cierre de Manifiesto Diario y Entrega al Courier (Corte DHL 14:00 hrs))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Pérdida de Paquetes sin Respaldo Legal</div>
+        <div class="risk">Riesgo: Entregar cajas sueltas a la paquetería sin comprobante de entrega firmado por el chofer.</div>
+        <div class="mitigation">Mitigacion en Software: El sistema no permite cerrar el despacho hasta adjuntar el número de manifiesto oficial sellado.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion E6</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Inspeccion Sanitaria de Devoluciones RMA (Precinto Intimo vs Exterior)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">packer</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Determinar si una prenda devuelta puede reingresar a stock o debe destruirse por ley sanitaria.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 6: LOGISTICA > MODULO DE INSPECCION DE GARANTIAS RMA</span>
+          <span style="color: #4f46e5;">Criterio COFEPRIS: ropa interior sin precinto no reingresa jamas</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fff1f2; border:1px solid #fecdd3; padding:4px; font-size:7pt; color:#9f1239;">
+            <strong>Inspeccion RMA #DEV-042:</strong> Boxer Modal recibido con precinto higienico violado.<br>
+            Resolucion del Sistema: BAJA_DESTRUCCION_SANITARIA (Prohibido reingreso a stock comercial).
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_e6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Paquete Devuelto</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e6)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Precinto Intacto?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_e6)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Reingreso Kardex</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Stock disponible</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_e6)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Cierre de Ticket</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Nota contable</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e6)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Baja Sanitaria</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Destruccion merma</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_e6)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion E6 (Inspeccion Sanitaria de Devoluciones RMA (Precinto Intimo vs Exterior))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Contaminación Sanitaria en Anaqueles</div>
+        <div class="risk">Riesgo: Reintegrar por error prendas íntimas probadas o usadas al inventario disponible para venta.</div>
+        <div class="mitigation">Mitigacion en Software: Bloqueo estricto del sistema: las categorías íntimas exigen confirmación de precinto intacto para reingresar.</div>
+      </div>
+    </div>
+    </div>
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      3. Rol: Encargada de Compras & Abastecimiento
+      <span class="role-tag">ID: purchases • 6 Funciones Clave</span>
+    </h1>
+    <p style="margin-bottom: 10px;">
+      El siguiente modulo formaliza las 6 responsabilidades operativas que estructuran la labor de <strong>Encargada de Compras & Abastecimiento</strong>, detallando para cada una el objetivo, la pantalla del sistema donde ocurre la accion, el diagrama de decision aplicable y el mecanismo de software que mitiga el error humano.
+    </p>
+  
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion C1</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Monitoreo de Puntos de Reorden (ROP) y Alertas de Stock Critico</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">purchases</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Supervisar dias de cobertura y disparar recompras antes de agotar tallas clave.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: INVENTARIO > COMPRAS & REABASTECIMIENTO > CALCULADORA ROP</span>
+          <span style="color: #4f46e5;">Formula: Cobertura = Existencias / Ritmo Semanal de Ventas</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="font-size:7pt;">
+            <div style="color:#be123c; font-weight:bold;">ALERTA ROP: BX-MOD-001 (1.8 dias de vida restante)</div>
+            <div style="color:#475569;">Consumo: 45 uds/sem | Stock: 12 uds | Lead Time Taller: 5 dias. Accion: Comprar +120 uds.</div>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_c1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Revision ROP</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c1)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Cobertura < 7 dias?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_c1)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Calcular Lote PO</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Presets +60, +120</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c1)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Generar Orden</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Enviar a taller</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c1)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Stock Normal</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Seguimiento ritmo</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c1)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion C1 (Monitoreo de Puntos de Reorden (ROP) y Alertas de Stock Critico)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Quiebre de Inventario en Fin de Semana</div>
+        <div class="risk">Riesgo: No percatarse del agotamiento de la talla M hasta el lunes con 40 pedidos pendientes.</div>
+        <div class="mitigation">Mitigacion en Software: Semáforo automático de cobertura en días que proyecta el agotamiento según el ritmo real de venta.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion C2</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Generacion y Emision de Ordenes de Compra (PO) a Talleres Maquileros</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">purchases</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Formalizar solicitudes de produccion con curvas completas de tallas y costos pactados.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: INVENTARIO > MODAL GENERADOR DE PO DIGITAL</span>
+          <span style="color: #4f46e5;">Captura de curvas: CH, M, G, XL, 2XL, 3XL con costos historicos</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>PO #PO-2026-088:</strong> Taller Torzo Confeccion • 150 piezas Boxer Modal.<br>
+            Curva: CH(20), M(50), G(50), XL(20), 2XL(10). Costo Unitario: $68.00 MXN. Total: $10,200 MXN.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_c2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Reorden Aprobado</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c2)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Taller Asignado?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_c2)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Capturar Curva</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">CH a 3XL con costo</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c2)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Emitir PO Digital</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Envio formal</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c2)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Evaluar Talleres</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Comparar plazos</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c2)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion C2 (Generacion y Emision de Ordenes de Compra (PO) a Talleres Maquileros)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Sobrecostos por Pedidos Fuera de Rango</div>
+        <div class="risk">Riesgo: Comprar prendas a talleres a precios superiores al costo histórico de adquisición sin justificación.</div>
+        <div class="mitigation">Mitigacion en Software: El modal compara automáticamente el costo capturado contra el CPP histórico alertando variaciones.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion C3</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Conexion y Disparo de Ordenes a Extranet B2B de Proveedores (TASK-HUB-VND)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">purchases</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Sincronizar ordenes de maquila al portal digital de proveedores para trazabilidad en vivo.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 7 / PORTAL B2B: CONSOLA DE FABRICANTES (vendorPortalState)</span>
+          <span style="color: #4f46e5;">Hitos de produccion: Corte Iniciado -> En Confeccion -> Despachado a Rampa</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#eef2ff; border:1px solid #c7d2fe; padding:4px; font-size:7pt; color:#3730a3;">
+            <strong>Extranet B2B:</strong> Taller Confeccion Express confirmo PO #8912 vía token seguro.<br>
+            Hito actual: Tela Cortada (150 piezas) • Fecha estimada rampa: 22 de Septiembre.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_c3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">PO Emitida</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c3)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Taller con Extranet?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_c3)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Sync Directo B2B</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Token de acceso</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c3)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Seguimiento Hitos</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Rampa enterada</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c3)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Envio Manual PDF</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Correo cifrado</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c3)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion C3 (Conexion y Disparo de Ordenes a Extranet B2B de Proveedores (TASK-HUB-VND))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Incertidumbre en Fechas de Entrega</div>
+        <div class="risk">Riesgo: Desconocer el estado del lote en confección hasta que la fecha prometida ya expiró.</div>
+        <div class="mitigation">Mitigacion en Software: La extranet exige al fabricante marcar digitalmente cada hito para mantener su calificación SLA.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion C4</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Evaluacion de Proveedores y Scorecards SLA (Fill Rate % & On-Time %)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">purchases</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Monitorear la puntualidad y calidad de cada taller para negociar volumen y plazos de pago.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: INVENTARIO > PESTAÑA PROVEEDORES > SCORECARD SLA</span>
+          <span style="color: #4f46e5;">Metricas: On-Time Delivery %, Fill Rate %, Tasa de Defectos %</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="display:flex; justify-content:space-between; font-size:7.5pt;">
+            <span><strong>Proveedor:</strong> Torzo Labs Maquila</span>
+            <span class="kpi-chip kpi-chip-emerald">SLA Score: 94.2/100</span>
+          </div>
+          <div style="font-size:7pt; color:#475569; margin-top:2px;">Entregas a tiempo: 96% | Cumplimiento unidades: 98% | Defectos en rampa: 0.8%.</div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_c4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Evaluacion Mensual</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c4)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Score SLA >= 85%?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_c4)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Taller Preferente</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Prioridad en volumen</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c4)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Asignar Maquila</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Contrato seguro</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c4)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Condicionar POs</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Ajustar terminos</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c4)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion C4 (Evaluacion de Proveedores y Scorecards SLA (Fill Rate % & On-Time %))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Asignación Ciega a Proveedores Incumplidos</div>
+        <div class="risk">Riesgo: Seguir ordenando producción a talleres con demoras recurrentes que dañan las campañas de venta.</div>
+        <div class="mitigation">Mitigacion en Software: El scorecard pondera matemáticamente los retrasos y sugiere automáticamente talleres mejor evaluados.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion C5</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Curaduria Previa y Auditoria de Scraping de Catalogo Externo (Torzo)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">purchases</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Revisar prendas captadas por el bot antes de ingresarlas al catalogo activo.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: AJUSTES DE MODULO > CURADURIA PREVIA DE SCRAPING</span>
+          <span style="color: #4f46e5;">Aprobacion manual de fotos, tablas de equivalencias y margen bruto >= 50%</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fafafa; border:1px solid #e2e8f0; padding:4px; font-size:7pt;">
+            <strong>Prenda Scrapeada:</strong> Jockstrap Torzo Neon Glow (SKU Externo: #TZ-401).<br>
+            Costo Proveedor: $110.00 MXN | PVP Sugerido: $280.00 MXN (Margen: 60.7%). Estado: Aprobada para Vitrina.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_c5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Ingesta Scraping</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c5)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Margen >= 50%?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_c5)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Aprobar Prenda</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Publicar catalogo</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c5)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Vitrina Activa</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Lista para venta</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c5)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Descartar SKU</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Margen inviable</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c5)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion C5 (Curaduria Previa y Auditoria de Scraping de Catalogo Externo (Torzo))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Ingreso de Productos No Rentables</div>
+        <div class="risk">Riesgo: Ingresar automáticamente prendas scrapeadas con márgenes estrechos que no cubren fletes.</div>
+        <div class="mitigation">Mitigacion en Software: Bandeja de cuarentena donde los artículos scrapeados requieren autorización expresa del margen.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion C6</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Cotejo Automatizado de 3 Vias (OC vs Rampa vs Liquidacion Fiscal)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">purchases</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Validar que la factura fiscal coincida al centavo con lo recibido fisicamente antes de pagar.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: COMPRAS & HUB 5: GASTOS (Matriz de 3 Vias Inbound)</span>
+          <span style="color: #4f46e5;">Regla inquebrantable: Cero pagos SPEI sin triple coincidencia limpia</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:4px; font-size:7pt; color:#166534;">
+            <strong>Cotejo 3 Vias PO-8912:</strong> PO ($10,200) == Rampa (150 uds) == Factura CFDI ($10,200).<br>
+            Estatus: Coincidencia limpia al 100%. Desbloqueado pago SPEI en Hub 5 Finanzas.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_c6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Llegada Factura</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c6)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">3 Vias Coinciden?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_c6)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Autorizar SPEI</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Pago liberado</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_c6)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Finanzas Paga</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Trazabilidad SAT</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c6)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Bloquear Pago</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Exigir nota credito</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_c6)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion C6 (Cotejo Automatizado de 3 Vias (OC vs Rampa vs Liquidacion Fiscal))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Fuga Financiera por Cobro de Insumos Faltantes</div>
+        <div class="risk">Riesgo: Pagar facturas completas cuando el taller entregó 10 piezas menos en la rampa.</div>
+        <div class="mitigation">Mitigacion en Software: Bloqueo de la pasarela de dispersión bancaria si existe discrepancia numérica entre rampa y factura.</div>
+      </div>
+    </div>
+    </div>
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      4. Rol: Asesora Comercial & Atencion (Ana)
+      <span class="role-tag">ID: sales • 6 Funciones Clave</span>
+    </h1>
+    <p style="margin-bottom: 10px;">
+      El siguiente modulo formaliza las 6 responsabilidades operativas que estructuran la labor de <strong>Asesora Comercial & Atencion (Ana)</strong>, detallando para cada una el objetivo, la pantalla del sistema donde ocurre la accion, el diagrama de decision aplicable y el mecanismo de software que mitiga el error humano.
+    </p>
+  
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion V1</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Validacion Predictiva de Codigos Postales y Direcciones Sepomex</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">sales</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Auditar y corregir domicilios de entrega con inconsistencias antes de que lleguen a empaque.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: DASHBOARD VENTAS > BANDEJA ANA ATENCION > ALERTA SEPOMEX</span>
+          <span style="color: #4f46e5;">Cruce predictivo entre CP, Colonia y Municipio del catalogo oficial</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fff1f2; border:1px solid #fecdd3; padding:4px; font-size:7pt; color:#9f1239;">
+            <strong>Alerta Sepomex en Orden #8940:</strong> CP 06700 registrado con Municipio 'Benito Juarez' (Correcto: Cuauhtemoc).<br>
+            Accion de Ana: Corregir en 1 clic y liberar paquete a mesa de empaque.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_v1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Alerta Sepomex</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v1)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Error Evidente?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_v1)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Corregir en 1 Clic</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Actualizar direccion</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v1)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Liberar a Mesa</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Sin fletes fallidos</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v1)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Contactar WhatsApp</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Pedir ubicacion</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v1)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion V1 (Validacion Predictiva de Codigos Postales y Direcciones Sepomex)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Guías Rebotadas por Domicilio Inexistente</div>
+        <div class="risk">Riesgo: Generar guías con errores tipográficos que DHL rechaza en destino con cobro de devolución.</div>
+        <div class="mitigation">Mitigacion en Software: El sistema detiene preventivamente la orden y sugiere la combinación correcta según Sepomex.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion V2</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Recuperacion de Carritos Abandonados con Enlaces Tokenizados WhatsApp</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">sales</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Contactar compradores que abandonaron su compra con un enlace que restaura su carrito exacto.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: EMBUDO MULTIVERSO > GATILLO WHATSAPP EN 1 CLIC</span>
+          <span style="color: #4f46e5;">Generacion de token seguro que preserva productos, variantes y cupon de envio</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fff7ed; border:1px solid #fed7aa; padding:4px; font-size:7pt; color:#9a3412;">
+            <strong>Carrito Abandonado ($1,280 MXN):</strong> Carlos Mendoza • Hace 18 minutos.<br>
+            Gatillo WhatsApp: 'Hola Carlos, reservamos tu Pack Trio Talla M. Completa tu pedido con envio gratis aqui: [Link]'.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_v2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Carrito > 15 min</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v2)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Ticket > $800?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_v2)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">WhatsApp + Cupon</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Envio gratis 1 clic</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v2)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Checkout Pagado</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Venta recuperada</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v2)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">WhatsApp Amigable</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Recordatorio stock</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v2)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion V2 (Recuperacion de Carritos Abandonados con Enlaces Tokenizados WhatsApp)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Contacto Extemporáneo con Pérdida de Interés</div>
+        <div class="risk">Riesgo: Enviar mensajes de recuperación días después cuando el comprador ya compró en otra tienda.</div>
+        <div class="mitigation">Mitigacion en Software: Monitor en vivo de carritos abandonados con disparador prioritario entre los 15 y 45 minutos.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion V3</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Asesoria Anatomica y Guia de Siluetas Intimas (Torzo Fit)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">sales</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Guiar a compradores sobre que prenda elegir segun su fisonomia, tela y tipo de uso.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: WHATSAPP CRM CONECTADO CON FICHA ANATOMICA DE PRODUCTO</span>
+          <span style="color: #4f46e5;">Parametros de ajuste: Compresion Atletica, Confort Diario, Minima Cobertura</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="font-size:7pt;">
+            <strong>Consulta Cliente:</strong> 'Tengo cintura 86cm y piernas gruesas, ¿Boxer o Jockstrap?'<br>
+            <strong>Respuesta Ana:</strong> 'Para cintura 86cm te sugerimos talla M en Boxer Modal Seamless (pierna no comprime).'
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_v3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Consulta de Talla</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v3)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Uso Deportivo?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_v3)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Recomendar Jock</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Copa y elasticidad</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v3)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Enviar Enlace</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Cliente seguro</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v3)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Recomendar Boxer</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Modal suave</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v3)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion V3 (Asesoria Anatomica y Guia de Siluetas Intimas (Torzo Fit))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Devoluciones por Elección Errónea de Talla</div>
+        <div class="risk">Riesgo: Dar recomendaciones apresuradas sin consultar la tabla oficial de centímetros de cadera.</div>
+        <div class="mitigation">Mitigacion en Software: Ficha anatómica accesible en el chat que indica rangos exactos de cintura y factor de elongación.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion V4</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Gestion de Membresias y Suscripciones Recurrentes (MRR)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">sales</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Atender cambios de tallas, pausas temporales y resolucion de cobros declinados en membresias.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: BANDEJA DE MEMBRESIAS & HUB 5: MOTOR DE DUNNING</span>
+          <span style="color: #4f46e5;">Preservacion del ingreso recurrente mensual sin fricciones</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f1f5f9; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>Suscriptor #SUB-4021:</strong> Solicita cambiar talla de su caja mensual de M a G para la siguiente entrega.<br>
+            Accion: Actualizacion inmediata en perfil y reflejada en la receta BOM de la proxima corrida.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_v4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Ajuste Membresia</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v4)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Cobro Fallido?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_v4)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Dunning Inteligente</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Reintento + WhatsApp</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v4)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Suscripcion Activa</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">MRR protegido</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v4)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Actualizar Talla</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Sync en recetas BOM</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v4)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion V4 (Gestion de Membresias y Suscripciones Recurrentes (MRR))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Bajas Evitables de Suscripciones Mensuales</div>
+        <div class="risk">Riesgo: Cancelar cuentas por tarjetas declinadas sin ofrecer alternativas de pago (OXXO Pay o SPEI).</div>
+        <div class="mitigation">Mitigacion en Software: Notificación preventiva 3 días antes de renovar con enlace para actualizar tarjeta o elegir OXXO.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion V5</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Tramitacion de Garantias, Cambios de Talla y Emision de Reemplazos</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">sales</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Resolver quejas y aplicar politicas de garantia justas minimizando costos para el negocio.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 6: PORTAL DE GARANTIAS & HUB 1: BANDEJA POST-VENTA</span>
+          <span style="color: #4f46e5;">Criterio de retorno inteligente: si flete > prenda, reemplazo sin retorno</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:4px; font-size:7pt; color:#1e40af;">
+            <strong>Ticket Garantia #GAR-088:</strong> Costura descosida en Boxer ($68 costo). Foto validada.<br>
+            Resolucion: Reemplazo express sin exigir retorno fisico (flete DHL retorno costaria $140 MXN).
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_v5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Queja con Foto</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v5)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Flete > Costo?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_v5)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Envio Directo</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Sin retorno fisico</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v5)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Cliente Satisfecho</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Costo optimizado</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v5)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Guia Prepagada</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Inspeccion rampa</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v5)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion V5 (Tramitacion de Garantias, Cambios de Talla y Emision de Reemplazos)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Gasto Duplicado en Retornos Antieconómicos</div>
+        <div class="risk">Riesgo: Pagar una guía de retorno de $140 MXN para inspeccionar una prenda de costo de fabricación de $50 MXN.</div>
+        <div class="mitigation">Mitigacion en Software: El sistema evalúa el costo del producto vs flete y sugiere el reenvío directo si la foto es concluyente.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion V6</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Escudo Antifraude y Retencion Preventiva en Mesa de Empaque</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">sales</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Detener ordenes con alta sospecha de fraude antes de que el paquete salga de bodega.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: ALERTA STRIPE RADAR & BOTON FRENO DE EMERGENCIA</span>
+          <span style="color: #4f46e5;">Retencion inmediata en mesa de empaque ante disputas en pasarela</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fee2e2; border:1px solid #fca5a5; padding:4px; font-size:7pt; color:#991b1b;">
+            <strong>FRENO DE EMERGENCIA ACTIVO:</strong> Stripe Radar marco Orden #8990 con 89% score de fraude.<br>
+            Estatus: Empaque bloqueado. Ana solicito comprobante de titularidad al comprador.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_v6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Alerta Radar</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v6)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Titular Acreditado?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_v6)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Liberar Orden</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Desbloquear empaque</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_v6)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Riesgo Mitigado</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Cero contracargos</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v6)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Cancelar y Reembolso</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Prendas a inventario</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_v6)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion V6 (Escudo Antifraude y Retencion Preventiva en Mesa de Empaque)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Pérdida de Mercancía por Contracargos</div>
+        <div class="risk">Riesgo: Despachar pedidos pagados con tarjetas robadas que derivan en reclamo bancario y penalización.</div>
+        <div class="mitigation">Mitigacion en Software: Webhook de Stripe Radar congela la orden en el Kanban de empaque con alarma visual en rojo.</div>
+      </div>
+    </div>
+    </div>
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      5. Rol: Direccion General / RevOps / Finanzas
+      <span class="role-tag">ID: admin • 6 Funciones Clave</span>
+    </h1>
+    <p style="margin-bottom: 10px;">
+      El siguiente modulo formaliza las 6 responsabilidades operativas que estructuran la labor de <strong>Direccion General / RevOps / Finanzas</strong>, detallando para cada una el objetivo, la pantalla del sistema donde ocurre la accion, el diagrama de decision aplicable y el mecanismo de software que mitiga el error humano.
+    </p>
+  
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion D1</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Auditoria de Cascada de Margen Neto Real por Pedido</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">admin</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Supervisar la utilidad neta real descontando todos los costos directos de la operacion.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: CONCENTRADOR EJECUTIVO > COMERCIAL & REVOPS > CASCADA DE MARGEN</span>
+          <span style="color: #4f46e5;">GMV (-) Costo Prenda (-) Pasarela Stripe (-) Flete DHL (-) Caja = Margen Neto</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>Cascada GMV ($1,104,800 MXN):</strong> Costo Prendas (-$386,680) | Pasarelas (-$44,192) | Logistica (-$143,624) | Cajas (-$46,402).<br>
+            <strong style="color:#15803d;">Utilidad Neta Real: $483,902 MXN (Margen Neto: 43.8%).</strong>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_d1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Auditoria Margen</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d1)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Margen >= 40%?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_d1)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Mantener Pauta</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Escalado comercial</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d1)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Optimizar Costos</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Rentabilidad firme</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d1)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Analizar Fuga</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Fletes o pasarela</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d1)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion D1 (Auditoria de Cascada de Margen Neto Real por Pedido)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Falsa Sensación de Éxito por GMV Alto</div>
+        <div class="risk">Riesgo: Facturar 1 millón de pesos vendiendo productos con márgenes netos de 5% que no pagan la nómina.</div>
+        <div class="mitigation">Mitigacion en Software: La cascada desglosa obligatoriamente cada deducción directa antes de reportar la ganancia neta.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion D2</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Analisis Pareto ABC (80/20) del Catalogo y Liquidacion de Clase C</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">admin</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Auditar los productos que generan el 80% de ventas y liquidar el inventario de baja rotacion.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: CONCENTRADOR EJECUTIVO > SUB-PESTAÑA ALMACEN E INVENTARIO</span>
+          <span style="color: #4f46e5;">Clase A (Top 20% SKUs / 80% GMV), Clase B (30% / 15%), Clase C (50% / 5%)</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="font-size:7pt;">
+            <span class="kpi-chip kpi-chip-amber">Clase A: 124 SKUs (79.4% Ventas)</span>
+            <span class="kpi-chip kpi-chip-slate">Clase C: 1,232 SKUs (5.4% Ventas)</span>
+            <div style="margin-top:2px; color:#475569;">Recomendacion: Liquidar 45 SKUs Clase C estancados mediante combos promocionales al 30%.</div>
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_d2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Auditoria Pareto</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d2)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">SKU en Clase C?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_d2)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Promo Outlet</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Descuento en lote</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d2)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Liberar Capital</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Racks depurados</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d2)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Recomprar Stock</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Invertir en Clase A</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d2)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion D2 (Analisis Pareto ABC (80/20) del Catalogo y Liquidacion de Clase C)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Capital Congelado en Inventario Fantasma</div>
+        <div class="risk">Riesgo: Seguir almacenando prendas de siluetas impopulares que pierden valor y pagan renta de anaquel.</div>
+        <div class="mitigation">Mitigacion en Software: El dashboard permite aislar la Clase C en 1 clic y enviarla a la herramienta de combos promocionales.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion D3</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Monitoreo del Embudo Multiverso y Optimizacion de Pauta Publicitaria</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">admin</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Supervisar tasas de conversion en checkout y decidir ampliaciones de pauta en Meta Ads.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: DASHBOARD EJECUTIVO > EMBUDO DE CONVERSION MULTIVERSO</span>
+          <span style="color: #4f46e5;">Sesiones (45,000) -> Carritos (3,200) -> Checkout (1,800) -> Ventas (1,440)</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:4px; font-size:7pt; color:#166534;">
+            <strong>Tasa de Conversion Global: 3.2% [OBJETIVO CUMPLIDO].</strong><br>
+            Retorno de Inversion en Pauta (ROAS Meta CAPI): 4.6x • Autorizado incremento del 15% en presupuesto.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_d3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Revision Embudo</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d3)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Conversion >= 3.2%?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_d3)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Escalar AdSpend</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Meta CAPI y Google</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d3)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Monitoreo ROAS</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Crecimiento sano</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d3)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Auditar Fuga</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Checkout o envios</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d3)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion D3 (Monitoreo del Embudo Multiverso y Optimizacion de Pauta Publicitaria)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Desperdicio de Presupuesto Publicitario</div>
+        <div class="risk">Riesgo: Invertir más dinero en tráfico cuando la tasa de conversión en la pasarela de pago está rota.</div>
+        <div class="mitigation">Mitigacion en Software: Diagnóstico en tiempo real que alerta si el abandono en el checkout supera el umbral del 45%.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion D4</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Motor Fiscal SAT, Conciliacion de IVA y Retenciones</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">admin</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Separar el IVA trasladado y reportar retenciones de plataformas para cumplimiento contable.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 5: FINANZAS > CONSOLA FISCAL SAT (Base Gravable e IVA)</span>
+          <span style="color: #4f46e5;">Base Gravable = Total / 1.16 | Retenciones: 1% ISR + 8% IVA plataformas</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>Consola Fiscal SAT (Mes Actual):</strong><br>
+            Facturado Bruto: $1,104,800 MXN | Base Gravable: $952,413.79 MXN | IVA Trasladado (16%): $152,386.21 MXN.<br>
+            Retencion ISR Plataformas: $9,524.14 MXN | Reporte exportable en UTF-8 con BOM para SAT.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_d4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Cierre Fiscal</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d4)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Conciliado con SAT?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_d4)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Exportar a Contador</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Reporte limpio UTF-8</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d4)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Impuestos al Dia</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Cero multas fiscales</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d4)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Auditar Discrepancia</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Revisar reembolsos</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d4)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion D4 (Motor Fiscal SAT, Conciliacion de IVA y Retenciones)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Confundir IVA Recaudado con Utilidad</div>
+        <div class="risk">Riesgo: Gastar el total ingresado a bancos olvidando que el 16% de IVA pertenece al SAT.</div>
+        <div class="mitigation">Mitigacion en Software: Separación automática en dos cuentas contables: Caja Operativa vs Provisión de Impuestos SAT.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion D5</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Conciliacion de Facturas de Paqueteria vs Manifiestos Emitidos</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">admin</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Auditar cobros de DHL/Skydropx contra registros de empaque para evitar sobrecargos indebidos.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 6 & HUB 5: MATRIZ DE CONCILIACION DE FLETES COURIER</span>
+          <span style="color: #4f46e5;">Cruce de peso volumetrico registrado vs peso facturado por el transportista</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fff1f2; border:1px solid #fecdd3; padding:4px; font-size:7pt; color:#9f1239;">
+            <strong>Auditoria DHL Quincenal:</strong> 4 guias facturadas con sobrepeso de 2kg injustificado.<br>
+            Accion: Ticket de disputa generado con foto de bascula y medidas registradas en empaque (-$380 MXN).
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_d5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Factura Courier</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d5)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Pesos Coinciden?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_d5)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Aprobar Pago Flete</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Liquidacion courier</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d5)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Ahorro Logistico</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Cobro justo</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d5)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Emitir Disputa</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Pruebas de balanza</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d5)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion D5 (Conciliacion de Facturas de Paqueteria vs Manifiestos Emitidos)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Fuga Invisible por Fletes Inflados</div>
+        <div class="risk">Riesgo: Pagar tarifas de paquetería sin cotejar si el transportista reclasificó el peso arbitrariamente.</div>
+        <div class="mitigation">Mitigacion en Software: Registro inmutable del peso capturado en mesa de empaque que sirve de prueba irrefutable para disputas.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion D6</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Telemetria de APIs, Health Check y Consulta al Copiloto IA</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">admin</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Monitorear la estabilidad de las integraciones y consultar escenarios estrategicos con IA.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: SYSTEM HEALTH MONITOR & COPILOTO IA EN COLUMNA DERECHA</span>
+          <span style="color: #4f46e5;">Telemetria de Stripe, Torzo Bot, DHL y Drawer de Chat Estrategico</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="display:flex; justify-content:space-between; font-size:7.5pt;">
+            <span><strong>System Health:</strong> Stripe (99.9%) • DHL (99.8%) • Torzo Bot (100%)</span>
+            <span class="kpi-chip kpi-chip-emerald">Operativo</span>
+          </div>
+          <div style="background:#f1f5f9; padding:4px; border-radius:3px; font-size:7pt; margin-top:2px;">
+            <strong>Copiloto IA:</strong> 'Se sugiere adelantar orden de maquila de Boxer Modal por festivos en taller textil.'
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_d6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Monitoreo APIs</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d6)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Sistemas en Verde?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_d6)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Operacion Normal</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Telemetria < 300ms</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_d6)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Plan de Accion</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Respaldo activo</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d6)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Activar Contingencia</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Consultar Copiloto IA</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_d6)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion D6 (Telemetria de APIs, Health Check y Consulta al Copiloto IA)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Caídas Silenciosas de Pasarelas de Pago</div>
+        <div class="risk">Riesgo: Perder ventas durante horas porque un webhook de pagos falló y nadie se percató.</div>
+        <div class="mitigation">Mitigacion en Software: Monitor de telemetría con ping periódico cada 5 minutos que emite alarma audible ante anomalías.</div>
+      </div>
+    </div>
+    </div>
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      6. Rol: Operador Integral / Administrador Multirrol
+      <span class="role-tag">ID: all_roles • 6 Funciones Clave</span>
+    </h1>
+    <p style="margin-bottom: 10px;">
+      El siguiente modulo formaliza las 6 responsabilidades operativas que estructuran la labor de <strong>Operador Integral / Administrador Multirrol</strong>, detallando para cada una el objetivo, la pantalla del sistema donde ocurre la accion, el diagrama de decision aplicable y el mecanismo de software que mitiga el error humano.
+    </p>
+  
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion M1</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Orquestacion Secuencial de la Jornada mediante Time-Boxing Estricto</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">all_roles</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Garantizar que un solo operador cubra almacen, empaque, atencion y finanzas sin colapsar.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: CABINA OPERATIVA MULTIRROL CON ADAPTACION HORARIA</span>
+          <span style="color: #4f46e5;">Bloque 1 (Empaque) -> Bloque 2 (Courier) -> Bloque 3 (Ventas) -> Bloque 4 (Finanzas)</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:4px; font-size:7pt; color:#1e3a8a;">
+            <strong>08:00 - 13:30 MODO EMPAQUE OBLIGATORIO:</strong> Enfoque ciego en preparar 18 pedidos pendientes.<br>
+            Chat comercial silenciado temporalmente para garantizar recoleccion DHL de las 14:00 hrs.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_m1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">Inicio Jornada</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m1)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Hora < 13:30 hrs?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_m1)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Modo Almacen/Empaque</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Corte DHL prioritario</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m1)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Cierre del Dia</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">P&L y Kardex</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m1)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Modo Tarde/Ventas</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Atencion y compras</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m1)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion M1 (Orquestacion Secuencial de la Jornada mediante Time-Boxing Estricto)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Colapso por Dispersión y Multitarea</div>
+        <div class="risk">Riesgo: Tratar de responder mensajes mientras se empaca, cometiendo errores de prenda y perdiendo el courier.</div>
+        <div class="mitigation">Mitigacion en Software: La cabina multirrol reconfigura la pantalla silenciando canales secundarios hasta liberar el despacho.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion M2</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Ejecucion del Ciclo Fisico Matutino (Almacen + Picking + Empaque + Courier)</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">all_roles</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Realizar personalmente la recoleccion por pasillo, validacion, embalaje y rotulacion.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: KANBAN PISO & HUB 4: RECETAS BOM EN AJUSTES</span>
+          <span style="color: #4f46e5;">Ejecucion fisica integral con checklist digital bloqueante</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="font-size:7pt;">
+            <strong>Ciclo Matutino Concluido:</strong> 18 paquetes empacados con cajas volumetricas medianas.<br>
+            Guias termicas adheridas y 18 checklists validados al 100%. Listos en rampa de salida.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_m2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">08:00 hrs Inicio</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m2)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Existencias BOM Ok?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_m2)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Picking por Pasillo</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Surtir racks A y B</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m2)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Empaque y Guias</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Listo para camioneta</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m2)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Ajustar Receta</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Sustituir prenda</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m2)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion M2 (Ejecucion del Ciclo Fisico Matutino (Almacen + Picking + Empaque + Courier))</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Pérdida de la Recolección Matutina</div>
+        <div class="risk">Riesgo: Retrasarse en el surtido y llegar a las 14:00 hrs con paquetes a medio preparar.</div>
+        <div class="mitigation">Mitigacion en Software: Semáforo predictivo de cuenta regresiva en el encabezado de la pantalla con alarma a los 45 minutos.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion M3</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Recepcion Inbound y Descarga en Rampa Post-Corte Courier</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">all_roles</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Ingresar fisicamente la mercancia de proveedores inmediatamente tras despedir a DHL.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: RAMPA DE RECEPCION & HUB 4: KARDEX Y SLOTTING</span>
+          <span style="color: #4f46e5;">Cotejo en rampa, conteo por talla y acomodo en anaqueles antes de la tarde</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>14:10 hrs Recepcion en Rampa:</strong> 80 prendas recibidas de maquila textil.<br>
+            Cotejadas e ingresadas a Kardex (ENTRADA_COMPRA). Acomodadas en Pasillo A-02. Catalogo actualizado.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_m3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">14:00 hrs Post-DHL</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m3)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Mercancia en Rampa?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_m3)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Cotejo e Ingreso</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Kardex actualizado</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m3)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Acomodo en Racks</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Stock disponible</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m3)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Pausa Almuerzo</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Descanso operativo</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m3)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion M3 (Recepcion Inbound y Descarga en Rampa Post-Corte Courier)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Mercancía Abandonada en Piso de Entrada</div>
+        <div class="risk">Riesgo: Dejar cajas recibidas en el suelo durante días sin inventariar, perdiendo visibilidad comercial.</div>
+        <div class="mitigation">Mitigacion en Software: El protocolo asigna forzosamente la franja de 14:00 a 14:30 hrs para vaciar la rampa de recepción.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion M4</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Rescate Comercial y Gestion de Incidencias en Bloque Vespertino</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">all_roles</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Atender clientes, corregir domicilios Sepomex y recuperar carritos en una ventana dedicada.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: BANDEJA ANA ATENCION & WHATSAPP CRM MULTIVERSO</span>
+          <span style="color: #4f46e5;">Concentracion de respuesta sin interrupciones fisicas de bodega</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#fff7ed; border:1px solid #fed7aa; padding:4px; font-size:7pt; color:#9a3412;">
+            <strong>15:00 hrs Bloque Comercial:</strong> 6 carritos de la manana recuperados via WhatsApp ($4,200 MXN).<br>
+            2 domicilios con error Sepomex corregidos para el despacho del dia siguiente.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_m4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">14:30 hrs Comercial</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m4)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Alertas Sepomex?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_m4)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Corregir Domicilios</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Evitar retrasos manana</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m4)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Atencion Dudas</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Clientes atendidos</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m4)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Rescate Carritos</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">WhatsApp tokenizado</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m4)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion M4 (Rescate Comercial y Gestion de Incidencias en Bloque Vespertino)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Atención al Cliente Tardía o Fragmentada</div>
+        <div class="risk">Riesgo: Responder mensajes entre pausas de empaque, dando respuestas cortantes o con información errónea.</div>
+        <div class="mitigation">Mitigacion en Software: Ventana vespertina continua donde el operador se sienta frente a la consola con toda la información.</div>
+      </div>
+    </div>
+    <div class="page-break"></div>
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion M5</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Balance de Abastecimiento ROP y Emision de Ordenes de Compra</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">all_roles</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Revisar existencias al cierre de la tarde y ordenar fabricacion antes de agotar productos.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 4: INVENTARIO > COMPRAS & REABASTECIMIENTO</span>
+          <span style="color: #4f46e5;">Revision de inventario residual tras las ventas del dia</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="font-size:7pt;">
+            <strong>16:30 hrs Balance ROP:</strong> Boxer Modal llego a 8 unidades restantes.<br>
+            Orden emitida digitalmente a Taller Torzo vía Extranet B2B (+120 unidades). Abastecimiento asegurado.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_m5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">16:30 hrs Balance</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m5)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Quiebre en 7 dias?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_m5)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Emitir PO Digital</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Envio a Extranet B2B</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m5)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Orden Confirmada</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Cadena asegurada</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m5)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Inventario Ok</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Monitoreo ordinario</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m5)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion M5 (Balance de Abastecimiento ROP y Emision de Ordenes de Compra)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Olvido de Reabastecimiento por Fatiga</div>
+        <div class="risk">Riesgo: Terminar la jornada exhausto por el trabajo físico y olvidar pedir mercancía crítica al taller.</div>
+        <div class="mitigation">Mitigacion en Software: Alerta de cierre que exige revisar la pestaña de ROP antes de permitir el cierre de sesión diario.</div>
+      </div>
+    </div>
+    
+    <div class="function-container avoid-break">
+      <div class="function-header">
+        <div>
+          <span class="func-code-badge">Funcion M6</span>
+          <span style="font-weight: 800; font-size: 9pt; color: #1e293b; margin-left: 6px;">Cierre Financiero Diario, Conciliacion de Kardex y Planificacion IA</span>
+        </div>
+        <span class="kpi-chip kpi-chip-slate">all_roles</span>
+      </div>
+
+      <p style="font-size: 8pt; margin-bottom: 4px;"><strong>Objetivo Operativo:</strong> Auditar la rentabilidad neta del dia, sellar movimientos de Kardex y consultar al Copiloto IA.</p>
+
+      <!-- Mockup Seccion del Sistema -->
+      <div class="ui-mockup-frame">
+        <div class="ui-mockup-header">
+          <span>PANTALLA: HUB 1: CONCENTRADOR EJECUTIVO & COPILOTO IA EN COLUMNA DERECHA</span>
+          <span style="color: #4f46e5;">Cierre inmutable de libros y generacion de plan de tareas para la siguiente jornada</span>
+        </div>
+        <div class="ui-mockup-body">
+          
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:4px; font-size:7pt;">
+            <strong>17:30 hrs Cierre Diario:</strong> Facturacion del dia: $38,400 MXN | Margen Neto Real: 44.2%.<br>
+            Kardex cuadrado al 100%. Copiloto IA genero la lista priorizada de tareas para las 08:00 hrs de manana.
+          </div>
+        
+        </div>
+      </div>
+
+      <!-- Diagrama Vectorial -->
+      <div class="diagram-container">
+        
+  <svg width="100%" height="150" viewBox="0 0 650 150" style="background:#ffffff; border-radius:4px; font-family:sans-serif;">
+    <defs>
+      <marker id="arr_m6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#475569"/></marker>
+    </defs>
+    <!-- Inicio -->
+    <rect x="15" y="15" width="125" height="34" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+    <text x="77" y="36" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#1e293b">17:30 hrs Cierre</text>
+    
+    <line x1="140" y1="32" x2="180" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m6)"/>
+    
+    <!-- Rombo Condicion -->
+    <polygon points="250,10 315,32 250,54 185,32" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="250" y="30" font-size="7" text-anchor="middle" font-weight="bold" fill="#92400e">Kardex Cuadrado?</text>
+    <text x="250" y="40" font-size="6.5" text-anchor="middle" fill="#b45309">(Validacion de Regla)</text>
+    
+    <!-- Rama SI -->
+    <line x1="315" y1="32" x2="360" y2="32" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr_m6)"/>
+    <text x="335" y="26" font-size="7" font-weight="bold" fill="#16a34a">SI</text>
+    
+    <rect x="360" y="15" width="135" height="34" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+    <text x="427" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#166534">Cerrar Jornada</text>
+    <text x="427" y="41" font-size="6.5" text-anchor="middle" fill="#15803d">Generar plan manana</text>
+    
+    <!-- Rama Final SI -->
+    <line x1="495" y1="32" x2="525" y2="32" stroke="#475569" stroke-width="1.5" marker-end="url(#arr_m6)"/>
+    <rect x="525" y="15" width="115" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+    <text x="582" y="29" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#3730a3">Consultar IA</text>
+    <text x="582" y="41" font-size="6.5" text-anchor="middle" fill="#4338ca">Dia concluido</text>
+    
+    <!-- Rama NO -->
+    <line x1="250" y1="54" x2="250" y2="90" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m6)"/>
+    <text x="255" y="74" font-size="7" font-weight="bold" fill="#dc2626">NO</text>
+    
+    <rect x="180" y="90" width="140" height="34" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="250" y="104" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#991b1b">Auditar Diferencias</text>
+    <text x="250" y="116" font-size="6.5" text-anchor="middle" fill="#b91c1c">Registrar merma formal</text>
+    
+    <line x1="320" y1="107" x2="427" y2="107" stroke="#dc2626" stroke-width="1.5"/>
+    <line x1="427" y1="107" x2="427" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr_m6)"/>
+  </svg>
+  
+        <div class="diagram-caption">Diagrama de Decision: Protocolo Operativo para Funcion M6 (Cierre Financiero Diario, Conciliacion de Kardex y Planificacion IA)</div>
+      </div>
+
+      <!-- Punto Ciego y Mitigacion -->
+      <div class="blindspot-card">
+        <div class="title">PUNTO CIEGO & RIESGO OPERATIVO: Sesgo de Auto-Auditoría e Indulgencia</div>
+        <div class="risk">Riesgo: Justificar internamente mermas o diferencias sin registrarlas formalmente por ser operador único.</div>
+        <div class="mitigation">Mitigacion en Software: El sistema genera un log inmutable de cierre que vincula la sesión y exige tipificar cada ajuste.</div>
+      </div>
+    </div>
+    </div>
+  <div class="page-break"></div>
+  <div>
+    <h1 class="chapter-title">
+      7. Matriz de Puntos Ciegos Cruzados entre Roles
+      <span class="role-tag">AUDITORIA INTER-DEPARTAMENTAL</span>
+    </h1>
+    <p>
+      Los mayores riesgos operativos surgen en las fronteras de comunicacion entre areas. La plataforma resuelve sistematicamente los 7 puntos ciegos cruzados mas criticos:
+    </p>
+
+    <table style="width:100%; border-collapse:collapse; font-size:7.5pt; margin:8px 0 14px 0;">
+      <thead>
+        <tr style="background:#f1f5f9; text-align:left;">
+          <th style="padding:6px; border:1px solid #cbd5e1; width:22%;">Cruce entre Roles</th>
+          <th style="padding:6px; border:1px solid #cbd5e1; width:38%;">Punto Ciego Tipico</th>
+          <th style="padding:6px; border:1px solid #cbd5e1; width:40%;">Mecanismo de Mitigacion en Software</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Almacen &lt;-&gt; Compras</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Almacen avisa que un insumo de combo se agoto cuando el empaque ya esta parado.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">La pestana <code>bundles</code> recalcula capacidad en vivo y emite alerta cuando el stock cae bajo ROP.</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Almacen &lt;-&gt; Empaque</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Empacador toma variantes equivocadas por falta de rotulacion en anaquel.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Asignacion estricta de ubicacion fisica (slotting: A-01-A) requerida en catalogo y hoja de picking.</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Empaque &lt;-&gt; Ventas</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Pedidos con domicilio incompleto se empacan, generando guias rechazadas y costo doble.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Validador Sepomex con semaforo que bloquea la guia y canaliza la orden a Ana Atencion.</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Ventas &lt;-&gt; Direccion</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Descuentos otorgados por asesores erosionan el margen neto sin control.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">El copiloto comercial restringe cupones a umbrales segun el ticket y margen marginal.</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Compras &lt;-&gt; Direccion</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Compromiso de pagos a talleres sin visibilidad de cobros por membresias MRR.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Conciliacion en Concentrador Ejecutivo entre proyecciones de cobro y vencimientos de maquila.</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Operador &lt;-&gt; Almacen</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Perdida de recoleccion DHL de las 14:00 hrs por atender dudas de clientes en la manana.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Bloqueo matutino en Hub 1 enfocado exclusivamente en semaforo SLA hasta liberar empaque.</td>
+        </tr>
+        <tr>
+          <td style="padding:5px; border:1px solid #cbd5e1;"><strong>Operador &lt;-&gt; Auditoria</strong></td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Sesgo de auto-auditoria: mermas no se registran formalmente por falta de otro supervisor.</td>
+          <td style="padding:5px; border:1px solid #cbd5e1;">Registro inmutable en Kardex con causa tipificada obligatoria y sello criptografico.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 style="font-size:10pt; font-weight:800; color:#1e293b; margin-top:12px; margin-bottom:4px;">Checklist de Certificacion para Nuevos Colaboradores</h2>
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:8px; font-size:7.5pt;">
+      <div style="margin-bottom:3px;">[ ] Domina la localizacion de prendas por nomenclatura Pasillo-Rack-Nivel (Slotting) en Hub 4.</div>
+      <div style="margin-bottom:3px;">[ ] Comprende el calculo de Capacidad Inmediata en Recetas BOM en Ajustes (Pestana 8).</div>
+      <div style="margin-bottom:3px;">[ ] Valida el 100% de prendas en checklist interactivo antes de emitir etiquetas termicas.</div>
+      <div style="margin-bottom:3px;">[ ] Conoce el procedimiento de corte DHL (14:00 hrs) y cierre de manifiesto sellado.</div>
+      <div style="margin-bottom:3px;">[ ] Identifica alertas Sepomex y sabe corregir domicilios en la bandeja de atencion.</div>
+      <div>[ ] Sabe consultar las recomendaciones operativas del Copiloto IA en columna derecha.</div>
+    </div>
+  </div>
+</body>
+</html>
