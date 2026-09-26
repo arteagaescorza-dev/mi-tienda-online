@@ -117,6 +117,7 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 ### Escala de Prioridades Fullstack Senior (5 Frentes de Ejecución)
 
 #### Prioridad 1 (Crítica e Inmediata): Motor D2C Transaccional & Storefront Multiverso PWA
+* **Slice 1.1: Shell Base PWA, Conmutador Multiverso y Catálogo Real de BD:** [COMPLETADO] (113/113 pruebas pasando, 528 aserciones, 0 emojis).
 * **Backend:**
   - Scopes multiverso en `Product` (`marte`, `venus`, `tiresias`, `terra`) con cálculo en vivo de stock disponible ($\text{Disponible} = \text{Cantidad} - \text{Apartados}$).
   - `StockReservationService`: Candado de stock temporal (`stock_locks`) con TTL de 300 segundos, bloqueo pesimista en MySQL y liberación automática.

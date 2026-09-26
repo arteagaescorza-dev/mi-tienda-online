@@ -20,20 +20,79 @@ use App\Models\CustomerSubscription;
 use App\Models\DunningRetryLog;
 use App\Models\VendorBill;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class StorefrontController extends Controller
 {
-    public function home()
+    public function home(Request $request)
     {
-        $products = $this->catalogProducts();
+        $activeUniverse = strtolower((string) $request->query('universo', 'marte'));
+        if (!in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
+            $activeUniverse = 'marte';
+        }
 
-        return view('welcome', [
-            'featuredProducts' => array_slice($products, 0, 3),
-            'preorderProducts' => array_slice($products, 3, 3),
-            'outletProducts' => $this->outletProducts(),
-            'scrapedProducts' => $this->scrapedLandingProducts(),
-            'scrapedBrands' => $this->scrapedBrandLogos(),
+        $defaultStorefronts = [
+            'marte' => [
+                'brandName' => 'MARTE',
+                'subTitle' => 'UNIVERSO MASCULINO',
+                'heroTag' => 'MARTE // COLECCIÓN OFICIAL TORZO',
+                'heroTitle' => 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA',
+                'heroSubtitle' => 'Diseño textil anatómico con modal pima, costuras planas y microfibras de alta transpirabilidad. Envíos express a todo México.',
+                'pageTitle' => 'MARTE — Universo Masculino & Multiverso Store',
+            ],
+            'venus' => [
+                'brandName' => 'VENUS',
+                'subTitle' => 'LENCERÍA & BEAUTY',
+                'heroTag' => 'VENUS // LENCERÍA DE AUTOR & SILUETAS',
+                'heroTitle' => 'LENCERÍA DE AUTOR & SILUETAS SENSORIALES',
+                'heroSubtitle' => 'Encajes finos, satín italiano y fórmulas limpias de cuidado personal pensadas para tu bienestar diario.',
+                'pageTitle' => 'VENUS — Lencería de Autor & Beauty',
+            ],
+            'tiresias' => [
+                'brandName' => 'TIRESIAS',
+                'subTitle' => 'MODA AFIRMATIVA',
+                'heroTag' => 'TIRESIAS // AFIRMATIVA & NO BINARIO',
+                'heroTitle' => 'LIBERTAD DE EXPRESIÓN Y AJUSTE SEGURO',
+                'heroSubtitle' => 'Prendas afirmativas confeccionadas con ingeniería textil transpirable de compresión médica segura.',
+                'pageTitle' => 'TIRESIAS — Moda Afirmativa & Binders',
+            ],
+            'terra' => [
+                'brandName' => 'TERRA',
+                'subTitle' => 'ECOSISTEMA GLOBAL',
+                'heroTag' => 'TERRA // CATÁLOGO GLOBAL CONSOLIDADO',
+                'heroTitle' => 'EL ECOSISTEMA COMPLETO DE MODA ÍNTIMA Y ESTILO',
+                'heroSubtitle' => 'Catálogo unificado, membresías mensuales recurrentes y fórmulas de autocuidado para todas las identidades.',
+                'pageTitle' => 'TERRA — Ecosistema Multiverso Store',
+            ],
+        ];
+
+        $cachedStorefront = Cache::get('cms_storefront_' . $activeUniverse, []);
+        $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $cachedStorefront);
+
+        $shippingRule = Cache::get('cms_shipping_rule', [
+            'freeShippingThreshold' => 999.00,
+            'flatRate' => 149.00,
+            'status' => 'active',
+        ]);
+
+        $announcements = Cache::get('cms_announcements', [
+            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+            ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI SIN COMISIÓN', 'active' => true],
+            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+            ['id' => 5, 'text' => 'ATENCIÓN PERSONALIZADA POR WHATSAPP', 'active' => true],
+        ]);
+
+        $pwaProducts = $this->getPwaStoreProducts();
+
+        return view('store.pwa.home', [
+            'activeUniverse' => $activeUniverse,
+            'currentStorefront' => $currentStorefront,
+            'shippingRule' => $shippingRule,
+            'announcements' => $announcements,
+            'products' => $pwaProducts,
+            'initialProducts' => $pwaProducts,
         ]);
     }
 
@@ -672,6 +731,90 @@ class StorefrontController extends Controller
             'query' => $term,
             'products' => $products->values()->all(),
         ]);
+    }
+
+    public function getPwaStoreProducts(): array
+    {
+        return Product::query()
+            ->with([
+                'variants.inventories',
+                'categories',
+            ])
+            ->where('visible', true)
+            ->orderBy('id')
+            ->get()
+            ->map(function (Product $product): array {
+                $variants = $product->variants;
+                $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+                $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+                $availableStock = max(0, $totalStock - $totalReserved);
+
+                $brandUpper = strtoupper((string) ($product->brand ?: data_get($product->meta, 'category', '')));
+                $categorySlug = 'jocks';
+                if (str_contains($brandUpper, 'BOXER') || str_contains($brandUpper, 'BRIEF')) {
+                    $categorySlug = 'boxers';
+                } elseif (str_contains($brandUpper, 'TANGA')) {
+                    $categorySlug = 'tangas';
+                } elseif (str_contains($brandUpper, 'BIKINI')) {
+                    $categorySlug = 'bikinis';
+                } elseif (str_contains($brandUpper, 'TANK') || str_contains($brandUpper, 'SHIRT')) {
+                    $categorySlug = 'tanktops';
+                } elseif (str_contains($brandUpper, 'SWIM')) {
+                    $categorySlug = 'swimwear';
+                }
+
+                $universes = ['marte', 'terra'];
+                if (in_array($categorySlug, ['bikinis', 'swimwear'])) {
+                    $universes = ['marte', 'venus', 'terra'];
+                } elseif ($categorySlug === 'tanktops') {
+                    $universes = ['marte', 'tiresias', 'terra'];
+                }
+                if ($product->meta && isset($product->meta['universes']) && is_array($product->meta['universes'])) {
+                    $universes = $product->meta['universes'];
+                }
+
+                $sizes = [];
+                foreach ($variants as $v) {
+                    $sz = strtoupper(trim((string) data_get($v->attributes, 'size', 'M')));
+                    if ($sz !== '' && !in_array($sz, $sizes)) {
+                        $sizes[] = $sz;
+                    }
+                }
+                if (empty($sizes)) {
+                    $sizes = ['CH', 'M', 'G', 'XG'];
+                }
+
+                $image = data_get($product->meta, 'image') ?: (data_get($product->meta, 'images.0') ?: '/user-avatar.png');
+                $image = str_replace('/./', '/', $image);
+
+                return [
+                    'id' => (string) $product->id,
+                    'sku' => $product->sku,
+                    'name' => $product->title,
+                    'slug' => $product->slug,
+                    'category' => $categorySlug,
+                    'categoryName' => $product->brand ?: (data_get($product->meta, 'category', 'Prenda')),
+                    'price' => (float) $product->price,
+                    'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
+                    'universes' => $universes,
+                    'stockType' => $availableStock > 0 ? 'ready' : 'on_demand',
+                    'stockLabel' => $availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido',
+                    'availableStock' => $availableStock,
+                    'image' => $image,
+                    'sizes' => $sizes,
+                    'description' => $product->description ?: 'Prenda anatómica confeccionada con textiles transpirables.',
+                    'variants' => $variants->map(fn ($v) => [
+                        'id' => $v->id,
+                        'sku' => $v->sku,
+                        'size' => strtoupper(trim((string) data_get($v->attributes, 'size', 'M'))),
+                        'color' => data_get($v->attributes, 'color', 'Unico'),
+                        'price' => (float) $v->price,
+                        'available' => max(0, $v->inventories->sum('quantity') - $v->inventories->sum('reserved')),
+                    ])->values()->all(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     private function sampleProducts(): array

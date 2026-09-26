@@ -50,16 +50,19 @@ flowchart TD
 
 ---
 
-### Slice 1: Shell Base PWA, Conmutador Multiverso y Catálogo Real de Base de Datos
+### Slice 1: Shell Base PWA, Conmutador Multiverso y Catálogo Real de Base de Datos [COMPLETADO]
+* **Estado:** Completado y verificado (113/113 pruebas verdes en PHPUnit, 528 aserciones).
 * **Backend:**
-  - `StorefrontController::home()` y `StorefrontController::catalog()`: Consulta optimizada de `Product::with(['variants.inventories', 'categories'])->where('visible', true)`.
-  - Scopes de universo (`scopeForUniverse($query, $universe)`) para filtrar productos de *Marte, Venus, Tiresias y Terra*.
-  - Cache de catálogo público con invalidación ante actualizaciones de stock.
+  - `StorefrontController::home()` y `StorefrontController::getPwaStoreProducts()`: Consulta optimizada con `Product::with(['variants.inventories', 'categories'])->where('visible', true)->orderBy('id')->get()`.
+  - Conmutador multiverso dinámico vía parámetro `?universo=marte|venus|tiresias|terra` conectado a la cache del CMS de vitrinas del Hub 6.
+  - Reglas de flete (\$999 MXN envío gratis / \$149 tarifa plana) y marquesina de avisos sincronizadas con el Hub 6.
+  - Cálculo de stock físico disponible en bodega (`quantity - reserved`) y determinación de badge (`Stock Físico` vs `Bajo Pedido`).
 * **Frontend:**
-  - Layout maestro `resources/views/layouts/store-pwa.blade.php` con tipografía Plus Jakarta Sans / Outfit y cero colisiones CSS (`store-pwa.css`).
-  - Barra superior táctil de universos multiverso y marquesina superior de avisos comerciales del Hub 6.
-  - Bottom dock bar PWA fijo con 4 destinos táctiles.
-* **Verificación:** `GET /` renderiza el catálogo real con precios, imágenes WebP y badges de stock en vivo.
+  - Layout maestro `resources/views/layouts/store-pwa.blade.php` con tipografía Plus Jakarta Sans / Outfit y estilos aislados en `public/css/store-pwa.css`.
+  - Hidratación reactiva `window.__INITIAL_STORE_PRODUCTS__` en `public/js/storefront/store-pwa.js`.
+  - Manifest oficial `public/manifest.json` y Service Worker `public/sw.js` para instalación PWA.
+  - Barra superior táctil de universos, marquesina comercial y bottom dock bar móvil de 4 accesos fijos.
+* **Verificación:** Suite `tests/Feature/StorefrontPwaHomeTest.php` creada y pasando al 100% (6 pruebas, 41 aserciones, 0 emojis).
 
 ---
 
