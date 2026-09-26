@@ -26,4 +26,14 @@ class Order extends Model
     {
         return $this->belongsTo(Attribution::class, 'attributed_via_id');
     }
+
+    public function financialMargin()
+    {
+        return $this->hasOne(OrderFinancialMargin::class);
+    }
+
+    public function shipment()
+    {
+        return $this->hasOne(Shipment::class);
+    }
 }
