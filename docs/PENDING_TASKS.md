@@ -103,6 +103,51 @@
 
 ---
 
+## 1.1. Plan Maestro de Prioridades de Adaptación Backend (Post-Conexión Hubs Administrativos)
+
+Tras la conexión de los 6 Hubs administrativos a bases de datos reales (Pasos A al E), las funcionalidades pendientes identificadas en la carpeta de referencia `import/` se formalizan bajo la siguiente escala obligatoria de prioridades de desarrollo:
+
+### Prioridad 1: Tienda Pública D2C Multiverso PWA (TASK-STR-01 a TASK-STR-06 & TASK-INT-06)
+* **Objetivo:** Sustituir el storefront legacy de `resources/views/store/` por la arquitectura reactiva multiverso contenida en `import/tienda.html`, `import/store.js` y `import/store.css`.
+* **Componentes Críticos:**
+  1. *Multiverse Switcher:* Conmutación reactiva entre Marte, Venus, Tiresias y Terra consumiendo configuraciones de vitrinas del Hub 6.
+  2. *Reserva Temporal de Stock (`stock_locks` / 5 minutos):* Conteo regresivo de 300s en drawer de carrito con bloqueo en MySQL para evitar sobreventa.
+  3. *Checkout en 3 Pasos:* Stepper deslizable con validación CP Sepomex, absorción de flete comercial y pago vía SPEI directo (CLABE BBVA) o tarjeta.
+  4. *Atribución B2B:* Banner de bienvenida a usuarios referidos por convenios (`?utm_source={aliado}&coupon={codigo}`).
+  5. *Portal del Comprador D2C:* Sección *"Mi Cuenta"* con perfil anatómico, tracking de paquetería y gestión de membresías mensuales recurrentes MRR.
+  6. *PWA & Web Push:* Service Worker `sw.js` y `manifest.json` con soporte VAPID para alertas de urgencia y despacho.
+
+### Prioridad 2: Curaduría Previa de Scraping y Calidad de Catálogo en Hub 4 (TASK-INV-08 & TASK-INV-11)
+* **Objetivo:** Blindar la calidad del catálogo antes de publicar artículos extraídos por el scraper de Torzo.
+* **Componentes Críticos:**
+  1. *Bandeja de Cuarentena (`scrapedPendingItems`):* Aprobación/descarte manual de artículos con validación de telas, tornasoles y sección web.
+  2. *CRUD de Telas y Colores Tornasoles:* Administración dinámica de fibras textiles y gradientes CSS reflejados en la tienda pública.
+
+### Prioridad 3: Motor de Recetas BOM & Combos de Suscripción (TASK-INV-17 & TASK-INV-03)
+* **Objetivo:** Soporte a la venta recurrente (MRR) en cajas de suscripción Nivel 1, 2 y VIP.
+* **Componentes Críticos:**
+  1. *Constructor BOM (`bundleEditor`):* Formulación de combos y cálculo del cuello de botella por insumo limitante.
+  2. *Deducción Atómica en Kardex:* Salidas inmutables de existencias individuales al despacharse un lote de suscripción.
+
+### Prioridad 4: Sinergias Operativas Inter-Hub y Cierre de Fugas Contables (Cross-Hub)
+* **Objetivo:** Automatizar la comunicación y deducción contable entre Hubs.
+* **Componentes Críticos:**
+  1. *Deducción de Empaques en Kardex (`TASK-INT-13`):* Descuento automático de cajas volumétricas y bolsas de lavado al emitir guías en Logística.
+  2. *Resolución de Garantías RMA (`TASK-INT-09`):* Emisión automática de orden de reposición o saldo a favor desde Logística.
+  3. *Cotejo Automatizado de 3 Vías (`TASK-INT-07`):* Cruce entre PO, rampa física y factura de proveedor con retenciones SAT.
+  4. *Conciliación Courier vs Manifiestos (`TASK-INT-08`):* Detección de sobrecostos por peso volumétrico.
+  5. *Liquidaciones B2B a Cuentas por Pagar (`TASK-INT-19` / `TASK-INT-20`):* Integración directa entre convenios y tesorería.
+
+### Prioridad 5: Shell Global, Notificaciones Dinámicas y Ajustes a Pantalla Completa
+* **Objetivo:** Cumplimiento pleno de las reglas de ergonomía y gobernanza (`MASTER_ROADMAP.md`).
+* **Componentes Críticos:**
+  1. *Centro de Notificaciones Operativas:* Topbar conectado a eventos de dominio en vivo con saltos prefiltrados al catálogo.
+  2. *Chat Inter-Áreas Persistente:* Mensajería por canales (`#almacen-compras`, `#atencion-ventas`, `#logistica-guias`).
+  3. *Ajustes a Pantalla Completa (Regla 15):* Migración del modal flotante de ajustes a vista completa dentro de `<main>`.
+  4. *Consola de Permisos RBAC (`TASK-RBAC-02`):* Restricción real de datos financieros para operarios de bodega.
+
+---
+
 ## 2. Especificación Detallada: Grupo Inventario & Cadena de Suministro (Hub 4)
 
 ### `TASK-INV-01`: Slotting y Ubicaciones Físicas en Bodega (Pasillo - Rack - Nivel / Gaveta)
