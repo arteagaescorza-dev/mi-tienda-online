@@ -442,60 +442,62 @@ Con la culminación de la fase de conexión de los 6 Hubs administrativos a base
 
 ---
 
-### 12.2. Programa de Implementación Detallado: Prioridad 1 (Tienda Pública D2C Multiverso PWA)
+### 12.2. Programa de Implementación Fullstack Senior: Prioridad 1 (Tienda Pública D2C Multiverso PWA)
 
-El despliegue de la Prioridad 1 se ejecutará bajo un programa riguroso de 6 pasos atómicos secuenciales, manteniendo en todo momento 100% de pruebas verdes, cero emojis y respeto a la carpeta `import/`:
+El despliegue de la Prioridad 1 se ejecutará bajo la metodología de **Vertical Slices Completos (End-to-End)**, donde cada entrega conecta base de datos, transacciones, controladores y componentes visuales PWA:
 
-#### Paso 1.1: Shell Base, Layout PWA y Assets Desacoplados
-* **Archivos Involucrados:** `resources/views/layouts/store-pwa.blade.php`, `public/css/store-pwa.css`, `public/js/storefront/store-pwa.js`, `public/manifest.json`, `public/sw.js`.
-* **Alcance Técnico:**
-  - Migrar la estructura ergonómica de `import/tienda.html` con topbar desktop, header táctil móvil, bottom dock fijo de 4 botones (Inicio, Catálogo, Deseos, Carrito) y manifest PWA para instalación móvil.
-  - Aislar los estilos en `store-pwa.css` para garantizar nula colisión con `revops-panel.css` ni `crm.css`.
-  - Integrar el selector superior de Universos Multiverso (*MARTE // Masculino*, *VENUS // Lencería & Beauty*, *TIRESIAS // Afirmativo*, *TERRA // Global*).
+#### Slice 1.1: Shell PWA, Conmutador Multiverso y Catálogo Real de Base de Datos
+* **Backend:**
+  - `StorefrontController::home()` y `StorefrontController::catalog()`: Consulta optimizada de `Product::with(['variants.inventories', 'categories'])->where('visible', true)`.
+  - Scopes de universo (`scopeForUniverse($query, $universe)`) para filtrar productos de *Marte, Venus, Tiresias y Terra*.
+  - Cálculo en vivo del inventario disponible (`quantity - reserved`) y precios formateados en MXN.
+* **Frontend PWA:**
+  - Layout maestro `resources/views/layouts/store-pwa.blade.php` con tipografía Plus Jakarta Sans / Outfit y estilos aislados (`store-pwa.css`).
+  - Barra superior táctil de universos multiverso y marquesina superior de avisos comerciales del Hub 6.
+  - Bottom dock bar PWA fijo con 4 destinos táctiles (*Inicio, Catálogo, Deseos, Mi Cuenta*).
+* **Criterio de Aceptación:** `GET /` renderiza el catálogo real con 259 SKUs, precios, imágenes WebP y badges de stock en vivo directamente de la base de datos.
 
-#### Paso 1.2: Catálogo Público Dinámico, Ficha Anatómica PDP & Guía de Tallas
-* **Archivos Involucrados:** `resources/views/store/pwa/catalog.blade.php`, `app/Http/Controllers/StorefrontController.php`.
-* **Alcance Técnico:**
-  - Conectar el feed de productos a la base de datos real (`Product` y `ProductVariant`), filtrando dinámicamente por el universo activo y categorías.
-  - Ficha de producto (PDP) en modal centrado (desktop) o bottom-sheet deslizante (móvil) con selector de curva de 6 tallas (`CH, M, G, XL, 2XL, 3XL`) y stock disponible en tiempo real.
-  - Modal interactivo de Guía de Tallas Torzo con tabla de medidas en centímetros de cintura/cadera y recomendador ergonómico según complexión.
-  - Lista de Deseos (*Wishlist*) con almacenamiento local y sincronización de sesión.
+#### Slice 1.2: Ficha Anatómica PDP, Matriz de 6 Tallas Textiles y Guía de Medidas Torzo
+* **Backend:**
+  - Endpoint `GET /api/v1/store/products/{slug}` que devuelve el producto con sus 6 tallas textiles (`CH, M, G, XL, 2XL, 3XL`), stock disponible real por talla (`quantity - reserved`) y composición de tela.
+* **Frontend PWA:**
+  - Ficha de producto (PDP) en modal centrado (desktop) o bottom-sheet deslizante (móvil) con selector de tallas reactivo y bloqueo automático de tallas sin stock.
+  - Modal interactivo de Guía de Tallas Torzo con tabla de medidas en centímetros (cintura 71-120 cm) y recomendador de ajuste ergonómico.
+  - Lista de Deseos (*Wishlist*) con almacenamiento local y sincronización asíncrona.
 
-#### Paso 1.3: Carrito Deslizable & Gestor de Reserva Temporal de Stock (`TASK-INT-06`)
-* **Archivos Involucrados:** `resources/views/store/pwa/cart-drawer.blade.php`, `app/Services/StockLockService.php`, `app/Http/Controllers/CartLockController.php`, tabla `stock_locks`.
-* **Alcance Técnico:**
-  - Drawer lateral deslizable `#cartSheet` con renderizado reactivo de prendas añadidas.
-  - Al agregar un producto, llamada atómica a `POST /api/v1/store/cart/lock` que crea la reserva temporal por **5 minutos (300 segundos)** en la tabla `stock_locks`.
-  - Barra de urgencia decreciente con temporizador visible en la cabecera del carrito.
-  - Desglose transparente de Carrito Mixto (Línea A: Stock Físico en bodega con despacho en 24-48h vs Línea B: Taller On-Demand con confección en 3-5 días).
-  - Liberación automática del stock al expirar el tiempo mediante notificación suave `.cart-expiry-notice` sin alertas invasivas.
+#### Slice 1.3: Carrito Deslizable & Gestor de Reserva Temporal de Stock (`TASK-INT-06`)
+* **Backend:**
+  - `StockReservationService`: llamada a `POST /api/v1/store/cart/lock` que aparta la unidad durante **300 segundos** en `stock_locks` y bloquea existencias en `inventories.reserved`.
+  - Comando programado de liberación automática `cleanupExpired()` al vencer los 5 minutos.
+* **Frontend PWA:**
+  - Drawer lateral deslizable `#cartSheet` con renderizado de ítems seleccionados.
+  - Barra decreciente de urgencia con temporizador en vivo en la cabecera del carrito.
+  - Desglose transparente de Carrito Mixto (Línea A Bodega 24-48h vs Línea B Taller 3-5 días).
+  - Aviso suave `.cart-expiry-notice` cuando la reserva caduca sin alertas invasivas.
 
-#### Paso 1.4: Checkout en 3 Pasos, Fletes del Hub 6 y Liquidación Multimodal
-* **Archivos Involucrados:** `resources/views/store/pwa/checkout-drawer.blade.php`, `app/Http/Controllers/CheckoutPwaController.php`, `app/Services/OrderProcessingService.php`.
-* **Alcance Técnico:**
-  - Stepper integrado dentro del mismo contenedor deslizable:
-    - *Paso 1 (Resumen & Cupones):* Validación y canje de cupones de afiliados B2B del Hub 7 (`PARADISO15`, `ALEXRIVERA`, `SODOME10`, etc.) con recálculo dinámico de descuento.
-    - *Paso 2 (Envío & CP Sepomex):* Captura de dirección con autocompletado y validación de código postal, aplicando las reglas comerciales fijadas en el Hub 6 (envío gratis $\ge \$999$ MXN o flete courier \$149 MXN).
-    - *Paso 3 (Pago Multimodal & Confirmación):* Selección entre Transferencia SPEI directa BBVA (con generación inmediata de CLABE y botón de copiado en 1 clic), Tarjeta o pasarela, generando la orden inmutable en base de datos (`#ORD-2026-XXXX` o `#MIX-2026-XXXX`).
+#### Slice 1.4: Checkout en 3 Pasos, Fletes del Hub 6 y Liquidación Multimodal Transaccional
+* **Backend:**
+  - `OrderProcessingService` con transacción ACID `DB::transaction()`:
+    1. Transmuta `stock_locks` a estado `purchased`.
+    2. Descuenta el inventario físico (`quantity` y `reserved`).
+    3. Asienta el movimiento inmutable en Kardex (`InventoryMovement::create(['type' => 'SALIDA_VENTA_ONLINE'])`).
+    4. Crea la `Order` con folio unívoco (`#ORD-2026-XXXX` o `#MIX-2026-XXXX`).
+    5. Registra el desglose de margen para el Hub 1 (Finanzas) en `order_financial_margins`.
+  - Validación de código postal Sepomex con reglas de flete del Hub 6 (envío gratis $\ge \$999$ MXN o flete courier \$149 MXN).
+  - Validación de cupones de afiliados B2B del Hub 7 (`ally_coupons_dir_b`).
+* **Frontend PWA:**
+  - Stepper integrado dentro del drawer deslizable con selector de pago: Transferencia SPEI directa BBVA (con CLABE y copiado en 1 clic) o pasarela de tarjeta.
 
-#### Paso 1.5: Portal del Comprador D2C ("Mi Cuenta", Tracking Courier y Suscripciones MRR)
-* **Archivos Involucrados:** `resources/views/store/pwa/account-portal.blade.php`, `app/Http/Controllers/CustomerAccountController.php`.
-* **Alcance Técnico:**
-  - Panel `#accountSheet` estructurado en 4 pestañas:
-    1. *Mis Pedidos:* Historial de órdenes con desglose de líneas físicas/taller y enlace a guía de rastreo courier.
-    2. *Perfil Anatómico:* Slider de cintura (70 a 102 cm) con recomendador de talla Torzo y siluetas predilectas.
-    3. *Direcciones:* Libreta de domicilios frecuentes con validación de código postal.
-    4. *Membresías MRR:* Visor y administración de suscripción mensual (Cajas Nivel 1, 2 o VIP) con botones para pausar, reactivar o modificar fecha de entrega.
+#### Slice 1.5: Portal del Comprador D2C ("Mi Cuenta", Tracking y Suscripciones MRR)
+* **Backend:**
+  - `CustomerAccountController`: Consulta segura de pedidos del comprador por sesión autenticada o token seguro de consulta por folio/email.
+  - Consulta y actualización de suscripciones en `customer_subscriptions` (pausar, reactivar o cambiar fecha de entrega de Cajas Nivel 1, 2 o VIP).
+* **Frontend PWA:**
+  - Panel `#accountSheet` estructurado en 4 pestañas: *Mis Pedidos* (con estatus courier y guía), *Perfil Anatómico* (slider de cintura 70-102 cm), *Direcciones* y *Membresías MRR*.
 
-#### Paso 1.6: Notificaciones Web Push PWA & Atribución de Aliados B2B
-* **Archivos Involucrados:** `public/sw.js`, `app/Services/WebPushNotificationService.php`, `resources/views/store/pwa/partner-banner.blade.php`.
-* **Alcance Técnico:**
-  - Detección de parámetros URL `?utm_source={aliado}&coupon={codigo}` que despliega en cabecera el `#partnerWelcomeBanner` personalizado y fija la atribución en sesión.
-  - Banner no invasivo de solicitud de permisos Web Push en base al estándar VAPID para alertas de urgencia de stock (a los 120s de expirar el carrito) y notificaciones de paquetería en tránsito.
-
-#### Paso 1.7: Suite de Pruebas de Integración y Cierre de Calidad
-* **Archivos Involucrados:** `tests/Feature/StorefrontPwaModuleTest.php`.
-* **Alcance Técnico:**
-  - Pruebas automatizadas de renderizado multiverso, creación y liberación de `stock_locks`, validación de cupones, procesamiento de checkout y portal de comprador.
-  - Verificación estricta de cero emojis y 100% de pruebas pasando en `artisan test`.
+#### Slice 1.6: Web Push VAPID, Atribución B2B y Suite de Pruebas de Integración
+* **Backend & Frontend PWA:**
+  - Detección de parámetros URL `?utm_source={aliado}&coupon={codigo}` que despliega el `#partnerWelcomeBanner` y fija la atribución en sesión.
+  - Service Worker `sw.js` y `manifest.json` registrados con soporte para notificaciones Web Push VAPID.
+  - `tests/Feature/StorefrontPwaModuleTest.php`: Cobertura automatizada de catálogo, candados de stock, checkout transaccional y portal de cliente con 100% de pruebas verdes en `artisan test` y cero emojis.
 
