@@ -66,15 +66,18 @@ flowchart TD
 
 ---
 
-### Slice 2: Ficha Anatómica PDP, Matriz de 6 Tallas y Guía de Medidas Torzo
+### Slice 2: Ficha Anatómica PDP, Matriz de 6 Tallas y Guía de Medidas Torzo [COMPLETADO]
+* **Estado:** Completado y verificado (119/119 pruebas verdes en PHPUnit, 563 aserciones, 0 emojis).
 * **Backend:**
-  - Endpoint `GET /api/v1/store/products/{slug}` que devuelve el producto con sus 6 tallas textiles (`CH, M, G, XL, 2XL, 3XL`), stock disponible real por talla (`quantity - reserved`) y composición de tela.
+  - Endpoint RESTful `GET /api/v1/store/products/{slug}` en `StorefrontApiController::productDetail` que expone contrato JSON estricto con variantes en 6 tallas textiles (`CH, M, G, XL, 2XL, 3XL`), existencias reales en bodega (`quantity - reserved`), composición de tela y medidas antropométricas Torzo en cm.
+  - Ruta directa `GET /productos/{slug}` en `StorefrontController::product` con hidratación automática de PDP mediante `autoOpenProductId` en la vista PWA.
 * **Frontend:**
-  - Modal centrado en desktop y bottom-sheet en móvil (`#productDetailSheet`) con selector de tallas reactivo.
-  - Desactivación automática de tallas sin existencias físicas en bodega.
-  - Modal interactivo de Guía de Tallas Torzo con tabla de medidas en centímetros (cintura 71-120 cm) y recomendador de ajuste ergonómico.
-  - Lista de deseos (*Wishlist*) persistida en cliente con sincronización asíncrona.
-* **Verificación:** Un SKU con stock 0 en talla M aparece inhabilitado para compra inmediata en la ficha del producto.
+  - Modal centrado en desktop y bottom-sheet en móvil (`#productDetailSheet`) con selector interactivo de 6 tallas textiles.
+  - Indicador dinámico de existencias por talla en tiempo real (`X pzas` o `Bajo pedido`) y actualización reactiva de `#pdpStockBadge`.
+  - Desactivación y marcado visual de tallas sin inventario físico.
+  - Modal interactivo de Guía de Tallas Torzo (`#sizeGuideSheet`) con tabla de rangos de cintura (71 a 120 cm: CH, M, G, XG, 2XL, 3XL) y calculador de equivalencias anatómicas.
+  - Lista de deseos (*Wishlist*) persistida en `localStorage` con botón toggle en modal PDP.
+* **Verificación:** Suite `tests/Feature/StorefrontPwaPdpTest.php` creada y pasando al 100% (6 pruebas, 35 aserciones, 0 emojis). Suite global al 100% (119 pruebas, 563 aserciones).
 
 ---
 

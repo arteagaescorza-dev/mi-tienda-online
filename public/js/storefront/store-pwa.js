@@ -1092,8 +1092,12 @@
       return { size: 'M',  pants: '31-32', range: '78-84 cm', fitAdvice: 'Soporte anatómico exacto y confort de microfibra.' };
     } else if (cm <= 92) {
       return { size: 'G',  pants: '33-34', range: '86-92 cm', fitAdvice: 'Calce amplio con soporte seguro sin marcas en piel.' };
-    } else {
+    } else if (cm <= 102) {
       return { size: 'XG', pants: '35-36', range: '94-102 cm', fitAdvice: 'Máxima elasticidad y ajuste anatómico generoso.' };
+    } else if (cm <= 110) {
+      return { size: '2XL', pants: '38-40', range: '103-110 cm', fitAdvice: 'Curva extendida con refuerzo elástico lateral.' };
+    } else {
+      return { size: '3XL', pants: '42-44', range: '111-120 cm', fitAdvice: 'Corte anatómico extra confort sin compresión excesiva.' };
     }
   }
 
@@ -1102,7 +1106,7 @@
     if (!product) return;
 
     storeState.activeModalProductId = productId;
-    const currentSize = storeState.selectedSizes[productId] || 'M';
+    const currentSize = storeState.selectedSizes[productId] || (product.sizes[0] || 'M');
     storeState.selectedModalSize = currentSize;
 
     const modal = document.getElementById('productModal');
@@ -1111,14 +1115,16 @@
     if (!modal || !backdrop || !content) return;
 
     const isFav = isInWishlist(productId);
+    const selectedVariant = (product.variants || []).find(v => v.size === currentSize);
+    const initialAvailable = selectedVariant ? (selectedVariant.available > 0) : (product.availableStock > 0);
 
     content.innerHTML = `
       <div class="pdp-layout-grid">
         <!-- Columna Izquierda: Galería -->
         <div class="pdp-gallery-box">
           <div class="pdp-main-image-wrap">
-            <span class="product-stock-badge ${product.stockType === 'ready' ? 'ready' : ''}" style="top: 14px; left: 14px;">
-              ${product.stockLabel}
+            <span id="pdpStockBadge" class="product-stock-badge ${initialAvailable ? 'ready' : ''}" style="top: 14px; left: 14px;">
+              ${initialAvailable ? 'Stock Físico' : 'Bajo Pedido'}
             </span>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #a1a1aa; padding: 40px 0;">
               <svg width="72" height="72" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1135,11 +1141,11 @@
         <!-- Columna Derecha: Información, Tallas y Compra -->
         <div class="pdp-info-col">
           <div>
-            <span class="pdp-universe-badge">${product.categoryName} // ${product.universes.join(' & ').toUpperCase()}</span>
+            <span class="pdp-universe-badge">${product.categoryName} // ${(product.universes || []).join(' & ').toUpperCase()}</span>
             <h2 class="pdp-product-title">${product.name}</h2>
             <div class="pdp-pricing-box">
               <span class="pdp-price-amount">MXN $${product.price.toFixed(2)}</span>
-              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">IVA incluido · Envío Express Courier</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">IVA incluido • Envío Express Courier</span>
             </div>
           </div>
 
@@ -1155,11 +1161,15 @@
             </div>
             <div class="pdp-size-grid">
               ${product.sizes.map(sz => {
-                const subMap = { 'CH': '28-30', 'M': '31-32', 'G': '33-34', 'XG': '35-36' };
+                const subMap = { 'CH': '28-30', 'M': '31-32', 'G': '33-34', 'XG': '35-36', 'XL': '35-36', '2XL': '38-40', '3XL': '42-44' };
+                const variant = (product.variants || []).find(v => v.size === sz);
+                const isOutOfStock = variant ? (variant.available <= 0) : false;
+                const stockTag = variant ? (variant.available > 0 ? `${variant.available} pzas` : 'Bajo pedido') : '';
                 return `
-                  <button type="button" class="pdp-size-card-btn ${sz === currentSize ? 'selected' : ''}" data-action="pdp-select-size" data-size="${sz}">
+                  <button type="button" class="pdp-size-card-btn ${sz === currentSize ? 'selected' : ''} ${isOutOfStock ? 'on-demand-size' : ''}" data-action="pdp-select-size" data-size="${sz}">
                     <span class="pdp-size-name">${sz}</span>
                     <span class="pdp-size-sub">${subMap[sz] || ''}</span>
+                    ${stockTag ? `<span class="pdp-size-stock-tag" style="font-size: 0.58rem; font-weight: 700; color: ${isOutOfStock ? '#d97706' : '#059669'}; display: block; margin-top: 2px;">${stockTag}</span>` : ''}
                   </button>
                 `;
               }).join('')}
@@ -3232,6 +3242,21 @@
 
       const lbl = document.getElementById('pdpSelectedSizeLabel');
       if (lbl) lbl.textContent = `Talla ${sz}`;
+
+      const modalProd = STORE_PRODUCTS.find(p => p.id === storeState.activeModalProductId);
+      if (modalProd) {
+        const variant = (modalProd.variants || []).find(v => v.size === sz);
+        const stockBadge = document.getElementById('pdpStockBadge');
+        if (stockBadge) {
+          if (variant && variant.available > 0) {
+            stockBadge.className = 'product-stock-badge ready';
+            stockBadge.textContent = 'Stock Físico';
+          } else {
+            stockBadge.className = 'product-stock-badge';
+            stockBadge.textContent = 'Bajo Pedido';
+          }
+        }
+      }
 
       // Telemetría de talla preferida
       dispatchWishlistTelemetry('size_select', {

@@ -381,10 +381,20 @@
               <td style="padding: 10px;">33 - 34</td>
               <td style="padding: 10px; font-family: monospace;">86 - 92 cm</td>
             </tr>
-            <tr style="background: var(--bg-secondary);">
-              <td style="padding: 10px; font-weight: 800;">XG (Extra Grande)</td>
+            <tr style="border-bottom: 1px solid var(--border-subtle); background: var(--bg-secondary);">
+              <td style="padding: 10px; font-weight: 800;">XG / XL (Extra Grande)</td>
               <td style="padding: 10px;">35 - 36</td>
               <td style="padding: 10px; font-family: monospace;">94 - 102 cm</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 10px; font-weight: 800;">2XL (Doble Extra Grande)</td>
+              <td style="padding: 10px;">38 - 40</td>
+              <td style="padding: 10px; font-family: monospace;">104 - 110 cm</td>
+            </tr>
+            <tr style="background: var(--bg-secondary);">
+              <td style="padding: 10px; font-weight: 800;">3XL (Triple Extra Grande)</td>
+              <td style="padding: 10px;">42 - 44</td>
+              <td style="padding: 10px; font-family: monospace;">112 - 120 cm</td>
             </tr>
           </tbody>
         </table>
@@ -1134,8 +1144,18 @@
     window.__INITIAL_STORE_PRODUCTS__ = @json($initialProducts ?? []);
     window.__ACTIVE_UNIVERSE__ = @json($activeUniverse ?? 'marte');
     window.__STORE_CSRF_TOKEN__ = "{{ csrf_token() }}";
+    window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
   </script>
   <script src="{{ asset('js/storefront/store-pwa.js') }}"></script>
+  @if(!empty($autoOpenProductId))
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof openProductModal === 'function') {
+          openProductModal(@json($autoOpenProductId));
+        }
+      });
+    </script>
+  @endif
   @stack('scripts')
 </body>
 </html>

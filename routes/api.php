@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\RevOps\FinanceApiController;
 use App\Http\Controllers\Api\RevOps\LogisticsApiController;
 use App\Http\Controllers\Api\RevOps\AlliesApiController;
 use App\Http\Controllers\Api\RevOps\DashboardApiController;
+use App\Http\Controllers\Api\StorefrontApiController;
 
 // =========================================================================
 // STOREFRONT D2C PUBLIC API ENDPOINTS
@@ -75,5 +76,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/tasks/{id}/complete', [DashboardApiController::class, 'completeTask']);
         Route::post('/environment/switch', [DashboardApiController::class, 'switchEnvironment']);
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
+    });
+
+    // 8. STOREFRONT D2C CATALOG & PDP (PRIORIDAD 1 - SLICE 1.2)
+    Route::prefix('store')->group(function () {
+        Route::get('/products/{slug}', [StorefrontApiController::class, 'productDetail']);
     });
 });

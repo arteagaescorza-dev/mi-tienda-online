@@ -110,12 +110,88 @@ class StorefrontController extends Controller
 
     public function product(string $slug)
     {
-        $products = collect($this->catalogProducts())->merge($this->outletProducts());
-        $product = $products->firstWhere('slug', $slug) ?? $products->first();
+        $dbProduct = Product::query()
+            ->with(['variants.inventories', 'categories'])
+            ->where('visible', true)
+            ->where(function ($query) use ($slug) {
+                $query->where('slug', $slug)
+                    ->orWhere('id', $slug)
+                    ->orWhere('sku', $slug);
+            })
+            ->first();
 
-        return view('store.product', [
-            'product' => $product,
-            'products' => $products->values()->all(),
+        if (! $dbProduct) {
+            return redirect()->route('store.home');
+        }
+
+        $activeUniverse = strtolower((string) request()->query('universo', 'marte'));
+        if (! in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
+            $activeUniverse = 'marte';
+        }
+
+        $defaultStorefronts = [
+            'marte' => [
+                'brandName' => 'MARTE',
+                'subTitle' => 'UNIVERSO MASCULINO',
+                'heroTag' => 'MARTE // COLECCIÓN OFICIAL TORZO',
+                'heroTitle' => 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA',
+                'heroSubtitle' => 'Diseño textil anatómico con modal pima, costuras planas y microfibras de alta transpirabilidad. Envíos express a todo México.',
+                'pageTitle' => $dbProduct->title . ' — MARTE Store',
+            ],
+            'venus' => [
+                'brandName' => 'VENUS',
+                'subTitle' => 'LENCERÍA & BEAUTY',
+                'heroTag' => 'VENUS // LENCERÍA DE AUTOR & SILUETAS',
+                'heroTitle' => 'LENCERÍA DE AUTOR & SILUETAS SENSORIALES',
+                'heroSubtitle' => 'Encajes finos, satín italiano y fórmulas limpias de cuidado personal pensadas para tu bienestar diario.',
+                'pageTitle' => $dbProduct->title . ' — VENUS Store',
+            ],
+            'tiresias' => [
+                'brandName' => 'TIRESIAS',
+                'subTitle' => 'MODA AFIRMATIVA',
+                'heroTag' => 'TIRESIAS // AFIRMATIVA & NO BINARIO',
+                'heroTitle' => 'LIBERTAD DE EXPRESIÓN Y AJUSTE SEGURO',
+                'heroSubtitle' => 'Prendas afirmativas confeccionadas con ingeniería textil transpirable de compresión médica segura.',
+                'pageTitle' => $dbProduct->title . ' — TIRESIAS Store',
+            ],
+            'terra' => [
+                'brandName' => 'TERRA',
+                'subTitle' => 'ECOSISTEMA GLOBAL',
+                'heroTag' => 'TERRA // CATÁLOGO GLOBAL CONSOLIDADO',
+                'heroTitle' => 'EL ECOSISTEMA COMPLETO DE MODA ÍNTIMA Y ESTILO',
+                'heroSubtitle' => 'Catálogo unificado, membresías mensuales recurrentes y fórmulas de autocuidado para todas las identidades.',
+                'pageTitle' => $dbProduct->title . ' — TERRA Store',
+            ],
+        ];
+
+        $cachedStorefront = Cache::get('cms_storefront_' . $activeUniverse, []);
+        $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $cachedStorefront);
+        $currentStorefront['pageTitle'] = $dbProduct->title . ' — ' . ($currentStorefront['brandName'] ?? 'MARTE');
+
+        $shippingRule = Cache::get('cms_shipping_rule', [
+            'freeShippingThreshold' => 999.00,
+            'flatRate' => 149.00,
+            'status' => 'active',
+        ]);
+
+        $announcements = Cache::get('cms_announcements', [
+            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+            ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI SIN COMISIÓN', 'active' => true],
+            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+            ['id' => 5, 'text' => 'ATENCIÓN PERSONALIZADA POR WHATSAPP', 'active' => true],
+        ]);
+
+        $pwaProducts = $this->getPwaStoreProducts();
+
+        return view('store.pwa.home', [
+            'activeUniverse' => $activeUniverse,
+            'currentStorefront' => $currentStorefront,
+            'shippingRule' => $shippingRule,
+            'announcements' => $announcements,
+            'products' => $pwaProducts,
+            'initialProducts' => $pwaProducts,
+            'autoOpenProductId' => (string) $dbProduct->id,
         ]);
     }
 
