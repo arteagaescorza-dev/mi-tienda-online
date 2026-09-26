@@ -36,4 +36,14 @@ class Order extends Model
     {
         return $this->hasOne(Shipment::class);
     }
+
+    public function fraudAssessment()
+    {
+        return $this->hasOne(FraudRiskAssessment::class);
+    }
+
+    public function rmaRequests()
+    {
+        return $this->hasMany(RmaRequest::class);
+    }
 }

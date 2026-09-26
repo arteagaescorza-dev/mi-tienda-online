@@ -59,6 +59,10 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/marketing/campanas/{adCampaign}/toggle', [PortalMarketingController::class, 'pauseCampaign'])->name('portal.marketing.campaigns.pause');
 	Route::post('/admin/marketing/conversaciones/{conversation}/intervenir', [PortalMarketingController::class, 'takeoverConversation'])->name('portal.marketing.conversations.takeover');
 	Route::post('/admin/marketing/email-automations/{emailAutomation}/toggle', [PortalMarketingController::class, 'toggleEmailAutomation'])->name('portal.marketing.automations.toggle');
+	Route::post('/admin/logistica/manifiestos/cerrar', [PortalLogisticsController::class, 'closeManifest'])->name('portal.logistics.manifests.close');
+	Route::post('/admin/logistica/rma/{rmaRequest}/inspeccionar', [PortalLogisticsController::class, 'inspectRma'])->name('portal.logistics.rma.inspect');
+	Route::post('/admin/logistica/cajas/{packageType}/stock', [PortalLogisticsController::class, 'updatePackageStock'])->name('portal.logistics.packages.stock');
+	Route::post('/admin/logistica/envios/{shipment}/status', [PortalLogisticsController::class, 'updateShipmentStatus'])->name('portal.logistics.shipments.status');
 });
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');
