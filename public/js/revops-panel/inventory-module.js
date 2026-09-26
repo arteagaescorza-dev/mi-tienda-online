@@ -687,7 +687,9 @@ function hybridInventoryModule() {
             timeout: null
         },
 
-        products: [
+        products: (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts) && window.serverInventoryProducts.length > 0)
+            ? window.serverInventoryProducts
+            : [
     {
         "sku": "BX-MOD-001",
         "weightedAverageCost": 138.50,
@@ -4173,6 +4175,9 @@ function hybridInventoryModule() {
         },
 
         init() {
+            if (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts) && window.serverInventoryProducts.length > 0) {
+                this.products = window.serverInventoryProducts;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
