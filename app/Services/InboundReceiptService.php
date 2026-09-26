@@ -31,7 +31,9 @@ class InboundReceiptService
 
             foreach ($allPoItems as $item) {
                 // Cantidad recibida para esta línea (por defecto todo lo pendiente si no se especifica)
-                $qtyToReceive = $itemsReceived[$item->id] ?? ($item->quantity_ordered - $item->quantity_received);
+                $qtyToReceive = $itemsReceived[$item->id]
+                    ?? $itemsReceived[strtolower((string) $item->size_name)]
+                    ?? ($item->quantity_ordered - $item->quantity_received);
                 if ($qtyToReceive <= 0) {
                     continue;
                 }

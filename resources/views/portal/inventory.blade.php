@@ -44,6 +44,10 @@
     {{-- Inyección de Datos Reales de Inventario desde Laravel (259 SKUs, 1,283 variantes) --}}
     <script>
         window.serverInventoryProducts = @json($portalProducts);
+        window.serverSuppliers = @json($portalProviders);
+        window.serverPurchaseOrders = @json($portalPurchaseOrders);
+        window.serverFuturePurchaseOrders = @json($portalFuturePurchaseOrders);
+        window.serverPurchaseKardex = @json($portalPurchaseKardex);
     </script>
 
     <!-- ========================================================================= -->
@@ -79,8 +83,8 @@
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     <span>Proveedores & Scraping</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-bold">7 Activos</span>
-                    <!-- Help Icon Tab 3 (Regla 8: BotÃ³n ? Universal) -->
+                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-bold" x-text="providers.length + ' Activos'"></span>
+                    <!-- Help Icon Tab 3 (Regla 8: Botón ? Universal) -->
                     <button class="section-help-btn" type="button" aria-label="Ayuda Proveedores y Scraping" data-help-title="Pestaña: Proveedores & Scraping" data-help-desc="Conectores de scrapers (Torzo) y APIs de mayoristas para dropshipping sincronizado y seguimiento de órdenes de compra pendientes.">?</button>
                 </button>
 
@@ -95,7 +99,7 @@
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     <span>Compras</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="futurePurchaseOrders.length + 2"></span>
+                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="futurePurchaseOrders.length + activePurchaseOrders.length"></span>
                     <!-- Help Icon Tab 4 (Regla 8: BotÃ³n ? Universal) -->
                     <button class="section-help-btn" type="button" aria-label="Ayuda Compras y Reabastecimiento" data-help-title="Pestaña: Compras & Reabastecimiento" data-help-desc="Seguimiento de órdenes de compra pendientes, recepción de mercancía y consolidación de compras planificadas desde el catÃ¡logo.">?</button>
                 </button>
@@ -793,7 +797,7 @@
                                               x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo'">
                                         </span>
                                         <span class="text-slate-300">&bull;</span>
-                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX')"></span>
+                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo' : 'Adrenaline Forte')"></span>
                                     </div>
 
                                     <!-- Swatches CromÃ¡ticos de CosmÃ©tica (TASK-INV-09) -->
@@ -2460,8 +2464,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="text-xl font-bold text-indigo-600 mt-2">2 Ã“rdenes</div>
-                <p class="text-xs text-slate-500 mt-1">1 en camino &bull; 1 por confirmar</p>
+                <div class="text-xl font-bold text-indigo-600 mt-2" x-text="activePurchaseOrders.length + ' Órdenes'"></div>
+                <p class="text-xs text-slate-500 mt-1" x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length + ' en camino • ' + activePurchaseOrders.filter(o => o.status === 'Recibida en Almacén').length + ' recibidas'"></p>
             </div>
 
             <!-- KPI 2: Lotes Planificados -->
@@ -4430,13 +4434,9 @@
                                     x-model="purchaseSupplier" 
                                     class="w-full bg-white border border-slate-200 rounded-lg py-2 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                 >
-                                    <option value="Torzo B2B">Torzo B2B &bull; Headless Scraper (CDMX)</option>
-                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX &bull; Fabricante Nacional SAP (Puebla)</option>
-                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL &bull; AlgodÃ³n/Modal OrgÃ¡nico (Barcelona)</option>
-                                    <option value="Lingerie Drop Global">Lingerie Drop Global &bull; Dropshipping Jocks/Bikinis (Miami)</option>
-                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel &bull; Sin Costuras (MedellÃ­n)</option>
-                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale &bull; DiseÃ±o Autor (Guadalajara)</option>
-                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics &bull; Distribuidor Multimarca (Monterrey)</option>
+                                    <template x-for="p in providers" :key="p.id">
+                                        <option :value="p.tradeName || p.name" x-text="p.name + ' • ' + (p.city || 'Mayorista')"></option>
+                                    </template>
                                 </select>
                             </div>
 
@@ -5211,13 +5211,9 @@
                                     x-model="newProduct.provider" 
                                     class="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                 >
-                                    <option value="Torzo B2B">Torzo B2B (Headless Feed)</option>
-                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
-                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel</option>
-                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
-                                    <option value="MicroModal Fabrics Brasil">MicroModal Fabrics Brasil</option>
-                                    <option value="EcoUnderwear Colombia">EcoUnderwear Colombia</option>
-                                    <option value="EuroLuxe Knits Portugal">EuroLuxe Knits Portugal</option>
+                                    <template x-for="p in providers" :key="p.id">
+                                        <option :value="p.tradeName || p.name" x-text="p.name + (p.typeLabel ? ' • ' + p.typeLabel : '')"></option>
+                                    </template>
                                 </select>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
@@ -6981,10 +6977,10 @@
                         <div class="flex items-center gap-2">
                             <label class="text-xs font-bold text-slate-700">Proveedor:</label>
                             <select x-model="exportSupplierFilter" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-                                <option value="Torzo B2B">Torzo B2B (Mayorista)</option>
-                                <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
-                                <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
                                 <option value="all">Consolidado Multimarca (Todos)</option>
+                                <template x-for="p in providers" :key="p.id">
+                                    <option :value="p.tradeName || p.name" x-text="(p.tradeName || p.name) + ' (' + (p.syncedItemsCount || 0) + ' SKUs)'"></option>
+                                </template>
                             </select>
                         </div>
                         <div class="flex items-center gap-4 text-xs">
@@ -7444,10 +7440,9 @@
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">Nuevo Proveedor:</label>
                         <select x-model="bulkTargetProvider" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            <option value="Torzo B2B">Torzo B2B (Mayorista)</option>
-                            <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
-                            <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
-                            <option value="Balam Textil">Balam Textil</option>
+                            <template x-for="p in providers" :key="p.id">
+                                <option :value="p.tradeName || p.name" x-text="p.name"></option>
+                            </template>
                         </select>
                     </div>
                 </div>

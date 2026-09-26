@@ -9,6 +9,10 @@ use App\Models\Cart;
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Models\Lead;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseKardex;
+use App\Models\Supplier;
 use App\Models\SupplierSyncRun;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -264,6 +268,140 @@ class StorefrontController extends Controller
             ? now()->parse(SupplierProduct::max('last_checked_at'))->format('d/m/Y H:i')
             : 'Hace 14 min';
 
+        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->orderBy('name')->get();
+        $portalProviders = $dbSuppliers->map(function ($s) {
+            $isTorzo = str_contains(strtolower($s->name), 'torzo');
+            return [
+                'id' => 'prov_' . $s->id,
+                'dbId' => $s->id,
+                'vendorCode' => 'VND-' . strtoupper(Str::slug($s->name)) . '-001',
+                'name' => $s->name . ' B2B',
+                'tradeName' => $s->name,
+                'type' => 'scraper',
+                'typeLabel' => 'Fabricante Mayorista & Scraping B2B',
+                'city' => $isTorzo ? 'CDMX' : 'Guadalajara',
+                'contactName' => $isTorzo ? 'Carlos Mendoza' : 'Atención Mayoristas',
+                'phone' => '+52 55 4182 9901',
+                'email' => $s->contact_email ?: ('b2b@' . Str::slug($s->name) . '.com'),
+                'extractionMethod' => 'Headless Scraper (Puppeteer)',
+                'frequency' => 'Automático (Cada 6 hrs)',
+                'lastScrapeTime' => 'Hace 18 min',
+                'syncedItemsCount' => (int) $s->supplier_products_count,
+                'status' => 'connected',
+                'leadTimeDays' => $isTorzo ? 3 : 5,
+                'paymentTerms' => 'contado',
+                'slaOnTimePct' => 97.5,
+                'slaFillRatePct' => 98.0,
+                'totalOrders' => 12,
+                'completedOrders' => 11,
+                'avgDelayDays' => 0.3,
+                'isSyncing' => false,
+                'notes' => $s->notes ?: 'Proveedor oficial sincronizado.',
+            ];
+        })->values();
+
+        $dbPurchaseOrders = PurchaseOrder::query()->with(['supplier', 'items.product', 'items.variant'])->latest()->get();
+        $portalPurchaseOrders = $dbPurchaseOrders->map(function ($po) {
+            $firstItem = $po->items->first();
+            $sizes = ['ch' => 0, 'm' => 0, 'g' => 0, 'xl' => 0, '2xl' => 0, '3xl' => 0];
+            foreach ($po->items as $it) {
+                $szKey = strtolower(trim((string) $it->size_name));
+                if (array_key_exists($szKey, $sizes)) {
+                    $sizes[$szKey] += $it->quantity_ordered;
+                } else {
+                    $sizes[$szKey] = $it->quantity_ordered;
+                }
+            }
+            $statusLabel = match ($po->status) {
+                'received' => 'Recibida en Almacén',
+                'in_transit' => 'En Camino',
+                'partially_received' => 'Parcialmente Recibida',
+                'confirmed' => 'Por Despachar',
+                'cancelled' => 'Cancelada',
+                default => 'Borrador',
+            };
+
+            return [
+                'id' => $po->po_number,
+                'dbId' => $po->id,
+                'supplier' => $po->supplier?->name ?? 'Proveedor',
+                'supplier_id' => $po->supplier_id,
+                'carrier' => $po->notes ?: 'Paquetería Express (Guía Pendiente)',
+                'eta' => $po->estimated_delivery_at ? $po->estimated_delivery_at->format('d M, Y') : 'En preparación',
+                'sku' => $firstItem?->product?->sku ?? 'LOTE-COMPRA',
+                'productName' => $firstItem?->product?->title ?? 'Lote de Reabastecimiento',
+                'qty' => (int) $po->total_units,
+                'sizes' => $sizes,
+                'unitCost' => (float) ($firstItem?->unit_cost ?? 0),
+                'totalCost' => (float) $po->total_amount,
+                'date' => $po->created_at ? $po->created_at->format('d M, Y') : now()->format('d M, Y'),
+                'status' => $statusLabel,
+                'linkedCartId' => null,
+                'linkedCustomer' => null,
+                'items' => $po->items->map(fn ($it) => [
+                    'id' => $it->id,
+                    'product_id' => $it->product_id,
+                    'variant_id' => $it->product_variant_id,
+                    'size' => $it->size_name,
+                    'quantity_ordered' => $it->quantity_ordered,
+                    'quantity_received' => $it->quantity_received,
+                    'unit_cost' => (float) $it->unit_cost,
+                    'total_cost' => (float) $it->total_cost,
+                ])->values(),
+            ];
+        })->values();
+
+        $topProductsToPlan = $portalProducts->sortBy('localStock')->take(3)->values();
+        $portalFuturePurchaseOrders = $topProductsToPlan->map(function ($p, $idx) {
+            $needed = max(24, 60 - (int) $p['localStock']);
+            $cost = (float) $p['cost'];
+            $ch = (int) round($needed * 0.15);
+            $m = (int) round($needed * 0.35);
+            $g = (int) round($needed * 0.30);
+            $xl = (int) round($needed * 0.15);
+            $xxl = max(0, $needed - ($ch + $m + $g + $xl));
+
+            return [
+                'id' => 'FP-2026-0' . ($idx + 1),
+                'sku' => $p['sku'],
+                'productName' => $p['name'],
+                'supplier' => $p['brand'] ?: 'Torzo',
+                'qty' => $needed,
+                'sizes' => ['ch' => $ch, 'm' => $m, 'g' => $g, 'xl' => $xl, '2xl' => $xxl, '3xl' => 0],
+                'costUnit' => $cost,
+                'totalCost' => round($needed * $cost, 2),
+                'priority' => $p['localStock'] <= 0 ? 'alta' : 'media',
+                'status' => 'Planificada',
+                'date' => now()->subDays(2 - $idx)->format('d M, Y'),
+                '_editingSizes' => false,
+            ];
+        })->values();
+
+        $portalPurchaseKardex = PurchaseKardex::query()
+            ->with(['supplier', 'purchaseOrder'])
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(fn ($k) => [
+                'id' => 'KDX-PUR-' . str_pad((string) $k->id, 4, '0', STR_PAD_LEFT),
+                'timestamp' => $k->created_at->format('d M, Y H:i'),
+                'type' => $k->movement_type,
+                'typeLabel' => match ($k->movement_type) {
+                    'PO_CREATED' => 'Emisión de PO',
+                    'INBOUND_RECEIPT' => 'Recepción en Rampa',
+                    default => 'Movimiento Compras',
+                },
+                'badgeClass' => $k->movement_type === 'INBOUND_RECEIPT' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                'poNumber' => $k->purchaseOrder?->po_number ?? 'PO-GRAL',
+                'supplier' => $k->supplier?->name ?? 'Mayorista',
+                'sku' => $k->purchaseOrder?->items?->first()?->product?->sku ?? 'MULTIPLE',
+                'productName' => $k->purchaseOrder?->items?->first()?->product?->title ?? 'Lote de Compra',
+                'deltaQty' => '+' . ($k->purchaseOrder?->total_units ?? 0) . ' uds',
+                'totalAmount' => (float) $k->total_amount,
+                'user' => 'Elena Compras',
+                'notes' => $k->description,
+            ])->values();
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -272,6 +410,10 @@ class StorefrontController extends Controller
                 'last_scrape' => (string) $lastScrape,
             ],
             'portalProducts' => $portalProducts,
+            'portalProviders' => $portalProviders,
+            'portalPurchaseOrders' => $portalPurchaseOrders,
+            'portalFuturePurchaseOrders' => $portalFuturePurchaseOrders,
+            'portalPurchaseKardex' => $portalPurchaseKardex,
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()

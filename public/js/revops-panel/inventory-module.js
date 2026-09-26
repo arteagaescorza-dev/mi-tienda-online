@@ -214,7 +214,9 @@ function hybridInventoryModule() {
         ropSettings: { leadTimeLocal: 3, leadTimeDropship: 5, safetyStockDays: 7, defaultDailySales: 2 },
 
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
-        providers: [
+        providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
+            ? window.serverSuppliers
+            : [
             {
                 id: 'prov_torzo',
                 vendorCode: 'VND-TORZO-001',
@@ -3328,6 +3330,22 @@ function hybridInventoryModule() {
                 note: (order.linkedCartId ? ('Recepción de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'Recepción conforme de mercancía en tránsito. ') + 'Valuación CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
             });
 
+            // Sincronizar recepción Inbound con backend si la orden tiene persistencia DB
+            if (order.dbId) {
+                fetch('/api/v1/inventory/purchases/orders/' + order.dbId + '/receive', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({
+                        items: this.receivingSizes,
+                        notes: this.receivingNotes
+                    })
+                }).catch(err => console.error('Error sincronizando recepcion Inbound:', err));
+            }
+
             this.receiveOrderModalOpen = false;
             this.showToast('¡' + totalReceived + ' piezas de ' + order.sku + ' ingresadas a almacén exitosamente!', 'success');
         },
@@ -4177,6 +4195,18 @@ function hybridInventoryModule() {
         init() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts) && window.serverInventoryProducts.length > 0) {
                 this.products = window.serverInventoryProducts;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0) {
+                this.providers = window.serverSuppliers;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseOrders) && window.serverPurchaseOrders.length > 0) {
+                this.activePurchaseOrders = window.serverPurchaseOrders;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverFuturePurchaseOrders) && window.serverFuturePurchaseOrders.length > 0) {
+                this.futurePurchaseOrders = window.serverFuturePurchaseOrders;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseKardex) && window.serverPurchaseKardex.length > 0) {
+                this.purchaseKardexLog = window.serverPurchaseKardex;
             }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
