@@ -476,6 +476,12 @@
     if (drawerId === 'accountSheet' && typeof renderAccountSheetContent === 'function') {
       renderAccountSheetContent();
     }
+    if (drawerId === 'cartSheet') {
+      renderCartSheetContent();
+      if (typeof fetchCartFromBackend === 'function') {
+        fetchCartFromBackend();
+      }
+    }
   }
 
   function closeAllDrawers() {
@@ -494,8 +500,8 @@
     closeAllDrawers();
   }
 
-  // Lógica del Carrito (Agregar, Quitar, Renderizar)
-  function addToCart(productId, explicitSize = null) {
+  // Logica del Carrito (Agregar, Quitar, Renderizar y Sincronizacion RESTful TASK-INT-06)
+  function addToCart(productId, explicitSize = null, explicitVariantId = null) {
     const product = STORE_PRODUCTS.find(p => p.id === productId);
     if (!product) return;
 
@@ -512,8 +518,10 @@
         categoryName: product.categoryName,
         price: product.price,
         size: size,
+        variantId: explicitVariantId || null,
         stockType: product.stockType || 'ready',
-        stockLabel: product.stockLabel || (product.stockType === 'on_demand' ? 'Bajo Pedido' : 'Stock Físico'),
+        stockLabel: product.stockLabel || (product.stockType === 'on_demand' ? 'Bajo Pedido' : 'Stock Fisico'),
+        lineType: (product.stockType === 'on_demand' ? 'line_b' : 'line_a'),
         quantity: 1
       });
     }
@@ -522,31 +530,179 @@
     notifyStockLockAcquired();
     showToastNotification(`Agregado: ${product.name} (Talla ${size})`);
     checkPushPromptTrigger();
+
+    // Sincronizar en caliente con el backend RESTful (reserva temporal de stock)
+    syncCartItemWithBackend(product.id, size, explicitVariantId, 1);
+  }
+
+  function syncCartItemWithBackend(productId, size, variantId, qty = 1) {
+    try {
+      fetch('/api/v1/store/cart/items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cart-Session-Id': getCartSessionId(),
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          cart_id: getCartSessionId(),
+          product_id: productId,
+          size: size,
+          variant_id: variantId || null,
+          quantity: qty
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && data.summary) {
+          applyBackendCartData(data);
+        }
+      })
+      .catch(e => console.warn('Error sincronizando carrito con backend:', e));
+    } catch (e) {}
+  }
+
+  function applyBackendCartData(data) {
+    if (!data || !data.items) return;
+
+    if (data.summary && data.summary.reservation) {
+      if (data.summary.reservation.has_active_reservation && data.summary.reservation.min_remaining_seconds > 0) {
+        stockLockTimerRemaining = data.summary.reservation.min_remaining_seconds;
+        const expMs = Date.now() + (stockLockTimerRemaining * 1000);
+        localStorage.setItem('multiverse_stock_lock_expires_at', expMs.toString());
+      }
+    }
+
+    storeState.cart = data.items.map(bi => ({
+      backendId: bi.id,
+      productId: bi.product_id ? String(bi.product_id) : bi.sku,
+      variantId: bi.variant_id,
+      sku: bi.sku,
+      name: bi.product_name,
+      categoryName: 'Prenda',
+      price: bi.price,
+      size: bi.size,
+      stockType: bi.line_type === 'line_b' ? 'on_demand' : 'ready',
+      stockLabel: bi.stock_badge,
+      lineType: bi.line_type,
+      lineLabel: bi.line_label,
+      quantity: bi.quantity,
+      hasActiveLock: bi.has_active_lock
+    }));
+
+    saveCart();
+    updateCartBadges();
+    renderCartSheetContent();
+  }
+
+  function fetchCartFromBackend() {
+    try {
+      fetch(`/api/v1/store/cart?cart_id=${encodeURIComponent(getCartSessionId())}`, {
+        headers: {
+          'X-Cart-Session-Id': getCartSessionId(),
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && data.items && data.items.length > 0) {
+          applyBackendCartData(data);
+        }
+      })
+      .catch(() => {});
+    } catch (e) {}
   }
 
   function updateCartQuantity(index, delta) {
     if (!storeState.cart[index]) return;
-    storeState.cart[index].quantity += delta;
-    if (storeState.cart[index].quantity <= 0) {
-      storeState.cart.splice(index, 1);
+    const item = storeState.cart[index];
+    const newQty = item.quantity + delta;
+
+    if (newQty <= 0) {
+      removeCartItem(index);
+      return;
     }
+
+    item.quantity = newQty;
     saveCart();
     if (storeState.cart.length > 0) {
       notifyStockLockAcquired();
-    } else {
-      notifyStockLockReleased();
+    }
+    renderCartSheetContent();
+
+    if (item.backendId) {
+      fetch(`/api/v1/store/cart/items/${item.backendId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cart-Session-Id': getCartSessionId(),
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          cart_id: getCartSessionId(),
+          quantity: newQty
+        })
+      })
+      .then(r => r.json())
+      .then(d => { if (d && d.success) applyBackendCartData(d); })
+      .catch(() => {});
     }
   }
 
   function removeCartItem(index) {
     if (!storeState.cart[index]) return;
+    const item = storeState.cart[index];
     storeState.cart.splice(index, 1);
     saveCart();
+
     if (storeState.cart.length > 0) {
       notifyStockLockAcquired();
     } else {
       notifyStockLockReleased();
     }
+    renderCartSheetContent();
+
+    if (item.backendId) {
+      fetch(`/api/v1/store/cart/items/${item.backendId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cart-Session-Id': getCartSessionId(),
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ cart_id: getCartSessionId() })
+      })
+      .then(r => r.json())
+      .then(d => { if (d && d.success) applyBackendCartData(d); })
+      .catch(() => {});
+    } else if (storeState.cart.length === 0) {
+      fetch('/api/v1/store/cart/clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cart-Session-Id': getCartSessionId(),
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ cart_id: getCartSessionId() })
+      }).catch(() => {});
+    }
+  }
+
+  function clearCart() {
+    storeState.cart = [];
+    saveCart();
+    notifyStockLockReleased();
+    renderCartSheetContent();
+
+    fetch('/api/v1/store/cart/clear', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Cart-Session-Id': getCartSessionId(),
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ cart_id: getCartSessionId() })
+    }).catch(() => {});
   }
 
   // ============================================================================
@@ -840,16 +996,35 @@
       `;
     }
 
-    // Lista de ítems
-    const itemsHtml = storeState.cart.map((item, idx) => `
+    // Desglose de carrito mixto: Linea A (Bodega local, entrega 24-48h) vs Linea B (Taller On-Demand, entrega 3-5 dias)
+    const lineAEntries = storeState.cart.map((item, idx) => ({ item, idx }))
+      .filter(x => (x.item.lineType || x.item.stockType) !== 'line_b' && (x.item.lineType || x.item.stockType) !== 'on_demand');
+    const lineBEntries = storeState.cart.map((item, idx) => ({ item, idx }))
+      .filter(x => (x.item.lineType || x.item.stockType) === 'line_b' || (x.item.lineType || x.item.stockType) === 'on_demand');
+    const isMixedCart = lineAEntries.length > 0 && lineBEntries.length > 0;
+
+    let mixedNoticeHtml = '';
+    if (isMixedCart) {
+      mixedNoticeHtml = `
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.72rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div><strong style="color: #0f172a;">Pedido Mixto:</strong> Incluye prendas de bodega inmediata y confeccion en taller.</div>
+        </div>
+      `;
+    }
+
+    const renderItemHtml = ({ item, idx }) => `
       <div style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); align-items: center;">
-        <div style="width: 50px; height: 50px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>
+        <div style="width: 50px; height: 50px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+          ${item.image && item.image !== '/user-avatar.png' ? `<img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
         </div>
         
         <div style="flex-grow: 1;">
           <div style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; line-height: 1.2;">${item.name}</div>
-          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${item.size}</strong></div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Talla: <strong style="color: var(--text-primary);">${item.size}</strong></span>
+            <span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; ${((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'background: #fffbeb; color: #b45309;' : 'background: #ecfdf5; color: #047857;'}">${item.stockLabel || (((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'Bajo Pedido' : 'Stock Fisico')}</span>
+          </div>
           <div style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 800; color: #050505; margin-top: 4px;">MXN $${(item.price * item.quantity).toFixed(2)}</div>
         </div>
 
@@ -862,7 +1037,47 @@
           </button>
         </div>
       </div>
-    `).join('');
+    `;
+
+    let itemsHtml = '';
+    if (isMixedCart) {
+      itemsHtml += `
+        <div style="margin-top: 10px;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Linea A - Bodega Local (Entrega 24-48h)</span>
+            <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
+          </div>
+          ${lineAEntries.map(renderItemHtml).join('')}
+        </div>
+        <div style="margin-top: 16px;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Linea B - Taller On-Demand (Entrega 3-5 dias)</span>
+            <span style="color: #d97706; font-size: 0.65rem;">Confeccion Artesanal</span>
+          </div>
+          ${lineBEntries.map(renderItemHtml).join('')}
+        </div>
+      `;
+    } else if (lineAEntries.length > 0) {
+      itemsHtml += `
+        <div style="margin-top: 10px;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Linea A - Bodega Local (Entrega Express 24-48h)</span>
+            <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
+          </div>
+          ${lineAEntries.map(renderItemHtml).join('')}
+        </div>
+      `;
+    } else {
+      itemsHtml += `
+        <div style="margin-top: 10px;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Linea B - Taller On-Demand (Entrega 3-5 dias)</span>
+            <span style="color: #d97706; font-size: 0.65rem;">Confeccion Artesanal</span>
+          </div>
+          ${lineBEntries.map(renderItemHtml).join('')}
+        </div>
+      `;
+    }
 
     // Actualizar Totales
     const cartSubtotalEl = document.getElementById('cartSubtotalAmount');
@@ -874,7 +1089,7 @@
       }
     }
 
-    container.innerHTML = urgencyBanner + shippingNotice + itemsHtml;
+    container.innerHTML = urgencyBanner + shippingNotice + mixedNoticeHtml + itemsHtml;
     renderCouponBoxes();
   }
 
@@ -3839,6 +4054,9 @@
     renderProductsGrid('homeProductsGrid');
     renderProductsGrid('catalogProductsGrid');
     renderCartSheetContent();
+    if (typeof fetchCartFromBackend === 'function') {
+      fetchCartFromBackend();
+    }
     renderWishlistDrawerContent();
     renderCouponBoxes();
     initPushNotifications();
@@ -3869,6 +4087,9 @@
     window.openDrawer = openDrawer;
     window.closeAllDrawers = closeAllDrawers;
     window.addToCart = addToCart;
+    window.clearCart = clearCart;
+    window.fetchCartFromBackend = fetchCartFromBackend;
+    window.syncCartItemWithBackend = syncCartItemWithBackend;
     window.renderProductsGrid = renderProductsGrid;
     window.isInWishlist = isInWishlist;
     window.toggleWishlist = toggleWishlist;

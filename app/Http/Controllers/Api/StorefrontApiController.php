@@ -4,12 +4,36 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class StorefrontApiController extends Controller
 {
+    protected CartService $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
+
+    /**
+     * Resuelve el identificador de sesion del carrito desde cabeceras, input o cookies.
+     */
+    protected function getCartSessionId(Request $request): string
+    {
+        $sid = $request->header('X-Cart-Session-Id')
+            ?: ($request->input('cart_id')
+            ?: ($request->cookie('multiverse_cart_session_id')
+            ?: ($request->cookie('cart_session_id'))));
+
+        if (!$sid || strlen($sid) < 3) {
+            $sid = 'sess_' . Str::random(12);
+        }
+
+        return (string) $sid;
+    }
     /**
      * Devuelve el detalle anatómico de un producto para la ficha PDP
      * con su matriz de tallas, stock en vivo (físico vs bajo pedido)
@@ -138,5 +162,112 @@ class StorefrontApiController extends Controller
                 'variants' => $variantList,
             ],
         ]);
+    }
+
+    /**
+     * Consulta el estado en vivo del carrito con desglose mixto y telemetria de candados.
+     */
+    public function getCart(Request $request): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $cartDetails = $this->cartService->getCartDetails($cartSessionId, auth()->id());
+
+        return response()->json($cartDetails);
+    }
+
+    /**
+     * Agrega un articulo al carrito con reserva de stock temporal inmediata.
+     */
+    public function addToCart(Request $request): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $quantity = max(1, (int) $request->input('quantity', 1));
+        $variantId = $request->input('variant_id');
+
+        // Si se envio product_id y size en vez de variant_id, resolver la variante
+        if (!$variantId && $request->has('product_id')) {
+            $product = Product::with('variants.inventories')->find($request->input('product_id'));
+            if ($product) {
+                $requestedSize = strtoupper(trim((string) $request->input('size', 'M')));
+                $matchedVariant = $product->variants->first(function ($v) use ($requestedSize) {
+                    $attrSize = strtoupper(trim((string) data_get($v->attributes, 'size', '')));
+                    return $attrSize === $requestedSize || str_ends_with($v->sku, '-' . $requestedSize);
+                }) ?: $product->variants->first();
+
+                if ($matchedVariant) {
+                    $variantId = $matchedVariant->id;
+                }
+            }
+        }
+
+        if (!$variantId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Variante de prenda no especificada o no valida.',
+            ], 422);
+        }
+
+        $cartDetails = $this->cartService->addItem($cartSessionId, (int) $variantId, $quantity, auth()->id());
+
+        return response()->json($cartDetails);
+    }
+
+    /**
+     * Actualiza la cantidad de un articulo en el carrito.
+     */
+    public function updateCartItem(Request $request, int $id): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $quantity = (int) $request->input('quantity', 1);
+
+        $cartDetails = $this->cartService->updateItemQuantity($cartSessionId, $id, $quantity, auth()->id());
+
+        return response()->json($cartDetails);
+    }
+
+    /**
+     * Elimina un articulo del carrito liberando su reserva temporal de stock.
+     */
+    public function removeCartItem(Request $request, int $id): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $cartDetails = $this->cartService->removeItem($cartSessionId, $id, auth()->id());
+
+        return response()->json($cartDetails);
+    }
+
+    /**
+     * Vacia el carrito completo y libera todos los candados de inventario.
+     */
+    public function clearCart(Request $request): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $cartDetails = $this->cartService->clearCart($cartSessionId, auth()->id());
+
+        return response()->json($cartDetails);
+    }
+
+    /**
+     * Bloquea o renueva la reserva temporal de stock de los articulos del carrito.
+     */
+    public function lockCart(Request $request): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $durationMinutes = max(1, min(60, (int) $request->input('duration_minutes', 5)));
+
+        $cartDetails = $this->cartService->lockCart($cartSessionId, auth()->id(), $durationMinutes);
+
+        return response()->json($cartDetails);
+    }
+
+    /**
+     * Libera los candados de stock del carrito manteniendo los articulos en la lista.
+     */
+    public function releaseCartLock(Request $request): JsonResponse
+    {
+        $cartSessionId = $this->getCartSessionId($request);
+        $cartDetails = $this->cartService->releaseCartLocks($cartSessionId);
+
+        return response()->json($cartDetails);
     }
 }

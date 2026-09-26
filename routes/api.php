@@ -78,8 +78,17 @@ Route::prefix('v1')->group(function () {
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
     });
 
-    // 8. STOREFRONT D2C CATALOG & PDP (PRIORIDAD 1 - SLICE 1.2)
+    // 8. STOREFRONT D2C CATALOG, PDP & CARRITO CON RESERVA TEMPORAL (PRIORIDAD 1 - SLICE 1.2 & 1.3)
     Route::prefix('store')->group(function () {
         Route::get('/products/{slug}', [StorefrontApiController::class, 'productDetail']);
+
+        // Carrito Deslizable y Candados de Stock (TASK-INT-06)
+        Route::get('/cart', [StorefrontApiController::class, 'getCart']);
+        Route::post('/cart/items', [StorefrontApiController::class, 'addToCart']);
+        Route::patch('/cart/items/{id}', [StorefrontApiController::class, 'updateCartItem']);
+        Route::delete('/cart/items/{id}', [StorefrontApiController::class, 'removeCartItem']);
+        Route::post('/cart/clear', [StorefrontApiController::class, 'clearCart']);
+        Route::post('/cart/lock', [StorefrontApiController::class, 'lockCart']);
+        Route::post('/cart/release', [StorefrontApiController::class, 'releaseCartLock']);
     });
 });

@@ -81,19 +81,27 @@ flowchart TD
 
 ---
 
-### Slice 3: Carrito Deslizable y Motor de Reserva Temporal de Stock (`TASK-INT-06`)
+### Slice 3: Carrito Deslizable y Motor de Reserva Temporal de Stock (`TASK-INT-06`) [COMPLETADO]
+* **Estado:** Completado y verificado (127/127 pruebas verdes en PHPUnit, 593 aserciones, 0 emojis).
 * **Backend:**
-  - `CartService` y `StockReservationService`:
-    - Creación/recuperación atómica de carrito (`Cart` y `CartItem`).
-    - Endpoint `POST /api/v1/store/cart/lock`: ejecuta `reserveStock()` bloqueando el inventario (`inventories.reserved += qty`) y creando registro en `stock_locks` con `expires_at = now()->addMinutes(5)`.
-    - Endpoint `POST /api/v1/store/cart/release`: libera el candado antes de tiempo si el usuario elimina la prenda.
-    - Comando Artisan / Job programado `php artisan stock-locks:cleanup` que libera reservas vencidas cada minuto.
+  - `CartService` (`app/Services/CartService.php`) y `StockReservationService`:
+    - Creación y resolución atómica de carrito (`Cart` y `CartItem`).
+    - Clasificación inteligente de ítems: Línea A (Bodega local, entrega 24-48h con inventario físico) vs Línea B (Taller On-Demand, confección artesanal 3-5 días sin inventario físico).
+    - Reserva temporal inmediata de stock en `warehouse-1`: incrementa `inventories.reserved` y crea/actualiza registros en `stock_locks` con TTL de 5 minutos (300 segundos).
+    - Endpoints RESTful completos en `StorefrontApiController` y registrados en `routes/api.php`:
+      - `GET /api/v1/store/cart`: resumen en vivo, ítems clasificados, estatus de reserva y segundos restantes.
+      - `POST /api/v1/store/cart/items`: alta/incremento de prenda con reserva de stock automática.
+      - `PATCH /api/v1/store/cart/items/{id}`: actualización de cantidad y ajuste reactivo del candado.
+      - `DELETE /api/v1/store/cart/items/{id}`: eliminación de prenda y liberación inmediata del candado en Kardex/Inventario.
+      - `POST /api/v1/store/cart/clear`: vaciado total y liberación de todos los candados.
+      - `POST /api/v1/store/cart/lock` y `POST /api/v1/store/cart/release`: gestión explícita de candados.
+    - Comando Artisan `php artisan stock-locks:cleanup` (con alias `stock:cleanup-expired-locks`) probado y funcional para liberar automáticamente bloqueos expirados.
 * **Frontend:**
-  - Drawer lateral deslizable `#cartSheet`.
-  - Temporizador reactivo en cabecera: cuenta regresiva de 300 segundos con barra decreciente.
-  - Desglose de carrito mixto: Línea A (Bodega local, entrega 24-48h) vs Línea B (Taller On-Demand, entrega 3-5 días).
-  - Aviso suave `.cart-expiry-notice` cuando la reserva caduca.
-* **Verificación:** Al agregar un ítem, la base de datos refleja `inventories.reserved = 1` y la tabla `stock_locks` tiene el registro activo.
+  - Sincronización asíncrona bidireccional entre la PWA (`store-pwa.js`) y los endpoints RESTful.
+  - Drawer lateral deslizable `#cartSheet` con banner de urgencia en tiempo real (`#stockLockTimeRemaining`, `#stockLockProgressBar`).
+  - Desglose de carrito mixto: secciones diferenciadas para Línea A (Bodega local) y Línea B (Taller On-Demand), badges de estado y aviso informativo de envío mixto.
+  - Aviso visual `.cart-expiry-notice` cuando la reserva caduca.
+* **Verificación:** Suite `tests/Feature/StorefrontPwaCartTest.php` creada y pasando al 100% (8 pruebas, 30 aserciones, 0 emojis). Suite global al 100% (127 pruebas, 593 aserciones).
 
 ---
 
