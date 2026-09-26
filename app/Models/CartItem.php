@@ -11,6 +11,11 @@ class CartItem extends Model
 
     protected $fillable = ['cart_id','variant_id','quantity','price','added_from'];
 
+    protected $casts = [
+        'price' => 'decimal:2',
+        'quantity' => 'integer',
+    ];
+
     public function cart()
     {
         return $this->belongsTo(Cart::class);

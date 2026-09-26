@@ -16,14 +16,18 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Crear datos base
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
 
         $this->call([
-            SupplierSeeder::class,
-            ProductSeeder::class,
+            TorzoProviderSeeder::class,
+            AdrenalineForteProviderSeeder::class,
             RevOpsMasterSeeder::class,
         ]);
     }

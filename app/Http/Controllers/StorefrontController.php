@@ -17,7 +17,7 @@ class StorefrontController extends Controller
 {
     public function home()
     {
-        $products = $this->sampleProducts();
+        $products = $this->catalogProducts();
 
         return view('welcome', [
             'featuredProducts' => array_slice($products, 0, 3),
@@ -299,11 +299,13 @@ class StorefrontController extends Controller
     public function search(Request $request)
     {
         $term = trim((string) $request->query('q', ''));
-        $products = collect($this->sampleProducts());
+        $products = collect($this->catalogProducts());
 
         if ($term !== '') {
             $products = $products->filter(function (array $product) use ($term) {
-                return str_contains(strtolower($product['name']), strtolower($term));
+                return str_contains(strtolower($product['name']), strtolower($term))
+                    || str_contains(strtolower($product['brand'] ?? ''), strtolower($term))
+                    || str_contains(strtolower($product['category'] ?? ''), strtolower($term));
             });
         }
 
@@ -315,97 +317,12 @@ class StorefrontController extends Controller
 
     private function sampleProducts(): array
     {
-        return [
-            [
-                'slug' => 'set-lino-aura',
-                'name' => 'Set Lino Aura',
-                'price' => 'MXN $129.00',
-                'price_value' => 129,
-                'description' => 'Composicion suave para uso diario con acabado premium.',
-                'image' => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Aster',
-                'size' => 'M',
-                'fit' => 'Regular',
-                'color' => 'Blanco',
-                'garment_type' => 'Conjunto',
-                'category' => 'Conjuntos',
-            ],
-            [
-                'slug' => 'camisola-eter',
-                'name' => 'Camisola Eter',
-                'price' => 'MXN $99.00',
-                'price_value' => 99,
-                'description' => 'Diseno ligero con ajuste elegante y maxima comodidad.',
-                'image' => 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Noble',
-                'size' => 'S',
-                'fit' => 'Slim',
-                'color' => 'Arena',
-                'garment_type' => 'Camisa',
-                'category' => 'Camisas',
-            ],
-            [
-                'slug' => 'conjunto-alba',
-                'name' => 'Conjunto Alba',
-                'price' => 'MXN $149.00',
-                'price_value' => 149,
-                'description' => 'Minimalismo moderno con detalles de confeccion premium.',
-                'image' => 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Aster',
-                'size' => 'L',
-                'fit' => 'Oversize',
-                'color' => 'Negro',
-                'garment_type' => 'Conjunto',
-                'category' => 'Conjuntos',
-            ],
-            [
-                'slug' => 'abrigo-siena',
-                'name' => 'Abrigo Siena',
-                'price' => 'MXN $179.00',
-                'price_value' => 179,
-                'description' => 'Corte limpio para un look sobrio en temporada fresca.',
-                'image' => 'https://images.unsplash.com/photo-1484516758160-69878111a911?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Valle',
-                'size' => 'M',
-                'fit' => 'Regular',
-                'color' => 'Camel',
-                'garment_type' => 'Abrigo',
-                'category' => 'Abrigos',
-            ],
-            [
-                'slug' => 'denim-zenit',
-                'name' => 'Denim Zenit',
-                'price' => 'MXN $119.00',
-                'price_value' => 119,
-                'description' => 'Fit contemporaneo con acabado resistente para uso intensivo.',
-                'image' => 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Rift',
-                'size' => 'XL',
-                'fit' => 'Regular',
-                'color' => 'Azul',
-                'garment_type' => 'Pantalon',
-                'category' => 'Jeans',
-            ],
-            [
-                'slug' => 'top-bruma',
-                'name' => 'Top Bruma',
-                'price' => 'MXN $89.00',
-                'price_value' => 89,
-                'description' => 'Textil liviano para climas calidos con tacto suave.',
-                'image' => 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Noble',
-                'size' => 'S',
-                'fit' => 'Cropped',
-                'color' => 'Rosa',
-                'garment_type' => 'Top',
-                'category' => 'Tops',
-            ],
-        ];
+        return $this->catalogProducts();
     }
 
     private function catalogProducts(): array
     {
-        $products = Product::query()
+        return Product::query()
             ->with([
                 'variants' => fn ($query) => $query->where('visible', true)->orderBy('id'),
                 'categories',
@@ -429,7 +346,7 @@ class StorefrontController extends Controller
                     'fit' => data_get($attributes, 'fit', 'Regular'),
                     'color' => data_get($attributes, 'color', 'Negro'),
                     'garment_type' => data_get($product->meta, 'garment_type', 'Prenda'),
-                    'category' => $product->categories->first()?->name ?? 'Catalogo',
+                    'category' => $product->categories->first()?->name ?? (data_get($product->meta, 'category', 'Catalogo')),
                     'variant_id' => $variant?->id,
                     'variants' => $product->variants->map(function ($productVariant): array {
                         return [
@@ -442,56 +359,12 @@ class StorefrontController extends Controller
                 ];
             })
             ->all();
-
-        return $products ?: $this->sampleProducts();
     }
 
     private function outletProducts(): array
     {
-        return [
-            [
-                'slug' => 'outlet-lino-aurora',
-                'name' => 'Lino Aurora Outlet',
-                'price' => 'MXN $79.00',
-                'price_value' => 79,
-                'description' => 'Últimas piezas con descuento especial de temporada.',
-                'image' => 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Aster',
-                'size' => 'M',
-                'fit' => 'Regular',
-                'color' => 'Blanco',
-                'garment_type' => 'Conjunto',
-                'category' => 'Outlet',
-            ],
-            [
-                'slug' => 'outlet-denim-luma',
-                'name' => 'Denim Luma Outlet',
-                'price' => 'MXN $69.00',
-                'price_value' => 69,
-                'description' => 'Denim con rebaja para cierre de colección.',
-                'image' => 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Rift',
-                'size' => 'L',
-                'fit' => 'Slim',
-                'color' => 'Azul',
-                'garment_type' => 'Pantalon',
-                'category' => 'Outlet',
-            ],
-            [
-                'slug' => 'outlet-top-nube',
-                'name' => 'Top Nube Outlet',
-                'price' => 'MXN $49.00',
-                'price_value' => 49,
-                'description' => 'Pieza ligera con precio especial para remate.',
-                'image' => 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=1200&q=80',
-                'brand' => 'Noble',
-                'size' => 'S',
-                'fit' => 'Cropped',
-                'color' => 'Rosa',
-                'garment_type' => 'Top',
-                'category' => 'Outlet',
-            ],
-        ];
+        $all = $this->catalogProducts();
+        return array_slice($all, 6, 6) ?: array_slice($all, 0, 3);
     }
 
     private function scrapedLandingProducts(): array

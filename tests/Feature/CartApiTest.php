@@ -88,7 +88,7 @@ class CartApiTest extends TestCase
         $response->assertOk();
         $response->assertJsonCount(1, 'items');
         $response->assertJsonPath('items.0.variant_id', $secondVariant->id);
-        $response->assertJsonPath('items.0.price', (float) $secondVariant->price);
+        $this->assertEquals((float) $secondVariant->price, (float) $response->json('items.0.price'));
         $this->assertDatabaseMissing('cart_items', ['variant_id' => $firstVariant->id]);
         $this->assertDatabaseHas('cart_items', [
             'variant_id' => $secondVariant->id,
