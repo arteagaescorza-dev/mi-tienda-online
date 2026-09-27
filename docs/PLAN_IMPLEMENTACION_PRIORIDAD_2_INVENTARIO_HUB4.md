@@ -80,14 +80,16 @@ flowchart TD
 
 ---
 
-### Slice 2.1: Saneamiento UTF-8 y Normalizacion de Paridad en `inventory.blade.php`
-* **Objetivo:** Erradicar todo el texto corrupto (mojibake) en `resources/views/portal/inventory.blade.php`, adoptando el texto UTF-8 limpio de `import/inventory.blade.php` y manteniendo el bloque `@push('scripts')` con `inventory-module.js` y SheetJS CDN.
+### Slice 2.1: Saneamiento UTF-8 y Normalizacion de Paridad en `inventory.blade.php` [COMPLETADO]
+* **Estado:** Completado y verificado (Commit `a6daa81`, 151/151 pruebas verdes en PHPUnit, 730 aserciones, 0 mojibake, 0 emojis).
+* **Objetivo:** Erradicar todo el texto corrupto (mojibake) en `resources/views/portal/inventory.blade.php`, adoptando el texto UTF-8 limpio de `import/inventory.blade.php` y manteniendo el bloque `@push('scripts')` con `inventory-module.js` y SheetJS CDN, preservando ademas las inyecciones de datos del backend (`window.server...`, `$summary['stock_local']`, `$syncRuns` y `$variantMappings`).
 * **Archivos Afectados:**
   - `resources/views/portal/inventory.blade.php`
-* **Criterios de Aceptacion:**
-  - Cero entidades corruptas (`Ã³`, `Ã¡`, `Ã©`, `Ã±`, `â€¢`).
-  - Todas las directivas Alpine.js, modales y conmutadores de vista funcionan sin errores en consola.
-  - La suite de pruebas actual de Laravel permanece al 100% en verde (151/151 pruebas).
+* **Criterios de Aceptacion Superados:**
+  - Cero entidades corruptas (0 mojibake detectados en auditoria automatizada).
+  - Cero emojis en la plantilla conforme a la Regla 1.
+  - Compilacion y cacheo de vistas Blade verificado exitosamente con `php artisan view:cache`.
+  - La suite de pruebas de Laravel permanece al 100% en verde (151/151 pruebas, 730 aserciones).
 
 ---
 
