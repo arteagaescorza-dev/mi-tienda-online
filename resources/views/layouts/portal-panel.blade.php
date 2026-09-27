@@ -37,55 +37,24 @@
       <div class="topbar-notif-wrapper">
         <button class="topbar-icon-btn" data-action="toggle-notifications" aria-label="Notificaciones" title="Notificaciones operativas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span class="topbar-badge" data-notif-badge>3</span>
+          <span class="topbar-badge" data-notif-badge style="display:none;">0</span>
         </button>
         <div class="notif-popover" data-notif-popover style="display:none;">
           <div class="notif-header">
             <div>
               <h3 class="notif-title">Centro de Notificaciones</h3>
-              <span class="notif-subtitle" data-notif-status-text>3 alertas operativas pendientes</span>
+              <span class="notif-subtitle" data-notif-status-text>Cargando alertas...</span>
             </div>
             <button class="notif-mark-read" data-action="mark-all-read">Marcar leidas</button>
           </div>
           <div class="notif-tabs">
-            <button class="notif-tab active" data-notif-tab="all">Todas (3)</button>
-            <button class="notif-tab" data-notif-tab="critical">Criticas (2)</button>
-            <button class="notif-tab" data-notif-tab="info">Operativas (1)</button>
+            <button class="notif-tab active" data-notif-tab="all">Todas (<span data-notif-count-all>0</span>)</button>
+            <button class="notif-tab" data-notif-tab="critical">Criticas (<span data-notif-count-critical>0</span>)</button>
+            <button class="notif-tab" data-notif-tab="info">Operativas (<span data-notif-count-info>0</span>)</button>
           </div>
-          {{-- MOCK Fase 3: sustituir por notificaciones reales del backend --}}
-          <div class="notif-list">
-            <div class="notif-item unread" data-notif-category="critical">
-              <div class="notif-icon-col"><span class="notif-alert-dot red"></span></div>
-              <div class="notif-content-col">
-                <div class="notif-item-title">Alerta ROP critica de inventario</div>
-                <p class="notif-item-desc">Hay referencias con stock disponible por debajo del punto de reorden.</p>
-                <div class="notif-item-footer">
-                  <span class="notif-time">Hace 8 min</span>
-                  <a class="button button-light notif-action-btn" href="{{ route('portal.inventory') }}">Ver Inventario</a>
-                </div>
-              </div>
-            </div>
-            <div class="notif-item unread" data-notif-category="critical">
-              <div class="notif-icon-col"><span class="notif-alert-dot emerald"></span></div>
-              <div class="notif-content-col">
-                <div class="notif-item-title">Pedido listo para empaque</div>
-                <p class="notif-item-desc">Un pedido con mercancia local y de proveedor quedo desbloqueado.</p>
-                <div class="notif-item-footer">
-                  <span class="notif-time">Hace 22 min</span>
-                  <a class="button button-light notif-action-btn" href="{{ route('portal.dashboard') }}">Ver Dashboard</a>
-                </div>
-              </div>
-            </div>
-            <div class="notif-item unread" data-notif-category="info">
-              <div class="notif-icon-col"><span class="notif-alert-dot amber"></span></div>
-              <div class="notif-content-col">
-                <div class="notif-item-title">Sincronizacion de proveedor con discrepancias</div>
-                <p class="notif-item-desc">Un proveedor reporto cambios de costo o disponibilidad recientes.</p>
-                <div class="notif-item-footer">
-                  <span class="notif-time">Hace 35 min</span>
-                  <a class="button button-light notif-action-btn" href="{{ route('portal.suppliers.colors') }}">Ver Proveedores</a>
-                </div>
-              </div>
+          <div class="notif-list" data-notif-list>
+            <div class="p-4 text-center text-xs text-slate-500" data-notif-loading>
+              Cargando notificaciones...
             </div>
           </div>
         </div>
@@ -93,7 +62,7 @@
 
       <button class="topbar-icon-btn" data-action="toggle-chat" aria-label="Chat entre areas" title="Chat inter-areas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span class="topbar-badge chat-badge">2</span>
+        <span class="topbar-badge chat-badge" data-chat-badge style="display:none;">0</span>
       </button>
 
       <!-- AJUSTES Y CONFIGURACIÓN DEL MÓDULO -->
@@ -140,10 +109,12 @@
             <svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4ZM4 7l8 4 8-4M12 11v10"/></svg>
             <span>4. Inventario &amp; Compras</span>
           </a>
+          @canViewFinancials
           <a class="module-link {{ request()->routeIs('portal.finance') ? 'active' : '' }}" href="{{ route('portal.finance') }}" data-screen="finance" title="Hub 5: Finanzas &amp; Conciliacion">
             <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
             <span>5. Finanzas &amp; Conciliacion</span>
           </a>
+          @endcanViewFinancials
           <a class="module-link {{ request()->routeIs('portal.logistics') ? 'active' : '' }}" href="{{ route('portal.logistics') }}" data-screen="logistics" title="Hub 6: Logística &amp; Post-Venta">
             <svg viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14v10Z"/><circle cx="17" cy="18.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/></svg>
             <span>6. Logística &amp; Envíos</span>
@@ -151,6 +122,10 @@
           <a class="module-link {{ request()->routeIs('portal.allies') ? 'active' : '' }}" href="{{ route('portal.allies') }}" data-screen="allies" title="Hub 7: Convenios &amp; Aliados">
             <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="12" y1="1" x2="12" y2="7"/></svg>
             <span>7. Convenios &amp; Aliados</span>
+          </a>
+          <a class="module-link {{ request()->routeIs('portal.governance') ? 'active' : '' }}" href="{{ route('portal.governance') }}" data-screen="governance" title="Hub 8: Gobernanza, Auditoria &amp; RBAC">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>8. Gobernanza &amp; RBAC</span>
           </a>
         </nav>
       </div>
@@ -175,6 +150,9 @@
       @if(session('success'))
         <div class="alert alert-success" role="status">{{ session('success') }}</div>
       @endif
+      @if(session('error'))
+        <div class="alert alert-error bg-rose-50 text-rose-800 border border-rose-200 p-3 rounded-lg mb-4 text-xs font-semibold" role="alert">{{ session('error') }}</div>
+      @endif
       @if($errors->any())
         <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
       @endif
@@ -182,31 +160,40 @@
     </main>
   </div>
 
-  {{-- CHAT INTER-AREAS --}}
+  {{-- CHAT INTER-AREAS (TASK-COM-01) --}}
   <div class="chat-drawer-container" data-chat-container style="display:none;">
     <div class="chat-backdrop" data-action="close-chat"></div>
     <aside class="chat-drawer">
       <div class="chat-header">
         <div class="chat-header-title">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <div><h3>Comunicacion Inter-Areas</h3><span class="chat-status-sub"><span class="status-indicator-online"></span> Demostracion local</span></div>
+          <div><h3>Comunicacion Inter-Areas</h3><span class="chat-status-sub"><span class="status-indicator-online"></span> En linea - Trazabilidad formal</span></div>
         </div>
         <button class="chat-close-btn" data-action="close-chat" aria-label="Cerrar chat"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
       <div class="chat-channels-bar">
-        <button class="chat-channel-btn active" data-channel="almacen"># almacen-compras</button>
-        <button class="chat-channel-btn" data-channel="ventas"># atencion-ventas</button>
-        <button class="chat-channel-btn" data-channel="logistica"># logistica-guias</button>
-        <button class="chat-channel-btn" data-channel="general"># revops-general</button>
+        <button class="chat-channel-btn active" data-channel="almacen"># almacen-compras <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="almacen" style="display:none;">0</span></button>
+        <button class="chat-channel-btn" data-channel="ventas"># atencion-ventas <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="ventas" style="display:none;">0</span></button>
+        <button class="chat-channel-btn" data-channel="logistica"># logistica-guias <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="logistica" style="display:none;">0</span></button>
+        <button class="chat-channel-btn" data-channel="general"># revops-general <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="general" style="display:none;">0</span></button>
       </div>
       <div class="chat-messages-wrap" data-chat-messages></div>
-      <div class="chat-context-chips">
-        <span class="chip-label">Etiquetar:</span>
-        <button type="button" class="chat-chip" data-chip="@SKU:">+ SKU</button>
-        <button type="button" class="chat-chip" data-chip="@Pedido:">+ Pedido</button>
+      <div class="chat-context-chips flex items-center justify-between gap-1 px-3 py-1.5 bg-slate-50 border-t border-slate-200 text-xs">
+        <div class="flex items-center gap-1 overflow-x-auto">
+          <span class="chip-label text-slate-500 font-semibold text-[11px]">Etiquetar:</span>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@SKU:">+ SKU</button>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@Pedido:">+ Pedido</button>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@OC:">+ OC</button>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@Guia:">+ Guia</button>
+        </div>
+        <select class="chat-priority-select text-[11px] px-1.5 py-0.5 rounded border border-slate-300 bg-white" data-chat-priority title="Prioridad operativa">
+          <option value="normal">Normal</option>
+          <option value="high">Alta</option>
+          <option value="urgent">Urgente</option>
+        </select>
       </div>
       <form class="chat-input-bar" data-chat-form>
-        <input type="text" class="chat-input" placeholder="Escribe un mensaje..." data-chat-input required autocomplete="off">
+        <input type="text" class="chat-input" placeholder="Escribe una nota formal..." data-chat-input required autocomplete="off">
         <button type="submit" class="chat-send-btn" aria-label="Enviar mensaje"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
       </form>
     </aside>
@@ -307,6 +294,7 @@
     <div class="tooltip-body" data-tooltip-body></div>
   </div>
   <div class="toast" data-toast role="status"></div>
+  <div id="global-toast-container" class="toast-container fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full" aria-live="polite"></div>
 
   <script src="{{ asset('js/revops-panel/app.js') }}?v=20260926"></script>
   @stack('scripts')

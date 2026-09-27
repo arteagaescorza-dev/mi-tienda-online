@@ -56,8 +56,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/chatbot/message', [MarketingApiController::class, 'sendChatbotMessage']);
     });
 
-    // 4. FINANZAS & CONCILIACIÓN (HUB 5)
-    Route::prefix('finance')->group(function () {
+    // 4. FINANZAS & CONCILIACIÓN (HUB 5) - PROTEGIDO CON PRIVACIDAD FINANCIERA (TASK-RBAC-03)
+    Route::prefix('finance')->middleware('financial.privacy')->group(function () {
         Route::post('/dunning/{id}/retry', [FinanceApiController::class, 'retryDunningCharge']);
         Route::post('/dunning/{id}/recover', [FinanceApiController::class, 'markDunningRecovered']);
         Route::get('/orders/{id}/margin', [FinanceApiController::class, 'getOrderMarginBreakdown']);
@@ -71,6 +71,23 @@ Route::prefix('v1')->group(function () {
         Route::post('/three-way-matching/{id}/debit-note', [FinanceApiController::class, 'issueDebitNote']);
         Route::post('/three-way-matching/{id}/authorize-spei', [FinanceApiController::class, 'authorizeSpeiPayout']);
         Route::get('/taxes/summary', [FinanceApiController::class, 'getTaxSummary']);
+    });
+
+    // 4B. GOBERNANZA, PRIVACIDAD RBAC & AUDITORIA MASTER (TASK-RBAC-02, TASK-RBAC-03, TASK-DSH-09, TASK-UX-03)
+    Route::prefix('governance')->group(function () {
+        Route::post('/roles/switch', [\App\Http\Controllers\PortalAccessController::class, 'switchRole']);
+        Route::get('/audit-logs', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getAuditLogs']);
+        Route::post('/audit-logs/custom', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'recordCustomAction']);
+        Route::get('/notifications', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getNotifications']);
+        Route::post('/notifications/dispatch', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'dispatchNotification']);
+        Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'markAllNotificationsRead']);
+        Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'markNotificationRead']);
+
+        // Mensajeria Interdepartamental Operativa (TASK-COM-01)
+        Route::get('/chat/messages', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getChatMessages']);
+        Route::post('/chat/messages', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'sendChatMessage']);
+        Route::post('/chat/messages/{id}/resolve', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'resolveChatMessage']);
+        Route::get('/chat/summary', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getChatSummary']);
     });
 
     // 5. LOGÍSTICA & POST-VENTA (HUB 6)

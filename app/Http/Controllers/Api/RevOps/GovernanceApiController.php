@@ -1,0 +1,335 @@
+<?php
+
+namespace App\Http\Controllers\Api\RevOps;
+
+use App\Http\Controllers\Controller;
+use App\Services\Governance\AuditTrailService;
+use App\Services\Governance\InterdepartmentalChatService;
+use App\Services\Governance\NotificationDispatcherService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class GovernanceApiController extends Controller
+{
+    public function __construct(
+        protected AuditTrailService $auditService,
+        protected NotificationDispatcherService $notificationService,
+        protected InterdepartmentalChatService $chatService
+    ) {}
+
+    /**
+     * Consulta paginada y filtrada del Master Log de Auditoria Omnicanal (TASK-DSH-09).
+     */
+    public function getAuditLogs(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $role = $user ? (session('active_role') ?: $user->role) : null;
+
+        // Solo administradores y superadministradores pueden consultar la bitacora forense
+        if (!$role || !in_array($role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
+            return response()->json([
+                'error' => 'Acceso denegado por politica de gobernanza y auditoria RBAC (TASK-DSH-09).',
+                'message' => 'Solo los perfiles con rango de superadministrador pueden auditar la bitacora omnicanal.',
+            ], 403);
+        }
+
+        $module = $request->query('module');
+        $action = $request->query('action');
+        $search = $request->query('search');
+        $perPage = (int) $request->query('per_page', 25);
+
+        $paginator = $this->auditService->getAuditHistory(
+            module: $module,
+            action: $action,
+            term: $search,
+            perPage: $perPage
+        );
+
+        $stats = $this->auditService->getAuditStats();
+
+        // Enriquecer registros con diff_summary
+        $items = collect($paginator->items())->map(function ($log) {
+            $array = $log->toArray();
+            $array['diff_summary'] = $log->diff_summary;
+            return $array;
+        });
+
+        return response()->json([
+            'success' => true,
+            'stats' => $stats,
+            'data' => $items,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Registra una accion manual de auditoria solicitada desde la consola directiva.
+     */
+    public function recordCustomAction(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user || !in_array($user->active_role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
+            return response()->json([
+                'error' => 'No autorizado para emitir asientos manuales de auditoria.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'action' => ['required', 'string', 'max:50'],
+            'module' => ['required', 'string', 'max:50'],
+            'reference_code' => ['nullable', 'string', 'max:100'],
+            'description' => ['required', 'string', 'max:500'],
+            'old_values' => ['nullable', 'array'],
+            'new_values' => ['nullable', 'array'],
+        ]);
+
+        $log = $this->auditService->logAction(
+            action: $validated['action'],
+            module: $validated['module'],
+            referenceCode: $validated['reference_code'] ?? null,
+            oldValues: $validated['old_values'] ?? null,
+            newValues: $validated['new_values'] ?? null,
+            description: $validated['description'],
+            user: $user
+        );
+
+        return response()->json([
+            'success' => true,
+            'log_id' => $log->id,
+            'message' => 'Evento de auditoria registrado de forma inmutable.',
+        ], 201);
+    }
+
+    /**
+     * Obtiene el feed de notificaciones operativas filtrado por rol y permisos del usuario (TASK-UX-03).
+     */
+    public function getNotifications(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // En caso de invocacion no autenticada en entorno de pruebas, asociar al primer usuario portal
+        if (!$user) {
+            $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
+        }
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Sesion requerida para consultar notificaciones operativas.',
+            ], 401);
+        }
+
+        $category = $request->query('category');
+        $unreadOnly = $request->boolean('unread_only', false);
+        $limit = (int) $request->query('limit', 30);
+
+        $feed = $this->notificationService->getFeedForUser(
+            user: $user,
+            category: $category,
+            unreadOnly: $unreadOnly,
+            limit: $limit
+        );
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $feed['unread_count'],
+            'total' => $feed['total'],
+            'categories' => $feed['categories'],
+            'data' => $feed['items'],
+        ]);
+    }
+
+    /**
+     * Marca una notificacion especifica como leida (TASK-UX-03).
+     */
+    public function markNotificationRead(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
+        }
+
+        if (!$user) {
+            return response()->json(['error' => 'No autorizado'], 401);
+        }
+
+        $success = $this->notificationService->markAsRead($id, $user);
+
+        if (!$success) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notificacion no encontrada o no accesible para el usuario.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $this->notificationService->getUnreadCount($user),
+            'message' => 'Notificacion marcada como leida.',
+        ]);
+    }
+
+    /**
+     * Marca todas las notificaciones pendientes del usuario como leidas.
+     */
+    public function markAllNotificationsRead(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
+        }
+
+        if (!$user) {
+            return response()->json(['error' => 'No autorizado'], 401);
+        }
+
+        $affected = $this->notificationService->markAllAsRead($user);
+
+        return response()->json([
+            'success' => true,
+            'marked_count' => $affected,
+            'unread_count' => 0,
+            'message' => 'Todas las notificaciones fueron marcadas como leidas.',
+        ]);
+    }
+
+    /**
+     * Despacha una notificacion operativa manual o automatizada.
+     */
+    public function dispatchNotification(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $role = $user ? (session('active_role') ?: $user->role) : null;
+
+        // Validar que el rol tenga permisos para emitir alertas
+        if (!$role || !in_array($role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
+            return response()->json([
+                'error' => 'No autorizado para emitir notificaciones directivas.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:150'],
+            'message' => ['required', 'string', 'max:1000'],
+            'type' => ['nullable', 'string', 'in:critical,urgent,warning,info,success'],
+            'category' => ['nullable', 'string', 'max:50'],
+            'target_role' => ['nullable', 'string', 'max:50'],
+            'reference_code' => ['nullable', 'string', 'max:50'],
+            'deep_link' => ['nullable', 'string', 'max:255'],
+            'action_label' => ['nullable', 'string', 'max:50'],
+            'metadata' => ['nullable', 'array'],
+        ]);
+
+        $notification = $this->notificationService->dispatch($validated);
+
+        return response()->json([
+            'success' => true,
+            'notification' => $notification,
+            'message' => 'Notificacion operativa despachada exitosamente.',
+        ], 201);
+    }
+
+    /**
+     * Consulta el timeline de mensajes del chat interdepartamental (TASK-COM-01).
+     */
+    public function getChatMessages(Request $request): JsonResponse
+    {
+        $channel = $request->query('channel', 'almacen');
+        $limit = (int) $request->query('limit', 50);
+        $user = $request->user();
+
+        $data = $this->chatService->getChannelMessages($channel, $limit, $user);
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'channel' => $data['channel'],
+            'channel_title' => $data['channel_title'],
+            'unresolved_count' => $data['unresolved_count'],
+            'summary' => $summary,
+            'messages' => $data['messages'],
+        ]);
+    }
+
+    /**
+     * Envia una nueva nota formal en el canal del chat inter-areas.
+     */
+    public function sendChatMessage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'channel' => ['required', 'string', 'in:almacen,ventas,logistica,general'],
+            'message' => ['required', 'string', 'max:2000'],
+            'reference_type' => ['nullable', 'string', 'max:50'],
+            'reference_code' => ['nullable', 'string', 'max:100'],
+            'priority' => ['nullable', 'string', 'in:normal,high,urgent'],
+            'target_role' => ['nullable', 'string', 'max:50'],
+            'sender_name' => ['nullable', 'string', 'max:120'],
+            'sender_role' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $user = $request->user();
+
+        $message = $this->chatService->sendMessage(
+            channel: $validated['channel'],
+            message: $validated['message'],
+            refType: $validated['reference_type'] ?? null,
+            refCode: $validated['reference_code'] ?? null,
+            priority: $validated['priority'] ?? 'normal',
+            user: $user,
+            senderName: $validated['sender_name'] ?? null,
+            senderRole: $validated['sender_role'] ?? null,
+            targetRole: $validated['target_role'] ?? null
+        );
+
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'summary' => $summary,
+            'notice' => 'Mensaje interdepartamental transmitido exitosamente.',
+        ], 201);
+    }
+
+    /**
+     * Marca un mensaje operativo como resuelto.
+     */
+    public function resolveChatMessage(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $success = $this->chatService->resolveMessage($id, $user);
+
+        if (!$success) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Mensaje no encontrado.',
+            ], 404);
+        }
+
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary,
+            'message' => 'Mensaje operativo marcado como resuelto.',
+        ]);
+    }
+
+    /**
+     * Resumen de mensajes pendientes y contadores de canales para la barra superior.
+     */
+    public function getChatSummary(Request $request): JsonResponse
+    {
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary,
+        ]);
+    }
+}

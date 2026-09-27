@@ -65,4 +65,32 @@ class OperationalTask extends Model
     {
         return $this->due_at ? $this->due_at->format('H:i') . ' hrs' : '14:00 hrs';
     }
+
+    /**
+     * Scope para filtrar tareas operativas segun el rol del usuario autenticado (TASK-RBAC-04).
+     */
+    public function scopeForUserRole($query, ?string $role = null)
+    {
+        $role = $role ?: (auth()->check() ? auth()->user()->active_role : 'admin');
+
+        if (in_array($role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
+            return $query;
+        }
+
+        $departmentMap = [
+            'warehouse' => ['almacen', 'picking', 'packing', 'inventory', 'merma', 'rma_biohazard_destruction'],
+            'purchases' => ['compras', 'procurement', 'packaging_restock', 'inbound'],
+            'logistics' => ['logistica', 'shipping', 'envios', 'courier', 'manifests'],
+            'finance'   => ['finanzas', 'finance', 'finance_matching_hold', 'finance_discrepancy_hold', 'spei'],
+            'sales'     => ['ventas', 'atencion', 'support', 'crm', 'abandoned_cart'],
+            'operator'  => ['almacen', 'picking', 'packing', 'logistica'],
+        ];
+
+        $allowedCategories = $departmentMap[$role] ?? [$role];
+
+        return $query->where(function ($q) use ($role, $allowedCategories) {
+            $q->where('assigned_role', $role)
+              ->orWhereIn('category', $allowedCategories);
+        });
+    }
 }
