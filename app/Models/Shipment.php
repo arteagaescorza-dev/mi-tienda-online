@@ -37,4 +37,9 @@ class Shipment extends Model
     {
         return $this->hasMany(PackagingMovement::class);
     }
+
+    public function getWeightKgAttribute(): float
+    {
+        return (float)($this->attributes['weight_kg'] ?? $this->weight_actual_kg ?? 0.50);
+    }
 }

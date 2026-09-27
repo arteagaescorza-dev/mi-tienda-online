@@ -53,6 +53,8 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/finanzas/payouts/{payoutBatch}/conciliar', [StorefrontController::class, 'reconcilePayoutBatch'])->name('portal.finance.payouts.reconcile');
 	Route::post('/admin/finanzas/suscripciones/{subscription}/reintentar', [StorefrontController::class, 'retrySubscriptionDunning'])->name('portal.finance.subscriptions.retry');
 	Route::post('/admin/finanzas/cuentas/{vendorBill}/pagar', [StorefrontController::class, 'payVendorBill'])->name('portal.finance.vendor_bills.pay');
+	Route::post('/admin/finanzas/auditoria-envios/cargar', [StorefrontController::class, 'uploadShippingInvoiceReport'])->name('portal.finance.shipping_audit.upload');
+	Route::post('/admin/finanzas/auditoria-envios/{reconciliation}/reclamar', [StorefrontController::class, 'fileShippingClaim'])->name('portal.finance.shipping_audit.claim');
 	Route::post('/admin/marketing/cupones', [PortalMarketingController::class, 'storeCoupon'])->name('portal.marketing.coupons.store');
 	Route::post('/admin/marketing/cupones/{coupon}/toggle', [PortalMarketingController::class, 'toggleCoupon'])->name('portal.marketing.coupons.toggle');
 	Route::post('/admin/marketing/campanas/{adCampaign}/escalar', [PortalMarketingController::class, 'scaleCampaign'])->name('portal.marketing.campaigns.scale');

@@ -81,6 +81,20 @@
                 <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-slate-100 text-slate-600 font-medium">{{ count($vendorBills ?? []) }} Facturas</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Cuentas por Pagar" data-help-title="Cuentas por Pagar" data-help-desc="Programación de pagos a talleres de confección, proveedores dropship (Torzo), laboratorios cosmética y fleteras.">?</button>
             </button>
+
+            <!-- TAB 6: AUDITORÍA DE PAQUETERÍAS (TASK-INT-08) -->
+            <button 
+                type="button"
+                data-finance-tab="shipping_audit"
+                class="finance-nav-btn py-3 px-4 border-b-2 font-semibold text-sm transition-all flex items-center gap-2 cursor-pointer group relative {{ ($activeTab ?? '') === 'shipping_audit' ? 'border-indigo-600 text-indigo-600 bg-white shadow-xs rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 rounded-t-lg' }}"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Auditoría de Paqueterías</span>
+                <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full {{ ($carrierAuditKpis['total_discrepant_tracks'] ?? 0) > 0 ? 'bg-rose-100 text-rose-800 font-bold animate-pulse' : 'bg-slate-100 text-slate-600 font-medium' }}">
+                    {{ ($carrierAuditKpis['total_discrepant_tracks'] ?? 0) > 0 ? ($carrierAuditKpis['total_discrepant_tracks'] . ' Discrepancias') : 'Al Día' }}
+                </span>
+                <button class="section-help-btn" type="button" aria-label="Ayuda Auditoría Envíos" data-help-title="Auditoría de Paqueterías" data-help-desc="Detección algorítmica de sobreprecios volumétricos y cubicaje inflado en facturas de transportistas contra manifiestos de almacén (TASK-INT-08).">?</button>
+            </button>
         </nav>
 
         <div class="flex items-center gap-3 text-xs pb-2 sm:pb-0">
@@ -637,9 +651,295 @@
             </div>
         </div>
     </div>
+
+    {{-- ========================================================================= --}}
+    {{-- PANEL 6: AUDITORÍA DE FACTURAS DE PAQUETERÍA (TASK-INT-08)               --}}
+    {{-- ========================================================================= --}}
+    <div data-finance-panel="shipping_audit" class="{{ ($activeTab ?? '') === 'shipping_audit' ? '' : 'hidden' }} space-y-6">
+        <!-- 1. KPIS DE AUDITORÍA LOGÍSTICA -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Guías Auditadas</span>
+                    <span class="text-2xl font-bold font-mono text-slate-900 mt-1 block">{{ number_format($carrierAuditKpis['total_audited_tracks'] ?? 0) }}</span>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Cotejadas vs Manifiestos</span>
+                    <span class="font-bold text-slate-700">Hub 6 Rampa</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Discrepancias Detectadas</span>
+                    <span class="text-2xl font-bold font-mono {{ ($carrierAuditKpis['total_discrepant_tracks'] ?? 0) > 0 ? 'text-rose-600' : 'text-slate-900' }} mt-1 block">
+                        {{ number_format($carrierAuditKpis['total_discrepant_tracks'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Sobreprecio > 10%</span>
+                    <span class="font-bold text-rose-600">Alerta Cobro</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Sobreprecio Reclamable</span>
+                    <span class="text-2xl font-bold font-mono text-rose-600 mt-1 block">
+                        MXN ${{ number_format($carrierAuditKpis['total_overcharge_amount'] ?? 0, 2) }}
+                    </span>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Cubicaje inflado / Tarifas</span>
+                    <span class="font-bold text-slate-700">Recuperable</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Expedientes de Reclamación</span>
+                    <span class="text-2xl font-bold font-mono text-indigo-600 mt-1 block">
+                        {{ $carrierAuditKpis['total_claims_count'] ?? 0 }}
+                    </span>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Retenido en CxP:</span>
+                    <span class="font-bold text-indigo-700 font-mono">MXN ${{ number_format($carrierAuditKpis['total_claimed_amount'] ?? 0, 2) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. INGESTA Y CRUCE ALGORÍTMICO DE FACTURA COURIER -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <span>Ingesta y Auditoría de Factura de Transportista</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Cruce automatizado de peso volumétrico IATA (L x W x H / 5000) y tarifa pactada contra el cobro de la paquetería</p>
+                </div>
+                <button type="button" onclick="loadSampleShippingAudit()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition cursor-pointer">
+                    Cargar Ejemplo de Prueba
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.finance.shipping_audit.upload') }}" enctype="multipart/form-data" class="space-y-4 text-xs">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Paquetería / Fletera</label>
+                        <select name="carrier_id" id="auditCarrierSelect" required class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800 focus:outline-indigo-600">
+                            <option value="dhl">DHL Express México</option>
+                            <option value="estafeta">Estafeta Mexicana</option>
+                            <option value="fedex">FedEx Express</option>
+                            <option value="skydropx">Skydropx API</option>
+                            <option value="99minutos">99 Minutos</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Folio de Factura del Proveedor</label>
+                        <input type="text" name="invoice_folio" id="auditInvoiceFolio" required placeholder="F-DHL-99201948" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-800 font-mono bg-white focus:outline-indigo-600">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Archivo CSV de la Paquetería</label>
+                        <input type="file" name="report_file" accept=".csv,.txt" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">O pegar datos en formato CSV directo:</label>
+                    <textarea name="raw_csv" id="auditRawCsv" rows="3" placeholder="guia,peso_kg,costo_facturado,pedido" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-800 font-mono text-[11px] focus:outline-indigo-600 bg-white"></textarea>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Encabezados esperados: <code>guia, peso_kg, costo_facturado, pedido</code>. El sistema cruzará con el tipo de caja y manifiesto de rampa.</span>
+                </div>
+
+                <div class="flex items-center justify-end">
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-xs transition cursor-pointer">
+                        Ejecutar Auditoría Algorítmica contra Manifiestos
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. HISTORIAL DE RECONCILIACIONES Y SEMÁFORO DE PARTIDAS -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Lotes de Conciliación de Fletes & Semáforo de Discrepancias</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Detección de cobros indebidos por sobrepeso o tarifas fuera de contrato</p>
+                </div>
+
+                <button 
+                    type="button" 
+                    onclick="openClaimModal()" 
+                    class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>Generar Expediente de Reclamación</span>
+                </button>
+            </div>
+
+            @if(count($shippingReconciliations ?? []) > 0)
+                <div class="space-y-6">
+                    @foreach($shippingReconciliations as $recon)
+                        <div class="border border-slate-200/90 rounded-xl p-4 bg-slate-50/50 space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200/70 pb-3">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono font-bold text-slate-900 text-xs">{{ $recon->folio }}</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">{{ $recon->carrier_label }}</span>
+                                        <span class="text-xs text-slate-500 font-mono">Factura: {{ $recon->invoice_folio ?? $recon->invoice_number }}</span>
+                                    </div>
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">Auditado por {{ $recon->audited_by ?? 'Sistema' }} • {{ $recon->created_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-xs">
+                                    <div class="text-right">
+                                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Facturado / Esperado</span>
+                                        <span class="font-mono font-bold text-slate-800">MXN ${{ number_format($recon->total_invoiced_amount, 2) }}</span>
+                                        <span class="text-slate-400 text-[11px] font-mono">/ ${{ number_format($recon->total_expected_amount, 2) }}</span>
+                                    </div>
+                                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono {{ $recon->total_overcharge_amount > 0 ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-emerald-100 text-emerald-800' }}">
+                                        {{ $recon->total_overcharge_amount > 0 ? '+MXN $' . number_format($recon->total_overcharge_amount, 2) . ' Sobrepeso' : 'Conciliado OK' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- TABLA DE PARTIDAS DE ESTE LOTE -->
+                            <div class="overflow-x-auto bg-white rounded-lg border border-slate-200/80">
+                                <table class="w-full text-xs text-left">
+                                    <thead>
+                                        <tr class="border-b border-slate-100 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                                            <th class="py-2 px-3 w-8 text-center">
+                                                <input type="checkbox" onclick="toggleReconCheckboxes(this, {{ $recon->id }})" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            </th>
+                                            <th class="py-2 px-3">Guía & Pedido</th>
+                                            <th class="py-2 px-3">Caja / Dimensión IATA</th>
+                                            <th class="py-2 px-3">Peso Almacén vs Báscula</th>
+                                            <th class="py-2 px-3">Tarifa Pactada vs Cobrada</th>
+                                            <th class="py-2 px-3">Diferencia</th>
+                                            <th class="py-2 px-3">Semáforo & Motivo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
+                                        @forelse($recon->items as $item)
+                                            <tr class="hover:bg-slate-50 transition {{ $item->audit_status === 'discrepancy' ? 'bg-rose-50/40' : '' }}">
+                                                <td class="py-2.5 px-3 text-center">
+                                                    @if($item->audit_status === 'discrepancy')
+                                                        <input type="checkbox" name="claim_items[]" value="{{ $item->id }}" data-recon-id="{{ $recon->id }}" class="recon-claim-cb rounded text-rose-600 focus:ring-rose-500 cursor-pointer">
+                                                    @else
+                                                        <span class="text-slate-300 text-[10px]">-</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-2.5 px-3">
+                                                    <span class="font-bold text-slate-900 block">{{ $item->tracking_number }}</span>
+                                                    <span class="text-[10px] text-slate-500 font-sans">{{ $item->order_number ?? 'Expedición directa' }}</span>
+                                                </td>
+                                                <td class="py-2.5 px-3 font-sans">
+                                                    <span class="font-medium text-slate-800 block">{{ $item->box_code ?? 'BOX-STD' }}</span>
+                                                    <span class="text-[10px] text-slate-400 font-mono">{{ $item->box_length_cm }}x{{ $item->box_width_cm }}x{{ $item->box_height_cm }} cm</span>
+                                                </td>
+                                                <td class="py-2.5 px-3">
+                                                    <span class="text-slate-700 block">Rampa: {{ number_format($item->warehouse_weight_kg, 2) }} kg (Vol: {{ number_format($item->warehouse_volumetric_kg, 2) }})</span>
+                                                    <span class="font-bold {{ $item->carrier_billed_weight_kg > max($item->warehouse_weight_kg, $item->warehouse_volumetric_kg) * 1.15 ? 'text-rose-600' : 'text-slate-900' }}">
+                                                        Báscula: {{ number_format($item->carrier_billed_weight_kg, 2) }} kg
+                                                    </span>
+                                                </td>
+                                                <td class="py-2.5 px-3">
+                                                    <span class="text-slate-600 block">Pactada: ${{ number_format($item->expected_rate_mxn, 2) }}</span>
+                                                    <span class="font-bold text-slate-900">Cobrada: ${{ number_format($item->carrier_invoiced_rate_mxn, 2) }}</span>
+                                                </td>
+                                                <td class="py-2.5 px-3">
+                                                    <span class="font-bold block {{ $item->overcharge_amount_mxn > 0 ? 'text-rose-600' : 'text-emerald-600' }}">
+                                                        {{ $item->overcharge_amount_mxn > 0 ? '+MXN $' . number_format($item->overcharge_amount_mxn, 2) : '$0.00' }}
+                                                    </span>
+                                                    @if($item->overcharge_pct > 0)
+                                                        <span class="text-[10px] text-rose-500 block">(+{{ number_format($item->overcharge_pct, 1) }}%)</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-2.5 px-3 font-sans">
+                                                    <div class="space-y-0.5">
+                                                        <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold {{ $item->audit_status === 'discrepancy' ? 'bg-rose-100 text-rose-800' : ($item->audit_status === 'claim_filed' ? 'bg-indigo-100 text-indigo-800' : ($item->audit_status === 'marginal_variance' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800')) }}">
+                                                            {{ match($item->audit_status) {
+                                                                'discrepancy' => 'SOBREPESO INDEBIDO',
+                                                                'claim_filed' => 'RECLAMACIÓN RADICADA',
+                                                                'marginal_variance' => 'MARGEN TOLERANCIA',
+                                                                default => 'CONCILIADO OK'
+                                                            } }}
+                                                        </span>
+                                                        @if($item->discrepancy_reason)
+                                                            <span class="text-[10px] text-slate-500 block leading-tight">{{ $item->discrepancy_reason }}</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4 text-slate-400 font-sans">Sin partidas registradas en este lote.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <p class="text-slate-500 text-xs font-medium">No se han registrado auditorías de paquetería aún.</p>
+                    <p class="text-slate-400 text-[11px] mt-1">Cargue un archivo CSV o use el botón "Cargar Ejemplo de Prueba" superior para conciliar facturas contra manifiestos.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- MODAL DE RECLAMACIÓN FORMAL DE FLETES (TASK-INT-08) --}}
+    <div id="claimModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Emitir Expediente Formal de Reclamación</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-500">Radica retención preventiva en Cuentas por Pagar ante el transportista</p>
+                </div>
+                <button type="button" onclick="closeClaimModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer font-bold text-lg">&times;</button>
+            </div>
+
+            <form id="shippingClaimForm" method="POST" action="" class="space-y-4">
+                @csrf
+                <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+                    <span class="block text-rose-900 font-bold">Partidas Seleccionadas con Discrepancia:</span>
+                    <span id="selectedClaimCount" class="text-rose-700 block font-mono">0 partidas seleccionadas</span>
+                    <span class="text-[10px] text-rose-600 block">El sistema bloqueará el pago correspondiente en Cuentas por Pagar hasta resolución de la fletera.</span>
+                </div>
+
+                <div id="hiddenClaimItemsContainer"></div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Notas Técnicas para el Expediente:</label>
+                    <textarea name="claim_notes" rows="3" required placeholder="Fundamentación de cubicaje inflado según dimensiones estandarizadas de empaque y manifiesto de rampa..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-800 focus:outline-indigo-600 bg-white">Discrepancia volumétrica > 10% provocada por calibración errónea de báscula de andén del transportista. Las dimensiones corresponden a cajas microcorrugadas estandarizadas.</textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeClaimModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-xs transition cursor-pointer">
+                        Emitir Expediente & Radicar Retención
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
-{{-- SCRIPT REACTIVO DE PESTAÑAS (VANILLA JS LIGERO, SIN DEPENDENCIAS PESADAS) --}}
+{{-- SCRIPT REACTIVO DE PESTAÑAS Y AUDITORÍA DE TRANSPORTISTAS --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const tabButtons = document.querySelectorAll('[data-finance-tab]');
@@ -675,5 +975,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+function toggleReconCheckboxes(masterCb, reconId) {
+    const cbs = document.querySelectorAll(`.recon-claim-cb[data-recon-id="${reconId}"]`);
+    cbs.forEach(cb => {
+        cb.checked = masterCb.checked;
+    });
+}
+
+function openClaimModal() {
+    const checked = Array.from(document.querySelectorAll('.recon-claim-cb:checked'));
+    if (checked.length === 0) {
+        alert('Por favor seleccione al menos una partida con sobrepeso indebido para generar el expediente de reclamacion.');
+        return;
+    }
+
+    const firstReconId = checked[0].getAttribute('data-recon-id');
+    const form = document.getElementById('shippingClaimForm');
+    form.action = `/portal/finance/shipping-audit/${firstReconId}/claim`;
+
+    const container = document.getElementById('hiddenClaimItemsContainer');
+    container.innerHTML = '';
+    checked.forEach(cb => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'claim_items[]';
+        input.value = cb.value;
+        container.appendChild(input);
+    });
+
+    document.getElementById('selectedClaimCount').textContent = `${checked.length} partida(s) seleccionada(s) del lote #${firstReconId}`;
+    document.getElementById('claimModal').classList.remove('hidden');
+}
+
+function closeClaimModal() {
+    document.getElementById('claimModal').classList.add('hidden');
+}
+
+function loadSampleShippingAudit() {
+    const carrier = document.getElementById('auditCarrierSelect');
+    const folio = document.getElementById('auditInvoiceFolio');
+    const rawCsv = document.getElementById('auditRawCsv');
+
+    if (carrier) carrier.value = 'dhl';
+    if (folio) folio.value = 'FAC-DHL-' + Math.floor(100000 + Math.random() * 900000);
+    if (rawCsv) {
+        rawCsv.value = "guia,peso_kg,costo_facturado,pedido\nDHL-TEST-001,5.20,380.00,ORD-8001\nDHL-TEST-002,1.30,175.00,ORD-8002\nDHL-TEST-003,8.90,560.00,ORD-8003";
+    }
+}
 </script>
 @endsection

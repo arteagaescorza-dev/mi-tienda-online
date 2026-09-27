@@ -97,22 +97,31 @@ La operacion de un e-commerce omnicanal de ropa interior, cosmetica y suscripcio
 
 ---
 
-### Slice 4.3: Conciliacion Automatizada de Facturas Courier vs Manifiestos (`TASK-INT-08`)
-* **Objetivo:** Detectar cobros excesivos por cubicaje y discrepancias entre las facturas emitidas por paqueterias (DHL, Estafeta, etc.) y los manifiestos de expedicion de rampa.
+### Slice 4.3: Conciliacion Automatizada de Facturas Courier vs Manifiestos (`TASK-INT-08`) [COMPLETADO]
+* **Objetivo:** Detectar cobros excesivos por cubicaje y discrepancias entre las facturas emitidas por paqueterias (DHL, Estafeta, FedEx, Skydropx, 99minutos) y los manifiestos de expedicion de rampa.
 * **Backend:**
-  * Endpoint `POST /api/v1/finance/shipping-audit/reconcile`.
-  * Algoritmo de auditoria:
-    - Calculo de peso volumetrico IATA: `(largo_cm * ancho_cm * alto_cm) / 5000`.
-    - Comparacion contra el peso facturado por el courier.
-    - Categorizacion automatica: `CONCILIADO`, `SOBREPESO_INDEBIDO`, `GUIA_NO_RECONOCIDA`, `TARIFA_EXCEDIDA`.
-    - Registro de reclamacion formal para retencion de pago.
+  * Migracion ejecutada: `2026_09_27_000005_enhance_shipping_reconciliations_tables.php` ampliando `shipping_reconciliations`, `shipping_reconciliation_items` y `shipping_discrepancy_claims` (DDL 3.41).
+  * Modelos sincronizados: `ShippingReconciliation`, `ShippingReconciliationItem`, `ShippingDiscrepancyClaim`, `Shipment`.
+  * Servicio de Dominio: `App\Services\Finance\ShippingInvoiceAuditorService`:
+    - Calculo de peso volumetrico estandar IATA: `(largo_cm * ancho_cm * alto_cm) / 5000`.
+    - `auditCarrierInvoiceReport`: cruce algoritmico de facturas courier contra rampa con semaforo (>10% sobreprecio -> `discrepancy` / `SOBREPESO_INDEBIDO`).
+    - `parseCsvContent`: normalizador flexible de encabezados (`guia`, `peso_kg`, `costo_facturado`, `pedido`).
+    - `fileCarrierClaimDossier`: generacion de expediente formal `CLAIM-COU-YYYYMM-XXXX`, actualizacion de partidas a `claim_filed` y despacho de `OperationalTask` de retencion preventiva en Cuentas por Pagar.
+    - `calculateExpectedRate`: formula contractual por carrier y kilogramos facturables.
+  * Controladores y rutas:
+    - Web: `StorefrontController::portalFinance`, `uploadShippingInvoiceReport`, `fileShippingClaim` con rutas registradas en `routes/web.php`.
+    - API: `FinanceApiController::uploadShippingReconciliationReport`, `reconcileShippingAudit`, `fileShippingDiscrepancyClaim` en `routes/api.php`.
 * **Frontend:**
-  * En [resources/views/portal/finance.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/finance.blade.php) (Pestaña "Auditoria de Paqueterias"):
-    - Carga de archivo CSV o dataset de guia facturada.
-    - Tabla comparativa con badges de semaforo de discrepancia.
-    - Boton "Generar Expediente de Reclamacion" que exporta el reporte para retencion a la paqueteria.
-* **Criterios de Aceptacion:**
-  * Pruebas comprobando la deteccion de sobrepesos y calculo exacto del importe reclamable.
+  * En [resources/views/portal/finance.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/finance.blade.php):
+    - Subnav: Pestaña 6 "Auditoria de Paqueterias" con badge reactivo de discrepancias.
+    - Panel 6: 4 tarjetas KPI (Guias Auditadas, Discrepancias / Sobrepeso, Importe Cobrado de Mas, Expedientes de Reclamacion / Retenido en CxP).
+    - Formulario de ingesta CSV y boton "Cargar Ejemplo de Prueba".
+    - Tabla comparativa de lotes auditados con semaforos de sobrepeso e inspectores de diferencias.
+    - Modal de expedientes de reclamacion formal para retencion preventiva en CxP.
+* **Criterios de Aceptacion Superados:**
+  * 5 pruebas unitarias/funcionales en `tests/Feature/RevOps/CrossHubCarrierAuditTest.php` al 100% verde (34 aserciones).
+  * Suite global de la plataforma ampliada a 194 pruebas al 100% verde (1,294 aserciones).
+  * Cero emojis en toda la base de codigo y vistas.
 
 ---
 

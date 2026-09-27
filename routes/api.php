@@ -61,6 +61,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/dunning/{id}/retry', [FinanceApiController::class, 'retryDunningCharge']);
         Route::post('/dunning/{id}/recover', [FinanceApiController::class, 'markDunningRecovered']);
         Route::get('/orders/{id}/margin', [FinanceApiController::class, 'getOrderMarginBreakdown']);
+        Route::post('/shipping-reconciliations/upload-report', [FinanceApiController::class, 'uploadShippingReconciliationReport']);
+        Route::post('/shipping-audit/reconcile', [FinanceApiController::class, 'reconcileShippingAudit']);
+        Route::post('/shipping-reconciliations/{id}/file-claim', [FinanceApiController::class, 'fileShippingDiscrepancyClaim']);
     });
 
     // 5. LOGÍSTICA & POST-VENTA (HUB 6)

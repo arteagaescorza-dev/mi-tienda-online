@@ -24,6 +24,10 @@ use App\Models\CycleCount;
 use App\Models\OperationalTask;
 use App\Models\ShiftLog;
 use App\Models\SupportCase;
+use App\Models\ShippingReconciliation;
+use App\Models\ShippingReconciliationItem;
+use App\Models\ShippingDiscrepancyClaim;
+use App\Services\Finance\ShippingInvoiceAuditorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -894,6 +898,17 @@ class StorefrontController extends Controller
             ]);
         }
 
+        // 6. Auditoría de Paqueterías (TASK-INT-08)
+        $shippingReconciliations = ShippingReconciliation::with(['items', 'claims'])->latest()->get();
+        $shippingClaims = ShippingDiscrepancyClaim::with(['reconciliation', 'items'])->latest()->get();
+        $carrierAuditKpis = [
+            'total_audited_tracks' => (int) ShippingReconciliation::sum('total_tracks_count'),
+            'total_discrepant_tracks' => (int) ShippingReconciliation::sum('discrepant_tracks_count'),
+            'total_overcharge_amount' => (float) ShippingReconciliation::sum('total_overcharge_amount'),
+            'total_claims_count' => $shippingClaims->count(),
+            'total_claimed_amount' => (float) ShippingDiscrepancyClaim::sum('total_disputed_amount'),
+        ];
+
         $activeTab = $request->query('tab', 'cashflow');
 
         return view('portal.finance', [
@@ -909,8 +924,70 @@ class StorefrontController extends Controller
             'marginKpis' => $marginKpis,
             'vendorBills' => $vendorBills,
             'vendorBillKpis' => $vendorBillKpis,
+            'shippingReconciliations' => $shippingReconciliations,
+            'shippingClaims' => $shippingClaims,
+            'carrierAuditKpis' => $carrierAuditKpis,
             'movements' => $movements->take(6)->values(),
         ]);
+    }
+
+    public function uploadShippingInvoiceReport(Request $request)
+    {
+        $validated = $request->validate([
+            'carrier_id' => 'required|string|in:dhl,dhl_express,skydropx,estafeta,fedex,99minutos,paquetexpress',
+            'invoice_folio' => 'required|string|max:100',
+            'report_file' => 'nullable|file',
+            'raw_csv' => 'nullable|string',
+        ]);
+
+        $service = new ShippingInvoiceAuditorService();
+        $rows = [];
+        $fileName = null;
+
+        if ($request->hasFile('report_file')) {
+            $file = $request->file('report_file');
+            $fileName = $file->getClientOriginalName();
+            $content = file_get_contents($file->getRealPath());
+            $rows = $service->parseCsvContent($content);
+        } elseif (!empty($validated['raw_csv'])) {
+            $rows = $service->parseCsvContent($validated['raw_csv']);
+        }
+
+        if (empty($rows)) {
+            return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
+                ->with('error', 'No se pudieron extraer partidas válidas del reporte de paquetería.');
+        }
+
+        $reconciliation = $service->auditCarrierInvoiceReport(
+            $validated['carrier_id'],
+            $validated['invoice_folio'],
+            $rows,
+            $request->user() ? $request->user()->name : 'Mickey RevOps',
+            $fileName
+        );
+
+        return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
+            ->with('success', "Factura {$reconciliation->invoice_folio} auditada contra {$reconciliation->total_tracks_count} guías. {$reconciliation->discrepant_tracks_count} discrepancias detectadas (Sobreprecio: MXN \${$reconciliation->total_overcharge_amount}).");
+    }
+
+    public function fileShippingClaim(Request $request, ShippingReconciliation $reconciliation)
+    {
+        $validated = $request->validate([
+            'item_ids' => 'required|array|min:1',
+            'item_ids.*' => 'integer',
+            'claim_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $service = new ShippingInvoiceAuditorService();
+        $claim = $service->fileCarrierClaimDossier(
+            $reconciliation->id,
+            $validated['item_ids'],
+            $request->user() ? $request->user()->name : 'Mickey RevOps',
+            $validated['claim_notes'] ?? null
+        );
+
+        return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
+            ->with('success', "Expediente formal {$claim->claim_folio} emitido por MXN \${$claim->total_disputed_amount}. Retención preventiva radicada en Cuentas por Pagar.");
     }
 
     public function reconcilePayoutBatch(PayoutBatch $payoutBatch)
