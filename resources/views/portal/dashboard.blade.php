@@ -94,24 +94,22 @@
     {{-- ========================================================================= --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <!-- VISTA EJECUTIVA KPIS -->
-        <template x-if="activeTab === 'executive'">
-            <template x-if="canViewFinancialCosts()">
-                <div class="contents">
-                    <template x-for="(kpi, idx) in currentKpis" :key="'exec-kpi-' + idx">
-                        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500" x-text="kpi.label"></span>
-                                <button class="section-help-btn" type="button" :aria-label="'Ayuda de ' + kpi.label" :data-help-title="kpi.label" data-help-desc="Metrica calculada en tiempo real por el motor de ventas y checkout de la plataforma.">?</button>
-                            </div>
-                            <div class="mt-3 flex items-baseline justify-between">
-                                <span class="text-2xl font-black font-mono tracking-tight text-slate-900" x-text="kpi.value"></span>
-                                <span class="text-xs font-bold font-mono" :class="idx === 0 ? 'text-emerald-600' : (idx === 2 ? 'text-rose-600' : 'text-indigo-600')" x-text="kpi.trend"></span>
-                            </div>
-                            <div class="mt-2 text-[11px] text-slate-400" x-text="kpi.subtitle"></div>
+        <template x-if="activeTab === 'executive' && canViewFinancialCosts()">
+            <div class="contents">
+                <template x-for="(kpi, idx) in currentKpis" :key="'exec-kpi-' + idx">
+                    <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500" x-text="kpi.label"></span>
+                            <button class="section-help-btn" type="button" :aria-label="'Ayuda de ' + kpi.label" :data-help-title="kpi.label" data-help-desc="Metrica calculada en tiempo real por el motor de ventas y checkout de la plataforma.">?</button>
                         </div>
-                    </template>
-                </div>
-            </template>
+                        <div class="mt-3 flex items-baseline justify-between">
+                            <span class="text-2xl font-black font-mono tracking-tight text-slate-900" x-text="kpi.value"></span>
+                            <span class="text-xs font-bold font-mono" :class="idx === 0 ? 'text-emerald-600' : (idx === 2 ? 'text-rose-600' : 'text-indigo-600')" x-text="kpi.trend"></span>
+                        </div>
+                        <div class="mt-2 text-[11px] text-slate-400" x-text="kpi.subtitle"></div>
+                    </div>
+                </template>
+            </div>
         </template>
 
         <!-- AVISO DE PRIVACIDAD EN EJECUTIVO SI ES ALMACEN -->
@@ -299,7 +297,7 @@
 
                                 <!-- Eje X: Etiquetas de Días -->
                                 <div class="flex justify-between px-6 text-[10px] font-bold text-slate-600 border-t border-slate-100 pt-1">
-                                    <template x-for="(label, idx) in (salesVsMrr.labels || [])" :key="'lbl-' + idx">
+                                    <template x-for="(label, idx) in salesChartLabels" :key="'lbl-' + idx">
                                         <span x-text="label"></span>
                                     </template>
                                 </div>
@@ -1921,6 +1919,8 @@
                         </div>
                     </div>
                 </div>
+            </template>
+
             <!-- MODAL: DETALLE DE CONECTORES & WEBHOOKS (TASK-DSH-03) -->
             <template x-if="activeModal === 'connectors_detail'">
                 <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all text-left">
@@ -2199,6 +2199,7 @@
             </div>
         </div>
     </div>
+</div>
 
 <script>
 function dashboardModule() {
@@ -2702,6 +2703,10 @@ function dashboardModule() {
         // =====================================================================
         // MÉTODOS Y GETTERS ANALÍTICOS (SLICE 3.4)
         // =====================================================================
+        get salesChartLabels() {
+            return this.salesVsMrr?.labels || ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        },
+
         get salesVsMrr() {
             return this.analyticsCharts?.sales_vs_mrr || {
                 labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
