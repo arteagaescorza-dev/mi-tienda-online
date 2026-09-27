@@ -1,0 +1,192 @@
+# Plan de Implementacion Fullstack: Prioridad 2 — Inventario, Cadena de Suministro & Compras (Hub 4)
+
+**Perfil de Ejecucion:** Senior Fullstack Architect & Lead Engineer  
+**Rama de Trabajo:** `feature/prioridad-2-inventario-hub4`  
+**Linea Base:** `master@v1.1-prioridad-1-storefront-pwa` (Commit `750f7b4`)  
+**Paradigma:** Vertical Slice Architecture (BD -> Modelos Eloquent -> Servicios de Dominio -> Endpoints RESTful -> UI Alpine/Blade -> Pruebas de Integracion)  
+**Alcance Excluido Expresamente:** `TASK-MOB-01` (Modo Movil / Escaner de Bodega con Codigos SVG) queda fuera de alcance por instruccion del usuario.  
+
+---
+
+## 1. Filosofia Fullstack Senior: Cero UI Desconectada & Blindaje de Roles
+
+Bajo este plan de implementacion **no se admiten componentes visuales aislados, calculos en memoria cliente sin persistencia ni maquetas con datos ficticios**. Cada funcionalidad del Hub 4 se implementa como un **Vertical Slice completo** que conecta:
+1. **Persistencia y Modelo de Datos:** Tablas MySQL relacionales (`purchase_orders`, `purchase_order_items`, `purchase_kardex`, `supplier_credit_agreements`, `product_bundles`, `bundle_items`, `cycle_counts`, `bom_deficit_procurements`, `warehouse_slots`).
+2. **Logica de Negocio Transaccional:** Servicios de dominio blindados con transacciones ACID (`DB::transaction()`), recalculacion de Costo Promedio Ponderado (CPP), deduccion de notas de credito y asientos inmutables en Kardex.
+3. **Capa de Transporte RESTful:** FormRequests con validacion estricta, controladores Laravel con respuestas JSON estandarizadas segun `BACKEND_INTEGRATION_SPEC.md`.
+4. **Frontend Reactivo en Blade & Alpine.js:** Adopcion de la **reformulación visual y ergonomica integral** del modulo, respetando los modales de 2 columnas (`max-w-4xl`), iframe de impresion aislada y segregacion estricta de vistas por rol.
+5. **Calidad y 0 Emojis:** 100% de apego a la Regla 1 (cero emojis en codigo, comentarios, vistas, commits y documentos) y creacion de la suite `tests/Feature/RevOps/InventoryHub4ModuleTest.php` garantizando el 100% de pruebas en verde en la suite global.
+
+---
+
+## 2. Marco de la Reformulacion Visual & Arquitectura de Roles
+
+El modulo de Inventario (Hub 4) paso por un proceso critico de reformulacion visual y ergonomica que queda formalizado e implementado en este plan:
+
+### 2.1. Descentralizacion del Dashboard y Enfoque en Ejecucion Fisica
+* **Retiro del Dashboard de Hub 4:** El modulo ya no contiene graficas directivas en la cabecera. La analitica ejecutiva de inventario fue transferida a **Hub 1 (Dashboard General -> Dashboard Ejecutivo -> Sub-pestana Almacen e Inventario)**.
+* **Las 3 Pestanas Clave de Hub 4:**
+  1. **Catalogo Operativo:** Vista Plana vs Tree View (agrupado por taller/proveedor), curva de 6 tallas textiles (`CH, M, G, XL, 2XL, 3XL`), stock en 3 estados (*Fisico, Comprometido, Disponible*), ubicacion en slotting (`A-01-B`), calculador de dias de cobertura (*DOH*) y semaforo de Punto de Reorden (*ROP*).
+  2. **Proveedores & Scraping:** Panel de control de fabricantes e importadores, estado de integraciones B2B (Torzo Bot), latencia y feed de alertas con resolucion en 1 clic.
+  3. **Compras & Reabastecimiento:** Subdividido visualmente entre la **Bandeja de Solicitudes On-Demand** (pedidos de clientes bajo pedido con temporizador SLA < 2h) y el **Reabastecimiento Planificado** (lotes preventivos con barra de avance de MOQ por proveedor).
+
+### 2.2. Segregacion Estricta de Atribuciones por Rol
+* **Encargada de Compras & Abastecimiento (`purchases` / Elena Compras):**
+  - **Exclusiones Fisicas (`TASK-PUR-02`):** Se le retiro el boton fisico "Recibir Mercancia" y el modal de "Surtido Interno" (traslado con carretilla de racks a anaqueles de picking).
+  - **Ocultamiento de Bodega (`TASK-PUR-03`):** Se ocultan herramientas de operario de almacen (boton "Auditoria Diaria a Ciegas de 3 SKUs" y reubicacion fisica de slotting).
+  - **Especializacion Comercial:** Tiene acceso a la visibilidad de Costo pactado, Costo Promedio Ponderado (**CPP**), margen comercial bruto %, DOH, semaforo ROP y el boton `+ Generar PO` / `Comprar Lote`.
+* **Almacenista / Jefe de Almacen (`warehouse` / Carlos Almacen):**
+  - **Recepcion en Rampa:** Modal de recepcion fisica, conteo de piezas por talla, registro de estado del embalaje, impresion de etiquetas termicas e ingreso inmediato a existencias de rack. Cuenta con **cero visibilidad de costos o margenes** (confidencialidad financiera estricta).
+  - **Surtido Interno:** Modal de reposicion fisica entre racks y anaqueles.
+  - **Auditoria Ciega:** Modal de conteo ciclico a ciegas de 3 SKUs diarios (`blindAuditModal`) con calculo de puntaje IRA (Inventory Record Accuracy).
+
+### 2.3. Generador Formal de Ordenes de Compra (`TASK-PUR-04`)
+* **Pipeline de Impresion Aislada via Iframe Oculto (`printPurchaseOrderDoc`):** Resuelve el truncamiento en navegadores basados en Chromium. Extrae el nodo `#printablePurchaseOrderDoc` a un iframe temporal invisible con estilos de pagina Letter `@page { size: letter portrait; margin: 12mm 15mm; }` garantizando una impresion limpia y multipagina sin interferencias del DOM principal.
+* **Panel de Compensacion de Discrepancias (`po-discrepancy-panel`):** Selector desplegable interactivo (`handleCreditAgreementSelect`) que lista acuerdos pendientes de notas de credito del proveedor actual, recalculando en caliente el monto neto de la orden e insertando la Clausula 4 de compensacion mercantil en el cuerpo del documento.
+* **Tree View Dinamico:** Barras de progreso de MOQ por proveedor y edicion en linea de costos unitarios y prioridades ROP.
+
+### 2.4. Amplitud Ergonomica de Modales (`TASK-UX-01`, `TASK-INV-10`, `TASK-INV-11`)
+* **Drawer de Ficha de Producto (`max-w-4xl` a 2 Columnas):** Distribuye a la izquierda la fotografia WebP, catalogacion comercial y swatches de color; y a la derecha el control de stock RevOps 3 estados, matriz multidimensional (textil, tonos cosmetica, volumen perfume o unitario fijo), slotting y calculador de margenes.
+* **Centro de Ajustes Espacioso:** Pestanas horizontales sin scroll (Telas, Colores, Tonos, ROP, Slotting y **Pestana 8: Escandallos & Recetas BOM**) con editor interactivo de formulas.
+
+---
+
+## 3. Diagnostico del Backend Actual vs. Requerimientos de Hub 4
+
+| Componente / Tarea | Estado Actual en BD & Modelos | Brecha a Resolver en esta Prioridad |
+| :--- | :--- | :--- |
+| **Saneamiento Blade (UTF-8)** | `resources/views/portal/inventory.blade.php` tiene miles de caracteres mojibake (`EstÃ¡ndar`, `UbicaciÃ³n`, `DescripciÃ³n`). | Reemplazar con texto UTF-8 limpio de `import/inventory.blade.php`, preservando scripts e integracion Laravel. |
+| **Persistencia de OCs (`TASK-INV-16`, `TASK-PUR-04`)** | Tablas `purchase_orders` y `purchase_order_items` creadas. Modelos Eloquent existen. | Crear endpoints `POST /api/v1/inventory/purchases/orders` y `POST /api/v1/inventory/purchases/orders/{id}/dispatch`. Conectar `submitPurchaseOrder` de JS con backend. |
+| **Compensacion Notas de Credito (`TASK-PUR-01`, `TASK-PUR-04`)** | Tabla `supplier_credit_agreements` creada. Modelo `SupplierCreditAgreement` existe. | Hidratar `window.serverCreditAgreements` en `StorefrontController::portalInventory`. Procesar aplicacion del credito y cambio a status `applied` al emitir la PO. |
+| **Recetas BOM & Combos (`TASK-INV-17`, `TASK-INV-03`)** | Tablas `product_bundles` y `bundle_items` creadas. Modelos `ProductBundle` y `BundleItem` existen. | Hidratar `window.serverProductBundles`. Crear endpoints `GET /api/v1/inventory/bundles` y `POST /api/v1/inventory/bundles` para guardar formulas desde la Pestana 8. |
+| **Auditoria de Deficit BOM (`TASK-INT-11`)** | Tabla `bom_deficit_procurements` creada. | Crear endpoint `POST /api/v1/inventory/bundles/audit-deficit` que evalua insumos contra demanda, crea deficit y emite borradores de OC `#OC-2026-BOM-XXX`. |
+| **Inbound & Traza Sanitaria (`TASK-INV-04`, `TASK-INV-06`)** | `InboundReceiptService` recalcula CPP y asienta en Kardex. | Extender `receivePurchaseOrder` para capturar lote (`batch_number`), caducidad (`expiration_date`) y PAO (`pao_months`) en cosmetica/fragancias. |
+| **Auditoria Ciclica a Ciegas (`TASK-INV-07`)** | Endpoint `POST /api/v1/inventory/cycle-counts` existe. | Enlazar `confirmCycleCount` en `inventory-module.js` con el endpoint, mostrar puntaje IRA e hidratar historial `window.serverCycleCounts`. |
+
+---
+
+## 4. Mapa del Programa de Implementacion por Vertical Slices
+
+```mermaid
+flowchart TD
+    S21["Slice 2.1: Saneamiento UTF-8 y Paridad de Diseno Reformulado<br><i>(resources/views/portal/inventory.blade.php + UTF-8 limpio)</i>"]
+    S22["Slice 2.2: Ciclo de Vida Fullstack de OCs y Notas de Credito<br><i>(TASK-INV-16 / TASK-PUR-01 / TASK-PUR-04: API + Kardex + Iframe)</i>"]
+    S23["Slice 2.3: Motor Fullstack de Recetas BOM & Deficit de Insumos<br><i>(TASK-INV-17 / TASK-INV-03 / TASK-INT-11: Bundles CRUD + OC Auto)</i>"]
+    S24["Slice 2.4: Inbound en Rampa con Trazabilidad Sanitaria & CPP<br><i>(TASK-INV-04 / TASK-INV-06: InboundReceiptService + Lotes/PAO)</i>"]
+    S25["Slice 2.5: Auditoria Ciclica IRA, Historial & Suite de Pruebas Hub 4<br><i>(TASK-INV-07: CycleCount API + InventoryHub4ModuleTest 100% green)</i>"]
+
+    S21 --> S22 --> S23 --> S24 --> S25
+```
+
+---
+
+### Slice 2.1: Saneamiento UTF-8 y Normalizacion de Paridad en `inventory.blade.php`
+* **Objetivo:** Erradicar todo el texto corrupto (mojibake) en `resources/views/portal/inventory.blade.php`, adoptando el texto UTF-8 limpio de `import/inventory.blade.php` y manteniendo el bloque `@push('scripts')` con `inventory-module.js` y SheetJS CDN.
+* **Archivos Afectados:**
+  - `resources/views/portal/inventory.blade.php`
+* **Criterios de Aceptacion:**
+  - Cero entidades corruptas (`Ã³`, `Ã¡`, `Ã©`, `Ã±`, `â€¢`).
+  - Todas las directivas Alpine.js, modales y conmutadores de vista funcionan sin errores en consola.
+  - La suite de pruebas actual de Laravel permanece al 100% en verde (151/151 pruebas).
+
+---
+
+### Slice 2.2: Ciclo de Vida Fullstack de Ordenes de Compra y Compensacion de Notas de Credito (`TASK-INV-16`, `TASK-PUR-01`, `TASK-PUR-04`)
+* **Objetivo:** Conectar la emision, impresion y despacho de Ordenes de Compra con persistencia real en base de datos, deduccion automatica de notas de credito y asientos mercantiles en `purchase_kardex`.
+* **Backend:**
+  - `StorefrontController::portalInventory`:
+    - Hidratar `window.serverCreditAgreements` con registros `pending` de `supplier_credit_agreements`.
+  - `InventoryApiController`:
+    - `POST /api/v1/inventory/purchases/orders`: Valida proveedor, partidas de curva de tallas, costos, totales, deduccion de notas de credito (`credit_agreement_id`) marcando el acuerdo como `applied`, e inserta el asiento `PO_CREATED` en `purchase_kardex`.
+    - `POST /api/v1/inventory/purchases/orders/{id}/dispatch`: Marca la orden como `confirmed` o `sent`, registra `PO_SENT` en `purchase_kardex` con notas de despacho y destinatario.
+* **Frontend:**
+  - `public/js/revops-panel/inventory-module.js`:
+    - Conectar `submitPurchaseOrder` y `confirmPurchaseOrder` al endpoint `POST /api/v1/inventory/purchases/orders`.
+    - Conectar `handleCreditAgreementSelect` para descontar el saldo del acuerdo seleccionado y enlazar su ID en la carga util.
+    - Asegurar que el pipeline de impresion aislada en iframe (`printPurchaseOrderDoc`) opere sobre los datos persistidos.
+* **Criterios de Aceptacion:**
+  - Al emitir una OC desde el generador formal, se guarda en `purchase_orders` y sus partidas en `purchase_order_items`.
+  - Si se aplica una nota de credito, el total a pagar disminuye en la orden y el registro en `supplier_credit_agreements` pasa a estatus `applied`.
+  - Se genera un registro inmutable en `purchase_kardex`.
+
+---
+
+### Slice 2.3: Motor Fullstack de Recetas BOM & Combos Virtuales (`TASK-INV-17`, `TASK-INV-03`, `TASK-INT-11`)
+* **Objetivo:** Habilitar el guardado, edicion y auditoria de formulas de ensamblado para suscripciones y combos, con disparo automatico de ordenes de compra por deficit de insumos.
+* **Backend:**
+  - `StorefrontController::portalInventory`:
+    - Hidratar `window.serverProductBundles` con los registros de `product_bundles` y sus relaciones `bundleItems.product`.
+  - `InventoryApiController` (o servicio de dominio `BomService`):
+    - `GET /api/v1/inventory/bundles`: Lista combos activos con sus componentes y calculo de stock maximo ensamblable segun cuello de botella.
+    - `POST /api/v1/inventory/bundles`: Alta/edicion de una receta BOM con sus componentes (`bundle_items`) y cantidades.
+    - `POST /api/v1/inventory/bundles/audit-deficit`: Evalua existencias de insumos contra demanda proyectada de suscripciones, registra en `bom_deficit_procurements` y crea borradores de OCs a proveedores (`#OC-2026-BOM-XXX`).
+* **Frontend:**
+  - `public/js/revops-panel/inventory-module.js`:
+    - Conectar la Pestana 8 de Ajustes ("Escandallos & Recetas BOM") para guardar y editar formulas contra el backend.
+    - Conectar el modal de auditoria de deficit de insumos para disparar la generacion de OCs reales.
+* **Criterios de Aceptacion:**
+  - Creacion y edicion de recetas BOM persistidas en base de datos.
+  - Calculo en vivo de capacidad de ensamble segun stock del insumo mas escaso.
+  - La auditoria de deficit crea registros en `bom_deficit_procurements` y genera OCs en estado borrador.
+
+---
+
+### Slice 2.4: Inbound en Rampa con Trazabilidad Sanitaria y Valuacion CPP (`TASK-INV-04`, `TASK-INV-06`)
+* **Objetivo:** Extender la recepcion fisica en rampa para soportar trazabilidad sanitaria en articulos de higiene, fragancias y cosmeticos (lote, fecha de caducidad y meses PAO), manteniendo el recalculo contable de Costo Promedio Ponderado.
+* **Backend:**
+  - `InboundReceiptService::receivePurchaseOrder`:
+    - Aceptar parametros sanitarios por partida: `batch_number`, `expiration_date` y `pao_months`.
+    - Registrar los datos de lote en la metadata del movimiento de Kardex (`inventory_movements`) y actualizar la variante.
+    - Mantener el recalculo de CPP y la transicion automatica de producto de `dropship` a `both` (mixto).
+* **Frontend:**
+  - `public/js/revops-panel/inventory-module.js`:
+    - Actualizar el modal de recepcion fisica para capturar los campos sanitarios cuando el producto pertenezca a categorias aplicables.
+* **Criterios de Aceptacion:**
+  - Recepcion en rampa actualiza existencias fisicas, recalcula CPP y genera asientos en `purchase_kardex` e `inventory_movements`.
+  - Se registra el numero de lote y caducidad de forma auditable.
+
+---
+
+### Slice 2.5: Auditoria Ciclica a Ciegas (IRA Score), Historial y Suite Integral de Pruebas Hub 4 (`TASK-INV-07`)
+* **Objetivo:** Conectar el conteo ciclico a ciegas de 3 SKUs diarios con el backend, calcular el puntaje IRA (Inventory Record Accuracy), registrar historial de auditoria y blindar el Hub 4 con pruebas automatizadas completas.
+* **Backend:**
+  - `StorefrontController::portalInventory`:
+    - Hidratar `window.serverCycleCounts` con los ultimos conteos ciclicos de `cycle_counts`.
+  - `InventoryApiController@recordCycleCount`:
+    - Validar conteo a ciegas, calcular discrepancia absoluta, computar puntaje IRA (%) y registrar en `cycle_counts`.
+    - Si se solicita reconciliacion automatica, generar movimientos de inventario de ajuste (`AJUSTE_AUDITORIA_CIEGA`) en Kardex.
+* **Frontend:**
+  - `public/js/revops-panel/inventory-module.js`:
+    - Conectar `confirmCycleCount` con `POST /api/v1/inventory/cycle-counts`.
+    - Mostrar modal de dictamen con el puntaje IRA obtenido y clasificacion (`reconciled` o `flagged`).
+* **Suite de Pruebas Automatizadas:**
+  - Crear `tests/Feature/RevOps/InventoryHub4ModuleTest.php` validando:
+    1. Creacion de Orden de Compra y deduccion de notas de credito.
+    2. Recepcion Inbound con recalculo contable CPP y registro de lote/caducidad.
+    3. CRUD de Receta BOM y evaluacion de deficit de insumos.
+    4. Conteo ciclico a ciegas con calculo de puntaje IRA y conciliacion en Kardex.
+  - Ejecucion del test suite completo de Laravel garantizando 100% de pruebas en verde (>= 155 pruebas).
+
+---
+
+## 5. Matriz de Trazabilidad de Tareas Resueltas
+
+| ID Tarea | Nombre Operativo | Slice de Resolucion | Estado Proyectado |
+| :--- | :--- | :---: | :---: |
+| `TASK-INV-01` | Ubicaciones Fisicas de Almacen (Slotting) | **Slice 2.1 & 2.2** | Completada Fullstack |
+| `TASK-INV-02` | Matriz de Variantes no Textiles | **Slice 2.1 & 2.4** | Completada Fullstack |
+| `TASK-INV-03` | Escandallos / Recetas para Suscripciones & Combos (BOM) | **Slice 2.3** | Completada Fullstack |
+| `TASK-INV-04` | Valuacion Contable: Costo Promedio Ponderado (CPP) | **Slice 2.4** | Completada Fullstack |
+| `TASK-INV-05` | Generacion e Impresion de Etiquetas Termicas | **Slice 2.4** | Completada Fullstack |
+| `TASK-INV-06` | Control Sanitario: Lotes, Caducidad y PAO | **Slice 2.4** | Completada Fullstack |
+| `TASK-INV-07` | Auditoria Ciclica a Ciegas de 3 SKUs Diarios (IRA Score) | **Slice 2.5** | Completada Fullstack |
+| `TASK-INV-10` | Rediseno Ergonomico de Barra de Acciones y Menu Hub 4 | **Slice 2.1** | Completada Fullstack |
+| `TASK-INV-11` | CRUD Integral de Telas, Colores y Parametros ROP | **Slice 2.1 & 2.3** | Completada Fullstack |
+| `TASK-INV-16` | Refactorizacion de Bandeja de Compras On-Demand | **Slice 2.2** | Completada Fullstack |
+| `TASK-INV-17` | CRUD Integral y Gestor de Formulas BOM | **Slice 2.3** | Completada Fullstack |
+| `TASK-PUR-01` | Notificacion de Discrepancia Inbound y Formalizacion | **Slice 2.2** | Completada Fullstack |
+| `TASK-PUR-02` | Reasignacion de Modales Fisicos (Rampa/Surtido) a Almacen | **Slice 2.1 & 2.4** | Completada Fullstack |
+| `TASK-PUR-03` | Depuracion y Especializacion del Catalogo para Compras | **Slice 2.1 & 2.2** | Completada Fullstack |
+| `TASK-PUR-04` | Generador de PO con Impresion Iframe y Compensacion de Notas | **Slice 2.2** | Completada Fullstack |
+| `TASK-INT-11` | Disparo Automatico de OCs por Deficit de Ensamble BOM | **Slice 2.3** | Completada Fullstack |
+| `TASK-MOB-01` | Modo Movil / Escaner de Bodega con Codigos SVG | **Excluida Expresamente** | Descartada del Alcance |
