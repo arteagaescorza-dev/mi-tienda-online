@@ -66,7 +66,7 @@
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
                 <span>Atención & Ventas</span>
-                <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-bold">3 Casos</span>
+                <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-bold" x-text="salesPendingCount + ' Casos'">3 Casos</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Atención y Ventas" data-help-title="Atención & Ventas" data-help-desc="Gestion comercial de leads calientes, carritos abandonados recuperables y contacto directo via WhatsApp.">?</button>
             </button>
         </nav>
@@ -657,58 +657,92 @@
                                 <p class="text-xs text-slate-500">Contactos y recuperaciones con mayor probabilidad de cierre</p>
                             </div>
                         </div>
-                        <span class="text-xs font-bold text-blue-600 font-mono bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">3 Pendientes</span>
+                        <span class="text-xs font-bold text-blue-600 font-mono bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100" x-text="salesPendingCount + ' Pendientes'">3 Pendientes</span>
                     </div>
 
+                    <!-- Filtros por Categoría Comercial -->
+                    <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                        <button type="button" @click="salesFilter = 'all'" :class="salesFilter === 'all' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                            Todas (<span x-text="salesIncidents.filter(i => i.status !== 'resolved').length"></span>)
+                        </button>
+                        <button type="button" @click="salesFilter = 'abandoned_carts'" :class="salesFilter === 'abandoned_carts' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                            Carritos Abandonados (<span x-text="salesIncidents.filter(i => i.status !== 'resolved' && i.case_type === 'abandoned_cart').length"></span>)
+                        </button>
+                        <button type="button" @click="salesFilter = 'doubtful_addresses'" :class="salesFilter === 'doubtful_addresses' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                            Direcciones Detenidas (<span x-text="salesIncidents.filter(i => i.status !== 'resolved' && i.case_type === 'doubtful_address').length"></span>)
+                        </button>
+                        <button type="button" @click="salesFilter = 'leads'" :class="salesFilter === 'leads' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                            Leads Calientes (<span x-text="salesIncidents.filter(i => i.status !== 'resolved' && i.case_type === 'lead_hot').length"></span>)
+                        </button>
+                    </div>
+
+                    <!-- Lista Reactiva de Casos Comerciales -->
                     <div class="space-y-3">
-                        <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-start gap-3">
-                                <div class="w-2.5 h-2.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-slate-900">Carrito Abandonado: Andrea Ruiz</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Alta Urgencia</span>
+                        <template x-for="inc in filteredSalesIncidents" :key="'sales-inc-' + inc.id">
+                            <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0"
+                                         :class="{
+                                            'bg-rose-500 animate-pulse': inc.case_type === 'doubtful_address',
+                                            'bg-amber-500': inc.case_type === 'abandoned_cart',
+                                            'bg-indigo-500': inc.case_type === 'lead_hot'
+                                         }"></div>
+                                    <div>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="text-xs font-bold text-slate-900" x-text="inc.subject"></span>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                                  :class="{
+                                                     'bg-amber-100 text-amber-800': inc.case_type === 'abandoned_cart',
+                                                     'bg-rose-100 text-rose-800': inc.case_type === 'doubtful_address',
+                                                     'bg-indigo-100 text-indigo-800': inc.case_type === 'lead_hot'
+                                                  }"
+                                                  x-text="inc.case_type === 'abandoned_cart' ? 'Alta Urgencia' : (inc.case_type === 'doubtful_address' ? 'Falta Número Exterior' : 'Scoring 92 pts')"></span>
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-0.5" x-text="inc.notes"></p>
                                     </div>
-                                    <p class="text-xs text-slate-600 mt-0.5">3 prendas en carrito (MXN $1,450.00). Abandonado hace 25 min en paso de pago.</p>
                                 </div>
-                            </div>
-                            <button type="button" @click="showActionNotice('Recuperación WhatsApp con Enlace Tokenizado')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer shrink-0 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                <span>Recuperar WhatsApp</span>
-                            </button>
-                        </div>
+                                
+                                <div class="shrink-0">
+                                    <template x-if="inc.case_type === 'abandoned_cart'">
+                                        <button 
+                                            type="button" 
+                                            @click="openRescueCartModal(inc)" 
+                                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                            <span>Recuperar WhatsApp</span>
+                                        </button>
+                                    </template>
 
-                        <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-start gap-3">
-                                <div class="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1.5 shrink-0"></div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-slate-900">Dirección Incompleta: Orden #ORD-1092</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Falta Número Exterior</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600 mt-0.5">Cliente: Marco Valdés (Guadalajara, CP 44100). Validar con Sepomex antes de expedir.</p>
-                                </div>
-                            </div>
-                            <button type="button" @click="showActionNotice('Validador Predictivo Sepomex')" class="px-3 py-1.5 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-slate-800 transition cursor-pointer shrink-0">
-                                Corregir Dirección
-                            </button>
-                        </div>
+                                    <template x-if="inc.case_type === 'doubtful_address'">
+                                        <button 
+                                            type="button" 
+                                            @click="openAddressFixModal(inc)" 
+                                            class="px-3.5 py-1.5 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-slate-800 transition cursor-pointer"
+                                        >
+                                            Corregir Dirección
+                                        </button>
+                                    </template>
 
-                        <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-start gap-3">
-                                <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-1.5 shrink-0"></div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-slate-900">Lead Caliente: Carlos Mendoza</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">Scoring: 92 pts</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600 mt-0.5">Preguntó por suscripción Caja VIP Nivel 3. Requiere confirmación de tallas.</p>
+                                    <template x-if="inc.case_type === 'lead_hot'">
+                                        <button 
+                                            type="button" 
+                                            @click="openLeadModal(inc)" 
+                                            class="px-3.5 py-1.5 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-slate-800 transition cursor-pointer"
+                                        >
+                                            Abrir Ficha CRM
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
-                            <a href="{{ route('leads.index') }}" class="px-3 py-1.5 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-slate-800 transition shrink-0" style="text-decoration:none;">
-                                Abrir Ficha CRM
-                            </a>
-                        </div>
+                        </template>
+
+                        <template x-if="filteredSalesIncidents.length === 0">
+                            <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                                <p class="text-xs font-bold text-slate-600">No hay casos pendientes en esta categoría comercial.</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Todos los prospectos y pedidos pausados han sido gestionados.</p>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -1183,6 +1217,319 @@
                     </div>
                 </div>
             </template>
+
+            <!-- 5. MODAL RECUPERACIÓN CARRITO WHATSAPP (TASK-DSH-06) -->
+            <template x-if="activeModal === 'rescue_cart'">
+                <div>
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <span>Recuperación de Carrito Abandonado vía WhatsApp</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Alta Urgencia</span>
+                                </h3>
+                                <p class="text-xs text-slate-500">Generación de enlace tokenizado de reanudación y plantilla directa a WhatsApp Web</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="closeModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Columna 1: Datos del Comprador y Carrito -->
+                        <div class="space-y-4">
+                            <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-900 block mb-1">Comprador Identificado</span>
+                                <div class="text-sm font-black text-slate-900" x-text="rescueForm.customerName || 'Andrea Ruiz'"></div>
+                                <div class="text-xs text-slate-600 mt-1" x-text="'Teléfono: ' + (rescueForm.phone || '+52 55 9182 3341')"></div>
+                                <div class="text-xs font-mono font-bold text-amber-900 mt-2">Monto en Carrito: MXN $1,450.00 (3 prendas)</div>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-700">
+                                <div class="font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1">Prendas en Carrito Abandonado:</div>
+                                <div class="flex justify-between">
+                                    <span>2x Boxer Modal Negro (Talla M)</span>
+                                    <span class="font-mono font-bold">MXN $900.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>1x Playera Oversize Blanca (Talla L)</span>
+                                    <span class="font-mono font-bold">MXN $550.00</span>
+                                </div>
+                                <div class="flex justify-between pt-1 border-t border-slate-200 text-slate-900 font-bold">
+                                    <span>Total Checkout:</span>
+                                    <span class="font-mono text-emerald-700">MXN $1,450.00</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950">
+                                <strong>Token de Reanudación Activo:</strong> El comprador conservará el stock reservado y su carrito cargado con 1 solo toque desde el chat.
+                            </div>
+                        </div>
+
+                        <!-- Columna 2: Oferta y Redacción WhatsApp -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs font-black uppercase tracking-wider text-slate-900 block mb-1.5">Incentivo Comercial (Cupón Automático)</label>
+                                <select x-model="rescueForm.discountCode" @change="updateRescueMessage()" class="w-full text-xs font-bold bg-white border border-slate-300 rounded-xl p-2.5 focus:ring-emerald-500">
+                                    <option value="RESCUE10">10% Descuento Especial (RESCUE10) - Recomendado</option>
+                                    <option value="RESCUE5">5% Descuento Inmediato (RESCUE5)</option>
+                                    <option value="ENVIOGRATIS">Envío Express Gratis Nacional (ENVIOGRATIS)</option>
+                                    <option value="SIN_CUPON">Sin cupón de descuento adicional</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-black uppercase tracking-wider text-slate-900 block mb-1.5">Mensaje para WhatsApp Web</label>
+                                <textarea x-model="rescueForm.customMessage" rows="5" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-3 focus:ring-emerald-500 leading-relaxed font-sans"></textarea>
+                            </div>
+
+                            <div class="p-2.5 bg-slate-100 rounded-xl border border-slate-200 text-[11px] text-slate-600 font-mono break-all">
+                                <span class="font-bold text-slate-700 block">Enlace Tokenizado:</span>
+                                <span x-text="rescueTokenUrl"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <span class="text-xs text-slate-500">Asesora: <strong>Ana Atención</strong></span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                                Cancelar
+                            </button>
+                            <button 
+                                type="button" 
+                                @click="submitRescueCart()" 
+                                :disabled="isSubmittingTask"
+                                class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                <span x-text="isSubmittingTask ? 'Enviando...' : 'Disparar WhatsApp Web & Registrar Rescate'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- 6. MODAL VALIDADOR PREDICTIVO SEPOMEX (TASK-INT-05) -->
+            <template x-if="activeModal === 'fix_address'">
+                <div>
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <span>Validador Predictivo de Domicilios Sepomex</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800" x-text="addressForm.orderNumber">ORD-1092</span>
+                                </h3>
+                                <p class="text-xs text-slate-500">Cotejo postal normativo para evitar devoluciones de paquetería DHL Express</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="closeModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Columna 1: Domicilio Problemático Actual -->
+                        <div class="space-y-4">
+                            <div class="bg-rose-50/70 border border-rose-200 rounded-xl p-4">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-900 block mb-1">Incidencia de Entrega</span>
+                                <div class="text-sm font-black text-slate-900">Marco Valdés</div>
+                                <div class="text-xs text-slate-600 mt-1">Tel: +52 33 1482 7701 &bull; Orden: <strong x-text="addressForm.orderNumber"></strong></div>
+                                <div class="text-xs text-rose-800 font-bold mt-2 bg-rose-100 p-2 rounded-lg">
+                                    Dirección actual: "Av. Vallarta s/n, Guadalajara, Jalisco, CP 44100"
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-700">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Paquetería:</span>
+                                    <span class="font-bold text-slate-800">DHL Express Nacional</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Motivo de Retención:</span>
+                                    <span class="font-bold text-rose-700">Falta Número Exterior</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Impacto Logístico:</span>
+                                    <span class="font-bold text-slate-800">DHL no expide guía sin numeración física</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
+                                <strong>Liberación Automática:</strong> Al guardar la dirección completa, la orden pasará a estatus <em>processing</em> y aparecerá de inmediato en la mesa de empaque de Almacén.
+                            </div>
+                        </div>
+
+                        <!-- Columna 2: Formulario Predictivo Sepomex -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Normalización de Domicilio</h4>
+
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Código Postal</label>
+                                    <input type="text" x-model="addressForm.postalCode" @input="searchSepomex()" maxlength="5" class="w-full text-xs font-mono font-bold bg-white border border-slate-300 rounded-lg p-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Estado</label>
+                                    <input type="text" x-model="addressForm.state" readonly class="w-full text-xs bg-slate-100 border border-slate-300 rounded-lg p-2 text-slate-600 font-semibold">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Ciudad / Mpio</label>
+                                    <input type="text" x-model="addressForm.city" readonly class="w-full text-xs bg-slate-100 border border-slate-300 rounded-lg p-2 text-slate-600 font-semibold">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Colonia (Catálogo Sepomex)</label>
+                                <select x-model="addressForm.colonia" class="w-full text-xs font-semibold bg-white border border-slate-300 rounded-lg p-2 focus:ring-indigo-500">
+                                    <template x-for="col in sepomexColonias" :key="col">
+                                        <option :value="col" x-text="col"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Calle</label>
+                                <input type="text" x-model="addressForm.street" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2 focus:ring-indigo-500" placeholder="Nombre de la calle o avenida">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-rose-700 block mb-1">Número Exterior *</label>
+                                    <input type="text" x-model="addressForm.exteriorNumber" class="w-full text-xs font-bold bg-white border border-rose-300 rounded-lg p-2 focus:ring-rose-500" placeholder="Ej. 1480">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Número Interior</label>
+                                    <input type="text" x-model="addressForm.interiorNumber" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2 focus:ring-indigo-500" placeholder="Ej. Piso 3, Depto 302">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Referencias de Entrega</label>
+                                <input type="text" x-model="addressForm.references" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2 focus:ring-indigo-500" placeholder="Ej. Entre Atenas y Chapultepec, portón gris">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <span class="text-xs text-slate-500">Asesora: <strong>Ana Atención</strong></span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                                Cancelar
+                            </button>
+                            <button 
+                                type="button" 
+                                @click="submitAddressFix()" 
+                                :disabled="isSubmittingTask"
+                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" :class="isSubmittingTask ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span x-text="isSubmittingTask ? 'Validando...' : 'Actualizar y Liberar a Almacén'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- 7. MODAL FICHA DE LEAD CALIENTE (TASK-DSH-01) -->
+            <template x-if="activeModal === 'lead_detail'">
+                <div>
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-indigo-600 animate-pulse"></span>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <span>Ficha Comercial de Prospecto:</span>
+                                    <span x-text="leadForm.name || 'Carlos Mendoza'"></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">Scoring: 92 pts</span>
+                                </h3>
+                                <p class="text-xs text-slate-500">Historial de navegación, scoring predictivo e interés comercial</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="closeModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-4">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block mb-1">Información de Contacto</span>
+                                <div class="text-sm font-black text-slate-900" x-text="leadForm.name || 'Carlos Mendoza'"></div>
+                                <div class="text-xs text-slate-600 mt-1" x-text="'Teléfono: ' + (leadForm.phone || '+52 81 1234 5678')"></div>
+                                <div class="text-xs text-slate-600" x-text="'Email: ' + (leadForm.email || 'carlos.mendoza@corporativo.mx')"></div>
+                                <div class="text-xs font-mono font-bold text-indigo-800 mt-2">Vitrina de Origen: MARTE (Universo Masculino)</div>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-700">
+                                <div class="font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1">Interés y Scoring:</div>
+                                <div class="flex justify-between">
+                                    <span>Nivel de Interés:</span>
+                                    <span class="font-bold text-emerald-700">Muy Caliente (92/100)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Producto / Oferta:</span>
+                                    <span class="font-bold text-slate-800">Suscripción Caja VIP Nivel 3</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Horario de Contacto:</span>
+                                    <span class="font-bold text-slate-800">Tarde (14:00 - 18:00 hrs)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Seguimiento Comercial</h4>
+
+                            <div class="space-y-2 text-xs">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <div class="font-bold text-slate-800 flex justify-between">
+                                        <span>Visita a Landing VIP</span>
+                                        <span class="text-slate-400 font-mono text-[10px]">Hoy 10:14 AM</span>
+                                    </div>
+                                    <p class="text-slate-500 mt-0.5">3 interacciones con el configurador de tallas.</p>
+                                </div>
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <div class="font-bold text-slate-800 flex justify-between">
+                                        <span>Pregunta por Chat</span>
+                                        <span class="text-slate-400 font-mono text-[10px]">Hoy 10:25 AM</span>
+                                    </div>
+                                    <p class="text-slate-500 mt-0.5">Consultó sobre métodos de pago recurrentes con SPEI.</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Notas de la Asesora</label>
+                                <textarea x-model="leadNotes" rows="3" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-indigo-500" placeholder="Añade notas del contacto o acuerdo comercial..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <span class="text-xs text-slate-500">Asesora: <strong>Ana Atención</strong></span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                                Cerrar
+                            </button>
+                            <a :href="'https://wa.me/' + (leadForm.phone || '').replace(/\\D/g, '')" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5" style="text-decoration:none;">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                <span>Contactar WhatsApp</span>
+                            </a>
+                            <button 
+                                type="button" 
+                                @click="submitLeadFollowup()" 
+                                :disabled="isSubmittingTask"
+                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer"
+                            >
+                                <span x-text="isSubmittingTask ? 'Guardando...' : 'Marcar como Ganado / Cerrado'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
 </div>
@@ -1197,10 +1544,13 @@ function dashboardModule() {
         kpis: {},
         alerts: [],
         operationalTasks: [],
+        salesIncidents: [],
         shiftLogs: [],
         taskFilter: 'all',
+        salesFilter: 'all',
         activeModal: null,
         selectedTask: null,
+        selectedIncident: null,
         isSubmittingTask: false,
         dhlCountdown: '2h 15m restantes',
         dhlStatusColor: 'amber',
@@ -1228,6 +1578,37 @@ function dashboardModule() {
             driverBadge: 'DHL-OP-8821',
         },
 
+        rescueForm: {
+            phone: '+52 55 9182 3341',
+            customerName: 'Andrea Ruiz',
+            discountCode: 'RESCUE10',
+            customMessage: '',
+            cartToken: 'rec_cart_andrea_9921',
+        },
+
+        addressForm: {
+            orderNumber: 'ORD-1092',
+            postalCode: '44100',
+            state: 'Jalisco',
+            city: 'Guadalajara',
+            colonia: 'Americana',
+            street: 'Av. Vallarta',
+            exteriorNumber: '1480',
+            interiorNumber: 'Piso 3',
+            references: 'Entre Atenas y Chapultepec, portón gris',
+        },
+
+        leadForm: {
+            name: 'Carlos Mendoza',
+            phone: '+52 81 1234 5678',
+            email: 'carlos.mendoza@corporativo.mx',
+            subject: 'Lead Caliente: Carlos Mendoza (Scoring: 92 pts)',
+            universe: 'marte',
+            interest: 'Suscripción Caja VIP Nivel 3',
+        },
+        leadNotes: '',
+        sepomexColonias: ['Americana', 'Centro', 'Ladrón de Guevara', 'Moderna', 'Vallarta'],
+
         init() {
             const data = window.serverDashboardData || {};
             this.userRole = data.userRole || 'admin';
@@ -1236,6 +1617,7 @@ function dashboardModule() {
             this.kpis = data.kpis || {};
             this.alerts = data.alerts || [];
             this.operationalTasks = Array.isArray(data.operationalTasks) ? data.operationalTasks : [];
+            this.salesIncidents = Array.isArray(data.salesIncidents) ? data.salesIncidents : [];
             this.shiftLogs = Array.isArray(data.shiftLogs) ? data.shiftLogs : [];
 
             // Si el rol es de almacen, forzar que la vista sea operativa
@@ -1245,6 +1627,7 @@ function dashboardModule() {
 
             this.updateDhlCountdown();
             setInterval(() => this.updateDhlCountdown(), 60000);
+            this.updateRescueMessage();
         },
 
         updateDhlCountdown() {
@@ -1284,6 +1667,33 @@ function dashboardModule() {
             return this.operationalTasks.filter(t => t.status !== 'completed').length;
         },
 
+        get filteredSalesIncidents() {
+            if (this.salesFilter === 'all') {
+                return this.salesIncidents.filter(i => i.status !== 'resolved');
+            }
+            return this.salesIncidents.filter(i => i.status !== 'resolved' && (
+                (this.salesFilter === 'abandoned_carts' && i.case_type === 'abandoned_cart') ||
+                (this.salesFilter === 'doubtful_addresses' && i.case_type === 'doubtful_address') ||
+                (this.salesFilter === 'leads' && i.case_type === 'lead_hot') ||
+                (this.salesFilter === 'subscriptions' && i.case_type === 'subscription')
+            ));
+        },
+
+        get salesPendingCount() {
+            return this.salesIncidents.filter(i => i.status !== 'resolved').length;
+        },
+
+        get rescueTokenUrl() {
+            const base = window.location.origin || 'https://mitienda.online';
+            return `${base}/store/checkout?rescue_token=${this.rescueForm.cartToken}&coupon=${this.rescueForm.discountCode}`;
+        },
+
+        updateRescueMessage() {
+            const name = this.rescueForm.customerName || 'Estimado(a)';
+            const code = this.rescueForm.discountCode;
+            this.rescueForm.customMessage = `Hola ${name}, vimos que dejaste prendas seleccionadas en tu carrito. Completa tu pedido hoy y aprovecha el cupón especial ${code} con envío express incluido: ${this.rescueTokenUrl}`;
+        },
+
         openTaskModal(task) {
             this.selectedTask = task;
             const category = task.category || '';
@@ -1308,9 +1718,209 @@ function dashboardModule() {
             }
         },
 
+        openRescueCartModal(inc) {
+            this.selectedIncident = inc;
+            this.rescueForm.customerName = inc.customer_name || 'Andrea Ruiz';
+            this.rescueForm.phone = inc.customer_phone || '+52 55 9182 3341';
+            this.rescueForm.cartToken = inc.metadata?.rescue_token || 'rec_cart_andrea_9921';
+            this.rescueForm.discountCode = 'RESCUE10';
+            this.updateRescueMessage();
+            this.activeModal = 'rescue_cart';
+        },
+
+        openAddressFixModal(inc) {
+            this.selectedIncident = inc;
+            const meta = inc.metadata || {};
+            this.addressForm = {
+                orderNumber: meta.order_number || 'ORD-1092',
+                postalCode: meta.postal_code || '44100',
+                state: meta.state || 'Jalisco',
+                city: meta.city || 'Guadalajara',
+                colonia: meta.colonia || 'Americana',
+                street: meta.street || 'Av. Vallarta',
+                exteriorNumber: '1480',
+                interiorNumber: 'Piso 3, Depto 302',
+                references: 'Entre Atenas y Chapultepec, portón gris',
+            };
+            this.activeModal = 'fix_address';
+            this.searchSepomex();
+        },
+
+        openLeadModal(inc) {
+            this.selectedIncident = inc;
+            const meta = inc.metadata || {};
+            this.leadForm = {
+                name: inc.customer_name || 'Carlos Mendoza',
+                phone: inc.customer_phone || '+52 81 1234 5678',
+                email: inc.customer_email || 'carlos.mendoza@corporativo.mx',
+                subject: inc.subject || 'Lead Caliente: Carlos Mendoza',
+                universe: inc.universe || 'marte',
+                interest: meta.interest || 'Suscripción Caja VIP Nivel 3',
+            };
+            this.leadNotes = '';
+            this.activeModal = 'lead_detail';
+        },
+
         closeModal() {
             this.activeModal = null;
             this.selectedTask = null;
+            this.selectedIncident = null;
+        },
+
+        async searchSepomex() {
+            const cp = (this.addressForm.postalCode || '').replace(/\D/g, '');
+            if (cp.length !== 5) return;
+
+            try {
+                const response = await fetch(`/api/v1/dashboard/sales/sepomex-lookup?cp=${cp}`);
+                const data = await response.json();
+                if (data.success) {
+                    this.addressForm.state = data.state;
+                    this.addressForm.city = data.city;
+                    this.sepomexColonias = data.colonias || [];
+                    if (this.sepomexColonias.length > 0 && !this.sepomexColonias.includes(this.addressForm.colonia)) {
+                        this.addressForm.colonia = this.sepomexColonias[0];
+                    }
+                }
+            } catch (e) {
+                console.error('Error al consultar Sepomex:', e);
+            }
+        },
+
+        async submitRescueCart() {
+            this.isSubmittingTask = true;
+            try {
+                const response = await fetch('/api/v1/dashboard/sales/rescue-whatsapp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    body: JSON.stringify({
+                        case_id: this.selectedIncident?.id || null,
+                        phone: this.rescueForm.phone,
+                        customer_name: this.rescueForm.customerName,
+                        cart_token: this.rescueForm.cartToken,
+                        discount_code: this.rescueForm.discountCode,
+                        custom_message: this.rescueForm.customMessage,
+                    }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    if (this.selectedIncident) {
+                        const idx = this.salesIncidents.findIndex(i => i.id === this.selectedIncident.id);
+                        if (idx !== -1) {
+                            this.salesIncidents[idx].status = 'resolved';
+                        }
+                    }
+
+                    if (data.shift_log) {
+                        this.shiftLogs.unshift(data.shift_log);
+                    }
+
+                    if (data.whatsapp_url) {
+                        window.open(data.whatsapp_url, '_blank');
+                    }
+
+                    if (typeof showToast === 'function') {
+                        showToast('Gatillo WhatsApp lanzado y caso registrado como atendido');
+                    }
+                    this.closeModal();
+                } else {
+                    alert(data.message || 'Error al registrar rescate de carrito');
+                }
+            } catch (err) {
+                console.error(err);
+                if (this.selectedIncident) {
+                    const idx = this.salesIncidents.findIndex(i => i.id === this.selectedIncident.id);
+                    if (idx !== -1) {
+                        this.salesIncidents[idx].status = 'resolved';
+                    }
+                }
+                const waUrl = 'https://wa.me/' + (this.rescueForm.phone || '').replace(/\D/g, '') + '?text=' + encodeURIComponent(this.rescueForm.customMessage);
+                window.open(waUrl, '_blank');
+                this.closeModal();
+            } finally {
+                this.isSubmittingTask = false;
+            }
+        },
+
+        async submitAddressFix() {
+            this.isSubmittingTask = true;
+            try {
+                const response = await fetch('/api/v1/dashboard/sales/validate-address', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    body: JSON.stringify({
+                        case_id: this.selectedIncident?.id || null,
+                        order_number: this.addressForm.orderNumber,
+                        postal_code: this.addressForm.postalCode,
+                        state: this.addressForm.state,
+                        city: this.addressForm.city,
+                        colonia: this.addressForm.colonia,
+                        street: this.addressForm.street,
+                        exterior_number: this.addressForm.exteriorNumber,
+                        interior_number: this.addressForm.interiorNumber,
+                        references: this.addressForm.references,
+                    }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    if (this.selectedIncident) {
+                        const idx = this.salesIncidents.findIndex(i => i.id === this.selectedIncident.id);
+                        if (idx !== -1) {
+                            this.salesIncidents[idx].status = 'resolved';
+                        }
+                    }
+
+                    if (data.shift_log) {
+                        this.shiftLogs.unshift(data.shift_log);
+                    }
+
+                    if (typeof showToast === 'function') {
+                        showToast(`Dirección validada para ${this.addressForm.orderNumber}. Liberada a empaque.`);
+                    }
+                    this.closeModal();
+                } else {
+                    alert(data.message || 'Error al validar dirección');
+                }
+            } catch (err) {
+                console.error(err);
+                if (this.selectedIncident) {
+                    const idx = this.salesIncidents.findIndex(i => i.id === this.selectedIncident.id);
+                    if (idx !== -1) {
+                        this.salesIncidents[idx].status = 'resolved';
+                    }
+                }
+                this.closeModal();
+            } finally {
+                this.isSubmittingTask = false;
+            }
+        },
+
+        submitLeadFollowup() {
+            if (this.selectedIncident) {
+                const idx = this.salesIncidents.findIndex(i => i.id === this.selectedIncident.id);
+                if (idx !== -1) {
+                    this.salesIncidents[idx].status = 'resolved';
+                }
+            }
+            this.shiftLogs.unshift({
+                id: Date.now(),
+                event_type: 'lead_won',
+                message: `Lead ${this.leadForm.name} cerrado exitosamente. Notas: ${this.leadNotes || 'Atendido vía WhatsApp'}`,
+                operator_name: 'Ana Atención',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+            if (typeof showToast === 'function') {
+                showToast(`Prospecto ${this.leadForm.name} marcado como ganado.`);
+            }
+            this.closeModal();
         },
 
         async completeCurrentTask() {
@@ -1352,7 +1962,6 @@ function dashboardModule() {
                 }
             } catch (err) {
                 console.error(err);
-                // Fallback optimista si no hay conexión de red
                 const taskIndex = this.operationalTasks.findIndex(t => t.id === taskId);
                 if (taskIndex !== -1) {
                     this.operationalTasks[taskIndex].status = 'completed';

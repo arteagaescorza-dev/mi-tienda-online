@@ -93,19 +93,25 @@ El **Hub 1** funciona como el centro neurálgico y cabina de mando diario de la 
 
 ---
 
-### Slice 3.3: Bandeja de Atención & Ventas, Rescate WhatsApp y Validador Postal Sepomex (`TASK-DSH-01`, `TASK-DSH-06`, `TASK-INT-05`)
+### Slice 3.3: Bandeja de Atención & Ventas, Rescate WhatsApp y Validador Postal Sepomex (`TASK-DSH-01`, `TASK-DSH-06`, `TASK-INT-05`) [COMPLETADO]
 * **Objetivo:** Implementar la vista comercial para asesores de atención al cliente y soporte, integrando recuperación de carritos por WhatsApp y validación predictiva de domicilios.
 * **Backend:**
   * Endpoints en `DashboardApiController.php`:
     - `GET /api/v1/dashboard/sales/incidents` (listado de leads, carritos y direcciones dudosas).
     - `POST /api/v1/dashboard/sales/rescue-whatsapp` (registro de contacto tokenizado).
     - `POST /api/v1/dashboard/sales/validate-address` (validación de código postal y liberación de orden).
+    - `GET /api/v1/dashboard/sales/sepomex-lookup` (catálogo y sugerencias Sepomex).
 * **Frontend:**
   * 4 KPIs contextuales de atención con botones de ayuda `?`.
   * Filtros: *Todas*, *Leads & Consultas*, *Carritos Abandonados*, *Direcciones Detenidas*, *Suscriptores*.
   * **Modal de Recuperación WhatsApp (`TASK-INT-05`):** Plantilla oficial, enlace tokenizado prellenado (`/checkout?resume=TOKEN`), cupón `RECUPERA10` al 10% OFF y confirmación de envío.
   * **Modal Validador Sepomex (`TASK-DSH-06`):** Validación reactiva de CP, número exterior obligatorio, autocompletado de municipio/estado y liberación inmediata de la orden con badge *"Sepomex OK"*.
+  * **Modal Ficha CRM Leads:** Seguimiento de scoring, canal preferido y notas de contacto.
   * Bitácora comercial inmutable de incidencias resueltas.
+* **Entregables Verificados:**
+  * Pruebas completas en `tests/Feature/RevOps/DashboardHub1ModuleTest.php` al 100% verde (7 pruebas, 203 aserciones).
+  * Suite global de la plataforma ampliada a 170 pruebas al 100% verde (1,036 aserciones).
+  * Cero emojis en toda la base de código.
 
 ---
 

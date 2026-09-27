@@ -82,6 +82,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/tasks', [DashboardApiController::class, 'getOperationalTasks']);
         Route::post('/tasks/{id}/complete', [DashboardApiController::class, 'completeTask']);
         Route::get('/shift-logs', [DashboardApiController::class, 'getShiftLogs']);
+        Route::get('/sales/incidents', [DashboardApiController::class, 'getSalesIncidents']);
+        Route::post('/sales/rescue-whatsapp', [DashboardApiController::class, 'rescueAbandonedCartViaWhatsApp']);
+        Route::post('/sales/validate-address', [DashboardApiController::class, 'validateOrderAddress']);
+        Route::get('/sales/sepomex-lookup', [DashboardApiController::class, 'lookupSepomex']);
         Route::post('/environment/switch', [DashboardApiController::class, 'switchEnvironment']);
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
     });

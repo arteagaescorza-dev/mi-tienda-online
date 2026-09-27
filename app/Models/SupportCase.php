@@ -13,5 +13,6 @@ class SupportCase extends Model
 
     protected $casts = [
         'resolved_at' => 'datetime',
+        'metadata' => 'array',
     ];
 }

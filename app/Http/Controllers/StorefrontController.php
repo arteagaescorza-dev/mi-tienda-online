@@ -23,6 +23,7 @@ use App\Models\ProductBundle;
 use App\Models\CycleCount;
 use App\Models\OperationalTask;
 use App\Models\ShiftLog;
+use App\Models\SupportCase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -361,12 +362,20 @@ class StorefrontController extends Controller
             default => 'executive',
         };
 
-        app(\App\Http\Controllers\Api\RevOps\DashboardApiController::class)->ensureDefaultOperationalTasksExist();
+        $dashboardApi = app(\App\Http\Controllers\Api\RevOps\DashboardApiController::class);
+        $dashboardApi->ensureDefaultOperationalTasksExist();
+        $dashboardApi->ensureDefaultSalesIncidentsExist();
+
         $operationalTasks = OperationalTask::query()
             ->orderByRaw("CASE WHEN priority = 'critical' THEN 1 WHEN priority = 'high' THEN 2 WHEN priority = 'medium' THEN 3 ELSE 4 END")
             ->orderBy('due_at', 'asc')
             ->get();
         $shiftLogs = ShiftLog::query()->latest('id')->limit(15)->get();
+        $salesIncidents = SupportCase::query()
+            ->orderBy('status', 'asc')
+            ->orderByRaw("CASE WHEN priority = 'high' THEN 1 WHEN priority = 'medium' THEN 2 ELSE 3 END")
+            ->latest('id')
+            ->get();
 
         $serverDashboardData = [
             'userRole' => $userRole,
@@ -375,6 +384,7 @@ class StorefrontController extends Controller
             'kpis' => $kpis,
             'alerts' => $this->dashboardAlerts(),
             'operationalTasks' => $operationalTasks,
+            'salesIncidents' => $salesIncidents,
             'shiftLogs' => $shiftLogs->map(fn ($l) => [
                 'id' => $l->id,
                 'event_type' => $l->event_type,
@@ -393,6 +403,7 @@ class StorefrontController extends Controller
             'legacyKpis' => $kpis['executive'],
             'alerts' => $this->dashboardAlerts(),
             'operationalTasks' => $operationalTasks,
+            'salesIncidents' => $salesIncidents,
             'shiftLogs' => $shiftLogs,
             'serverDashboardData' => $serverDashboardData,
         ]);
