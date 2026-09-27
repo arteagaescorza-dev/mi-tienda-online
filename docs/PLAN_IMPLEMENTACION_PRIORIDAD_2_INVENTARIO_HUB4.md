@@ -166,25 +166,26 @@ flowchart TD
 
 ---
 
-### Slice 2.5: Auditoria Ciclica a Ciegas (IRA Score), Historial y Suite Integral de Pruebas Hub 4 (`TASK-INV-07`)
+### Slice 2.5: Auditoria Ciclica a Ciegas (IRA Score), Historial y Suite Integral de Pruebas Hub 4 (`TASK-INV-07`) [COMPLETADO]
 * **Objetivo:** Conectar el conteo ciclico a ciegas de 3 SKUs diarios con el backend, calcular el puntaje IRA (Inventory Record Accuracy), registrar historial de auditoria y blindar el Hub 4 con pruebas automatizadas completas.
 * **Backend:**
   - `StorefrontController::portalInventory`:
-    - Hidratar `window.serverCycleCounts` con los ultimos conteos ciclicos de `cycle_counts`.
+    - Hidratacion de `window.serverCycleCounts` y `$portalCycleCounts` con los ultimos 10 conteos ciclicos de `cycle_counts`.
   - `InventoryApiController@recordCycleCount`:
-    - Validar conteo a ciegas, calcular discrepancia absoluta, computar puntaje IRA (%) y registrar en `cycle_counts`.
-    - Si se solicita reconciliacion automatica, generar movimientos de inventario de ajuste (`AJUSTE_AUDITORIA_CIEGA`) en Kardex.
+    - Valida conteo a ciegas tanto por `sku` como por `variant_id`.
+    - Calcula discrepancia absoluta, computa puntaje IRA (%) y persiste en `cycle_counts` con status `reconciled` o `flagged`.
+    - Si `reconcile_kardex` es true, ajusta las existencias en `inventories` y genera movimientos inmutables de inventario (`AJUSTE_AUDITORIA_CIEGA`) en Kardex.
 * **Frontend:**
+  - `resources/views/portal/inventory.blade.php`:
+    - Inyeccion de `window.serverCycleCounts` en el objeto global de ventana.
   - `public/js/revops-panel/inventory-module.js`:
-    - Conectar `confirmCycleCount` con `POST /api/v1/inventory/cycle-counts`.
-    - Mostrar modal de dictamen con el puntaje IRA obtenido y clasificacion (`reconciled` o `flagged`).
+    - Propiedad reactiva `cycleCountHistory` agregada e hidratada en `init()`.
+    - Metodo `confirmCycleCountReconciliation()` conectado a `POST /api/v1/inventory/cycle-counts` con `reconcile_kardex: true`, actualizando el estado de Alpine y prepending al historial.
 * **Suite de Pruebas Automatizadas:**
-  - Crear `tests/Feature/RevOps/InventoryHub4ModuleTest.php` validando:
-    1. Creacion de Orden de Compra y deduccion de notas de credito.
-    2. Recepcion Inbound con recalculo contable CPP y registro de lote/caducidad.
-    3. CRUD de Receta BOM y evaluacion de deficit de insumos.
-    4. Conteo ciclico a ciegas con calculo de puntaje IRA y conciliacion en Kardex.
-  - Ejecucion del test suite completo de Laravel garantizando 100% de pruebas en verde (>= 155 pruebas).
+  - Pruebas dedicadas anadidas a `tests/Feature/RevOps/InventoryHub4ModuleTest.php`:
+    1. `test_can_record_cycle_count_with_ira_score_and_kardex_reconciliation` (calculo de IRA, status reconciled, actualizacion de inventario y asiento en Kardex).
+    2. `test_portal_inventory_hydrates_cycle_counts_in_blade` (hidratacion de `window.serverCycleCounts` en Blade).
+  - Ejecucion de la suite completa de Laravel: 163 pruebas ejecutadas, 163 pasadas (100% verde), 833 aserciones, 0 fallos.
 
 ---
 

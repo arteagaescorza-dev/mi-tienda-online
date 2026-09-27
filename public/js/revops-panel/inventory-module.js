@@ -537,6 +537,7 @@ function hybridInventoryModule() {
         },
 
         // Estado Auditoría Cíclica a Ciegas (TASK-INV-07: 3 SKUs Diarios)
+        cycleCountHistory: [],
         cycleCountModal: {
             isOpen: false,
             step: 'count', // 'count' | 'reconcile' | 'summary'
@@ -4216,6 +4217,9 @@ function hybridInventoryModule() {
             }
             if (typeof window !== 'undefined' && Array.isArray(window.serverProductBundles) && window.serverProductBundles.length > 0) {
                 this.productBundles = window.serverProductBundles;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCycleCounts) && window.serverCycleCounts.length > 0) {
+                this.cycleCountHistory = window.serverCycleCounts;
             }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
@@ -7961,8 +7965,16 @@ function hybridInventoryModule() {
         confirmCycleCountReconciliation() {
             const report = this.cycleCountReport;
             let adjustedCount = 0;
+            const countsPayload = [];
 
             report.rows.forEach(row => {
+                const reason = this.cycleCountModal.discrepancyReasons[row.sku] || 'Merma operativa';
+                countsPayload.push({
+                    sku: row.sku,
+                    physical_counted: row.physical,
+                    reason: reason
+                });
+
                 if (row.diff !== 0) {
                     const product = this.products.find(p => p.sku === row.sku);
                     if (product) {
@@ -8000,13 +8012,45 @@ function hybridInventoryModule() {
                             stockAfter: stockAfter,
                             reference: 'Auditoría Diaria (Ciega)',
                             user: 'Auditor de Almacén (Conteo Cíclico)',
-                            note: 'Motivo: ' + (this.cycleCountModal.discrepancyReasons[row.sku] || 'Merma operativa') + 
-                                  ' | Discrepancia: ' + (row.diff > 0 ? '+' : '') + row.diff + ' uds'
+                            note: 'Motivo: ' + reason + ' | Discrepancia: ' + (row.diff > 0 ? '+' : '') + row.diff + ' uds'
                         });
 
                         adjustedCount++;
                     }
                 }
+            });
+
+            // Enviar auditoria a ciegas con conciliacion Kardex al backend
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('/api/v1/inventory/cycle-counts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    counts: countsPayload,
+                    reconcile_kardex: true
+                })
+            }).then(r => r.json()).then(data => {
+                if (data && data.success) {
+                    if (this.cycleCountHistory) {
+                        this.cycleCountHistory.unshift({
+                            id: data.cycle_count_id,
+                            date: new Date().toLocaleDateString('es-MX'),
+                            skuCount: countsPayload.length,
+                            totalCounted: data.total_units_counted || 0,
+                            totalVariance: data.total_variance_units || 0,
+                            iraScore: data.ira_accuracy_score || 100,
+                            auditedBy: 'Operador Almacén',
+                            status: data.status || 'reconciled',
+                            details: data.details || []
+                        });
+                    }
+                }
+            }).catch(err => {
+                console.error('Error al persistir auditoria ciclica:', err);
             });
 
             this.cycleCountModal.isCompletedToday = true;

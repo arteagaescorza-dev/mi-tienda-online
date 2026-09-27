@@ -14,6 +14,8 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Models\SupplierCreditAgreement;
 use App\Models\User;
+use App\Models\CycleCount;
+use App\Models\InventoryMovement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -642,6 +644,98 @@ class InventoryHub4ModuleTest extends TestCase
         $this->assertEquals('received', $po->status);
         $this->assertNotNull($po->received_at);
         $this->assertStringContainsString('LOT-2026-COSM-8841', $po->notes);
+    }
+
+    public function test_can_record_cycle_count_with_ira_score_and_kardex_reconciliation(): void
+    {
+        $product = Product::create([
+            'sku' => 'AUDIT-SKU-001',
+            'title' => 'Boxer Pima Auditoria',
+            'slug' => 'boxer-pima-auditoria',
+            'price' => 380.00,
+            'cost' => 120.00,
+            'type' => 'physical',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'AUDIT-SKU-001-M',
+            'price' => 380.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        $inventory = Inventory::create([
+            'variant_id' => $variant->id,
+            'location' => 'warehouse-1',
+            'quantity' => 20,
+            'reserved' => 0,
+            'type' => 'physical',
+        ]);
+
+        $payload = [
+            'counts' => [
+                [
+                    'sku' => 'AUDIT-SKU-001-M',
+                    'physical_counted' => 18,
+                    'reason' => 'Merma en estante por prueba de calidad',
+                ],
+            ],
+            'reconcile_kardex' => true,
+        ];
+
+        $response = $this->postJson('/api/v1/inventory/cycle-counts', $payload);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('ira_accuracy_score', 90)
+            ->assertJsonPath('status', 'reconciled')
+            ->assertJsonPath('total_units_counted', 18)
+            ->assertJsonPath('total_variance_units', 2);
+
+        // Verificacion de persistencia de auditoria
+        $this->assertDatabaseHas('cycle_counts', [
+            'sample_sku_count' => 1,
+            'total_units_counted' => 18,
+            'total_variance_units' => 2,
+            'ira_accuracy_score' => 90.00,
+            'status' => 'reconciled',
+        ]);
+
+        // Verificacion de ajuste de inventario
+        $inventory->refresh();
+        $this->assertEquals(18, $inventory->quantity);
+
+        // Verificacion de movimiento de auditoria en Kardex
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_id' => $inventory->id,
+            'quantity' => -2,
+            'quantity_before' => 20,
+            'quantity_after' => 18,
+        ]);
+    }
+
+    public function test_portal_inventory_hydrates_cycle_counts_in_blade(): void
+    {
+        $user = User::factory()->create(['role' => 'portal']);
+
+        CycleCount::create([
+            'count_date' => now()->toDateString(),
+            'sample_sku_count' => 3,
+            'total_units_counted' => 45,
+            'total_variance_units' => 1,
+            'ira_accuracy_score' => 97.83,
+            'audited_by' => 'Auditor Certificado',
+            'status' => 'reconciled',
+            'details_json' => [
+                ['sku' => 'TEST-SKU-1', 'variance' => 1],
+            ],
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/inventario-catalogo');
+
+        $response->assertOk()
+            ->assertSee('window.serverCycleCounts', false)
+            ->assertSee('Auditor Certificado');
     }
 }
 

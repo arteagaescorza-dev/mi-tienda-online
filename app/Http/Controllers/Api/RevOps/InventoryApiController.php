@@ -10,6 +10,8 @@ use App\Models\Supplier;
 use App\Models\SupplierCreditAgreement;
 use App\Models\ScrapedPendingItem;
 use App\Models\CycleCount;
+use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductBundle;
@@ -459,57 +461,116 @@ class InventoryApiController extends Controller
     {
         $validated = $request->validate([
             'counts' => 'required|array|min:1',
-            'counts.*.variant_id' => 'required|integer',
+            'counts.*.variant_id' => 'nullable|integer',
+            'counts.*.sku' => 'nullable|string|max:100',
             'counts.*.physical_counted' => 'required|integer|min:0',
+            'counts.*.reason' => 'nullable|string|max:255',
+            'reconcile_kardex' => 'nullable|boolean',
         ]);
 
-        $totalCounted = 0;
-        $totalVariance = 0;
-        $details = [];
+        return DB::transaction(function () use ($validated, $request) {
+            $totalCounted = 0;
+            $totalSystem = 0;
+            $totalVariance = 0;
+            $details = [];
+            $shouldReconcile = $request->boolean('reconcile_kardex');
 
-        foreach ($validated['counts'] as $countData) {
-            $variant = ProductVariant::with('inventory')->find($countData['variant_id']);
-            if ($variant) {
-                $systemStock = $variant->inventory ? $variant->inventory->quantity : 0;
-                $physical = $countData['physical_counted'];
-                $variance = $physical - $systemStock;
+            foreach ($validated['counts'] as $countData) {
+                $variant = null;
+                $sku = $countData['sku'] ?? null;
+                $variantId = $countData['variant_id'] ?? null;
 
-                $totalCounted += $physical;
-                $totalVariance += abs($variance);
+                if ($variantId) {
+                    $variant = ProductVariant::with(['inventory', 'product'])->find($variantId);
+                }
+                if (!$variant && $sku) {
+                    $variant = ProductVariant::with(['inventory', 'product'])->where('sku', $sku)->first();
+                    if (!$variant) {
+                        $product = Product::with(['variants.inventories'])->where('sku', $sku)->first();
+                        $variant = $product?->variants?->first();
+                    }
+                }
 
-                $details[] = [
-                    'variant_id' => $variant->id,
-                    'sku' => $variant->sku,
-                    'system_stock' => $systemStock,
-                    'physical_counted' => $physical,
-                    'variance' => $variance,
-                ];
+                if ($variant) {
+                    $inventory = Inventory::firstOrCreate(
+                        ['variant_id' => $variant->id, 'location' => 'warehouse-1'],
+                        ['quantity' => 0, 'reserved' => 0, 'type' => 'physical']
+                    );
+
+                    $systemStock = (int) $inventory->quantity;
+                    $physical = (int) $countData['physical_counted'];
+                    $variance = $physical - $systemStock;
+
+                    $totalCounted += $physical;
+                    $totalSystem += $systemStock;
+                    $totalVariance += abs($variance);
+
+                    if ($shouldReconcile && $variance !== 0) {
+                        $prevQty = $inventory->quantity;
+                        $inventory->quantity = $physical;
+                        $inventory->save();
+
+                        $reasonText = sprintf(
+                            'AJUSTE_AUDITORIA_CIEGA - SKU: %s | Discrepancia: %s%d uds | %s',
+                            $variant->sku,
+                            $variance > 0 ? '+' : '',
+                            $variance,
+                            $countData['reason'] ?? 'Merma operativa'
+                        );
+                        if (strlen($reasonText) > 250) {
+                            $reasonText = substr($reasonText, 0, 247) . '...';
+                        }
+
+                        InventoryMovement::create([
+                            'inventory_id' => $inventory->id,
+                            'user_id' => auth()->id(),
+                            'quantity' => $variance,
+                            'quantity_before' => $prevQty,
+                            'quantity_after' => $physical,
+                            'reason' => $reasonText,
+                        ]);
+                    }
+
+                    $details[] = [
+                        'variant_id' => $variant->id,
+                        'sku' => $variant->sku,
+                        'product_name' => $variant->product?->title ?? $variant->sku,
+                        'system_stock' => $systemStock,
+                        'physical_counted' => $physical,
+                        'variance' => $variance,
+                        'reason' => $countData['reason'] ?? 'Merma operativa',
+                    ];
+                }
             }
-        }
 
-        $totalTheoretical = $totalCounted + $totalVariance;
-        $iraScore = $totalTheoretical > 0 
-            ? max(0, min(100, round((1 - ($totalVariance / $totalTheoretical)) * 100, 2))) 
-            : 100.00;
+            $totalTheoretical = $totalCounted + $totalVariance;
+            $iraScore = $totalTheoretical > 0 
+                ? max(0, min(100, round((1 - ($totalVariance / $totalTheoretical)) * 100, 2))) 
+                : 100.00;
 
-        $cycleCount = CycleCount::create([
-            'count_date' => now()->toDateString(),
-            'sample_sku_count' => count($details),
-            'total_units_counted' => $totalCounted,
-            'total_variance_units' => $totalVariance,
-            'ira_accuracy_score' => $iraScore,
-            'audited_by' => auth()->user() ? auth()->user()->name : 'Operador Almacén',
-            'status' => $totalVariance === 0 ? 'reconciled' : 'flagged',
-            'details_json' => $details,
-        ]);
+            $status = ($totalVariance === 0 || $shouldReconcile) ? 'reconciled' : 'flagged';
 
-        return response()->json([
-            'success' => true,
-            'cycle_count_id' => $cycleCount->id,
-            'ira_accuracy_score' => $iraScore,
-            'status' => $cycleCount->status,
-            'details' => $details,
-        ]);
+            $cycleCount = CycleCount::create([
+                'count_date' => now()->toDateString(),
+                'sample_sku_count' => count($details),
+                'total_units_counted' => $totalCounted,
+                'total_variance_units' => $totalVariance,
+                'ira_accuracy_score' => $iraScore,
+                'audited_by' => auth()->user() ? auth()->user()->name : 'Operador Almacén',
+                'status' => $status,
+                'details_json' => $details,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'cycle_count_id' => $cycleCount->id,
+                'ira_accuracy_score' => $iraScore,
+                'status' => $cycleCount->status,
+                'total_units_counted' => $totalCounted,
+                'total_variance_units' => $totalVariance,
+                'details' => $details,
+            ]);
+        });
     }
 
     /**

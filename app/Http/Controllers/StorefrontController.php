@@ -20,6 +20,7 @@ use App\Models\CustomerSubscription;
 use App\Models\DunningRetryLog;
 use App\Models\VendorBill;
 use App\Models\ProductBundle;
+use App\Models\CycleCount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -615,6 +616,24 @@ class StorefrontController extends Controller
                 ];
             })->values();
 
+        $portalCycleCounts = CycleCount::query()
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function ($cc) {
+                return [
+                    'id' => $cc->id,
+                    'date' => $cc->count_date ? \Carbon\Carbon::parse($cc->count_date)->format('d/m/Y') : now()->format('d/m/Y'),
+                    'skuCount' => (int) $cc->sample_sku_count,
+                    'totalCounted' => (int) $cc->total_units_counted,
+                    'totalVariance' => (int) $cc->total_variance_units,
+                    'iraScore' => (float) $cc->ira_accuracy_score,
+                    'auditedBy' => $cc->audited_by,
+                    'status' => $cc->status,
+                    'details' => $cc->details_json,
+                ];
+            })->values();
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -629,6 +648,7 @@ class StorefrontController extends Controller
             'portalPurchaseKardex' => $portalPurchaseKardex,
             'portalCreditAgreements' => $portalCreditAgreements,
             'portalProductBundles' => $portalProductBundles,
+            'portalCycleCounts' => $portalCycleCounts,
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()

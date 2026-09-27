@@ -51,6 +51,7 @@
         window.serverPurchaseKardex = @json($portalPurchaseKardex);
         window.serverCreditAgreements = @json($portalCreditAgreements ?? []);
         window.serverProductBundles = @json($portalProductBundles ?? []);
+        window.serverCycleCounts = @json($portalCycleCounts ?? []);
     </script>
 
     <!-- ========================================================================= -->
