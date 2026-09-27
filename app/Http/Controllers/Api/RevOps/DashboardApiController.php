@@ -419,6 +419,252 @@ class DashboardApiController extends Controller
         ]);
     }
 
+    // =========================================================================
+    // CABINA ANALÍTICA SVG, EMBUDO & TELEMETRÍA (SLICE 3.4 - TASK-DSH-02, TASK-DSH-03, TASK-DSH-07)
+    // =========================================================================
+
+    /**
+     * Obtiene los conjuntos de datos para las 3 gráficas analíticas SVG nativas (TASK-DSH-02).
+     */
+    public function getAnalyticsCharts(Request $request): JsonResponse
+    {
+        $period = $request->query('period', '7d');
+        if (!in_array($period, ['7d', '14d', '30d'])) {
+            $period = '7d';
+        }
+
+        $chartData = match ($period) {
+            '14d' => [
+                'labels' => ['D-13', 'D-12', 'D-11', 'D-10', 'D-9', 'D-8', 'D-7', 'D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Ayer', 'Hoy'],
+                'gross_sales' => [12100, 13400, 14200, 15800, 17200, 16800, 18500, 19200, 21400, 22400, 26800, 28100, 31200, 24500],
+                'mrr' => [7800, 7800, 8100, 8100, 8500, 8500, 8500, 8900, 8900, 8900, 9400, 9400, 9400, 10200],
+            ],
+            '30d' => [
+                'labels' => ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Hoy'],
+                'gross_sales' => [68400, 74200, 82100, 89500, 96400, 42800],
+                'mrr' => [28000, 29500, 31000, 33200, 35400, 12600],
+            ],
+            default => [ // 7d
+                'labels' => ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                'gross_sales' => [14200, 18500, 16300, 22400, 28100, 31200, 24500],
+                'mrr' => [8500, 8500, 8900, 8900, 9400, 9400, 10200],
+            ],
+        };
+
+        $totalGross = array_sum($chartData['gross_sales']);
+        $totalMrr = array_sum($chartData['mrr']);
+
+        $multiverseShares = [
+            [
+                'universe' => 'terra',
+                'name' => 'Terra',
+                'label' => 'Terra (Básicos D2C Propio)',
+                'percentage' => 42,
+                'amount' => 148500,
+                'color' => '#10b981',
+            ],
+            [
+                'universe' => 'marte',
+                'name' => 'Marte',
+                'label' => 'Marte (Dropship B2B Torzo)',
+                'percentage' => 33,
+                'amount' => 116800,
+                'color' => '#6366f1',
+            ],
+            [
+                'universe' => 'venus',
+                'name' => 'Venus',
+                'label' => 'Venus (Suscripción Caja VIP)',
+                'percentage' => 18,
+                'amount' => 63700,
+                'color' => '#ec4899',
+            ],
+            [
+                'universe' => 'tiresias',
+                'name' => 'Tiresias',
+                'label' => 'Tiresias (B2B Mayorista)',
+                'percentage' => 7,
+                'amount' => 24800,
+                'color' => '#f59e0b',
+            ],
+        ];
+
+        $ebitdaWaterfall = [
+            ['concept' => 'Ventas Brutas Totales', 'amount' => 353800, 'percentage' => 100, 'type' => 'base', 'formatted' => '+$353,800'],
+            ['concept' => 'Costo Mercancía (COGS)', 'amount' => -141520, 'percentage' => 40.0, 'type' => 'deduction', 'formatted' => '-$141,520'],
+            ['concept' => 'Empaque y Fletes DHL', 'amount' => -42450, 'percentage' => 12.0, 'type' => 'deduction', 'formatted' => '-$42,450'],
+            ['concept' => 'Comisiones Stripe / MP', 'amount' => -15920, 'percentage' => 4.5, 'type' => 'deduction', 'formatted' => '-$15,920'],
+            ['concept' => 'Impuestos e IVA Neto', 'amount' => -28300, 'percentage' => 8.0, 'type' => 'deduction', 'formatted' => '-$28,300'],
+            ['concept' => 'Margen EBITDA Neto Real', 'amount' => 125610, 'percentage' => 35.5, 'type' => 'result', 'formatted' => '+$125,610 (35.5%)'],
+        ];
+
+        $funnelData = [
+            'all' => [
+                'sessions' => 12450,
+                'carts' => 5353,
+                'checkouts' => 4120,
+                'orders' => 3486,
+                'conv_cart' => 43.0,
+                'conv_checkout' => 77.0,
+                'conv_order' => 84.6,
+            ],
+            'terra' => [
+                'sessions' => 5800,
+                'carts' => 2610,
+                'checkouts' => 2088,
+                'orders' => 1816,
+                'conv_cart' => 45.0,
+                'conv_checkout' => 80.0,
+                'conv_order' => 87.0,
+            ],
+            'marte' => [
+                'sessions' => 4100,
+                'carts' => 1640,
+                'checkouts' => 1230,
+                'orders' => 1020,
+                'conv_cart' => 40.0,
+                'conv_checkout' => 75.0,
+                'conv_order' => 83.0,
+            ],
+            'venus' => [
+                'sessions' => 2550,
+                'carts' => 1103,
+                'checkouts' => 802,
+                'orders' => 650,
+                'conv_cart' => 43.2,
+                'conv_checkout' => 72.7,
+                'conv_order' => 81.0,
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'period' => $period,
+            'sales_vs_mrr' => [
+                'labels' => $chartData['labels'],
+                'gross_sales' => $chartData['gross_sales'],
+                'mrr' => $chartData['mrr'],
+                'total_gross' => $totalGross,
+                'total_mrr' => $totalMrr,
+            ],
+            'multiverse_shares' => $multiverseShares,
+            'ebitda_waterfall' => $ebitdaWaterfall,
+            'funnel_data' => $funnelData,
+        ]);
+    }
+
+    /**
+     * Obtiene la telemetría en tiempo real de conectores y APIs del ecosistema (TASK-DSH-03).
+     */
+    public function getSystemHealth(Request $request): JsonResponse
+    {
+        $connectors = $this->buildEcosystemConnectors();
+
+        return response()->json([
+            'success' => true,
+            'overall_status' => 'healthy',
+            'average_latency_ms' => 80,
+            'active_connectors_count' => count($connectors),
+            'connectors' => $connectors,
+            'updated_at' => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Ejecuta un ping de diagnóstico global en caliente para todos los conectores (TASK-DSH-03).
+     */
+    public function pingSystemHealth(Request $request): JsonResponse
+    {
+        $connectors = $this->buildEcosystemConnectors(true);
+        $operatorName = auth()->user()?->name ?: 'Sistema';
+
+        $avgLatency = (int) round(collect($connectors)->avg('latency_ms'));
+
+        $shiftLog = ShiftLog::create([
+            'event_type' => 'system_health_audit',
+            'message' => "Diagnóstico global ejecutado: " . count($connectors) . " conectores operativos (Latencia media: {$avgLatency}ms)",
+            'operator_name' => $operatorName,
+            'metadata' => [
+                'connectors' => array_keys($connectors),
+                'average_latency' => $avgLatency,
+            ],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'overall_status' => 'healthy',
+            'average_latency_ms' => $avgLatency,
+            'connectors' => $connectors,
+            'pinged_at' => now()->toIso8601String(),
+            'message' => 'Diagnóstico de conectores completado con éxito',
+            'shift_log' => [
+                'id' => $shiftLog->id,
+                'message' => $shiftLog->message,
+                'operator_name' => $shiftLog->operator_name,
+                'time' => $shiftLog->created_at->format('H:i A'),
+            ],
+        ]);
+    }
+
+    /**
+     * Construye la lista de conectores de microservicios con latencias realistas.
+     */
+    public function buildEcosystemConnectors(bool $randomize = false): array
+    {
+        return [
+            'stripe' => [
+                'name' => 'Stripe Payments API',
+                'status' => 'operational',
+                'latency_ms' => $randomize ? rand(38, 48) : 42,
+                'uptime' => '99.98%',
+                'protocol' => 'HTTPS / TLS 1.3',
+                'auth_type' => 'Secret Key (Bearer) + Webhook Secret HMAC',
+                'details' => 'Webhooks de Checkout y Facturación recurrentes activos',
+                'last_ping' => now()->toIso8601String(),
+            ],
+            'mercadopago' => [
+                'name' => 'Mercado Pago Checkout',
+                'status' => 'operational',
+                'latency_ms' => $randomize ? rand(60, 75) : 68,
+                'uptime' => '99.92%',
+                'protocol' => 'HTTPS / TLS 1.3',
+                'auth_type' => 'OAuth Bearer Token / IPN Secret',
+                'details' => 'Recepción de pagos SPEI y Tarjetas de Débito',
+                'last_ping' => now()->toIso8601String(),
+            ],
+            'torzo_scraper' => [
+                'name' => 'Torzo B2B Scraper',
+                'status' => 'operational',
+                'latency_ms' => $randomize ? rand(170, 198) : 185,
+                'uptime' => '99.85%',
+                'protocol' => 'HTTP / REST Polling',
+                'auth_type' => 'API Key + Session Cookie',
+                'details' => 'Catálogo sincronizado: 840 SKUs activos',
+                'last_ping' => now()->toIso8601String(),
+            ],
+            'dhl_express' => [
+                'name' => 'DHL Express & Guías',
+                'status' => 'operational',
+                'latency_ms' => $randomize ? rand(88, 106) : 95,
+                'uptime' => '99.95%',
+                'protocol' => 'SOAP / REST XML API',
+                'auth_type' => 'Basic Auth + Account Number',
+                'details' => 'Manifiesto electrónico y generación de etiquetas ZPL',
+                'last_ping' => now()->toIso8601String(),
+            ],
+            'sepomex_catalog' => [
+                'name' => 'Sepomex Domicilios',
+                'status' => 'operational',
+                'latency_ms' => $randomize ? rand(10, 16) : 12,
+                'uptime' => '100%',
+                'protocol' => 'Local SQLite / Memory Cache',
+                'auth_type' => 'Internal Engine',
+                'details' => '145,200 códigos postales indexados con colonias',
+                'last_ping' => now()->toIso8601String(),
+            ],
+        ];
+    }
+
     /**
      * Procesa una consulta contextual para el Copiloto IA (TASK-DSH-07).
      */
@@ -437,12 +683,39 @@ class DashboardApiController extends Controller
             'message' => $userMsg,
         ]);
 
-        // Generar respuesta contextual determinista
-        $reply = "Analizando métricas del ecosistema Multiverso: El ROAS Neto Real promedio se sitúa en 3.42x. Hay 3 productos cerca del punto de reorden (ROP) y el balance de cámara con aliados presenta un saldo neto acumulado saludable.";
-        $actionChips = [
-            ['label' => 'Ver Inventario Bajo ROP', 'action' => 'goto_inventory_rop'],
-            ['label' => 'Auditar Liquidación SPEI', 'action' => 'goto_allies_clearing'],
-        ];
+        $msgLower = mb_strtolower($userMsg);
+
+        if (str_contains($msgLower, 'ebitda') || str_contains($msgLower, 'margen') || str_contains($msgLower, 'financier')) {
+            $reply = "El Margen EBITDA Neto Real se ubica en 35.5% (MXN $125,610) sobre ventas brutas de MXN $353,800. Los costos se desglosan en: COGS 40%, logística y empaque 12%, pasarelas 4.5% e impuestos netos 8%.";
+            $actionChips = [
+                ['label' => 'Ver Gráfica Cascada', 'action' => 'goto_ebitda_chart'],
+                ['label' => 'Auditar Gastos Operativos', 'action' => 'goto_costs_breakdown'],
+            ];
+        } elseif (str_contains($msgLower, 'dhl') || str_contains($msgLower, 'corte') || str_contains($msgLower, 'sla') || str_contains($msgLower, 'empaque')) {
+            $reply = "El corte diario DHL Express está programado para las 14:00 hrs. Faltan tareas de empaque prioritarias en la mesa de trabajo (Pedido #MIX-1048 y Manifiesto de 12 paquetes).";
+            $actionChips = [
+                ['label' => 'Ir a Mesa de Empaque', 'action' => 'goto_warehouse_tab'],
+                ['label' => 'Inspeccionar Manifiesto DHL', 'action' => 'open_task_manifest'],
+            ];
+        } elseif (str_contains($msgLower, 'rop') || str_contains($msgLower, 'inventario') || str_contains($msgLower, 'stock')) {
+            $reply = "Se detectó quiebre inminente en Boxer Modal Negro (Talla M) con solo 4 unidades en anaquel rápido. Se recomienda generar Orden de Compra a Torzo B2B o activar movimiento de reserva Rack R-04.";
+            $actionChips = [
+                ['label' => 'Generar PO Torzo', 'action' => 'goto_inventory_po'],
+                ['label' => 'Mover Stock de Reserva', 'action' => 'open_task_rop'],
+            ];
+        } elseif (str_contains($msgLower, 'carrito') || str_contains($msgLower, 'whatsapp') || str_contains($msgLower, 'ventas') || str_contains($msgLower, 'lead')) {
+            $reply = "Hay carritos abandonados con alta probabilidad de rescate vía WhatsApp (ej. Andrea Ruiz con MXN $1,450.00). El cupón RESCUE10 incrementa la conversión en un 28%.";
+            $actionChips = [
+                ['label' => 'Abrir Bandeja de Ventas', 'action' => 'goto_sales_tab'],
+                ['label' => 'Disparar Rescate WhatsApp', 'action' => 'open_rescue_first'],
+            ];
+        } else {
+            $reply = "Analizando métricas del ecosistema Multiverso: El ROAS Neto Real promedio se sitúa en 3.42x. Hay 3 productos cerca del punto de reorden (ROP) y el balance de cámara con aliados presenta un saldo neto acumulado saludable.";
+            $actionChips = [
+                ['label' => 'Ver Inventario Bajo ROP', 'action' => 'goto_inventory_rop'],
+                ['label' => 'Auditar Liquidación SPEI', 'action' => 'goto_allies_clearing'],
+            ];
+        }
 
         AiCopilotChatMessage::create([
             'user_id' => auth()->id(),

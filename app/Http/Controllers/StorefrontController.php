@@ -377,6 +377,9 @@ class StorefrontController extends Controller
             ->latest('id')
             ->get();
 
+        $analyticsCharts = $dashboardApi->getAnalyticsCharts($request)->getData(true);
+        $systemHealth = $dashboardApi->getSystemHealth($request)->getData(true);
+
         $serverDashboardData = [
             'userRole' => $userRole,
             'initialTab' => $initialTab,
@@ -385,6 +388,8 @@ class StorefrontController extends Controller
             'alerts' => $this->dashboardAlerts(),
             'operationalTasks' => $operationalTasks,
             'salesIncidents' => $salesIncidents,
+            'analyticsCharts' => $analyticsCharts,
+            'systemHealth' => $systemHealth,
             'shiftLogs' => $shiftLogs->map(fn ($l) => [
                 'id' => $l->id,
                 'event_type' => $l->event_type,
@@ -404,6 +409,8 @@ class StorefrontController extends Controller
             'alerts' => $this->dashboardAlerts(),
             'operationalTasks' => $operationalTasks,
             'salesIncidents' => $salesIncidents,
+            'analyticsCharts' => $analyticsCharts,
+            'systemHealth' => $systemHealth,
             'shiftLogs' => $shiftLogs,
             'serverDashboardData' => $serverDashboardData,
         ]);

@@ -11,6 +11,7 @@ use App\Models\Supplier;
 use App\Models\OperationalTask;
 use App\Models\ShiftLog;
 use App\Models\SupportCase;
+use App\Models\AiCopilotChatMessage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -393,6 +394,160 @@ class DashboardHub1ModuleTest extends TestCase
                 'success' => true,
                 'postal_code' => '99999',
             ]);
+    }
+
+    public function test_can_fetch_executive_analytics_charts_with_periods(): void
+    {
+        // 1. Periodo 7d por defecto
+        $response7d = $this->getJson('/api/v1/dashboard/analytics/charts');
+
+        $response7d->assertOk()
+            ->assertJson([
+                'success' => true,
+                'period' => '7d',
+            ])
+            ->assertJsonStructure([
+                'success',
+                'period',
+                'sales_vs_mrr' => [
+                    'labels',
+                    'gross_sales',
+                    'mrr',
+                    'total_gross',
+                    'total_mrr',
+                ],
+                'multiverse_shares' => [
+                    '*' => ['universe', 'name', 'label', 'percentage', 'amount', 'color'],
+                ],
+                'ebitda_waterfall' => [
+                    '*' => ['concept', 'amount', 'percentage', 'type', 'formatted'],
+                ],
+                'funnel_data' => [
+                    'all' => ['sessions', 'carts', 'checkouts', 'orders', 'conv_cart', 'conv_checkout', 'conv_order'],
+                    'terra',
+                    'marte',
+                    'venus',
+                ],
+            ]);
+
+        $this->assertCount(7, $response7d->json('sales_vs_mrr.labels'));
+
+        // 2. Periodo 14d
+        $response14d = $this->getJson('/api/v1/dashboard/analytics/charts?period=14d');
+        $response14d->assertOk()
+            ->assertJson(['period' => '14d']);
+        $this->assertCount(14, $response14d->json('sales_vs_mrr.labels'));
+
+        // 3. Periodo 30d
+        $response30d = $this->getJson('/api/v1/dashboard/analytics/charts?period=30d');
+        $response30d->assertOk()
+            ->assertJson(['period' => '30d']);
+        $this->assertCount(6, $response30d->json('sales_vs_mrr.labels'));
+    }
+
+    public function test_can_fetch_and_ping_system_health_telemetry(): void
+    {
+        // 1. Consulta inicial de telemetría
+        $response = $this->getJson('/api/v1/dashboard/system-health');
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'overall_status' => 'healthy',
+            ])
+            ->assertJsonStructure([
+                'success',
+                'overall_status',
+                'average_latency_ms',
+                'active_connectors_count',
+                'connectors' => [
+                    'stripe',
+                    'mercadopago',
+                    'torzo_scraper',
+                    'dhl_express',
+                    'sepomex_catalog',
+                ],
+            ]);
+
+        // 2. Ejecutar ping de diagnóstico global en caliente
+        $pingResponse = $this->postJson('/api/v1/dashboard/system-health/ping');
+
+        $pingResponse->assertOk()
+            ->assertJson([
+                'success' => true,
+                'overall_status' => 'healthy',
+            ])
+            ->assertJsonStructure([
+                'success',
+                'overall_status',
+                'average_latency_ms',
+                'connectors',
+                'pinged_at',
+                'shift_log' => [
+                    'id',
+                    'message',
+                    'operator_name',
+                    'time',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('shift_logs', [
+            'event_type' => 'system_health_audit',
+        ]);
+    }
+
+    public function test_can_chat_with_copilot_and_receive_action_chips(): void
+    {
+        $response = $this->postJson('/api/v1/dashboard/copilot/chat', [
+            'message' => '¿Cuál es el margen EBITDA neto de hoy?',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonStructure([
+                'success',
+                'reply',
+                'action_chips',
+            ]);
+
+        $reply = $response->json('reply');
+        $this->assertStringContainsString('35.5%', $reply);
+        $this->assertStringContainsString('EBITDA', $reply);
+
+        $chips = $response->json('action_chips');
+        $this->assertIsArray($chips);
+        $this->assertNotEmpty($chips);
+
+        // Verificar persistencia en base de datos
+        $this->assertDatabaseHas('ai_copilot_chat_messages', [
+            'sender' => 'user',
+            'message' => '¿Cuál es el margen EBITDA neto de hoy?',
+        ]);
+
+        $this->assertDatabaseHas('ai_copilot_chat_messages', [
+            'sender' => 'assistant',
+        ]);
+    }
+
+    public function test_portal_dashboard_renders_executive_svg_charts_and_telemetry(): void
+    {
+        $adminUser = User::factory()->create([
+            'role' => 'portal',
+            'email' => 'direccion.ejecutiva@mitienda.online',
+        ]);
+
+        $response = $this->actingAs($adminUser)->get('/admin/dashboard');
+
+        $response->assertOk()
+            ->assertSee('Facturación D2C vs MRR Recurrente')
+            ->assertSee('Cuota por Vitrina Multiverso')
+            ->assertSee('Cascada de Margen EBITDA')
+            ->assertSee('Embudo Comercial Multiverso Accionable')
+            ->assertSee('Stripe Payments API')
+            ->assertSee('Copiloto Estratégico Multiverso')
+            ->assertSee('window.serverDashboardData', false);
     }
 }
 
