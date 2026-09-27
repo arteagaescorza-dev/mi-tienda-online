@@ -123,6 +123,10 @@
             <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="12" y1="1" x2="12" y2="7"/></svg>
             <span>7. Convenios &amp; Aliados</span>
           </a>
+          <a class="module-link {{ request()->routeIs('portal.governance') ? 'active' : '' }}" href="{{ route('portal.governance') }}" data-screen="governance" title="Hub 8: Gobernanza, Auditoria &amp; RBAC">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>8. Gobernanza &amp; RBAC</span>
+          </a>
         </nav>
       </div>
 

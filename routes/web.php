@@ -44,6 +44,8 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::get('/admin/inventario-catalogo', [StorefrontController::class, 'portalInventory'])->name('portal.inventory');
 	Route::get('/admin/logistica', [PortalLogisticsController::class, 'index'])->name('portal.logistics');
 	Route::get('/admin/convenios', [PortalAlliesController::class, 'index'])->name('portal.allies');
+	Route::get('/admin/gobernanza', [\App\Http\Controllers\PortalGovernanceController::class, 'index'])->name('portal.governance');
+	Route::post('/admin/gobernanza/entorno', [\App\Http\Controllers\PortalGovernanceController::class, 'updateEnvironment'])->name('portal.governance.environment.update');
 	Route::get('/admin/modulos/{module}', [StorefrontController::class, 'portalModule'])->name('portal.module');
 	Route::get('/admin/proveedores/colores', [SupplierColorMappingController::class, 'index'])->name('portal.suppliers.colors');
 	Route::post('/admin/inventario/{inventory}/movimientos', [InventoryMovementController::class, 'store'])->name('portal.inventory.movements.store');
