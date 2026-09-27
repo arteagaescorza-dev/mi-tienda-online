@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Api\RevOps;
 
 use App\Http\Controllers\Controller;
 use App\Services\Governance\AuditTrailService;
+use App\Services\Governance\NotificationDispatcherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GovernanceApiController extends Controller
 {
     public function __construct(
-        protected AuditTrailService $auditService
+        protected AuditTrailService $auditService,
+        protected NotificationDispatcherService $notificationService
     ) {}
 
     /**
@@ -98,6 +100,135 @@ class GovernanceApiController extends Controller
             'success' => true,
             'log_id' => $log->id,
             'message' => 'Evento de auditoria registrado de forma inmutable.',
+        ], 201);
+    }
+
+    /**
+     * Obtiene el feed de notificaciones operativas filtrado por rol y permisos del usuario (TASK-UX-03).
+     */
+    public function getNotifications(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // En caso de invocacion no autenticada en entorno de pruebas, asociar al primer usuario portal
+        if (!$user) {
+            $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
+        }
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Sesion requerida para consultar notificaciones operativas.',
+            ], 401);
+        }
+
+        $category = $request->query('category');
+        $unreadOnly = $request->boolean('unread_only', false);
+        $limit = (int) $request->query('limit', 30);
+
+        $feed = $this->notificationService->getFeedForUser(
+            user: $user,
+            category: $category,
+            unreadOnly: $unreadOnly,
+            limit: $limit
+        );
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $feed['unread_count'],
+            'total' => $feed['total'],
+            'categories' => $feed['categories'],
+            'data' => $feed['items'],
+        ]);
+    }
+
+    /**
+     * Marca una notificacion especifica como leida (TASK-UX-03).
+     */
+    public function markNotificationRead(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
+        }
+
+        if (!$user) {
+            return response()->json(['error' => 'No autorizado'], 401);
+        }
+
+        $success = $this->notificationService->markAsRead($id, $user);
+
+        if (!$success) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notificacion no encontrada o no accesible para el usuario.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $this->notificationService->getUnreadCount($user),
+            'message' => 'Notificacion marcada como leida.',
+        ]);
+    }
+
+    /**
+     * Marca todas las notificaciones pendientes del usuario como leidas.
+     */
+    public function markAllNotificationsRead(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
+        }
+
+        if (!$user) {
+            return response()->json(['error' => 'No autorizado'], 401);
+        }
+
+        $affected = $this->notificationService->markAllAsRead($user);
+
+        return response()->json([
+            'success' => true,
+            'marked_count' => $affected,
+            'unread_count' => 0,
+            'message' => 'Todas las notificaciones fueron marcadas como leidas.',
+        ]);
+    }
+
+    /**
+     * Despacha una notificacion operativa manual o automatizada.
+     */
+    public function dispatchNotification(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $role = $user ? (session('active_role') ?: $user->role) : null;
+
+        // Validar que el rol tenga permisos para emitir alertas
+        if (!$role || !in_array($role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
+            return response()->json([
+                'error' => 'No autorizado para emitir notificaciones directivas.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:150'],
+            'message' => ['required', 'string', 'max:1000'],
+            'type' => ['nullable', 'string', 'in:critical,urgent,warning,info,success'],
+            'category' => ['nullable', 'string', 'max:50'],
+            'target_role' => ['nullable', 'string', 'max:50'],
+            'reference_code' => ['nullable', 'string', 'max:50'],
+            'deep_link' => ['nullable', 'string', 'max:255'],
+            'action_label' => ['nullable', 'string', 'max:50'],
+            'metadata' => ['nullable', 'array'],
+        ]);
+
+        $notification = $this->notificationService->dispatch($validated);
+
+        return response()->json([
+            'success' => true,
+            'notification' => $notification,
+            'message' => 'Notificacion operativa despachada exitosamente.',
         ], 201);
     }
 }

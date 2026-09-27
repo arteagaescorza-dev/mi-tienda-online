@@ -351,6 +351,44 @@
       }, 2400);
     }
 
+    window.showToast = function (message, type, duration) {
+      type = type || 'info';
+      duration = duration || 5000;
+      var container = document.getElementById('global-toast-container');
+      if (container) {
+        var toastItem = document.createElement('div');
+        toastItem.className = 'toast-stack-item toast-' + type;
+        toastItem.style.cssText = 'background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); pointer-events: auto; transition: all 0.3s ease; transform: translateY(10px); opacity: 0; border: 1px solid rgba(255,255,255,0.1);';
+        if (type === 'success') toastItem.style.borderColor = 'rgba(16,185,129,0.5)';
+        if (type === 'error' || type === 'critical') toastItem.style.borderColor = 'rgba(239,68,68,0.5)';
+        if (type === 'warning') toastItem.style.borderColor = 'rgba(245,158,11,0.5)';
+
+        toastItem.innerHTML = '<span>' + message + '</span><button type="button" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:16px; font-weight:bold; line-height:1;" aria-label="Cerrar">&times;</button>';
+        var closeBtn = toastItem.querySelector('button');
+        closeBtn.addEventListener('click', function () {
+          toastItem.style.opacity = '0';
+          toastItem.style.transform = 'translateY(10px)';
+          setTimeout(function () { toastItem.remove(); }, 300);
+        });
+
+        container.appendChild(toastItem);
+        setTimeout(function () {
+          toastItem.style.opacity = '1';
+          toastItem.style.transform = 'translateY(0)';
+        }, 20);
+
+        setTimeout(function () {
+          if (toastItem.parentElement) {
+            toastItem.style.opacity = '0';
+            toastItem.style.transform = 'translateY(10px)';
+            setTimeout(function () { toastItem.remove(); }, 300);
+          }
+        }, duration);
+      } else {
+        showShareToast(message);
+      }
+    };
+
     function closeAvailabilityModal() {
       if (!availabilityModal) {
         return;

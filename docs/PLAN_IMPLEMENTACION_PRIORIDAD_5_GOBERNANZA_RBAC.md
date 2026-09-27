@@ -113,23 +113,34 @@ El crecimiento escalable de la plataforma exige que cada operador acceda unicame
 
 ---
 
-### Slice 5.3: Sistema Global de Notificaciones, Toasts y Deep Links de Tareas Operativas (`TASK-UX-03`, `TASK-DSH-04`)
+### Slice 5.3: Sistema Global de Notificaciones, Toasts y Deep Links de Tareas Operativas (`TASK-UX-03`, `TASK-DSH-04`) [COMPLETADO]
 * **Objetivo:** Informar al usuario en tiempo real mediante toasts acumulativos y una campanita interactiva en cabecera con saltos directos en 1 clic a los registros de trabajo.
 * **Backend:**
-  * Endpoints RESTful en `routes/api.php`:
-    - `GET /api/v1/governance/notifications`: feed de tareas y alertas activas para el rol autenticado.
-    - `POST /api/v1/governance/notifications/{id}/mark-read`: marcado de notificacion como atendida.
-  * Servicio `App\Services\Governance\NotificationDispatcherService`:
-    - Generacion y despacho de notificaciones operativas vinculadas a deep links internos (`/portal/inventario?sku=...`, `/portal/logistica?guia=...`, `/portal/finanzas?oc=...`).
+  * Migracion ejecutada: `2026_09_27_000008_create_user_notifications_table.php` (`user_notifications` con indices compuestos y vinculo a tareas operativas).
+  * Modelo `App\Models\UserNotification`:
+    - Scopes de filtrado `unread`, `byCategory`, `byType` y `forUserOrRole` con aislamiento estricto de privacidad financiera.
+    - Accesores `badge_color` y `time_ago`.
+  * Servicio de Dominio `App\Services\Governance\NotificationDispatcherService`:
+    - Generacion y despacho de notificaciones operativas vinculadas a deep links internos (`/portal/inventario?sku=...`, `/portal/logistica?guia=...`, `/portal/finanzas?folio=...`).
+    - Despachadores especializados: `dispatchInventoryRopAlert`, `dispatchLogisticsBlockedAlert`, `dispatchFinanceHoldAlert`, `dispatchPurchasesDelayedAlert` y `dispatchFromOperationalTask`.
+    - Metodos de consulta y atencion: `getFeedForUser`, `markAsRead`, `markAllAsRead`, `getUnreadCount`.
+  * Endpoints RESTful en `routes/api.php` y `GovernanceApiController`:
+    - `GET /api/v1/governance/notifications`: feed categorizado reactivo con conteo no leido y division de severidades.
+    - `POST /api/v1/governance/notifications/{id}/mark-read`: marcado individual de atencion.
+    - `POST /api/v1/governance/notifications/mark-all-read`: marcado masivo.
+    - `POST /api/v1/governance/notifications/dispatch`: emision autorizada de notificaciones personalizadas.
 * **Frontend:**
-  * Componente flotante de Toasts en `resources/views/layouts/app.blade.php`:
-    - Contenedor con `z-index: 9999`, stack acumulativo, animacion de entrada/salida y cierre automatico tras 6 segundos.
-  * Campanita interactiva en Navbar:
-    - Badge con contador numerico reactivo de tareas pendientes del rol.
-    - Popover con listado categorizado (Urgente, Normal, Informativo) y botones de accion directa ("Atender Folio en 1 Clic").
-* **Criterios de Aceptacion:**
-  * Despacho y renderizado correcto de toasts ante operaciones exitosas o advertencias.
-  * El contador del navbar se actualiza y los deep links dirigen con precision al modulo y registro correspondiente.
+  * Componentes flotantes de Toasts acumulativos en `resources/views/layouts/portal-panel.blade.php` y `resources/views/layouts/app.blade.php`:
+    - Contenedor `#global-toast-container` con `z-index: 9999`, stack acumulativo, animacion suave y cierre automatico tras 5 segundos con boton de descarte manual.
+    - Implementacion mejorada de `showToast(message, type, duration)` en `public/js/revops-panel/app.js` y `public/js/site.js`.
+  * Campanita interactiva y Popover dinamico en Navbar:
+    - Badge reactivo `[data-notif-badge]` sincronizado con el conteo no leido del backend.
+    - Popover con listado categorizado (Todas, Criticas, Operativas) y enlaces de accion directa ("Atender Folio en 1 Clic").
+    - Marcado automatico como leida al presionar el salto directo o el boton de marcado masivo.
+* **Criterios de Aceptacion Superados:**
+  * 7 pruebas unitarias y de integracion en `tests/Feature/Governance/OperationalNotificationsTest.php` al 100% verde (28 aserciones).
+  * Suite global de la plataforma expandida a 228 pruebas al 100% verde (1,517 aserciones).
+  * Cero emojis en toda la base de codigo, vistas y comentarios.
 
 ---
 

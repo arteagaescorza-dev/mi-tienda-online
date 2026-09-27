@@ -260,6 +260,7 @@
             </div>
         </div>
     </div>
+    <div id="global-toast-container" class="toast-container fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full" aria-live="polite"></div>
     <script src="/js/site.js?v=20260909" defer></script>
 </body>
 </html>

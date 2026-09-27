@@ -37,55 +37,24 @@
       <div class="topbar-notif-wrapper">
         <button class="topbar-icon-btn" data-action="toggle-notifications" aria-label="Notificaciones" title="Notificaciones operativas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span class="topbar-badge" data-notif-badge>3</span>
+          <span class="topbar-badge" data-notif-badge style="display:none;">0</span>
         </button>
         <div class="notif-popover" data-notif-popover style="display:none;">
           <div class="notif-header">
             <div>
               <h3 class="notif-title">Centro de Notificaciones</h3>
-              <span class="notif-subtitle" data-notif-status-text>3 alertas operativas pendientes</span>
+              <span class="notif-subtitle" data-notif-status-text>Cargando alertas...</span>
             </div>
             <button class="notif-mark-read" data-action="mark-all-read">Marcar leidas</button>
           </div>
           <div class="notif-tabs">
-            <button class="notif-tab active" data-notif-tab="all">Todas (3)</button>
-            <button class="notif-tab" data-notif-tab="critical">Criticas (2)</button>
-            <button class="notif-tab" data-notif-tab="info">Operativas (1)</button>
+            <button class="notif-tab active" data-notif-tab="all">Todas (<span data-notif-count-all>0</span>)</button>
+            <button class="notif-tab" data-notif-tab="critical">Criticas (<span data-notif-count-critical>0</span>)</button>
+            <button class="notif-tab" data-notif-tab="info">Operativas (<span data-notif-count-info>0</span>)</button>
           </div>
-          {{-- MOCK Fase 3: sustituir por notificaciones reales del backend --}}
-          <div class="notif-list">
-            <div class="notif-item unread" data-notif-category="critical">
-              <div class="notif-icon-col"><span class="notif-alert-dot red"></span></div>
-              <div class="notif-content-col">
-                <div class="notif-item-title">Alerta ROP critica de inventario</div>
-                <p class="notif-item-desc">Hay referencias con stock disponible por debajo del punto de reorden.</p>
-                <div class="notif-item-footer">
-                  <span class="notif-time">Hace 8 min</span>
-                  <a class="button button-light notif-action-btn" href="{{ route('portal.inventory') }}">Ver Inventario</a>
-                </div>
-              </div>
-            </div>
-            <div class="notif-item unread" data-notif-category="critical">
-              <div class="notif-icon-col"><span class="notif-alert-dot emerald"></span></div>
-              <div class="notif-content-col">
-                <div class="notif-item-title">Pedido listo para empaque</div>
-                <p class="notif-item-desc">Un pedido con mercancia local y de proveedor quedo desbloqueado.</p>
-                <div class="notif-item-footer">
-                  <span class="notif-time">Hace 22 min</span>
-                  <a class="button button-light notif-action-btn" href="{{ route('portal.dashboard') }}">Ver Dashboard</a>
-                </div>
-              </div>
-            </div>
-            <div class="notif-item unread" data-notif-category="info">
-              <div class="notif-icon-col"><span class="notif-alert-dot amber"></span></div>
-              <div class="notif-content-col">
-                <div class="notif-item-title">Sincronizacion de proveedor con discrepancias</div>
-                <p class="notif-item-desc">Un proveedor reporto cambios de costo o disponibilidad recientes.</p>
-                <div class="notif-item-footer">
-                  <span class="notif-time">Hace 35 min</span>
-                  <a class="button button-light notif-action-btn" href="{{ route('portal.suppliers.colors') }}">Ver Proveedores</a>
-                </div>
-              </div>
+          <div class="notif-list" data-notif-list>
+            <div class="p-4 text-center text-xs text-slate-500" data-notif-loading>
+              Cargando notificaciones...
             </div>
           </div>
         </div>
@@ -312,6 +281,7 @@
     <div class="tooltip-body" data-tooltip-body></div>
   </div>
   <div class="toast" data-toast role="status"></div>
+  <div id="global-toast-container" class="toast-container fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full" aria-live="polite"></div>
 
   <script src="{{ asset('js/revops-panel/app.js') }}?v=20260926"></script>
   @stack('scripts')

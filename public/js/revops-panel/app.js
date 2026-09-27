@@ -14966,10 +14966,157 @@ document.querySelector('[data-action="toggle-menu"]').addEventListener('click', 
 
 overlay.addEventListener('click', closeMobile);
 
-// 9. GESTIÓN DE NOTIFICACIONES (POPOVER)
+// 9. GESTION DE NOTIFICACIONES Y DEEP LINKS EN TIEMPO REAL (TASK-UX-03)
 const notifPopover = document.querySelector('[data-notif-popover]');
 const notifBtn = document.querySelector('[data-action="toggle-notifications"]');
 const notifBadge = document.querySelector('[data-notif-badge]');
+const notifList = document.querySelector('[data-notif-list]');
+const notifStatusText = document.querySelector('[data-notif-status-text]');
+
+let liveNotifications = [];
+
+async function fetchNotifications() {
+  try {
+    const res = await fetch('/api/v1/governance/notifications', {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.success) return;
+
+    liveNotifications = data.data || [];
+    renderNotifications(data);
+  } catch (err) {
+    console.warn('Error al cargar notificaciones operativas:', err);
+  }
+}
+
+function renderNotifications(data) {
+  const unreadCount = data.unread_count || 0;
+  const items = data.data || [];
+
+  // Actualizar badge
+  if (notifBadge) {
+    if (unreadCount > 0) {
+      notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      notifBadge.style.display = 'inline-flex';
+    } else {
+      notifBadge.style.display = 'none';
+    }
+  }
+
+  // Actualizar subtitulo
+  if (notifStatusText) {
+    notifStatusText.textContent = unreadCount > 0
+      ? `${unreadCount} alerta${unreadCount > 1 ? 's' : ''} pendiente${unreadCount > 1 ? 's' : ''}`
+      : 'Todas las alertas al dia';
+  }
+
+  // Actualizar contadores de tabs
+  const countAll = document.querySelector('[data-notif-count-all]');
+  const countCrit = document.querySelector('[data-notif-count-critical]');
+  const countInfo = document.querySelector('[data-notif-count-info]');
+
+  if (countAll) countAll.textContent = data.total || items.length;
+  if (countCrit) countCrit.textContent = (data.categories?.critical || []).length;
+  if (countInfo) countInfo.textContent = (data.categories?.info || []).length;
+
+  if (!notifList) return;
+
+  if (items.length === 0) {
+    notifList.innerHTML = `
+      <div class="p-6 text-center text-xs text-slate-500">
+        No hay notificaciones pendientes para tu rol.
+      </div>
+    `;
+    return;
+  }
+
+  notifList.innerHTML = items.map(item => {
+    const dotColor = item.badge_color || 'blue';
+    const isCritical = item.type === 'critical' || item.type === 'urgent';
+    const categoryAttr = isCritical ? 'critical' : 'info';
+    const deepLink = item.deep_link || '#';
+    const actionLabel = item.action_label || 'Atender Folio en 1 Clic';
+
+    return `
+      <div class="notif-item ${item.is_read ? 'read' : 'unread'}" data-notif-id="${item.id}" data-notif-category="${categoryAttr}">
+        <div class="notif-icon-col">
+          <span class="notif-alert-dot ${dotColor}"></span>
+        </div>
+        <div class="notif-content-col">
+          <div class="notif-item-title">${item.title}</div>
+          <p class="notif-item-desc">${item.message}</p>
+          <div class="notif-item-footer">
+            <span class="notif-time">${item.time_ago || 'Reciente'}</span>
+            <a class="button button-light notif-action-btn" href="${deepLink}" data-notif-action-link="${item.id}">
+              ${actionLabel}
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function markNotificationAsRead(id) {
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const res = await fetch(`/api/v1/governance/notifications/${id}/mark-read`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken || '',
+        'X-Requested-With': 'XMLHttpRequest',
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && typeof data.unread_count === 'number') {
+        if (notifBadge) {
+          if (data.unread_count > 0) {
+            notifBadge.textContent = data.unread_count;
+            notifBadge.style.display = 'inline-flex';
+          } else {
+            notifBadge.style.display = 'none';
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error al marcar notificacion como leida:', err);
+  }
+}
+
+async function markAllNotificationsAsRead() {
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const res = await fetch('/api/v1/governance/notifications/mark-all-read', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken || '',
+        'X-Requested-With': 'XMLHttpRequest',
+      }
+    });
+    if (res.ok) {
+      document.querySelectorAll('.notif-item').forEach(item => {
+        item.classList.remove('unread');
+        item.classList.add('read');
+      });
+      if (notifBadge) notifBadge.style.display = 'none';
+      if (notifStatusText) notifStatusText.textContent = 'Todas las alertas al dia';
+      showToast('Todas las notificaciones marcadas como leidas', 'success');
+    }
+  } catch (err) {
+    console.warn('Error al marcar todas como leidas:', err);
+  }
+}
 
 if (notifBtn && notifPopover) {
   notifBtn.addEventListener('click', (e) => {
@@ -14977,6 +15124,9 @@ if (notifBtn && notifPopover) {
     const isHidden = notifPopover.style.display === 'none';
     notifPopover.style.display = isHidden ? 'flex' : 'none';
     notifBtn.classList.toggle('active', isHidden);
+    if (isHidden) {
+      fetchNotifications();
+    }
   });
 
   document.addEventListener('click', (e) => {
@@ -14986,7 +15136,7 @@ if (notifBtn && notifPopover) {
     }
   });
 
-  // Filtros de pestañas de notificaciones
+  // Filtros de pestanas de notificaciones
   document.querySelectorAll('[data-notif-tab]').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('[data-notif-tab]').forEach(t => t.classList.remove('active'));
@@ -15002,21 +15152,31 @@ if (notifBtn && notifPopover) {
     });
   });
 
-  // Marcar todas como leídas
+  // Boton marcar todas como leidas
   const markReadBtn = document.querySelector('[data-action="mark-all-read"]');
   if (markReadBtn) {
     markReadBtn.addEventListener('click', () => {
-      document.querySelectorAll('.notif-item').forEach(item => {
-        item.classList.remove('unread');
-        item.classList.add('read');
-      });
-      if (notifBadge) notifBadge.style.display = 'none';
-      const statusText = document.querySelector('[data-notif-status-text]');
-      if (statusText) statusText.textContent = 'Todas las alertas al día';
-      showToast('Todas las notificaciones marcadas como leídas');
+      markAllNotificationsAsRead();
+    });
+  }
+
+  // Click en deep link dentro de notificaciones marca como leida
+  if (notifList) {
+    notifList.addEventListener('click', (e) => {
+      const link = e.target.closest('[data-notif-action-link]');
+      if (link) {
+        const id = link.dataset.notifActionLink;
+        if (id) {
+          markNotificationAsRead(id);
+        }
+      }
     });
   }
 }
+
+// Carga inicial reactiva de notificaciones al iniciar la sesion
+fetchNotifications();
+window.reloadNotifications = fetchNotifications;
 
 // 10. GESTIÓN DEL CHAT INTER-ÁREAS (SLIDE-OVER DRAWER)
 const chatContainer = document.querySelector('[data-chat-container]');
@@ -19975,13 +20135,56 @@ function navigateToInventory(options = {}) {
 window.navigateToInventory = navigateToInventory;
 
 
-// 14. UTILIDAD DE TOASTS
-function showToast(message) {
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2400);
+// 14. UTILIDAD DE TOASTS ACUMULATIVOS Y ESTILIZADOS (TASK-UX-03)
+function showToast(message, type = 'info', duration = 5000) {
+  const container = document.getElementById('global-toast-container');
+  if (container) {
+    const toastItem = document.createElement('div');
+    const colorClasses = {
+      success: 'bg-emerald-900/95 text-white border border-emerald-500/40 shadow-xl shadow-emerald-950/30',
+      error: 'bg-rose-900/95 text-white border border-rose-500/40 shadow-xl shadow-rose-950/30',
+      critical: 'bg-rose-900/95 text-white border border-rose-500/40 shadow-xl shadow-rose-950/30',
+      warning: 'bg-amber-900/95 text-white border border-amber-500/40 shadow-xl shadow-amber-950/30',
+      info: 'bg-slate-900/95 text-white border border-slate-700 shadow-xl shadow-black/30',
+    };
+    const chosenClass = colorClasses[type] || colorClasses.info;
+
+    toastItem.className = `flex items-center justify-between gap-3 px-4 py-3 rounded-xl backdrop-blur-md pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 text-xs font-medium ${chosenClass}`;
+    toastItem.setAttribute('role', 'status');
+    toastItem.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full ${type === 'success' ? 'bg-emerald-400' : (type === 'critical' || type === 'error' ? 'bg-rose-400' : (type === 'warning' ? 'bg-amber-400' : 'bg-sky-400'))}"></span>
+        <span>${message}</span>
+      </div>
+      <button type="button" class="text-white/60 hover:text-white ml-2 text-base leading-none font-bold" aria-label="Cerrar">&times;</button>
+    `;
+
+    const closeBtn = toastItem.querySelector('button');
+    closeBtn.addEventListener('click', () => {
+      toastItem.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => toastItem.remove(), 300);
+    });
+
+    container.appendChild(toastItem);
+    requestAnimationFrame(() => {
+      toastItem.classList.remove('opacity-0', 'translate-y-2');
+    });
+
+    setTimeout(() => {
+      if (toastItem.parentElement) {
+        toastItem.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toastItem.remove(), 300);
+      }
+    }, duration);
+  }
+
+  if (toast) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
 }
+window.showToast = showToast;
 
 document.querySelector('[data-action="logout"]').addEventListener('click', () => {
   showToast('Sesión administrativa cerrada correctamente');
