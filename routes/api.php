@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\RevOps\InventoryApiController;
+use App\Http\Controllers\Api\RevOps\InventorySettingsApiController;
 use App\Http\Controllers\Api\RevOps\StockReservationApiController;
 use App\Http\Controllers\Api\RevOps\MarketingApiController;
 use App\Http\Controllers\Api\RevOps\FinanceApiController;
@@ -39,6 +40,38 @@ Route::prefix('v1')->group(function () {
         Route::get('/bundles', [InventoryApiController::class, 'getBundles']);
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
+
+        // GESTOR DE AJUSTES DE INVENTARIO: TALLAS, VOLUMENES Y CATEGORIAS (TASK-INV-14)
+        Route::prefix('settings')->group(function () {
+            Route::get('/size-curves', [InventorySettingsApiController::class, 'getSizeCurves']);
+            Route::post('/size-curves', [InventorySettingsApiController::class, 'storeSizeCurve']);
+            Route::put('/size-curves/{id}', [InventorySettingsApiController::class, 'updateSizeCurve']);
+            Route::patch('/size-curves/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleSizeCurveActive']);
+            Route::post('/size-curves/{id}/archive', [InventorySettingsApiController::class, 'archiveSizeCurve']);
+            Route::post('/size-curves/{id}/restore', [InventorySettingsApiController::class, 'restoreSizeCurve']);
+            Route::delete('/size-curves/{id}', [InventorySettingsApiController::class, 'destroySizeCurve']);
+
+            Route::post('/size-curves/{curveId}/sizes', [InventorySettingsApiController::class, 'storeSize']);
+            Route::put('/sizes/{sizeId}', [InventorySettingsApiController::class, 'updateSize']);
+            Route::patch('/sizes/{sizeId}/toggle-active', [InventorySettingsApiController::class, 'toggleSizeActive']);
+            Route::delete('/sizes/{sizeId}', [InventorySettingsApiController::class, 'destroySize']);
+
+            Route::get('/fragrance-volumes', [InventorySettingsApiController::class, 'getFragranceVolumes']);
+            Route::post('/fragrance-volumes', [InventorySettingsApiController::class, 'storeFragranceVolume']);
+            Route::put('/fragrance-volumes/{id}', [InventorySettingsApiController::class, 'updateFragranceVolume']);
+            Route::patch('/fragrance-volumes/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleFragranceVolumeActive']);
+            Route::post('/fragrance-volumes/{id}/archive', [InventorySettingsApiController::class, 'archiveFragranceVolume']);
+            Route::post('/fragrance-volumes/{id}/restore', [InventorySettingsApiController::class, 'restoreFragranceVolume']);
+            Route::delete('/fragrance-volumes/{id}', [InventorySettingsApiController::class, 'destroyFragranceVolume']);
+
+            Route::get('/categories', [InventorySettingsApiController::class, 'getCategories']);
+            Route::post('/categories', [InventorySettingsApiController::class, 'storeCategory']);
+            Route::put('/categories/{id}', [InventorySettingsApiController::class, 'updateCategory']);
+            Route::patch('/categories/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleCategoryActive']);
+            Route::post('/categories/{id}/archive', [InventorySettingsApiController::class, 'archiveCategory']);
+            Route::post('/categories/{id}/restore', [InventorySettingsApiController::class, 'restoreCategory']);
+            Route::delete('/categories/{id}', [InventorySettingsApiController::class, 'destroyCategory']);
+        });
     });
 
     // 2. CHECKOUT & RESERVA TEMPORAL DE STOCK (TASK-INT-06)

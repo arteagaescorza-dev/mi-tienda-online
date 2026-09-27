@@ -52,6 +52,9 @@
         window.serverCreditAgreements = @json($portalCreditAgreements ?? []);
         window.serverProductBundles = @json($portalProductBundles ?? []);
         window.serverCycleCounts = @json($portalCycleCounts ?? []);
+        window.serverSizeCurves = @json($portalSizeCurves ?? []);
+        window.serverFragranceVolumes = @json($portalFragranceVolumes ?? []);
+        window.serverCategories = @json($portalCategories ?? []);
     </script>
 
     <!-- ========================================================================= -->
@@ -8173,11 +8176,38 @@
                     </button>
                     <button 
                         type="button" 
+                        @click="activeSettingsTab = 'sizes'" 
+                        :class="activeSettingsTab === 'sizes' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <span>Curvas & Tallas</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'sizes' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(sizeCurves || []).length"></span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="activeSettingsTab = 'volumes'" 
+                        :class="activeSettingsTab === 'volumes' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <span>Volúmenes Perfumería</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'volumes' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(fragranceVolumes || []).length"></span>
+                    </button>
+                    <button 
+                        type="button" 
                         @click="activeSettingsTab = 'shades'" 
                         :class="activeSettingsTab === 'shades' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
                         class="cursor-pointer whitespace-nowrap px-2"
                     >
                         Tonos Cosmética
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="activeSettingsTab = 'categories'" 
+                        :class="activeSettingsTab === 'categories' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <span>Categorías & Familias</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'categories' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(categoriesTree || []).length"></span>
                     </button>
                     <button 
                         type="button" 
@@ -8418,6 +8448,349 @@
                         </div>
                     </template>
 
+                    <!-- TAB: CURVAS DE TALLAS & ESCALAS (CRUD COMPLETO - TASK-INV-14) -->
+                    <template x-if="activeSettingsTab === 'sizes'">
+                        <div class="space-y-6">
+                            <!-- Top: Gestor de Curvas Maestras -->
+                            <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="curveEditState.isEditing ? 'Editar Curva de Tallas: ' + curveEditState.form.name : 'Crear Nueva Curva de Tallas'"></h4>
+                                        <p class="text-[11px] text-slate-600">Configura escalas maestras de tallas (Americana, Pantalones numéricos, Lencería, Unitalla).</p>
+                                    </div>
+                                    <span x-show="curveEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Curva</span>
+                                </div>
+
+                                <!-- Formulario Alta / Edición Curva -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Curva</label>
+                                        <input type="text" x-model="curveEditState.isEditing ? curveEditState.form.name : newCurveForm.name" placeholder="Ej: Curva Americana Estándar" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Ámbito / Scope</label>
+                                        <select x-model="curveEditState.isEditing ? curveEditState.form.category_scope : newCurveForm.category_scope" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                            <option value="textil">Textil (Ropa Interior, Boxers, Playeras)</option>
+                                            <option value="calzado">Calzado & Sneakers</option>
+                                            <option value="one_size">Unitalla / Accesorios</option>
+                                            <option value="general">General</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
+                                        <input type="text" x-model="curveEditState.isEditing ? curveEditState.form.description : newCurveForm.description" placeholder="Ej: Tallas comerciales XS a 4XL" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
+                                    <div class="flex items-center gap-4 text-xs">
+                                        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                            <input type="checkbox" x-model="curveEditState.isEditing ? curveEditState.form.is_default : newCurveForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            <span class="font-medium text-slate-700">Curva Predeterminada</span>
+                                        </label>
+                                        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                            <input type="checkbox" x-model="curveEditState.isEditing ? curveEditState.form.is_active : newCurveForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            <span class="font-medium text-slate-700">Activa</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <template x-if="!curveEditState.isEditing">
+                                            <button type="button" @click="addNewCurve()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                Crear Curva de Tallas
+                                            </button>
+                                        </template>
+                                        <template x-if="curveEditState.isEditing">
+                                            <div class="flex items-center gap-2">
+                                                <button type="button" @click="saveCurve()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                    Actualizar Curva
+                                                </button>
+                                                <button type="button" @click="cancelEditCurve()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selector Horizontal de Curvas Existentes -->
+                            <div>
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2">Curvas Configuradas en el Sistema</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <template x-for="curve in sizeCurves" :key="curve.id">
+                                        <div 
+                                            @click="selectCurve(curve.id)"
+                                            class="p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-3"
+                                            :class="selectedCurveId === curve.id ? 'bg-indigo-50/50 border-indigo-500 shadow-xs ring-1 ring-indigo-500' : 'bg-white border-slate-200 hover:border-slate-300'"
+                                        >
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="font-bold text-xs text-slate-900" x-text="curve.name"></span>
+                                                        <template x-if="curve.is_default">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">Default</span>
+                                                        </template>
+                                                        <span 
+                                                            class="px-1.5 py-0.2 rounded-full text-[9px] font-bold border"
+                                                            :class="curve.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (curve.is_active ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
+                                                            x-text="curve.deleted_at ? 'Archivada' : (curve.is_active ? 'Activa' : 'Inactiva')"
+                                                        ></span>
+                                                    </div>
+                                                    <p class="text-[11px] text-slate-500 mt-1" x-text="curve.description || 'Sin descripcion'"></p>
+                                                    <div class="text-[10px] text-slate-400 mt-0.5">
+                                                        Ambito: <span class="font-semibold text-slate-600 uppercase" x-text="curve.category_scope"></span> | <span class="font-bold text-indigo-700" x-text="(curve.sizes || []).length"></span> tallas
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Acciones de la Curva (Universal Rule) -->
+                                            <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5" @click.stop>
+                                                <button type="button" @click="editCurve(curve)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar curva">
+                                                    Editar
+                                                </button>
+                                                <button type="button" @click="toggleActiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="curve.is_active ? 'Desactivar' : 'Activar'" x-text="curve.is_active ? 'Desactivar' : 'Activar'"></button>
+                                                <button type="button" @click="archiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="curve.deleted_at ? 'Restaurar' : 'Archivar'" x-text="curve.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                <button type="button" @click="deleteCurve(curve.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Bottom: Detalle de Tallas de la Curva Seleccionada -->
+                            <template x-if="selectedCurve">
+                                <div class="space-y-4 pt-4 border-t border-slate-200">
+                                    <div class="flex items-center justify-between flex-wrap gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-800">
+                                                Tallas de la Curva: <span class="text-indigo-600" x-text="selectedCurve.name"></span>
+                                            </h4>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800" x-text="(selectedCurve.sizes || []).length + ' Tallas'"></span>
+                                        </div>
+                                        <span x-show="sizeEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Talla</span>
+                                    </div>
+
+                                    <!-- Formulario Alta / Edición Talla Individual -->
+                                    <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                                        <div class="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                                            <div>
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código (ej: XS, 32)</label>
+                                                <input type="text" x-model="sizeEditState.isEditing ? sizeEditState.form.code : newSizeForm.code" placeholder="XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold uppercase">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Etiqueta Descriptiva</label>
+                                                <input type="text" x-model="sizeEditState.isEditing ? sizeEditState.form.label : newSizeForm.label" placeholder="Extra Chica / XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Orden (Sort)</label>
+                                                <input type="number" x-model.number="sizeEditState.isEditing ? sizeEditState.form.sort_order : newSizeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Cintura Min (cm)</label>
+                                                <input type="number" step="0.5" x-model.number="sizeEditState.isEditing ? sizeEditState.form.waist_min_cm : newSizeForm.waist_min_cm" placeholder="65" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Cintura Max (cm)</label>
+                                                <input type="number" step="0.5" x-model.number="sizeEditState.isEditing ? sizeEditState.form.waist_max_cm : newSizeForm.waist_max_cm" placeholder="70" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-200">
+                                            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
+                                                <input type="checkbox" x-model="sizeEditState.isEditing ? sizeEditState.form.is_active : newSizeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                                <span class="font-medium text-slate-700">Talla Activa para Catálogo</span>
+                                            </label>
+
+                                            <div class="flex items-center gap-2">
+                                                <template x-if="!sizeEditState.isEditing">
+                                                    <button type="button" @click="addNewSize()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                        + Agregar Talla
+                                                    </button>
+                                                </template>
+                                                <template x-if="sizeEditState.isEditing">
+                                                    <div class="flex items-center gap-2">
+                                                        <button type="button" @click="saveSize()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                            Actualizar Talla
+                                                        </button>
+                                                        <button type="button" @click="cancelEditSize()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tabla de Tallas de la Curva -->
+                                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                                        <table class="w-full text-left text-xs border-collapse">
+                                            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                                <tr>
+                                                    <th class="py-2.5 px-3 w-14 text-center">Orden</th>
+                                                    <th class="py-2.5 px-3 w-24">Código</th>
+                                                    <th class="py-2.5 px-3">Etiqueta Comercial</th>
+                                                    <th class="py-2.5 px-3">Rango de Medida (Cintura)</th>
+                                                    <th class="py-2.5 px-3 text-center">Estado</th>
+                                                    <th class="py-2.5 px-3 text-right">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100">
+                                                <template x-for="sz in (selectedCurve.sizes || [])" :key="sz.id">
+                                                    <tr class="hover:bg-slate-50 transition" :class="sz.deleted_at ? 'opacity-50 bg-rose-50/30' : (sz.is_active === false ? 'opacity-60 bg-slate-50/50' : '')">
+                                                        <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-500" x-text="sz.sort_order"></td>
+                                                        <td class="py-2.5 px-3">
+                                                            <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-900" x-text="sz.code"></span>
+                                                        </td>
+                                                        <td class="py-2.5 px-3 font-semibold text-slate-800" x-text="sz.label"></td>
+                                                        <td class="py-2.5 px-3 text-slate-600 font-mono text-[11px]">
+                                                            <span x-text="sz.waist_min_cm ? (sz.waist_min_cm + ' - ' + (sz.waist_max_cm || '?') + ' cm') : 'No especificada'"></span>
+                                                        </td>
+                                                        <td class="py-2.5 px-3 text-center">
+                                                            <span 
+                                                                class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                                                                :class="sz.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (sz.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
+                                                                x-text="sz.deleted_at ? 'Archivada' : (sz.is_active !== false ? 'Activa' : 'Inactiva')"
+                                                            ></span>
+                                                        </td>
+                                                        <td class="py-2.5 px-3 text-right">
+                                                            <div class="inline-flex items-center gap-1.5">
+                                                                <button type="button" @click="editSize(sz)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer" title="Editar talla">
+                                                                    Editar
+                                                                </button>
+                                                                <button type="button" @click="toggleActiveSize(sz)" class="px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer" :class="sz.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="sz.is_active !== false ? 'Desactivar' : 'Activar'" x-text="sz.is_active !== false ? 'Desactivar' : 'Activar'"></button>
+                                                                <button type="button" @click="archiveSize(sz)" class="px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer" :class="sz.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="sz.deleted_at ? 'Restaurar' : 'Archivar'" x-text="sz.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                                <button type="button" @click="deleteSize(sz.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                                    Eliminar
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- TAB: VOLUMENES DE PERFUMERIA (CRUD COMPLETO - TASK-INV-14) -->
+                    <template x-if="activeSettingsTab === 'volumes'">
+                        <div class="space-y-5">
+                            <!-- Formulario Alta / Edición de Volumen -->
+                            <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="volumeEditState.isEditing ? 'Editar Volumen: ' + volumeEditState.form.label : 'Registrar Nuevo Volumen de Perfumería / Decant'"></h4>
+                                        <p class="text-[11px] text-slate-600">Control de cubicaje, frascos comerciales, viales de muestra y decants de autor.</p>
+                                    </div>
+                                    <span x-show="volumeEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Volumen</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Capacidad Numérica</label>
+                                        <input type="number" step="0.1" x-model.number="volumeEditState.isEditing ? volumeEditState.form.value : newVolumeForm.value" placeholder="100" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Unidad de Medida</label>
+                                        <select x-model="volumeEditState.isEditing ? volumeEditState.form.unit : newVolumeForm.unit" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                            <option value="ml">Mililitros (ml)</option>
+                                            <option value="oz">Onzas líquidas (fl oz)</option>
+                                            <option value="gr">Gramos (gr)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Etiqueta Comercial</label>
+                                        <input type="text" x-model="volumeEditState.isEditing ? volumeEditState.form.label : newVolumeForm.label" placeholder="Ej: 100ml Standard" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Orden de Visualización</label>
+                                        <input type="number" x-model.number="volumeEditState.isEditing ? volumeEditState.form.sort_order : newVolumeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
+                                    <input type="text" x-model="volumeEditState.isEditing ? volumeEditState.form.description : newVolumeForm.description" placeholder="Ej: Frasco de cristal regular para venta al público" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                </div>
+
+                                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
+                                    <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
+                                        <input type="checkbox" x-model="volumeEditState.isEditing ? volumeEditState.form.is_active : newVolumeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <span class="font-medium text-slate-700">Volumen Activo en Catálogo</span>
+                                    </label>
+
+                                    <div class="flex items-center gap-2">
+                                        <template x-if="!volumeEditState.isEditing">
+                                            <button type="button" @click="addNewVolume()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                Registrar Volumen
+                                            </button>
+                                        </template>
+                                        <template x-if="volumeEditState.isEditing">
+                                            <div class="flex items-center gap-2">
+                                                <button type="button" @click="saveVolume()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                    Actualizar Volumen
+                                                </button>
+                                                <button type="button" @click="cancelEditVolume()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de Volúmenes de Perfumería -->
+                            <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-2.5 px-3 w-16 text-center">Orden</th>
+                                            <th class="py-2.5 px-3">Cubicaje / Valor</th>
+                                            <th class="py-2.5 px-3">Etiqueta Comercial</th>
+                                            <th class="py-2.5 px-3">Descripción</th>
+                                            <th class="py-2.5 px-3 text-center">Estado</th>
+                                            <th class="py-2.5 px-3 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <template x-for="vol in fragranceVolumes" :key="vol.id">
+                                            <tr class="hover:bg-slate-50 transition" :class="vol.deleted_at ? 'opacity-50 bg-rose-50/30' : (vol.is_active === false ? 'opacity-60 bg-slate-50/50' : '')">
+                                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-500" x-text="vol.sort_order"></td>
+                                                <td class="py-2.5 px-3 font-mono font-bold text-slate-900" x-text="vol.value + ' ' + vol.unit"></td>
+                                                <td class="py-2.5 px-3 font-semibold text-slate-800" x-text="vol.label"></td>
+                                                <td class="py-2.5 px-3 text-slate-600" x-text="vol.description || '-'"></td>
+                                                <td class="py-2.5 px-3 text-center">
+                                                    <span 
+                                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                                                        :class="vol.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (vol.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
+                                                        x-text="vol.deleted_at ? 'Archivado' : (vol.is_active !== false ? 'Activo' : 'Inactivo')"
+                                                    ></span>
+                                                </td>
+                                                <td class="py-2.5 px-3 text-right">
+                                                    <div class="inline-flex items-center gap-1.5">
+                                                        <button type="button" @click="editVolume(vol)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer" title="Editar volumen">
+                                                            Editar
+                                                        </button>
+                                                        <button type="button" @click="toggleActiveVolume(vol)" class="px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer" :class="vol.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="vol.is_active !== false ? 'Desactivar' : 'Activar'" x-text="vol.is_active !== false ? 'Desactivar' : 'Activar'"></button>
+                                                        <button type="button" @click="archiveVolume(vol)" class="px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer" :class="vol.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="vol.deleted_at ? 'Restaurar' : 'Archivar'" x-text="vol.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                        <button type="button" @click="deleteVolume(vol.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                            Eliminar
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+
                     <!-- TAB 3: TONOS DE COSMÉTICA (INTEGRADO EN AJUSTES - TASK-INV-09 / TASK-INV-11) -->
                     <template x-if="activeSettingsTab === 'shades'">
                         <div class="space-y-4">
@@ -8493,6 +8866,159 @@
                                                 <button type="button" @click="deleteCosmeticShade(shade.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
                                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                                 </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- TAB: CATEGORIAS & FAMILIAS (CRUD COMPLETO - TASK-INV-14) -->
+                    <template x-if="activeSettingsTab === 'categories'">
+                        <div class="space-y-6">
+                            <!-- Formulario Alta / Edición de Categoría / Subcategoría -->
+                            <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="categoryEditState.isEditing ? 'Editar Categoría: ' + categoryEditState.form.name : 'Crear Nueva Categoría o Subcategoría'"></h4>
+                                        <p class="text-[11px] text-slate-600">Jerarquía y familias de producto para catálogo, navegación web y taxonomía.</p>
+                                    </div>
+                                    <span x-show="categoryEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Categoría</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Categoría</label>
+                                        <input type="text" x-model="categoryEditState.isEditing ? categoryEditState.form.name : newCategoryForm.name" placeholder="Ej: Ropa Interior Deportiva" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Categoría Padre (Nivel Jerárquico)</label>
+                                        <select x-model="categoryEditState.isEditing ? categoryEditState.form.parent_id : newCategoryForm.parent_id" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                            <option value="">-- Ninguna (Categoría Raíz / Familia Principal) --</option>
+                                            <template x-for="parentCat in flatCategories" :key="parentCat.id">
+                                                <option :value="parentCat.id" x-text="parentCat.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Taxonomía</label>
+                                        <input type="text" x-model="categoryEditState.isEditing ? categoryEditState.form.description : newCategoryForm.description" placeholder="Ej: Siluetas anatómicas masculinas de alto rendimiento" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
+                                    <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
+                                        <input type="checkbox" x-model="categoryEditState.isEditing ? categoryEditState.form.is_active : newCategoryForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <span class="font-medium text-slate-700">Categoría Activa en E-Commerce</span>
+                                    </label>
+
+                                    <div class="flex items-center gap-2">
+                                        <template x-if="!categoryEditState.isEditing">
+                                            <button type="button" @click="addNewCategory()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                Guardar Categoría
+                                            </button>
+                                        </template>
+                                        <template x-if="categoryEditState.isEditing">
+                                            <div class="flex items-center gap-2">
+                                                <button type="button" @click="saveCategory()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
+                                                    Actualizar Categoría
+                                                </button>
+                                                <button type="button" @click="cancelEditCategory()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Árbol Jerárquico de Categorías & Subcategorías -->
+                            <div>
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-3">Familias Principales & Subcategorías Activas</h4>
+                                <div class="space-y-3">
+                                    <template x-for="rootCat in categoriesTree" :key="rootCat.id">
+                                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                                            <!-- Fila Padre (Categoría Raíz) -->
+                                            <div class="p-3.5 bg-slate-50 flex items-center justify-between gap-3 border-b border-slate-200/80">
+                                                <div class="flex items-center gap-2.5 min-w-0">
+                                                    <span class="p-2 bg-indigo-100 text-indigo-700 rounded-lg shrink-0">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                                    </span>
+                                                    <div class="min-w-0">
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            <span class="font-bold text-xs text-slate-900" x-text="rootCat.name"></span>
+                                                            <span class="font-mono text-[10px] text-slate-500 bg-slate-200 px-1.5 py-0.2 rounded" x-text="'/' + rootCat.slug"></span>
+                                                            <span 
+                                                                class="px-2 py-0.2 rounded-full text-[9px] font-bold border"
+                                                                :class="rootCat.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (rootCat.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
+                                                                x-text="rootCat.deleted_at ? 'Archivada' : (rootCat.is_active !== false ? 'Activa' : 'Inactiva')"
+                                                            ></span>
+                                                        </div>
+                                                        <p class="text-[11px] text-slate-500 mt-0.5 truncate" x-text="rootCat.description || 'Sin descripcion adicional'"></p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Acciones Categoría Raíz -->
+                                                <div class="flex items-center gap-1.5 shrink-0">
+                                                    <button 
+                                                        type="button" 
+                                                        @click="newCategoryForm.parent_id = String(rootCat.id); newCategoryForm.name = '';" 
+                                                        class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold transition cursor-pointer"
+                                                        title="Añadir subcategoría"
+                                                    >
+                                                        + Subcategoría
+                                                    </button>
+                                                    <button type="button" @click="editCategory(rootCat)" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar">
+                                                        Editar
+                                                    </button>
+                                                    <button type="button" @click="toggleActiveCategory(rootCat)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="rootCat.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="rootCat.is_active !== false ? 'Desactivar' : 'Activar'" x-text="rootCat.is_active !== false ? 'Desactivar' : 'Activar'"></button>
+                                                    <button type="button" @click="archiveCategory(rootCat)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="rootCat.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="rootCat.deleted_at ? 'Restaurar' : 'Archivar'" x-text="rootCat.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                    <button type="button" @click="deleteCategory(rootCat.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Subcategorías Hijas (Indented List) -->
+                                            <div class="divide-y divide-slate-100 pl-8 pr-4 py-1 bg-white">
+                                                <template x-if="!rootCat.children || rootCat.children.length === 0">
+                                                    <div class="py-2.5 text-xs text-slate-400 italic">
+                                                        No hay subcategorías hijas asociadas a esta familia principal.
+                                                    </div>
+                                                </template>
+
+                                                <template x-for="child in (rootCat.children || [])" :key="child.id">
+                                                    <div class="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/80 transition -mx-4 px-4 rounded-lg" :class="child.deleted_at ? 'opacity-50' : (child.is_active === false ? 'opacity-60' : '')">
+                                                        <div class="flex items-center gap-2 min-w-0">
+                                                            <span class="text-slate-300 font-mono text-xs select-none">&bull;</span>
+                                                            <div class="min-w-0">
+                                                                <div class="flex items-center gap-2 flex-wrap">
+                                                                    <span class="font-bold text-xs text-slate-800" x-text="child.name"></span>
+                                                                    <span class="font-mono text-[10px] text-slate-400" x-text="'/' + child.slug"></span>
+                                                                    <span 
+                                                                        class="px-1.5 py-0.2 rounded-full text-[9px] font-bold border"
+                                                                        :class="child.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (child.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
+                                                                        x-text="child.deleted_at ? 'Archivada' : (child.is_active !== false ? 'Activa' : 'Inactiva')"
+                                                                    ></span>
+                                                                </div>
+                                                                <p class="text-[11px] text-slate-500 truncate" x-text="child.description || 'Sin descripcion adicional'"></p>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Acciones Subcategoría -->
+                                                        <div class="flex items-center gap-1.5 shrink-0">
+                                                            <button type="button" @click="editCategory(child)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar">
+                                                                Editar
+                                                            </button>
+                                                            <button type="button" @click="toggleActiveCategory(child)" class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" :class="child.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="child.is_active !== false ? 'Desactivar' : 'Activar'" x-text="child.is_active !== false ? 'Desactivar' : 'Activar'"></button>
+                                                            <button type="button" @click="archiveCategory(child)" class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" :class="child.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="child.deleted_at ? 'Restaurar' : 'Archivar'" x-text="child.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                            <button type="button" @click="deleteCategory(child.id)" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                                Eliminar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </template>

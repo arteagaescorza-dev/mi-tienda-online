@@ -213,6 +213,22 @@ function hybridInventoryModule() {
         slotEditState: { isEditing: false, editingCode: null, form: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true } },
         ropSettings: { leadTimeLocal: 3, leadTimeDropship: 5, safetyStockDays: 7, defaultDailySales: 2 },
 
+        // TASK-INV-14: Gestión Configurable de Curvas de Tallas, Volúmenes y Categorías
+        sizeCurves: [],
+        selectedCurveId: null,
+        newCurveForm: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true },
+        curveEditState: { isEditing: false, editingId: null, form: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true } },
+        newSizeForm: { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true },
+        sizeEditState: { isEditing: false, editingId: null, form: { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true } },
+
+        fragranceVolumes: [],
+        newVolumeForm: { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true },
+        volumeEditState: { isEditing: false, editingId: null, form: { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true } },
+
+        categoriesTree: [],
+        newCategoryForm: { name: '', description: '', parent_id: '', is_active: true },
+        categoryEditState: { isEditing: false, editingId: null, form: { name: '', description: '', parent_id: '', is_active: true } },
+
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
         providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
             ? window.serverSuppliers
@@ -4221,6 +4237,17 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverCycleCounts) && window.serverCycleCounts.length > 0) {
                 this.cycleCountHistory = window.serverCycleCounts;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverSizeCurves) && window.serverSizeCurves.length > 0) {
+                this.sizeCurves = window.serverSizeCurves;
+                const def = this.sizeCurves.find(c => c.is_default) || this.sizeCurves[0];
+                if (def) this.selectedCurveId = def.id;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverFragranceVolumes) && window.serverFragranceVolumes.length > 0) {
+                this.fragranceVolumes = window.serverFragranceVolumes;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCategories) && window.serverCategories.length > 0) {
+                this.categoriesTree = window.serverCategories;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
@@ -6901,6 +6928,620 @@ function hybridInventoryModule() {
             });
 
             this.showToast(`Parámetros ROP guardados. ${this.products.length} productos recalculados en tiempo real (${underCount} en riesgo de quiebre).`, 'success');
+        },
+
+        // =========================================================================
+        // TASK-INV-14: CURVAS DE TALLAS, VOLUMENES Y CATEGORIAS (UNIVERSAL CRUD)
+        // =========================================================================
+
+        get selectedCurve() {
+            if (!this.selectedCurveId && this.sizeCurves && this.sizeCurves.length > 0) {
+                const def = this.sizeCurves.find(c => c.is_default) || this.sizeCurves[0];
+                this.selectedCurveId = def ? def.id : null;
+            }
+            return (this.sizeCurves || []).find(c => c.id === this.selectedCurveId) || null;
+        },
+
+        get flatCategories() {
+            return (this.categoriesTree || []).map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                slug: cat.slug
+            }));
+        },
+
+        selectCurve(curveId) {
+            this.selectedCurveId = curveId;
+            this.cancelEditCurve();
+            this.cancelEditSize();
+        },
+
+        // --- CURVAS DE TALLAS CRUD ---
+        async addNewCurve() {
+            const name = (this.newCurveForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa un nombre valido para la curva de tallas.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch('/api/v1/inventory/settings/size-curves', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(this.newCurveForm)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al crear la curva de tallas.', 'warning');
+                    return;
+                }
+                this.sizeCurves.push(data.data);
+                this.selectedCurveId = data.data.id;
+                this.newCurveForm = { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true };
+                this.showToast(`Curva "${data.data.name}" creada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error de comunicacion con el servidor.', 'warning');
+            }
+        },
+
+        editCurve(curve) {
+            this.curveEditState.isEditing = true;
+            this.curveEditState.editingId = curve.id;
+            this.curveEditState.form = {
+                name: curve.name,
+                category_scope: curve.category_scope || 'textil',
+                description: curve.description || '',
+                is_default: Boolean(curve.is_default),
+                is_active: curve.is_active !== false
+            };
+        },
+
+        cancelEditCurve() {
+            this.curveEditState.isEditing = false;
+            this.curveEditState.editingId = null;
+            this.curveEditState.form = { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true };
+        },
+
+        async saveCurve() {
+            const name = (this.curveEditState.form.name || '').trim();
+            if (!name) {
+                this.showToast('El nombre de la curva no puede estar vacio.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${this.curveEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(this.curveEditState.form)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar la curva.', 'warning');
+                    return;
+                }
+                const idx = this.sizeCurves.findIndex(c => c.id === this.curveEditState.editingId);
+                if (idx !== -1) {
+                    this.sizeCurves[idx] = data.data;
+                }
+                this.cancelEditCurve();
+                this.showToast(`Curva "${data.data.name}" actualizada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al guardar la curva.', 'warning');
+            }
+        },
+
+        async toggleActiveCurve(curve) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${curve.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    curve.is_active = data.data.is_active;
+                    this.showToast(`Curva "${curve.name}" ${curve.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado de la curva.', 'warning');
+            }
+        },
+
+        async archiveCurve(curve) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(curve.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/size-curves/${curve.id}/restore`
+                    : `/api/v1/inventory/settings/size-curves/${curve.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    curve.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Curva "${curve.name}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al modificar archivo de la curva.', 'warning');
+            }
+        },
+
+        async deleteCurve(curveId) {
+            if (!confirm('Deseas eliminar permanentemente esta curva de tallas?')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${curveId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    this.sizeCurves = this.sizeCurves.filter(c => c.id !== curveId);
+                    if (this.selectedCurveId === curveId) {
+                        this.selectedCurveId = this.sizeCurves.length > 0 ? this.sizeCurves[0].id : null;
+                    }
+                    this.showToast('Curva de tallas eliminada permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar la curva.', 'warning');
+            }
+        },
+
+        // --- TALLAS INDIVIDUALES CRUD ---
+        async addNewSize() {
+            if (!this.selectedCurveId) {
+                this.showToast('Selecciona primero una curva de tallas.', 'warning');
+                return;
+            }
+            const code = (this.newSizeForm.code || '').trim();
+            if (!code) {
+                this.showToast('Ingresa el codigo de talla (ej: XS, 32, XL).', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    ...this.newSizeForm,
+                    label: (this.newSizeForm.label || '').trim() || code,
+                    sort_order: parseInt(this.newSizeForm.sort_order) || 1
+                };
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${this.selectedCurveId}/sizes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al agregar talla.', 'warning');
+                    return;
+                }
+                const curve = this.selectedCurve;
+                if (curve) {
+                    if (!Array.isArray(curve.sizes)) curve.sizes = [];
+                    curve.sizes.push(data.data);
+                    curve.sizes.sort((a, b) => a.sort_order - b.sort_order);
+                }
+                this.newSizeForm = { code: '', label: '', sort_order: (curve?.sizes?.length || 0) + 1, waist_min_cm: null, waist_max_cm: null, is_active: true };
+                this.showToast(`Talla "${data.data.code}" registrada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al agregar talla.', 'warning');
+            }
+        },
+
+        editSize(size) {
+            this.sizeEditState.isEditing = true;
+            this.sizeEditState.editingId = size.id;
+            this.sizeEditState.form = {
+                code: size.code,
+                label: size.label || size.code,
+                sort_order: size.sort_order || 1,
+                waist_min_cm: size.waist_min_cm,
+                waist_max_cm: size.waist_max_cm,
+                is_active: size.is_active !== false
+            };
+        },
+
+        cancelEditSize() {
+            this.sizeEditState.isEditing = false;
+            this.sizeEditState.editingId = null;
+            this.sizeEditState.form = { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true };
+        },
+
+        async saveSize() {
+            const code = (this.sizeEditState.form.code || '').trim();
+            if (!code) {
+                this.showToast('El codigo de talla no puede estar vacio.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${this.sizeEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(this.sizeEditState.form)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar talla.', 'warning');
+                    return;
+                }
+                const curve = this.selectedCurve;
+                if (curve && Array.isArray(curve.sizes)) {
+                    const idx = curve.sizes.findIndex(s => s.id === this.sizeEditState.editingId);
+                    if (idx !== -1) {
+                        curve.sizes[idx] = data.data;
+                        curve.sizes.sort((a, b) => a.sort_order - b.sort_order);
+                    }
+                }
+                this.cancelEditSize();
+                this.showToast(`Talla "${data.data.code}" actualizada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al guardar talla.', 'warning');
+            }
+        },
+
+        async toggleActiveSize(size) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${size.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    size.is_active = data.data.is_active;
+                    this.showToast(`Talla "${size.code}" ${size.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado de talla.', 'warning');
+            }
+        },
+
+        async archiveSize(size) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(size.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/sizes/${size.id}/restore`
+                    : `/api/v1/inventory/settings/sizes/${size.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    size.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Talla "${size.code}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al archivar talla.', 'warning');
+            }
+        },
+
+        async deleteSize(sizeId) {
+            if (!confirm('Deseas eliminar permanentemente esta talla?')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${sizeId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    const curve = this.selectedCurve;
+                    if (curve && Array.isArray(curve.sizes)) {
+                        curve.sizes = curve.sizes.filter(s => s.id !== sizeId);
+                    }
+                    this.showToast('Talla eliminada permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar talla.', 'warning');
+            }
+        },
+
+        // --- VOLUMENES DE PERFUMERIA CRUD ---
+        async addNewVolume() {
+            const val = parseFloat(this.newVolumeForm.value);
+            if (!val || val <= 0) {
+                this.showToast('Ingresa un valor numerico valido para el volumen (ej: 50, 100).', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    ...this.newVolumeForm,
+                    value: val,
+                    label: (this.newVolumeForm.label || '').trim() || `${val}${this.newVolumeForm.unit || 'ml'}`
+                };
+                const res = await fetch('/api/v1/inventory/settings/volumes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al agregar volumen.', 'warning');
+                    return;
+                }
+                this.fragranceVolumes.push(data.data);
+                this.fragranceVolumes.sort((a, b) => a.sort_order - b.sort_order || a.value - b.value);
+                this.newVolumeForm = { value: 100, unit: 'ml', label: '', description: '', sort_order: this.fragranceVolumes.length + 1, is_active: true };
+                this.showToast(`Volumen "${data.data.label}" registrado con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al crear volumen.', 'warning');
+            }
+        },
+
+        editVolume(vol) {
+            this.volumeEditState.isEditing = true;
+            this.volumeEditState.editingId = vol.id;
+            this.volumeEditState.form = {
+                value: vol.value,
+                unit: vol.unit || 'ml',
+                label: vol.label || '',
+                description: vol.description || '',
+                sort_order: vol.sort_order || 1,
+                is_active: vol.is_active !== false
+            };
+        },
+
+        cancelEditVolume() {
+            this.volumeEditState.isEditing = false;
+            this.volumeEditState.editingId = null;
+            this.volumeEditState.form = { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true };
+        },
+
+        async saveVolume() {
+            const val = parseFloat(this.volumeEditState.form.value);
+            if (!val || val <= 0) {
+                this.showToast('El volumen debe ser un numero mayor a 0.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    ...this.volumeEditState.form,
+                    value: val,
+                    label: (this.volumeEditState.form.label || '').trim() || `${val}${this.volumeEditState.form.unit || 'ml'}`
+                };
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${this.volumeEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar volumen.', 'warning');
+                    return;
+                }
+                const idx = this.fragranceVolumes.findIndex(v => v.id === this.volumeEditState.editingId);
+                if (idx !== -1) {
+                    this.fragranceVolumes[idx] = data.data;
+                    this.fragranceVolumes.sort((a, b) => a.sort_order - b.sort_order || a.value - b.value);
+                }
+                this.cancelEditVolume();
+                this.showToast(`Volumen "${data.data.label}" actualizado con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al actualizar volumen.', 'warning');
+            }
+        },
+
+        async toggleActiveVolume(vol) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${vol.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    vol.is_active = data.data.is_active;
+                    this.showToast(`Volumen "${vol.label}" ${vol.is_active ? 'activado' : 'desactivado'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado del volumen.', 'warning');
+            }
+        },
+
+        async archiveVolume(vol) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(vol.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/volumes/${vol.id}/restore`
+                    : `/api/v1/inventory/settings/volumes/${vol.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    vol.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Volumen "${vol.label}" ${isArchived ? 'restaurado' : 'archivado'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al archivar volumen.', 'warning');
+            }
+        },
+
+        async deleteVolume(volId) {
+            if (!confirm('Deseas eliminar permanentemente este volumen de perfumeria?')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${volId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    this.fragranceVolumes = this.fragranceVolumes.filter(v => v.id !== volId);
+                    this.showToast('Volumen eliminado permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar volumen.', 'warning');
+            }
+        },
+
+        // --- CATEGORIAS & SUBCATEGORIAS CRUD ---
+        async addNewCategory() {
+            const name = (this.newCategoryForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa un nombre para la categoria o subcategoria.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    name: name,
+                    description: (this.newCategoryForm.description || '').trim() || null,
+                    parent_id: this.newCategoryForm.parent_id ? parseInt(this.newCategoryForm.parent_id) : null,
+                    is_active: this.newCategoryForm.is_active !== false
+                };
+                const res = await fetch('/api/v1/inventory/settings/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al crear categoria.', 'warning');
+                    return;
+                }
+                if (payload.parent_id) {
+                    const parent = this.categoriesTree.find(c => c.id === payload.parent_id);
+                    if (parent) {
+                        if (!Array.isArray(parent.children)) parent.children = [];
+                        parent.children.push(data.data);
+                    } else {
+                        await this.reloadCategoriesTree();
+                    }
+                } else {
+                    data.data.children = [];
+                    this.categoriesTree.push(data.data);
+                }
+                this.newCategoryForm = { name: '', description: '', parent_id: '', is_active: true };
+                this.showToast(`Categoria "${data.data.name}" registrada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al crear categoria.', 'warning');
+            }
+        },
+
+        editCategory(cat) {
+            this.categoryEditState.isEditing = true;
+            this.categoryEditState.editingId = cat.id;
+            this.categoryEditState.form = {
+                name: cat.name,
+                description: cat.description || '',
+                parent_id: cat.parent_id ? String(cat.parent_id) : '',
+                is_active: cat.is_active !== false
+            };
+        },
+
+        cancelEditCategory() {
+            this.categoryEditState.isEditing = false;
+            this.categoryEditState.editingId = null;
+            this.categoryEditState.form = { name: '', description: '', parent_id: '', is_active: true };
+        },
+
+        async saveCategory() {
+            const name = (this.categoryEditState.form.name || '').trim();
+            if (!name) {
+                this.showToast('El nombre de la categoria no puede estar vacio.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    name: name,
+                    description: (this.categoryEditState.form.description || '').trim() || null,
+                    parent_id: this.categoryEditState.form.parent_id ? parseInt(this.categoryEditState.form.parent_id) : null,
+                    is_active: this.categoryEditState.form.is_active !== false
+                };
+                const res = await fetch(`/api/v1/inventory/settings/categories/${this.categoryEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar categoria.', 'warning');
+                    return;
+                }
+                await this.reloadCategoriesTree();
+                this.cancelEditCategory();
+                this.showToast(`Categoria "${data.data.name}" actualizada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al guardar categoria.', 'warning');
+            }
+        },
+
+        async toggleActiveCategory(cat) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/categories/${cat.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    cat.is_active = data.data.is_active;
+                    this.showToast(`Categoria "${cat.name}" ${cat.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado de categoria.', 'warning');
+            }
+        },
+
+        async archiveCategory(cat) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(cat.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/categories/${cat.id}/restore`
+                    : `/api/v1/inventory/settings/categories/${cat.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    cat.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Categoria "${cat.name}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al archivar categoria.', 'warning');
+            }
+        },
+
+        async deleteCategory(catId) {
+            if (!confirm('Deseas eliminar permanentemente esta categoria? Sus subcategorias seran desacopladas a la raiz.')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/categories/${catId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    await this.reloadCategoriesTree();
+                    this.showToast('Categoria eliminada permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar categoria.', 'warning');
+            }
+        },
+
+        async reloadCategoriesTree() {
+            try {
+                const res = await fetch('/api/v1/inventory/settings/categories?include_archived=1', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.categoriesTree = data.data || [];
+                }
+            } catch (err) {
+                console.error('Error al recargar arbol de categorias', err);
+            }
         },
 
         // --- TASK-INV-13: GESTOR DE PROVEEDORES & CONTROL DE ESTADOS ---

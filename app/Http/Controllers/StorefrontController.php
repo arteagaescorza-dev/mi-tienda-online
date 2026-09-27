@@ -32,6 +32,7 @@ use App\Models\TaxLedgerEntry;
 use App\Services\Finance\ShippingInvoiceAuditorService;
 use App\Services\Finance\ThreeWayMatchingService;
 use App\Services\Finance\TaxCalculationEngineService;
+use App\Services\Inventory\VariantDimensionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -453,8 +454,13 @@ class StorefrontController extends Controller
         ]);
     }
 
-    public function portalInventory(Request $request)
+    public function portalInventory(Request $request, VariantDimensionService $dimensionService)
     {
+        $dimensionService->ensureBootstrapDefaults();
+        $portalSizeCurves = $dimensionService->getAllCurves(true);
+        $portalFragranceVolumes = $dimensionService->getAllVolumes(true);
+        $portalCategories = $dimensionService->getAllCategories(true);
+
         $productsQuery = Product::query()
             ->with([
                 'variants.inventories',
@@ -758,6 +764,9 @@ class StorefrontController extends Controller
             'portalCreditAgreements' => $portalCreditAgreements,
             'portalProductBundles' => $portalProductBundles,
             'portalCycleCounts' => $portalCycleCounts,
+            'portalSizeCurves' => $portalSizeCurves,
+            'portalFragranceVolumes' => $portalFragranceVolumes,
+            'portalCategories' => $portalCategories,
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()
