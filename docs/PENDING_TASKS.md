@@ -93,8 +93,8 @@
 | `TASK-STR-02` | Catálogo Público de Productos & Ficha Anatómica Torzo (Ref: `pop/catalogo.html`) | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/catalogo.html`, Torzo 244 SKUs |
 | `TASK-STR-03` | Carrito Deslizable & Checkout en 3 Pasos con Logística de Carritos Mixtos | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/carrito.html`, Checkout Multimodal |
 | `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (UI)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01` |
-| `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR) |
-| `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (UI)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5 |
+| `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR) |
+| `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5 |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Modal Ajustes Inventario, Catálogo Operativo, ROLES_AND_WORKFLOWS_SPEC |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | Ficha SKU, Curva Tallas, Margen Real, ROP |
@@ -103,48 +103,79 @@
 
 ---
 
-## 1.1. Plan Maestro de Prioridades de Adaptación Backend (Post-Conexión Hubs Administrativos)
+## 1.1. Plan Maestro Fullstack Senior de Prioridades de Implementación (Backend & Frontend Integrados)
 
-Tras la conexión de los 6 Hubs administrativos a bases de datos reales (Pasos A al E), las funcionalidades pendientes identificadas en la carpeta de referencia `import/` se formalizan bajo la siguiente escala obligatoria de prioridades de desarrollo:
+Bajo la modalidad **Fullstack Senior**, se erradica cualquier desarrollo puramente cosmético o desconectado. Toda tarea se aborda como un **Vertical Slice completo (End-to-End)**:  
+$$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrightarrow \text{Servicios Transaccionales (ACID / Kardex)} \longrightarrow \text{Endpoints REST / FormRequests} \longrightarrow \text{UI PWA Reactiva} \longrightarrow \text{Pruebas Automatizadas}$$
 
-### Prioridad 1: Tienda Pública D2C Multiverso PWA (TASK-STR-01 a TASK-STR-06 & TASK-INT-06)
-* **Objetivo:** Sustituir el storefront legacy de `resources/views/store/` por la arquitectura reactiva multiverso contenida en `import/tienda.html`, `import/store.js` y `import/store.css`.
-* **Componentes Críticos:**
-  1. *Multiverse Switcher:* Conmutación reactiva entre Marte, Venus, Tiresias y Terra consumiendo configuraciones de vitrinas del Hub 6.
-  2. *Reserva Temporal de Stock (`stock_locks` / 5 minutos):* Conteo regresivo de 300s en drawer de carrito con bloqueo en MySQL para evitar sobreventa.
-  3. *Checkout en 3 Pasos:* Stepper deslizable con validación CP Sepomex, absorción de flete comercial y pago vía SPEI directo (CLABE BBVA) o tarjeta.
-  4. *Atribución B2B:* Banner de bienvenida a usuarios referidos por convenios (`?utm_source={aliado}&coupon={codigo}`).
-  5. *Portal del Comprador D2C:* Sección *"Mi Cuenta"* con perfil anatómico, tracking de paquetería y gestión de membresías mensuales recurrentes MRR.
-  6. *PWA & Web Push:* Service Worker `sw.js` y `manifest.json` con soporte VAPID para alertas de urgencia y despacho.
+### ¿Cuál es Nuestra Principal Prioridad Absoluta?
+**La Prioridad 1: Motor D2C Transaccional & Storefront Multiverso PWA (`TASK-STR-01` a `TASK-STR-06` & `TASK-INT-06`).**  
+*Razón Técnica y de Negocio:* El Storefront D2C es el **Generador de la Verdad Transaccional del Sistema**. Mientras la tienda pública continúe en las vistas legacy, los 6 Hubs administrativos operan sobre datos sintéticos o estáticos. Al desplegar el Storefront Multiverso con reserva de stock en vivo (`stock_locks`), validación de CP/fletes y checkout atómico, se desata el flujo orgánico de órdenes reales (`orders`), movimientos inmutables de Kardex (`inventory_movements`), márgenes P&L (`order_financial_margins`), manifiestos de empaque y comisiones de aliados comerciales.
 
-### Prioridad 2: Curaduría Previa de Scraping y Calidad de Catálogo en Hub 4 (TASK-INV-08 & TASK-INV-11)
-* **Objetivo:** Blindar la calidad del catálogo antes de publicar artículos extraídos por el scraper de Torzo.
-* **Componentes Críticos:**
-  1. *Bandeja de Cuarentena (`scrapedPendingItems`):* Aprobación/descarte manual de artículos con validación de telas, tornasoles y sección web.
-  2. *CRUD de Telas y Colores Tornasoles:* Administración dinámica de fibras textiles y gradientes CSS reflejados en la tienda pública.
+---
 
-### Prioridad 3: Motor de Recetas BOM & Combos de Suscripción (TASK-INV-17 & TASK-INV-03)
-* **Objetivo:** Soporte a la venta recurrente (MRR) en cajas de suscripción Nivel 1, 2 y VIP.
-* **Componentes Críticos:**
-  1. *Constructor BOM (`bundleEditor`):* Formulación de combos y cálculo del cuello de botella por insumo limitante.
-  2. *Deducción Atómica en Kardex:* Salidas inmutables de existencias individuales al despacharse un lote de suscripción.
+### Escala de Prioridades Fullstack Senior (5 Frentes de Ejecución)
 
-### Prioridad 4: Sinergias Operativas Inter-Hub y Cierre de Fugas Contables (Cross-Hub)
-* **Objetivo:** Automatizar la comunicación y deducción contable entre Hubs.
-* **Componentes Críticos:**
-  1. *Deducción de Empaques en Kardex (`TASK-INT-13`):* Descuento automático de cajas volumétricas y bolsas de lavado al emitir guías en Logística.
-  2. *Resolución de Garantías RMA (`TASK-INT-09`):* Emisión automática de orden de reposición o saldo a favor desde Logística.
-  3. *Cotejo Automatizado de 3 Vías (`TASK-INT-07`):* Cruce entre PO, rampa física y factura de proveedor con retenciones SAT.
-  4. *Conciliación Courier vs Manifiestos (`TASK-INT-08`):* Detección de sobrecostos por peso volumétrico.
-  5. *Liquidaciones B2B a Cuentas por Pagar (`TASK-INT-19` / `TASK-INT-20`):* Integración directa entre convenios y tesorería.
+#### Prioridad 1 (Crítica e Inmediata): Motor D2C Transaccional & Storefront Multiverso PWA
+* **Slice 1.1: Shell Base PWA, Conmutador Multiverso y Catálogo Real de BD:** [COMPLETADO] (113/113 pruebas pasando, 528 aserciones, 0 emojis).
+* **Slice 1.2: Ficha Anatómica PDP, Matriz de 6 Tallas y Guía de Medidas Torzo en cm:** [COMPLETADO] (119/119 pruebas pasando, 563 aserciones, 0 emojis).
+* **Slice 1.3: Carrito Deslizable y Motor de Reserva Temporal de Stock (`TASK-INT-06`):** [COMPLETADO] (127/127 pruebas pasando, 593 aserciones, 0 emojis).
+* **Slice 1.4: Checkout Transaccional, Cupones del Hub 7, Fletes del Hub 6 y Liquidación:** [COMPLETADO] (134/134 pruebas pasando, 623 aserciones, 0 emojis).
+* **Backend:**
+  - Scopes multiverso en `Product` (`marte`, `venus`, `tiresias`, `terra`) con cálculo en vivo de stock disponible ($\text{Disponible} = \text{Cantidad} - \text{Apartados}$).
+  - `StockReservationService`: Candado de stock temporal (`stock_locks`) con TTL de 300 segundos, bloqueo pesimista en MySQL y liberación automática.
+  - `OrderProcessingService`: Transacción ACID completa de checkout que liquida el candado, descuenta inventario físico, genera el asiento inmutable en Kardex (`SALIDA_VENTA_ONLINE`), calcula el margen neto en `order_financial_margins` y emite folios `#ORD-2026-XXXX` o `#MIX-2026-XXXX`.
+  - Consumo en caliente de reglas de flete del Hub 6 (`cms_shipping_rule`) y validación de cupones del Hub 7 (`ally_coupons_dir_b`).
+  - `CustomerAccountController`: Consulta de órdenes del cliente, tracking courier y autogestión de membresías en `customer_subscriptions`.
+* **Frontend PWA:**
+  - Layout `store-pwa.blade.php`, estilos aislados `store-pwa.css` y lógica cliente `store-pwa.js`.
+  - Selector táctil de universos, PDP con matriz de 6 tallas textiles (`CH-3XL`), modal de Guía de Tallas Torzo en cm, drawer de carrito con temporizador regresivo de 5 minutos, stepper de checkout en 3 pasos y portal `#accountSheet`.
+  - PWA Offline y Service Worker `sw.js` con soporte para notificaciones Web Push VAPID.
+* **Criterio de Cierre:** Compra completada desde la web que descuenta el stock en el Hub 4, aparece en el Hub 3 para empaque y en el Hub 1 en finanzas.
 
-### Prioridad 5: Shell Global, Notificaciones Dinámicas y Ajustes a Pantalla Completa
-* **Objetivo:** Cumplimiento pleno de las reglas de ergonomía y gobernanza (`MASTER_ROADMAP.md`).
-* **Componentes Críticos:**
-  1. *Centro de Notificaciones Operativas:* Topbar conectado a eventos de dominio en vivo con saltos prefiltrados al catálogo.
-  2. *Chat Inter-Áreas Persistente:* Mensajería por canales (`#almacen-compras`, `#atencion-ventas`, `#logistica-guias`).
-  3. *Ajustes a Pantalla Completa (Regla 15):* Migración del modal flotante de ajustes a vista completa dentro de `<main>`.
-  4. *Consola de Permisos RBAC (`TASK-RBAC-02`):* Restricción real de datos financieros para operarios de bodega.
+#### Prioridad 2 (Alta): Filtro de Calidad y Curaduría de Catálogo en Hub 4
+* **Backend:**
+  - Modelo y migración `scraped_pending_items` para staging de productos en bruto del scraper de Torzo.
+  - Endpoints RESTful `POST /api/v1/inventory/scraping/pending/{id}/curate` y `/discard`.
+  - Tablas y modelos Eloquent para composiciones textiles (`apparel_fabrics`) y catálogo de colores sólidos y tornasoles iridiscentes (`apparel_colors`).
+  - Cálculo de métricas de confiabilidad de proveedores en `suppliers` (% On-Time, % Fill Rate, días de demora).
+* **Frontend:**
+  - Pestaña de Curaduría Previa en Inventario con modal de aprobación humana (color, tela, sección web, PVP).
+  - Gestor de telas y colores con previsualización en vivo de degradados CSS tornasol.
+* **Criterio de Cierre:** Ningún producto extraído automáticamente pasa a la tienda pública sin validación y aprobación de un operador.
+
+#### Prioridad 3 (Alta): Motor de Ensamble BOM y Recetas de Suscripción MRR
+* **Backend:**
+  - Tablas y modelos Eloquent `product_bundles` y `bundle_items`.
+  - Algoritmo de cálculo de existencias armables gobernado estrictamente por el insumo cuello de botella.
+  - Endpoint `POST /api/v1/inventory/bundles/{id}/liquidate` que emite salidas atómicas individuales en Kardex (`SALIDA_COMBO_SUSCRIPCION`).
+  - Detección de déficit de ensamble con registro en `bom_deficit_procurements` (`TASK-INT-11`).
+* **Frontend:**
+  - Modal constructor `bundleEditor` en Ajustes de Inventario con asignación de componentes físicos por talla/slotting y simulación de despacho masivo.
+* **Criterio de Cierre:** El sistema impide vender o prometer más cajas de membresía que las prendas físicas disponibles en rack del componente limitante.
+
+#### Prioridad 4 (Media): Sinergias Transversales Automatizadas (Cross-Hub)
+* **Backend:**
+  - `TASK-INT-13`: Deducción automática de cajas de empaque y bolsas de lavado en Kardex al emitir guías en Logística.
+  - `TASK-INT-09`: `RmaResolutionService` para emitir orden de reposición o saldo a favor del cliente al dictaminar garantías.
+  - `TASK-INT-07`: Algoritmo de cotejo de 3 vías (PO $\leftrightarrow$ Conteo Rampa $\leftrightarrow$ Factura Proveedor) con cálculo de retenciones SAT e IVA.
+  - `TASK-INT-08`: Conciliación automatizada de facturas courier vs. manifiestos diarios de expedición.
+  - `TASK-INT-19` / `TASK-INT-20`: Conexión de liquidaciones de convenios B2B a Cuentas por Pagar (`vendor_bills`) y remisiones a rampa.
+* **Frontend:**
+  - Vistas y modales de conciliación en Hubs 1, 4, 5 y 6.
+* **Criterio de Cierre:** Erradicación de discrepancias manuales entre bodega, logística y tesorería.
+
+#### Prioridad 5 (Gobernanza): Shell Operativo y Restricción Estricta RBAC
+* **Backend:**
+  - Middleware de auditoría y restricción real de campos financieros en responses JSON y vistas Blade según rol (`role:warehouse`, `role:purchases`, `role:sales`, `role:admin`).
+  - Feed de notificaciones en tiempo real desde `operational_tasks` con deep links prefiltrados al catálogo.
+  - Persistencia de mensajes del chat inter-áreas en `interdepartmental_messages`.
+* **Frontend:**
+  - Campanita con popover categorizado y saltos en 1 clic.
+  - Chat inter-áreas con canales `#almacen-compras`, `#atencion-ventas`, etc.
+  - Pantalla completa de Ajustes del Sistema dentro de `<main>` (Regla 15 de `MASTER_ROADMAP.md`).
+  - Consola de gestión de roles RBAC interactiva.
+* **Criterio de Cierre:** Cumplimiento total de la regla de privacidad (empleados de bodega con cero visibilidad de facturación o márgenes).
 
 ---
 
@@ -1430,7 +1461,11 @@ graph TD
 * **Impacto en Backend:** Subsección KK, Paso 39, servicio `StoreAffiliationService`, middleware de referidos y modelos de cupones y leads en Laravel.
 
 ### `TASK-STR-05`: Portal del Comprador D2C: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Implementación Fullstack:**
+  - Servicio de dominio `CustomerAccountService` y 7 endpoints RESTful en `StorefrontApiController` (`GET /orders`, `GET /tracking/{folio}`, `GET /subscriptions`, `POST /subscriptions/{id}/pause`, `POST /subscriptions/{id}/resume`, `POST /subscriptions/subscribe`, `POST /profile`).
+  - Drawer PWA interconectado reactivamente con persistencia real en base de datos (`orders`, `shipments`, `customer_subscriptions`).
+  - Suite de pruebas de integración `tests/Feature/StorefrontPwaAccountTest.php` al 100% verde (9 pruebas, 52 aserciones).
 * **Punto Ciego Resuelto:** El botón "Cuenta" del Bottom Navigation Dock de la tienda pública anteriormente abría un drawer básico de consulta sin pantallas dedicadas de gestión de comprador. Los clientes no podían consultar su historial de compras, ver el estado en vivo de sus paquetes con enlace al courier, gestionar su suscripción de caja mensual (MRR), guardar sus direcciones de entrega ni configurar su Perfil Anatómico para que la tienda recomiende su talla automáticamente.
 * **Solución de UI/UX Mobile-First (Vistas Dedicadas en Storefront):**
   - **1. Pantalla de Bienvenida & Acceso Seguro con Google OAuth2:**
@@ -1459,7 +1494,13 @@ graph TD
 * **Impacto en Backend:** DDL 3.37 (`customer_profiles`, `customer_addresses`, `customer_subscriptions`), Modelos Eloquent 4.31, Servicio 5.22 (`CustomerPortalService`), Subsecciones II y JJ, y Paso 38 en `BACKEND_INTEGRATION_SPEC.md`.
 
 ### `TASK-STR-06`: Motor de Notificaciones Web Push PWA (VAPID, Alertas de Stock de 5 min, Courier Tracking & Club MRR)
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Implementación Fullstack:**
+  - Migración con tablas `pwa_push_subscriptions` y `pwa_push_notification_logs`.
+  - Modelos Eloquent `PwaPushSubscription` y `PwaPushNotificationLog`.
+  - Servicio de dominio `WebPushNotificationService` y endpoints RESTful en `StorefrontApiController` (`POST /push/subscribe`, `POST /push/unsubscribe`, `POST /push/test`).
+  - Sincronización asíncrona PWA en `store-pwa.js` y Service Worker `sw.js` con soporte para eventos `push` y enrutamiento en `notificationclick`.
+  - Suite de integración completa `tests/Feature/StorefrontPwaModuleTest.php` al 100% verde (8 pruebas, 55 aserciones, 0 emojis).
 * **Punto Ciego Resuelto:** Ausencia de un canal de comunicación directo, gratuito e inmediato con los compradores móviles para alertar sobre la expiración del apartado de stock (5 minutos), avisar la salida a ruta del paquete courier y gestionar renovaciones de membresías MRR sin depender de los costos crecientes de la API de WhatsApp Business ($0.65 - $1.35 MXN por mensaje).
 * **Solución de UI/UX Mobile-First:**
   - **1. Solicitud de Permiso Táctil No Invasiva:**

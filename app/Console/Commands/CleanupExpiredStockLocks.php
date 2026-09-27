@@ -15,6 +15,13 @@ class CleanupExpiredStockLocks extends Command
     protected $signature = 'stock:cleanup-expired-locks';
 
     /**
+     * Aliases for the console command.
+     *
+     * @var array
+     */
+    protected $aliases = ['stock-locks:cleanup'];
+
+    /**
      * The console command description.
      *
      * @var string

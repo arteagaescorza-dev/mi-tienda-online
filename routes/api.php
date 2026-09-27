@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\RevOps\FinanceApiController;
 use App\Http\Controllers\Api\RevOps\LogisticsApiController;
 use App\Http\Controllers\Api\RevOps\AlliesApiController;
 use App\Http\Controllers\Api\RevOps\DashboardApiController;
+use App\Http\Controllers\Api\StorefrontApiController;
 
 // =========================================================================
 // STOREFRONT D2C PUBLIC API ENDPOINTS
@@ -75,5 +76,38 @@ Route::prefix('v1')->group(function () {
         Route::post('/tasks/{id}/complete', [DashboardApiController::class, 'completeTask']);
         Route::post('/environment/switch', [DashboardApiController::class, 'switchEnvironment']);
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
+    });
+
+    // 8. STOREFRONT D2C CATALOG, PDP & CARRITO CON RESERVA TEMPORAL (PRIORIDAD 1 - SLICE 1.2 & 1.3)
+    Route::prefix('store')->group(function () {
+        Route::get('/products/{slug}', [StorefrontApiController::class, 'productDetail']);
+
+        // Carrito Deslizable y Candados de Stock (TASK-INT-06)
+        Route::get('/cart', [StorefrontApiController::class, 'getCart']);
+        Route::post('/cart/items', [StorefrontApiController::class, 'addToCart']);
+        Route::patch('/cart/items/{id}', [StorefrontApiController::class, 'updateCartItem']);
+        Route::delete('/cart/items/{id}', [StorefrontApiController::class, 'removeCartItem']);
+        Route::post('/cart/clear', [StorefrontApiController::class, 'clearCart']);
+        Route::post('/cart/lock', [StorefrontApiController::class, 'lockCart']);
+        Route::post('/cart/release', [StorefrontApiController::class, 'releaseCartLock']);
+
+        // Checkout Transaccional, Cupones y Sepomex (Slice 1.4 / TASK-STR-03 / TASK-FIN-01)
+        Route::post('/postal-code/lookup', [StorefrontApiController::class, 'validatePostalCode']);
+        Route::post('/coupons/validate', [StorefrontApiController::class, 'validateCoupon']);
+        Route::post('/checkout', [StorefrontApiController::class, 'checkout']);
+
+        // Portal del Comprador, Tracking Courier y Suscripciones MRR (Slice 1.5 / TASK-STR-04 / TASK-STR-05)
+        Route::get('/account/orders', [StorefrontApiController::class, 'orders']);
+        Route::get('/account/tracking/{folio}', [StorefrontApiController::class, 'tracking']);
+        Route::get('/account/subscriptions', [StorefrontApiController::class, 'subscriptions']);
+        Route::post('/account/subscriptions/{id}/pause', [StorefrontApiController::class, 'pauseSubscription']);
+        Route::post('/account/subscriptions/{id}/resume', [StorefrontApiController::class, 'resumeSubscription']);
+        Route::post('/account/subscriptions/subscribe', [StorefrontApiController::class, 'subscribe']);
+        Route::post('/account/profile', [StorefrontApiController::class, 'updateProfile']);
+
+        // Motor de Notificaciones Web Push PWA (Slice 1.6 / TASK-STR-06)
+        Route::post('/push/subscribe', [StorefrontApiController::class, 'pushSubscribe']);
+        Route::post('/push/unsubscribe', [StorefrontApiController::class, 'pushUnsubscribe']);
+        Route::post('/push/test', [StorefrontApiController::class, 'pushTest']);
     });
 });
