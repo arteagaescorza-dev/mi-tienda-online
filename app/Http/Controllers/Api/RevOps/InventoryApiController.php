@@ -363,14 +363,27 @@ class InventoryApiController extends Controller
         $validated = $request->validate([
             'items' => 'nullable|array',
             'notes' => 'nullable|string|max:500',
+            'batch_number' => 'nullable|string|max:80',
+            'expiration_date' => 'nullable|string|max:30',
+            'pao_months' => 'nullable|integer|min:0|max:120',
+            'sanitary_data' => 'nullable|array',
         ]);
 
         $po = PurchaseOrder::with('items.variant')->findOrFail($id);
+
+        $sanitaryPayload = [
+            'batch_number' => $validated['batch_number'] ?? null,
+            'expiration_date' => $validated['expiration_date'] ?? null,
+            'pao_months' => $validated['pao_months'] ?? null,
+            'sanitary_data' => $validated['sanitary_data'] ?? [],
+        ];
+
         $result = $this->inboundService->receivePurchaseOrder(
             $po,
             $validated['items'] ?? [],
             auth()->id(),
-            $validated['notes'] ?? null
+            $validated['notes'] ?? null,
+            $sanitaryPayload
         );
 
         return response()->json($result);

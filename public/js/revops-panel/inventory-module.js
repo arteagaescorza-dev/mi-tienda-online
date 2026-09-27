@@ -3341,7 +3341,10 @@ function hybridInventoryModule() {
                     },
                     body: JSON.stringify({
                         items: this.receivingSizes,
-                        notes: this.receivingNotes
+                        notes: this.receivingNotes,
+                        batch_number: this.receivingRequiresSanitary ? (this.receivingBatchNumber || null) : null,
+                        expiration_date: this.receivingRequiresSanitary ? (this.receivingExpirationDate || null) : null,
+                        pao_months: this.receivingRequiresSanitary ? (parseInt(this.receivingPaoMonths, 10) || 12) : null
                     })
                 }).catch(err => console.error('Error sincronizando recepcion Inbound:', err));
             }

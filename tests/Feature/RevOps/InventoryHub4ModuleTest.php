@@ -520,5 +520,129 @@ class InventoryHub4ModuleTest extends TestCase
             ->assertSee('Caja VIP Total Experiencia')
             ->assertSee('window.serverProductBundles', false);
     }
+
+    public function test_can_receive_purchase_order_with_sanitary_traceability_and_cpp_valuation(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Terra Labs Cosmetics MX',
+            'contact_email' => 'inbound@terralabs.com',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'SERUM-INT-001',
+            'title' => 'Suero Intimo Hidratante pH 4.5',
+            'slug' => 'suero-intimo-hidratante-ph-45',
+            'price' => 450.00,
+            'cost' => 140.00, // Costo previo
+            'type' => 'dropship', // Inicia como dropship
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'SERUM-INT-001-50ML',
+            'price' => 450.00,
+            'cost' => 140.00,
+            'attributes' => ['size' => '50ml'],
+        ]);
+
+        // Stock previo en rampa: 10 unidades a $140 = $1,400
+        $inventory = Inventory::create([
+            'variant_id' => $variant->id,
+            'location' => 'warehouse-1',
+            'quantity' => 10,
+            'reserved' => 0,
+            'type' => 'physical',
+        ]);
+
+        // Orden de compra: 20 unidades a $110 = $2,200
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-2026-SAN-001',
+            'supplier_id' => $supplier->id,
+            'status' => 'confirmed',
+            'total_units' => 20,
+            'subtotal' => 2200.00,
+            'tax' => 352.00,
+            'total_amount' => 2552.00,
+        ]);
+
+        $poItem = PurchaseOrderItem::create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'size_name' => '50ml',
+            'quantity_ordered' => 20,
+            'quantity_received' => 0,
+            'unit_cost' => 110.00,
+            'total_cost' => 2200.00,
+        ]);
+
+        // Recepcion Inbound con trazabilidad sanitaria
+        // Calculo CPP esperado: (10 * 140 + 20 * 110) / (10 + 20) = (1400 + 2200) / 30 = 3600 / 30 = 120.00
+        $payload = [
+            'items' => [
+                $poItem->id => 20,
+            ],
+            'notes' => 'Inspeccion sanitaria en rampa satisfactoria. Precinto de seguridad integro.',
+            'batch_number' => 'LOT-2026-COSM-8841',
+            'expiration_date' => '2028-11-30',
+            'pao_months' => 12,
+        ];
+
+        $response = $this->postJson("/api/v1/inventory/purchases/orders/{$po->id}/receive", $payload);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', 'received')
+            ->assertJsonPath('units_received', 20)
+            ->assertJsonPath('batch_number', 'LOT-2026-COSM-8841')
+            ->assertJsonPath('expiration_date', '2028-11-30')
+            ->assertJsonPath('pao_months', 12);
+
+        // Verificacion de nuevo inventario fisico (10 + 20 = 30)
+        $inventory->refresh();
+        $this->assertEquals(30, $inventory->quantity);
+
+        // Verificacion de valuacion contable CPP
+        $variant->refresh();
+        $product->refresh();
+        $this->assertEquals(120.00, (float) $variant->cost);
+        $this->assertEquals(120.00, (float) $product->cost);
+
+        // Verificacion de atributos sanitarios en variante
+        $this->assertEquals('LOT-2026-COSM-8841', data_get($variant->attributes, 'batch_number'));
+        $this->assertEquals('2028-11-30', data_get($variant->attributes, 'expiration_date'));
+        $this->assertEquals(12, data_get($variant->attributes, 'pao_months'));
+        $this->assertTrue(data_get($variant->attributes, 'requires_sanitary_control'));
+
+        // Verificacion de metadatos sanitarios en producto
+        $this->assertEquals('LOT-2026-COSM-8841', data_get($product->meta, 'batch_number'));
+        $this->assertEquals('2028-11-30', data_get($product->meta, 'expiration_date'));
+        $this->assertEquals(12, data_get($product->meta, 'pao_months'));
+
+        // Verificacion de transicion dropship -> both
+        $this->assertEquals('both', $product->type);
+
+        // Verificacion de asiento inmutable en Kardex de Inventario
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_id' => $inventory->id,
+            'quantity' => 20,
+            'quantity_before' => 10,
+            'quantity_after' => 30,
+        ]);
+
+        // Verificacion de asiento mercantil en Kardex de Compras
+        $this->assertDatabaseHas('purchase_kardex', [
+            'purchase_order_id' => $po->id,
+            'movement_type' => 'INBOUND_RECEIPT',
+            'supplier_id' => $supplier->id,
+        ]);
+
+        // Verificacion de estado final de la OC
+        $po->refresh();
+        $this->assertEquals('received', $po->status);
+        $this->assertNotNull($po->received_at);
+        $this->assertStringContainsString('LOT-2026-COSM-8841', $po->notes);
+    }
 }
+
 

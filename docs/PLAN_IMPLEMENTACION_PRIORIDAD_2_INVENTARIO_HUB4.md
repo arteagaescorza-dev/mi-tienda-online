@@ -144,19 +144,25 @@ flowchart TD
 
 ---
 
-### Slice 2.4: Inbound en Rampa con Trazabilidad Sanitaria y Valuacion CPP (`TASK-INV-04`, `TASK-INV-06`)
+### Slice 2.4: Inbound en Rampa con Trazabilidad Sanitaria y Valuacion CPP (`TASK-INV-04`, `TASK-INV-06`) [COMPLETADO]
+* **Estado:** Completado y verificado (161/161 pruebas verdes en PHPUnit, 821 aserciones, 0 emojis).
 * **Objetivo:** Extender la recepcion fisica en rampa para soportar trazabilidad sanitaria en articulos de higiene, fragancias y cosmeticos (lote, fecha de caducidad y meses PAO), manteniendo el recalculo contable de Costo Promedio Ponderado.
 * **Backend:**
   - `InboundReceiptService::receivePurchaseOrder`:
-    - Aceptar parametros sanitarios por partida: `batch_number`, `expiration_date` y `pao_months`.
-    - Registrar los datos de lote en la metadata del movimiento de Kardex (`inventory_movements`) y actualizar la variante.
-    - Mantener el recalculo de CPP y la transicion automatica de producto de `dropship` a `both` (mixto).
+    - Acepta parametros sanitarios: `batch_number`, `expiration_date` y `pao_months`.
+    - Actualiza atributos en `product_variants` (`requires_sanitary_control`, `batch_number`, `expiration_date`, `pao_months`) y `products` (`meta`).
+    - Registra los datos de lote en la metadata del movimiento de Kardex (`inventory_movements`) y notas de `purchase_orders`.
+    - Mantiene el recalculo de CPP y la transicion automatica de producto de `dropship` a `both` (mixto).
+  - `InventoryApiController::receivePurchaseOrder`:
+    - Valida y transporta los campos sanitarios al servicio de recepcion fisica.
 * **Frontend:**
   - `public/js/revops-panel/inventory-module.js`:
-    - Actualizar el modal de recepcion fisica para capturar los campos sanitarios cuando el producto pertenezca a categorias aplicables.
-* **Criterios de Aceptacion:**
+    - Modal de recepcion fisica conectado con captura de lote, caducidad y meses PAO (`receivingBatchNumber`, `receivingExpirationDate`, `receivingPaoMonths`).
+    - Envio asincrono en `confirmInboundReceipt()` hacia `POST /api/v1/inventory/purchases/orders/{id}/receive` con carga util sanitaria.
+* **Criterios de Aceptacion Superados:**
   - Recepcion en rampa actualiza existencias fisicas, recalcula CPP y genera asientos en `purchase_kardex` e `inventory_movements`.
-  - Se registra el numero de lote y caducidad de forma auditable.
+  - Se registra el numero de lote, fecha de vencimiento y PAO de forma auditable en base de datos.
+  - Suite de pruebas de Laravel ampliada a 161 pruebas al 100% en verde (821 aserciones).
 
 ---
 

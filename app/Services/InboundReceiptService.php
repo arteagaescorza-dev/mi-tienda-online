@@ -17,9 +17,9 @@ class InboundReceiptService
      * Procesa la recepción física de mercancía amparada por una Orden de Compra.
      * Recalcula el Costo Promedio Ponderado (CPP), asienta en Kardex y transiciona dropship a mixto.
      */
-    public function receivePurchaseOrder(PurchaseOrder|int $purchaseOrder, array $itemsReceived = [], ?int $userId = null, ?string $notes = null): array
+    public function receivePurchaseOrder(PurchaseOrder|int $purchaseOrder, array $itemsReceived = [], ?int $userId = null, ?string $notes = null, array $sanitaryData = []): array
     {
-        return DB::transaction(function () use ($purchaseOrder, $itemsReceived, $userId, $notes) {
+        return DB::transaction(function () use ($purchaseOrder, $itemsReceived, $userId, $notes, $sanitaryData) {
             $po = $purchaseOrder instanceof PurchaseOrder 
                 ? $purchaseOrder 
                 : PurchaseOrder::with(['items', 'supplier'])->findOrFail($purchaseOrder);
@@ -28,6 +28,11 @@ class InboundReceiptService
             $totalUnitsReceivedInBatch = 0;
             $totalCostReceivedInBatch = 0.0;
             $itemsProcessed = [];
+
+            $batchNumber = $sanitaryData['batch_number'] ?? null;
+            $expirationDate = $sanitaryData['expiration_date'] ?? null;
+            $paoMonths = !empty($sanitaryData['pao_months']) ? (int) $sanitaryData['pao_months'] : null;
+            $hasSanitary = !empty($batchNumber) || !empty($expirationDate) || !empty($paoMonths);
 
             foreach ($allPoItems as $item) {
                 // Cantidad recibida para esta línea (por defecto todo lo pendiente si no se especifica)
@@ -66,8 +71,16 @@ class InboundReceiptService
                         $newCpp = (float) $item->unit_cost;
                     }
 
-                    // Actualizar costo en variante y producto
+                    // Actualizar costo y trazabilidad sanitaria en variante y producto (TASK-INV-06)
                     $variant->cost = $newCpp;
+                    if ($hasSanitary) {
+                        $attrs = $variant->attributes ?? [];
+                        if (!empty($batchNumber)) $attrs['batch_number'] = $batchNumber;
+                        if (!empty($expirationDate)) $attrs['expiration_date'] = $expirationDate;
+                        if (!empty($paoMonths)) $attrs['pao_months'] = $paoMonths;
+                        $attrs['requires_sanitary_control'] = true;
+                        $variant->attributes = $attrs;
+                    }
                     $variant->save();
 
                     if ($product) {
@@ -76,6 +89,14 @@ class InboundReceiptService
                         if ($product->type === 'dropship') {
                             $product->type = 'both';
                         }
+                        if ($hasSanitary) {
+                            $meta = $product->meta ?? [];
+                            if (!empty($batchNumber)) $meta['batch_number'] = $batchNumber;
+                            if (!empty($expirationDate)) $meta['expiration_date'] = $expirationDate;
+                            if (!empty($paoMonths)) $meta['pao_months'] = $paoMonths;
+                            $meta['requires_sanitary_control'] = true;
+                            $product->meta = $meta;
+                        }
                         $product->save();
                     }
 
@@ -83,14 +104,22 @@ class InboundReceiptService
                     $inventory->quantity = $newQty;
                     $inventory->save();
 
+                    $sanitaryTag = $hasSanitary 
+                        ? sprintf(' [Lote: %s | Cad: %s | PAO: %dM]', $batchNumber ?: 'N/A', $expirationDate ?: 'N/A', $paoMonths ?: 12) 
+                        : '';
+
                     $movementNote = sprintf(
-                        'ENTRADA_COMPRA OC #%s - Valuación CPP: $%0.2f -> $%0.2f (Lote @ $%0.2f) %s',
+                        'ENTRADA_COMPRA OC #%s - Valuacion CPP: $%0.2f -> $%0.2f (Lote @ $%0.2f)%s%s',
                         $po->po_number,
                         $prevCost,
                         $newCpp,
                         $item->unit_cost,
-                        $notes ? "[$notes]" : ''
+                        $sanitaryTag,
+                        $notes ? " [$notes]" : ''
                     );
+                    if (strlen($movementNote) > 250) {
+                        $movementNote = substr($movementNote, 0, 247) . '...';
+                    }
 
                     InventoryMovement::create([
                         'inventory_id' => $inventory->id,
@@ -108,6 +137,9 @@ class InboundReceiptService
                         'quantity_received' => $qtyToReceive,
                         'previous_cost' => $prevCost,
                         'new_cpp' => round($newCpp, 2),
+                        'batch_number' => $batchNumber,
+                        'expiration_date' => $expirationDate,
+                        'pao_months' => $paoMonths,
                     ];
                 }
             }
@@ -117,20 +149,29 @@ class InboundReceiptService
             $po->status = $isFullyReceived ? 'received' : 'partially_received';
             $po->received_at = now();
             if ($notes) {
-                $po->notes = ($po->notes ? $po->notes . "\n" : '') . "Recepción Inbound: " . $notes;
+                $po->notes = ($po->notes ? $po->notes . "\n" : '') . "Recepcion Inbound: " . $notes;
+            }
+            if ($hasSanitary) {
+                $sanitaryNote = sprintf('Trazabilidad Sanitaria: Lote %s | Caducidad %s | PAO %dM', $batchNumber ?: 'N/A', $expirationDate ?: 'N/A', $paoMonths ?: 12);
+                $po->notes = ($po->notes ? $po->notes . "\n" : '') . $sanitaryNote;
             }
             $po->save();
 
             // 6. Asentar en Purchase Kardex
+            $sanitaryDescTag = $hasSanitary 
+                ? sprintf(' (Lote Sanitario: %s, Cad: %s, PAO: %dM)', $batchNumber ?: 'N/A', $expirationDate ?: 'N/A', $paoMonths ?: 12) 
+                : '';
+
             PurchaseKardex::create([
                 'purchase_order_id' => $po->id,
                 'supplier_id' => $po->supplier_id,
                 'movement_type' => 'INBOUND_RECEIPT',
                 'description' => sprintf(
-                    'Recepción Inbound de %d unidades amparadas en OC #%s por total de $%.2f MXN',
+                    'Recepcion Inbound de %d unidades amparadas en OC #%s por total de $%.2f MXN%s',
                     $totalUnitsReceivedInBatch,
                     $po->po_number,
-                    $totalCostReceivedInBatch
+                    $totalCostReceivedInBatch,
+                    $sanitaryDescTag
                 ),
                 'total_amount' => $totalCostReceivedInBatch,
             ]);
@@ -142,6 +183,9 @@ class InboundReceiptService
                 'status' => $po->status,
                 'units_received' => $totalUnitsReceivedInBatch,
                 'total_cost' => $totalCostReceivedInBatch,
+                'batch_number' => $batchNumber,
+                'expiration_date' => $expirationDate,
+                'pao_months' => $paoMonths,
                 'items_processed' => $itemsProcessed,
             ];
         });
