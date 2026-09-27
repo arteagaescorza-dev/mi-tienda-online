@@ -537,6 +537,7 @@ function hybridInventoryModule() {
         },
 
         // Estado Auditoría Cíclica a Ciegas (TASK-INV-07: 3 SKUs Diarios)
+        cycleCountHistory: [],
         cycleCountModal: {
             isOpen: false,
             step: 'count', // 'count' | 'reconcile' | 'summary'
@@ -3341,7 +3342,10 @@ function hybridInventoryModule() {
                     },
                     body: JSON.stringify({
                         items: this.receivingSizes,
-                        notes: this.receivingNotes
+                        notes: this.receivingNotes,
+                        batch_number: this.receivingRequiresSanitary ? (this.receivingBatchNumber || null) : null,
+                        expiration_date: this.receivingRequiresSanitary ? (this.receivingExpirationDate || null) : null,
+                        pao_months: this.receivingRequiresSanitary ? (parseInt(this.receivingPaoMonths, 10) || 12) : null
                     })
                 }).catch(err => console.error('Error sincronizando recepcion Inbound:', err));
             }
@@ -4208,6 +4212,15 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseKardex) && window.serverPurchaseKardex.length > 0) {
                 this.purchaseKardexLog = window.serverPurchaseKardex;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0) {
+                this.pendingCreditAgreements = window.serverCreditAgreements;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverProductBundles) && window.serverProductBundles.length > 0) {
+                this.productBundles = window.serverProductBundles;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCycleCounts) && window.serverCycleCounts.length > 0) {
+                this.cycleCountHistory = window.serverCycleCounts;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
@@ -4908,7 +4921,9 @@ function hybridInventoryModule() {
         onDemandRejectReason: 'Agotado en taller sin fecha de resurtido',
         sizeEditModalOpen: false,
         selectedOrderForSizes: null,
-        pendingCreditAgreements: [
+        pendingCreditAgreements: (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0)
+            ? window.serverCreditAgreements
+            : [
             {
                 supplier: 'Silk & Cotton Iberia SL',
                 ref: 'NC-SILK-2026-03',
@@ -6048,6 +6063,7 @@ function hybridInventoryModule() {
             const found = pendingList.find(a => a.ref === selectedRef);
             if (found) {
                 po.hasCreditDeduction = true;
+                po.creditAgreementId = found.id || null;
                 po.creditNoteRef = found.ref;
                 po.creditNoteAmount = found.amount;
                 po.creditNoteReason = found.reason;
@@ -6244,6 +6260,64 @@ function hybridInventoryModule() {
 
             const targetActive = target.activePurchaseOrders || this.activePurchaseOrders || [];
             targetActive.unshift(newActivePo);
+
+            // 2.5 Persistir en base de datos via API RESTful (Slice 2.2 / TASK-INV-16 / TASK-PUR-04)
+            const csrfToken = (typeof document !== 'undefined' && document.querySelector('meta[name="csrf-token"]'))
+                ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                : '';
+
+            fetch('/api/v1/inventory/purchases/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    po_number: po.poNumber,
+                    supplier: po.supplier,
+                    notes: po.notes,
+                    payment_terms: po.paymentTerms,
+                    delivery_commitment_date: po.deliveryCommitmentDate,
+                    has_credit_deduction: po.hasCreditDeduction,
+                    credit_agreement_id: po.creditAgreementId || null,
+                    credit_note_ref: po.creditNoteRef || null,
+                    credit_note_amount: po.deductionAmount || po.creditNoteAmount || 0,
+                    credit_note_reason: po.creditNoteReason || null,
+                    items: (po.items || []).map(it => ({
+                        id: it.id,
+                        sku: it.sku,
+                        product_name: it.productName,
+                        qty: it.qty,
+                        unit_cost: it.costUnit,
+                        sizes: it.sizes || null,
+                        priority: it.priority || 'media'
+                    })),
+                    po_snapshot: poSnapshot
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.order && data.order.dbId) {
+                    newActivePo.dbId = data.order.dbId;
+                    fetch('/api/v1/inventory/purchases/orders/' + data.order.dbId + '/dispatch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            recipient_email: recipient,
+                            carrier: po.carrier || 'Transportista B2B',
+                            notes: 'Despacho formal notificado por correo institucional.'
+                        })
+                    }).catch(() => {});
+                }
+            })
+            .catch(err => {
+                console.warn('Nota: Persistencia de PO completada en modo offline/cache:', err);
+            });
 
             // 3. Si se aplicó una nota de crédito, marcar el acuerdo como aplicado
             if (po.hasCreditDeduction && po.creditNoteRef) {
@@ -7891,8 +7965,16 @@ function hybridInventoryModule() {
         confirmCycleCountReconciliation() {
             const report = this.cycleCountReport;
             let adjustedCount = 0;
+            const countsPayload = [];
 
             report.rows.forEach(row => {
+                const reason = this.cycleCountModal.discrepancyReasons[row.sku] || 'Merma operativa';
+                countsPayload.push({
+                    sku: row.sku,
+                    physical_counted: row.physical,
+                    reason: reason
+                });
+
                 if (row.diff !== 0) {
                     const product = this.products.find(p => p.sku === row.sku);
                     if (product) {
@@ -7930,13 +8012,45 @@ function hybridInventoryModule() {
                             stockAfter: stockAfter,
                             reference: 'Auditoría Diaria (Ciega)',
                             user: 'Auditor de Almacén (Conteo Cíclico)',
-                            note: 'Motivo: ' + (this.cycleCountModal.discrepancyReasons[row.sku] || 'Merma operativa') + 
-                                  ' | Discrepancia: ' + (row.diff > 0 ? '+' : '') + row.diff + ' uds'
+                            note: 'Motivo: ' + reason + ' | Discrepancia: ' + (row.diff > 0 ? '+' : '') + row.diff + ' uds'
                         });
 
                         adjustedCount++;
                     }
                 }
+            });
+
+            // Enviar auditoria a ciegas con conciliacion Kardex al backend
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('/api/v1/inventory/cycle-counts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    counts: countsPayload,
+                    reconcile_kardex: true
+                })
+            }).then(r => r.json()).then(data => {
+                if (data && data.success) {
+                    if (this.cycleCountHistory) {
+                        this.cycleCountHistory.unshift({
+                            id: data.cycle_count_id,
+                            date: new Date().toLocaleDateString('es-MX'),
+                            skuCount: countsPayload.length,
+                            totalCounted: data.total_units_counted || 0,
+                            totalVariance: data.total_variance_units || 0,
+                            iraScore: data.ira_accuracy_score || 100,
+                            auditedBy: 'Operador Almacén',
+                            status: data.status || 'reconciled',
+                            details: data.details || []
+                        });
+                    }
+                }
+            }).catch(err => {
+                console.error('Error al persistir auditoria ciclica:', err);
             });
 
             this.cycleCountModal.isCompletedToday = true;
@@ -8215,6 +8329,37 @@ function hybridInventoryModule() {
                 this.showToast(`Nueva receta BOM creada exitosamente: ${newBundle.name}`, 'success');
             }
 
+            // Persistir de forma asincrona en base de datos
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const payload = {
+                id: this.bundleEditor.isEditing ? this.bundleEditor.bundleId : null,
+                sku: cleanSku,
+                name: this.bundleEditor.form.name.trim(),
+                type: this.bundleEditor.form.type,
+                subscriptionPrice: cleanPrice,
+                regularPrice: cleanRegPrice,
+                isActive: this.bundleEditor.form.isActive,
+                components: this.bundleEditor.form.components
+            };
+            fetch('/api/v1/inventory/bundles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(data => {
+                if (data && data.success && data.bundle && data.bundle.id) {
+                    const item = this.productBundles.find(b => b.id === cleanSku || b.sku === cleanSku || b.id === this.bundleEditor.bundleId);
+                    if (item) {
+                        item.dbId = data.bundle.id;
+                    }
+                }
+            }).catch(err => {
+                console.error('Error al persistir receta BOM en backend:', err);
+            });
+
             this.bundleEditor.isOpen = false;
         },
 
@@ -8442,6 +8587,50 @@ function hybridInventoryModule() {
 
             this.bomDeficitState.lastGeneratedOrders = ordersToCreate;
             this.bomDeficitState.isProcessing = false;
+
+            // Persistir deficit en base de datos y crear OCs borrador en backend
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('/api/v1/inventory/bundles/audit-deficit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    bundle_sku: res.bundleSku,
+                    bundle_id: res.bundleId,
+                    target_units: res.targetQty,
+                    batch_reference: batchRef
+                })
+            }).then(r => r.json()).then(data => {
+                if (data && data.success && Array.isArray(data.purchase_orders) && data.purchase_orders.length > 0) {
+                    data.purchase_orders.forEach(po => {
+                        const exists = this.activePurchaseOrders.some(p => p.id === po.id || p.poCode === po.id);
+                        if (!exists) {
+                            this.activePurchaseOrders.unshift({
+                                id: po.id,
+                                dbId: po.dbId,
+                                supplier: po.supplierName,
+                                supplier_id: po.supplierId,
+                                carrier: 'Paqueteria Express (BOM Guia Pendiente)',
+                                eta: 'En 7 dias',
+                                sku: res.bundleSku,
+                                productName: `Insumos BOM Deficit Lote ${res.targetQty}x ${res.bundleSku}`,
+                                qty: po.totalPieces,
+                                sizes: {},
+                                unitCost: po.totalPieces > 0 ? (po.subtotal / po.totalPieces) : 135.00,
+                                totalCost: po.totalAmount,
+                                date: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
+                                status: 'Borrador',
+                                notes: po.notes
+                            });
+                        }
+                    });
+                }
+            }).catch(err => {
+                console.error('Error al sincronizar auditoria BOM con backend:', err);
+            });
 
             const generatedPoCodes = ordersToCreate.map(o => o.poCode).join(', ');
             this.showToast(`Exito: Se generaron ${ordersToCreate.length} ordenes de compra (${generatedPoCodes}) enviadas a Extranet B2B.`, 'success');

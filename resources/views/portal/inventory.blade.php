@@ -7,9 +7,9 @@
 
 @section('content')
 {{-- 
-  Módulo de Inventario HÃ­brido y Catálogo - Plataforma RevOps E-Commerce B2C (Ropa Interior)
+  Módulo de Inventario Híbrido y Catálogo - Plataforma RevOps E-Commerce B2C (Ropa Interior)
   Stack: Laravel Blade + Tailwind CSS + Alpine.js
-  UbicaciÃ³n sugerida en Laravel: resources/views/inventory/index.blade.php
+  Ubicación sugerida en Laravel: resources/views/inventory/index.blade.php
 --}}
 
 <div 
@@ -41,6 +41,7 @@
         </button>
     </div>
 
+    
     {{-- Inyección de Datos Reales de Inventario desde Laravel (259 SKUs, 1,283 variantes) --}}
     <script>
         window.serverInventoryProducts = @json($portalProducts);
@@ -48,16 +49,19 @@
         window.serverPurchaseOrders = @json($portalPurchaseOrders);
         window.serverFuturePurchaseOrders = @json($portalFuturePurchaseOrders);
         window.serverPurchaseKardex = @json($portalPurchaseKardex);
+        window.serverCreditAgreements = @json($portalCreditAgreements ?? []);
+        window.serverProductBundles = @json($portalProductBundles ?? []);
+        window.serverCycleCounts = @json($portalCycleCounts ?? []);
     </script>
 
     <!-- ========================================================================= -->
-    <!-- SECCIÓN 1: PESTAÑAS DE SUBMÃ“DULOS FIJAS (STICKY SUB-NAVBAR)               -->
+    <!-- SECCIÓN 1: PESTAÑAS DE SUBMÓDULOS FIJAS (STICKY SUB-NAVBAR)               -->
     <!-- ========================================================================= -->
     <div class="sticky top-0 sm:top-[64px] z-20 bg-[#f8fafc]/95 backdrop-blur-md -mt-6 -mx-6 px-6 pt-3 pb-2 mb-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
         <!-- PESTAÑAS DE NAVEGACIÓN (Alpine.js) -->
         <nav class="flex gap-2 -mb-px overflow-x-auto">
 
-                <!-- TAB 1: CATÃLOGO OPERATIVO -->
+                <!-- TAB 1: CATÁLOGO OPERATIVO -->
                 <button 
                     @click="activeTab = 'inventory'" 
                     :class="activeTab === 'inventory' 
@@ -68,8 +72,8 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                     <span>Catálogo Operativo</span>
                     <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-semibold" x-text="products.length"></span>
-                    <!-- Help Icon Tab 2 (Regla 8: BotÃ³n ? Universal) -->
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Catálogo Operativo" data-help-title="Pestaña: Catálogo Operativo" data-help-desc="GestiÃ³n diaria de existencias locales, ajustes manuales por merma/entrada, re-scraping de Torzo y panel de desglose por talla con calculadora de margen.">?</button>
+                    <!-- Help Icon Tab 2 (Regla 8: Botón ? Universal) -->
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Catálogo Operativo" data-help-title="Pestaña: Catálogo Operativo" data-help-desc="Gestión diaria de existencias locales, ajustes manuales por merma/entrada, re-scraping de Torzo y panel de desglose por talla con calculadora de margen.">?</button>
                 </button>
 
                 <!-- TAB 2: PROVEEDORES & SCRAPING -->
@@ -83,7 +87,7 @@
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     <span>Proveedores & Scraping</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-bold" x-text="providers.length + ' Activos'"></span>
+                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-bold">7 Activos</span>
                     <!-- Help Icon Tab 3 (Regla 8: Botón ? Universal) -->
                     <button class="section-help-btn" type="button" aria-label="Ayuda Proveedores y Scraping" data-help-title="Pestaña: Proveedores & Scraping" data-help-desc="Conectores de scrapers (Torzo) y APIs de mayoristas para dropshipping sincronizado y seguimiento de órdenes de compra pendientes.">?</button>
                 </button>
@@ -99,13 +103,13 @@
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     <span>Compras</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="futurePurchaseOrders.length + activePurchaseOrders.length"></span>
-                    <!-- Help Icon Tab 4 (Regla 8: BotÃ³n ? Universal) -->
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Compras y Reabastecimiento" data-help-title="Pestaña: Compras & Reabastecimiento" data-help-desc="Seguimiento de órdenes de compra pendientes, recepción de mercancía y consolidación de compras planificadas desde el catÃ¡logo.">?</button>
+                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="futurePurchaseOrders.length + 2"></span>
+                    <!-- Help Icon Tab 4 (Regla 8: Botón ? Universal) -->
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Compras y Reabastecimiento" data-help-title="Pestaña: Compras & Reabastecimiento" data-help-desc="Seguimiento de órdenes de compra pendientes, recepción de mercancía y consolidación de compras planificadas desde el catálogo.">?</button>
                 </button>
         </nav>
 
-        <!-- ACCIONES RÃPIDAS & CONEXIÓN (A LA MISMA ALTURA QUE LAS PESTAÑAS) -->
+        <!-- ACCIONES RÁPIDAS & CONEXIÓN (A LA MISMA ALTURA QUE LAS PESTAÑAS) -->
         <div class="flex items-center gap-2.5 pb-2 sm:pb-0 shrink-0">
             <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-lg text-xs font-medium text-emerald-700">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -116,7 +120,7 @@
                 :disabled="isRefreshing"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 shadow-xs transition cursor-pointer disabled:opacity-50"
                 style="min-height: unset;"
-                title="Sincronizar inventario y catÃ¡logo"
+                title="Sincronizar inventario y catálogo"
             >
                 <svg :class="isRefreshing ? 'animate-spin' : ''" class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -127,12 +131,12 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- PESTAÃ‘A 1: CATÃLOGO OPERATIVO (Vista Principal)                   -->
+    <!-- PESTAÑA 1: CATÁLOGO OPERATIVO (Vista Principal)                   -->
     <!-- ================================================================= -->
     <div x-show="activeTab === 'inventory'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
         
         <!-- ============================================================= -->
-        <!-- SECCIÓN 2: TARJETAS CON KPIS (CONTRAÃBLES Y EXPANDIBLES)      -->
+        <!-- SECCIÓN 2: TARJETAS CON KPIS (CONTRAÍBLES Y EXPANDIBLES)      -->
         <!-- ============================================================= -->
         <div class="mb-5">
             <!-- Barra de control del toggle de KPIs -->
@@ -140,7 +144,7 @@
                 <div class="flex items-center gap-2">
                     <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Métricas Clave de Inventario</span>
                     <template x-if="kpisCollapsed">
-                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md" x-text="products.reduce((acc, p) => acc + (p.localStock || 0), 0).toLocaleString() + ' piezas disponibles | ' + products.length + ' modelos activos | Último scrape: ' + lastScrapeTime"></span>
+                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md" x-text="'3,674 piezas disponibles | 25 modelos activos | Último scrape: ' + lastScrapeTime"></span>
                     </template>
                 </div>
                 <button 
@@ -203,12 +207,12 @@
                             <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                             <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                 <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Pedidos Dropshipping</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Referencias vendidas que requieren gestión externa con el proveedor para envÃ­o directo al cliente.</p>
+                                <p class="text-[10px] text-slate-200 leading-snug">Referencias vendidas que requieren gestión externa con el proveedor para envío directo al cliente.</p>
                                 <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                             </div>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5"><span x-text="products.filter(p => p.type === 'dropship' || (p.supplierStock && p.supplierStock > 0)).length"></span> <span class="text-xs font-normal text-slate-500">referencias</span></div>
+                    <div class="text-2xl font-bold text-slate-900 mt-0.5">0 <span class="text-xs font-normal text-slate-500">referencias</span></div>
                     <div class="text-[11px] text-slate-500">Sin rezagos acumulados</div>
                 </div>
             </div>
@@ -231,8 +235,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5"><span x-text="products.length"></span> <span class="text-xs font-normal text-slate-500">modelos</span></div>
-                    <div class="text-[11px] text-slate-500" x-text="products.reduce((acc, p) => acc + Object.keys(p.sizes || {}).length, 0).toLocaleString() + ' variantes activas'"></div>
+                    <div class="text-2xl font-bold text-slate-900 mt-0.5">25 <span class="text-xs font-normal text-slate-500">modelos</span></div>
+                    <div class="text-[11px] text-slate-500">4 tallas x modelo (CH a XL)</div>
                 </div>
             </div>
 
@@ -255,14 +259,14 @@
                         </div>
                     </div>
                     <div class="text-lg font-bold text-slate-800 mt-0.5" x-text="lastScrapeTime">Sin registros</div>
-                    <div class="text-[11px] text-emerald-600 font-medium">Torzo & Adrenaline Scrapers Activos</div>
+                    <div class="text-[11px] text-emerald-600 font-medium">Torzo Feed Bot activo</div>
                 </div>
             </div>
         </div>
         </div>
 
         <!-- ============================================================= -->
-        <!-- SECCIÓN 3: FUNCIONALIDADES DEL MÃ“DULO (ACCIONES OPERATIVAS)   -->
+        <!-- SECCIÓN 3: FUNCIONALIDADES DEL MÓDULO (ACCIONES OPERATIVAS)   -->
         <!-- ============================================================= -->
         <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs mb-4 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2">
@@ -271,12 +275,12 @@
                 </div>
                 <div>
                     <span class="text-xs font-bold text-slate-800 block leading-tight">Funcionalidades del Módulo</span>
-                    <span class="text-[10px] text-slate-400 block">Acciones de auditoría, combos BOM y gestión de catÃ¡logo</span>
+                    <span class="text-[10px] text-slate-400 block">Acciones de auditoría, combos BOM y gestión de catálogo</span>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <!-- BotÃ³n Kardex / Auditoría (Permanente) -->
+                <!-- Botón Kardex / Auditoría (Permanente) -->
                 <button 
                     type="button"
                     @click.stop="openKardexDrawer()" 
@@ -291,13 +295,13 @@
                     <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700" x-text="inventoryMovements.length"></span>
                 </button>
 
-                <!-- BotÃ³n Carritos Activos (Permanente: TelemetrÃ­a de Stock Locks con TTL 5m) -->
+                <!-- Botón Carritos Activos (Permanente: Telemetría de Stock Locks con TTL 5m) -->
                 <button 
                     type="button"
                     @click.stop="openStockLocksModal()" 
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 rounded-lg text-xs font-bold transition border border-rose-200 cursor-pointer"
                     style="min-height: unset;"
-                    title="TelemetrÃ­a de Carritos SimultÃ¡neos y Reserva Temporal de Stock (TTL 5m)"
+                    title="Telemetría de Carritos Simultáneos y Reserva Temporal de Stock (TTL 5m)"
                 >
                     <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
@@ -310,7 +314,7 @@
                           x-text="activeStockLocksCount + ' en espera'"></span>
                 </button>
 
-                <!-- MenÃº Desplegable "Herramientas de Stock" (TASK-INV-10) -->
+                <!-- Menú Desplegable "Herramientas de Stock" (TASK-INV-10) -->
                 <div class="relative inline-block text-left" @click.outside="toolsDropdownOpen = false">
                     <button 
                         type="button"
@@ -318,14 +322,14 @@
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-lg text-xs font-bold transition border border-slate-200 cursor-pointer"
                         :class="toolsDropdownOpen ? 'bg-slate-200 ring-2 ring-indigo-500/20' : ''"
                         style="min-height: unset;"
-                        title="Herramientas de auditoría, fÃ³rmulas BOM y balance de insumos"
+                        title="Herramientas de auditoría, fórmulas BOM y balance de insumos"
                     >
                         <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <span>Herramientas</span>
-                        <!-- Alerta Ã¡mbar si la auditoría ciega estÃ¡ pendiente hoy -->
+                        <!-- Alerta ámbar si la auditoría ciega está pendiente hoy -->
                         <span 
                             class="w-2 h-2 rounded-full" 
                             :class="cycleCountModal.isCompletedToday ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'"
@@ -352,7 +356,7 @@
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Herramientas Operativas</span>
                         </div>
 
-                        <!-- OpciÃ³n 1: Recetas & Combos BOM -->
+                        <!-- Opción 1: Recetas & Combos BOM -->
                         <button 
                             type="button" 
                             @click="toolsDropdownOpen = false; activeSettingsTab = 'bundles'; moduleSettingsModalOpen = true;" 
@@ -373,7 +377,7 @@
                             <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200" x-text="productBundles.length"></span>
                         </button>
 
-                        <!-- OpciÃ³n 2: DÃ©ficit BOM & OCs B2B -->
+                        <!-- Opción 2: Déficit BOM & OCs B2B -->
                         <button 
                             type="button" 
                             @click="toolsDropdownOpen = false; openBomDeficitModal('SUB-BOX-MARTE-LVL2', 200)" 
@@ -387,14 +391,14 @@
                                     </svg>
                                 </span>
                                 <div>
-                                    <div class="text-xs font-bold text-slate-800">DÃ©ficit BOM & OCs B2B</div>
+                                    <div class="text-xs font-bold text-slate-800">Déficit BOM & OCs B2B</div>
                                     <div class="text-[10px] text-slate-400">Disparo automático a mayoristas</div>
                                 </div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">Auto OC</span>
                         </button>
 
-                        <!-- OpciÃ³n 3: Auditoría CÃ­clica a Ciegas -->
+                        <!-- Opción 3: Auditoría Cíclica a Ciegas -->
                         <button 
                             type="button" 
                             @click="toolsDropdownOpen = false; openCycleCountModal()" 
@@ -421,7 +425,7 @@
                     </div>
                 </div>
 
-                <!-- BotÃ³n Agregar Producto -->
+                <!-- Botón Agregar Producto -->
                 <button 
                     type="button"
                     @click.stop="openCreateProductDrawer()" 
@@ -437,11 +441,11 @@
         </div>
 
         <!-- ============================================================= -->
-        <!-- SECCIÓN 4: FILTROS DE LAS TABLAS (BÃšSQUEDA Y SEGMENTACIÃ“N)    -->
+        <!-- SECCIÓN 4: FILTROS DE LAS TABLAS (BÚSQUEDA Y SEGMENTACIÓN)    -->
         <!-- ============================================================= -->
         <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs mb-5 flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[320px]">
-                <!-- Input BÃºsqueda -->
+                <!-- Input Búsqueda -->
                 <div class="relative w-full sm:w-60 min-w-[200px]">
                     <input 
                         type="text" 
@@ -468,7 +472,7 @@
                     class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-semibold"
                 >
                     <option value="all">Clase ABC: Todas</option>
-                    <option value="A">Clase A (Alta RotaciÃ³n 80%)</option>
+                    <option value="A">Clase A (Alta Rotación 80%)</option>
                     <option value="B">Clase B (Complementarios 15%)</option>
                     <option value="C">Clase C (Cola Larga 5%)</option>
                 </select>
@@ -482,23 +486,23 @@
                     <option value="under_rop">Bajo ROP (Reabastecer Urgente)</option>
                 </select>
 
-                <!-- Filtro Sanitario (TASK-INV-06: Caducidad y Lotes en CosmÃ©tica/Fragancias) -->
+                <!-- Filtro Sanitario (TASK-INV-06: Caducidad y Lotes en Cosmética/Fragancias) -->
                 <select 
                     x-model="sanitaryFilter" 
                     class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-medium"
                 >
                     <option value="all">Control Sanitario: Todos</option>
-                    <option value="sanitary_only">Solo CosmÃ©tica / Cuidado Personal</option>
+                    <option value="sanitary_only">Solo Cosmética / Cuidado Personal</option>
                     <option value="expiring_soon">Por Vencer (&le; 90 días)</option>
-                    <option value="critical">Vencimiento CrÃ­tico (&le; 30 días)</option>
+                    <option value="critical">Vencimiento Crítico (&le; 30 días)</option>
                 </select>
 
                 <!-- Help Icon Filtros -->
                 <div x-data="{ tip: false }" class="relative inline-flex items-center">
                     <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-60 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">BÃºsqueda & Filtros de Catálogo</div>
-                        <p class="text-[11px] text-slate-200 leading-snug">Filtra instantÃ¡neamente por nombre, cÃ³digo SKU o separa las prendas fÃ­sicas de bodega de las sincronizadas con proveedores.</p>
+                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Búsqueda & Filtros de Catálogo</div>
+                        <p class="text-[11px] text-slate-200 leading-snug">Filtra instantáneamente por nombre, código SKU o separa las prendas físicas de bodega de las sincronizadas con proveedores.</p>
                         <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                     </div>
                 </div>
@@ -517,7 +521,7 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
                 <div class="deep-link-banner-text">
-                    <strong x-text="deepLinkBannerText">Filtro de NavegaciÃ³n RÃ¡pida Activo</strong>
+                    <strong x-text="deepLinkBannerText">Filtro de Navegación Rápida Activo</strong>
                     <small>Mostrando registros coincidentes desde el Dashboard General.</small>
                 </div>
             </div>
@@ -552,7 +556,7 @@
                                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-60 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Motor de Stock de 3 Estados</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Disponible para Venta = FÃ­sico en Rack - Comprometido (apartado en preparaciÃ³n o esperando arribo de mayorista en carritos mixtos).</p>
+                                            <p class="text-[10px] text-slate-200 leading-snug">Disponible para Venta = Físico en Rack - Comprometido (apartado en preparación o esperando arribo de mayorista en carritos mixtos).</p>
                                             <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                         </div>
                                     </div>
@@ -578,8 +582,8 @@
                                     <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-52 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Precio Venta PÃºblico</div>
-                                            <p class="text-[10px] text-slate-200">Haz clic sobre el precio para editarlo en lÃ­nea al instante sin abrir el panel lateral.</p>
+                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Precio Venta Público</div>
+                                            <p class="text-[10px] text-slate-200">Haz clic sobre el precio para editarlo en línea al instante sin abrir el panel lateral.</p>
                                             <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                         </div>
                                     </div>
@@ -592,10 +596,10 @@
                                     <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">ValuaciÃ³n: Último Costo vs CPP Contable</div>
+                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Valuación: Último Costo vs CPP Contable</div>
                                             <p class="text-[10px] text-slate-200 leading-snug">
-                                                <strong>Último Costo:</strong> Precio de adquisiciÃ³n de la orden mÃ¡s reciente.<br>
-                                                <strong>CPP (Costo Promedio Ponderado):</strong> ValuaciÃ³n contable ponderada por existencias en balance general.<br>
+                                                <strong>Último Costo:</strong> Precio de adquisición de la orden más reciente.<br>
+                                                <strong>CPP (Costo Promedio Ponderado):</strong> Valuación contable ponderada por existencias en balance general.<br>
                                                 <span class="text-indigo-300 font-mono text-[9px] mt-1 block">CPP = (Stock x CPP + Inbound x Costo) / Total</span>
                                             </p>
                                             <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
@@ -604,16 +608,16 @@
                                 </div>
                             </th>
                             <th class="py-3 px-3 text-center">Margen</th>
-                            <th class="py-3 px-3">UbicaciÃ³n</th>
+                            <th class="py-3 px-3">Ubicación</th>
                             <th class="py-3 px-3 min-w-[260px]">
                                 <div class="inline-flex items-center gap-1">
-                                    <span>Ajuste RÃ¡pido de Stock</span>
+                                    <span>Ajuste Rápido de Stock</span>
                                     <!-- Help Icon -->
                                     <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Formulario Inline de Ajuste</div>
-                                            <p class="text-[10px] text-slate-200">Ingresa o deduce stock al instante por conteos fÃ­sicos, mermas o devoluciones sin salir de la tabla.</p>
+                                            <p class="text-[10px] text-slate-200">Ingresa o deduce stock al instante por conteos físicos, mermas o devoluciones sin salir de la tabla.</p>
                                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                         </div>
                                     </div>
@@ -680,21 +684,21 @@
                                     <option value="none">Sin stock</option>
                                 </select>
                             </td>
-                            <!-- Col 7: PVP MÃ­nimo -->
+                            <!-- Col 7: PVP Mínimo -->
                             <td class="py-2 px-1 text-right">
                                 <input 
                                     type="number" 
                                     x-model="colFilters.minPvp" 
-                                    placeholder="MÃ­n $" 
+                                    placeholder="Mín $" 
                                     class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-mono text-right"
                                 >
                             </td>
-                            <!-- Col 8: Costo MÃ¡ximo -->
+                            <!-- Col 8: Costo Máximo -->
                             <td class="py-2 px-1 text-right">
                                 <input 
                                     type="number" 
                                     x-model="colFilters.maxCost" 
-                                    placeholder="MÃ¡x $" 
+                                    placeholder="Máx $" 
                                     class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-mono text-right"
                                 >
                             </td>
@@ -710,7 +714,7 @@
                                     <option value="low">&lt; 40%</option>
                                 </select>
                             </td>
-                            <!-- Col 10: UbicaciÃ³n -->
+                            <!-- Col 10: Ubicación -->
                             <td class="py-2 px-1">
                                 <input 
                                     type="text" 
@@ -744,7 +748,7 @@
                     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
                         <template x-for="(item, index) in displayedProducts" :key="item.sku">
                             <tr :class="(selectedSkus.includes(item.sku) ? 'bg-indigo-50/50 hover:bg-indigo-50/70' : 'hover:bg-slate-50/70') + (highlightedSku === item.sku ? ' sku-row-highlight' : '')" class="transition group">
-                                <!-- Columna: CHECKBOX SELECCIÃ“N MASIVA -->
+                                <!-- Columna: CHECKBOX SELECCIÓN MASIVA -->
                                 <td class="py-3.5 px-3 text-center">
                                     <input 
                                         type="checkbox" 
@@ -797,10 +801,10 @@
                                               x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo'">
                                         </span>
                                         <span class="text-slate-300">&bull;</span>
-                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo' : 'Adrenaline Forte')"></span>
+                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX')"></span>
                                     </div>
 
-                                    <!-- Swatches CromÃ¡ticos de CosmÃ©tica (TASK-INV-09) -->
+                                    <!-- Swatches Cromáticos de Cosmética (TASK-INV-09) -->
                                     <template x-if="item.variantDimension === 'shade'">
                                         <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
                                             <span class="text-[10px] font-bold text-pink-700 uppercase tracking-wider mr-0.5">Tonos:</span>
@@ -818,7 +822,7 @@
                                         </div>
                                     </template>
 
-                                    <!-- Badges de Atributos Textiles: Tela, Color/Tornasol, DiseÃ±o y SecciÃ³n -->
+                                    <!-- Badges de Atributos Textiles: Tela, Color/Tornasol, Diseño y Sección -->
                                     <template x-if="item.variantDimension !== 'shade'">
                                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
                                             <!-- Swatch Color & Tornasol -->
@@ -828,20 +832,20 @@
                                             </span>
 
                                             <!-- Badge Tipo de Tela -->
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'ComposiciÃ³n textil: ' + (item.fabricType || 'Modal')">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'Composición textil: ' + (item.fabricType || 'Modal')">
                                                 <span x-text="item.fabricType || 'Modal'"></span>
                                             </span>
 
-                                            <!-- Badge Variante DiseÃ±o -->
+                                            <!-- Badge Variante Diseño -->
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
                                                   :class="item.designType === 'con_diseno' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600 border border-slate-200'">
                                                 <span x-text="item.designType === 'con_diseno' ? 'Estampado' : 'Liso'"></span>
                                             </span>
 
-                                            <!-- Badge SecciÃ³n Web -->
+                                            <!-- Badge Sección Web -->
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200"
-                                                  :title="'SecciÃ³n de vitrina: ' + (item.websiteSection || 'General')">
-                                                <span x-text="item.websiteSection === 'basicos' ? 'BÃ¡sicos' : (item.websiteSection === 'disenador' ? 'DiseÃ±ador' : (item.websiteSection === 'temporada' ? 'Temporada' : 'General'))"></span>
+                                                  :title="'Sección de vitrina: ' + (item.websiteSection || 'General')">
+                                                <span x-text="item.websiteSection === 'basicos' ? 'Básicos' : (item.websiteSection === 'disenador' ? 'Diseñador' : (item.websiteSection === 'temporada' ? 'Temporada' : 'General'))"></span>
                                             </span>
                                         </div>
                                     </template>
@@ -867,7 +871,7 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: STOCK LOCAL (3 ESTADOS: DISPONIBLE, FÃSICO, COMPROMETIDO) -->
+                                <!-- Columna: STOCK LOCAL (3 ESTADOS: DISPONIBLE, FÍSICO, COMPROMETIDO) -->
                                 <td class="py-3.5 px-3 text-right">
                                     <div class="flex flex-col items-end">
                                         <!-- Disponible para venta directa -->
@@ -875,9 +879,9 @@
                                             <span class="text-sm font-extrabold text-emerald-600" x-text="getAvailableStock(item)"></span>
                                             <span class="text-[9px] uppercase font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">Disp.</span>
                                         </div>
-                                        <!-- FÃ­sico en rack vs Comprometido -->
+                                        <!-- Físico en rack vs Comprometido -->
                                         <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                                            <span x-text="item.localStock + ' fÃ­sico'"></span>
+                                            <span x-text="item.localStock + ' físico'"></span>
                                             <template x-if="item.committedStock > 0">
                                                 <span class="text-indigo-600 font-semibold bg-indigo-50 px-1 rounded border border-indigo-100" :title="'Apartado en pedidos/mixtos: ' + item.committedStock"><svg class="w-2.5 h-2.5 inline-block -mt-0.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span x-text="item.committedStock"></span></span>
                                             </template>
@@ -890,7 +894,7 @@
                                             <span 
                                                 :class="getDOHBadgeClass(getDOH(item))"
                                                 class="text-[9px] font-bold px-1.5 py-0.2 rounded border"
-                                                :title="'DÃ­as de Inventario Restante (DOH): ' + getDOH(item) + ' días'"
+                                                :title="'Días de Inventario Restante (DOH): ' + getDOH(item) + ' días'"
                                                 x-text="getDOH(item) + 'd DOH'"
                                             ></span>
                                             <template x-if="isUnderROP(item)">
@@ -920,7 +924,7 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: PVP ($) CON EDICIÃ“N EN LÃNEA -->
+                                <!-- Columna: PVP ($) CON EDICIÓN EN LÍNEA -->
                                 <td class="py-3.5 px-3 text-right">
                                     <template x-if="editingCell.sku === item.sku && editingCell.field === 'pvp'">
                                         <div class="inline-flex items-center gap-1 justify-end">
@@ -973,7 +977,7 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: COSTO ($) CON EDICIÃ“N EN LÃNEA -->
+                                <!-- Columna: COSTO ($) CON EDICIÓN EN LÍNEA -->
                                 <td class="py-3.5 px-3 text-right">
                                     <template x-if="canViewFinancialCosts()">
                                         <div>
@@ -1056,14 +1060,14 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: UBICACIÓN FÃSICA (SLOTTING: TASK-INV-01) -->
+                                <!-- Columna: UBICACIÓN FÍSICA (SLOTTING: TASK-INV-01) -->
                                 <td class="py-3.5 px-3">
                                     <template x-if="item.type === 'propio'">
                                         <button 
                                             @click="openSlotReassign(item)" 
                                             :class="getSlotBadgeClass(item.location)"
                                             class="group/slot inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold border transition cursor-pointer shadow-2xs"
-                                            :title="'UbicaciÃ³n en bodega: ' + item.location + '. Clic para reasignar slot.'"
+                                            :title="'Ubicación en bodega: ' + item.location + '. Clic para reasignar slot.'"
                                         >
                                             <svg class="w-3.5 h-3.5 opacity-60 group-hover/slot:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                             <span x-text="formatSlotCode(item.location)"></span>
@@ -1075,7 +1079,7 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: AJUSTE RÃPIDO -->
+                                <!-- Columna: AJUSTE RÁPIDO -->
                                 <td class="py-3.5 px-4">
                                     <!-- FILA TIPO 1: STOCK PROPIO -->
                                     <template x-if="item.type === 'propio'">
@@ -1137,14 +1141,14 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: VITRINA WEB (SWITCH PUBLICACIÃ“N) -->
+                                <!-- Columna: VITRINA WEB (SWITCH PUBLICACIÓN) -->
                                 <td class="py-3.5 px-3 text-center">
                                     <button 
                                         type="button" 
                                         @click.stop="toggleProductPublication(item.sku)"
                                         class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition border cursor-pointer shadow-3xs"
                                         :class="item.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'"
-                                        :title="item.isPublished ? 'Publicado en sitio web (visible para clientes). Clic para despublicar.' : 'Fuera de catÃ¡logo (oculto). Clic para publicar en sitio web.'"
+                                        :title="item.isPublished ? 'Publicado en sitio web (visible para clientes). Clic para despublicar.' : 'Fuera de catálogo (oculto). Clic para publicar en sitio web.'"
                                     >
                                         <span class="w-2 h-2 rounded-full" :class="item.isPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
                                         <span x-text="item.isPublished ? 'En Sitio' : 'Oculto'"></span>
@@ -1165,7 +1169,7 @@
                                         <button 
                                             type="button"
                                             @click.stop="openThermalLabelModal(item)"
-                                            title="Imprimir etiqueta tÃ©rmica Code128 / QR"
+                                            title="Imprimir etiqueta térmica Code128 / QR"
                                             class="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors border border-indigo-200 cursor-pointer shadow-3xs flex items-center justify-center"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -1178,7 +1182,7 @@
                 </table>
             </div>
 
-            <!-- BARRA DE PAGINACIÃ“N INCREMENTAL: BOTÃ“N "CARGAR MÃS" -->
+            <!-- BARRA DE PAGINACIÓN INCREMENTAL: BOTÓN "CARGAR MÁS" -->
             <div class="p-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="text-xs text-slate-500 font-medium">
                     Mostrando <span class="font-bold text-slate-800" x-text="Math.min(visibleCount, filteredProducts.length)"></span> de <span class="font-bold text-slate-800" x-text="filteredProducts.length"></span> productos
@@ -1196,7 +1200,7 @@
                             <template x-if="isLoadingMore">
                                 <svg class="w-4 h-4 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                             </template>
-                            <span x-text="isLoadingMore ? 'Cargando mÃ¡s...' : 'Cargar mÃ¡s'"></span>
+                            <span x-text="isLoadingMore ? 'Cargando más...' : 'Cargar más'"></span>
                         </button>
                     </template>
                     <template x-if="visibleCount >= filteredProducts.length && filteredProducts.length > 0">
@@ -1210,7 +1214,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- PESTAÃ‘A 2: PROVEEDORES & SCRAPING (7 PROVEEDORES + Ã“RDENES PLANIFICADAS) -->
+    <!-- PESTAÑA 2: PROVEEDORES & SCRAPING (7 PROVEEDORES + ÓRDENES PLANIFICADAS) -->
     <div x-show="activeTab === 'suppliers' && isTabAllowed('suppliers')" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
         
         <!-- 5 KPI Cards Proveedores con Tooltips & Modales de Detalle -->
@@ -1237,7 +1241,7 @@
                     <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="text-xl font-bold text-slate-900" x-text="providers.length + ' Proveedores'">7 Proveedores</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-1" x-text="connectedProvidersCount + ' activos â€¢ ' + maintenanceProvidersCount + ' en mant. â€¢ ' + pausedProvidersCount + ' pausados' + (archivedProvidersCount > 0 ? (' â€¢ ' + archivedProvidersCount + ' archivados') : '')">6 activos â€¢ 1 en mantenimiento</p>
+                <p class="text-xs text-slate-500 mt-1" x-text="connectedProvidersCount + ' activos • ' + maintenanceProvidersCount + ' en mant. • ' + pausedProvidersCount + ' pausados' + (archivedProvidersCount > 0 ? (' • ' + archivedProvidersCount + ' archivados') : '')">6 activos • 1 en mantenimiento</p>
                 <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold">
                     <span>Ver desglose y estados</span>
                     <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -1254,7 +1258,7 @@
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">SKUs Sincronizados</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Referencias activas en servidores de proveedores disponibles para venta sin stock fÃ­sico en bodega.</p>
+                            <p class="text-[10px] text-slate-200 leading-snug">Referencias activas en servidores de proveedores disponibles para venta sin stock físico en bodega.</p>
                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
                     </div>
@@ -1278,7 +1282,7 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Latencia de ConexiÃ³n</div>
+                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Latencia de Conexión</div>
                             <p class="text-[10px] text-slate-200 leading-snug">Tiempo promedio en milisegundos que toma extraer o consultar las existencias de cada mayorista.</p>
                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
@@ -1287,7 +1291,7 @@
                 <div class="text-xl font-bold text-slate-900 mt-2">1.18 seg</div>
                 <p class="text-xs text-slate-500 mt-1">Monitoreo de red y Webhooks</p>
                 <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold">
-                    <span>Ver telemetrÃ­a y pings</span>
+                    <span>Ver telemetría y pings</span>
                     <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </div>
             </div>
@@ -1305,7 +1309,7 @@
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Alertas de Stock/Costo/SLA</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Divergencias en precios de mayoreo, variantes agotadas en fÃ¡brica o demoras de confecciÃ³n.</p>
+                            <p class="text-[10px] text-slate-200 leading-snug">Divergencias en precios de mayoreo, variantes agotadas en fábrica o demoras de confección.</p>
                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
                     </div>
@@ -1351,20 +1355,20 @@
             </div>
         </div>
 
-        <!-- CUERPO PRINCIPAL EN 2 COLUMNAS: CURADURÃA + AUDITORÃA DE DISCREPANCIAS B2B -->
+        <!-- CUERPO PRINCIPAL EN 2 COLUMNAS: CURADURÍA + AUDITORÍA DE DISCREPANCIAS B2B -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 items-start">
             
-            <!-- COLUMNA 1: BANDEJA DE CURADURÃA DE SCRAPING (STAGING AREA) -->
+            <!-- COLUMNA 1: BANDEJA DE CURADURÍA DE SCRAPING (STAGING AREA) -->
             <div class="bg-slate-900 text-white rounded-2xl shadow-md p-6 border border-slate-800 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
                         <div>
                             <div class="flex items-center gap-2.5">
                                 <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
-                                <h3 class="text-base font-bold text-white">Bandeja de CuradurÃ­a Previa de Scraping</h3>
+                                <h3 class="text-base font-bold text-white">Bandeja de Curaduría Previa de Scraping</h3>
                                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30" x-text="scrapedPendingItems.length + ' pendientes'">3 pendientes</span>
                             </div>
-                            <p class="text-xs text-slate-400 mt-1">Prendas extraÃ­das automÃ¡ticamente desde proveedores mayoristas pendientes de validaciÃ³n textil antes de publicarse en el catÃ¡logo</p>
+                            <p class="text-xs text-slate-400 mt-1">Prendas extraídas automáticamente desde proveedores mayoristas pendientes de validación textil antes de publicarse en el catálogo</p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-xs text-slate-400">Canal:</span>
@@ -1372,7 +1376,7 @@
                         </div>
                     </div>
 
-                    <!-- Listado Vertical ErgonÃ³mico de Prendas Scrapeadas -->
+                    <!-- Listado Vertical Ergonómico de Prendas Scrapeadas -->
                     <div class="space-y-3 mt-4">
                         <template x-for="item in scrapedPendingItems" :key="item.id">
                             <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-600 transition space-y-3">
@@ -1385,7 +1389,7 @@
                                         <h4 class="text-sm font-bold text-white mt-1" x-text="item.name"></h4>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <span class="text-[10px] text-slate-400 block uppercase">Costo FÃ¡brica</span>
+                                        <span class="text-[10px] text-slate-400 block uppercase">Costo Fábrica</span>
                                         <span class="text-sm font-bold text-emerald-400 font-mono" x-text="'$' + (item.scrapedCost || item.cost || 0).toFixed(2)"></span>
                                     </div>
                                 </div>
@@ -1401,12 +1405,12 @@
                                     <span class="px-2 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800 text-[11px]" x-text="'Tallas: ' + (Array.isArray(item.availableSizes) ? item.availableSizes.join(', ') : 'CH, M, G, XL')"></span>
                                 </div>
 
-                                <!-- Snippet de descripciÃ³n scrapeada -->
-                                <p class="text-xs text-slate-300 italic line-clamp-2 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800" x-text="'â€œ' + item.scrapedDescription + 'â€'"></p>
+                                <!-- Snippet de descripción scrapeada -->
+                                <p class="text-xs text-slate-300 italic line-clamp-2 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800" x-text="'“' + item.scrapedDescription + '”'"></p>
 
-                                <!-- Botones de AcciÃ³n de CuradurÃ­a -->
+                                <!-- Botones de Acción de Curaduría -->
                                 <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
-                                    <span class="text-[11px] text-slate-400" x-text="(item.supplierStock || 0) + ' uds en almacÃ©n proveedor'"></span>
+                                    <span class="text-[11px] text-slate-400" x-text="(item.supplierStock || 0) + ' uds en almacén proveedor'"></span>
                                     <button 
                                         type="button" 
                                         @click="openScrapingCuration(item)"
@@ -1422,15 +1426,15 @@
                         <template x-if="scrapedPendingItems.length === 0">
                             <div class="py-8 text-center text-slate-400 bg-slate-800/40 rounded-xl border border-slate-800">
                                 <svg class="w-8 h-8 text-emerald-400 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <p class="text-sm font-semibold text-slate-300">Bandeja de curadurÃ­a al día</p>
-                                <p class="text-xs text-slate-400 mt-0.5">Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catÃ¡logo.</p>
+                                <p class="text-sm font-semibold text-slate-300">Bandeja de curaduría al día</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catálogo.</p>
                             </div>
                         </template>
                     </div>
                 </div>
             </div>
 
-            <!-- COLUMNA 2: CENTRO DE AUDITORÃA OPERATIVA & DISCREPANCIAS B2B (PROPUESTA 1 APROBADA) -->
+            <!-- COLUMNA 2: CENTRO DE AUDITORÍA OPERATIVA & DISCREPANCIAS B2B (PROPUESTA 1 APROBADA) -->
             <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
@@ -1439,7 +1443,7 @@
                                 <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
                                 <h3 class="text-base font-bold text-slate-900">Centro de Auditoría Operativa & Discrepancias B2B</h3>
                             </div>
-                            <p class="text-xs text-slate-500 mt-1">DetecciÃ³n y resoluciÃ³n de variaciones de costo mayorista, quiebres en origen y retrasos de confecciÃ³n</p>
+                            <p class="text-xs text-slate-500 mt-1">Detección y resolución de variaciones de costo mayorista, quiebres en origen y retrasos de confección</p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-xs text-slate-400">Último barrido: <strong class="text-slate-700" x-text="lastScrapeTime"></strong></span>
@@ -1460,7 +1464,7 @@
                         </div>
                     </div>
 
-                    <!-- Filtros RÃ¡pidos por Categoría de Discrepancia B2B -->
+                    <!-- Filtros Rápidos por Categoría de Discrepancia B2B -->
                     <div class="flex items-center gap-1.5 mt-4 pb-3 border-b border-slate-100 flex-wrap text-xs">
                         <button 
                             type="button" 
@@ -1536,7 +1540,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Botones de AcciÃ³n Resolutiva Contextual -->
+                                <!-- Botones de Acción Resolutiva Contextual -->
                                 <div class="pt-2 border-t border-slate-200/60 flex items-center justify-end gap-2 flex-wrap">
                                     <template x-if="!alert.resolved && alert.category === 'costs'">
                                         <div class="flex items-center gap-1.5">
@@ -1604,7 +1608,7 @@
                             <div class="py-6 text-center text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
                                 <svg class="w-7 h-7 text-emerald-500 mx-auto mb-1.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 <p class="text-xs font-bold text-slate-700">Sin discrepancias pendientes en esta categoría</p>
-                                <p class="text-[11px] text-slate-400 mt-0.5">Los parÃ¡metros comerciales y de entrega de tus proveedores estÃ¡n en regla.</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Los parámetros comerciales y de entrega de tus proveedores están en regla.</p>
                             </div>
                         </template>
                     </div>
@@ -1612,7 +1616,7 @@
 
                 <!-- Footer de Acceso Directo a Ajustes -->
                 <div class="pt-4 border-t border-slate-100 mt-5 flex items-center justify-between text-xs text-slate-500">
-                    <span>Gobernanza y conectores en catÃ¡logo central</span>
+                    <span>Gobernanza y conectores en catálogo central</span>
                     <button 
                         type="button" 
                         @click="activeSettingsTab = 'scraping'; moduleSettingsModalOpen = true;" 
@@ -1626,7 +1630,7 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- MODAL ERGONÃ“MICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
+        <!-- MODAL ERGONÓMICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
         <!-- ================================================================= -->
         <div 
             x-show="providerModalOpen" 
@@ -1651,7 +1655,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-slate-900" x-text="isCreatingProvider ? 'Conectar / Registrar Nuevo Proveedor' : (isEditingProvider ? 'Editar Condiciones: ' + (providerForm.tradeName || providerForm.name) : 'Ficha de Proveedor & Scorecard SLA')"></h3>
-                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confecciÃ³n, fabricante cosmÃ©tico o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' â€¢ ' + providerForm.name : 'Información tÃ©cnica y comercial')"></p>
+                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confección, fabricante cosmético o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' • ' + providerForm.name : 'Información técnica y comercial')"></p>
                         </div>
                     </div>
                     <button 
@@ -1674,10 +1678,10 @@
                             <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
                         </div>
 
-                        <!-- RazÃ³n Social y Nombre Comercial -->
+                        <!-- Razón Social y Nombre Comercial -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">RazÃ³n Social *</label>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Razón Social *</label>
                                 <input 
                                     type="text" 
                                     x-model="providerForm.name" 
@@ -1707,16 +1711,16 @@
                                     :disabled="!isCreatingProvider && !isEditingProvider"
                                     class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
                                 >
-                                    <option value="workshop">Taller de ConfecciÃ³n Textil</option>
-                                    <option value="cosmetics">Fabricante CosmÃ©tica & Skincare</option>
+                                    <option value="workshop">Taller de Confección Textil</option>
+                                    <option value="cosmetics">Fabricante Cosmética & Skincare</option>
                                     <option value="distributor">Distribuidor Mayorista</option>
                                     <option value="packaging">Insumos de Empaque & Cajas</option>
                                     <option value="commercial">Proveedor Comercial Directo</option>
-                                    <option value="scraper">IntegraciÃ³n Automatizada (Scraper/API)</option>
+                                    <option value="scraper">Integración Automatizada (Scraper/API)</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / UbicaciÃ³n</label>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / Ubicación</label>
                                 <input 
                                     type="text" 
                                     x-model="providerForm.city" 
@@ -1727,7 +1731,7 @@
                             </div>
                         </div>
 
-                        <!-- Persona de Contacto, TelÃ©fono y Correo -->
+                        <!-- Persona de Contacto, Teléfono y Correo -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-600 mb-1">Contacto Operativo *</label>
@@ -1740,7 +1744,7 @@
                                 >
                             </div>
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / TelÃ©fono *</label>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / Teléfono *</label>
                                 <input 
                                     type="tel" 
                                     x-model="providerForm.phone" 
@@ -1764,7 +1768,7 @@
                         <!-- Condiciones Comerciales: Lead Time y Plazos de Pago -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (DÃ­as)</label>
+                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (Días)</label>
                                 <div class="flex items-center gap-2">
                                     <input 
                                         type="number" 
@@ -1774,20 +1778,20 @@
                                         :disabled="!isCreatingProvider && !isEditingProvider"
                                         class="w-24 px-3 py-1.5 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200 text-center"
                                     >
-                                    <span class="text-xs text-slate-500">días hÃ¡biles a rampa</span>
+                                    <span class="text-xs text-slate-500">días hábiles a rampa</span>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1">TÃ©rminos de Pago</label>
+                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Términos de Pago</label>
                                 <select 
                                     x-model="providerForm.paymentTerms" 
                                     :disabled="!isCreatingProvider && !isEditingProvider"
                                     class="w-full px-3 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200"
                                 >
                                     <option value="contado">Contado / Anticipo 100%</option>
-                                    <option value="credito_15">CrÃ©dito Comercial 15 días</option>
-                                    <option value="credito_30">CrÃ©dito Comercial 30 días</option>
-                                    <option value="credito_60">CrÃ©dito Comercial 60 días</option>
+                                    <option value="credito_15">Crédito Comercial 15 días</option>
+                                    <option value="credito_30">Crédito Comercial 30 días</option>
+                                    <option value="credito_60">Crédito Comercial 60 días</option>
                                 </select>
                             </div>
                         </div>
@@ -1808,7 +1812,7 @@
                     <!-- Columna Derecha: Scorecard SLA & Control de Estado (5 Cols) -->
                     <div class="md:col-span-5 space-y-4">
                         <div class="border-b border-slate-100 pb-2">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">DesempeÃ±o SLA & Confiabilidad</h4>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Desempeño SLA & Confiabilidad</h4>
                         </div>
 
                         <!-- Modo Proveedor Existente: Scorecard SLA -->
@@ -1822,7 +1826,7 @@
                                 <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
                                     <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaOnTimePct || 100) + '%'"></div>
                                 </div>
-                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">HistÃ³rico validado en rampa de recepción contra fecha compromiso de OC.</p>
+                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">Histórico validado en rampa de recepción contra fecha compromiso de OC.</p>
                             </div>
 
                             <!-- Tarjeta Fill Rate (Sin Faltantes) -->
@@ -1834,10 +1838,10 @@
                                 <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
                                     <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaFillRatePct || 100) + '%'"></div>
                                 </div>
-                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas fÃ­sicas recibidas completas sin remanentes pendientes.</p>
+                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas físicas recibidas completas sin remanentes pendientes.</p>
                             </div>
 
-                            <!-- Comparativa Lead Time y Ã“rdenes -->
+                            <!-- Comparativa Lead Time y Órdenes -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
                                     <span class="block text-[10px] uppercase font-bold text-slate-400">Demora Promedio</span>
@@ -1845,13 +1849,13 @@
                                     <span class="block text-[10px] text-slate-500">sobre fecha pactada</span>
                                 </div>
                                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Ã“rdenes OCs</span>
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Órdenes OCs</span>
                                     <span class="text-base font-black text-slate-800" x-text="(selectedProvider?.completedOrders || 0) + ' / ' + (selectedProvider?.totalOrders || 0)"></span>
                                     <span class="block text-[10px] text-slate-500">completadas</span>
                                 </div>
                             </div>
 
-                            <!-- Selector de Estado TÃ©cnico / Operativo -->
+                            <!-- Selector de Estado Técnico / Operativo -->
                             <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
                                 <label class="block text-[11px] font-bold text-slate-700 mb-2">Estado Operativo en Plataforma</label>
                                 <template x-if="selectedProvider?.status === 'archived'">
@@ -1906,10 +1910,10 @@
                         <div x-show="isCreatingProvider" class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 text-slate-700 space-y-2">
                             <div class="flex items-center gap-2 font-bold text-xs text-indigo-900">
                                 <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Monitoreo Automático de DesempeÃ±o</span>
+                                <span>Monitoreo Automático de Desempeño</span>
                             </div>
                             <p class="text-xs leading-relaxed text-slate-600">
-                                Al vincular este proveedor comercial o taller, el sistema comenzarÃ¡ a auditar automÃ¡ticamente sus tiempos de entrega y cumplimiento de piezas en el Kardex de Compras (TASK-INV-16) cada vez que se reciba un lote en la rampa de almacÃ©n.
+                                Al vincular este proveedor comercial o taller, el sistema comenzará a auditar automáticamente sus tiempos de entrega y cumplimiento de piezas en el Kardex de Compras (TASK-INV-16) cada vez que se reciba un lote en la rampa de almacén.
                             </p>
                             <div class="pt-2 text-[11px] font-semibold text-slate-500">
                                 Estado inicial recomendado: <span class="text-emerald-700 font-bold">Conectado / Activo</span>
@@ -2053,7 +2057,7 @@
                                         }"></span>
                                         <div>
                                             <div class="font-bold text-slate-900" x-text="p.tradeName || p.name"></div>
-                                            <div class="text-[11px] text-slate-500" x-text="(p.city || 'Nacional') + ' â€¢ ' + (p.typeLabel || 'Proveedor')"></div>
+                                            <div class="text-[11px] text-slate-500" x-text="(p.city || 'Nacional') + ' • ' + (p.typeLabel || 'Proveedor')"></div>
                                         </div>
                                     </div>
                                     <div class="text-right">
@@ -2081,7 +2085,7 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- MODAL KPI 3: DIAGNÃ“STICO DE TELEMETRÃA & SALUD DE RED             -->
+        <!-- MODAL KPI 3: DIAGNÓSTICO DE TELEMETRÍA & SALUD DE RED             -->
         <!-- ================================================================= -->
         <div 
             x-show="latencyKpiModalOpen" 
@@ -2101,7 +2105,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </span>
                         <div>
-                            <h3 class="text-base font-bold text-slate-900">DiagnÃ³stico de TelemetrÃ­a & Salud de Red</h3>
+                            <h3 class="text-base font-bold text-slate-900">Diagnóstico de Telemetría & Salud de Red</h3>
                             <p class="text-xs text-slate-500">Métricas de latencia, ping de APIs y estado de webhooks</p>
                         </div>
                     </div>
@@ -2183,7 +2187,7 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- MODAL KPI 4: REGISTRO DE AUDITORÃA DE DISCREPANCIAS B2B           -->
+        <!-- MODAL KPI 4: REGISTRO DE AUDITORÍA DE DISCREPANCIAS B2B           -->
         <!-- ================================================================= -->
         <div 
             x-show="discrepancyKpiModalOpen" 
@@ -2297,9 +2301,9 @@
                             <span class="text-[10px] text-blue-600">Sin piezas faltantes</span>
                         </div>
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                            <span class="text-xs font-bold text-slate-600 uppercase block">Ã“rdenes Totales</span>
+                            <span class="text-xs font-bold text-slate-600 uppercase block">Órdenes Totales</span>
                             <span class="text-xl font-black text-slate-800 mt-1 block">96 OCs</span>
-                            <span class="text-[10px] text-slate-500">HistÃ³rico auditado</span>
+                            <span class="text-[10px] text-slate-500">Histórico auditado</span>
                         </div>
                     </div>
 
@@ -2312,7 +2316,7 @@
                                     <th class="py-3 px-4 text-center">On-Time %</th>
                                     <th class="py-3 px-4 text-center">Fill Rate %</th>
                                     <th class="py-3 px-4 text-center">Demora Media</th>
-                                    <th class="py-3 px-4 text-center">Ã“rdenes</th>
+                                    <th class="py-3 px-4 text-center">Órdenes</th>
                                     <th class="py-3 px-4 text-right">Confiabilidad</th>
                                 </tr>
                             </thead>
@@ -2321,7 +2325,7 @@
                                     <tr class="hover:bg-slate-50 transition">
                                         <td class="py-3 px-4">
                                             <div class="font-bold text-slate-900" x-text="p.tradeName || p.name"></div>
-                                            <div class="text-[10px] text-slate-400" x-text="(p.city || 'Nacional') + ' â€¢ ' + (p.typeLabel || 'Proveedor')"></div>
+                                            <div class="text-[10px] text-slate-400" x-text="(p.city || 'Nacional') + ' • ' + (p.typeLabel || 'Proveedor')"></div>
                                         </td>
                                         <td class="py-3 px-4 text-center">
                                             <div class="flex items-center justify-center gap-1.5 font-bold text-slate-800">
@@ -2366,6 +2370,7 @@
             </div>
         </div>
 
+    
         @if(isset($syncRuns) && $syncRuns->isNotEmpty())
             <!-- SECCION: HISTORIAL DE SINCRONIZACIONES REALES (LARAVEL BACKEND) -->
             <div class="mt-8 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
@@ -2382,8 +2387,8 @@
                             <tr class="border-b border-slate-100 text-slate-400 font-semibold uppercase tracking-wider">
                                 <th class="py-2.5 px-3">Proveedor</th>
                                 <th class="py-2.5 px-3">Estado</th>
-                                <th class="py-2.5 px-3">Fecha y Hora</th>
-                                <th class="py-2.5 px-3">Detalle / Registros / Error</th>
+                                <th class="py-2.5 px-3">Inicio</th>
+                                <th class="py-2.5 px-3">Resultado / Detalle</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -2443,29 +2448,29 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- PESTAÃ‘A 3: COMPRAS & REABASTECIMIENTO                             -->
+    <!-- PESTAÑA 3: COMPRAS & REABASTECIMIENTO                             -->
     <!-- ================================================================= -->
     <div x-show="activeTab === 'purchases' && isTabAllowed('purchases')" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
         
         <!-- 4 KPI Cards Compras con Tooltips ? -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <!-- KPI 1: Ã“rdenes en TrÃ¡nsito -->
+            <!-- KPI 1: Órdenes en Tránsito -->
             <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Ã“rdenes en TrÃ¡nsito</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Órdenes en Tránsito</span>
                     <div x-data="{ tip: false }" class="relative inline-flex items-center">
                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Ã“rdenes Activas</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Pedidos de compra ya emitidos a mayoristas o fabricantes que se encuentran en preparaciÃ³n o despacho con guÃ­a de paqueterÃ­a.</p>
+                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Activas</div>
+                            <p class="text-[10px] text-slate-200 leading-snug">Pedidos de compra ya emitidos a mayoristas o fabricantes que se encuentran en preparación o despacho con guía de paquetería.</p>
                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
                     </div>
                 </div>
-                <div class="text-xl font-bold text-indigo-600 mt-2" x-text="activePurchaseOrders.length + ' Órdenes'"></div>
-                <p class="text-xs text-slate-500 mt-1" x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length + ' en camino • ' + activePurchaseOrders.filter(o => o.status === 'Recibida en Almacén').length + ' recibidas'"></p>
+                <div class="text-xl font-bold text-indigo-600 mt-2">2 Órdenes</div>
+                <p class="text-xs text-slate-500 mt-1">1 en camino &bull; 1 por confirmar</p>
             </div>
 
             <!-- KPI 2: Lotes Planificados -->
@@ -2478,7 +2483,7 @@
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Cola de Futuras Compras</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">ArtÃ­culos agregados desde los Drawers de producto para consolidar pedidos masivos antes de quebrar existencias.</p>
+                            <p class="text-[10px] text-slate-200 leading-snug">Artículos agregados desde los Drawers de producto para consolidar pedidos masivos antes de quebrar existencias.</p>
                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
                     </div>
@@ -2487,17 +2492,17 @@
                 <p class="text-xs text-emerald-600 mt-1 font-medium">Acumulando para MOQ de proveedor</p>
             </div>
 
-            <!-- KPI 3: InversiÃ³n Proyectada -->
+            <!-- KPI 3: Inversión Proyectada -->
             <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">InversiÃ³n Estimada</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Inversión Estimada</span>
                     <div x-data="{ tip: false }" class="relative inline-flex items-center">
                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Compromiso Financiero RevOps</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Costo total proyectado de la reposiciÃ³n planificada en cola calculada a costo mayorista directo.</p>
+                            <p class="text-[10px] text-slate-200 leading-snug">Costo total proyectado de la reposición planificada en cola calculada a costo mayorista directo.</p>
                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
                     </div>
@@ -2516,17 +2521,17 @@
                         </span>
                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Tiempo de Reabastecimiento</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">DÃ­as promedio desde la confirmaciÃ³n de la orden hasta la recepción e ingreso fÃ­sico a rack en almacÃ©n.</p>
+                            <p class="text-[10px] text-slate-200 leading-snug">Días promedio desde la confirmación de la orden hasta la recepción e ingreso físico a rack en almacén.</p>
                             <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                         </div>
                     </div>
                 </div>
                 <div class="text-xl font-bold text-slate-900 mt-2">4.2 días</div>
-                <p class="text-xs text-emerald-600 mt-1 font-medium">LogÃ­stica rÃ¡pida optimizada</p>
+                <p class="text-xs text-emerald-600 mt-1 font-medium">Logística rápida optimizada</p>
             </div>
         </div>
 
-        <!-- Sub-navegaciÃ³n interna de Compras: Reabastecimiento vs Solicitudes On-Demand -->
+        <!-- Sub-navegación interna de Compras: Reabastecimiento vs Solicitudes On-Demand -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
             <div class="flex items-center gap-2">
                 <button 
@@ -2539,7 +2544,7 @@
                     style="min-height: unset;"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span>Ã“rdenes & Reabastecimiento Mayorista</span>
+                    <span>Órdenes & Reabastecimiento Mayorista</span>
                     <span :class="purchasesSubTab === 'reorder' ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-700'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="futurePurchaseOrders.length + 2"></span>
                 </button>
                 <button 
@@ -2558,18 +2563,18 @@
             </div>
             <div class="text-xs text-slate-500 font-medium px-2">
                 <template x-if="purchasesSubTab === 'reorder'">
-                    <span>Ã“rdenes a mayoristas y lotes acumulados</span>
+                    <span>Órdenes a mayoristas y lotes acumulados</span>
                 </template>
                 <template x-if="purchasesSubTab === 'on_demand'">
-                    <span>Backorders y lÃ­neas proveedor de carritos mixtos</span>
+                    <span>Backorders y líneas proveedor de carritos mixtos</span>
                 </template>
             </div>
         </div>
 
-        <!-- SUB-VISTA 1: Ã“RDENES Y REABASTECIMIENTO MAYORISTA -->
+        <!-- SUB-VISTA 1: ÓRDENES Y REABASTECIMIENTO MAYORISTA -->
         <div x-show="purchasesSubTab === 'reorder'" class="space-y-6">
 
-        <!-- [P2.1] BANNER DE CARRITO MIXTO LIBERADO TRAS RECEPCIÃ“N DE MERCANCÃA -->
+        <!-- [P2.1] BANNER DE CARRITO MIXTO LIBERADO TRAS RECEPCIÓN DE MERCANCÍA -->
         <template x-if="mixedCartLiberated.show">
             <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-pulse">
                 <div class="flex items-center gap-3">
@@ -2578,18 +2583,18 @@
                     </span>
                     <div>
                         <h4 class="text-xs font-bold text-emerald-950 flex items-center gap-2">
-                            <span>Â¡Carrito Mixto Liberado para Empaque Total!</span>
+                            <span>¡Carrito Mixto Liberado para Empaque Total!</span>
                             <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-200 text-emerald-900 font-mono font-bold" x-text="mixedCartLiberated.orderId"></span>
                         </h4>
                         <p class="text-[11px] text-emerald-800 mt-0.5">
-                            Cliente: <strong x-text="mixedCartLiberated.customer"></strong> &bull; La prenda <strong x-text="mixedCartLiberated.item"></strong> arribÃ³ e ingresÃ³ a rack. El pedido ya cuenta con todas sus piezas completas.
+                            Cliente: <strong x-text="mixedCartLiberated.customer"></strong> &bull; La prenda <strong x-text="mixedCartLiberated.item"></strong> arribó e ingresó a rack. El pedido ya cuenta con todas sus piezas completas.
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <button 
                         type="button" 
-                        @click="showToast('NotificaciÃ³n enviada a la mesa de empaque en LogÃ­stica (Hub 6)', 'success')" 
+                        @click="showToast('Notificación enviada a la mesa de empaque en Logística (Hub 6)', 'success')" 
                         class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
                     >
                         <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Enviar a Empaque</span>
@@ -2605,12 +2610,12 @@
             </div>
         </template>
 
-        <!-- Tabla 1: Ã“rdenes de Compra y Dropshipping Pendientes (Reactiva con RecepciÃ³n Inbound) -->
+        <!-- Tabla 1: Órdenes de Compra y Dropshipping Pendientes (Reactiva con Recepción Inbound) -->
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm mb-8">
             <div class="p-5 border-b border-slate-200 flex items-center justify-between">
                 <div>
                     <div class="flex items-center gap-2">
-                        <h3 class="text-base font-bold text-slate-900">Ã“rdenes de Compra y Dropshipping Pendientes</h3>
+                        <h3 class="text-base font-bold text-slate-900">Órdenes de Compra y Dropshipping Pendientes</h3>
                         <!-- Help Icon -->
                         <div x-data="{ tip: false }" class="relative inline-flex items-center">
                             <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
@@ -2618,15 +2623,15 @@
                             </span>
                             <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                 <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Seguimiento de Reabastecimiento</div>
-                                <p class="text-[11px] text-slate-200 leading-snug">Monitorea órdenes enviadas a mayoristas para resurtir prendas en bodega o para envÃ­os directos, con seguimiento de guÃ­a de transporte y recepción fÃ­sica.</p>
+                                <p class="text-[11px] text-slate-200 leading-snug">Monitorea órdenes enviadas a mayoristas para resurtir prendas en bodega o para envíos directos, con seguimiento de guía de transporte y recepción física.</p>
                                 <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                             </div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500">Reabastecimiento y envÃ­os directos solicitados a proveedor</p>
+                    <p class="text-xs text-slate-500">Reabastecimiento y envíos directos solicitados a proveedor</p>
                 </div>
                 <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100">
-                    <span x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en AlmacÃ©n').length"></span> Ã“rdenes Activas
+                    <span x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length"></span> Órdenes Activas
                 </span>
             </div>
 
@@ -2636,11 +2641,11 @@
                         <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                             <th class="py-3 px-4">ID Orden</th>
                             <th class="py-3 px-4">Proveedor & Guía</th>
-                            <th class="py-3 px-4">ArtÃ­culos Solicitados</th>
+                            <th class="py-3 px-4">Artículos Solicitados</th>
                             <th class="py-3 px-4 text-right">Total ($)</th>
                             <th class="py-3 px-4">Fecha & ETA</th>
                             <th class="py-3 px-4 text-center">Estado</th>
-                            <th class="py-3 px-4 text-right">AcciÃ³n</th>
+                            <th class="py-3 px-4 text-right">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -2655,7 +2660,7 @@
                                     <div class="flex items-center gap-1.5">
                                         <span class="font-bold text-slate-900" x-text="order.qty + ' unidades'"></span>
                                         <template x-if="order.linkedCartId">
-                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200" title="Contiene Ã­tems de Carrito Mixto">
+                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200" title="Contiene ítems de Carrito Mixto">
                                                 Pedido Mixto
                                             </span>
                                         </template>
@@ -2678,15 +2683,15 @@
                                             <span>En Camino</span>
                                         </span>
                                     </template>
-                                    <template x-if="order.status === 'Recibida en AlmacÃ©n'">
+                                    <template x-if="order.status === 'Recibida en Almacén'">
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                            <span>Recibida en AlmacÃ©n</span>
+                                            <span>Recibida en Almacén</span>
                                         </span>
                                     </template>
-                                    <template x-if="order.status === 'Pendiente ConfirmaciÃ³n'">
+                                    <template x-if="order.status === 'Pendiente Confirmación'">
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span>â³ Pendiente</span>
+                                            <span>⏳ Pendiente</span>
                                         </span>
                                     </template>
                                 </td>
@@ -2698,10 +2703,10 @@
                                             class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition cursor-pointer"
                                         >
                                             <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                                            <span>Recibir MercancÃ­a</span>
+                                            <span>Recibir Mercancía</span>
                                         </button>
                                     </template>
-                                    <template x-if="order.status === 'Recibida en AlmacÃ©n'">
+                                    <template x-if="order.status === 'Recibida en Almacén'">
                                         <button 
                                             type="button"
                                             @click="openKardexForRef(order.id)"
@@ -2710,7 +2715,7 @@
                                             <span>Ver en Kardex &rarr;</span>
                                         </button>
                                     </template>
-                                    <template x-if="order.status === 'Pendiente ConfirmaciÃ³n'">
+                                    <template x-if="order.status === 'Pendiente Confirmación'">
                                         <button 
                                             type="button"
                                             @click="openOrderExportModal(order.supplier)"
@@ -2742,13 +2747,13 @@
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                             </span>
                             <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">ConsolidaciÃ³n de Compras</div>
-                                <p class="text-[11px] text-slate-200 leading-snug">ArtÃ­culos agregados individualmente desde el Drawer de producto para generar una orden consolidada por fabricante.</p>
+                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Consolidación de Compras</div>
+                                <p class="text-[11px] text-slate-200 leading-snug">Artículos agregados individualmente desde el Drawer de producto para generar una orden consolidada por fabricante.</p>
                                 <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                             </div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500">Lotes de reposiciÃ³n acumulados desde el panel lateral de producto</p>
+                    <p class="text-xs text-slate-500">Lotes de reposición acumulados desde el panel lateral de producto</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button 
@@ -2770,10 +2775,10 @@
                             <th class="py-3 px-4">Producto & SKU</th>
                             <th class="py-3 px-4">Proveedor Asignado</th>
                             <th class="py-3 px-4 text-center">Unidades</th>
-                            <th class="py-3 px-4 text-right">InversiÃ³n Estimada</th>
+                            <th class="py-3 px-4 text-right">Inversión Estimada</th>
                             <th class="py-3 px-4 text-center">Prioridad</th>
                             <th class="py-3 px-4 text-center">Estado</th>
-                            <th class="py-3 px-4 text-right">AcciÃ³n</th>
+                            <th class="py-3 px-4 text-right">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -2818,7 +2823,7 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-right">
                                     <button 
-                                        @click="futurePurchaseOrders.splice(index, 1); showToast('Ãtem removido de la lista de futuras compras.', 'info')" 
+                                        @click="futurePurchaseOrders.splice(index, 1); showToast('Ítem removido de la lista de futuras compras.', 'info')" 
                                         class="text-xs text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
                                     >
                                         Quitar
@@ -2847,13 +2852,13 @@
                             <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-amber-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                 <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-amber-300 text-[11px] mb-0.5">AtenciÃ³n RÃ¡pida On-Demand</div>
-                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas aÃ±adidas en 'Carritos para Solicitud de Pedido' o lÃ­neas externas de 'Carritos Mixtos'. Valida existencias con el proveedor antes de emitir el enlace de pago.</p>
+                                    <div class="font-bold text-amber-300 text-[11px] mb-0.5">Atención Rápida On-Demand</div>
+                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas añadidas en 'Carritos para Solicitud de Pedido' o líneas externas de 'Carritos Mixtos'. Valida existencias con el proveedor antes de emitir el enlace de pago.</p>
                                     <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-500 mt-0.5">AtenciÃ³n y verificaciÃ³n de existencias remotas con temporizador SLA</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Atención y verificación de existencias remotas con temporizador SLA</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-bold flex items-center gap-1.5">
@@ -2873,8 +2878,8 @@
                                 <th class="py-3 px-4">Prenda & Talla</th>
                                 <th class="py-3 px-4">Proveedor / Torzo</th>
                                 <th class="py-3 px-4 text-center">Temporizador SLA</th>
-                                <th class="py-3 px-4 text-center">Estado VerificaciÃ³n</th>
-                                <th class="py-3 px-4 text-right">Acciones RÃ¡pidas</th>
+                                <th class="py-3 px-4 text-center">Estado Verificación</th>
+                                <th class="py-3 px-4 text-right">Acciones Rápidas</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -2908,7 +2913,7 @@
                                     <td class="py-3.5 px-4 font-semibold text-slate-800" x-text="req.supplier"></td>
                                     <td class="py-3.5 px-4 text-center">
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">
-                                            <span>â±</span>
+                                            <span>⏱</span>
                                             <span x-text="req.slaMinutes + ' min'"></span>
                                         </span>
                                     </td>
@@ -2928,7 +2933,7 @@
                                     </td>
                                     <td class="py-3.5 px-4 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
-                                            <!-- AcciÃ³n 1: Verificar con Proveedor -->
+                                            <!-- Acción 1: Verificar con Proveedor -->
                                             <button 
                                                 type="button" 
                                                 @click="verifyRequestWithSupplier(req)" 
@@ -2938,7 +2943,7 @@
                                             >
                                                 Verificar
                                             </button>
-                                            <!-- AcciÃ³n 2: WhatsApp Link de Pago -->
+                                            <!-- Acción 2: WhatsApp Link de Pago -->
                                             <button 
                                                 type="button" 
                                                 @click="sendPaymentLinkToCustomer(req)" 
@@ -2948,7 +2953,7 @@
                                             >
                                                 <span>WhatsApp</span>
                                             </button>
-                                            <!-- AcciÃ³n 3: Pasar a Orden de Compra -->
+                                            <!-- Acción 3: Pasar a Orden de Compra -->
                                             <button 
                                                 type="button" 
                                                 @click="convertRequestToPurchaseOrder(req)" 
@@ -3030,12 +3035,12 @@
                                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Matriz de Rendimiento Top 10</div>
-                                            <p class="text-[11px] text-slate-200 leading-snug">Monitorea los 10 productos que concentran el 64.2% del flujo de caja. Permite supervisar la curva de tallas mÃ¡s demandadas, rentabilidad neta y nivel de existencias fÃ­sicas o externas para evitar quiebres.</p>
+                                            <p class="text-[11px] text-slate-200 leading-snug">Monitorea los 10 productos que concentran el 64.2% del flujo de caja. Permite supervisar la curva de tallas más demandadas, rentabilidad neta y nivel de existencias físicas o externas para evitar quiebres.</p>
                                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                         </div>
                                     </div>
                                 </div>
-                                <p class="text-xs text-slate-500 mt-1">Data grid completo: facturaciÃ³n consolidada, curva de tallas mÃ¡s demandadas y stock disponible</p>
+                                <p class="text-xs text-slate-500 mt-1">Data grid completo: facturación consolidada, curva de tallas más demandadas y stock disponible</p>
                             </div>
                         </div>
                         <button 
@@ -3049,17 +3054,17 @@
 
                     <!-- Métricas destacadas en cabecera del drawer con Tooltips ? -->
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-200/80">
-                        <!-- KPI 1: FacturaciÃ³n Top 10 -->
+                        <!-- KPI 1: Facturación Top 10 -->
                         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
                             <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">FacturaciÃ³n Top 10</span>
+                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Facturación Top 10</span>
                                 <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                     <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                                     </span>
                                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">FacturaciÃ³n Concentrada Top 10</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Monto acumulado por los 10 productos estrella en los Ãºltimos 30 días. Representa el 64.2% del volumen total de ingresos del catÃ¡logo.</p>
+                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Facturación Concentrada Top 10</div>
+                                        <p class="text-[10px] text-slate-200 leading-snug">Monto acumulado por los 10 productos estrella en los últimos 30 días. Representa el 64.2% del volumen total de ingresos del catálogo.</p>
                                         <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                     </div>
                                 </div>
@@ -3078,7 +3083,7 @@
                                     </span>
                                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                         <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Prendas Despachadas Top 10</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Total de piezas vendidas entre los 10 modelos lÃ­deres, promediando 289 unidades por SKU con alta tasa de rotaciÃ³n en inventario.</p>
+                                        <p class="text-[10px] text-slate-200 leading-snug">Total de piezas vendidas entre los 10 modelos líderes, promediando 289 unidades por SKU con alta tasa de rotación en inventario.</p>
                                         <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                     </div>
                                 </div>
@@ -3087,10 +3092,10 @@
                             <div class="text-[10px] text-slate-500 mt-0.5">Promedio 289 uds por SKU</div>
                         </div>
 
-                        <!-- KPI 3: Talla Central MÃ¡s Vendida -->
+                        <!-- KPI 3: Talla Central Más Vendida -->
                         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
                             <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Talla Central MÃ¡s Vendida</span>
+                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Talla Central Más Vendida</span>
                                 <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                     <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
@@ -3116,7 +3121,7 @@
                                     </span>
                                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                         <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Rentabilidad Comercial Ponderada</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Margen comercial ponderado combinando confecciÃ³n propia (65%-73%) y dropshipping (57%-63%). Se ubica en un rango Ã³ptimo y saludable (>50%).</p>
+                                        <p class="text-[10px] text-slate-200 leading-snug">Margen comercial ponderado combinando confección propia (65%-73%) y dropshipping (57%-63%). Se ubica en un rango óptimo y saludable (>50%).</p>
                                         <span class="absolute bottom-full right-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                     </div>
                                 </div>
@@ -3137,15 +3142,15 @@
                                     <th class="py-3.5 px-4 min-w-[200px]">Producto & SKU</th>
                                     <th class="py-3.5 px-3 text-center">Categoría</th>
                                     
-                                    <!-- ENCABEZADO CON HELP ? : TALLAS MÃS VENDIDAS -->
+                                    <!-- ENCABEZADO CON HELP ? : TALLAS MÁS VENDIDAS -->
                                     <th class="py-3.5 px-3 text-center">
                                         <div class="inline-flex items-center justify-center gap-1">
-                                            <span>Tallas MÃ¡s Vendidas</span>
+                                            <span>Tallas Más Vendidas</span>
                                             <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                                 <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                                     <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva de Demanda por Talla</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Identifica las 2 tallas con mayor penetraciÃ³n (Top 1 y Top 2). En boxers y jocks dominan M y G; en tangas y bikinis dominan CH y M. Vital para no quebrar tallas centrales.</p>
+                                                    <p class="text-[10px] text-slate-200 leading-snug">Identifica las 2 tallas con mayor penetración (Top 1 y Top 2). En boxers y jocks dominan M y G; en tangas y bikinis dominan CH y M. Vital para no quebrar tallas centrales.</p>
                                                     <span class="absolute bottom-full left-1/2 -translate-x-1/2 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                                 </div>
                                             </div>
@@ -3162,17 +3167,17 @@
                                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                                 <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                                     <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Volumen Despachado</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas vendidas en los Ãºltimos 30 días. La micro-barra indica la proporciÃ³n respecto al producto lÃ­der (#1).</p>
+                                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas vendidas en los últimos 30 días. La micro-barra indica la proporción respecto al producto líder (#1).</p>
                                                     <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </th>
 
-                                    <!-- ENCABEZADO CON HELP ? : FACTURACIÃ“N (GMV) -->
+                                    <!-- ENCABEZADO CON HELP ? : FACTURACIÓN (GMV) -->
                                     <th class="py-3.5 px-4 text-right">
                                         <div class="inline-flex items-center justify-end gap-1">
-                                            <span>FacturaciÃ³n (GMV)</span>
+                                            <span>Facturación (GMV)</span>
                                             <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                                 <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
@@ -3207,14 +3212,14 @@
                                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                                 <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                                     <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Nivel de Existencias</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Piezas fÃ­sicas en almacÃ©n o confirmadas en catÃ¡logo del proveedor. Permite detectar quiebres inminentes en productos estrella.</p>
+                                                    <p class="text-[10px] text-slate-200 leading-snug">Piezas físicas en almacén o confirmadas en catálogo del proveedor. Permite detectar quiebres inminentes en productos estrella.</p>
                                                     <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </th>
 
-                                    <th class="py-3.5 px-3 text-center">AcciÃ³n</th>
+                                    <th class="py-3.5 px-3 text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -3280,7 +3285,7 @@
                                         <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">2</span>
                                     </td>
                                     <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Boxer AlgodÃ³n Pima OrgÃ¡nico</div>
+                                        <div class="font-bold text-slate-900 text-sm">Boxer Algodón Pima Orgánico</div>
                                         <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BX-COT-007</div>
                                     </td>
                                     <td class="py-3.5 px-3 text-center">
@@ -3782,7 +3787,7 @@
                 <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3 text-xs">
                     <div class="flex items-center gap-2 text-slate-500">
                         <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Estrategia RevOps: Las tallas centrales <strong>M</strong> y <strong>G</strong> dominan en boxers y jocks, mientras que <strong>CH</strong> lidera en tangas y bikinis. Concentrar compras segÃºn esta curva.</span>
+                        <span>Estrategia RevOps: Las tallas centrales <strong>M</strong> y <strong>G</strong> dominan en boxers y jocks, mientras que <strong>CH</strong> lidera en tangas y bikinis. Concentrar compras según esta curva.</span>
                     </div>
                     <button 
                         @click="closeTopTenDrawer()" 
@@ -3858,7 +3863,7 @@
                         <!-- COLUMNA IZQUIERDA: VITRINA WEB, ATRIBUTOS TEXTILES & CURA -->
                         <!-- ========================================================= -->
                         <div class="space-y-5">
-                            <!-- 1. Toggle de PublicaciÃ³n en Tienda Online -->
+                            <!-- 1. Toggle de Publicación en Tienda Online -->
                             <div class="p-4 rounded-xl border transition-colors shadow-2xs" :class="drawerIsPublished ? 'bg-emerald-50/80 border-emerald-300' : 'bg-slate-50 border-slate-200'">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -3866,14 +3871,14 @@
                                             <span class="w-2.5 h-2.5 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
                                             <span class="font-bold text-xs uppercase tracking-wider" :class="drawerIsPublished ? 'text-emerald-900' : 'text-slate-700'">Estado en Vitrina Web</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catÃ¡logo (oculta temporalmente del pÃºblico).'"></p>
+                                        <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catálogo (oculta temporalmente del público).'"></p>
                                     </div>
                                     <button 
                                         type="button" 
                                         @click="drawerIsPublished = !drawerIsPublished" 
                                         class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
                                         :class="drawerIsPublished ? 'bg-emerald-600' : 'bg-slate-300'"
-                                        title="Alternar publicaciÃ³n"
+                                        title="Alternar publicación"
                                     >
                                         <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
                                               :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
@@ -3881,9 +3886,9 @@
                                 </div>
                             </div>
 
-                            <!-- 2. Marca o Proveedor & SecciÃ³n del Sitio Web -->
+                            <!-- 2. Marca o Proveedor & Sección del Sitio Web -->
                             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">CatalogaciÃ³n & Proveedor</h4>
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
                                 
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -3896,22 +3901,22 @@
                                         >
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">SecciÃ³n en Tienda Web</label>
+                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
                                         <select 
                                             x-model="drawerWebsiteSection" 
                                             class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         >
-                                            <option value="basicos">Línea BÃ¡sicos Esenciales</option>
-                                            <option value="disenador">Línea DiseÃ±ador & Autor</option>
-                                            <option value="temporada">ColecciÃ³n Temporada / Drops</option>
+                                            <option value="basicos">Línea Básicos Esenciales</option>
+                                            <option value="disenador">Línea Diseñador & Autor</option>
+                                            <option value="temporada">Colección Temporada / Drops</option>
                                             <option value="general">Catálogo General</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                <!-- Variante de DiseÃ±o: Con diseÃ±o vs Sin diseÃ±o -->
+                                <!-- Variante de Diseño: Con diseño vs Sin diseño -->
                                 <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de DiseÃ±o</label>
+                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de Diseño</label>
                                     <div class="grid grid-cols-2 gap-2">
                                         <button 
                                             type="button" 
@@ -3919,7 +3924,7 @@
                                             class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
                                             :class="drawerDesignType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
                                         >
-                                            Sin DiseÃ±o (Liso / SÃ³lido)
+                                            Sin Diseño (Liso / Sólido)
                                         </button>
                                         <button 
                                             type="button" 
@@ -3927,7 +3932,7 @@
                                             class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
                                             :class="drawerDesignType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
                                         >
-                                            Con DiseÃ±o (Estampado / Pattern)
+                                            Con Diseño (Estampado / Pattern)
                                         </button>
                                     </div>
                                 </div>
@@ -3972,11 +3977,11 @@
                                     <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
                                     <div class="flex-1 min-w-0">
                                         <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
-                                        <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol HologrÃ¡fico' : 'Color SÃ³lido'"></div>
+                                        <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
                                     </div>
                                 </div>
 
-                                <!-- Selector RÃ¡pido de Paleta -->
+                                <!-- Selector Rápido de Paleta -->
                                 <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
                                     <template x-for="c in apparelColors" :key="c.id">
                                         <button 
@@ -3997,12 +4002,12 @@
                             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-1.5 shadow-2xs">
                                 <div class="flex items-center justify-between">
                                     <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Descripción de la Prenda</label>
-                                    <span class="text-[10px] text-slate-400">Para vitrina web y curadurÃ­a</span>
+                                    <span class="text-[10px] text-slate-400">Para vitrina web y curaduría</span>
                                 </div>
                                 <textarea 
                                     x-model="drawerDescription" 
                                     rows="4" 
-                                    placeholder="Describe la composiciÃ³n, tacto, silueta y detalles de diseÃ±o de la prenda..." 
+                                    placeholder="Describe la composición, tacto, silueta y detalles de diseño de la prenda..." 
                                     class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                 ></textarea>
                             </div>
@@ -4011,7 +4016,7 @@
                         <!-- COLUMNA DERECHA: EXISTENCIAS, SLOTTING, MARGEN & REORDEN   -->
                         <!-- ========================================================= -->
                         <div class="space-y-6">
-                            <!-- Tarjeta Resumen 3 Estados: FÃ­sico vs Comprometido vs Disponible -->
+                            <!-- Tarjeta Resumen 3 Estados: Físico vs Comprometido vs Disponible -->
                     <div class="bg-gradient-to-r from-slate-50 to-indigo-50/40 p-3.5 rounded-xl border border-slate-200/90 shadow-2xs">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
@@ -4022,7 +4027,7 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-center">
                             <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-3xs">
-                                <span class="text-[10px] text-slate-500 block uppercase font-medium">FÃ­sico en Rack</span>
+                                <span class="text-[10px] text-slate-500 block uppercase font-medium">Físico en Rack</span>
                                 <span class="text-base font-extrabold text-slate-900" x-text="selectedProduct ? selectedProduct.localStock : 0"></span>
                             </div>
                             <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-3xs">
@@ -4053,12 +4058,12 @@
                         </div>
                     </div>
                     
-                    <!-- 1. Desglose de Stock por Talla o Tono CosmÃ©tico (TASK-INV-09) -->
+                    <!-- 1. Desglose de Stock por Talla o Tono Cosmético (TASK-INV-09) -->
                     <template x-if="selectedProduct && selectedProduct.variantDimension === 'shade'">
                         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono CosmÃ©tico</label>
+                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono Cosmético</label>
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-pink-100 text-pink-800 border border-pink-200">Swatches & Subtonos</span>
                                 </div>
                                 <span class="text-xs text-slate-500">Total: <strong class="text-pink-700 font-bold" x-text="totalProductStockCount()"></strong> piezas</span>
@@ -4082,7 +4087,7 @@
                                 </template>
                             </div>
                             <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-200/80">
-                                <span class="text-[10px] text-slate-400">Tonos configurables dinÃ¡micamente con cÃ³digo HEX y subtono.</span>
+                                <span class="text-[10px] text-slate-400">Tonos configurables dinámicamente con código HEX y subtono.</span>
                                 <button type="button" @click="openCosmeticShadesModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Gestionar Tonos</button>
                             </div>
                         </div>
@@ -4098,7 +4103,7 @@
                                         <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva de Tallas</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Desglose de existencias por talla para evitar que quiebres en tallas centrales (M, G) bloqueen la conversiÃ³n del modelo.</p>
+                                            <p class="text-[10px] text-slate-200 leading-snug">Desglose de existencias por talla para evitar que quiebres en tallas centrales (M, G) bloqueen la conversión del modelo.</p>
                                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                         </div>
                                     </div>
@@ -4154,15 +4159,15 @@
                         </div>
                     </template>
 
-                    <!-- 2. UbicaciÃ³n en Bodega -->
+                    <!-- 2. Ubicación en Bodega -->
                     <div>
                         <div class="flex items-center gap-1.5 mb-2">
-                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">UbicaciÃ³n FÃ­sica en AlmacÃ©n</label>
+                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Ubicación Física en Almacén</label>
                             <!-- Help Icon -->
                             <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                                 <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">DirecciÃ³n de Rack</div>
+                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Dirección de Rack</div>
                                     <p class="text-[10px] text-slate-200 leading-snug">Identificador exacto de pasillo, rack y gaveta para guiar al equipo de picking y empaque de pedidos.</p>
                                     <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                 </div>
@@ -4407,17 +4412,17 @@
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                                             </span>
                                             <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Ã“rdenes Planificadas RevOps</div>
-                                                <p class="text-[10px] text-slate-200 leading-snug">Permite programar lotes de reabastecimiento antes de quebrar stock, acumulando volumen para alcanzar MOQ (pedido mÃ­nimo) o mejores tarifas mayoristas.</p>
+                                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Planificadas RevOps</div>
+                                                <p class="text-[10px] text-slate-200 leading-snug">Permite programar lotes de reabastecimiento antes de quebrar stock, acumulando volumen para alcanzar MOQ (pedido mínimo) o mejores tarifas mayoristas.</p>
                                                 <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <p class="text-[11px] text-slate-500">AÃ±adir a lista de compras para consolidar orden con fabricante</p>
+                                    <p class="text-[11px] text-slate-500">Añadir a lista de compras para consolidar orden con fabricante</p>
                                 </div>
                             </div>
                             
-                            <!-- Badge indicador si el SKU ya estÃ¡ en la lista -->
+                            <!-- Badge indicador si el SKU ya está en la lista -->
                             <template x-if="selectedProduct && isProductInPurchaseList(selectedProduct.sku)">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs">
                                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
@@ -4434,16 +4439,20 @@
                                     x-model="purchaseSupplier" 
                                     class="w-full bg-white border border-slate-200 rounded-lg py-2 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                 >
-                                    <template x-for="p in providers" :key="p.id">
-                                        <option :value="p.tradeName || p.name" x-text="p.name + ' • ' + (p.city || 'Mayorista')"></option>
-                                    </template>
+                                    <option value="Torzo B2B">Torzo B2B &bull; Headless Scraper (CDMX)</option>
+                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX &bull; Fabricante Nacional SAP (Puebla)</option>
+                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL &bull; Algodón/Modal Orgánico (Barcelona)</option>
+                                    <option value="Lingerie Drop Global">Lingerie Drop Global &bull; Dropshipping Jocks/Bikinis (Miami)</option>
+                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel &bull; Sin Costuras (Medellín)</option>
+                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale &bull; Diseño Autor (Guadalajara)</option>
+                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics &bull; Distribuidor Multimarca (Monterrey)</option>
                                 </select>
                             </div>
 
-                            <!-- Matriz Reactiva de Tallas & Presets RÃ¡pidos -->
+                            <!-- Matriz Reactiva de Tallas & Presets Rápidos -->
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Matriz de ReposiciÃ³n por Talla</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Matriz de Reposición por Talla</label>
                                     <div class="flex items-center gap-1">
                                         <button type="button" @click="setPurchaseQty(30)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 8px;">+30</button>
                                         <button type="button" @click="setPurchaseQty(60)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 8px;">+60</button>
@@ -4526,14 +4535,14 @@
 
                                 <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1.5 px-0.5">
                                     <span>Total calculado: <strong class="text-indigo-600 font-bold" x-text="purchaseQty"></strong> piezas</span>
-                                    <span class="text-slate-400 text-[10px] inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Tallas de mayor rotaciÃ³n</span>
+                                    <span class="text-slate-400 text-[10px] inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Tallas de mayor rotación</span>
                                 </div>
                             </div>
 
-                            <!-- Prioridad e InversiÃ³n Estimada -->
+                            <!-- Prioridad e Inversión Estimada -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Prioridad de ReposiciÃ³n</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Prioridad de Reposición</label>
                                     <select 
                                         x-model="purchasePriority" 
                                         class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
@@ -4544,7 +4553,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">InversiÃ³n Estimada</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Inversión Estimada</label>
                                     <div class="bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-extrabold text-emerald-700 flex items-center justify-between">
                                         <span x-text="formatCurrency(calculatePurchaseTotal())"></span>
                                         <span class="text-[10px] font-normal text-slate-400">PVP Costo</span>
@@ -4552,7 +4561,7 @@
                                 </div>
                             </div>
 
-                            <!-- BotÃ³n AcciÃ³n: AÃ±adir a Lista de Compras -->
+                            <!-- Botón Acción: Añadir a Lista de Compras -->
                             <button 
                                 type="button" 
                                 @click="addToFuturePurchaseList()" 
@@ -4562,10 +4571,10 @@
                                 <svg class="w-4 h-4 text-indigo-200 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                 </svg>
-                                <span>AÃ±adir a Lista de Futuras Compras</span>
+                                <span>Añadir a Lista de Futuras Compras</span>
                             </button>
 
-                            <!-- Mensaje de confirmaciÃ³n en lÃ­nea inmediato dentro del drawer -->
+                            <!-- Mensaje de confirmación en línea inmediato dentro del drawer -->
                             <div 
                                 x-show="purchaseAddedSuccess" 
                                 x-transition:enter="transition ease-out duration-200 transform"
@@ -4578,7 +4587,7 @@
                                 style="display: none;"
                             >
                                 <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span class="flex-1 leading-tight">Â¡AÃ±adido exitosamente a la lista de futuras compras!</span>
+                                <span class="flex-1 leading-tight">¡Añadido exitosamente a la lista de futuras compras!</span>
                                 <span class="text-[10px] bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded font-bold shrink-0">En Proveedores</span>
                             </div>
                         </div>
@@ -4609,7 +4618,7 @@
         </div>
     </div>
     <!-- ================================================================= -->
-    <!-- DRAWER LATERAL: AGREGAR NUEVO PRODUCTO AL CATÃLOGO                -->
+    <!-- DRAWER LATERAL: AGREGAR NUEVO PRODUCTO AL CATÁLOGO                -->
     <!-- ================================================================= -->
     <div 
         x-show="newProductDrawerOpen" 
@@ -4663,7 +4672,7 @@
                                         </span>
                                         <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                             <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Alta de Producto RevOps</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Registra un nuevo SKU fÃ­sico o catÃ¡logo virtual. El sistema configurarÃ¡ automÃ¡ticamente la matriz de tallas, la valuaciÃ³n en tiempo real y el monitoreo de margen bruto.</p>
+                                            <p class="text-[10px] text-slate-200 leading-snug">Registra un nuevo SKU físico o catálogo virtual. El sistema configurará automáticamente la matriz de tallas, la valuación en tiempo real y el monitoreo de margen bruto.</p>
                                             <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                         </div>
                                     </div>
@@ -4686,7 +4695,7 @@
                 <!-- Contenido con Scroll -->
                 <div class="p-6 space-y-5 overflow-y-auto flex-1 text-sm">
                     
-                    <!-- 1. IdentificaciÃ³n y SKU -->
+                    <!-- 1. Identificación y SKU -->
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
@@ -4710,8 +4719,8 @@
                                     <option value="Tangas">Tangas</option>
                                     <option value="Bikinis">Bikinis</option>
                                     <option value="Camisillas">Camisillas</option>
-                                    <option value="CosmÃ©tica / Skincare">CosmÃ©tica / Skincare</option>
-                                    <option value="PerfumerÃ­a / Fragancias">PerfumerÃ­a / Fragancias</option>
+                                    <option value="Cosmética / Skincare">Cosmética / Skincare</option>
+                                    <option value="Perfumería / Fragancias">Perfumería / Fragancias</option>
                                     <option value="Accesorios & Cuidado">Accesorios & Cuidado</option>
                                 </select>
                             </div>
@@ -4727,7 +4736,7 @@
                             >
                         </div>
 
-                        <!-- Marca / Proveedor y SecciÃ³n Web -->
+                        <!-- Marca / Proveedor y Sección Web -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Marca / Proveedor</label>
@@ -4739,14 +4748,14 @@
                                 >
                             </div>
                             <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">SecciÃ³n en Tienda Web</label>
+                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Sección en Tienda Web</label>
                                 <select 
                                     x-model="newProduct.websiteSection" 
                                     class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                 >
-                                    <option value="basicos">Línea BÃ¡sicos Esenciales</option>
-                                    <option value="disenador">Línea DiseÃ±ador & Autor</option>
-                                    <option value="temporada">ColecciÃ³n Temporada / Drops</option>
+                                    <option value="basicos">Línea Básicos Esenciales</option>
+                                    <option value="disenador">Línea Diseñador & Autor</option>
+                                    <option value="temporada">Colección Temporada / Drops</option>
                                     <option value="general">Catálogo General</option>
                                 </select>
                             </div>
@@ -4779,15 +4788,15 @@
                                     class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                 >
                                     <template x-for="col in apparelColors" :key="col.id">
-                                        <option :value="col.name" :selected="col.name === newProduct.colorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'SÃ³lido') + ')'"></option>
+                                        <option :value="col.name" :selected="col.name === newProduct.colorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
                                     </template>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Variante de DiseÃ±o: Con diseÃ±o vs Sin diseÃ±o -->
+                        <!-- Variante de Diseño: Con diseño vs Sin diseño -->
                         <div>
-                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Variante de DiseÃ±o</label>
+                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Variante de Diseño</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <button 
                                     type="button" 
@@ -4795,7 +4804,7 @@
                                     class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
                                     :class="newProduct.designType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
                                 >
-                                    Sin DiseÃ±o (Liso)
+                                    Sin Diseño (Liso)
                                 </button>
                                 <button 
                                     type="button" 
@@ -4803,7 +4812,7 @@
                                     class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
                                     :class="newProduct.designType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
                                 >
-                                    Con DiseÃ±o (Estampado)
+                                    Con Diseño (Estampado)
                                 </button>
                             </div>
                         </div>
@@ -4814,20 +4823,20 @@
                             <textarea 
                                 x-model="newProduct.description" 
                                 rows="3" 
-                                placeholder="Describe el corte, ergonomÃ­a, suavidad y transpirabilidad..." 
+                                placeholder="Describe el corte, ergonomía, suavidad y transpirabilidad..." 
                                 class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                             ></textarea>
                         </div>
                     </div>
 
-                    <!-- 2. GalerÃ­a FotogrÃ¡fica del Producto (Hasta 10 imÃ¡genes) -->
+                    <!-- 2. Galería Fotográfica del Producto (Hasta 10 imágenes) -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span>GalerÃ­a del Producto</span>
+                                <span>Galería del Producto</span>
                             </label>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" 
                                   :class="(newProduct.images && newProduct.images.length >= 10) ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'">
@@ -4859,13 +4868,13 @@
                                     </svg>
                                 </div>
                                 <div class="text-xs font-semibold text-slate-700">
-                                    <span class="text-indigo-600 hover:underline">Selecciona archivos</span> o arrastra aquÃ­
+                                    <span class="text-indigo-600 hover:underline">Selecciona archivos</span> o arrastra aquí
                                 </div>
-                                <p class="text-[10px] text-slate-400">Hasta 10 fotos (JPG, PNG, WEBP, AVIF mÃ¡x. 5 MB)</p>
+                                <p class="text-[10px] text-slate-400">Hasta 10 fotos (JPG, PNG, WEBP, AVIF máx. 5 MB)</p>
                             </div>
                         </div>
 
-                        <!-- CuadrÃ­cula de Miniaturas -->
+                        <!-- Cuadrícula de Miniaturas -->
                         <template x-if="newProduct.images && newProduct.images.length > 0">
                             <div class="grid grid-cols-5 gap-2 pt-1">
                                 <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
@@ -4879,12 +4888,12 @@
                                             <span x-text="idx + 1"></span>
                                         </div>
 
-                                        <!-- BotÃ³n Eliminar (Top Right) -->
+                                        <!-- Botón Eliminar (Top Right) -->
                                         <button 
                                             type="button" 
                                             @click.stop="removeImage(idx)" 
                                             class="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center opacity-80 group-hover:opacity-100 transition cursor-pointer shadow-xs"
-                                            title="Eliminar fotografÃ­a"
+                                            title="Eliminar fotografía"
                                             style="min-height: unset;"
                                         >
                                             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4929,7 +4938,7 @@
                                     <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-400'"></span>
                                     <span>Stock Propio</span>
                                 </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">En bodega fÃ­sica</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">En bodega física</div>
                             </button>
 
                             <button 
@@ -4943,19 +4952,19 @@
                                     <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'dropship' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
                                     <span>Dropshipping</span>
                                 </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">Sincronizado vÃ­a Feed</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">Sincronizado vía Feed</div>
                             </button>
                         </div>
                     </div>
 
-                    <!-- 4. DimensiÃ³n de Variantes & Curva de Stock Inicial (TASK-INV-02) -->
+                    <!-- 4. Dimensión de Variantes & Curva de Stock Inicial (TASK-INV-02) -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Matriz de Variantes & Stock Inicial</label>
                             <span class="text-xs text-slate-500 font-medium">Total: <strong class="text-indigo-600" x-text="calculateNewProductTotalStock()"></strong> piezas</span>
                         </div>
 
-                        <!-- Selector de DimensiÃ³n de Variantes (4 PÃ­ldoras) -->
+                        <!-- Selector de Dimensión de Variantes (4 Píldoras) -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-3 bg-slate-100 p-1 rounded-xl border border-slate-200">
                             <button 
                                 type="button"
@@ -4974,7 +4983,7 @@
                                 class="py-1.5 px-2 rounded-lg text-xs transition text-center cursor-pointer border flex items-center justify-center gap-1"
                             >
                                 <span class="w-2.5 h-2.5 rounded-full bg-pink-400 border border-pink-500"></span>
-                                <span>CosmÃ©tica (Tonos)</span>
+                                <span>Cosmética (Tonos)</span>
                             </button>
 
                             <button 
@@ -5061,7 +5070,7 @@
                             </div>
                         </template>
 
-                        <!-- 2. CASO COSMÃ‰TICA: Tonos DinÃ¡micos Configurables (TASK-INV-09) -->
+                        <!-- 2. CASO COSMÉTICA: Tonos Dinámicos Configurables (TASK-INV-09) -->
                         <template x-if="newProduct.variantDimension === 'shade'">
                             <div>
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -5083,13 +5092,13 @@
                                     </template>
                                 </div>
                                 <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200">
-                                    <p class="text-[10px] text-slate-400 leading-snug">Escala cosmÃ©tica dinÃ¡mica con muestras cromÃ¡ticas y subtonos dermatolÃ³gicos.</p>
+                                    <p class="text-[10px] text-slate-400 leading-snug">Escala cosmética dinámica con muestras cromáticas y subtonos dermatológicos.</p>
                                     <button type="button" @click="openCosmeticShadesModal()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Gestionar Tonos</button>
                                 </div>
                             </div>
                         </template>
 
-                        <!-- 3. CASO PERFUMERÃA: 3 VolÃºmenes -->
+                        <!-- 3. CASO PERFUMERÍA: 3 Volúmenes -->
                         <template x-if="newProduct.variantDimension === 'volume'">
                             <div>
                                 <div class="grid grid-cols-3 gap-2">
@@ -5104,7 +5113,7 @@
                                         >
                                     </div>
                                     <div class="bg-slate-50 p-2 rounded-lg border border-teal-200 text-center ring-1 ring-teal-300">
-                                        <span class="text-xs font-bold text-teal-800 block mb-0.5">50 ml (EstÃ¡ndar)</span>
+                                        <span class="text-xs font-bold text-teal-800 block mb-0.5">50 ml (Estándar)</span>
                                         <span class="text-[9px] text-teal-600 block mb-1">Frasco Regular</span>
                                         <input 
                                             type="number" 
@@ -5115,7 +5124,7 @@
                                     </div>
                                     <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center">
                                         <span class="text-xs font-bold text-teal-800 block mb-0.5">100 ml</span>
-                                        <span class="text-[9px] text-slate-400 block mb-1">EdiciÃ³n Deluxe / Hogar</span>
+                                        <span class="text-[9px] text-slate-400 block mb-1">Edición Deluxe / Hogar</span>
                                         <input 
                                             type="number" 
                                             min="0" 
@@ -5124,7 +5133,7 @@
                                         >
                                     </div>
                                 </div>
-                                <p class="text-[10px] text-slate-400 mt-1.5 leading-snug">Presentaciones de fragancia: 10ml portÃ¡til, 50ml estÃ¡ndar y 100ml deluxe.</p>
+                                <p class="text-[10px] text-slate-400 mt-1.5 leading-snug">Presentaciones de fragancia: 10ml portátil, 50ml estándar y 100ml deluxe.</p>
                             </div>
                         </template>
 
@@ -5132,7 +5141,7 @@
                         <template x-if="newProduct.variantDimension === 'none'">
                             <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 flex items-center justify-between">
                                 <div>
-                                    <label class="text-xs font-bold text-slate-800 block">Stock FÃ­sico Unitario</label>
+                                    <label class="text-xs font-bold text-slate-800 block">Stock Físico Unitario</label>
                                     <p class="text-[10px] text-slate-500">Producto sin variantes de talla o tono (ej. accesorio, toalla o monodosis)</p>
                                 </div>
                                 <div class="w-28">
@@ -5147,11 +5156,11 @@
                         </template>
                     </div>
 
-                    <!-- 5. UbicaciÃ³n FÃ­sica en Bodega (Slotting: TASK-INV-01) -->
+                    <!-- 5. Ubicación Física en Bodega (Slotting: TASK-INV-01) -->
                     <template x-if="newProduct.type === 'propio'">
                         <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <div class="flex items-center justify-between">
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">UbicaciÃ³n FÃ­sica (Slotting)</label>
+                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Ubicación Física (Slotting)</label>
                                 <span 
                                     :class="getSlotBadgeClass(newProduct.location)"
                                     class="text-xs font-mono font-bold px-2 py-0.5 rounded border"
@@ -5167,7 +5176,7 @@
                                         class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                     >
                                         <option value="A">Pasillo A (Ropa Interior)</option>
-                                        <option value="B">Pasillo B (AtlÃ©tico & Jocks)</option>
+                                        <option value="B">Pasillo B (Atlético & Jocks)</option>
                                         <option value="C">Pasillo C (Cuidado Personal)</option>
                                     </select>
                                 </div>
@@ -5199,7 +5208,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-slate-400 leading-tight">Estructura de Slot: [Pasillo]-[Rack]-[Gaveta]. El cÃ³digo se sincroniza automÃ¡ticamente.</p>
+                            <p class="text-[10px] text-slate-400 leading-tight">Estructura de Slot: [Pasillo]-[Rack]-[Gaveta]. El código se sincroniza automáticamente.</p>
                         </div>
                     </template>
 
@@ -5211,9 +5220,13 @@
                                     x-model="newProduct.provider" 
                                     class="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                                 >
-                                    <template x-for="p in providers" :key="p.id">
-                                        <option :value="p.tradeName || p.name" x-text="p.name + (p.typeLabel ? ' • ' + p.typeLabel : '')"></option>
-                                    </template>
+                                    <option value="Torzo B2B">Torzo B2B (Headless Feed)</option>
+                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
+                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel</option>
+                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
+                                    <option value="MicroModal Fabrics Brasil">MicroModal Fabrics Brasil</option>
+                                    <option value="EcoUnderwear Colombia">EcoUnderwear Colombia</option>
+                                    <option value="EuroLuxe Knits Portugal">EuroLuxe Knits Portugal</option>
                                 </select>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
@@ -5243,7 +5256,7 @@
                     <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-4 rounded-xl border border-slate-800">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="font-bold text-xs text-white uppercase tracking-wider">Margen Comercial & Pricing</h4>
-                            <span class="text-[10px] text-indigo-300 font-semibold">CÃ¡lculo Reactivo</span>
+                            <span class="text-[10px] text-indigo-300 font-semibold">Cálculo Reactivo</span>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 mb-3">
@@ -5323,7 +5336,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL DE CONFIRMACIÃ“N: AÃ‘ADIR A FUTURAS COMPRAS AL GUARDAR        -->
+    <!-- MODAL DE CONFIRMACIÓN: AÑADIR A FUTURAS COMPRAS AL GUARDAR        -->
     <!-- ================================================================= -->
     <div 
         x-show="confirmPurchaseModalOpen" 
@@ -5366,13 +5379,13 @@
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-slate-900 leading-6" id="confirm-purchase-modal-title">
-                            Â¿Deseas aÃ±adir este producto a la lista de compras?
+                            ¿Deseas añadir este producto a la lista de compras?
                         </h3>
                         <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                            Tienes configurada una orden de reposiciÃ³n para <strong class="text-indigo-700" x-text="selectedProduct?.sku"></strong> por <strong class="text-slate-900" x-text="(purchaseQty || 0) + ' piezas'"></strong> con el proveedor <strong class="text-slate-900" x-text="purchaseSupplier"></strong> (InversiÃ³n estimada: <strong class="text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></strong>).
+                            Tienes configurada una orden de reposición para <strong class="text-indigo-700" x-text="selectedProduct?.sku"></strong> por <strong class="text-slate-900" x-text="(purchaseQty || 0) + ' piezas'"></strong> con el proveedor <strong class="text-slate-900" x-text="purchaseSupplier"></strong> (Inversión estimada: <strong class="text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></strong>).
                         </p>
                         <p class="text-xs text-slate-500 mt-1">
-                            Â¿Quieres incorporar esta orden a la pestaÃ±a <strong>Proveedores & Scraping</strong> al guardar los cambios del producto?
+                            ¿Quieres incorporar esta orden a la pestaña <strong>Proveedores & Scraping</strong> al guardar los cambios del producto?
                         </p>
                     </div>
                 </div>
@@ -5401,14 +5414,14 @@
                         style="min-height: unset;"
                     >
                         <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>SÃ­, aÃ±adir a compras y guardar</span>
+                        <span>Sí, añadir a compras y guardar</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
     <!-- ================================================================= -->
-    <!-- MODAL DE REASIGNACIÃ“N DE SLOT FÃSICO EN BODEGA (TASK-INV-01)      -->
+    <!-- MODAL DE REASIGNACIÓN DE SLOT FÍSICO EN BODEGA (TASK-INV-01)      -->
     <!-- ================================================================= -->
     <div 
         x-show="slotReassignModal.isOpen" 
@@ -5450,7 +5463,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold tracking-tight text-white">Reasignar UbicaciÃ³n FÃ­sica (Slotting)</h3>
+                            <h3 class="text-sm font-bold tracking-tight text-white">Reasignar Ubicación Física (Slotting)</h3>
                             <p class="text-[11px] text-slate-400">Actualiza el pasillo, rack o gaveta del producto en bodega</p>
                         </div>
                     </div>
@@ -5468,7 +5481,7 @@
                             <div class="text-xs font-semibold text-slate-900 mt-0.5" x-text="slotReassignModal.productName"></div>
                         </div>
                         <div class="text-right">
-                            <span class="text-[10px] text-slate-400 block uppercase font-semibold">UbicaciÃ³n Actual</span>
+                            <span class="text-[10px] text-slate-400 block uppercase font-semibold">Ubicación Actual</span>
                             <span class="text-xs font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 mt-0.5 inline-block" x-text="slotReassignModal.currentLocation || 'Sin Asignar'"></span>
                         </div>
                     </div>
@@ -5484,7 +5497,7 @@
                                     class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                 >
                                     <option value="A">Pasillo A (Ropa Interior)</option>
-                                    <option value="B">Pasillo B (AtlÃ©tico & Jocks)</option>
+                                    <option value="B">Pasillo B (Atlético & Jocks)</option>
                                     <option value="C">Pasillo C (Cuidado Personal)</option>
                                 </select>
                             </div>
@@ -5516,7 +5529,7 @@
                         </div>
                     </div>
 
-                    <!-- PrevisualizaciÃ³n del nuevo cÃ³digo -->
+                    <!-- Previsualización del nuevo código -->
                     <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-semibold text-indigo-900">Código de Slot Resultante:</span>
@@ -5531,11 +5544,11 @@
 
                     <!-- Motivo / Notas -->
                     <div>
-                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Motivo del Movimiento FÃ­sico</label>
+                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Motivo del Movimiento Físico</label>
                         <input 
                             type="text" 
                             x-model="slotReassignModal.notes" 
-                            placeholder="Ej: ReubicaciÃ³n por alta rotaciÃ³n (Clase A), consolidación de racks..."
+                            placeholder="Ej: Reubicación por alta rotación (Clase A), consolidación de racks..."
                             class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium"
                         >
                     </div>
@@ -5556,7 +5569,7 @@
                         class="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
                     >
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Confirmar ReubicaciÃ³n</span>
+                        <span>Confirmar Reubicación</span>
                     </button>
                 </div>
             </div>
@@ -5610,9 +5623,9 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 id="bundle-recipes-modal-title" class="text-base font-bold text-white leading-none">Recetas de Ensamble BOM & Combos Virtuales</h3>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/30 text-violet-200 border border-violet-400/40" x-text="productBundles.length + ' FÃ³rmulas'"></span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/30 text-violet-200 border border-violet-400/40" x-text="productBundles.length + ' Fórmulas'"></span>
                             </div>
-                            <p class="text-xs text-slate-300 mt-1">Bill of Materials para Cajas de SuscripciÃ³n Mensual Multiverso y Packs Promocionales</p>
+                            <p class="text-xs text-slate-300 mt-1">Bill of Materials para Cajas de Suscripción Mensual Multiverso y Packs Promocionales</p>
                         </div>
                     </div>
                     <button @click="bundleRecipesModal.isOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
@@ -5637,7 +5650,7 @@
                             class="px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer"
                             :class="bundleRecipesModal.activeFilter === 'subscription' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
                         >
-                            Cajas de SuscripciÃ³n
+                            Cajas de Suscripción
                         </button>
                         <button 
                             type="button" 
@@ -5649,7 +5662,7 @@
                         </button>
                     </div>
                     <div class="text-[11px] text-slate-500 font-medium">
-                        LiquidaciÃ³n atÃ³mica en Kardex (<code class="font-mono text-indigo-600 font-bold">SALIDA_COMBO_SUSCRIPCION</code>)
+                        Liquidación atómica en Kardex (<code class="font-mono text-indigo-600 font-bold">SALIDA_COMBO_SUSCRIPCION</code>)
                     </div>
                 </div>
 
@@ -5659,7 +5672,7 @@
                     <!-- Columna Izquierda: Lista de Combos -->
                     <div class="lg:col-span-5 space-y-3">
                         <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                            <span>Catálogo de FÃ³rmulas BOM</span>
+                            <span>Catálogo de Fórmulas BOM</span>
                             <span class="text-indigo-600 font-mono" x-text="filteredBundles.length + ' activos'"></span>
                         </div>
 
@@ -5728,8 +5741,8 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                                     </div>
                                     <div>
-                                        <div class="text-xs font-bold text-slate-800">Capacidad MÃ¡xima de Armado Inmediato</div>
-                                        <div class="text-[11px] text-slate-600">Calculado sobre el insumo fÃ­sico con menor existencia disponible</div>
+                                        <div class="text-xs font-bold text-slate-800">Capacidad Máxima de Armado Inmediato</div>
+                                        <div class="text-[11px] text-slate-600">Calculado sobre el insumo físico con menor existencia disponible</div>
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -5742,14 +5755,14 @@
                         <!-- Tabla de Escandallo (BOM) -->
                         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                             <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                                <h5 class="text-xs font-bold uppercase tracking-wider text-slate-700">FÃ³rmula de Insumos FÃ­sicos (BOM)</h5>
-                                <span class="text-[11px] text-slate-500">Componentes atÃ³micos a deducir</span>
+                                <h5 class="text-xs font-bold uppercase tracking-wider text-slate-700">Fórmula de Insumos Físicos (BOM)</h5>
+                                <span class="text-[11px] text-slate-500">Componentes atómicos a deducir</span>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-xs border-collapse">
                                     <thead>
                                         <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-500 text-[10px] uppercase font-bold tracking-wider">
-                                            <th class="py-2.5 px-3">Insumo FÃ­sico</th>
+                                            <th class="py-2.5 px-3">Insumo Físico</th>
                                             <th class="py-2.5 px-3">Slot Bodega</th>
                                             <th class="py-2.5 px-3 text-center">Cant / Caja</th>
                                             <th class="py-2.5 px-3 text-right">Stock Bodega</th>
@@ -5762,7 +5775,7 @@
                                             <tr class="hover:bg-slate-50/60 transition">
                                                 <td class="py-2.5 px-3">
                                                     <div class="font-bold text-slate-800" x-text="comp.name"></div>
-                                                    <div class="font-mono text-[10px] text-slate-400" x-text="comp.sku + (comp.size ? ' â€¢ ' + comp.size.toUpperCase() : '')"></div>
+                                                    <div class="font-mono text-[10px] text-slate-400" x-text="comp.sku + (comp.size ? ' • ' + comp.size.toUpperCase() : '')"></div>
                                                 </td>
                                                 <td class="py-2.5 px-3">
                                                     <span 
@@ -5788,12 +5801,12 @@
                             </div>
                         </div>
 
-                        <!-- Panel Simulador de Despacho Masivo & LiquidaciÃ³n AtÃ³mica -->
+                        <!-- Panel Simulador de Despacho Masivo & Liquidación Atómica -->
                         <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-3">
                             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                                 <h5 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
                                     <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    <span>Simulador de Despacho Masivo & LiquidaciÃ³n AtÃ³mica</span>
+                                    <span>Simulador de Despacho Masivo & Liquidación Atómica</span>
                                 </h5>
                                 <span class="text-[10px] text-slate-400 font-mono">POST /api/v1/inventory/bundles/{id}/liquidate</span>
                             </div>
@@ -5831,7 +5844,7 @@
 
                             <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
                                 <div class="text-xs text-slate-600">
-                                    Total insumos a liquidar: <strong class="text-slate-900" x-text="selectedBundle.components.reduce((acc, c) => acc + (c.qty * bundleRecipesModal.dispatchQty), 0) + ' unidades fÃ­sicas'"></strong>
+                                    Total insumos a liquidar: <strong class="text-slate-900" x-text="selectedBundle.components.reduce((acc, c) => acc + (c.qty * bundleRecipesModal.dispatchQty), 0) + ' unidades físicas'"></strong>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button 
@@ -6040,7 +6053,7 @@
                                             <div>
                                                 <div class="font-bold text-xs text-slate-900" x-text="comp.name"></div>
                                                 <div class="text-[11px] font-mono text-slate-500 flex items-center gap-2 mt-0.5">
-                                                    <span x-text="comp.sku + (comp.size !== 'std' ? ' â€¢ ' + comp.size.toUpperCase() : '')"></span>
+                                                    <span x-text="comp.sku + (comp.size !== 'std' ? ' • ' + comp.size.toUpperCase() : '')"></span>
                                                     <span class="text-slate-400">|</span>
                                                     <span class="text-indigo-600 font-medium" x-text="comp.supplierName"></span>
                                                 </div>
@@ -6147,7 +6160,7 @@
                                                         <span class="font-mono font-bold text-indigo-700" x-text="genPo.poCode"></span>
                                                         <span class="text-slate-500 text-[10px] ml-1.5" x-text="'(' + genPo.supplierName + ')'"></span>
                                                     </div>
-                                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold" x-text="genPo.totalPieces + ' pzas â€¢ En Taller'"></span>
+                                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold" x-text="genPo.totalPieces + ' pzas • En Taller'"></span>
                                                 </div>
                                             </template>
                                         </div>
@@ -6234,8 +6247,8 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-bold tracking-tight">Catálogo Maestro de Tonos de CosmÃ©tica</h3>
-                            <p class="text-xs text-pink-200/80">GestiÃ³n de muestras cromÃ¡ticas HEX, subtonos dermatolÃ³gicos y disponibilidad operativa</p>
+                            <h3 class="text-base font-bold tracking-tight">Catálogo Maestro de Tonos de Cosmética</h3>
+                            <p class="text-xs text-pink-200/80">Gestión de muestras cromáticas HEX, subtonos dermatológicos y disponibilidad operativa</p>
                         </div>
                     </div>
                     <button @click="closeCosmeticShadesModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg transition cursor-pointer">
@@ -6245,11 +6258,11 @@
 
                 <!-- Body en 2 Columnas -->
                 <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50/50">
-                    <!-- Formulario de Registro / EdiciÃ³n (col-span-5) -->
+                    <!-- Formulario de Registro / Edición (col-span-5) -->
                     <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col gap-4">
                         <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
                             <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider" x-text="cosmeticShadesModal.isEditing ? 'Editar Tono ' + cosmeticShadesModal.form.code : 'Registrar Nuevo Tono'"></h4>
-                            <span class="text-[10px] font-semibold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-100" x-text="cosmeticShadesModal.isEditing ? 'Modo EdiciÃ³n' : 'Nuevo Registro'"></span>
+                            <span class="text-[10px] font-semibold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-100" x-text="cosmeticShadesModal.isEditing ? 'Modo Edición' : 'Nuevo Registro'"></span>
                         </div>
 
                         <!-- Código del Tono -->
@@ -6261,7 +6274,7 @@
                                 placeholder="Ej. 07 o C-01" 
                                 class="w-full text-xs font-bold px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 uppercase transition"
                             >
-                            <p class="text-[10px] text-slate-400 mt-1">Identificador Ãºnico alfanumÃ©rico para el desglose de inventario.</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Identificador único alfanumérico para el desglose de inventario.</p>
                         </div>
 
                         <!-- Nombre Comercial -->
@@ -6270,14 +6283,14 @@
                             <input 
                                 type="text" 
                                 x-model="cosmeticShadesModal.form.name" 
-                                placeholder="Ej. Beige Almendra, Bronce CÃ¡lido" 
+                                placeholder="Ej. Beige Almendra, Bronce Cálido" 
                                 class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition"
                             >
                         </div>
 
-                        <!-- Selector CromÃ¡tico HEX -->
+                        <!-- Selector Cromático HEX -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Muestra CromÃ¡tica (Color HEX)</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Muestra Cromática (Color HEX)</label>
                             <div class="flex items-center gap-3">
                                 <input 
                                     type="color" 
@@ -6294,7 +6307,7 @@
                             </div>
                         </div>
 
-                        <!-- PrevisualizaciÃ³n en Vivo -->
+                        <!-- Previsualización en Vivo -->
                         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center gap-3">
                             <span class="cosmetic-swatch-preview w-8 h-8 rounded-full border border-black/15 shadow-xs flex-shrink-0" :style="'background: ' + (cosmeticShadesModal.form.hex_color || '#E8BEA2')"></span>
                             <div class="min-w-0 flex-1">
@@ -6306,15 +6319,15 @@
                             </div>
                         </div>
 
-                        <!-- Subtono DermatolÃ³gico -->
+                        <!-- Subtono Dermatológico -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Subtono DermatolÃ³gico</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Subtono Dermatológico</label>
                             <select 
                                 x-model="cosmeticShadesModal.form.undertone" 
                                 class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white transition"
                             >
-                                <option value="warm">CÃ¡lido (Warm / Dorado / MelocotÃ³n)</option>
-                                <option value="cool">FrÃ­o (Cool / Rosado / Azulado)</option>
+                                <option value="warm">Cálido (Warm / Dorado / Melocotón)</option>
+                                <option value="cool">Frío (Cool / Rosado / Azulado)</option>
                                 <option value="neutral">Neutro (Neutral / Equilibrado)</option>
                             </select>
                         </div>
@@ -6327,11 +6340,11 @@
                                     x-model="cosmeticShadesModal.form.is_active" 
                                     class="rounded border-slate-300 text-pink-600 focus:ring-pink-500 w-4 h-4 cursor-pointer"
                                 >
-                                <span class="text-xs font-medium text-slate-700">Tono activo en producciÃ³n y catÃ¡logo</span>
+                                <span class="text-xs font-medium text-slate-700">Tono activo en producción y catálogo</span>
                             </label>
                         </div>
 
-                        <!-- Botones de AcciÃ³n -->
+                        <!-- Botones de Acción -->
                         <div class="flex items-center gap-2 pt-2">
                             <button 
                                 type="button" 
@@ -6352,12 +6365,12 @@
                         </div>
                     </div>
 
-                    <!-- Lista / CuadrÃ­cula de Tonos Existentes (col-span-7) -->
+                    <!-- Lista / Cuadrícula de Tonos Existentes (col-span-7) -->
                     <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                             <div class="flex items-center gap-2">
                                 <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Tonos Configurados</h4>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200" x-text="cosmeticShades.length + ' en catÃ¡logo'"></span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200" x-text="cosmeticShades.length + ' en catálogo'"></span>
                             </div>
                             <span class="text-[11px] text-slate-400" x-text="activeCosmeticShades.length + ' activos para venta'"></span>
                         </div>
@@ -6381,31 +6394,31 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-1">
-                                        <!-- BotÃ³n Activar / Pausar -->
+                                        <!-- Botón Activar / Pausar -->
                                         <button 
                                             type="button" 
                                             @click="toggleCosmeticShadeStatus(shade)" 
                                             :class="shade.is_active ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200' : 'text-slate-500 bg-slate-100 hover:bg-slate-200 border-slate-200'" 
                                             class="px-1.5 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer"
-                                            :title="shade.is_active ? 'Desactivar de producciÃ³n' : 'Activar en producciÃ³n'"
+                                            :title="shade.is_active ? 'Desactivar de producción' : 'Activar en producción'"
                                         >
                                             <span x-text="shade.is_active ? 'Activo' : 'Pausa'"></span>
                                         </button>
-                                        <!-- BotÃ³n Editar -->
+                                        <!-- Botón Editar -->
                                         <button 
                                             type="button" 
                                             @click="editCosmeticShade(shade)" 
                                             class="p-1 text-slate-400 hover:text-indigo-600 rounded transition cursor-pointer"
-                                            title="Editar informaciÃ³n del tono"
+                                            title="Editar información del tono"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
-                                        <!-- BotÃ³n Eliminar -->
+                                        <!-- Botón Eliminar -->
                                         <button 
                                             type="button" 
                                             @click="deleteCosmeticShade(shade.id)" 
                                             class="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
-                                            title="Eliminar tono del catÃ¡logo"
+                                            title="Eliminar tono del catálogo"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
@@ -6420,7 +6433,7 @@
                 <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
                     <div class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Sincronización atÃ³mica con matrices de inventario y selectores cromÃ¡ticos del storefront</span>
+                        <span>Sincronización atómica con matrices de inventario y selectores cromáticos del storefront</span>
                     </div>
                     <button 
                         @click="closeCosmeticShadesModal()" 
@@ -6435,7 +6448,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL DE CARANCELES / TELEMETRÃA DE CARRITOS SIMULTÃNEOS (TASK-INT-06) -->
+    <!-- MODAL DE CARANCELES / TELEMETRÍA DE CARRITOS SIMULTÁNEOS (TASK-INT-06) -->
     <!-- ================================================================= -->
     <div 
         x-show="stockLocksModalOpen" 
@@ -6478,8 +6491,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Carritos SimultÃ¡neos y Reservas Activas de Stock</h3>
-                            <p class="text-xs text-slate-500 font-medium mt-0.5">TelemetrÃ­a en tiempo real de prendas retenidas con TTL configurable de 5 minutos</p>
+                            <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Carritos Simultáneos y Reservas Activas de Stock</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-0.5">Telemetría en tiempo real de prendas retenidas con TTL configurable de 5 minutos</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -6513,7 +6526,7 @@
                         <div class="text-lg font-black text-amber-600 mt-0.5" x-text="activeLockedUnitsTotal + ' uds'"></div>
                     </div>
                     <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Tiempo LÃ­mite EstÃ¡ndar</div>
+                        <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Tiempo Límite Estándar</div>
                         <div class="text-lg font-black text-slate-800 mt-0.5">5 Minutos (300s)</div>
                     </div>
                 </div>
@@ -6524,7 +6537,7 @@
                         <div class="text-center py-10 text-slate-400">
                             <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                             <p class="text-sm font-bold text-slate-700">No hay carritos activos con stock bloqueado en este momento.</p>
-                            <p class="text-xs text-slate-500 mt-1">El 100% de las unidades disponibles estÃ¡n libres para venta inmediata.</p>
+                            <p class="text-xs text-slate-500 mt-1">El 100% de las unidades disponibles están libres para venta inmediata.</p>
                         </div>
                     </template>
                     <template x-if="activeStockLocksCount > 0">
@@ -6532,12 +6545,12 @@
                             <table class="w-full text-xs text-left border-collapse stock-locks-table">
                                 <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
                                     <tr>
-                                        <th class="p-2.5">SesiÃ³n / Origen</th>
+                                        <th class="p-2.5">Sesión / Origen</th>
                                         <th class="p-2.5">Prenda / SKU</th>
                                         <th class="p-2.5 text-center">Talla</th>
                                         <th class="p-2.5 text-center">Cantidad</th>
                                         <th class="p-2.5 text-center">TTL Restante</th>
-                                        <th class="p-2.5 text-right">AcciÃ³n</th>
+                                        <th class="p-2.5 text-right">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -6582,7 +6595,7 @@
                 <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
                     <div class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span>El stock bloqueado en carrito se descuenta temporalmente del catÃ¡logo pÃºblico para evitar sobreventas simultÃ¡neas.</span>
+                        <span>El stock bloqueado en carrito se descuenta temporalmente del catálogo público para evitar sobreventas simultáneas.</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <template x-if="activeStockLocksCount > 0">
@@ -6608,7 +6621,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL DE RECEPCIÃ“N DE MERCANCÃA (INBOUND RECEIPT & COTEJO FÃSICO) -->
+    <!-- MODAL DE RECEPCIÓN DE MERCANCÍA (INBOUND RECEIPT & COTEJO FÍSICO) -->
     <!-- ================================================================= -->
     <div 
         x-show="receiveOrderModalOpen" 
@@ -6649,10 +6662,10 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <span>RecepciÃ³n Inbound de MercancÃ­a</span>
+                                <span>Recepción Inbound de Mercancía</span>
                                 <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-indigo-500/30 text-indigo-200 border border-indigo-400/40" x-text="receivingOrder ? '#' + receivingOrder.id : ''"></span>
                             </h3>
-                            <p class="text-xs text-slate-300">Cotejo fÃ­sico e ingreso inmediato a existencias de rack</p>
+                            <p class="text-xs text-slate-300">Cotejo físico e ingreso inmediato a existencias de rack</p>
                         </div>
                     </div>
                     <button @click="receiveOrderModalOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer">
@@ -6677,7 +6690,7 @@
                             <span class="font-bold text-indigo-600 text-sm" x-text="receivingOrder ? receivingOrder.qty + ' uds' : '0'"></span>
                         </div>
                         <div>
-                            <span class="text-slate-400 block text-[10px] uppercase font-bold">InversiÃ³n Lote</span>
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Inversión Lote</span>
                             <span class="font-bold text-slate-800" x-text="receivingOrder ? '$' + receivingOrder.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2}) : '$0.00'"></span>
                         </div>
                     </div>
@@ -6685,7 +6698,7 @@
                     <!-- Producto a Recibir -->
                     <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-center justify-between">
                         <div>
-                            <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">ArtÃ­culo que ingresa</span>
+                            <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">Artículo que ingresa</span>
                             <h4 class="font-bold text-slate-900 text-sm" x-text="receivingOrder?.productName"></h4>
                             <span class="text-xs text-slate-500 font-mono" x-text="'SKU: ' + (receivingOrder?.sku || '')"></span>
                         </div>
@@ -6701,7 +6714,7 @@
                     <!-- Matriz de Tallas a Cotejar -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Cotejo FÃ­sico por Talla (Piezas Recibidas en Mano)</label>
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Cotejo Físico por Talla (Piezas Recibidas en Mano)</label>
                             <span class="text-xs font-bold text-indigo-600">Total a Ingresar: <span x-text="calculateReceivingTotal()"></span> / <span x-text="receivingOrder?.qty || 0"></span> uds</span>
                         </div>
                         <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
@@ -6840,16 +6853,16 @@
                         </div>
                     </template>
 
-                    <!-- Impacto en ValuaciÃ³n Contable: CPP (TASK-INV-04) -->
+                    <!-- Impacto en Valuación Contable: CPP (TASK-INV-04) -->
                     <div class="p-3.5 bg-slate-900 text-white rounded-xl border border-slate-800 text-xs">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-2">
                                 <span class="p-1 bg-indigo-500/20 text-indigo-400 rounded border border-indigo-500/30">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                 </span>
-                                <span class="font-bold text-slate-200">Impacto en ValuaciÃ³n Contable (CPP)</span>
+                                <span class="font-bold text-slate-200">Impacto en Valuación Contable (CPP)</span>
                             </div>
-                            <span class="text-[10px] text-indigo-300 font-mono">FÃ³rmula Oficial CPP</span>
+                            <span class="text-[10px] text-indigo-300 font-mono">Fórmula Oficial CPP</span>
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-center">
                             <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700/60">
@@ -6872,9 +6885,9 @@
                         <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-xs">
                             <span class="text-amber-600 mt-0.5 flex items-center justify-center w-5 h-5 bg-amber-100 rounded-full"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
                             <div>
-                                <span class="font-bold text-amber-900 block">Â¡AtenciÃ³n de LiberaciÃ³n Inmediata!</span>
+                                <span class="font-bold text-amber-900 block">¡Atención de Liberación Inmediata!</span>
                                 <p class="text-amber-800 leading-relaxed text-[11px]">
-                                    Esta orden contiene la pieza solicitada por <strong><span x-text="receivingOrder.linkedCustomer"></span></strong> en el <strong><span x-text="receivingOrder.linkedCartId"></span></strong>. Al confirmar el ingreso, el carrito mixto se desbloquearÃ¡ automÃ¡ticamente y se notificarÃ¡ a LogÃ­stica para empaque y despacho total.
+                                    Esta orden contiene la pieza solicitada por <strong><span x-text="receivingOrder.linkedCustomer"></span></strong> en el <strong><span x-text="receivingOrder.linkedCartId"></span></strong>. Al confirmar el ingreso, el carrito mixto se desbloqueará automáticamente y se notificará a Logística para empaque y despacho total.
                                 </p>
                             </div>
                         </div>
@@ -6882,7 +6895,7 @@
 
                     <!-- Notas e Incidencias -->
                     <div>
-                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Notas de RecepciÃ³n / Estado del Paquete</label>
+                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Notas de Recepción / Estado del Paquete</label>
                         <input type="text" x-model="receivingNotes" placeholder="Ej. Embalaje intacto, precintos de seguridad verificados" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-700">
                     </div>
                 </div>
@@ -6912,7 +6925,7 @@
                             class="px-5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
                         >
                             <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Confirmar e Ingresar a AlmacÃ©n</span>
+                            <span>Confirmar e Ingresar a Almacén</span>
                         </button>
                     </div>
                 </div>
@@ -6962,7 +6975,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-white">Generador de Orden de Compra para WhatsApp</h3>
-                            <p class="text-xs text-emerald-200">Formato estructurado con emojis y viÃ±etas para envÃ­o rÃ¡pido a mayoristas</p>
+                            <p class="text-xs text-emerald-200">Formato estructurado con emojis y viñetas para envío rápido a mayoristas</p>
                         </div>
                     </div>
                     <button @click="orderExportModalOpen = false" class="text-emerald-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer">
@@ -6972,15 +6985,15 @@
 
                 <!-- Contenido del Modal -->
                 <div class="p-6 space-y-4">
-                    <!-- Filtros y Opciones de ExportaciÃ³n -->
+                    <!-- Filtros y Opciones de Exportación -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                         <div class="flex items-center gap-2">
                             <label class="text-xs font-bold text-slate-700">Proveedor:</label>
                             <select x-model="exportSupplierFilter" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+                                <option value="Torzo B2B">Torzo B2B (Mayorista)</option>
+                                <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
+                                <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
                                 <option value="all">Consolidado Multimarca (Todos)</option>
-                                <template x-for="p in providers" :key="p.id">
-                                    <option :value="p.tradeName || p.name" x-text="(p.tradeName || p.name) + ' (' + (p.syncedItemsCount || 0) + ' SKUs)'"></option>
-                                </template>
                             </select>
                         </div>
                         <div class="flex items-center gap-4 text-xs">
@@ -6995,7 +7008,7 @@
                         </div>
                     </div>
 
-                    <!-- Caja de PrevisualizaciÃ³n Monospace -->
+                    <!-- Caja de Previsualización Monospace -->
                     <div class="relative">
                         <div class="absolute top-3 right-3 z-10 flex items-center gap-2">
                             <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">WhatsApp Markdown</span>
@@ -7042,7 +7055,7 @@
                             <template x-if="exportCopiedToast">
                                 <span class="flex items-center gap-1.5 text-white">
                                     <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span>Â¡Copiado con Ã‰xito!</span>
+                                    <span>¡Copiado con Éxito!</span>
                                 </span>
                             </template>
                         </button>
@@ -7053,7 +7066,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- DRAWER LATERAL: KARDEX & AUDITORÃA DE MOVIMIENTOS MULTICANAL      -->
+    <!-- DRAWER LATERAL: KARDEX & AUDITORÍA DE MOVIMIENTOS MULTICANAL      -->
     <!-- ================================================================= -->
     <div 
         x-show="kardexDrawerOpen" 
@@ -7146,7 +7159,7 @@
                             <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </div>
                         <template x-if="kardexSearch">
-                            <button @click="kardexSearch = ''" class="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5" aria-label="Limpiar bÃºsqueda"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                            <button @click="kardexSearch = ''" class="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5" aria-label="Limpiar búsqueda"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                         </template>
                     </div>
                     <div class="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
@@ -7211,8 +7224,8 @@
                                 <th class="py-2.5 px-4">Tipo Movimiento</th>
                                 <th class="py-2.5 px-4">Producto & SKU</th>
                                 <th class="py-2.5 px-4 text-center">Tallas</th>
-                                <th class="py-2.5 px-4 text-center">VariaciÃ³n</th>
-                                <th class="py-2.5 px-4 text-center">Saldo FÃ­sico</th>
+                                <th class="py-2.5 px-4 text-center">Variación</th>
+                                <th class="py-2.5 px-4 text-center">Saldo Físico</th>
                                 <th class="py-2.5 px-4">Referencia / Usuario</th>
                             </tr>
                         </thead>
@@ -7268,7 +7281,7 @@
                     </table>
                 </div>
 
-                <!-- Footer del Kardex con PaginaciÃ³n Cargar mÃ¡s -->
+                <!-- Footer del Kardex con Paginación Cargar más -->
                 <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                     <div class="text-slate-500">
                         Mostrando <strong class="text-slate-800" x-text="Math.min(kardexVisibleCount, filteredMovements.length)"></strong> de <strong class="text-slate-800" x-text="filteredMovements.length"></strong> asientos de auditoría
@@ -7281,7 +7294,7 @@
                                 class="px-3 py-1.5 bg-white border border-slate-300 hover:border-slate-800 rounded-md text-xs font-bold text-slate-800 transition cursor-pointer flex items-center gap-1.5"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                <span x-text="kardexIsLoadingMore ? 'Cargando...' : 'Cargar mÃ¡s'"></span>
+                                <span x-text="kardexIsLoadingMore ? 'Cargando...' : 'Cargar más'"></span>
                             </button>
                         </template>
                         <button 
@@ -7311,35 +7324,35 @@
         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-wrap items-center gap-2 sm:gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700/80 max-w-4xl"
         style="display: none;"
     >
-        <!-- Contador de SelecciÃ³n -->
+        <!-- Contador de Selección -->
         <div class="flex items-center gap-2 pr-3 border-r border-slate-700">
             <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-black text-xs inline-flex items-center justify-center shadow-xs" x-text="selectedSkus.length"></span>
             <span class="text-xs font-bold text-slate-200 hidden sm:inline">Seleccionados</span>
         </div>
 
-        <!-- BotÃ³n 1: Exportar CSV -->
+        <!-- Botón 1: Exportar CSV -->
         <button 
             type="button" 
             @click="exportSelectedToCsv()"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-            title="Exportar selecciÃ³n a CSV plano"
+            title="Exportar selección a CSV plano"
         >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span>Exportar CSV</span>
         </button>
 
-        <!-- BotÃ³n 1B: Exportar Excel -->
+        <!-- Botón 1B: Exportar Excel -->
         <button 
             type="button" 
             @click="exportSelectedToExcel()"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-green-400 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-            title="Exportar selecciÃ³n a hoja de cÃ¡lculo Microsoft Excel (.xlsx / .xls)"
+            title="Exportar selección a hoja de cálculo Microsoft Excel (.xlsx / .xls)"
         >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span>Exportar Excel</span>
         </button>
 
-        <!-- BotÃ³n 2: Cambiar Proveedor -->
+        <!-- Botón 2: Cambiar Proveedor -->
         <button 
             type="button" 
             @click="openBulkProviderModal()"
@@ -7349,7 +7362,7 @@
             <span>Proveedor</span>
         </button>
 
-        <!-- BotÃ³n 3: Cambiar Categoría -->
+        <!-- Botón 3: Cambiar Categoría -->
         <button 
             type="button" 
             @click="openBulkCategoryModal()"
@@ -7359,17 +7372,17 @@
             <span>Categoría</span>
         </button>
 
-        <!-- BotÃ³n 4: AÃ±adir a Compras en Lote -->
+        <!-- Botón 4: Añadir a Compras en Lote -->
         <button 
             type="button" 
             @click="addSelectedToPurchases()"
             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
         >
             <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            <span>AÃ±adir a Compras</span>
+            <span>Añadir a Compras</span>
         </button>
 
-        <!-- BotÃ³n 5: Etiquetas TÃ©rmicas Lote (TASK-INV-05) -->
+        <!-- Botón 5: Etiquetas Térmicas Lote (TASK-INV-05) -->
         <button 
             type="button" 
             @click="openBulkLabelsModal()"
@@ -7377,10 +7390,10 @@
             title="Imprimir etiquetas termicas Code128 para los productos seleccionados"
         >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            <span>Etiquetas TÃ©rmicas</span>
+            <span>Etiquetas Térmicas</span>
         </button>
 
-        <!-- BotÃ³n 5: Limpiar SelecciÃ³n -->
+        <!-- Botón 5: Limpiar Selección -->
         <button 
             type="button" 
             @click="clearSelection()"
@@ -7427,7 +7440,7 @@
                 <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
                         <span>Reasignar Proveedor en Lote</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] bg-indigo-600 text-white" x-text="selectedSkus.length + ' Ã­tems'"></span>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-indigo-600 text-white" x-text="selectedSkus.length + ' ítems'"></span>
                     </h3>
                     <button @click="bulkProviderModalOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -7440,9 +7453,10 @@
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">Nuevo Proveedor:</label>
                         <select x-model="bulkTargetProvider" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            <template x-for="p in providers" :key="p.id">
-                                <option :value="p.tradeName || p.name" x-text="p.name"></option>
-                            </template>
+                            <option value="Torzo B2B">Torzo B2B (Mayorista)</option>
+                            <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
+                            <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
+                            <option value="Balam Textil">Balam Textil</option>
                         </select>
                     </div>
                 </div>
@@ -7455,7 +7469,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL MASIVO: REASIGNAR CATEGORÃA EN LOTE                         -->
+    <!-- MODAL MASIVO: REASIGNAR CATEGORÍA EN LOTE                         -->
     <!-- ================================================================= -->
     <div 
         x-show="bulkCategoryModalOpen" 
@@ -7490,7 +7504,7 @@
                 <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
                         <span>Reasignar Categoría en Lote</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] bg-amber-600 text-white" x-text="selectedSkus.length + ' Ã­tems'"></span>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-amber-600 text-white" x-text="selectedSkus.length + ' ítems'"></span>
                     </h3>
                     <button @click="bulkCategoryModalOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -7520,7 +7534,7 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL 9: GENERADOR DE ETIQUETAS TÃ‰RMICAS (CODE128 / QR) TASK-INV-05-->
+    <!-- MODAL 9: GENERADOR DE ETIQUETAS TÉRMICAS (CODE128 / QR) TASK-INV-05-->
     <!-- ================================================================= -->
     <div 
         x-show="thermalLabelModal.isOpen" 
@@ -7561,7 +7575,7 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                                <span>Etiquetas TÃ©rmicas de Bodega</span>
+                                <span>Etiquetas Térmicas de Bodega</span>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">Code128 + QR</span>
                             </h3>
                             <p class="text-[11px] text-slate-400" x-text="thermalLabelModal.isBatch ? thermalLabelModal.batchTitle : (thermalLabelModal.sku + ' - ' + thermalLabelModal.productName)"></p>
@@ -7572,12 +7586,12 @@
                     </button>
                 </div>
 
-                <!-- Barra de Configuración de ImpresiÃ³n -->
+                <!-- Barra de Configuración de Impresión -->
                 <div class="p-6 bg-slate-50 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">Formato TÃ©rmico:</label>
+                        <label class="font-bold text-slate-700 block mb-1">Formato Térmico:</label>
                         <select x-model="thermalLabelModal.labelFormat" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            <option value="50x30">50 x 30 mm (EstÃ¡ndar Prenda/Rack)</option>
+                            <option value="50x30">50 x 30 mm (Estándar Prenda/Rack)</option>
                             <option value="100x50">100 x 50 mm (Caja / Bulto / Pallet)</option>
                         </select>
                     </div>
@@ -7597,7 +7611,7 @@
 
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">
-                            <span x-text="thermalLabelModal.isBatch ? 'Copias Totales en Lote:' : 'NÃºmero de Copias:'"></span>
+                            <span x-text="thermalLabelModal.isBatch ? 'Copias Totales en Lote:' : 'Número de Copias:'"></span>
                         </label>
                         <div class="flex items-center gap-1.5">
                             <template x-if="!thermalLabelModal.isBatch">
@@ -7617,11 +7631,11 @@
                     </div>
                 </div>
 
-                <!-- Contenedor de PrevisualizaciÃ³n TÃ©rmica FÃ­sica -->
+                <!-- Contenedor de Previsualización Térmica Física -->
                 <div class="p-6 bg-slate-200/70 overflow-y-auto max-h-[380px] flex flex-col items-center justify-center">
-                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">PrevisualizaciÃ³n de Etiqueta TÃ©rmica</p>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Previsualización de Etiqueta Térmica</p>
 
-                    <!-- ÃREA IMPRIMIBLE (TARGET DE IMPRESIÃ“N AISLADA) -->
+                    <!-- ÁREA IMPRIMIBLE (TARGET DE IMPRESIÓN AISLADA) -->
                     <div id="thermal-print-area" class="w-full flex flex-col items-center gap-4">
                         <!-- Vista individual -->
                         <template x-if="!thermalLabelModal.isBatch">
@@ -7692,7 +7706,7 @@
                                     </div>
                                 </div>
 
-                                <!-- PrevisualizaciÃ³n de muestra del lote -->
+                                <!-- Previsualización de muestra del lote -->
                                 <div class="bg-white border-2 border-dashed border-slate-400 p-4 rounded-xl shadow-md w-[320px] mx-auto min-h-[175px] flex flex-col justify-between">
                                     <div class="flex items-center justify-between border-b border-slate-800/20 pb-1.5 mb-1.5">
                                         <div class="text-[10px] font-black tracking-widest text-slate-900">MI TIENDA ONLINE</div>
@@ -7725,7 +7739,7 @@
                     </div>
                 </div>
 
-                <!-- Footer del Modal con AcciÃ³n de ImpresiÃ³n TÃ©rmica -->
+                <!-- Footer del Modal con Acción de Impresión Térmica -->
                 <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="text-[11px] text-slate-500">
                         Compatible con Zebra ZD/GX, Rollo, Xprinter, Dymo o impresion laser/hoja adhesiva.
@@ -7798,10 +7812,10 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-sm font-bold text-white tracking-wide">Auditoría CÃ­clica a Ciegas</h3>
+                            <h3 class="text-sm font-bold text-white tracking-wide">Auditoría Cíclica a Ciegas</h3>
                             <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-mono">TASK-INV-07</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Conteo ciego de 3 SKUs diarios para exactitud fÃ­sica (WMS Best Practice)</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Conteo ciego de 3 SKUs diarios para exactitud física (WMS Best Practice)</p>
                     </div>
                 </div>
                 <button 
@@ -7851,11 +7865,11 @@
                                     <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-indigo-100 text-indigo-800" x-text="'Clase [' + getAbcClass(cycleCountActiveItem) + ']'"></span>
                                 </div>
                                 <h4 class="font-bold text-slate-800 text-sm leading-tight" x-text="cycleCountActiveItem.name"></h4>
-                                <p class="text-xs text-slate-500">Acude a la ubicaciÃ³n seÃ±alada y cuenta fÃ­sicamente las unidades en anaquel.</p>
+                                <p class="text-xs text-slate-500">Acude a la ubicación señalada y cuenta físicamente las unidades en anaquel.</p>
                             </div>
-                            <!-- Tarjeta de UbicaciÃ³n FÃ­sica (Slotting: TASK-INV-01) -->
+                            <!-- Tarjeta de Ubicación Física (Slotting: TASK-INV-01) -->
                             <div class="bg-white border border-slate-300 rounded-xl p-3 shadow-xs flex flex-col items-center justify-center min-w-[140px] text-center">
-                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">UbicaciÃ³n / Slot</span>
+                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Ubicación / Slot</span>
                                 <div class="font-mono font-black text-base text-slate-900 mt-0.5" x-text="cycleCountActiveItem.location || 'A-01-A'"></div>
                                 <span class="text-[9px] text-indigo-600 font-semibold mt-0.5">Pasillo - Rack - Nivel</span>
                             </div>
@@ -7867,7 +7881,7 @@
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                                <span class="text-xs font-bold text-slate-800">Conteo FÃ­sico Ciego en Anaquel</span>
+                                <span class="text-xs font-bold text-slate-800">Conteo Físico Ciego en Anaquel</span>
                             </div>
                             <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">Stock del sistema oculto para evitar sesgo</span>
                         </div>
@@ -7890,7 +7904,7 @@
                             </div>
                         </template>
 
-                        <!-- Matriz CosmÃ©tica (Tonos 01 a 06) -->
+                        <!-- Matriz Cosmética (Tonos 01 a 06) -->
                         <template x-if="cycleCountActiveItem && cycleCountActiveItem.variantDimension === 'shade'">
                             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                                 <template x-for="sh in ['t01', 't02', 't03', 't04', 't05', 't06']" :key="sh">
@@ -7908,7 +7922,7 @@
                             </div>
                         </template>
 
-                        <!-- Matriz PerfumerÃ­a (VolÃºmenes 10ml, 50ml, 100ml) -->
+                        <!-- Matriz Perfumería (Volúmenes 10ml, 50ml, 100ml) -->
                         <template x-if="cycleCountActiveItem && cycleCountActiveItem.variantDimension === 'volume'">
                             <div class="grid grid-cols-3 gap-3">
                                 <template x-for="vol in ['v10', 'v50', 'v100']" :key="vol">
@@ -7929,7 +7943,7 @@
                         <!-- Matriz Unitario / Accesorios -->
                         <template x-if="cycleCountActiveItem && cycleCountActiveItem.variantDimension === 'none'">
                             <div class="max-w-xs mx-auto text-center py-2">
-                                <label class="text-xs font-bold text-slate-700 block mb-1">Piezas FÃ­sicas Totales</label>
+                                <label class="text-xs font-bold text-slate-700 block mb-1">Piezas Físicas Totales</label>
                                 <input 
                                     type="number" 
                                     min="0" 
@@ -7942,7 +7956,7 @@
 
                         <!-- Subtotal Contado del SKU Actual -->
                         <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                            <span class="text-slate-500">Total fÃ­sico registrado para este SKU:</span>
+                            <span class="text-slate-500">Total físico registrado para este SKU:</span>
                             <span class="font-mono font-black text-sm text-indigo-700" x-text="getCycleCountItemTotal(cycleCountActiveItem ? cycleCountActiveItem.sku : '') + ' piezas'"></span>
                         </div>
                     </div>
@@ -7986,10 +8000,10 @@
                 </div>
             </template>
 
-            <!-- Paso 2: ReconciliaciÃ³n y RevelaciÃ³n de Discrepancias (step === 'reconcile') -->
+            <!-- Paso 2: Reconciliación y Revelación de Discrepancias (step === 'reconcile') -->
             <template x-if="cycleCountModal.step === 'reconcile'">
                 <div class="p-6 space-y-5 overflow-y-auto flex-1">
-                    <!-- Resumen SemafÃ³rico Superior -->
+                    <!-- Resumen Semafórico Superior -->
                     <div class="grid grid-cols-3 gap-3">
                         <div class="p-3 rounded-xl border bg-slate-50 border-slate-200 text-center">
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">SKUs Auditados</span>
@@ -8012,7 +8026,7 @@
                                 <tr>
                                     <th class="py-2.5 px-3">SKU & Producto</th>
                                     <th class="py-2.5 px-2 text-center">Slot</th>
-                                    <th class="py-2.5 px-2 text-right">FÃ­sico</th>
+                                    <th class="py-2.5 px-2 text-right">Físico</th>
                                     <th class="py-2.5 px-2 text-right">Sistema</th>
                                     <th class="py-2.5 px-2 text-right">Diferencia</th>
                                     <th class="py-2.5 px-3">Motivo de Discrepancia</th>
@@ -8039,8 +8053,8 @@
                                                 >
                                                     <option value="Merma operativa">Merma operativa</option>
                                                     <option value="Error de conteo previo">Error de conteo previo</option>
-                                                    <option value="Producto daÃ±ado en rack">Producto daÃ±ado en rack</option>
-                                                    <option value="UbicaciÃ³n cruzada">UbicaciÃ³n cruzada</option>
+                                                    <option value="Producto dañado en rack">Producto dañado en rack</option>
+                                                    <option value="Ubicación cruzada">Ubicación cruzada</option>
                                                 </select>
                                             </template>
                                             <template x-if="row.diff === 0">
@@ -8059,7 +8073,7 @@
                     <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-indigo-900 flex items-start gap-2">
                         <svg class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <p class="leading-relaxed">
-                            Al confirmar la reconciliaciÃ³n, el sistema ajustarÃ¡ automÃ¡ticamente el stock fÃ­sico local en el catÃ¡logo y generarÃ¡ asientos contables inmutables con tipo <strong>AJUSTE_AUDITORIA_CIEGA</strong> en el Kardex.
+                            Al confirmar la reconciliación, el sistema ajustará automáticamente el stock físico local en el catálogo y generará asientos contables inmutables con tipo <strong>AJUSTE_AUDITORIA_CIEGA</strong> en el Kardex.
                         </p>
                     </div>
                 </div>
@@ -8088,7 +8102,7 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- MODAL DE AJUSTES Y CONFIGURACIÃ“N DEL MÃ“DULO DE INVENTARIO       -->
+    <!-- MODAL DE AJUSTES Y CONFIGURACIÓN DEL MÓDULO DE INVENTARIO       -->
     <!-- ============================================================= -->
     <div 
         x-show="moduleSettingsModalOpen" 
@@ -8131,7 +8145,7 @@
                         </span>
                         <div>
                             <h3 class="text-base font-bold text-slate-900" id="settings-modal-title">Ajustes y Configuración de Inventario</h3>
-                            <p class="text-xs text-slate-500">Gobernanza de telas, paleta de colores/tornasoles, tonos cosmÃ©tica, slotting fÃ­sico, reglas ROP, scraping y vitrinas web</p>
+                            <p class="text-xs text-slate-500">Gobernanza de telas, paleta de colores/tornasoles, tonos cosmética, slotting físico, reglas ROP, scraping y vitrinas web</p>
                         </div>
                     </div>
                     <button @click="moduleSettingsModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition cursor-pointer">
@@ -8139,7 +8153,7 @@
                     </button>
                 </div>
 
-                <!-- Settings Tabs Bar (7 Pestañas ErgonÃ³micas en una sola fila) -->
+                <!-- Settings Tabs Bar (7 Pestañas Ergonómicas en una sola fila) -->
                 <div class="px-6 border-b border-slate-200 bg-slate-50/50 flex gap-2 text-xs font-bold overflow-x-auto no-scrollbar">
                     <button 
                         type="button" 
@@ -8163,7 +8177,7 @@
                         :class="activeSettingsTab === 'shades' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
                         class="cursor-pointer whitespace-nowrap px-2"
                     >
-                        Tonos CosmÃ©tica
+                        Tonos Cosmética
                     </button>
                     <button 
                         type="button" 
@@ -8214,11 +8228,11 @@
                     <!-- TAB 1: TELAS & FIBRAS (CRUD COMPLETO) -->
                     <template x-if="activeSettingsTab === 'fabrics'">
                         <div class="space-y-4">
-                            <!-- Formulario de Alta / EdiciÃ³n de Tela -->
+                            <!-- Formulario de Alta / Edición de Tela -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
                                 <div class="flex items-center justify-between mb-2">
                                     <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="fabricEditState.isEditing ? 'Editar Tipo de Tela: ' + fabricEditState.form.name : 'Dar de Alta Nuevo Tipo de Tela'"></h4>
-                                    <span x-show="fabricEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo EdiciÃ³n</span>
+                                    <span x-show="fabricEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                     <div>
@@ -8227,7 +8241,7 @@
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propiedad Textil</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.description : newFabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rÃ¡pido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.description : newFabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rápido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -8310,11 +8324,11 @@
                     <!-- TAB 2: COLORES & TORNASOLES (CRUD COMPLETO) -->
                     <template x-if="activeSettingsTab === 'colors'">
                         <div class="space-y-4">
-                            <!-- Formulario Alta / EdiciÃ³n Color -->
+                            <!-- Formulario Alta / Edición Color -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 space-y-3">
                                 <div class="flex items-center justify-between">
                                     <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="colorEditState.isEditing ? 'Editar Color: ' + colorEditState.form.name : 'Registrar Nuevo Color o Tornasol'"></h4>
-                                    <span x-show="colorEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo EdiciÃ³n</span>
+                                    <span x-show="colorEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
@@ -8324,7 +8338,7 @@
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Tipo de Color</label>
                                         <select x-model="colorEditState.isEditing ? colorEditState.form.type : newColorForm.type" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <option value="solid">SÃ³lido (Un solo tono HEX)</option>
+                                            <option value="solid">Sólido (Un solo tono HEX)</option>
                                             <option value="iridescent">Tornasol Iridiscente (Degradado)</option>
                                         </select>
                                     </div>
@@ -8373,7 +8387,7 @@
                                 </div>
                             </div>
 
-                            <!-- Grilla de Colores SÃ³lidos y Tornasoles con Acciones -->
+                            <!-- Grilla de Colores Sólidos y Tornasoles con Acciones -->
                             <div>
                                 <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2">Paleta de Colores en Plataforma</h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -8383,7 +8397,7 @@
                                                 <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + col.hex"></span>
                                                 <div class="min-w-0">
                                                     <div class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></div>
-                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' ? 'Tornasol' : 'SÃ³lido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
+                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-1 shrink-0">
@@ -8404,14 +8418,14 @@
                         </div>
                     </template>
 
-                    <!-- TAB 3: TONOS DE COSMÃ‰TICA (INTEGRADO EN AJUSTES - TASK-INV-09 / TASK-INV-11) -->
+                    <!-- TAB 3: TONOS DE COSMÉTICA (INTEGRADO EN AJUSTES - TASK-INV-09 / TASK-INV-11) -->
                     <template x-if="activeSettingsTab === 'shades'">
                         <div class="space-y-4">
-                            <!-- Formulario Alta / EdiciÃ³n Tono CosmÃ©tica -->
+                            <!-- Formulario Alta / Edición Tono Cosmética -->
                             <div class="bg-pink-50/60 p-4 rounded-xl border border-pink-200 space-y-3">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-pink-900" x-text="cosmeticShadesModal.isEditing ? 'Editar Tono: ' + cosmeticShadesModal.form.code : 'Registrar Nuevo Tono de CosmÃ©tica'"></h4>
-                                    <span x-show="cosmeticShadesModal.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-pink-900 border border-pink-200">Modo EdiciÃ³n</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-pink-900" x-text="cosmeticShadesModal.isEditing ? 'Editar Tono: ' + cosmeticShadesModal.form.code : 'Registrar Nuevo Tono de Cosmética'"></h4>
+                                    <span x-show="cosmeticShadesModal.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-pink-900 border border-pink-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                     <div>
@@ -8420,7 +8434,7 @@
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Tono</label>
-                                        <input type="text" x-model="cosmeticShadesModal.form.name" placeholder="Ej: Vainilla CÃ¡lido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500">
+                                        <input type="text" x-model="cosmeticShadesModal.form.name" placeholder="Ej: Vainilla Cálido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Color HEX</label>
@@ -8432,8 +8446,8 @@
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Subtono</label>
                                         <select x-model="cosmeticShadesModal.form.undertone" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500">
-                                            <option value="warm">CÃ¡lido</option>
-                                            <option value="cool">FrÃ­o</option>
+                                            <option value="warm">Cálido</option>
+                                            <option value="cool">Frío</option>
                                             <option value="neutral">Neutro</option>
                                         </select>
                                     </div>
@@ -8455,9 +8469,9 @@
                                 </div>
                             </div>
 
-                            <!-- Listado de Tonos CosmÃ©tica -->
+                            <!-- Listado de Tonos Cosmética -->
                             <div>
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2">Tonos CosmÃ©tica Registrados (<span x-text="cosmeticShades.length"></span>)</h4>
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2">Tonos Cosmética Registrados (<span x-text="cosmeticShades.length"></span>)</h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     <template x-for="shade in cosmeticShades" :key="shade.id">
                                         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2.5" :class="!shade.is_active ? 'opacity-60' : ''">
@@ -8487,14 +8501,14 @@
                         </div>
                     </template>
 
-                    <!-- TAB 4: SLOTTING FÃSICO & UBICACIONES (NUEVA PESTAÃ‘A CRUD - TASK-INV-11) -->
+                    <!-- TAB 4: SLOTTING FÍSICO & UBICACIONES (NUEVA PESTAÑA CRUD - TASK-INV-11) -->
                     <template x-if="activeSettingsTab === 'slotting'">
                         <div class="space-y-4">
-                            <!-- Formulario Alta / EdiciÃ³n de UbicaciÃ³n -->
+                            <!-- Formulario Alta / Edición de Ubicación -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 space-y-3">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="slotEditState.isEditing ? 'Editar UbicaciÃ³n: ' + slotEditState.editingCode : 'Registrar Nueva UbicaciÃ³n FÃ­sica de AlmacÃ©n'"></h4>
-                                    <span x-show="slotEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo EdiciÃ³n</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="slotEditState.isEditing ? 'Editar Ubicación: ' + slotEditState.editingCode : 'Registrar Nueva Ubicación Física de Almacén'"></h4>
+                                    <span x-show="slotEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                                     <div>
@@ -8513,14 +8527,14 @@
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Zona Operativa</label>
                                         <select x-model="slotEditState.isEditing ? slotEditState.form.zone : newSlotForm.zone" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg">
                                             <option value="Ropa Interior">Ropa Interior</option>
-                                            <option value="AtlÃ©tico & Jocks">AtlÃ©tico & Jocks</option>
+                                            <option value="Atlético & Jocks">Atlético & Jocks</option>
                                             <option value="Skincare & Cuidado">Skincare & Cuidado</option>
                                             <option value="General">General</option>
                                             <option value="Cuarentena / RMA">Cuarentena / RMA</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Capacidad MÃ¡x.</label>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Capacidad Máx.</label>
                                         <input type="number" min="10" max="1000" x-model="slotEditState.isEditing ? slotEditState.form.capacity : newSlotForm.capacity" placeholder="100" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg text-center font-bold">
                                     </div>
                                 </div>
@@ -8528,13 +8542,13 @@
                                 <div class="flex items-center gap-2">
                                     <template x-if="!slotEditState.isEditing">
                                         <button type="button" @click="addNewSlot()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            Guardar UbicaciÃ³n
+                                            Guardar Ubicación
                                         </button>
                                     </template>
                                     <template x-if="slotEditState.isEditing">
                                         <div class="flex items-center gap-2">
                                             <button type="button" @click="saveSlot()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                                Actualizar UbicaciÃ³n
+                                                Actualizar Ubicación
                                             </button>
                                             <button type="button" @click="cancelEditSlot()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
                                                 Cancelar
@@ -8544,14 +8558,14 @@
                                 </div>
                             </div>
 
-                            <!-- Tabla de Ubicaciones FÃ­sicas -->
+                            <!-- Tabla de Ubicaciones Físicas -->
                             <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
                                 <table class="w-full text-left text-xs border-collapse">
                                     <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                                         <tr>
                                             <th class="py-2.5 px-3">Código Slot</th>
                                             <th class="py-2.5 px-3">Zona Operativa</th>
-                                            <th class="py-2.5 px-3 text-center">OcupaciÃ³n / Capacidad</th>
+                                            <th class="py-2.5 px-3 text-center">Ocupación / Capacidad</th>
                                             <th class="py-2.5 px-3 text-center">SKUs</th>
                                             <th class="py-2.5 px-3 text-center">Estado</th>
                                             <th class="py-2.5 px-3 text-right">Acciones</th>
@@ -8582,7 +8596,7 @@
                                                             type="button" 
                                                             @click="editSlot(slot)" 
                                                             class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            title="Editar ubicaciÃ³n"
+                                                            title="Editar ubicación"
                                                         >
                                                             Editar
                                                         </button>
@@ -8597,7 +8611,7 @@
                                                             type="button" 
                                                             @click="deleteSlot(slot.code)" 
                                                             class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            title="Eliminar ubicaciÃ³n"
+                                                            title="Eliminar ubicación"
                                                         >
                                                             Eliminar
                                                         </button>
@@ -8611,41 +8625,41 @@
                         </div>
                     </template>
 
-                    <!-- TAB 5: REGLAS DE ROP (NUMÃ‰RICOS EDITABLES & RECÃLCULO EN VIVO - TASK-INV-11) -->
+                    <!-- TAB 5: REGLAS DE ROP (NUMÉRICOS EDITABLES & RECÁLCULO EN VIVO - TASK-INV-11) -->
                     <template x-if="activeSettingsTab === 'rop'">
                         <div class="space-y-4">
                             <div class="p-5 bg-indigo-50/60 rounded-xl border border-indigo-200 space-y-4">
                                 <div>
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900">FÃ³rmula de Punto de Reorden (ROP RevOps)</h4>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900">Fórmula de Punto de Reorden (ROP RevOps)</h4>
                                     <p class="text-xs text-slate-600 mt-1">
-                                        ROP = (Venta Diaria Promedio &times; Lead Time DÃ­as) + DÃ­as de Stock de Seguridad. Ajusta los parÃ¡metros operacionales y lanza el recÃ¡lculo asÃ­ncrono en caliente sobre todo el catÃ¡logo.
+                                        ROP = (Venta Diaria Promedio &times; Lead Time Días) + Días de Stock de Seguridad. Ajusta los parámetros operacionales y lanza el recálculo asíncrono en caliente sobre todo el catálogo.
                                     </p>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Lead Time Local (DÃ­as)</label>
+                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Lead Time Local (Días)</label>
                                         <div class="flex items-center gap-2">
                                             <input type="number" min="1" max="60" x-model.number="ropSettings.leadTimeLocal" class="w-full px-3 py-1.5 text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <span class="text-xs text-slate-400 font-semibold">días</span>
                                         </div>
                                     </div>
                                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Lead Time Dropship (DÃ­as)</label>
+                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Lead Time Dropship (Días)</label>
                                         <div class="flex items-center gap-2">
                                             <input type="number" min="1" max="90" x-model.number="ropSettings.leadTimeDropship" class="w-full px-3 py-1.5 text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <span class="text-xs text-slate-400 font-semibold">días</span>
                                         </div>
                                     </div>
                                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Stock de Seguridad (DÃ­as)</label>
+                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Stock de Seguridad (Días)</label>
                                         <div class="flex items-center gap-2">
                                             <input type="number" min="1" max="60" x-model.number="ropSettings.safetyStockDays" class="w-full px-3 py-1.5 text-sm font-extrabold text-indigo-600 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <span class="text-xs text-slate-400 font-semibold">días</span>
                                         </div>
                                     </div>
                                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Venta Diaria EstÃ¡ndar</label>
+                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Venta Diaria Estándar</label>
                                         <div class="flex items-center gap-2">
                                             <input type="number" min="0.5" max="100" step="0.5" x-model.number="ropSettings.defaultDailySales" class="w-full px-3 py-1.5 text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <span class="text-xs text-slate-400 font-semibold">pzs/d</span>
@@ -8670,18 +8684,18 @@
                         </div>
                     </template>
 
-                    <!-- TAB 6: PROVEEDORES & SCRAPERS CONFIGURADOS (CRUD COMPLETO Y PARÃMETROS) -->
+                    <!-- TAB 6: PROVEEDORES & SCRAPERS CONFIGURADOS (CRUD COMPLETO Y PARÁMETROS) -->
                     <template x-if="activeSettingsTab === 'scraping'">
                         <div class="space-y-5">
-                            <!-- ParÃ¡metros Torzo Bot Headless -->
+                            <!-- Parámetros Torzo Bot Headless -->
                             <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">ParÃ¡metros de ExtracciÃ³n Torzo Bot</h4>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Parámetros de Extracción Torzo Bot</h4>
                                     <span class="text-[10px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Torzo Bot v2.4 Headless</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Frecuencia de ExtracciÃ³n Global</label>
+                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Frecuencia de Extracción Global</label>
                                         <select class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg">
                                             <option>Cada 15 minutos (Recomendado)</option>
                                             <option>Cada 30 minutos</option>
@@ -8689,7 +8703,7 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Margen MÃ­nimo Sugerido s/ Catálogo</label>
+                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Margen Mínimo Sugerido s/ Catálogo</label>
                                         <input type="text" value="50% s/ PVP" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg">
                                     </div>
                                 </div>
@@ -8701,9 +8715,9 @@
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <h4 class="text-sm font-bold text-slate-900">Proveedores & Scrapers Configurados</h4>
-                                            <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold" x-text="providers.length + ' en catÃ¡logo'"></span>
+                                            <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold" x-text="providers.length + ' en catálogo'"></span>
                                         </div>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">GestiÃ³n de conectores automatizados, talleres de confecciÃ³n y condiciones comerciales</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Gestión de conectores automatizados, talleres de confección y condiciones comerciales</p>
                                     </div>
                                     <button 
                                         type="button"
@@ -8724,7 +8738,7 @@
                                         <input 
                                             type="text" 
                                             x-model="providerSearch" 
-                                            placeholder="Buscar por nombre, cÃ³digo o ciudad..." 
+                                            placeholder="Buscar por nombre, código o ciudad..." 
                                             class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500 text-slate-700"
                                         >
                                     </div>
@@ -8744,7 +8758,7 @@
                                             <select x-model="providerTypeFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
                                                 <option value="all">Todos los tipos</option>
                                                 <option value="scraper">Scrapers & APIs</option>
-                                                <option value="workshop">Talleres ConfecciÃ³n</option>
+                                                <option value="workshop">Talleres Confección</option>
                                                 <option value="distributor">Distribuidores</option>
                                                 <option value="commercial">Comerciales Directos</option>
                                             </select>
@@ -8758,7 +8772,7 @@
                                         <thead>
                                             <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                                                 <th class="py-2.5 px-3">Proveedor</th>
-                                                <th class="py-2.5 px-3">MÃ©todo de ExtracciÃ³n</th>
+                                                <th class="py-2.5 px-3">Método de Extracción</th>
                                                 <th class="py-2.5 px-3">Frecuencia</th>
                                                 <th class="py-2.5 px-3">Último Scrape</th>
                                                 <th class="py-2.5 px-3 text-center">Items Sincronizados</th>
@@ -8786,7 +8800,7 @@
                                                                     <span class="font-mono text-[10px] px-1 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200" x-text="prov.vendorCode"></span>
                                                                     <span x-show="prov.status === 'archived'" class="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 font-semibold">Archivado</span>
                                                                 </div>
-                                                                <span class="text-[10px] text-slate-400 font-normal block" x-text="(prov.city || 'Nacional') + ' â€¢ ' + (prov.typeLabel || 'Proveedor')"></span>
+                                                                <span class="text-[10px] text-slate-400 font-normal block" x-text="(prov.city || 'Nacional') + ' • ' + (prov.typeLabel || 'Proveedor')"></span>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -8825,7 +8839,7 @@
                                                                 type="button"
                                                                 @click="openProviderDetails(prov)" 
                                                                 class="px-2 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer shadow-3xs"
-                                                                title="Ver ficha tÃ©cnica, condiciones comerciales y Scorecard de SLA"
+                                                                title="Ver ficha técnica, condiciones comerciales y Scorecard de SLA"
                                                             >
                                                                 Detalles / SLA
                                                             </button>
@@ -8895,20 +8909,20 @@
                                 <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Secciones del Sitio Web E-Commerce</h4>
                                 <ul class="space-y-2 text-xs">
                                     <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea BÃ¡sicos Esenciales</span>
-                                        <span class="text-slate-400">Prendas lisas de alta rotaciÃ³n</span>
+                                        <span class="font-bold text-slate-800">Línea Básicos Esenciales</span>
+                                        <span class="text-slate-400">Prendas lisas de alta rotación</span>
                                     </li>
                                     <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea DiseÃ±ador & Autor</span>
-                                        <span class="text-slate-400">Prendas con diseÃ±o, estampados y tornasoles</span>
+                                        <span class="font-bold text-slate-800">Línea Diseñador & Autor</span>
+                                        <span class="text-slate-400">Prendas con diseño, estampados y tornasoles</span>
                                     </li>
                                     <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">ColecciÃ³n Temporada / Drops</span>
-                                        <span class="text-slate-400">Lanzamientos de ediciÃ³n limitada</span>
+                                        <span class="font-bold text-slate-800">Colección Temporada / Drops</span>
+                                        <span class="text-slate-400">Lanzamientos de edición limitada</span>
                                     </li>
                                     <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
                                         <span class="font-bold text-slate-800">Catálogo General</span>
-                                        <span class="text-slate-400">Vitrina multiverso estÃ¡ndar</span>
+                                        <span class="text-slate-400">Vitrina multiverso estándar</span>
                                     </li>
                                 </ul>
                             </div>
@@ -8918,7 +8932,7 @@
                     <!-- TAB 8: RECETAS DE ENSAMBLE BOM & COMBOS VIRTUALES (CRUD COMPLETO) -->
                     <template x-if="activeSettingsTab === 'bundles'">
                         <div class="space-y-5">
-                            <!-- Cabecera de la SecciÃ³n -->
+                            <!-- Cabecera de la Sección -->
                             <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-5 rounded-xl border border-slate-700 text-white flex items-center justify-between flex-wrap gap-4 shadow-sm">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
@@ -8929,9 +8943,9 @@
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <h4 class="text-base font-bold text-white leading-none">Gestor de Recetas BOM & Combos Virtuales</h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30" x-text="productBundles.length + ' FÃ³rmulas'"></span>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30" x-text="productBundles.length + ' Fórmulas'"></span>
                                         </div>
-                                        <p class="text-xs text-slate-300 mt-1">Configuración y despiece de cajas de suscripciÃ³n y packs promocionales. El almacenista decide quÃ© prendas componen cada fÃ³rmula y sus proporciones unitarias.</p>
+                                        <p class="text-xs text-slate-300 mt-1">Configuración y despiece de cajas de suscripción y packs promocionales. El almacenista decide qué prendas componen cada fórmula y sus proporciones unitarias.</p>
                                     </div>
                                 </div>
                                 <button 
@@ -8944,31 +8958,31 @@
                                 </button>
                             </div>
 
-                            <!-- KPIs Resumen de FÃ³rmulas -->
+                            <!-- KPIs Resumen de Fórmulas -->
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total FÃ³rmulas BOM</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Fórmulas BOM</span>
                                     <span class="text-xl font-black text-slate-900 mt-0.5 block" x-text="productBundles.length"></span>
                                     <span class="text-[10px] text-slate-500 font-medium">Catálogo completo</span>
                                 </div>
                                 <div class="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
                                     <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">Recetas Activas</span>
                                     <span class="text-xl font-black text-emerald-700 mt-0.5 block" x-text="productBundles.filter(b => b.isActive !== false).length"></span>
-                                    <span class="text-[10px] text-emerald-600 font-medium">En comercializaciÃ³n</span>
+                                    <span class="text-[10px] text-emerald-600 font-medium">En comercialización</span>
                                 </div>
                                 <div class="bg-amber-50/50 p-3.5 rounded-xl border border-amber-200 shadow-2xs">
                                     <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">Recetas Archivadas</span>
                                     <span class="text-xl font-black text-amber-700 mt-0.5 block" x-text="productBundles.filter(b => b.isActive === false).length"></span>
-                                    <span class="text-[10px] text-amber-600 font-medium">Pausadas / histÃ³rico</span>
+                                    <span class="text-[10px] text-amber-600 font-medium">Pausadas / histórico</span>
                                 </div>
                                 <div class="bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-200 shadow-2xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 block">Insumos FÃ­sicos</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 block">Insumos Físicos</span>
                                     <span class="text-xl font-black text-indigo-700 mt-0.5 block" x-text="productBundles.reduce((acc, b) => acc + (b.components ? b.components.length : 0), 0)"></span>
                                     <span class="text-[10px] text-indigo-600 font-medium">Prendas vinculadas</span>
                                 </div>
                             </div>
 
-                            <!-- Filtros y Barra de BÃºsqueda -->
+                            <!-- Filtros y Barra de Búsqueda -->
                             <div class="flex items-center justify-between flex-wrap gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <!-- Filtro Estado -->
@@ -9015,7 +9029,7 @@
                                             class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
                                             :class="bundleEditor.filterType === 'subscription' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
                                         >
-                                            Cajas SuscripciÃ³n
+                                            Cajas Suscripción
                                         </button>
                                         <button 
                                             type="button" 
@@ -9061,7 +9075,7 @@
                                                         <span 
                                                             class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
                                                             :class="bundle.type === 'subscription' ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'"
-                                                            x-text="bundle.type === 'subscription' ? 'Caja SuscripciÃ³n' : 'Pack Promocional'"
+                                                            x-text="bundle.type === 'subscription' ? 'Caja Suscripción' : 'Pack Promocional'"
                                                         ></span>
                                                         <span 
                                                             class="px-2 py-0.5 rounded-full text-[10px] font-bold"
@@ -9106,14 +9120,14 @@
                                             </div>
                                         </div>
 
-                                        <!-- Desglose de Insumos FÃ­sicos de la FÃ³rmula BOM (DecisiÃ³n del Almacenista) -->
+                                        <!-- Desglose de Insumos Físicos de la Fórmula BOM (Decisión del Almacenista) -->
                                         <div class="mt-3">
                                             <div class="flex items-center justify-between mb-2">
                                                 <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                                    <span>Prendas FÃ­sicas que Componen la FÃ³rmula BOM</span>
+                                                    <span>Prendas Físicas que Componen la Fórmula BOM</span>
                                                     <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600" x-text="(bundle.components ? bundle.components.length : 0) + ' items'"></span>
                                                 </span>
-                                                <span class="text-[10px] text-slate-400">DeducciÃ³n atÃ³mica en Kardex por cada caja ensamblada</span>
+                                                <span class="text-[10px] text-slate-400">Deducción atómica en Kardex por cada caja ensamblada</span>
                                             </div>
 
                                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -9130,7 +9144,7 @@
                                                                 <span>Rack:</span>
                                                                 <span class="font-mono font-semibold text-slate-600" x-text="comp.location || 'A-01-A'"></span>
                                                                 <span>&bull;</span>
-                                                                <span>Stock fÃ­sico:</span>
+                                                                <span>Stock físico:</span>
                                                                 <strong 
                                                                     :class="getBundleComponentStock(comp.sku, comp.size) >= comp.qty ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'"
                                                                     x-text="getBundleComponentStock(comp.sku, comp.size) + ' uds'"
@@ -9148,10 +9162,10 @@
                                         <!-- Barra de Acciones de la Receta -->
                                         <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
                                             <div class="text-[11px] text-slate-400 font-medium">
-                                                ID FÃ³rmula: <span class="font-mono" x-text="bundle.id"></span>
+                                                ID Fórmula: <span class="font-mono" x-text="bundle.id"></span>
                                             </div>
                                             <div class="flex items-center gap-2">
-                                                <!-- BotÃ³n Editar -->
+                                                <!-- Botón Editar -->
                                                 <button 
                                                     type="button" 
                                                     @click="openEditBundleModal(bundle.id)" 
@@ -9161,7 +9175,7 @@
                                                     <span>Editar Receta & Insumos</span>
                                                 </button>
 
-                                                <!-- BotÃ³n Archivar / Reactivar -->
+                                                <!-- Botón Archivar / Reactivar -->
                                                 <button 
                                                     type="button" 
                                                     @click="archiveBundleRecipe(bundle.id)" 
@@ -9172,7 +9186,7 @@
                                                     <span x-text="bundle.isActive !== false ? 'Archivar' : 'Reactivar'"></span>
                                                 </button>
 
-                                                <!-- BotÃ³n Eliminar -->
+                                                <!-- Botón Eliminar -->
                                                 <button 
                                                     type="button" 
                                                     @click="deleteBundleRecipe(bundle.id)" 
@@ -9193,7 +9207,7 @@
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                         </div>
                                         <h5 class="text-sm font-bold text-slate-800">No se encontraron recetas con los filtros seleccionados</h5>
-                                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Puedes modificar los criterios de filtro o dar de alta una nueva fÃ³rmula BOM con el botÃ³n superior.</p>
+                                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Puedes modificar los criterios de filtro o dar de alta una nueva fórmula BOM con el botón superior.</p>
                                         <button 
                                             type="button" 
                                             @click="openNewBundleModal()" 
@@ -9206,7 +9220,7 @@
                             </div>
 
                             <!-- ========================================================= -->
-                            <!-- SUB-MODAL / EDITOR DE RECETA BOM (DECISIÃ“N DEL ALMACENISTA) -->
+                            <!-- SUB-MODAL / EDITOR DE RECETA BOM (DECISIÓN DEL ALMACENISTA) -->
                             <!-- ========================================================= -->
                             <div 
                                 x-show="bundleEditor.isOpen" 
@@ -9247,7 +9261,7 @@
                                                 </div>
                                                 <div>
                                                     <h3 class="text-base font-bold text-white leading-none" x-text="bundleEditor.isEditing ? 'Editar Receta BOM: ' + bundleEditor.form.name : 'Nueva Receta de Ensamble BOM & Combo'"></h3>
-                                                    <p class="text-xs text-indigo-200 mt-1">El almacenista selecciona quÃ© prendas fÃ­sicas componen este combo y las proporciones a deducir en Kardex.</p>
+                                                    <p class="text-xs text-indigo-200 mt-1">El almacenista selecciona qué prendas físicas componen este combo y las proporciones a deducir en Kardex.</p>
                                                 </div>
                                             </div>
                                             <button @click="bundleEditor.isOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
@@ -9257,7 +9271,7 @@
 
                                         <!-- Body Editor -->
                                         <div class="p-6 space-y-5 max-h-[75vh] overflow-y-auto text-sm">
-                                            <!-- SecciÃ³n 1: Datos Generales del Combo -->
+                                            <!-- Sección 1: Datos Generales del Combo -->
                                             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-2">
                                                     <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
@@ -9273,7 +9287,7 @@
                                                             class="w-full px-3 py-1.5 text-xs font-mono font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase"
                                                             :disabled="bundleEditor.isEditing"
                                                         >
-                                                        <span class="text-[10px] text-slate-400 mt-0.5 block">Identificador inmutable para pedidos y guÃ­as</span>
+                                                        <span class="text-[10px] text-slate-400 mt-0.5 block">Identificador inmutable para pedidos y guías</span>
                                                     </div>
                                                     <div class="sm:col-span-2">
                                                         <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial de la Receta / Kit *</label>
@@ -9293,7 +9307,7 @@
                                                             x-model="bundleEditor.form.type" 
                                                             class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                         >
-                                                            <option value="subscription">Caja de SuscripciÃ³n</option>
+                                                            <option value="subscription">Caja de Suscripción</option>
                                                             <option value="promo">Pack Promocional</option>
                                                         </select>
                                                     </div>
@@ -9331,20 +9345,20 @@
                                                     <textarea 
                                                         x-model="bundleEditor.form.description" 
                                                         rows="2" 
-                                                        placeholder="Instrucciones de ensamble, presentaciÃ³n y caracterÃ­sticas del kit..."
+                                                        placeholder="Instrucciones de ensamble, presentación y características del kit..."
                                                         class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                     ></textarea>
                                                 </div>
                                             </div>
 
-                                            <!-- SecciÃ³n 2: SelecciÃ³n de Prendas FÃ­sicas (DecisiÃ³n del Almacenista) -->
+                                            <!-- Sección 2: Selección de Prendas Físicas (Decisión del Almacenista) -->
                                             <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-200">
                                                 <div class="flex items-center justify-between pb-2 mb-3 border-b border-indigo-200/60">
                                                     <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-950 flex items-center gap-2">
                                                         <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                                                        <span>2. SelecciÃ³n de Prendas Insumo (DecisiÃ³n del Almacenista)</span>
+                                                        <span>2. Selección de Prendas Insumo (Decisión del Almacenista)</span>
                                                     </h4>
-                                                    <span class="text-[11px] text-indigo-800 font-semibold">Elige del catÃ¡logo operativo quÃ© prendas integran la caja</span>
+                                                    <span class="text-[11px] text-indigo-800 font-semibold">Elige del catálogo operativo qué prendas integran la caja</span>
                                                 </div>
 
                                                 <!-- Selector de Prenda -->
@@ -9356,7 +9370,7 @@
                                                             class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                         >
                                                             <template x-for="prod in products" :key="prod.sku">
-                                                                <option :value="prod.sku" x-text="'[' + prod.sku + '] ' + prod.name + ' â€¢ Stock Rack: ' + prod.localStock + ' uds (' + (prod.location || 'Rack') + ')'"></option>
+                                                                <option :value="prod.sku" x-text="'[' + prod.sku + '] ' + prod.name + ' • Stock Rack: ' + prod.localStock + ' uds (' + (prod.location || 'Rack') + ')'"></option>
                                                             </template>
                                                         </select>
                                                     </div>
@@ -9371,8 +9385,8 @@
                                                             <option value="m">M</option>
                                                             <option value="g">G</option>
                                                             <option value="xl">XL</option>
-                                                            <option value="unit">EstÃ¡ndar / Ãšnica</option>
-                                                            <option value="v10">V10 (CosmÃ©tica)</option>
+                                                            <option value="unit">Estándar / Única</option>
+                                                            <option value="v10">V10 (Cosmética)</option>
                                                         </select>
                                                     </div>
 
@@ -9407,10 +9421,10 @@
                                                                 <th class="py-2 px-3 text-left">SKU Prenda</th>
                                                                 <th class="py-2 px-3 text-left">Nombre del Producto</th>
                                                                 <th class="py-2 px-3 text-center">Talla</th>
-                                                                <th class="py-2 px-3 text-left">UbicaciÃ³n Rack</th>
+                                                                <th class="py-2 px-3 text-left">Ubicación Rack</th>
                                                                 <th class="py-2 px-3 text-right">Stock Disponible</th>
                                                                 <th class="py-2 px-3 text-center">Cant / Caja</th>
-                                                                <th class="py-2 px-3 text-center">AcciÃ³n</th>
+                                                                <th class="py-2 px-3 text-center">Acción</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody class="divide-y divide-slate-100">
@@ -9452,8 +9466,8 @@
                                                     <template x-if="!bundleEditor.form.components || bundleEditor.form.components.length === 0">
                                                         <div class="p-6 text-center text-slate-400 bg-slate-50/50">
                                                             <svg class="w-6 h-6 mx-auto mb-1 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                                            <span class="font-bold text-slate-600 block text-xs">AÃºn no has agregado prendas a esta receta</span>
-                                                            <span class="text-[11px] text-slate-500">Selecciona una prenda del catÃ¡logo en el cuadro superior y presiona "Asignar".</span>
+                                                            <span class="font-bold text-slate-600 block text-xs">Aún no has agregado prendas a esta receta</span>
+                                                            <span class="text-[11px] text-slate-500">Selecciona una prenda del catálogo en el cuadro superior y presiona "Asignar".</span>
                                                         </div>
                                                     </template>
                                                 </div>
@@ -9503,7 +9517,7 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- MODAL DE CURADURÃA PREVIA DE SCRAPING                          -->
+    <!-- MODAL DE CURADURÍA PREVIA DE SCRAPING                          -->
     <!-- ============================================================= -->
     <div 
         x-show="scrapingCurationModalOpen" 
@@ -9545,8 +9559,8 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         </span>
                         <div>
-                            <h3 class="text-base font-bold text-white" id="curation-modal-title">ValidaciÃ³n & CuradurÃ­a de Prenda Scrapeada</h3>
-                            <p class="text-xs text-indigo-200">Revisa la descripciÃ³n y asigna color exacto, tela y secciÃ³n antes de publicar</p>
+                            <h3 class="text-base font-bold text-white" id="curation-modal-title">Validación & Curaduría de Prenda Scrapeada</h3>
+                            <p class="text-xs text-indigo-200">Revisa la descripción y asigna color exacto, tela y sección antes de publicar</p>
                         </div>
                     </div>
                     <button @click="scrapingCurationModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
@@ -9562,7 +9576,7 @@
                             <div>
                                 <span class="text-xs font-mono font-bold text-indigo-600" x-text="curatingItem.suggestedSku"></span>
                                 <h4 class="font-bold text-slate-900 text-base mt-0.5" x-text="curatingItem.name"></h4>
-                                <span class="text-xs text-slate-500" x-text="'Proveedor: ' + curatingItem.brand + ' â€¢ ' + curatingItem.suggestedCategory"></span>
+                                <span class="text-xs text-slate-500" x-text="'Proveedor: ' + curatingItem.brand + ' • ' + curatingItem.suggestedCategory"></span>
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-slate-400 block">Costo Mayorista</span>
@@ -9570,18 +9584,18 @@
                             </div>
                         </div>
 
-                        <!-- 1. ValidaciÃ³n / EdiciÃ³n de la Descripción Scrapeada -->
+                        <!-- 1. Validación / Edición de la Descripción Scrapeada -->
                         <div>
-                            <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Descripción del Producto (ValidaciÃ³n Humana)</label>
+                            <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Descripción del Producto (Validación Humana)</label>
                             <textarea 
                                 x-model="curatingItem.scrapedDescription" 
                                 rows="3" 
                                 class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                placeholder="Verifica que la descripciÃ³n tÃ©cnica y comercial sea correcta..."
+                                placeholder="Verifica que la descripción técnica y comercial sea correcta..."
                             ></textarea>
                         </div>
 
-                        <!-- 2. SelecciÃ³n de Color / Tornasol & Tipo de Tela -->
+                        <!-- 2. Selección de Color / Tornasol & Tipo de Tela -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Selector de Color / Tornasol -->
                             <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
@@ -9602,7 +9616,7 @@
                                     class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
                                 >
                                     <template x-for="col in apparelColors" :key="col.id">
-                                        <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'SÃ³lido') + ')'"></option>
+                                        <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
                                     </template>
                                 </select>
                             </div>
@@ -9621,11 +9635,11 @@
                             </div>
                         </div>
 
-                        <!-- 3. DiseÃ±o & SecciÃ³n Web -->
+                        <!-- 3. Diseño & Sección Web -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Variante DiseÃ±o -->
+                            <!-- Variante Diseño -->
                             <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Variante de DiseÃ±o</label>
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Variante de Diseño</label>
                                 <div class="grid grid-cols-2 gap-2">
                                     <button 
                                         type="button" 
@@ -9633,7 +9647,7 @@
                                         class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
                                         :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
                                     >
-                                        Sin DiseÃ±o (Liso)
+                                        Sin Diseño (Liso)
                                     </button>
                                     <button 
                                         type="button" 
@@ -9641,21 +9655,21 @@
                                         class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
                                         :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
                                     >
-                                        Con DiseÃ±o (Pattern)
+                                        Con Diseño (Pattern)
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- SecciÃ³n Web -->
+                            <!-- Sección Web -->
                             <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">SecciÃ³n Web de PublicaciÃ³n</label>
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Sección Web de Publicación</label>
                                 <select 
                                     x-model="curatingItem.suggestedSection" 
                                     class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
                                 >
-                                    <option value="basicos">Línea BÃ¡sicos Esenciales</option>
-                                    <option value="disenador">Línea DiseÃ±ador & Autor</option>
-                                    <option value="temporada">ColecciÃ³n Temporada</option>
+                                    <option value="basicos">Línea Básicos Esenciales</option>
+                                    <option value="disenador">Línea Diseñador & Autor</option>
+                                    <option value="temporada">Colección Temporada</option>
                                     <option value="general">Catálogo General</option>
                                 </select>
                             </div>
@@ -9664,7 +9678,7 @@
                         <!-- 4. PVP Sugerido & Margen Calculado -->
                         <div class="p-3.5 bg-slate-900 text-white rounded-xl border border-slate-800 flex items-center justify-between">
                             <div>
-                                <label class="text-[11px] text-slate-400 block">PVP Venta al PÃºblico</label>
+                                <label class="text-[11px] text-slate-400 block">PVP Venta al Público</label>
                                 <div class="flex items-center gap-1 mt-0.5">
                                     <span class="text-slate-400 text-sm">$</span>
                                     <input type="number" x-model.number="curatingItem.suggestedPvp" class="w-24 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm font-bold text-white font-mono">
@@ -9710,11 +9724,9 @@
     </div>
 
 </div>
-
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20260925"></script>
 @endpush
-

@@ -19,6 +19,8 @@ use App\Models\PayoutBatch;
 use App\Models\CustomerSubscription;
 use App\Models\DunningRetryLog;
 use App\Models\VendorBill;
+use App\Models\ProductBundle;
+use App\Models\CycleCount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -554,6 +556,84 @@ class StorefrontController extends Controller
                 'notes' => $k->description,
             ])->values();
 
+        $portalCreditAgreements = \App\Models\SupplierCreditAgreement::query()
+            ->with('supplier')
+            ->where('status', 'pending')
+            ->latest()
+            ->get()
+            ->map(fn ($ca) => [
+                'id' => $ca->id,
+                'supplier_id' => $ca->supplier_id,
+                'supplier' => $ca->supplier?->name ?? 'Proveedor',
+                'ref' => $ca->reference_folio ?: ('NC-' . $ca->id),
+                'amount' => (float) $ca->amount,
+                'reason' => $ca->resolution_notes ?: 'Acuerdo compensatorio por discrepancia',
+                'agreement_type' => $ca->agreement_type,
+                'status' => 'Pendiente de Aplicar',
+                'date' => $ca->created_at ? $ca->created_at->format('d/m/Y') : now()->format('d/m/Y'),
+            ])->values();
+
+        $portalProductBundles = ProductBundle::query()
+            ->with(['items.product', 'items.variant.inventories'])
+            ->get()
+            ->map(function ($bundle) {
+                $components = $bundle->items->map(function ($item) {
+                    $prod = $item->product;
+                    $var = $item->variant;
+                    $sku = $var?->sku ?? ($prod?->sku ?? 'SKU-COMP');
+                    $name = $prod?->title ?? 'Prenda Componente';
+                    $size = $var ? (data_get($var->attributes, 'size') ?? 'm') : 'm';
+                    return [
+                        'sku' => $sku,
+                        'name' => $name,
+                        'size' => strtolower((string) $size),
+                        'qty' => (int) $item->quantity,
+                        'location' => 'A-01-B',
+                    ];
+                })->values()->toArray();
+
+                $subPrice = (float) $bundle->bundle_price;
+                $regPrice = (float) $bundle->regular_price;
+                $disc = ($regPrice > $subPrice && $regPrice > 0)
+                    ? (int) round((($regPrice - $subPrice) / $regPrice) * 100)
+                    : 0;
+
+                return [
+                    'id' => (string) ($bundle->slug ?: $bundle->id),
+                    'dbId' => $bundle->id,
+                    'sku' => (string) ($bundle->slug ?: ('BUNDLE-' . $bundle->id)),
+                    'name' => $bundle->name,
+                    'type' => $bundle->bundle_type === 'box_subscription' ? 'subscription' : ($bundle->bundle_type === 'pack_multiple' ? 'promo' : $bundle->bundle_type),
+                    'tierLevel' => 'custom_pack',
+                    'tierName' => $bundle->name,
+                    'subscriptionPrice' => $subPrice,
+                    'regularPrice' => $regPrice,
+                    'discountPct' => $disc,
+                    'isActive' => (bool) $bundle->is_active,
+                    'badgeColor' => $bundle->bundle_type === 'box_subscription' ? 'indigo' : 'emerald',
+                    'description' => 'Receta BOM sincronizada con almacén.',
+                    'components' => $components,
+                ];
+            })->values();
+
+        $portalCycleCounts = CycleCount::query()
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function ($cc) {
+                return [
+                    'id' => $cc->id,
+                    'date' => $cc->count_date ? \Carbon\Carbon::parse($cc->count_date)->format('d/m/Y') : now()->format('d/m/Y'),
+                    'skuCount' => (int) $cc->sample_sku_count,
+                    'totalCounted' => (int) $cc->total_units_counted,
+                    'totalVariance' => (int) $cc->total_variance_units,
+                    'iraScore' => (float) $cc->ira_accuracy_score,
+                    'auditedBy' => $cc->audited_by,
+                    'status' => $cc->status,
+                    'details' => $cc->details_json,
+                ];
+            })->values();
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -566,6 +646,9 @@ class StorefrontController extends Controller
             'portalPurchaseOrders' => $portalPurchaseOrders,
             'portalFuturePurchaseOrders' => $portalFuturePurchaseOrders,
             'portalPurchaseKardex' => $portalPurchaseKardex,
+            'portalCreditAgreements' => $portalCreditAgreements,
+            'portalProductBundles' => $portalProductBundles,
+            'portalCycleCounts' => $portalCycleCounts,
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()

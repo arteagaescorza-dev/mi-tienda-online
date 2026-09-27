@@ -30,9 +30,15 @@ Route::delete('/cart/items/{item}', [CartController::class, 'removeItem']);
 Route::prefix('v1')->group(function () {
     // 1. INVENTARIO & COMPRAS (HUB 4)
     Route::prefix('inventory')->group(function () {
+        Route::get('/purchases/credit-agreements', [InventoryApiController::class, 'getCreditAgreements']);
+        Route::post('/purchases/orders', [InventoryApiController::class, 'storePurchaseOrder']);
+        Route::post('/purchases/orders/{id}/dispatch', [InventoryApiController::class, 'dispatchPurchaseOrder']);
         Route::post('/purchases/orders/{id}/receive', [InventoryApiController::class, 'receivePurchaseOrder']);
         Route::post('/scraping/pending/{id}/curate', [InventoryApiController::class, 'curateScrapedItem']);
         Route::post('/cycle-counts', [InventoryApiController::class, 'recordCycleCount']);
+        Route::get('/bundles', [InventoryApiController::class, 'getBundles']);
+        Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
+        Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
     });
 
     // 2. CHECKOUT & RESERVA TEMPORAL DE STOCK (TASK-INT-06)
