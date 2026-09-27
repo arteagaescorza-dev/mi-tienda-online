@@ -430,15 +430,15 @@ La migración hacia un VPS administrado (DigitalOcean, Linode, Hetzner - $6 a $1
 
 Con la culminación de la fase de conexión de los 6 Hubs administrativos a bases de datos reales (Pasos A al E), se establece la hoja de ruta definitiva para trasladar todas las capacidades operativas y visuales existentes en la carpeta de referencia `import/` hacia la aplicación Laravel en producción.
 
-### 12.1. Escala Oficial de Prioridades de Desarrollo
+### 12.1. Escala Oficial de Prioridades de Desarrollo (Prioridades 1 a 5 Completadas al 100%)
 
-| Prioridad | Bloque Funcional | Alcance Operativo | Justificación Estratégica |
-| :---: | :--- | :--- | :--- |
-| **Prioridad 1** | **Tienda Pública D2C Multiverso (PWA)** | `tienda.html`, `store.js`, `store.css`, `sw.js`, Multiverse Switcher, `stock_locks` (5 min), checkout 3 pasos, portal de cliente MRR. | **Crítica.** Motor de ventas, captación y conversión. Alimenta de órdenes reales a todos los Hubs. |
-| **Prioridad 2** | **Curaduría Previa de Scraping & Atributos (Hub 4)** | Submódulo de cuarentena `scrapedPendingItems`, CRUD de telas `apparelFabrics` y colores tornasol `apparelColors`. | **Alta.** Garantiza la calidad e integridad del catálogo antes de publicar artículos en la tienda. |
-| **Prioridad 3** | **Recetas BOM & Membresías de Suscripción (Hub 4/5)** | Constructor `bundleEditor`, cálculo automático de existencias por insumo cuello de botella y deducción en Kardex. | **Alta.** Soporte al modelo de ingresos recurrentes y predecibles (MRR) de las cajas mensuales. |
-| **Prioridad 4** | **Sinergias Operativas Inter-Hub (Cross-Hub)** | Deducción de cajas/empaques en Kardex, resolución RMA, cotejo de 3 vías y enlace CxP de convenios B2B. | **Media.** Eficiencia operativa, erradicación de mermas y conciliación contable sin fricción. |
-| **Prioridad 5** | **Shell Global, Notificaciones & Gobernanza** | Notificaciones operativas con saltos prefiltrados, chat inter-áreas, ajustes full-screen (Regla 15) y RBAC dinámico. | **Gobernanza.** Ergonomía del equipo administrativo y auditoría estricta de privacidad financiera. |
+| Prioridad | Bloque Funcional | Alcance Operativo | Estado & Tag Git |
+| :---: | :--- | :--- | :---: |
+| **Prioridad 1** | **Tienda Pública D2C Multiverso (PWA)** | `tienda.html`, `store.js`, `store.css`, `sw.js`, Multiverse Switcher, `stock_locks` (5 min), checkout 3 pasos, portal de cliente MRR, Web Push VAPID. | **[COMPLETADA]** (`v1.1-prioridad-1-storefront-pwa`) |
+| **Prioridad 2** | **Curaduría Previa de Scraping & Atributos (Hub 4)** | Submódulo de cuarentena `scrapedPendingItems`, CRUD de telas `apparelFabrics` y colores tornasol `apparelColors`. | **[COMPLETADA]** (`v1.2-prioridad-2-inventario-hub4`) |
+| **Prioridad 3** | **Recetas BOM & Membresías de Suscripción (Hub 4/5)** | Constructor `bundleEditor`, cálculo de existencias por cuello de botella, deducción Kardex, cabina ejecutiva Hub 1 con gráficos SVG y Copiloto IA. | **[COMPLETADA]** (`v1.3-prioridad-3-dashboard-hub1`) |
+| **Prioridad 4** | **Sinergias Operativas Inter-Hub (Cross-Hub)** | Deducción de cajas en Kardex (`TASK-INT-13`), resolución RMA y biotratamiento (`TASK-INT-09`), cotejo 3 vías Inbound (`TASK-INT-07`), CxP y remisiones B2B (`TASK-INT-19`, `TASK-INT-20`), contabilidad mermas (`TASK-INT-16`). | **[COMPLETADA]** (`v1.4-prioridad-4-sinergias-crosshub`) |
+| **Prioridad 5** | **Shell Global, Notificaciones & Gobernanza** | Matriz Roles Spatie (`TASK-RBAC-02`), Privacidad Financiera (`TASK-RBAC-03`), Tareas por Estación (`TASK-RBAC-04`), Kardex Auditoría (`TASK-DSH-09`), Toasts y Notificaciones (`TASK-UX-03`), Chat Interdepartamental (`TASK-COM-01`), Hub 8 Gobernanza Full-Screen (`TASK-SYS-01`, `TASK-SYS-ENV`). | **[COMPLETADA]** (`v1.5-prioridad-5-gobernanza-rbac`) |
 
 ---
 

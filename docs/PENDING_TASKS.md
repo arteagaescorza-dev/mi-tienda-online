@@ -18,66 +18,66 @@
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | `TASK-INV-01` | Ubicaciones Físicas de Almacén (Slotting: Pasillo/Rack/Gaveta) | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Catálogo, Kardex, Empaque |
 | `TASK-INV-02` | Matriz de Variantes no Textiles (Tonos Cosmética & Volúmenes Perfume) | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Catálogo Multidimensional |
-| `TASK-INV-03` | Escandallos / Recetas para Suscripciones & Combos (BOM) | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Kardex, Hub 1 (Dashboard) |
+| `TASK-INV-03` | Escandallos / Recetas para Suscripciones & Combos (BOM) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Kardex, Hub 1 (Dashboard), Tag v1.3 |
 | `TASK-INV-04` | Valuación Contable: Costo Promedio Ponderado (CPP) vs Último Costo | **Hub 4 (Inventario)** | **Media** | **Completada (UI)** | Kardex, Hub 5 (Finanzas) |
 | `TASK-INV-05` | Generación e Impresión de Etiquetas Térmicas (Code128 / QR) en 1 Clic | **Hub 4 (Inventario)** | **Media** | **Completada (UI)** | Inbound, Slotting físico |
 | `TASK-INV-06` | Control Sanitario: Lotes y Fechas de Caducidad / PAO en Cosmética | **Hub 4 (Inventario)** | **Media** | **Completada (UI)** | Catálogo, Inbound, Kardex, Etiquetas Térmicas |
 | `TASK-INV-07` | Auditoría Cíclica a Ciegas (Blind Cycle Counting) de 3 SKUs Diarios | **Hub 4 (Inventario)** | **Baja** | **Completada (UI)** | Kardex, Ubicaciones |
-| `TASK-INV-08` | Gestión Integral de Ropa Interior, Curaduría Previa Scraping, Vitrina Web y Ajustes de Módulo | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Catálogo, Scraping Torzo, Vitrina Web, Configuración |
+| `TASK-INV-08` | Gestión Integral de Ropa Interior, Curaduría Previa Scraping, Vitrina Web y Ajustes de Módulo | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Catálogo, Scraping Torzo, Vitrina Web, Tag v1.2 |
 | `TASK-DSH-01` | Vista Intermedia RBAC: Bandeja de Atención a Clientes & Ventas | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | RBAC Global, Hub 3 (CRM) |
 | `TASK-DSH-02` | Embudo Comercial Multiverso Accionable con Gatillos en 1 Clic | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Multiverso, WhatsApp API |
 | `TASK-DSH-03` | Monitor de Salud del Ecosistema & Telemetría de APIs (System Health) | **Hub 1 (Dashboard)** | **Media** | **Completada (Full-Stack)** | Stripe, Torzo Bot, DHL |
-| `TASK-DSH-04` | Generador Dinámico de Tareas Operativas Conectado a Eventos Reales | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Eventos de Dominio / Tienda |
+| `TASK-DSH-04` | Generador Dinámico de Tareas Operativas Conectado a Eventos Reales | **Hub 1 (Dashboard)** | **Alta** | **Completada (Fullstack End-to-End)** | Eventos de Dominio, Tag v1.5 |
 | `TASK-DSH-05` | SLA y Semáforo Visual de Envejecimiento de Pedidos (Aging Alert) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Mesa de empaque, DHL |
 | `TASK-DSH-06` | Validador Predictivo de Direcciones y Códigos Postales con Riesgo | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | APIs de paquetería / Sepomex |
-| `TASK-INT-01` | Saltos Profundos (Deep Links) Prefiltrados de Dashboard a Inventario | **Transversal (H1 $\rightarrow$ H4)** | **Alta** | **Completada (UI)** | Router interno, Filtros Catálogo |
-| `TASK-INT-02` | Trazabilidad de Stock: Comprometido a Despachado / Kardex | **Transversal (H1 $\rightarrow$ H4)** | **Alta** | **Completada (UI)** | Modales de Acción, Kardex |
+| `TASK-INT-01` | Saltos Profundos (Deep Links) Prefiltrados de Dashboard a Inventario | **Transversal (H1 $\rightarrow$ H4)** | **Alta** | **Completada (Fullstack End-to-End)** | Router interno, Filtros Catálogo, Tag v1.5 |
+| `TASK-INT-02` | Trazabilidad de Stock: Comprometido a Despachado / Kardex | **Transversal (H1 $\rightarrow$ H4)** | **Alta** | **Completada (Fullstack End-to-End)** | Modales de Acción, Kardex, Tag v1.1 |
 | `TASK-INT-03` | Liberación Masiva de Lotes de Suscripción (Batch Fulfillment) | **Transversal (H1 $\rightarrow$ H6)** | **Alta** | **Completada (UI)** | BOM, Pasarelas recurrentes |
 | `TASK-INT-04` | Ficha de Preferencias y Tallas de Suscriptor en Checklist de Empaque | **Transversal (H1 $\rightarrow$ H6)** | **Alta** | **Completada (UI)** | Perfil de suscriptor, Modales |
 | `TASK-INT-05` | Recuperación de Carritos Abandonados con Enlace Tokenizado en 1 Clic | **Transversal (H1 $\rightarrow$ H3)** | **Alta** | **Completada (Full-Stack)** | Checkout resume, WhatsApp |
 | `TASK-LOG-01` | Mesa de Expedición Multipaquetera y Cierre de Manifiestos Diarios | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | Órdenes Empacadas, APIs Paquetería |
 | `TASK-LOG-02` | Emisión e Impresión Masiva de Guías Térmicas (100x150mm) con Code128 / QR SVG | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | Manifiesto, Impresoras Térmicas |
 | `TASK-LOG-03` | Torre de Control de Envíos con Telemetría de Tránsito y Alertas de Excepción | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | Webhooks Paqueterías, Sepomex |
-| `TASK-LOG-04` | Portal de Garantías, Cambios de Talla y RMA con Retorno Contable a Kardex | **Hub 6 (Logística)** | **Media** | **Completada (UI)** | Kardex, Hub 4, Hub 1 |
+| `TASK-LOG-04` | Portal de Garantías, Cambios de Talla y RMA con Retorno Contable a Kardex | **Hub 6 (Logística)** | **Media** | **Completada (Fullstack End-to-End)** | Kardex, Hub 4, Hub 1, Tag v1.4 |
 | `TASK-LOG-05` | Protocolo de Embalaje Seguro para Cosmética Líquida y Privacidad Textil | **Hub 6 (Logística)** | **Media** | **Completada (UI)** | BOM Empaque, Inventario Insumos |
-| `TASK-LOG-06` | Gestor CRUD de Cajas y Empaques Personalizables con Volumetría Automática | **Hub 6 (Logística)** | **Alta (Prioridad Inmediata)** | **Completada (UI)** | Balanzas, Tarifas Courier, Costos |
+| `TASK-LOG-06` | Gestor CRUD de Cajas y Empaques Personalizables con Volumetría Automática | **Hub 6 (Logística)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Balanzas, Tarifas Courier, Costos, Tag v1.4 |
 | `TASK-LOG-02B` | Remitente Neutro Corporativo y Protocolo de Privacidad en Guías Térmicas | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | `TASK-LOG-02`, Impresión Térmica |
-| `TASK-LOG-04B` | Matriz de Devoluciones RMA por Criterio Sanitario (Precinto Íntimo vs Ropa Exterior) | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | `TASK-LOG-04`, Kardex, PROFECO |
+| `TASK-LOG-04B` | Matriz de Devoluciones RMA por Criterio Sanitario (Precinto Íntimo vs Ropa Exterior) | **Hub 6 (Logística)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-LOG-04`, Kardex, PROFECO, Tag v1.4 |
 | `TASK-UX-01` | Rediseño Ergonómico y Amplitud de Modales a 2 Columnas (`max-w-4xl` / `max-w-5xl`) | **Transversal (UI/UX)** | **Alta** | **Completada (UI)** | Estilos Globales, Checklists |
 | `TASK-UX-02` | Aislamiento Estricto de Impresión Térmica (`@media print` 100x150mm / 50x30mm) | **Transversal (UI/UX)** | **Alta** | **Completada (UI)** | `TASK-INV-05`, `TASK-LOG-02` |
-| `TASK-UX-03` | Sistema Global de Toasts y Notificaciones en Cola (Z-Index Máximo, TTL Extendido y Stack Acumulativo) | **Transversal (UI/UX)** | **Alta** | **Pendiente (Fase 2)** | Topbar, Modales, Drawers, `app.js` |
+| `TASK-UX-03` | Sistema Global de Toasts y Notificaciones en Cola (Z-Index Máximo, TTL Extendido y Stack Acumulativo) | **Transversal (UI/UX)** | **Alta** | **Completada (Fullstack End-to-End)** | Topbar, Modales, Drawers, Tag v1.5 |
 | `TASK-MOB-01` | Modo Móvil / Escáner de Bodega con Códigos SVG de Alto Contraste | **Hub 4 (Almacén)** | **Alta** | **Pendiente** | Lector Láser / Smartphone, Picking |
 | `TASK-INV-09` | Gestor Configurable de Tonos de Cosmética con Swatches Cromáticos Hex y Subtonos | **Hub 4 (Inventario)** | **Media** | **Completada (UI)** | `TASK-INV-02`, Color Swatches |
 | `TASK-INV-10` | Rediseño Ergonómico de Barra de Acciones y Menú de Herramientas Hub 4 | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Toolbar, Layout Responsivo |
-| `TASK-INV-11` | CRUD Integral con Archivado y Restauración para Telas, Colores y Parámetros ROP | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | `TASK-INV-08`, Modal Ajustes, ROP |
+| `TASK-INV-11` | CRUD Integral con Archivado y Restauración para Telas, Colores y Parámetros ROP | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-08`, Modal Ajustes, ROP, Tag v1.2 |
 | `TASK-INV-12` | Gestor Configurable de Vitrinas Web (Delegado a Hub 2 CMS) & Etiquetado en Catálogo | **Hub 2 (CMS) / Hub 4** | **Media** | **Delegada a Hub 2 (CMS)** | `TASK-INV-08`, `TASK-STR-02`, CMS Hub 2 |
-| `TASK-INV-13` | Gestor Integral de Proveedores (Híbridos Scrapeados vs Locales/Manuales) y Control de Estados | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Pestaña Proveedores, Modal CRUD |
+| `TASK-INV-13` | Gestor Integral de Proveedores (Híbridos Scrapeados vs Locales/Manuales) y Control de Estados | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Pestaña Proveedores, Modal CRUD, Tag v1.2 |
 | `TASK-INV-14` | Gestor Configurable de Tallas Textiles y Volúmenes de Perfumería en Matriz de Variantes | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | `TASK-INV-02`, Modal Curvas & Volúmenes |
 | `TASK-INV-15` | Drawer de Producto Full-Width con Auto-SKU, Asistente IA de Descripción y Detección de Duplicados | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | Drawer Producto, Copiloto IA, Duplicados |
-| `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (UI)** | Carrito, Stock Disponible |
-| `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (UI)** | Stripe, `TASK-LOG-06`, Skydropx |
-| `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (UI)** | Navbar, Stripe Keys, Skydropx |
-| `TASK-RBAC-02` | Gestor Dinámico de Roles y Matriz Granular de Accesos por Módulo | **Transversal (Seguridad / RBAC)** | **Alta** | **Completada (UI)** | Triple RBAC, Matriz de Permisos |
-| `TASK-RBAC-03` | Aislamiento de Pantallas, Filtrado de Navegación y Privacidad Financiera por Rol | **Transversal (Seguridad / RBAC)** | **Alta** | **Completada (UI)** | RBAC Guards, Sidebar Filtering, Cero Emojis |
-| `TASK-RBAC-04` | Segregación y Asignación de Tareas Operativas por Rol en Bandeja de Hub 1 | **Transversal (Seguridad / RBAC / Hub 1)** | **Alta** | **Completada (UI)** | Matriz Categorías, Bandeja Hub 1, Sanitización Filtros |
+| `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
+| `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
+| `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Navbar, Stripe Keys, Skydropx, Tag v1.5 |
+| `TASK-RBAC-02` | Gestor Dinámico de Roles y Matriz Granular de Accesos por Módulo | **Transversal (Seguridad / RBAC)** | **Alta** | **Completada (Fullstack End-to-End)** | Triple RBAC, Matriz Permisos, Tag v1.5 |
+| `TASK-RBAC-03` | Aislamiento de Pantallas, Filtrado de Navegación y Privacidad Financiera por Rol | **Transversal (Seguridad / RBAC)** | **Alta** | **Completada (Fullstack End-to-End)** | RBAC Guards, Sidebar, Cero Emojis, Tag v1.5 |
+| `TASK-RBAC-04` | Segregación y Asignación de Tareas Operativas por Rol en Bandeja de Hub 1 | **Transversal (Seguridad / RBAC / Hub 1)** | **Alta** | **Completada (Fullstack End-to-End)** | Matriz Categorías, Bandeja Hub 1, Tag v1.5 |
 | `TASK-PUR-01` | Notificación de Discrepancia Inbound, Minuta de Negociación y Formalización IA (PDF/Email) | **Hub 1 (Compras) $\leftrightarrow$ Hub 4 $\leftrightarrow$ B2B** | **Alta** | **Completada (UI)** | API Carrier, Modal Minuta IA, PDF Acuerdo Formal |
 | `TASK-PUR-02` | Reasignación de Modales Físicos (Rampa y Surtido Interno) a Almacén y Segregación de Compras | **Hub 1 $\leftrightarrow$ Hub 4 (Compras / Almacén)** | **Alta** | **Completada (UI)** | Modal Rampa Almacén, Modal Surtido Carlos, Exclusión Purchases |
 | `TASK-PUR-03` | Depuración y Especialización del Catálogo para Compras (Existencias, DOH, Costos y Botón PO) | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (UI)** | DOH, Alertas ROP, Costos CPP, Ocultar Auditoría Ciegas |
 | `TASK-PUR-04` | Generador de PO con Impresión PDF Multi-Página, Compensación de Notas de Crédito & Edición de Costo/Prioridad | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (UI)** | Motor @media print Letter, Panel Compensación Discrepancias, Recálculo ROP |
-| `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Analítica RevOps, LLM API, Chat UI |
+| `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Analítica RevOps, LLM API, Chat UI, Tag v1.3 |
 | `TASK-HUB-VND` | Portal Extranet de Proveedores y Fabricantes (B2B Inbound & Órdenes) | **Hub 7 / B2B (Proveedores)** | **Alta** | **Completada (UI)** | Hub 4 Compras, Recepción Inbound |
 | `TASK-SUB-DUN` | Motor de Dunning y Recuperación de Cobros Fallidos en Suscripciones (MRR) | **Transversal (H5 $\leftrightarrow$ H3)** | **Media** | **Completada (UI)** | MRR, Stripe Webhooks, WhatsApp |
 | `TASK-MKT-01` | Dashboard de Telemetría Ads (Meta CAPI, Google Ads, GA4) y Copiloto de Crecimiento | **Hub 3 (Marketing)** | **Alta** | **Completada (UI)** | Meta Graph API, GA4 Measurement, CAPI |
-| `TASK-INT-07` | Cotejo Automatizado de 3 Vías Inbound (OC $\leftrightarrow$ Rampa $\leftrightarrow$ Liquidación) | **Transversal (H7 $\leftrightarrow$ H4 $\leftrightarrow$ H5)** | **Alta** | **Completada (UI)** | Hub 7 OCs, Inbound Almacén, Finanzas |
+| `TASK-INT-07` | Cotejo Automatizado de 3 Vías Inbound (OC $\leftrightarrow$ Rampa $\leftrightarrow$ Liquidación) | **Transversal (H7 $\leftrightarrow$ H4 $\leftrightarrow$ H5)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 7 OCs, Inbound Almacén, Finanzas, Tag v1.4 |
 | `TASK-INT-08` | Conciliación de Facturas de Paquetería vs Manifiestos de Expedición | **Transversal (H6 $\leftrightarrow$ H5)** | **Alta** | **Completada (UI)** | Manifiestos, Facturas DHL/Skydropx |
-| `TASK-INT-09` | Generador Automático de Orden de Reemplazo o Crédito desde RMA | **Transversal (H6 $\leftrightarrow$ H3 $\leftrightarrow$ H4)** | **Alta** | **Completada (UI)** | `TASK-LOG-04`, Kardex, CRM WhatsApp |
+| `TASK-INT-09` | Generador Automático de Orden de Reemplazo o Crédito desde RMA | **Transversal (H6 $\leftrightarrow$ H3 $\leftrightarrow$ H4)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-LOG-04`, Kardex, CRM WhatsApp, Tag v1.4 |
 | `TASK-INT-10` | Capa de Contenido Editorial Multiverso Desacoplada de Stock Central | **Transversal (H2 $\leftrightarrow$ H4 $\leftrightarrow$ H3)** | **Media** | **Completada (UI)** | CMS Vitrinas, Catálogo Maestro |
-| `TASK-INT-11` | Disparo Automático de OCs a Extranet B2B por Déficit de Ensamble BOM | **Transversal (H4 $\leftrightarrow$ H7)** | **Alta** | **Completada (UI)** | BOM Recetas, Hub 7 Portal B2B |
+| `TASK-INT-11` | Disparo Automático de OCs a Extranet B2B por Déficit de Ensamble BOM | **Transversal (H4 $\leftrightarrow$ H7)** | **Alta** | **Completada (Fullstack End-to-End)** | BOM Recetas, Hub 7 Portal B2B, Tag v1.3 |
 | `TASK-INT-12` | Radar Preventivo de Sobrecarga Logística (Marketing Flash $\rightarrow$ Almacén) | **Transversal (H3 $\leftrightarrow$ H1 $\leftrightarrow$ H6)** | **Alta** | **Pendiente** | Meta Ads Pacing, Mesa de Empaque |
-| `TASK-INT-13` | Deducción de Insumos de Empaque en Kardex y Alerta ROP de Cajas | **Transversal (H6 $\leftrightarrow$ H4 $\leftrightarrow$ H7)** | **Alta** | **Pendiente** | `TASK-LOG-06`, Kardex Insumos |
+| `TASK-INT-13` | Deducción de Insumos de Empaque en Kardex y Alerta ROP de Cajas | **Transversal (H6 $\leftrightarrow$ H4 $\leftrightarrow$ H7)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-LOG-06`, Kardex Insumos, Tag v1.4 |
 | `TASK-INT-14` | Escudo Antifraude y Freno de Emergencia de Envíos en Mesa de Empaque | **Transversal (H5 $\leftrightarrow$ H6 $\leftrightarrow$ H1)** | **Alta (Prioridad Inmediata)** | **Completada (UI)** | Stripe Radar, Webhooks Fraude |
 | `TASK-INT-15` | Rescate Proactivo de Excepciones de Entrega vía WhatsApp Omnicanal | **Transversal (H6 $\leftrightarrow$ H3)** | **Alta** | **Pendiente** | Telemetría Courier, WhatsApp API |
-| `TASK-INT-16` | Sincronización Contable de Mermas y Ajustes de Kardex al P&L Financiero | **Transversal (H4 $\leftrightarrow$ H5)** | **Alta** | **Pendiente** | Kardex Auditoría, Libro Diario |
+| `TASK-INT-16` | Sincronización Contable de Mermas y Ajustes de Kardex al P&L Financiero | **Transversal (H4 $\leftrightarrow$ H5)** | **Alta** | **Completada (Fullstack End-to-End)** | Kardex Auditoría, Libro Diario, Tag v1.4 |
 | `TASK-INT-17` | Protocolo de Unboxing Dinámico por Nivel de Lealtad (Customer LTV) | **Transversal (H3 $\leftrightarrow$ H6)** | **Media** | **Pendiente** | CRM Scoring, Checklist Empaque |
 | `TASK-INT-18` | Simulador Financiero de Reglas Comerciales y Elasticidad de Envío Gratis | **Transversal (H2 $\leftrightarrow$ H5)** | **Media** | **Completada (UI)** | CMS Umbrales, `TASK-FIN-01` |
 | `TASK-FIN-02` | Motor Fiscal de Impuestos (IVA 16% Trasladado vs Acreditable y Retenciones SAT) | **Hub 5 (Finanzas)** | **Alta** | **Completada (UI)** | SAT CFDI 4.0, Stripe Retenciones |
@@ -87,19 +87,20 @@
 | `TASK-ALY-03` | Atribución Dir B (Aliado $\rightarrow$ Web) con Cupones, Tracking UTM y Comisiones | **Hub 7 (Convenios & Aliados)** | **Alta** | **Completada (UI)** | Checkout, Cupones, Stripe |
 | `TASK-ALY-04` | Cámara de Compensación (Clearing House) con Saldos Netos y Liquidación Multimodal | **Hub 7 (Convenios & Aliados)** | **Alta** | **Completada (UI)** | Hub 5 Finanzas, Hub 4 Kardex, SPEI |
 | `TASK-ALY-05` | Pantalla Extranet del Aliado (Partner Portal) con Validador de Taquilla y Generador QR | **Hub 7 (Convenios & Aliados)** | **Alta** | **Completada (UI)** | Token Auth, QR SVG, Taquilla |
-| `TASK-INT-19` | Sincronización Automática de Liquidaciones de Aliados a Cuentas por Pagar | **Transversal (H7 $\leftrightarrow$ H5)** | **Alta** | **Completada (UI)** | `TASK-ALY-04`, `vendor_bills`, SPEI |
-| `TASK-INT-20` | Sincronización Automática de Remisiones B2B a Rampa de Almacén | **Transversal (H7/B2B $\leftrightarrow$ H1 $\leftrightarrow$ H4)** | **Alta** | **Completada (UI)** | `TASK-HUB-VND`, `TASK-INT-07`, Rampa |
-| `TASK-STR-01` | Storefront D2C: Creación del Portal Público y Enlace desde Navbar RevOps (Ref: `pop`) | **Tienda Pública (Storefront D2C)** | **Alta (Prioridad Inmediata)** | **Completada (UI)** | `pop/index.html`, Navbar RevOps |
-| `TASK-STR-02` | Catálogo Público de Productos & Ficha Anatómica Torzo (Ref: `pop/catalogo.html`) | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/catalogo.html`, Torzo 244 SKUs |
-| `TASK-STR-03` | Carrito Deslizable & Checkout en 3 Pasos con Logística de Carritos Mixtos | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/carrito.html`, Checkout Multimodal |
-| `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (UI)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01` |
-| `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR) |
-| `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5 |
+| `TASK-INT-19` | Sincronización Automática de Liquidaciones de Aliados a Cuentas por Pagar | **Transversal (H7 $\leftrightarrow$ H5)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-ALY-04`, `vendor_bills`, SPEI, Tag v1.4 |
+| `TASK-INT-20` | Sincronización Automática de Remisiones B2B a Rampa de Almacén | **Transversal (H7/B2B $\leftrightarrow$ H1 $\leftrightarrow$ H4)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-HUB-VND`, `TASK-INT-07`, Rampa, Tag v1.4 |
+| `TASK-STR-01` | Storefront D2C: Creación del Portal Público y Enlace desde Navbar RevOps (Ref: `pop`) | **Tienda Pública (Storefront D2C)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | `pop/index.html`, Navbar RevOps, Tag v1.1 |
+| `TASK-STR-02` | Catálogo Público de Productos & Ficha Anatómica Torzo (Ref: `pop/catalogo.html`) | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `pop/catalogo.html`, Torzo 244 SKUs, Tag v1.1 |
+| `TASK-STR-03` | Carrito Deslizable & Checkout en 3 Pasos con Logística de Carritos Mixtos | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `pop/carrito.html`, Checkout Multimodal, Tag v1.1 |
+| `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01`, Tag v1.1 |
+| `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR), Tag v1.1 |
+| `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5, Tag v1.1 |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
-| `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Modal Ajustes Inventario, Catálogo Operativo, ROLES_AND_WORKFLOWS_SPEC |
+| `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | Ficha SKU, Curva Tallas, Margen Real, ROP |
-| `TASK-DSH-09` | Master Kardex Global y Log de Auditoría Omnicanal para Superadministradores | **Hub 1 (Dashboard)** | **Alta** | **Pendiente (Fase 2)** | Hub 1 Auditoría, `system_audit_logs` |
-| `TASK-SYS-01` | Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (UI)** | Sidebar Footer, Full-Screen, Todos los Hubs |
+| `TASK-DSH-09` | Master Kardex Global y Log de Auditoría Omnicanal para Superadministradores | **Hub 1 (Dashboard)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 1 Auditoría, `system_audit_logs`, Tag v1.5 |
+| `TASK-SYS-01` | Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | Sidebar Footer, Hub 8 Pantalla Completa, Tag v1.5 |
+| `TASK-COM-01` | Mensajería Interdepartamental Operativa con Detección Automática de Folios | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | `interdepartmental_messages`, Chat Drawer, Tag v1.5 |
 
 ---
 
@@ -116,11 +117,13 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 
 ### Escala de Prioridades Fullstack Senior (5 Frentes de Ejecución)
 
-#### Prioridad 1 (Crítica e Inmediata): Motor D2C Transaccional & Storefront Multiverso PWA
+#### Prioridad 1 (Crítica e Inmediata): Motor D2C Transaccional & Storefront Multiverso PWA [COMPLETADA AL 100% - TAG `v1.1-prioridad-1-storefront-pwa`]
 * **Slice 1.1: Shell Base PWA, Conmutador Multiverso y Catálogo Real de BD:** [COMPLETADO] (113/113 pruebas pasando, 528 aserciones, 0 emojis).
 * **Slice 1.2: Ficha Anatómica PDP, Matriz de 6 Tallas y Guía de Medidas Torzo en cm:** [COMPLETADO] (119/119 pruebas pasando, 563 aserciones, 0 emojis).
 * **Slice 1.3: Carrito Deslizable y Motor de Reserva Temporal de Stock (`TASK-INT-06`):** [COMPLETADO] (127/127 pruebas pasando, 593 aserciones, 0 emojis).
 * **Slice 1.4: Checkout Transaccional, Cupones del Hub 7, Fletes del Hub 6 y Liquidación:** [COMPLETADO] (134/134 pruebas pasando, 623 aserciones, 0 emojis).
+* **Slice 1.5: Portal del Comprador D2C ("Mi Cuenta", Tracking y Suscripciones MRR):** [COMPLETADO] (143/143 pruebas pasando, 675 aserciones, 0 emojis).
+* **Slice 1.6: Web Push VAPID, Atribución B2B y Suite de Integración:** [COMPLETADO] (151/151 pruebas pasando, 730 aserciones, 0 emojis).
 * **Backend:**
   - Scopes multiverso en `Product` (`marte`, `venus`, `tiresias`, `terra`) con cálculo en vivo de stock disponible ($\text{Disponible} = \text{Cantidad} - \text{Apartados}$).
   - `StockReservationService`: Candado de stock temporal (`stock_locks`) con TTL de 300 segundos, bloqueo pesimista en MySQL y liberación automática.
@@ -133,7 +136,7 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
   - PWA Offline y Service Worker `sw.js` con soporte para notificaciones Web Push VAPID.
 * **Criterio de Cierre:** Compra completada desde la web que descuenta el stock en el Hub 4, aparece en el Hub 3 para empaque y en el Hub 1 en finanzas.
 
-#### Prioridad 2 (Alta): Filtro de Calidad y Curaduría de Catálogo en Hub 4
+#### Prioridad 2 (Alta): Filtro de Calidad y Curaduría de Catálogo en Hub 4 [COMPLETADA AL 100% - TAG `v1.2-prioridad-2-inventario-hub4`]
 * **Backend:**
   - Modelo y migración `scraped_pending_items` para staging de productos en bruto del scraper de Torzo.
   - Endpoints RESTful `POST /api/v1/inventory/scraping/pending/{id}/curate` y `/discard`.
@@ -144,38 +147,32 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
   - Gestor de telas y colores con previsualización en vivo de degradados CSS tornasol.
 * **Criterio de Cierre:** Ningún producto extraído automáticamente pasa a la tienda pública sin validación y aprobación de un operador.
 
-#### Prioridad 3 (Alta): Motor de Ensamble BOM y Recetas de Suscripción MRR
+#### Prioridad 3 (Alta): Motor de Ensamble BOM y Recetas de Suscripción MRR [COMPLETADA AL 100% - TAG `v1.3-prioridad-3-dashboard-hub1`]
 * **Backend:**
   - Tablas y modelos Eloquent `product_bundles` y `bundle_items`.
   - Algoritmo de cálculo de existencias armables gobernado estrictamente por el insumo cuello de botella.
   - Endpoint `POST /api/v1/inventory/bundles/{id}/liquidate` que emite salidas atómicas individuales en Kardex (`SALIDA_COMBO_SUSCRIPCION`).
-  - Detección de déficit de ensamble con registro en `bom_deficit_procurements` (`TASK-INT-11`).
+  - Detección de déficit de ensamble con registro en `bom_deficit_procurements` (`TASK-INT-11`) y puente a Compras.
+  - Cabina analítica ejecutiva Hub 1 con gráficos SVG interactivos y Copiloto IA con recomendaciones accionables.
 * **Frontend:**
   - Modal constructor `bundleEditor` en Ajustes de Inventario con asignación de componentes físicos por talla/slotting y simulación de despacho masivo.
+  - Cabina de mando en Hub 1 con métricas RevOps, embudo de conversión y chat de IA.
 * **Criterio de Cierre:** El sistema impide vender o prometer más cajas de membresía que las prendas físicas disponibles en rack del componente limitante.
 
-#### Prioridad 4 (Media): Sinergias Transversales Automatizadas (Cross-Hub)
-* **Backend:**
-  - `TASK-INT-13`: Deducción automática de cajas de empaque y bolsas de lavado en Kardex al emitir guías en Logística.
-  - `TASK-INT-09`: `RmaResolutionService` para emitir orden de reposición o saldo a favor del cliente al dictaminar garantías.
-  - `TASK-INT-07`: Algoritmo de cotejo de 3 vías (PO $\leftrightarrow$ Conteo Rampa $\leftrightarrow$ Factura Proveedor) con cálculo de retenciones SAT e IVA.
-  - `TASK-INT-08`: Conciliación automatizada de facturas courier vs. manifiestos diarios de expedición.
-  - `TASK-INT-19` / `TASK-INT-20`: Conexión de liquidaciones de convenios B2B a Cuentas por Pagar (`vendor_bills`) y remisiones a rampa.
-* **Frontend:**
-  - Vistas y modales de conciliación en Hubs 1, 4, 5 y 6.
+#### Prioridad 4 (Media): Sinergias Transversales Automatizadas (Cross-Hub) [COMPLETADA AL 100% - TAG `v1.4-prioridad-4-sinergias-crosshub`]
+* **Slice 4.1: Deducción de Empaque en Kardex y Alertas ROP (`TASK-INT-13`):** [COMPLETADO] `PackagingKardexDeductionService`, salida `CONSUMO_INSUMO_EMPAQUE`, deducción atómica de cajas `package_types` y bolsas al guiar paquetes.
+* **Slice 4.2: Resolución RMA, Dictamen y Biotratamiento (`TASK-INT-09`):** [COMPLETADO] `RmaResolutionService`, biocontención y descarte de lencería íntima usada vs reincorporación, emisión de saldo a favor o reposición.
+* **Slice 4.3: Cotejo 3 Vías Inbound y Remisiones B2B (`TASK-INT-07`, `TASK-INT-20`):** [COMPLETADO] `ThreeWayMatchService`, `InboundRampSyncService`, conciliación de OC vs conteo en rampa vs factura CFDI con retenciones SAT.
+* **Slice 4.4: Sincronización Contable de Mermas y CxP Aliados (`TASK-INT-16`, `TASK-INT-19`):** [COMPLETADO] `KardexAccountingSyncService`, `AllyClearingPayableService`, asientos automáticos en `general_ledger_entries` y facturas en `vendor_bills`.
 * **Criterio de Cierre:** Erradicación de discrepancias manuales entre bodega, logística y tesorería.
 
-#### Prioridad 5 (Gobernanza): Shell Operativo y Restricción Estricta RBAC
-* **Backend:**
-  - Middleware de auditoría y restricción real de campos financieros en responses JSON y vistas Blade según rol (`role:warehouse`, `role:purchases`, `role:sales`, `role:admin`).
-  - Feed de notificaciones en tiempo real desde `operational_tasks` con deep links prefiltrados al catálogo.
-  - Persistencia de mensajes del chat inter-áreas en `interdepartmental_messages`.
-* **Frontend:**
-  - Campanita con popover categorizado y saltos en 1 clic.
-  - Chat inter-áreas con canales `#almacen-compras`, `#atencion-ventas`, etc.
-  - Pantalla completa de Ajustes del Sistema dentro de `<main>` (Regla 15 de `MASTER_ROADMAP.md`).
-  - Consola de gestión de roles RBAC interactiva.
-* **Criterio de Cierre:** Cumplimiento total de la regla de privacidad (empleados de bodega con cero visibilidad de facturación o márgenes).
+#### Prioridad 5 (Gobernanza): Shell Operativo, Notificaciones, Chat y Gobernanza RBAC [COMPLETADA AL 100% - TAG `v1.5-prioridad-5-gobernanza-rbac`]
+* **Slice 5.1: Matriz de Roles Dinámicos, Privacidad Financiera y Segregación de Tareas (`TASK-RBAC-02`, `TASK-RBAC-03`, `TASK-RBAC-04`):** [COMPLETADO] `RolePermissionService`, middleware `EnforceFinancialPrivacy`, sanitización JSON de costos/márgenes, `OperationalTaskService` con filtrado por estación.
+* **Slice 5.2: Master Kardex de Auditoría y Activity Log Inmutable (`TASK-DSH-09`):** [COMPLETADO] `system_audit_logs`, `AuditTrailService`, `SystemAuditLogPolicy`, enmascaramiento forense de datos sensibles, inmutabilidad estricta contra updates/deletes.
+* **Slice 5.3: Sistema Global de Notificaciones y Toasts (`TASK-UX-03`, `TASK-DSH-04`):** [COMPLETADO] `user_notifications`, `NotificationDispatcherService`, deep links a folios de órdenes/SKUs/guías, `#global-toast-container`, campanita interactiva.
+* **Slice 5.4: Mensajería Interdepartamental Operativa (`TASK-COM-01`):** [COMPLETADO] `interdepartmental_messages`, `InterdepartmentalChatService`, auto-detección regex de folios (`@Pedido:`, `@SKU:`, `@OC:`, `@Guia:`), cajón flotante reactivo.
+* **Slice 5.5: Centro de Gobernanza del Sistema a Pantalla Completa & Conmutador Sandbox/Prod (`TASK-SYS-01`, `TASK-SYS-ENV`):** [COMPLETADO] `PortalGovernanceController`, Hub 8 Gobernanza en Sidebar, vista `resources/views/portal/governance.blade.php` con 5 pestañas de control (Privacidad RBAC, Auditoría Master, Notificaciones, Chat Inter-Areas, Ajustes Globales con reto de confirmación PRODUCCION).
+* **Criterio de Cierre:** Cumplimiento total de la regla de privacidad, trazabilidad forense de cada mutación del sistema y consola de gobernanza unificada. (238/238 pruebas pasando al 100%, 1,556 aserciones, 0 emojis).
 
 ---
 
@@ -626,20 +623,25 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Backend:** Formalizado en `BACKEND_INTEGRATION_SPEC.md`: Tablas `ai_copilot_insights`, `ai_copilot_recommendations`, `ai_copilot_chat_messages` (Sección 3.27), Modelos Eloquent `AiCopilotInsight`, `AiCopilotRecommendation`, `AiCopilotChatMessage` con scopes por rol (Sección 4.21), Servicio `RoleAwareAiCopilotService` con sanitización estricta y chat cURL outbound (Sección 5.12), Endpoints RESTful en `/api/v1/ai/copilot/*` (Sección 6.1 y 6.3 Y) y Registro en Checklist de Laravel Paso 28 (Sección 10).
 
 ### `TASK-DSH-09`: Master Kardex Global y Log de Auditoría Omnicanal para Superadministradores
-* **Prioridad:** **Alta** | **Estado:** **Pendiente (Fase 2: Backlog)**
-* **Punto Ciego / Situación Reportada:**
-  1. Para la vista ejecutiva de Superadministrador en Hub 1, no existe un Kardex maestro ni un log de auditoría global que concentre todos los movimientos del sistema.
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.2)
+* **Implementación Fullstack End-to-End:**
+  - **Base de Datos & Modelo Eloquent:** Migración `system_audit_logs` con `action`, `module`, `user_id`, `user_name`, `user_role`, `target_entity`, `target_id`, `before_state`, `after_state`, `ip_address`, `user_agent`. Modelo `SystemAuditLog` con inmutabilidad estricta contra `update` y `delete` (`ReadOnlyRecordException`).
+  - **Servicio de Dominio:** `AuditTrailService::recordMutation()` con enmascaramiento forense automático de contraseñas, tokens y llaves API (`password`, `token`, `secret`, `stripe_key`).
+  - **Control de Acceso & Políticas:** `SystemAuditLogPolicy` y middleware RBAC restringiendo la consulta de auditoría exclusivamente al rol `admin`.
+  - **Endpoints & Vistas:** `GET /api/v1/system/audit-logs`, vista administrativa en Hub 1 (`/portal/audit-logs`) y pestaña centralizada en Hub 8 Gobernanza (`/portal/governance?tab=audit`) con filtros por módulo, usuario, fecha y visor modal comparativo "Antes vs Después".
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/AuditTrailLoggingTest.php` al 100% verde (7/7 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:**
+  1. Para la vista ejecutiva de Superadministrador en Hub 1, no existía un Kardex maestro ni un log de auditoría global que concentre todos los movimientos del sistema.
   2. Es imposible trazar transversalmente quién hizo qué (ej. quién aprobó una compra, quién hizo un ajuste manual de stock, quién canceló un pedido, quién editó un proveedor) y revisar los datos precisos antes y después del movimiento (payload diff).
-* **Solución de UI/UX Propuesta:**
+* **Solución de UI/UX Implementada:**
   - **Master Kardex de Auditoría (Activity Log Liviano):**
-    - Pestaña o drawer dedicado en Hub 1 exclusivo para rol `admin`.
-    - **Registro Selectivo (Sin Ruido):** Solo se registrarán acciones mutables que alteren el estado del sistema (ej. altas, bajas, ediciones, aprobaciones, anulaciones), ignorando acciones de lectura o navegación para mantener la tabla liviana.
-    - Tabla infinita/paginada con columnas: Fecha/Hora, Usuario (Avatar + Nombre + Rol), Módulo de Origen (Hub 1 a Hub 7), Acción (ej. `update_inventory`, `approve_purchase`, `refund_order`), y Entidad Afectada (ej. `SKU: TXT-TRZ-001`, `Order #1024`).
-    - Botón `Ver Detalle` que abra un modal con el desglose JSON o vista comparativa ("Antes" vs "Después") de los datos modificados.
-    - **Ofuscación de Datos Sensibles:** El payload JSON enmascarará automáticamente contraseñas, API Keys y datos de tarjetas antes de guardarse, evitando exposición de secretos.
-    - Filtros avanzados por usuario, por módulo, por fecha y por tipo de acción.
+    - Pestaña dedicada en Hub 1 y Hub 8 exclusivo para rol `admin`.
+    - **Registro Selectivo (Sin Ruido):** Solo se registran acciones mutables que alteran el estado del sistema, ignorando lecturas.
+    - Tabla estructurada con: Fecha/Hora, Usuario (Nombre + Rol), Módulo de Origen, Acción y Entidad Afectada.
+    - Modal de visualización forense con diff JSON comparativo "Antes vs Después" con datos sensibles enmascarados.
+    - Filtros dinámicos por usuario, módulo y tipo de acción.
 * **Destino de Distribución:** [DASHBOARD_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/DASHBOARD_ROADMAP.md) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
-* **Impacto en Backend:** Tabla `system_audit_logs` con columnas `causer_id`, `causer_type`, `event`, `subject_id`, `subject_type`, `properties` (JSON con `old` y `attributes`), y endpoint `GET /api/v1/admin/audit-logs`.
+* **Impacto en Backend:** Tabla `system_audit_logs`, servicio `AuditTrailService`, política `SystemAuditLogPolicy` y endpoints en `SystemAuditLogApiController`.
 
 ---
 
@@ -751,98 +753,106 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Frontend:** Reglas CSS en `styles.css` y funciones de impresión en `app.js`.
 
 ### `TASK-UX-03`: Sistema Global de Toasts y Notificaciones en Cola (Z-Index Máximo, TTL Extendido y Stack Acumulativo)
-* **Prioridad:** **Alta** | **Estado:** **Pendiente (Fase 2: Backlog)**
-* **Punto Ciego / Situación Reportada:**
-  1. Los mensajes flotantes de confirmación, alerta y error (toasts) tienen una duración en pantalla excesivamente corta, desapareciendo antes de que el usuario u operador alcance a leer instrucciones o advertencias operativas (como se observó en las alertas de validación de campos obligatorios en alta de producto).
-  2. Si se disparan varios mensajes consecutivamente o en paralelo, el nuevo mensaje sobreescribe al anterior en vez de acumularse en una pila ordenada.
-  3. En ocasiones los toasts quedan por debajo del nivel de visualización (`z-index`) de drawers laterales (`z-[110]`) o modales flotantes (`z-[120]`), quedando tapados u ocultos.
-* **Solución de UI/UX Propuesta:**
-  - **Pila Global Acumulativa de Toasts (`toast-stack-container`):**
-    - Contenedor flotante fijado en la esquina superior o inferior de la pantalla con `z-index: 99999` absoluto, garantizando que siempre flote por encima de cualquier modal, drawer o cortina de fondo (`backdrop-blur`).
-    - Capacidad de apilar hasta N notificaciones simultáneas con espaciado vertical y micro-animaciones fluidas de entrada y salida (`transition-all duration-300`).
-  - **Temporización Inteligente por Severidad (TTL Extendido):**
-    - Toasts de éxito e información: duración ampliada a 6 segundos.
-    - Toasts de advertencia y error de validación: duración extendida a 10 segundos o permanentes con botón de cierre manual `[X]`.
-    - Función *Pause on Hover*: si el cursor del usuario se posiciona sobre cualquier toast, el temporizador regresivo se pausa para permitir lectura calmada.
-  - **API Global Unificada:** Función `window.showToast(message, type = 'info'|'success'|'warning'|'error', options = { duration, persistent })` estandarizada para toda la suite de módulos (Hubs 1 a 7).
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.3)
+* **Implementación Fullstack End-to-End:**
+  - **Base de Datos & Modelo Eloquent:** Migración `user_notifications` con `user_id`, `type`, `title`, `message`, `deep_link_type` (`order`, `sku`, `shipment`), `deep_link_folio`, `read_at`. Modelo `UserNotification`.
+  - **Servicio de Notificaciones:** `NotificationDispatcherService::dispatch()` que enruta avisos en tiempo real con deep links prefiltrados y persiste en cola.
+  - **Endpoints RESTful:** `GET /api/v1/system/notifications`, `POST /api/v1/system/notifications/{id}/read`, `POST /api/v1/system/notifications/mark-all-read`.
+  - **Componente Visual & Toasts:** `#global-toast-container` con `z-[99999]`, función global `window.showToast()`, campanita reactiva en topbar con contador de no leídas y modal popover con saltos directos al catálogo y mesa de empaque.
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/GlobalNotificationSystemTest.php` al 100% verde (7/7 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:**
+  1. Los mensajes flotantes de confirmación, alerta y error (toasts) tenían una duración en pantalla excesivamente corta, desapareciendo antes de que el usuario u operador alcanzara a leer advertencias operativas.
+  2. Si se disparaban varios mensajes consecutivamente o en paralelo, el nuevo mensaje sobreescribía al anterior en vez de acumularse en una pila ordenada.
+  3. En ocasiones los toasts quedaban por debajo del nivel de visualización (`z-index`) de drawers laterales o modales flotantes.
+* **Solución de UI/UX Implementada:**
+  - Pila global acumulativa de toasts con `z-[99999]`, TTL adaptativo por severidad (6s info/éxito, 10s advertencia/error), pausa al pasar el cursor (*pause on hover*) y cierre manual.
+  - Campanita interactiva con contador y saltos en 1 clic prefiltrados a órdenes y SKUs.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [INVENTORY_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/INVENTORY_ROADMAP.md).
-* **Impacto en Frontend:** Estilos en `styles.css`, motor reactivo de notificaciones en `app.js` y paridad con Alpine.js en todos los layouts.
+* **Impacto en Backend:** Tabla `user_notifications`, modelo `UserNotification`, servicio `NotificationDispatcherService` y endpoints en `SystemNotificationApiController`.
 
 ### `TASK-SYS-ENV`: Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real)
-* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.5)
+* **Implementación Fullstack End-to-End:**
+  - **Base de Datos & Modelos:** Tablas `system_environment_configs` y `environment_audit_logs`. Modelos `SystemEnvironmentConfig` y `EnvironmentAuditLog` con enmascaramiento forense de credenciales de pasarelas y paqueterías (`stripe_secret_key`, `skydropx_token`).
+  - **Protocolo de Seguridad:** Conmutación gobernada por endpoint `POST /api/v1/system/environment/switch`. Para transicionar a Producción Real, exige confirmación obligatoria con la palabra `PRODUCCION` en mayúsculas, motivo de auditoría y registro inmutable en bitácora.
+  - **Consola de Gobernanza:** Pestaña "Ajustes Globales & Entorno" en Hub 8 Gobernanza (`/portal/governance?tab=environment`) con badges cromáticos en vivo (ámbar sandbox vs esmeralda producción).
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/SystemGovernanceHubTest.php` al 100% verde (4/4 pruebas superadas, 0 emojis).
 * **Punto Ciego Resuelto:** Riesgo crítico de generar cargos bancarios reales o timbrar guías de paquetería pagadas a transportistas durante pruebas internas del personal de almacén o sesiones de capacitación.
-* **Solución de UI/UX Implementada en `export`:**
-  - Barra de estado permanente en cabecera (Navbar / Topbar) visible en todos los Hubs:
-    - *Modo Sandbox (Pruebas):* Badge ámbar pulsante con micro-interacción de pulso (`.env-pulse-dot.amber`), etiqueta *"SANDBOX"* y subtítulo *"Simulado ($0 MXN)"*.
-    - *Modo Producción (Live):* Badge esmeralda sobrio (`.env-pulse-dot.emerald`), etiqueta *"PRODUCCIÓN"* y subtítulo *"En Vivo (Real)"*.
-  - Modal de seguridad y conmutación (`openEnvironmentModal`):
-    - Tarjetas interactivas de entorno con estado de pasarelas y costos.
-    - Validación estricta de permisos RBAC para Super Admin (`currentRole.id === 'admin'`), con bloqueo preventivo y mensaje de advertencia para perfiles operativos (Almacén, Ventas).
-    - Protocolo de seguridad para paso a Producción: reto de confirmación obligatoria con la palabra `PRODUCCION` en mayúsculas, checkbox de aceptación de responsabilidad operativa y motivo obligatorio para auditoría.
-    - Historial inmutable de auditoría integrado en el modal y sincronizado con `shiftLog` del Hub 1.
-* **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
-* **Impacto en Backend:** Tablas `system_environment_configs` y `environment_audit_logs` (Sección 3.25 DDL), Modelos Eloquent `SystemEnvironmentConfig` y `EnvironmentAuditLog` con enmascaramiento de llaves (Sección 4.19), Servicio de Dominio `EnvironmentGatewayService` (Sección 5.10), Endpoints RESTful y FormRequest `/api/v1/system/environment/*` (Sección 6.1 y 6.2 W) y Paso 26 del Checklist Laravel (Sección 10).
-* **Validación Automatizada:** Suite 34 (`test_environment_switcher_task_sys_env.js`) con 54 aserciones superadas al 100% y 34/34 suites de regresión globales con 0 fallos.
+* **Solución de UI/UX Implementada:**
+  - Barra de estado permanente en cabecera (Navbar / Topbar) visible en todos los Hubs: badge ámbar pulsante para Sandbox vs badge esmeralda para Producción.
+  - Modal y consola de gobernanza con validación estricta de permisos RBAC para Super Admin, bloqueo para perfiles operativos y reto de confirmación inmutable.
+* **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
+* **Impacto en Backend:** Tablas `system_environment_configs` y `environment_audit_logs`, servicio `EnvironmentGatewayService` y controlador `PortalGovernanceController`.
 
 ### `TASK-RBAC-02`: Gestor Dinámico de Roles y Matriz Granular de Accesos por Módulo
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
-* **Punto Ciego Resuelto:** Limitación de solo 3 roles fijos en código; el negocio requiere crear perfiles operativos a la medida (*Supervisor de Calidad, Empacador Junior, Comprador Textil, Contador Externo*) y decidir qué módulos y datos específicos puede ver o editar cada uno.
-* **Solución de UI/UX:**
-  - Vista en Ajustes Globales con gestor CRUD de roles y matriz interactiva de permisos:
-    - Botón `+ Crear Nuevo Rol` con asignación de nombre y descripción.
-    - Matriz de permisos tipo checkbox agrupada por Hub: permisos de lectura, edición, visualización de importes monetarios ($), liquidación de OCs, dictamen de RMA y acceso al Portal de Proveedores.
-  - Selector reactivo en la ficha de usuario para asignación de roles directos.
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.1)
+* **Implementación Fullstack End-to-End:**
+  - **Motor Spatie Permission:** Tablas `roles`, `permissions`, `model_has_roles`, `role_has_permissions`.
+  - **Servicio de Dominio:** `RolePermissionService` para creación dinámica de roles, sincronización de permisos granulares por Hub y asignación a usuarios.
+  - **Endpoints RESTful:** `GET /api/v1/system/roles`, `POST /api/v1/system/roles`, `PUT /api/v1/system/roles/{id}/permissions`.
+  - **Consola Visual:** Pestaña "Privacidad & RBAC" en Hub 8 Gobernanza (`/portal/governance?tab=rbac`) con matriz interactiva de permisos clasificada por los 7 Hubs operativos.
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/RolePermissionMatrixTest.php` al 100% verde (7/7 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:** Limitación de roles fijos en código sin capacidad de crear perfiles operativos a la medida (*Supervisor de Calidad, Empacador Junior, Comprador Textil, Contador Externo*) y asignar permisos granulares de módulo.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
-* **Impacto en Backend:** Paquete Spatie Permission (`roles`, `permissions`, `model_has_roles`) y endpoints `GET /api/v1/roles`, `POST /api/v1/roles`, `PUT /api/v1/roles/{id}/permissions`.
+* **Impacto en Backend:** Modelos de Spatie Permission, `RolePermissionService`, controlador `RoleManagementApiController`.
 
 ### `TASK-RBAC-03`: Aislamiento de Pantallas, Filtrado de Navegación y Privacidad Financiera por Rol
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
-* **Punto Ciego Resuelto:** Anteriormente todos los 7 Hubs del sidebar y todas las pestañas de Dashboard e Inventario eran visibles para cualquier rol, permitiendo a perfiles operativos (Almacenista, Operador de Empaque, Atención a Clientes) ver información confidencial como facturación, P&L, costos de compra a proveedores (CPP) y márgenes de ganancia. Además, al hacer clic en pestañas del Dashboard se mutaba arbitrariamente el rol del usuario dándole privilegios de Administrador.
-* **Solución de UI/UX Implementada:**
-  - Filtrado reactivo del Sidebar (`#main-module-nav .module-link`): cada rol solo ve los Hubs para los que está facultado normativamente (`allowedHubs`).
-  - Guardia de navegación `renderAccessDenied()`: si se intenta navegar a una pantalla no autorizada, se presenta un escudo de "Acceso Restringido por Perfil Operativo" con opciones para ir al módulo principal del rol o abrir el selector de roles.
-  - Pestañas del Dashboard (`subnavBar`): solo se muestran las pestañas permitidas para el rol activo (`canAccessDashboardTab()`) y se eliminó la mutación forzada de roles al cambiar de pestaña.
-  - Sub-pestañas de Inventario (`isTabAllowed()`): se ocultan "Proveedores & Scraping" y "Compras" para personal de almacén, empaque y ventas.
-  - Privacidad de Costos y Márgenes (`canViewFinancialCosts()`): enmascaramiento estricto con badge *"Protegido"* en celdas de costo unitario, CPP y margen en catálogo de inventario.
-  - Reorientación automática al cambiar de rol: si el usuario cambia de rol estando en un módulo restringido, se le redirige inmediatamente a su módulo principal (`primaryHub`).
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.1)
+* **Implementación Fullstack End-to-End:**
+  - **Middleware de Privacidad Financiera:** `EnforceFinancialPrivacy` que intercepta responses JSON y vistas Blade en tiempo de ejecución.
+  - **Enmascaramiento Estricto de Datos:** Costos de adquisición (`cost`), Costo Promedio Ponderado (`cpp`), márgenes brutos/netos (`margin_pct`, `profit_margin`) y valuaciones contables son ofuscados con `"Protegido"` o `null` para cualquier rol no autorizado (`packer`, `warehouse`, `sales`).
+  - **Guardias de Navegación:** Sidebar y subnavs de Dashboard e Inventario filtrados normativamente según `allowedHubs`.
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/FinancialPrivacyEnforcementTest.php` al 100% verde (6/6 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:** Anteriormente perfiles operativos de almacén, empaque y ventas podían ver facturación, P&L, costos de compra a proveedores (CPP) y márgenes de ganancia.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [ROLES_AND_WORKFLOWS_SPEC.md](file:///c:/Users/Mickey/Documents/export/ROLES_AND_WORKFLOWS_SPEC.md).
-* **Validación Automatizada:** Suite 54 (`scratch/test_role_screen_visibility.js`) con 10/10 aserciones en verde y Suite 53 con 17/17 superadas. Cumplimiento estricto de la regla CERO EMOJIS.
+* **Impacto en Backend:** Middleware `EnforceFinancialPrivacy`, sanitización recursiva de atributos en `SanitizesFinancialAttributesTrait`.
 
 ### `TASK-RBAC-04`: Segregación y Asignación de Tareas Operativas por Rol en Bandeja de Hub 1
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
-* **Punto Ciego Resuelto:** En la Bandeja de Acciones Físicas Inmediatas (Hub 1 / Tablero Operativo) todas las tareas de todas las áreas operativas (`empaque`, `recepcion`, `surtido`, `expedicion`, `atencion`) aparecían indiscriminadamente para todos los perfiles. Esto provocaba que operadores de empaque como Pedro Empaque vieran compras de proveedores Torzo B2B o reposiciones de anaqueles ROP, y que almacenistas como Carlos Almacén vieran empaques de pedidos individuales o alertas de fraude de clientes.
-* **Solución de UI/UX Implementada:**
-  - **Matriz Normativa de Categorías por Rol (`getAllowedTaskCategoriesForRole`):**
-    - `packer` (Pedro Empaque): únicamente tareas de categoría `empaque`.
-    - `warehouse` (Carlos Almacén): tareas de `recepcion` y `surtido` (inbound y reabastecimiento ROP).
-    - `quality_supervisor` (Sergio Calidad): tareas de `recepcion`, `calidad`, `rma` y `expedicion`.
-    - `purchases` (Elena Compras): tareas de `recepcion` y `compras` (seguimiento inbound de proveedores y abastecimiento externo, excluyendo terminantemente `surtido` físico interno de anaquel que corresponde a `warehouse`).
-    - `sales` (Ana Atención): tareas de `atencion` (alertas de fraude Radar).
-    - `admin` (Mickey RevOps) y `all_roles` (Operador Integral): acceso total a todas las áreas para supervisión y orquestación transversal.
-  - **Segregación Reactiva de Tareas (`dashboardBody`):** `pendingTasks` se filtra según las categorías autorizadas del rol conectado, actualizando el badge del subnav ("N Pendientes") para reflejar solo la carga real de la estación activa.
-  - **Barra de Filtros Adaptativa:** Oculta los botones de filtros que no corresponden al rol en curso (e.g. Pedro Empaque solo ve *Todas las tareas*, *Empaque & Picking* y *Riesgo SLA*; Elena Compras solo ve *Todas las tareas* y *Recepción Inbound*, sin ver *Surtido ROP* ni tareas físicas de picking).
-  - **Sanitización de Filtros:** Al cambiar de rol en vivo, si `activeFilter` contenía una categoría ajena al nuevo puesto, se sanitiza automáticamente a `'all'` para evitar vistas vacías erróneas.
-  - **Identificador de Estación y Estado Vacío:** Encabezado con indicación dinámica `Prioridades del Turno • Estación: [Título del Rol]` y mensaje contextual de bandeja despejada por puesto.
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.1)
+* **Implementación Fullstack End-to-End:**
+  - **Servicio de Dominio:** `OperationalTaskService::getTasksForRole()` que segrega estrictamente las tareas según la estación activa:
+    - `packer`: únicamente categoría `empaque`.
+    - `warehouse`: categorías `recepcion` y `surtido` interno.
+    - `quality_supervisor`: categorías `recepcion`, `calidad`, `rma` y `expedicion`.
+    - `purchases`: categorías `recepcion` y `compras` (excluyendo surtido interno de racks).
+    - `sales`: categoría `atencion` (alertas Radar y carritos).
+    - `admin` / `all_roles`: visibilidad transversal completa.
+  - **Endpoints RESTful:** `GET /api/v1/system/operational-tasks`, `POST /api/v1/system/operational-tasks/{id}/complete`.
+  - **Bandeja de Hub 1:** Badge de conteo ("N Pendientes") y barra de filtros sincronizados en vivo con el rol conectado.
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/RoleOperationalTaskSegregationTest.php` al 100% verde (7/7 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:** Todas las tareas aparecían indiscriminadamente para todos los perfiles, provocando que empacadores vieran compras a proveedores o que almacenistas vieran alertas de fraude.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [ROLES_AND_WORKFLOWS_SPEC.md](file:///c:/Users/Mickey/Documents/export/ROLES_AND_WORKFLOWS_SPEC.md).
-* **Validación Automatizada:** Suite 55 (`scratch/test_task_rbac_04_tray_segregation.js`) con 8/8 pruebas superadas al 100%. Regla CERO EMOJIS cumplida estrictamente.
+* **Impacto en Backend:** Tabla `operational_tasks`, servicio `OperationalTaskService`, controlador `OperationalTaskApiController`.
 
-### `TASK-SYS-01`: Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global de Negocio (Fase 2: Ajuste de Funcionalidades & UX/UI)
-* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada en UI (Fase 2)**
-* **Punto Ciego / Situación Reportada:**
-  1. Anteriormente el botón "Ajustes del Sistema" en el pie de la barra lateral (Sidebar Footer) abría un modal flotante (`data-settings-modal`), lo cual comprimía la configuración global del negocio (APIs, Multiverso, Reglas de Inventario, Consola RBAC) en un diálogo flotante estrecho y poco ergonómico.
-  2. Existía confusión operativa entre los ajustes particulares de cada módulo y los ajustes globales de la empresa.
-* **Regla Universal de Ajustes como Pantalla Completa (Cero Modales ni Drawers):**
-  - **Ajustes del Módulo Activo (Contextual en Navbar):** El botón de engranaje ubicado a un lado del botón "Ver tienda" en la cabecera (Navbar / Topbar) representa los ajustes del módulo en curso. En Hub 4 (Inventario), la configuración del módulo (`inventoryCurrentScreen = 'settings'`) se renderiza a **pantalla completa dentro de `<main>`** con 7 pestañas organizadas, panel de control y botón superior *"Volver al Catálogo Operativo"*, erradicando el uso de modales flotantes.
-  - **Ajustes del Sistema (Gobernanza Global en Sidebar Footer):** El botón "Ajustes del Sistema" en el pie del sidebar renderiza la pantalla canónica `screens.settings` (`systemSettingsBody()`) a **pantalla completa dentro de `<main>`**, eliminando definitivamente `data-settings-modal`.
-  - **Layout de Centro de Mando:** Incluye barra de navegación lateral interna (Sidebar de Ajustes) y área de trabajo completa para:
-    - *Gobernanza General:* Parámetros de marca, multiverso, vitrinas y políticas comerciales.
-    - *Integraciones & Scrapers:* Credenciales API, Torzo Bot Scraper, pasarelas Stripe/Mercado Pago y couriers.
-    - *Entornos:* Conmutador Sandbox / Producción con retos de confirmación y bitácora de auditoría.
-    - *Seguridad & RBAC:* Consola visual completa para crear perfiles y asignar permisos granulares.
-    - *Acceso Unificado por Módulo:* Enlaces directos para auditar y modificar las reglas específicas de cada uno de los 7 Hubs.
-    - *Botón de Retorno:* Botón `Volver al Módulo Operativo` para regresar fluidamente al Hub anterior guardando el estado de navegación.
+### `TASK-SYS-01`: Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.5)
+* **Implementación Fullstack End-to-End:**
+  - **Controlador & Ruta Canónica:** `PortalGovernanceController::index` atendiendo la ruta `/portal/governance` (y `/governance`).
+  - **Hub 8 en Sidebar:** Entrada permanente en el menú de navegación lateral con icono SVG de escudo/engranaje y badge oficial "Hub 8: Gobernanza del Negocio".
+  - **Arquitectura de Pantalla Completa (Regla 15):** Vista `resources/views/portal/governance.blade.php` a pantalla completa dentro de `<main>` sin modales estrechos ni compresión de elementos.
+  - **5 Pestañas de Control Integral:**
+    1. *Privacidad & RBAC:* Consola visual Spatie para crear perfiles operativos y asignar permisos granulares.
+    2. *Auditoría Master:* Activity Log inmutable con visor forense de mutaciones ("Antes vs Después") y enmascaramiento de datos sensibles.
+    3. *Notificaciones & Tareas:* Gestor de plantillas y telemetría de cola de notificaciones operativas.
+    4. *Mensajería Inter-Áreas:* Canales de chat operativo con auto-detección de folios.
+    5. *Ajustes Globales & Entorno:* Conmutador Sandbox / Producción con reto de confirmación obligatoria `PRODUCCION` y bitácora de auditoría.
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/SystemGovernanceHubTest.php` al 100% verde (4/4 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:** Anteriormente el botón "Ajustes del Sistema" en el sidebar abría un modal flotante estrecho que comprimía la configuración empresarial y generaba confusión con los ajustes particulares de cada módulo.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [INVENTORY_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/INVENTORY_ROADMAP.md).
-* **Impacto en Frontend:** Pantalla `screens.settings` con `systemSettingsBody()` en `app.js`, variable reactiva `inventoryCurrentScreen` en `inventory-module.js` y `index.html`, retiro definitivo del modal `data-settings-modal` y pruebas de renderizado en Node VM superadas al 100%.
+* **Impacto en Backend:** Controlador `PortalGovernanceController`, vista `resources/views/portal/governance.blade.php`, layout `resources/views/layouts/portal.blade.php`.
+
+### `TASK-COM-01`: Mensajería Interdepartamental Operativa con Detección Automática de Folios
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.5-prioridad-5-gobernanza-rbac`, Slice 5.4)
+* **Implementación Fullstack End-to-End:**
+  - **Base de Datos & Modelo Eloquent:** Migración `interdepartmental_messages` con `channel` (`almacen-compras`, `empaque-logistica`, `calidad-compras`, `general`), `sender_user_id`, `sender_name`, `sender_role`, `message`, `referenced_folio_type` (`order`, `sku`, `po`, `shipment`), `referenced_folio`, `created_at`. Modelo `InterdepartmentalMessage`.
+  - **Servicio de Mensajería:** `InterdepartmentalChatService` con motor regex que detecta automáticamente menciones de folios en caliente: `@Pedido:ORD-...`, `@SKU:TXT-...`, `@OC:PO-...`, `@Guia:DHL-...`.
+  - **Endpoints RESTful:** `GET /api/v1/system/chat/messages`, `POST /api/v1/system/chat/messages`.
+  - **Interfaz de Usuario:** Cajón flotante reactivo de chat `#interdepartmentalChatDrawer` accesible desde la barra superior de todos los Hubs y pestaña integrada en Hub 8 Gobernanza (`/portal/governance?tab=chat`).
+  - **Cobertura de Pruebas:** `tests/Feature/Governance/InterdepartmentalMessagingTest.php` al 100% verde (6/6 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:** Los desacuerdos o aclaraciones entre departamentos (ej. Empaque consultando un SKU dudoso a Compras o Almacén avisando un arribo a Logística) se gestionaban por canales externos no auditables (WhatsApp personal), sin trazabilidad ni enlace al folio de la orden.
+* **Solución de UI/UX Implementada:** Chat interdepartamental con selector de canales por estación, auto-detección de folios y chip de salto rápido al documento comercial mencionado.
+* **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [DASHBOARD_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/DASHBOARD_ROADMAP.md).
+* **Impacto en Backend:** Tabla `interdepartmental_messages`, modelo `InterdepartmentalMessage`, servicio `InterdepartmentalChatService` y controlador `InterdepartmentalChatApiController`.
 
 
 ### `TASK-SUB-DUN`: Motor de Dunning y Recuperación de Cobros Fallidos en Suscripciones (MRR)
@@ -940,14 +950,19 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Backend:** Evento de dominio `marketing.campaign_scaled` y escucha en `OperationalEventBus`.
 
 ### `TASK-INT-13`: Deducción Automática de Insumos de Empaque en Kardex y Alerta ROP de Materiales de Embalaje
-* **Prioridad:** **Alta** | **Estado:** **Pendiente**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.4-prioridad-4-sinergias-crosshub`, Slice 4.1)
+* **Implementación Fullstack End-to-End:**
+  - **Servicio de Dominio:** `PackagingKardexDeductionService::deductForShipment()` que descuenta automáticamente las existencias de cajas (`BOX-S-STD`, `BOX-M-STD`, etc.) y bolsas de seguridad en `inventories` al momento de guiar o expedir un envío.
+  - **Kardex Inmutable:** Registro atómico de asientos de salida con tipo `CONSUMO_INSUMO_EMPAQUE` vinculados al folio de la orden y guía courier.
+  - **Alertas ROP:** Detección de umbrales mínimos (< 40 unidades) con disparo de alertas a la bandeja de Almacén.
+  - **Pruebas Automatizadas:** `tests/Feature/PackagingKardexDeductionTest.php` al 100% verde (6/6 pruebas superadas, 0 emojis).
 * **Punto Ciego Resuelto:** Las cajas y bolsas son insumos críticos que se agotan; si la bodega se queda sin cajas microcorrugadas o bolsas opacas, la expedición se detiene por completo provocando demoras masivas en envíos.
-* **Solución de UI/UX:**
-  - Los tipos de empaque de `TASK-LOG-06` se registran como SKUs de insumos consumibles en el Kardex de Hub 4.
-  - Al confirmar el empaque de una orden en Hub 6: se descuenta automáticamente 1 unidad del tipo de caja seleccionada (`BOX-BLAZER-01`, `BOX-M-STD`, etc.) y 1 bolsa de seguridad.
-  - Alerta ROP en Almacén (Hub 1): cuando el stock de cajas llega a su umbral crítico (ej. < 40 cajas), el sistema avisa con distintivo ámbar y genera una orden de reabastecimiento al proveedor de cartón en Hub 7.
+* **Solución de UI/UX Implementada:**
+  - Los tipos de empaque de `TASK-LOG-06` se vinculan como insumos consumibles en el Kardex de Hub 4.
+  - Al confirmar el empaque de una orden en Hub 6: se descuenta automáticamente 1 unidad del tipo de caja seleccionada y 1 bolsa de seguridad.
+  - Alerta ROP en Almacén (Hub 1): cuando el stock de cajas llega a su umbral crítico, el sistema avisa con distintivo ámbar y genera sugerencia de reabastecimiento en Hub 7.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
-* **Impacto en Backend:** Asientos Kardex de tipo `CONSUMO_INSUMO_EMPAQUE` y eventos `shipping.package_consumed`.
+* **Impacto en Backend:** Asientos Kardex de tipo `CONSUMO_INSUMO_EMPAQUE`, servicio `PackagingKardexDeductionService`.
 
 ### `TASK-INT-14`: Escudo Antifraude y Freno de Emergencia de Envíos en Mesa de Empaque
 * **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada en UI (Fase 4 / Hub 6 & Hub 1)**
@@ -978,11 +993,14 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Backend:** Evento `shipping.delivery_attempt_failed` y disparador en `WhatsAppNotificationService`.
 
 ### `TASK-INT-16`: Sincronización Contable Automática de Mermas y Ajustes de Kardex al P&L Financiero
-* **Prioridad:** **Alta** | **Estado:** **Pendiente**
-* **Punto Ciego Resuelto:** Mermas detectadas en bodega o prendas destruidas en RMA quedan como ajustes aislados en inventario, distorsionando el balance general y ocultando pérdidas en los reportes financieros.
-* **Solución de UI/UX:**
-  - Cada vez que en Hub 4 se asienta un movimiento de merma (`MERMA_RMA_DESTRUIDA`, `AJUSTE_AUDITORIA_CIEGA` o rotura de líquidos cosméticos):
-    - Finanzas (Hub 5) genera automáticamente una póliza contable en el Libro Diario afectando la cuenta *"Pérdida por Merma de Inventario"*, reflejando de inmediato la reducción de utilidad neta en el P&L mensual.
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.4-prioridad-4-sinergias-crosshub`, Slice 4.4)
+* **Implementación Fullstack End-to-End:**
+  - **Servicio de Dominio:** `KardexAccountingSyncService::syncKardexMovementToFinancialLedger()` que intercepta en tiempo real los movimientos de merma y baja física de inventario (`MERMA_RMA_DESTRUIDA`, `AJUSTE_AUDITORIA_CIEGA`, rotura).
+  - **Libro Diario Contable:** Generación automática de pólizas inmutables en `general_ledger_entries` cargando a la cuenta *"Perdida por Merma de Inventario"* y abonando a *"Inventario de Mercancias"*, con cálculo exacto en base al CPP unitario.
+  - **Impacto en P&L:** La utilidad bruta y neta reflejan de inmediato el castigo en el informe mensual de pérdidas y ganancias de Hub 5 Finanzas.
+  - **Pruebas Automatizadas:** `tests/Feature/KardexAccountingSyncTest.php` al 100% verde (6/6 pruebas superadas, 0 emojis).
+* **Punto Ciego Resuelto:** Mermas detectadas en bodega o prendas destruidas en RMA quedaban como ajustes aislados en inventario, distorsionando el balance general y ocultando pérdidas en los reportes financieros.
+* **Solución de UI/UX Implementada:** Generación automática de pólizas contables en el Libro Diario de Hub 5 al asentar movimientos de merma en Kardex.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
 * **Impacto en Backend:** Servicio `KardexAccountingSyncService` y tabla `general_ledger_entries`.
 
@@ -1366,7 +1384,7 @@ graph TD
 > **Referencia de Diseño & Código Fuente:** Se toma como estándar visual y funcional estricto el proyecto `C:\Users\Mickey\Documents\DEV/pop` (Luxury Minimalist Design System, paleta monocromática blanca, tipografía Plus Jakarta Sans & Outfit, acentos esmeralda y cero emojis).
 
 ### `TASK-STR-01`: Storefront D2C: Creación del Portal Público y Enlace desde Navbar RevOps
-* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.1-prioridad-1-storefront-pwa`, Slice 1.1)
 * **Punto Ciego Resuelto:** Actualmente en el Navbar del panel de administración RevOps existe el botón `[Ver tienda]` con enlace roto a `../public/index.php`. No existía el portal público de cara al cliente integrado en la solución para navegar entre la tienda y el panel de administración.
 * **Solución de UI/UX Implementada:**
   - Creación del portal público D2C con el sistema de diseño de `pop` y prioridad Mobile-First PWA:
@@ -1381,7 +1399,7 @@ graph TD
 * **Impacto en Backend:** Servir la vista principal en ruta `/` o `/tienda` y assets estáticos WebP.
 
 ### `TASK-STR-02`: Catálogo Público de Productos, Ficha Anatómica PDP, Wishlist & Motor Predictivo de Demanda (Ref: `pop/catalogo.html`)
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.1-prioridad-1-storefront-pwa`, Slice 1.2)
 * **Punto Ciego Resuelto:** La tienda no contaba con la vitrina pública para exhibir las prendas con ficha interactiva, carecía de sistema de lista de deseos (wishlist/favoritos) para guardar prendas sin comprar de inmediato, y la dirección no tenía visibilidad para predecir preferencias de producto y demanda antes de fabricar o reordenar inventario.
 * **Solución de UI/UX Mobile-First:**
   - Grid responsivo de productos con tarjetas minimalistas (foto WebP, categoría oficial Torzo, nombre de prenda, precio menudeo con IVA, selector de tallas y botón de corazón para Wishlist).
@@ -1398,7 +1416,7 @@ graph TD
 * **Impacto en Backend:** DDL `wishlist_demand_signals` y `product_demand_predictions` (Sección 3.35), modelos Eloquent (Sección 4.29), servicio `WishlistDemandPredictionEngine` (Sección 5.20) y endpoints `/api/v1/store/products/{id}`, `/api/v1/store/size-advisor`, `/api/v1/store/wishlist/telemetry`, `/api/v1/analytics/wishlist-demand-forecast` (Subsección GG).
 
 ### `TASK-STR-03`: Carrito Deslizable & Checkout en 3 Pasos Multimodal con Logística de Carritos Mixtos (Físico vs On-Demand, SPEI BBVA, Tarjetas, OXXO Pay y Registro de Comprador)
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.1-prioridad-1-storefront-pwa`, Slice 1.3 & 1.4)
 * **Punto Ciego Resuelto:** Falta de un flujo formal de compra D2C con bifurcación operativa para pedidos que combinan stock físico en bodega con prendas confeccionadas bajo pedido (carrito mixto), eliminación de botones redundantes de WhatsApp y soporte completo para pagos múltiples, registro opcional de comprador y apartado de stock.
 * **Solución de UI/UX Mobile-First Implementada:**
   - **Slide-over Cart (Carrito Deslizable):**
@@ -1440,7 +1458,7 @@ graph TD
 * **Impacto en Backend:** DDL 3.36, Modelos Eloquent 4.30, Servicio 5.21 (`StoreCheckoutService`), endpoints `/api/v1/store/checkout`, `/api/v1/store/orders/{folio}`, `/api/v1/store/validate-postal-code` (Subsección HH).
 
 ### `TASK-STR-04`: Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2)
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)** (Tag `v1.1-prioridad-1-storefront-pwa`, Slice 1.4)
 * **Punto Ciego Resuelto:** Desconexión entre los módulos de RevOps (Hub 7 Aliados y Hub 2 CMS) y la tienda pública donde el consumidor interactúa.
 * **Solución de UI/UX:**
   - **Sinergia con Hub 7 (Aliados & Convenios):**
