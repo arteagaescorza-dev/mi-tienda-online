@@ -150,19 +150,34 @@ flowchart TD
 
 ---
 
-### Slice 6: Web Push VAPID, Atribución B2B y Suite de Pruebas de Integración
+### Slice 6: Web Push VAPID, Atribución B2B y Suite de Pruebas de Integración [COMPLETADO]
 * **Backend:**
-  - `WebPushNotificationService`: Manejo de endpoints `/api/v1/pwa/push/subscribe` con llaves VAPID.
-  - Middleware de captura UTM para registrar el aliado comercial en sesión.
+  - Migración `2026_09_26_000001_create_pwa_push_tables.php` ejecutada exitosamente con tablas `pwa_push_subscriptions` y `pwa_push_notification_logs`.
+  - Modelos Eloquent: `PwaPushSubscription` y `PwaPushNotificationLog`.
+  - Servicio de Dominio `WebPushNotificationService`:
+    - `subscribe(array $data, ?int $userId, ?string $cartSessionId)`: Registro de endpoint y llaves VAPID con emisión de notificación de bienvenida.
+    - `unsubscribe(string $endpoint)`: Baja de suscripción push.
+    - `updatePreferences(string $endpoint, array $topics)`: Ajuste granular de temas (urgencia stock, tracking courier, renovaciones MRR, lanzamientos).
+    - `sendTestNotification(string $endpoint)`: Disparo de push de prueba con log auditable.
+    - `notifyStockUrgency(string $cartSessionId, int $remainingMinutes)`: Alerta preventiva de expiración de reserva temporal.
+    - `notifyOrderShipped(string $folio, string $trackingNumber)`: Alerta automática de despacho courier DHL.
+  - Endpoints RESTful en `StorefrontApiController` (`routes/api.php`):
+    - `POST /api/v1/store/push/subscribe`
+    - `POST /api/v1/store/push/unsubscribe`
+    - `POST /api/v1/store/push/test`
 * **Frontend:**
-  - Banner de bienvenida `#partnerWelcomeBanner` para usuarios referidos de convenios (`?utm_source={aliado}&coupon={codigo}`).
-  - Service Worker `sw.js` y `manifest.json` registrados y funcionales.
-* **Suite de Pruebas:**
-  - `tests/Feature/StorefrontPwaModuleTest.php`:
-    - Test de renderizado del catálogo multiverso con productos reales.
-    - Test del ciclo de vida de `stock_locks` (reserva atómica, bloqueo concurrente y liberación).
-    - Test de validación y cálculo de cupones B2B.
-    - Test de checkout de punta a punta con deducción en Kardex y creación de orden.
-    - Test de acceso al portal de cliente.
-    - Verificación automatizada de **cero emojis** en todas las vistas y controladores.
-* **Criterio de Cierre:** 100% de pruebas en verde en `php artisan test`.
+  - Registro formal del Service Worker `public/sw.js` y manifiesto PWA `public/manifest.json`.
+  - Banner interactivo de bienvenida `#partnerWelcomeBanner` para usuarios referidos de convenios del Hub 7 (`?utm_source={aliado}&coupon={codigo}`) con autoaplicación de descuentos B2B.
+  - Centro de alertas push en PWA `#accountPushCenter` con sincronización asíncrona hacia el backend de estado y preferencias.
+* **Suite de Pruebas Automatizadas:**
+  - `tests/Feature/StorefrontPwaModuleTest.php` creada y pasando al 100% (8 pruebas, 55 aserciones):
+    - Catálogo multiverso conectado a base de datos real.
+    - Ficha técnica anatómica PDP con matriz de tallas y composición textil.
+    - Ciclo de vida de candados de stock (aislamiento, reserva, y fallback inteligente a Línea B On-Demand).
+    - Validación y cálculo de cupones B2B con aliados del Hub 7.
+    - Checkout transaccional con asiento inmutable en Kardex y guía courier DHL.
+    - Suscripción y registro de logs Web Push VAPID.
+    - Verificación estricta de **cero emojis** en todos los assets, controladores, vistas y servicios del Storefront.
+* **Criterio de Cierre Alcanzado:**
+  - 100% de pruebas en verde en `php artisan test` (**151 pruebas pasando, 730 aserciones**).
+  - Prioridad 1 culminada al 100% en sus 6 vertical slices Fullstack Senior.

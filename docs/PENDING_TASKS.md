@@ -94,7 +94,7 @@
 | `TASK-STR-03` | Carrito Deslizable & Checkout en 3 Pasos con Logística de Carritos Mixtos | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (UI)** | `pop/carrito.html`, Checkout Multimodal |
 | `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (UI)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01` |
 | `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR) |
-| `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (UI)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5 |
+| `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5 |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Modal Ajustes Inventario, Catálogo Operativo, ROLES_AND_WORKFLOWS_SPEC |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | Ficha SKU, Curva Tallas, Margen Real, ROP |
@@ -1494,7 +1494,13 @@ graph TD
 * **Impacto en Backend:** DDL 3.37 (`customer_profiles`, `customer_addresses`, `customer_subscriptions`), Modelos Eloquent 4.31, Servicio 5.22 (`CustomerPortalService`), Subsecciones II y JJ, y Paso 38 en `BACKEND_INTEGRATION_SPEC.md`.
 
 ### `TASK-STR-06`: Motor de Notificaciones Web Push PWA (VAPID, Alertas de Stock de 5 min, Courier Tracking & Club MRR)
-* **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Implementación Fullstack:**
+  - Migración con tablas `pwa_push_subscriptions` y `pwa_push_notification_logs`.
+  - Modelos Eloquent `PwaPushSubscription` y `PwaPushNotificationLog`.
+  - Servicio de dominio `WebPushNotificationService` y endpoints RESTful en `StorefrontApiController` (`POST /push/subscribe`, `POST /push/unsubscribe`, `POST /push/test`).
+  - Sincronización asíncrona PWA en `store-pwa.js` y Service Worker `sw.js` con soporte para eventos `push` y enrutamiento en `notificationclick`.
+  - Suite de integración completa `tests/Feature/StorefrontPwaModuleTest.php` al 100% verde (8 pruebas, 55 aserciones, 0 emojis).
 * **Punto Ciego Resuelto:** Ausencia de un canal de comunicación directo, gratuito e inmediato con los compradores móviles para alertar sobre la expiración del apartado de stock (5 minutos), avisar la salida a ruta del paquete courier y gestionar renovaciones de membresías MRR sin depender de los costos crecientes de la API de WhatsApp Business ($0.65 - $1.35 MXN por mensaje).
 * **Solución de UI/UX Mobile-First:**
   - **1. Solicitud de Permiso Táctil No Invasiva:**

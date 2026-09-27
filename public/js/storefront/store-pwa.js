@@ -3499,6 +3499,21 @@
         localStorage.setItem('multiverse_push_enabled', 'true');
       } catch(e) {}
 
+      // Sincronizar con backend RESTful (TASK-STR-06)
+      fetch('/api/v1/store/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Cart-Session-Id': getCartSessionId()
+        },
+        body: JSON.stringify({
+          endpoint: syntheticSub.endpoint,
+          keys: syntheticSub.keys,
+          topics: pushNotificationState.preferences
+        })
+      }).catch(e => console.warn('Error registrando push subscription en backend:', e));
+
       renderAccountPushPreferences();
       showToastNotification('Alertas Web Push activadas con éxito.');
       sendSimulatedPush('welcome');
@@ -3533,6 +3548,23 @@
       try {
         localStorage.setItem('multiverse_push_preferences', JSON.stringify(pushNotificationState.preferences));
       } catch(e) {}
+
+      const currentEndpoint = pushNotificationState.subscription?.endpoint;
+      if (currentEndpoint) {
+        fetch('/api/v1/store/push/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Cart-Session-Id': getCartSessionId()
+          },
+          body: JSON.stringify({
+            endpoint: currentEndpoint,
+            topics: pushNotificationState.preferences
+          })
+        }).catch(e => console.warn('Error sincronizando preferencias push:', e));
+      }
+
       renderAccountPushPreferences();
       showToastNotification('Preferencia de alertas actualizada.');
     }
@@ -3541,6 +3573,18 @@
   function togglePushNotifications() {
     const isEnabled = (pushNotificationState.permission === 'granted') && (localStorage.getItem('multiverse_push_enabled') !== 'false');
     if (isEnabled) {
+      const currentEndpoint = pushNotificationState.subscription?.endpoint;
+      if (currentEndpoint) {
+        fetch('/api/v1/store/push/unsubscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ endpoint: currentEndpoint })
+        }).catch(e => console.warn('Error cancelando push subscription en backend:', e));
+      }
+
       localStorage.setItem('multiverse_push_enabled', 'false');
       pushNotificationState.subscription = null;
       try {
@@ -4153,6 +4197,17 @@
     if (testPushBtn) {
       e.preventDefault();
       sendSimulatedPush('courier_dispatch');
+      const currentEndpoint = pushNotificationState.subscription?.endpoint;
+      if (currentEndpoint) {
+        fetch('/api/v1/store/push/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ endpoint: currentEndpoint })
+        }).catch(e => console.warn('Error enviando push test al backend:', e));
+      }
       return;
     }
 

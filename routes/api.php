@@ -104,5 +104,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/account/subscriptions/{id}/resume', [StorefrontApiController::class, 'resumeSubscription']);
         Route::post('/account/subscriptions/subscribe', [StorefrontApiController::class, 'subscribe']);
         Route::post('/account/profile', [StorefrontApiController::class, 'updateProfile']);
+
+        // Motor de Notificaciones Web Push PWA (Slice 1.6 / TASK-STR-06)
+        Route::post('/push/subscribe', [StorefrontApiController::class, 'pushSubscribe']);
+        Route::post('/push/unsubscribe', [StorefrontApiController::class, 'pushUnsubscribe']);
+        Route::post('/push/test', [StorefrontApiController::class, 'pushTest']);
     });
 });

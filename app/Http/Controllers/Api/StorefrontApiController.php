@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Services\CartService;
 use App\Services\CustomerAccountService;
 use App\Services\OrderProcessingService;
+use App\Services\WebPushNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -16,15 +17,18 @@ class StorefrontApiController extends Controller
     protected CartService $cartService;
     protected OrderProcessingService $orderProcessingService;
     protected CustomerAccountService $customerAccountService;
+    protected WebPushNotificationService $pushService;
 
     public function __construct(
         CartService $cartService,
         OrderProcessingService $orderProcessingService,
-        CustomerAccountService $customerAccountService
+        CustomerAccountService $customerAccountService,
+        WebPushNotificationService $pushService
     ) {
         $this->cartService = $cartService;
         $this->orderProcessingService = $orderProcessingService;
         $this->customerAccountService = $customerAccountService;
+        $this->pushService = $pushService;
     }
 
     /**
@@ -297,7 +301,7 @@ class StorefrontApiController extends Controller
      */
     public function validateCoupon(Request $request): JsonResponse
     {
-        $code = (string) $request->input('code', '');
+        $code = (string) ($request->input('code') ?: $request->input('coupon_code', ''));
         $subtotal = (float) $request->input('subtotal', 0.0);
         $result = $this->orderProcessingService->validateCoupon($code, $subtotal);
 
@@ -472,5 +476,74 @@ class StorefrontApiController extends Controller
         $result = $this->customerAccountService->updateProfile($validated, auth()->id());
 
         return response()->json($result);
+    }
+
+    /**
+     * Registra suscripcion a notificaciones Web Push PWA (TASK-STR-06).
+     */
+    public function pushSubscribe(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'endpoint' => 'required|string',
+            'keys' => 'nullable|array',
+            'p256dh_key' => 'nullable|string',
+            'auth_token' => 'nullable|string',
+            'topics' => 'nullable|array',
+        ]);
+
+        $cartSessionId = $this->getCartSessionId($request);
+        $subscription = $this->pushService->subscribe($validated, auth()->id(), $cartSessionId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Suscripcion Web Push activada exitosamente.',
+            'subscription' => [
+                'id' => $subscription->id,
+                'endpoint' => $subscription->endpoint,
+                'topics' => $subscription->topics,
+                'is_active' => $subscription->is_active,
+            ],
+        ], 201);
+    }
+
+    /**
+     * Da de baja suscripcion a notificaciones Web Push PWA.
+     */
+    public function pushUnsubscribe(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'endpoint' => 'required|string',
+        ]);
+
+        $success = $this->pushService->unsubscribe($validated['endpoint']);
+
+        return response()->json([
+            'success' => $success,
+            'message' => $success ? 'Suscripcion Web Push dada de baja.' : 'Suscripcion no encontrada.',
+        ]);
+    }
+
+    /**
+     * Envia notificacion de prueba y asienta registro auditable en BD.
+     */
+    public function pushTest(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'endpoint' => 'required|string',
+        ]);
+
+        $log = $this->pushService->sendTestNotification($validated['endpoint']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notificacion push de prueba enviada exitosamente.',
+            'log' => [
+                'id' => $log->id,
+                'type' => $log->notification_type,
+                'title' => $log->title,
+                'body' => $log->body,
+                'delivery_status' => $log->delivery_status,
+            ],
+        ]);
     }
 }
