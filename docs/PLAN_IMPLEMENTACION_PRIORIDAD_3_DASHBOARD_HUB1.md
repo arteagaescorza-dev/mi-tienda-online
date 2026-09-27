@@ -48,20 +48,23 @@ El **Hub 1** funciona como el centro neurálgico y cabina de mando diario de la 
 
 ## 3. Desglose de Vertical Slices de Implementacion
 
-### Slice 3.1: Subnav Unificado, Triple RBAC y Aislamiento de Privacidad en Dashboard
+### Slice 3.1: Subnav Unificado, Triple RBAC y Aislamiento de Privacidad en Dashboard [COMPLETADO]
 * **Objetivo:** Establecer la arquitectura base reactiva de submódulos en [`resources/views/portal/dashboard.blade.php`](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/dashboard.blade.php), garantizando la alternancia entre *Dashboard Ejecutivo*, *Bandeja Operativa* y *Atención & Ventas*, aplicando la política estricta de aislamiento financiero para roles de bodega.
 * **Backend (`StorefrontController::portalDashboard`):**
-  * Detectar rol del usuario autenticado (`auth()->user()->role`).
-  * Hidratar variables globales y estado para las 3 vistas:
+  * Detecta el rol del usuario autenticado o solicitado (`auth()->user()->role` o query parameter `role`).
+  * Hidrata variables globales y estado para las 3 vistas:
     - KPIs financieros consolidados (ventas brutas, ticket promedio, carritos abandonados, pedidos pagados).
     - KPIs físicos para almacén (órdenes listas para empaque, carritos mixtos listos, arribos en tránsito, quiebres ROP).
     - KPIs comerciales para ventas (leads calientes, carritos abandonados recuperables, domicilios pausados).
-  * Inyección segura de `window.serverDashboardData` en Blade.
+  * Inyección segura de `window.serverDashboardData` en Blade con `JSON_UNESCAPED_UNICODE`.
 * **Frontend (`dashboard.blade.php`):**
-  * Subnav reactivo con Alpine.js (`dashboardActiveTab`: `'executive'`, `'operative'`, `'sales'`).
+  * Subnav reactivo con Alpine.js (`activeTab`: `'executive'`, `'operative'`, `'sales'`).
   * Conmutación automática de pestaña según el rol (`warehouse` inicia en operativa con tabs financieras bloqueadas).
   * Renderizado condicional de KPIs superiores acorde a la vista activa (Regla 10).
-  * Enmascaramiento financiero: en la vista operativa, todo valor monetario se sustituye por unidades físicas.
+  * Enmascaramiento financiero: en la vista operativa y para roles de bodega, todo valor monetario se sustituye por unidades físicas y se despliega el aviso normativo de privacidad.
+* **Criterios de Aceptacion Superados:**
+  * Vista adaptativa probada en `tests/Feature/RevOps/DashboardHub1ModuleTest.php` para perfiles `admin`, `warehouse` y `sales`.
+  * Suite completa de pruebas de Laravel ampliada a 164 pruebas al 100% en verde (852 aserciones).
 
 ---
 

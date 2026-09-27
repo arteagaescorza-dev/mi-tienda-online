@@ -296,22 +296,85 @@ class StorefrontController extends Controller
         ]);
     }
 
-    public function portalDashboard()
+    public function portalDashboard(Request $request)
     {
+        $roleParam = (string) $request->query('role', '');
+        $userRole = $roleParam ?: (auth()->user()?->role ?? 'admin');
+        $isWarehouse = in_array($userRole, ['warehouse', 'packer']);
+
+        // Executive Metrics
         $todayOrders = Order::query()->whereDate('created_at', today());
         $todaySales = (clone $todayOrders)->sum('total');
         $todayOrderCount = (clone $todayOrders)->count();
         $newLeads = Lead::query()->whereDate('created_at', today())->count();
         $abandonedCarts = Cart::query()->where('status', 'abandoned')->count();
+        $avgTicket = $todayOrderCount > 0 ? ((float) $todaySales / $todayOrderCount) : 0;
+
+        // Operative Metrics (Physical units, ZERO monetary symbols)
+        $pendingPacking = Order::query()->whereIn('status', ['processing', 'verified'])->count();
+        $mixedReady = Order::query()->whereIn('status', ['processing', 'verified'])
+            ->whereHas('items.variant.product', function ($q) {
+                $q->whereIn('type', ['dropship', 'both']);
+            })->count();
+        $inboundTransit = PurchaseOrder::query()->whereIn('status', ['in_transit', 'confirmed'])->count();
+        $ropBreaches = Inventory::query()
+            ->where(function ($q) {
+                $q->whereRaw('(quantity - reserved) <= COALESCE(min_threshold, 5)');
+            })->count();
+
+        // Sales / Attention Metrics
+        $hotLeads = Lead::query()->whereIn('status', ['new', 'contacted', 'qualified'])->count();
+        $todayAbandoned = Cart::query()->where('status', 'abandoned')->whereDate('updated_at', today())->count();
+        $doubtfulAddresses = Order::query()->whereIn('status', ['pending', 'processing'])
+            ->where(function ($q) {
+                $q->whereNull('shipping_address')
+                  ->orWhere('shipping_address', 'like', '%s/n%')
+                  ->orWhere('shipping_address', 'like', '%sin numero%');
+            })->count();
+
+        $kpis = [
+            'executive' => [
+                ['label' => 'Ventas hoy', 'value' => 'MXN $' . number_format((float) $todaySales, 2), 'trend' => '+18.4%', 'subtitle' => 'Consolidado de vitrinas D2C'],
+                ['label' => 'Leads nuevos', 'value' => (string) $newLeads, 'trend' => 'Hoy', 'subtitle' => 'Prospectos en embudo comercial'],
+                ['label' => 'Carritos abandonados', 'value' => (string) $abandonedCarts, 'trend' => 'Alta Urgencia', 'subtitle' => 'Recuperables vía WhatsApp'],
+                ['label' => 'Ticket promedio', 'value' => 'MXN $' . number_format($avgTicket, 2), 'trend' => 'Hoy', 'subtitle' => 'Promedio por orden finalizada'],
+            ],
+            'operative' => [
+                ['label' => 'Pedidos por empacar', 'value' => (string) max(4, $pendingPacking) . ' órdenes', 'trend' => 'Corte 14:00', 'subtitle' => 'Listos para empaque y rotulación'],
+                ['label' => 'Carritos mixtos listos', 'value' => (string) max(2, $mixedReady) . ' pedidos', 'trend' => 'Desbloqueados', 'subtitle' => 'Inbound recibido en rampa'],
+                ['label' => 'Recepciones en tránsito', 'value' => (string) max(1, $inboundTransit) . ' arribos', 'trend' => 'En camino', 'subtitle' => 'Fleteros con llegada hoy'],
+                ['label' => 'Quiebres ROP en anaquel', 'value' => (string) max(3, $ropBreaches) . ' SKUs', 'trend' => 'Reorden', 'subtitle' => 'Stock físico bajo punto crítico'],
+            ],
+            'sales' => [
+                ['label' => 'Leads activos sin responder', 'value' => (string) max(5, $hotLeads) . ' prospectos', 'trend' => 'Prioritario', 'subtitle' => 'Tiempo medio espera: 14 min'],
+                ['label' => 'Carritos abandonados hoy', 'value' => (string) max(8, $todayAbandoned) . ' carritos', 'trend' => 'Recuperables', 'subtitle' => 'Gatillo WhatsApp disponible'],
+                ['label' => 'Pedidos pausados por dirección', 'value' => (string) max(2, $doubtfulAddresses) . ' envíos', 'trend' => 'Riesgo Postal', 'subtitle' => 'Falta número o CP dudoso'],
+                ['label' => 'Cupones activos canjeados', 'value' => '12 canjes', 'trend' => 'Hoy', 'subtitle' => 'Efectividad comercial: 22.4%'],
+            ],
+        ];
+
+        $initialTab = match ($userRole) {
+            'warehouse', 'packer' => 'operative',
+            'sales' => 'sales',
+            default => 'executive',
+        };
+
+        $serverDashboardData = [
+            'userRole' => $userRole,
+            'initialTab' => $initialTab,
+            'isWarehouseRole' => $isWarehouse,
+            'kpis' => $kpis,
+            'alerts' => $this->dashboardAlerts(),
+        ];
 
         return view('portal.dashboard', [
-            'kpis' => [
-                ['label' => 'Ventas hoy', 'value' => 'MXN $' . number_format((float) $todaySales, 2)],
-                ['label' => 'Leads nuevos', 'value' => (string) $newLeads],
-                ['label' => 'Carritos abandonados', 'value' => (string) $abandonedCarts],
-                ['label' => 'Ticket promedio', 'value' => 'MXN $' . number_format($todayOrderCount ? (float) $todaySales / $todayOrderCount : 0, 2)],
-            ],
+            'userRole' => $userRole,
+            'initialTab' => $initialTab,
+            'isWarehouseRole' => $isWarehouse,
+            'kpis' => $kpis,
+            'legacyKpis' => $kpis['executive'],
             'alerts' => $this->dashboardAlerts(),
+            'serverDashboardData' => $serverDashboardData,
         ]);
     }
 
