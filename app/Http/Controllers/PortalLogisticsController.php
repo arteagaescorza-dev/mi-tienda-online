@@ -11,12 +11,14 @@ use App\Models\RmaInspectionLog;
 use App\Models\FraudRiskAssessment;
 use App\Models\PackagingMovement;
 use App\Services\RevOps\PackagingFulfillmentService;
+use App\Services\RevOps\RmaResolutionService;
 use Illuminate\Http\Request;
 
 class PortalLogisticsController extends Controller
 {
     public function __construct(
-        protected PackagingFulfillmentService $packagingService = new PackagingFulfillmentService()
+        protected PackagingFulfillmentService $packagingService = new PackagingFulfillmentService(),
+        protected RmaResolutionService $rmaResolutionService = new RmaResolutionService()
     ) {}
 
     public function index(Request $request)
@@ -36,7 +38,7 @@ class PortalLogisticsController extends Controller
             ->get();
 
         // 3. Garantías & RMA
-        $rmaRequests = RmaRequest::with(['order', 'inspectionLogs'])
+        $rmaRequests = RmaRequest::with(['order', 'inspectionLogs', 'resolutions', 'replacementOrder', 'resolution'])
             ->orderBy('id', 'desc')
             ->get();
 
@@ -233,48 +235,30 @@ class PortalLogisticsController extends Controller
             'has_factory_tag' => 'nullable',
             'verdict' => 'required|in:approved,rejected_sanitary_violation',
             'technical_notes' => 'nullable|string|max:500',
-            'resolution_type' => 'nullable|string|in:replacement_shipped,store_credit_wallet,refund',
+            'resolution_type' => 'nullable|string|in:replacement_shipped,store_credit_wallet,replacement_order,store_credit,refund',
+            'replacement_sku' => 'nullable|string|max:60',
+            'credit_amount' => 'nullable|numeric|min:0',
         ]);
 
-        $sealIntact = (bool)($request->has_hygiene_seal_intact ?? false);
-        $tagIntact = (bool)($request->has_factory_tag ?? false);
+        $resType = match ($validated['resolution_type'] ?? 'replacement_order') {
+            'store_credit_wallet', 'store_credit' => 'store_credit',
+            'replacement_shipped', 'replacement_order' => 'replacement_order',
+            default => 'replacement_order',
+        };
 
-        $verdict = $validated['verdict'];
-        if (!$sealIntact && $verdict === 'approved') {
-            $verdict = 'rejected_sanitary_violation';
-        }
-
-        RmaInspectionLog::create([
-            'rma_id' => $rmaRequest->id,
+        $result = $this->rmaResolutionService->inspectAndResolve($rmaRequest, [
             'inspector_name' => $validated['inspector_name'],
-            'has_hygiene_seal_intact' => $sealIntact,
-            'has_factory_tag' => $tagIntact,
-            'verdict' => $verdict,
-            'technical_notes' => $validated['technical_notes'] ?? ($verdict === 'approved' 
-                ? 'Inspección aprobada. Precinto y sellos higiénicos íntegros. Reingreso contable autorizado.'
-                : 'Inspección rechazada por violación a protocolo higiénico de ropa interior.'),
-            'created_at' => now(),
-        ]);
-
-        if ($verdict === 'approved') {
-            $resolution = $validated['resolution_type'] ?? 'replacement_shipped';
-            $rmaRequest->update([
-                'sanitary_status' => $resolution === 'store_credit_wallet' ? 'approved_store_credit' : 'approved_replacement',
-                'resolution_type' => $resolution,
-                'status' => 'resolved',
-            ]);
-            $msg = "RMA {$rmaRequest->rma_number} APROBADO: Sellos higiénicos válidos. Dictamen registrado y reemplazo procesado.";
-        } else {
-            $rmaRequest->update([
-                'sanitary_status' => 'rejected_used_hygiene',
-                'resolution_type' => null,
-                'status' => 'rejected',
-            ]);
-            $msg = "RMA {$rmaRequest->rma_number} RECHAZADO: Violación de precinto sanitario. Se aplicó baja contable a merma por higiene.";
-        }
+            'has_hygiene_seal_intact' => (bool)($request->has_hygiene_seal_intact ?? false),
+            'has_factory_tag' => (bool)($request->has_factory_tag ?? false),
+            'verdict' => $validated['verdict'],
+            'resolution_type' => $resType,
+            'technical_notes' => $validated['technical_notes'] ?? null,
+            'replacement_sku' => $validated['replacement_sku'] ?? null,
+            'credit_amount' => $validated['credit_amount'] ?? null,
+        ], $request->user());
 
         return redirect()->route('portal.logistics')
-            ->with('success', $msg);
+            ->with('success', $result['message']);
     }
 
     public function updatePackageStock(Request $request, PackageType $packageType)

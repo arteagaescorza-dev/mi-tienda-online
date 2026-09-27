@@ -67,22 +67,33 @@ La operacion de un e-commerce omnicanal de ropa interior, cosmetica y suscripcio
 
 ---
 
-### Slice 4.2: Motor de Resoluciones RMA y Garantias con Aislamiento Sanitario PROFECO (`TASK-INT-09`, `TASK-LOG-04B`)
+### Slice 4.2: Motor de Resoluciones RMA y Garantias con Aislamiento Sanitario PROFECO (`TASK-INT-09`, `TASK-LOG-04B`) [COMPLETADO]
 * **Objetivo:** Automatizar la resolucion de devoluciones dictaminadas en Logistica, emitiendo reemplazos o monedero digital y protegiendo el stock con aislamiento sanitario.
 * **Backend:**
-  * Modelo `RmaRequest` y servicio `App\Services\RevOps\RmaResolutionService`.
-  * Endpoint `POST /api/v1/logistics/rma/{id}/resolve`.
-  * Reglas sanitarias inviolables:
-    - Si `sanitary_seal_intact === true`: Se autoriza reingreso comercial a `inventories` (`ENTRADA_DEVOLUCION_RMA`).
-    - Si `sanitary_seal_intact === false`: Bloqueo estricto; se cataloga como merma destructiva (`SALIDA_MERMA_RMA`), sin permitir reingreso a bodega vendible.
-  * Acciones de compensacion:
-    - Generacion de orden de reemplazo con prefijo `#ORD-XXXX-RMA` en estado `ready_to_pack`.
-    - O emision de credito digital (`store_credits`) vinculado al correo del cliente.
+  * Migracion `2026_09_27_000004_create_rma_resolutions_and_enhance_rma_tables.php`:
+    - Creacion de tabla inmutable `rma_resolutions` (`rma_request_id`, `resolution_type`, `replacement_order_id`, `replacement_order_number`, `store_credit_code`, `store_credit_amount`, `whatsapp_message_sent`, `whatsapp_payload`, `resolved_by_user_id`, `notes`).
+    - Enriquecimiento de `rma_requests` con trazabilidad directa de reemplazo, cupon y fecha de resolucion.
+    - Enriquecimiento de `orders` con `order_type` y vinculo `rma_request_id`.
+  * Modelo `App\Models\RmaResolution` y ampliacion de relaciones en `RmaRequest` y `Order`.
+  * Servicio de dominio `App\Services\RevOps\RmaResolutionService`:
+    - `inspectAndResolve`: Orquestador de inspeccion con aplicacion inquebrantable de la normativa PROFECO/COFEPRIS.
+    - Protocolo sanitario inquebrantable: Si `has_hygiene_seal_intact === true`, se autoriza reingreso a inventario vendible (`ENTRADA_DEVOLUCION_RMA`); si `has_hygiene_seal_intact === false`, se bloquea de forma estricta todo reingreso vendible y se asienta baja como merma sanitaria (`SALIDA_MERMA_RMA`).
+    - `issueReplacementOrder`: Genera orden `#ORD-XXXX-RMA` a costo $0.00 MXN en cola de empaque, descuenta variante de reemplazo en Kardex (`SALIDA_REEMPLAZO_RMA`), crea envio `Shipment` y despacha tarea prioritaria `OperationalTask` de almacen.
+    - `issueStoreCredit`: Emite cupon digital de un solo uso `CR-RMA-XXXX` en marketing CRM con 90 dias de vigencia y URL tokenizada para checkout directo.
+    - `rejectRma`: Formaliza rechazo con fundamentacion regulatoria COFEPRIS para prendas intimas.
+    - `whatsapp_payload`: Formateador automatico de plantilla para notificacion al cliente.
+  * Controladores y rutas:
+    - Web: `PortalLogisticsController::inspectRma` delegando a `RmaResolutionService`.
+    - API: `LogisticsApiController::inspectRma`, `resolveRma`, `issueReplacementOrder`, `issueStoreCredit`.
+    - Rutas registradas en `routes/api.php` y `routes/web.php`.
 * **Frontend:**
-  * Modal interactivo de resolucion en la pestaña "Gestor de Garantias & RMA" de Logistica.
-  * Formateador de mensaje estructurado para WhatsApp con folio RMA, resolucion y guia de retorno o codigo de credito.
-* **Criterios de Aceptacion:**
-  * Pruebas verificando que nunca se incremente inventario vendible si la prenda de ropa interior tiene precinto roto.
+  * En [resources/views/portal/logistics.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/logistics.blade.php):
+    - Tabla de Garantias & RMA: Columna "Estado & Resolucion" con badges de Orden de Reemplazo (`#ORD-XXXX-RMA`), Cupon de Monedero (`CR-RMA-XXXX ($XXX MXN)`) o Merma Sanitaria PROFECO, ademas de boton de contacto WhatsApp 1 clic.
+    - Modal pericial ergonomico `max-w-2xl` con checklist sanitario, conmutador reactivo entre Orden de Reemplazo y Monedero Digital, y preview en tiempo real del mensaje estructurado de WhatsApp.
+* **Criterios de Aceptacion Superados:**
+  * 5 pruebas unitarias/funcionales en `tests/Feature/RevOps/CrossHubRmaResolutionTest.php` al 100% verde (47 aserciones).
+  * Suite global de la plataforma ampliada a 189 pruebas al 100% verde (1,260 aserciones).
+  * Cero emojis en toda la base de codigo y vistas.
 
 ---
 

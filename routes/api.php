@@ -67,6 +67,9 @@ Route::prefix('v1')->group(function () {
     Route::prefix('logistics')->group(function () {
         Route::post('/manifests', [LogisticsApiController::class, 'generateManifest']);
         Route::post('/rma/{id}/inspect', [LogisticsApiController::class, 'inspectRma']);
+        Route::post('/rma/{id}/resolve', [LogisticsApiController::class, 'resolveRma']);
+        Route::post('/rma/{id}/replacement-order', [LogisticsApiController::class, 'issueReplacementOrder']);
+        Route::post('/rma/{id}/store-credit', [LogisticsApiController::class, 'issueStoreCredit']);
     });
 
     // 6. CONVENIOS & ALIADOS (HUB 7)
