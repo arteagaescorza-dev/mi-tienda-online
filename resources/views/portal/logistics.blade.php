@@ -174,6 +174,19 @@
                                     <td class="py-3 px-3">
                                         <span class="text-slate-800 font-medium block">{{ $pkg['box_type'] }}</span>
                                         <span class="text-[10px] text-slate-400 font-mono">{{ $pkg['dimensions'] }}</span>
+                                        @if($pkg['packaging_fulfilled_at'])
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mt-1">
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                Kardex OK
+                                            </span>
+                                        @else
+                                            <form method="POST" action="{{ route('portal.logistics.shipments.fulfill_packaging', $pkg['db_id']) }}" class="inline-block mt-1">
+                                                @csrf
+                                                <button type="submit" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[9px] font-bold border border-indigo-200 transition cursor-pointer" title="Deducir empaque en Kardex">
+                                                    Deducir Insumo
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                     <td class="py-3 px-3">
                                         <span class="font-bold text-slate-900 block font-mono">{{ number_format($pkg['weight_kg'], 2) }} kg</span>
@@ -374,7 +387,7 @@
                             <th class="py-2.5 px-3">Pedido & Cliente</th>
                             <th class="py-2.5 px-3">Producto / SKU</th>
                             <th class="py-2.5 px-3">Motivo</th>
-                            <th class="py-2.5 px-3">Estado Sanitario</th>
+                            <th class="py-2.5 px-3">Estado & Resolución</th>
                             <th class="py-2.5 px-3">Dictamen / Bitácora</th>
                             <th class="py-2.5 px-3 text-right">Acción</th>
                         </tr>
@@ -406,15 +419,30 @@
                                     </span>
                                 </td>
                                 <td class="py-3 px-3">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold
-                                        {{ $rma->sanitary_status === 'approved_replacement' || $rma->sanitary_status === 'approved_store_credit' ? 'bg-emerald-100 text-emerald-800' : ($rma->sanitary_status === 'rejected_used_hygiene' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
-                                        {{ match($rma->sanitary_status) {
-                                            'approved_replacement' => 'Aprobado: Reemplazo',
-                                            'approved_store_credit' => 'Aprobado: Crédito',
-                                            'rejected_used_hygiene' => 'Rechazado: Violación Higiene',
-                                            default => 'Pendiente Inspección'
-                                        } }}
-                                    </span>
+                                    <div class="space-y-1">
+                                        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold
+                                            {{ $rma->sanitary_status === 'approved_replacement' || $rma->sanitary_status === 'approved_store_credit' ? 'bg-emerald-100 text-emerald-800' : ($rma->sanitary_status === 'rejected_used_hygiene' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
+                                            {{ match($rma->sanitary_status) {
+                                                'approved_replacement' => 'Aprobado: Reemplazo',
+                                                'approved_store_credit' => 'Aprobado: Crédito',
+                                                'rejected_used_hygiene' => 'Rechazado: Violación Higiene',
+                                                default => 'Pendiente Inspección'
+                                            } }}
+                                        </span>
+                                        @if($rma->replacement_order_number)
+                                            <span class="block font-mono text-[10px] text-indigo-700 font-semibold bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">
+                                                Reemplazo: {{ $rma->replacement_order_number }}
+                                            </span>
+                                        @elseif($rma->store_credit_code)
+                                            <span class="block font-mono text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
+                                                Cupón: {{ $rma->store_credit_code }} (${{ number_format($rma->refund_or_credit_amount, 2) }})
+                                            </span>
+                                        @elseif($rma->sanitary_status === 'rejected_used_hygiene')
+                                            <span class="block font-mono text-[10px] text-rose-700 font-semibold bg-rose-50 border border-rose-200 rounded px-1.5 py-0.5">
+                                                Merma Sanitaria PROFECO
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="py-3 px-3 max-w-xs text-slate-600">
                                     @if($rma->inspectionLogs->isNotEmpty())
@@ -431,15 +459,34 @@
                                     @if($rma->status === 'open' || $rma->sanitary_status === 'pending_inspection')
                                         <button 
                                             type="button"
-                                            onclick="openRmaModal({{ $rma->id }}, '{{ $rma->rma_number }}', '{{ $rma->product_name }}', '{{ $rma->product_sku }}')"
+                                            onclick="openRmaModal({{ $rma->id }}, '{{ $rma->rma_number }}', '{{ addslashes($rma->product_name) }}', '{{ $rma->product_sku }}', '{{ addslashes($rma->customer_name) }}', '{{ $rma->customer_phone }}', {{ (float)($rma->refund_or_credit_amount > 0 ? $rma->refund_or_credit_amount : 399.00) }})"
                                             class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer"
                                         >
-                                            Inspeccionar
+                                            Inspeccionar & Resolver
                                         </button>
                                     @else
-                                        <span class="text-[11px] font-bold {{ $rma->status === 'resolved' ? 'text-emerald-600' : 'text-slate-400' }}">
-                                            {{ $rma->status === 'resolved' ? 'Resuelto' : 'Rechazado' }}
-                                        </span>
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <span class="text-[11px] font-bold {{ $rma->status === 'resolved' ? 'text-emerald-600' : 'text-slate-400' }}">
+                                                {{ $rma->status === 'resolved' ? 'Resuelto' : 'Rechazado' }}
+                                            </span>
+                                            @if($rma->customer_phone && $rma->resolution)
+                                                @php
+                                                    $cleanPhone = preg_replace('/[^0-9]/', '', $rma->customer_phone);
+                                                    $waText = urlencode($rma->resolution->whatsapp_payload['message'] ?? '');
+                                                @endphp
+                                                @if($cleanPhone && $waText)
+                                                    <a 
+                                                        href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        class="p-1 text-emerald-600 hover:bg-emerald-50 rounded transition" 
+                                                        title="Contactar al cliente por WhatsApp"
+                                                    >
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                                    </a>
+                                                @endif
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                             </tr>
@@ -475,13 +522,14 @@
                     @php
                         $volumeLiters = round(($box->length_cm * $box->width_cm * $box->height_cm) / 1000, 2);
                         $volumetricIata = round(($box->length_cm * $box->width_cm * $box->height_cm) / 5000, 2);
+                        $isLow = $box->stock_available <= ($box->reorder_point ?? 40);
                     @endphp
-                    <div class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl flex flex-col justify-between">
+                    <div class="p-4 bg-slate-50 border {{ $isLow ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-200/60' }} rounded-xl flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <span class="font-mono text-xs font-bold text-indigo-600">{{ $box->code }}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $box->stock_available > 50 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
-                                    {{ $box->stock_available }} en stock
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $isLow ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800' }}">
+                                    {{ $isLow ? 'ALERTA ROP: ' . $box->stock_available : $box->stock_available . ' en stock' }}
                                 </span>
                             </div>
                             <h4 class="text-xs font-bold text-slate-900">{{ $box->name }}</h4>
@@ -497,6 +545,10 @@
                                     <span class="font-mono font-bold">{{ $volumetricIata }} kg</span>
                                 </div>
                                 <div class="flex justify-between">
+                                    <span>Punto Reorden (ROP):</span>
+                                    <span class="font-mono font-bold text-slate-700">{{ $box->reorder_point ?? 40 }} u</span>
+                                </div>
+                                <div class="flex justify-between">
                                     <span>Costo Unitario:</span>
                                     <span class="font-mono font-bold text-emerald-700">MXN ${{ number_format($box->unit_cost, 2) }}</span>
                                 </div>
@@ -507,21 +559,99 @@
                             <form method="POST" action="{{ route('portal.logistics.packages.stock', $box->id) }}" class="flex items-center gap-1.5">
                                 @csrf
                                 <input type="hidden" name="unit_cost" value="{{ $box->unit_cost }}">
-                                <input 
-                                    type="number" 
-                                    name="stock_available" 
-                                    value="{{ $box->stock_available }}" 
-                                    min="0"
-                                    class="w-20 px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 focus:outline-indigo-600"
-                                    title="Ajustar stock de insumos"
-                                >
-                                <button type="submit" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[10px] font-bold transition cursor-pointer">
-                                    Ajustar
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[9px] text-slate-400 font-semibold uppercase">Stock</span>
+                                    <input 
+                                        type="number" 
+                                        name="stock_available" 
+                                        value="{{ $box->stock_available }}" 
+                                        min="0"
+                                        class="w-14 px-1.5 py-1 bg-white border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 focus:outline-indigo-600"
+                                        title="Ajustar stock de insumos"
+                                    >
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[9px] text-slate-400 font-semibold uppercase">ROP</span>
+                                    <input 
+                                        type="number" 
+                                        name="reorder_point" 
+                                        value="{{ $box->reorder_point ?? 40 }}" 
+                                        min="0"
+                                        class="w-12 px-1.5 py-1 bg-white border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 focus:outline-indigo-600"
+                                        title="Punto de reorden (ROP)"
+                                    >
+                                </div>
+                                <button type="submit" class="px-2 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[10px] font-bold transition cursor-pointer shrink-0">
+                                    Guardar
                                 </button>
                             </form>
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            {{-- KARDEX DE MOVIMIENTOS DE INSUMOS DE EMPAQUE (TASK-INT-13) --}}
+            <div class="mt-8 pt-6 border-t border-slate-200/80">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span>Kardex de Movimientos de Insumos de Empaque (Auditoría Inmutable)</span>
+                    </h4>
+                    <span class="text-[11px] text-slate-500 font-medium">Últimos registros de consumo y reabastecimiento</span>
+                </div>
+
+                @if(isset($packagingMovements) && count($packagingMovements) > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                                    <th class="py-2 px-3">Fecha</th>
+                                    <th class="py-2 px-3">Insumo</th>
+                                    <th class="py-2 px-3">Tipo Movimiento</th>
+                                    <th class="py-2 px-3 text-center">Cantidad</th>
+                                    <th class="py-2 px-3 text-center">Stock Anterior</th>
+                                    <th class="py-2 px-3 text-center">Stock Resultante</th>
+                                    <th class="py-2 px-3">Envío / Referencia</th>
+                                    <th class="py-2 px-3">Operador</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach($packagingMovements as $pm)
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-2 px-3 font-mono text-[11px] text-slate-500">{{ $pm->created_at->format('d/m H:i') }}</td>
+                                        <td class="py-2 px-3">
+                                            <span class="font-bold text-slate-900 block">{{ $pm->packageType?->name ?? 'Insumo' }}</span>
+                                            <span class="font-mono text-[10px] text-indigo-600">{{ $pm->packageType?->code }}</span>
+                                        </td>
+                                        <td class="py-2 px-3">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $pm->quantity < 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800' }}">
+                                                {{ $pm->type }}
+                                            </span>
+                                        </td>
+                                        <td class="py-2 px-3 text-center font-mono font-bold {{ $pm->quantity < 0 ? 'text-rose-600' : 'text-emerald-600' }}">
+                                            {{ $pm->quantity > 0 ? '+' . $pm->quantity : $pm->quantity }}
+                                        </td>
+                                        <td class="py-2 px-3 text-center font-mono text-slate-500">{{ $pm->stock_before }} u</td>
+                                        <td class="py-2 px-3 text-center font-mono font-bold text-slate-900">{{ $pm->stock_after }} u</td>
+                                        <td class="py-2 px-3 font-mono text-[11px]">
+                                            @if($pm->shipment)
+                                                <span class="text-indigo-600 block">{{ $pm->shipment->tracking_number }}</span>
+                                                <span class="text-[10px] text-slate-400">{{ $pm->order?->order_number }}</span>
+                                            @else
+                                                <span class="text-slate-500">{{ $pm->notes ?? 'Ajuste manual' }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="py-2 px-3 text-slate-600 text-[11px]">{{ $pm->user?->name ?? 'Sistema Automático' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                        <p class="text-slate-500 text-xs">Aún no se registran movimientos de empaque. Las salidas se generan automáticamente al empacar pedidos o cerrar manifiestos.</p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -665,67 +795,110 @@
     </div>
 
     {{-- ========================================================================= --}}
-    {{-- MODAL 3: INSPECCIÓN TÉCNICA RMA & HIGIENE (TASK-LOG-04B)                 --}}
+    {{-- MODAL 3: INSPECCIÓN TÉCNICA RMA & MOTOR DE RESOLUCIONES (TASK-INT-09)    --}}
     {{-- ========================================================================= --}}
     <div id="rmaModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Mesa de Inspección Sanitaria RMA</span>
+                        <span>Mesa Pericial RMA & Motor de Resoluciones</span>
                     </h3>
-                    <span id="rmaModalFolio" class="font-mono text-xs text-indigo-600 font-bold">RMA-0000</span>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span id="rmaModalFolio" class="font-mono text-xs text-indigo-600 font-bold">RMA-0000</span>
+                        <span class="text-slate-300">•</span>
+                        <span id="rmaModalCustomer" class="text-xs text-slate-600 font-medium">Cliente</span>
+                    </div>
                 </div>
                 <button type="button" onclick="closeRmaModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer font-bold text-lg">&times;</button>
             </div>
 
             <form id="rmaInspectForm" method="POST" action="" class="space-y-4 text-xs">
                 @csrf
-                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <span class="block text-slate-400 text-[10px] uppercase font-semibold">Prenda en Evaluación:</span>
-                    <span id="rmaModalProductName" class="font-bold text-slate-900 block text-xs">Nombre Producto</span>
-                    <span id="rmaModalProductSku" class="font-mono text-indigo-600 text-[11px] block">SKU-0000</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                        <span class="block text-slate-400 text-[10px] uppercase font-semibold">Prenda en Evaluación:</span>
+                        <span id="rmaModalProductName" class="font-bold text-slate-900 block text-xs truncate">Nombre Producto</span>
+                        <span id="rmaModalProductSku" class="font-mono text-indigo-600 text-[11px] block">SKU-0000</span>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Inspector de Calidad Autorizado</label>
+                        <input type="text" name="inspector_name" required value="Jefe de Calidad Almacén CDMX" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-indigo-600 text-slate-800 bg-white">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nombre del Inspector de Calidad</label>
-                    <input type="text" name="inspector_name" required value="Jefe de Calidad Almacén CDMX" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-indigo-600 text-slate-800">
-                </div>
-
-                <!-- CHECKLIST SANITARIO -->
-                <div class="space-y-2 pt-1">
-                    <span class="block font-semibold text-slate-800">Checklist Sanitario Obligatorio:</span>
-                    <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
+                <!-- CHECKLIST SANITARIO PROFECO / COFEPRIS -->
+                <div class="p-3.5 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
+                    <span class="block font-bold text-amber-900 text-[11px] uppercase tracking-wider">Protocolo Sanitario Obligatorio (COFEPRIS):</span>
+                    <label class="flex items-center gap-2.5 p-2 bg-white border border-amber-200 rounded-lg cursor-pointer">
                         <input type="checkbox" name="has_hygiene_seal_intact" value="1" id="sealCheckbox" class="rounded text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-slate-700 font-medium">¿Precinto higiénico termosellado 100% intacto?</span>
+                        <div class="text-slate-700">
+                            <span class="font-bold block">¿Precinto higiénico termosellado 100% intacto?</span>
+                            <span class="text-[11px] text-slate-500 block">Si está roto o retirado, se bloqueará automáticamente el reingreso al inventario comercial.</span>
+                        </div>
                     </label>
-                    <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
+                    <label class="flex items-center gap-2.5 p-2 bg-white border border-amber-200 rounded-lg cursor-pointer">
                         <input type="checkbox" name="has_factory_tag" value="1" checked class="rounded text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-slate-700 font-medium">¿Conserva etiquetas de fábrica adheridas?</span>
+                        <div class="text-slate-700">
+                            <span class="font-bold block">¿Conserva etiquetas textiles de fábrica adheridas?</span>
+                            <span class="text-[11px] text-slate-500 block">Garantiza autenticidad y condición original de manufactura.</span>
+                        </div>
                     </label>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Dictamen de Calidad</label>
-                    <select name="verdict" id="verdictSelect" required class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800 focus:outline-indigo-600">
-                        <option value="approved">Aprobado (Sellos Intactos - Proceder a Reposición)</option>
-                        <option value="rejected_sanitary_violation">Rechazado (Sello Violado / Indicios de Uso)</option>
-                    </select>
+                <!-- DICTAMEN Y RESOLUCION -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Dictamen Pericial</label>
+                        <select name="verdict" id="verdictSelect" required class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800 focus:outline-indigo-600">
+                            <option value="approved">Aprobado (Sellos Intactos - Proceder a Reposición)</option>
+                            <option value="rejected_sanitary_violation">Rechazado (Sello Violado / Merma Destructiva)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tipo de Resolución Automática</label>
+                        <select name="resolution_type" id="resolutionTypeSelect" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800 focus:outline-indigo-600">
+                            <option value="replacement_order">Orden de Reemplazo (#ORD-RMA a $0.00)</option>
+                            <option value="store_credit">Monedero Digital (Cupón WhatsApp)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Resolución (si es aprobado)</label>
-                    <select name="resolution_type" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-slate-800 focus:outline-indigo-600">
-                        <option value="replacement_shipped">Envío de Prenda de Sustitución (#ORD-RMA)</option>
-                        <option value="store_credit_wallet">Crédito en Monedero de Tienda (Cupón Digital)</option>
-                        <option value="refund">Reembolso a Pasarela Original</option>
-                    </select>
+                <!-- CAMPOS CONDICIONALES DE RESOLUCION -->
+                <div id="replacementField" class="p-3 bg-indigo-50/60 border border-indigo-200 rounded-xl space-y-1">
+                    <label class="block font-bold text-indigo-900 text-[11px]">SKU / Variante de Sustitución a Empacar:</label>
+                    <input type="text" name="replacement_sku" id="replacementSkuInput" class="w-full px-3 py-2 border border-indigo-300 rounded-lg text-slate-800 bg-white font-mono" placeholder="SKU de reemplazo">
+                    <span class="text-[10px] text-indigo-700 block">Se inyectará orden #ORD-XXXX-RMA con costo $0.00 a la cola de empaque y se descontará 1 unidad en Kardex.</span>
+                </div>
+
+                <div id="storeCreditField" class="hidden p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-1">
+                    <label class="block font-bold text-emerald-900 text-[11px]">Monto del Monedero Digital (MXN):</label>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-emerald-800">$</span>
+                        <input type="number" step="0.01" name="credit_amount" id="creditAmountInput" class="w-full px-3 py-2 border border-emerald-300 rounded-lg text-slate-800 bg-white font-mono" placeholder="399.00">
+                    </div>
+                    <span class="text-[10px] text-emerald-700 block">Genera un cupón digital único registrado en CRM de 1 solo uso con 90 días de vigencia.</span>
+                </div>
+
+                <!-- LIVE PREVIEW DE MENSAJE WHATSAPP -->
+                <div class="p-3.5 bg-slate-900 text-slate-100 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-[11px] text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <span>Plantilla Oficial de WhatsApp para el Cliente</span>
+                        </span>
+                        <span id="rmaModalPhone" class="font-mono text-[10px] text-slate-400">Tel: --</span>
+                    </div>
+                    <div id="whatsappPreviewBox" class="p-2.5 bg-slate-800/80 rounded-lg text-[11px] text-slate-200 leading-relaxed font-mono whitespace-pre-wrap">
+                        Cargando mensaje...
+                    </div>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Notas Técnicas de la Inspección</label>
-                    <textarea name="technical_notes" rows="2" placeholder="Observaciones físicas del tejido, precinto e integridad..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-800 focus:outline-indigo-600"></textarea>
+                    <textarea name="technical_notes" rows="2" placeholder="Observaciones físicas del tejido, precinto e integridad..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-800 focus:outline-indigo-600 bg-white"></textarea>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
@@ -733,7 +906,7 @@
                         Cancelar
                     </button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-xs transition cursor-pointer">
-                        Registrar Dictamen & Kardex
+                        Dictaminar & Generar Resolución
                     </button>
                 </div>
             </form>
@@ -802,17 +975,91 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Regla de salubridad dinámica en modal RMA: Si precinto se desmarca, sugerir rechazo
+    // 3. Reglas reactivas del Motor de Resoluciones RMA
     const sealCheckbox = document.getElementById('sealCheckbox');
     const verdictSelect = document.getElementById('verdictSelect');
+    const resolutionTypeSelect = document.getElementById('resolutionTypeSelect');
+    const replacementField = document.getElementById('replacementField');
+    const storeCreditField = document.getElementById('storeCreditField');
+    const replacementSkuInput = document.getElementById('replacementSkuInput');
+    const creditAmountInput = document.getElementById('creditAmountInput');
+
+    function updateRmaUiState() {
+        if (!verdictSelect || !resolutionTypeSelect) return;
+
+        const isApproved = verdictSelect.value === 'approved';
+        const isReplacement = resolutionTypeSelect.value === 'replacement_order';
+
+        if (!isApproved) {
+            if (replacementField) replacementField.classList.add('hidden');
+            if (storeCreditField) storeCreditField.classList.add('hidden');
+        } else {
+            if (replacementField) replacementField.classList.toggle('hidden', !isReplacement);
+            if (storeCreditField) storeCreditField.classList.toggle('hidden', isReplacement);
+        }
+
+        updateWhatsAppPreview();
+    }
+
     if (sealCheckbox && verdictSelect) {
         sealCheckbox.addEventListener('change', function () {
             if (!this.checked) {
                 verdictSelect.value = 'rejected_sanitary_violation';
+            } else if (verdictSelect.value === 'rejected_sanitary_violation') {
+                verdictSelect.value = 'approved';
             }
+            updateRmaUiState();
         });
     }
+
+    if (verdictSelect) {
+        verdictSelect.addEventListener('change', updateRmaUiState);
+    }
+
+    if (resolutionTypeSelect) {
+        resolutionTypeSelect.addEventListener('change', updateRmaUiState);
+    }
+
+    if (creditAmountInput) {
+        creditAmountInput.addEventListener('input', updateWhatsAppPreview);
+    }
+    if (replacementSkuInput) {
+        replacementSkuInput.addEventListener('input', updateWhatsAppPreview);
+    }
 });
+
+// Variables de estado del modal RMA
+let currentRmaData = {
+    id: null,
+    folio: '',
+    productName: '',
+    productSku: '',
+    customerName: '',
+    customerPhone: '',
+    amount: 399.00
+};
+
+function updateWhatsAppPreview() {
+    const previewBox = document.getElementById('whatsappPreviewBox');
+    if (!previewBox) return;
+
+    const verdict = document.getElementById('verdictSelect')?.value || 'approved';
+    const resType = document.getElementById('resolutionTypeSelect')?.value || 'replacement_order';
+    const amountVal = parseFloat(document.getElementById('creditAmountInput')?.value || currentRmaData.amount);
+    const amountFmt = '$' + (isNaN(amountVal) ? '399.00' : amountVal.toFixed(2)) + ' MXN';
+    const skuVal = document.getElementById('replacementSkuInput')?.value || currentRmaData.productSku;
+
+    let text = '';
+    if (verdict === 'rejected_sanitary_violation') {
+        text = `Estimado/a ${currentRmaData.customerName || 'Cliente'},\n\nTe informamos que tras la inspección técnica de tu solicitud ${currentRmaData.folio}, no fue posible admitir la prenda para devolución debido a que el precinto higiénico protector fue vulnerado o retirado, conforme a la normativa sanitaria de COFEPRIS y PROFECO para prendas íntimas y de contacto corporal.`;
+    } else if (resType === 'store_credit') {
+        text = `Hola ${currentRmaData.customerName || 'Cliente'},\n\nEn Mi Tienda Online tu devolución ${currentRmaData.folio} fue procesada con éxito.\nTu saldo a favor de ${amountFmt} está disponible con un cupón digital de un solo uso (vigencia 90 días).\nCanjéalo directamente en tu carrito al finalizar compra.`;
+    } else {
+        text = `Hola ${currentRmaData.customerName || 'Cliente'},\n\nEn Mi Tienda Online tu solicitud de garantía ${currentRmaData.folio} ha sido APROBADA.\nHemos generado tu orden de reemplazo sin costo (Variante: ${skuVal}).\nEl equipo de almacén ya prepara tu nuevo paquete. Consulta el rastreo en tu panel.`;
+    }
+
+    previewBox.textContent = text;
+}
 
 // Funciones globales para modales
 function openThermalModal(order, tracking, courier, customer, destination) {
@@ -829,14 +1076,49 @@ function closeThermalModal() {
     if (modal) modal.classList.add('hidden');
 }
 
-function openRmaModal(id, rmaNumber, productName, productSku) {
+function openRmaModal(id, rmaNumber, productName, productSku, customerName = 'Cliente', customerPhone = '--', defaultAmount = 399.00) {
+    currentRmaData = {
+        id: id,
+        folio: rmaNumber,
+        productName: productName,
+        productSku: productSku,
+        customerName: customerName,
+        customerPhone: customerPhone,
+        amount: defaultAmount
+    };
+
     document.getElementById('rmaModalFolio').textContent = rmaNumber;
     document.getElementById('rmaModalProductName').textContent = productName;
     document.getElementById('rmaModalProductSku').textContent = productSku;
+    document.getElementById('rmaModalCustomer').textContent = customerName;
+    document.getElementById('rmaModalPhone').textContent = 'Tel: ' + (customerPhone || 'No registrado');
     
     const form = document.getElementById('rmaInspectForm');
     form.action = `/admin/logistica/rma/${id}/inspeccionar`;
-    
+
+    const repSkuInput = document.getElementById('replacementSkuInput');
+    if (repSkuInput) repSkuInput.value = productSku;
+
+    const amtInput = document.getElementById('creditAmountInput');
+    if (amtInput) amtInput.value = defaultAmount.toFixed(2);
+
+    const sealBox = document.getElementById('sealCheckbox');
+    if (sealBox) sealBox.checked = true;
+
+    const vSelect = document.getElementById('verdictSelect');
+    if (vSelect) vSelect.value = 'approved';
+
+    const rSelect = document.getElementById('resolutionTypeSelect');
+    if (rSelect) rSelect.value = 'replacement_order';
+
+    const repField = document.getElementById('replacementField');
+    if (repField) repField.classList.remove('hidden');
+
+    const credField = document.getElementById('storeCreditField');
+    if (credField) credField.classList.add('hidden');
+
+    updateWhatsAppPreview();
+
     document.getElementById('rmaModal').classList.remove('hidden');
 }
 

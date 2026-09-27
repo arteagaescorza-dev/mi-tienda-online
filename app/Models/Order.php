@@ -9,7 +9,7 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_number','user_id','billing_address','shipping_address','status','total','payment_status','payment_method','notes','created_via','attributed_via_id'];
+    protected $fillable = ['order_number','user_id','billing_address','shipping_address','status','order_type','rma_request_id','total','payment_status','payment_method','notes','created_via','attributed_via_id'];
     protected $casts = ['billing_address' => 'array','shipping_address' => 'array','total' => 'decimal:2'];
 
     public function user()
@@ -45,5 +45,10 @@ class Order extends Model
     public function rmaRequests()
     {
         return $this->hasMany(RmaRequest::class);
+    }
+
+    public function rmaRequest()
+    {
+        return $this->belongsTo(RmaRequest::class, 'rma_request_id');
     }
 }

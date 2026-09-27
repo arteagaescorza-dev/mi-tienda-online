@@ -53,6 +53,12 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/finanzas/payouts/{payoutBatch}/conciliar', [StorefrontController::class, 'reconcilePayoutBatch'])->name('portal.finance.payouts.reconcile');
 	Route::post('/admin/finanzas/suscripciones/{subscription}/reintentar', [StorefrontController::class, 'retrySubscriptionDunning'])->name('portal.finance.subscriptions.retry');
 	Route::post('/admin/finanzas/cuentas/{vendorBill}/pagar', [StorefrontController::class, 'payVendorBill'])->name('portal.finance.vendor_bills.pay');
+	Route::post('/admin/finanzas/auditoria-envios/cargar', [StorefrontController::class, 'uploadShippingInvoiceReport'])->name('portal.finance.shipping_audit.upload');
+	Route::post('/admin/finanzas/auditoria-envios/{reconciliation}/reclamar', [StorefrontController::class, 'fileShippingClaim'])->name('portal.finance.shipping_audit.claim');
+	Route::post('/portal/finance/shipping-audit/{reconciliation}/claim', [StorefrontController::class, 'fileShippingClaim']);
+	Route::post('/admin/finanzas/cotejo-3-vias/verificar', [StorefrontController::class, 'verifyThreeWayMatching'])->name('portal.finance.three_way_matching.verify');
+	Route::post('/admin/finanzas/cotejo-3-vias/{id}/nota-debito', [StorefrontController::class, 'issueDebitNoteWeb'])->name('portal.finance.three_way_matching.debit_note');
+	Route::post('/admin/finanzas/cotejo-3-vias/{id}/autorizar-spei', [StorefrontController::class, 'authorizeSpeiPayoutWeb'])->name('portal.finance.three_way_matching.authorize_spei');
 	Route::post('/admin/marketing/cupones', [PortalMarketingController::class, 'storeCoupon'])->name('portal.marketing.coupons.store');
 	Route::post('/admin/marketing/cupones/{coupon}/toggle', [PortalMarketingController::class, 'toggleCoupon'])->name('portal.marketing.coupons.toggle');
 	Route::post('/admin/marketing/campanas/{adCampaign}/escalar', [PortalMarketingController::class, 'scaleCampaign'])->name('portal.marketing.campaigns.scale');
@@ -63,6 +69,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/logistica/rma/{rmaRequest}/inspeccionar', [PortalLogisticsController::class, 'inspectRma'])->name('portal.logistics.rma.inspect');
 	Route::post('/admin/logistica/cajas/{packageType}/stock', [PortalLogisticsController::class, 'updatePackageStock'])->name('portal.logistics.packages.stock');
 	Route::post('/admin/logistica/envios/{shipment}/status', [PortalLogisticsController::class, 'updateShipmentStatus'])->name('portal.logistics.shipments.status');
+	Route::post('/admin/logistica/envios/{shipment}/empacar', [PortalLogisticsController::class, 'fulfillPackaging'])->name('portal.logistics.shipments.fulfill_packaging');
 
 	// Hub 2: Tienda & CMS Multiverso
 	Route::post('/admin/tienda-cms/fletes', [PortalStoreController::class, 'updateShippingRule'])->name('portal.store.shipping.update');

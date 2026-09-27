@@ -13,6 +13,8 @@ class VendorBill extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
+        'amount' => 'decimal:2',
+        'is_spei_blocked' => 'boolean',
         'due_date' => 'datetime',
         'paid_at' => 'datetime',
     ];
@@ -25,5 +27,10 @@ class VendorBill extends Model
     public function ally(): BelongsTo
     {
         return $this->belongsTo(Ally::class);
+    }
+
+    public function threeWayMatching(): BelongsTo
+    {
+        return $this->belongsTo(ThreeWayMatching::class, 'three_way_matching_id');
     }
 }

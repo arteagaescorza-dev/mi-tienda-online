@@ -24,6 +24,14 @@ use App\Models\CycleCount;
 use App\Models\OperationalTask;
 use App\Models\ShiftLog;
 use App\Models\SupportCase;
+use App\Models\ShippingReconciliation;
+use App\Models\ShippingReconciliationItem;
+use App\Models\ShippingDiscrepancyClaim;
+use App\Models\ThreeWayMatching;
+use App\Models\TaxLedgerEntry;
+use App\Services\Finance\ShippingInvoiceAuditorService;
+use App\Services\Finance\ThreeWayMatchingService;
+use App\Services\Finance\TaxCalculationEngineService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -894,6 +902,28 @@ class StorefrontController extends Controller
             ]);
         }
 
+        // 6. Auditoría de Paqueterías (TASK-INT-08)
+        $shippingReconciliations = ShippingReconciliation::with(['items', 'claims'])->latest()->get();
+        $shippingClaims = ShippingDiscrepancyClaim::with(['reconciliation', 'items'])->latest()->get();
+        $carrierAuditKpis = [
+            'total_audited_tracks' => (int) ShippingReconciliation::sum('total_tracks_count'),
+            'total_discrepant_tracks' => (int) ShippingReconciliation::sum('discrepant_tracks_count'),
+            'total_overcharge_amount' => (float) ShippingReconciliation::sum('total_overcharge_amount'),
+            'total_claims_count' => $shippingClaims->count(),
+            'total_claimed_amount' => (float) ShippingDiscrepancyClaim::sum('total_disputed_amount'),
+        ];
+
+        // 7. Cotejo de 3 Vias Inbound & Motor Fiscal SAT (TASK-INT-07 / TASK-FIN-02)
+        $threeWayMatchings = ThreeWayMatching::with('vendorBill')->latest()->get();
+        $matchingKpis = [
+            'total_inbound_audited' => $threeWayMatchings->count(),
+            'matched_count' => $threeWayMatchings->where('match_status', 'matched')->count(),
+            'discrepancy_held_count' => $threeWayMatchings->where('match_status', 'discrepancy_held')->count(),
+            'total_held_amount' => (float) $threeWayMatchings->where('spei_payout_blocked', true)->sum('invoice_gross_amount'),
+        ];
+        $taxEngine = app(TaxCalculationEngineService::class);
+        $taxSummary = $taxEngine->getPeriodTaxSummary(date('Y-m'));
+
         $activeTab = $request->query('tab', 'cashflow');
 
         return view('portal.finance', [
@@ -909,8 +939,144 @@ class StorefrontController extends Controller
             'marginKpis' => $marginKpis,
             'vendorBills' => $vendorBills,
             'vendorBillKpis' => $vendorBillKpis,
+            'shippingReconciliations' => $shippingReconciliations,
+            'shippingClaims' => $shippingClaims,
+            'carrierAuditKpis' => $carrierAuditKpis,
+            'threeWayMatchings' => $threeWayMatchings,
+            'matchingKpis' => $matchingKpis,
+            'taxSummary' => $taxSummary,
             'movements' => $movements->take(6)->values(),
         ]);
+    }
+
+    public function uploadShippingInvoiceReport(Request $request)
+    {
+        $validated = $request->validate([
+            'carrier_id' => 'required|string|in:dhl,dhl_express,skydropx,estafeta,fedex,99minutos,paquetexpress',
+            'invoice_folio' => 'required|string|max:100',
+            'report_file' => 'nullable|file',
+            'raw_csv' => 'nullable|string',
+        ]);
+
+        $service = new ShippingInvoiceAuditorService();
+        $rows = [];
+        $fileName = null;
+
+        if ($request->hasFile('report_file')) {
+            $file = $request->file('report_file');
+            $fileName = $file->getClientOriginalName();
+            $content = file_get_contents($file->getRealPath());
+            $rows = $service->parseCsvContent($content);
+        } elseif (!empty($validated['raw_csv'])) {
+            $rows = $service->parseCsvContent($validated['raw_csv']);
+        }
+
+        if (empty($rows)) {
+            return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
+                ->with('error', 'No se pudieron extraer partidas válidas del reporte de paquetería.');
+        }
+
+        $reconciliation = $service->auditCarrierInvoiceReport(
+            $validated['carrier_id'],
+            $validated['invoice_folio'],
+            $rows,
+            $request->user() ? $request->user()->name : 'Mickey RevOps',
+            $fileName
+        );
+
+        return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
+            ->with('success', "Factura {$reconciliation->invoice_folio} auditada contra {$reconciliation->total_tracks_count} guías. {$reconciliation->discrepant_tracks_count} discrepancias detectadas (Sobreprecio: MXN \${$reconciliation->total_overcharge_amount}).");
+    }
+
+    public function fileShippingClaim(Request $request, ShippingReconciliation $reconciliation)
+    {
+        $validated = $request->validate([
+            'item_ids' => 'required|array|min:1',
+            'item_ids.*' => 'integer',
+            'claim_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $service = new ShippingInvoiceAuditorService();
+        $claim = $service->fileCarrierClaimDossier(
+            $reconciliation->id,
+            $validated['item_ids'],
+            $request->user() ? $request->user()->name : 'Mickey RevOps',
+            $validated['claim_notes'] ?? null
+        );
+
+        return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
+            ->with('success', "Expediente formal {$claim->claim_folio} emitido por MXN \${$claim->total_disputed_amount}. Retención preventiva radicada en Cuentas por Pagar.");
+    }
+
+    public function verifyThreeWayMatching(Request $request)
+    {
+        $validated = $request->validate([
+            'po_code' => 'required|string|max:50',
+            'supplier_id' => 'required|string|max:50',
+            'supplier_name' => 'required|string|max:150',
+            'po_qty' => 'required|integer|min:1',
+            'po_total_amount' => 'required|numeric|min:0',
+            'warehouse_received_qty' => 'required|integer|min:0',
+            'warehouse_damaged_qty' => 'nullable|integer|min:0',
+            'invoice_number' => 'required|string|max:80',
+            'invoice_qty' => 'required|integer|min:1',
+            'invoice_gross_amount' => 'required|numeric|min:0',
+            'inspected_by' => 'nullable|string|max:100',
+        ]);
+
+        $service = app(ThreeWayMatchingService::class);
+        $matching = $service->evaluateInboundMatch(
+            poCode: $validated['po_code'],
+            supplierId: $validated['supplier_id'],
+            supplierName: $validated['supplier_name'],
+            poQty: (int) $validated['po_qty'],
+            poTotal: (float) $validated['po_total_amount'],
+            whReceivedQty: (int) $validated['warehouse_received_qty'],
+            whDamagedQty: (int) ($validated['warehouse_damaged_qty'] ?? 0),
+            invoiceNumber: $validated['invoice_number'],
+            invoiceQty: (int) $validated['invoice_qty'],
+            invoiceGross: (float) $validated['invoice_gross_amount'],
+            inspectedBy: $validated['inspected_by'] ?? ($request->user() ? $request->user()->name : 'Rampa Control Central')
+        );
+
+        $msg = $matching->spei_payout_blocked
+            ? "Cotejo {$matching->po_code}: Discrepancia detectada. Retención preventiva de pago SPEI activada (Nota de débito sugerida: MXN \${$matching->debit_note_amount})."
+            : "Cotejo {$matching->po_code}: 3 Vías conciliadas exitosamente. Pago SPEI habilitado.";
+
+        return redirect()->route('portal.finance', ['tab' => 'expenses'])->with('success', $msg);
+    }
+
+    public function issueDebitNoteWeb(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'debit_note_number' => 'required|string|max:80',
+            'debit_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $service = app(ThreeWayMatchingService::class);
+        $matching = $service->issueDebitNote(
+            matchingId: $id,
+            debitNoteNumber: $validated['debit_note_number'],
+            customDebitAmount: isset($validated['debit_amount']) ? (float) $validated['debit_amount'] : null
+        );
+
+        return redirect()->route('portal.finance', ['tab' => 'expenses'])
+            ->with('success', "Nota de débito {$matching->debit_note_number} emitida por MXN \${$matching->debit_note_amount}. Retención SPEI liberada (Monto neto a pagar: MXN \${$matching->payable_net_amount}).");
+    }
+
+    public function authorizeSpeiPayoutWeb(Request $request, int $id)
+    {
+        $paymentRef = $request->input('payment_reference');
+        try {
+            $service = app(ThreeWayMatchingService::class);
+            $matching = $service->authorizeSpeiPayout($id, $paymentRef);
+
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('success', "Dispersión SPEI autorizada para {$matching->po_code} y factura {$matching->invoice_number}.");
+        } catch (\DomainException $e) {
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('error', $e->getMessage());
+        }
     }
 
     public function reconcilePayoutBatch(PayoutBatch $payoutBatch)

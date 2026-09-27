@@ -15,6 +15,7 @@ class Shipment extends Model
     protected $casts = [
         'dispatched_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'packaging_fulfilled_at' => 'datetime',
     ];
 
     public function order(): BelongsTo
@@ -25,5 +26,20 @@ class Shipment extends Model
     public function manifest(): BelongsTo
     {
         return $this->belongsTo(ShippingManifest::class, 'manifest_id');
+    }
+
+    public function packageType(): BelongsTo
+    {
+        return $this->belongsTo(PackageType::class, 'package_type_id');
+    }
+
+    public function packagingMovements()
+    {
+        return $this->hasMany(PackagingMovement::class);
+    }
+
+    public function getWeightKgAttribute(): float
+    {
+        return (float)($this->attributes['weight_kg'] ?? $this->weight_actual_kg ?? 0.50);
     }
 }
