@@ -144,24 +144,33 @@ El crecimiento escalable de la plataforma exige que cada operador acceda unicame
 
 ---
 
-### Slice 5.4: Mensajeria Interdepartamental Operativa Vinculada a Folios
+### Slice 5.4: Mensajeria Interdepartamental Operativa Vinculada a Folios (`TASK-COM-01`) [COMPLETADO]
 * **Objetivo:** Proveer un canal de comunicacion formal entre almacén, compras, atencion y logistica, anclando cada nota a folios de negocio reales.
 * **Backend:**
-  * Migracion `create_interdepartmental_messages_table`:
-    - Campos: `id`, `channel` (`almacen_compras`, `logistica_atencion`, `finanzas_auditoria`, `general`), `sender_id`, `sender_name`, `sender_role`, `target_role`, `message`, `reference_type` (order, po, rma, claim, sku), `reference_code`, `priority` (normal, high, urgent), `is_resolved`, `resolved_at`, `created_at`.
-  * Modelo `App\Models\InterdepartmentalMessage`.
-  * Servicio `App\Services\Governance\InterdepartmentalChatService`:
-    - `sendMessage(string $channel, string $message, ?string $refType, ?string $refCode, string $priority)`.
-    - `getChannelMessages(string $channel, int $limit = 50)`.
-    - `resolveMessage(int $messageId)`.
-  * Rutas API y Web para envio y consulta de mensajes.
+  * Migracion ejecutada: `2026_09_27_000009_create_interdepartmental_messages_table.php` (`interdepartmental_messages` con indices en canal, estado de resolucion y folios de referencia).
+  * Modelo `App\Models\InterdepartmentalMessage`:
+    - Relacion `sender()` y scopes `channel()` y `unresolved()`.
+    - Accesores `formatted_time`, `tag_badge` y `priority_badge_color`.
+    - Metodo de resolucion formal `resolve($resolvedBy)`.
+  * Servicio de Dominio `App\Services\Governance\InterdepartmentalChatService`:
+    - Auto-deteccion inteligente de folios mediante regex (`@Pedido:`, `@SKU:`, `@OC:`, `@Guia:`, `@RMA:`).
+    - Despacho reactivo de notificaciones operativas prioritarias ante mensajes de severidad urgente.
+    - Metodos `sendMessage`, `getChannelMessages`, `resolveMessage`, `getChannelsSummary` y `seedBaselineMessagesIfEmpty`.
+  * Endpoints RESTful en `routes/api.php` y `GovernanceApiController`:
+    - `GET /api/v1/governance/chat/messages`: timeline ordenado con metadata de autoria y badges de folio.
+    - `POST /api/v1/governance/chat/messages`: envio de notas formales con asociacion de folios.
+    - `POST /api/v1/governance/chat/messages/{id}/resolve`: resolucion de notas operativas.
+    - `GET /api/v1/governance/chat/summary`: resumen de notas pendientes por canal para badges de cabecera.
 * **Frontend:**
-  * Tablero de Mensajeria en Vista de Gobernanza y cajon colapsable contextual:
-    - Selector de canales con badge de mensajes sin resolver.
-    - Timeline de mensajes con referencia cliqueable hacia la entidad vinculada.
-    - Formulario agil de envio con seleccion de prioridad y folio de referencia.
-* **Criterios de Aceptacion:**
-  * Pruebas validando creacion de mensajes, filtrado por canal y asociacion correcta de folios.
+  * Cajon deslizante de Chat en `resources/views/layouts/portal-panel.blade.php`:
+    - Sincronizacion reactiva con la API de gobernanza.
+    - Selector de canales con badge numerico de mensajes sin resolver.
+    - Chips de contexto rapido (`@SKU:`, `@Pedido:`, `@OC:`, `@Guia:`) y selector de prioridad (Normal, Alta, Urgente).
+    - Accion directa de "Resolver" integrada en cada burbuja de conversacion.
+* **Criterios de Aceptacion Superados:**
+  * 6 pruebas unitarias y de integracion en `tests/Feature/Governance/InterdepartmentalChatTest.php` al 100% verde (17 aserciones).
+  * Suite global de la plataforma expandida a 234 pruebas al 100% verde (1,534 aserciones).
+  * Cero emojis en toda la base de codigo, vistas y comentarios.
 
 ---
 

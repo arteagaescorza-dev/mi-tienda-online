@@ -82,6 +82,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/notifications/dispatch', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'dispatchNotification']);
         Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'markAllNotificationsRead']);
         Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'markNotificationRead']);
+
+        // Mensajeria Interdepartamental Operativa (TASK-COM-01)
+        Route::get('/chat/messages', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getChatMessages']);
+        Route::post('/chat/messages', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'sendChatMessage']);
+        Route::post('/chat/messages/{id}/resolve', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'resolveChatMessage']);
+        Route::get('/chat/summary', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getChatSummary']);
     });
 
     // 5. LOGÍSTICA & POST-VENTA (HUB 6)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\RevOps;
 
 use App\Http\Controllers\Controller;
 use App\Services\Governance\AuditTrailService;
+use App\Services\Governance\InterdepartmentalChatService;
 use App\Services\Governance\NotificationDispatcherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,8 @@ class GovernanceApiController extends Controller
 {
     public function __construct(
         protected AuditTrailService $auditService,
-        protected NotificationDispatcherService $notificationService
+        protected NotificationDispatcherService $notificationService,
+        protected InterdepartmentalChatService $chatService
     ) {}
 
     /**
@@ -230,5 +232,104 @@ class GovernanceApiController extends Controller
             'notification' => $notification,
             'message' => 'Notificacion operativa despachada exitosamente.',
         ], 201);
+    }
+
+    /**
+     * Consulta el timeline de mensajes del chat interdepartamental (TASK-COM-01).
+     */
+    public function getChatMessages(Request $request): JsonResponse
+    {
+        $channel = $request->query('channel', 'almacen');
+        $limit = (int) $request->query('limit', 50);
+        $user = $request->user();
+
+        $data = $this->chatService->getChannelMessages($channel, $limit, $user);
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'channel' => $data['channel'],
+            'channel_title' => $data['channel_title'],
+            'unresolved_count' => $data['unresolved_count'],
+            'summary' => $summary,
+            'messages' => $data['messages'],
+        ]);
+    }
+
+    /**
+     * Envia una nueva nota formal en el canal del chat inter-areas.
+     */
+    public function sendChatMessage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'channel' => ['required', 'string', 'in:almacen,ventas,logistica,general'],
+            'message' => ['required', 'string', 'max:2000'],
+            'reference_type' => ['nullable', 'string', 'max:50'],
+            'reference_code' => ['nullable', 'string', 'max:100'],
+            'priority' => ['nullable', 'string', 'in:normal,high,urgent'],
+            'target_role' => ['nullable', 'string', 'max:50'],
+            'sender_name' => ['nullable', 'string', 'max:120'],
+            'sender_role' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $user = $request->user();
+
+        $message = $this->chatService->sendMessage(
+            channel: $validated['channel'],
+            message: $validated['message'],
+            refType: $validated['reference_type'] ?? null,
+            refCode: $validated['reference_code'] ?? null,
+            priority: $validated['priority'] ?? 'normal',
+            user: $user,
+            senderName: $validated['sender_name'] ?? null,
+            senderRole: $validated['sender_role'] ?? null,
+            targetRole: $validated['target_role'] ?? null
+        );
+
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'summary' => $summary,
+            'notice' => 'Mensaje interdepartamental transmitido exitosamente.',
+        ], 201);
+    }
+
+    /**
+     * Marca un mensaje operativo como resuelto.
+     */
+    public function resolveChatMessage(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $success = $this->chatService->resolveMessage($id, $user);
+
+        if (!$success) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Mensaje no encontrado.',
+            ], 404);
+        }
+
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary,
+            'message' => 'Mensaje operativo marcado como resuelto.',
+        ]);
+    }
+
+    /**
+     * Resumen de mensajes pendientes y contadores de canales para la barra superior.
+     */
+    public function getChatSummary(Request $request): JsonResponse
+    {
+        $summary = $this->chatService->getChannelsSummary();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary,
+        ]);
     }
 }

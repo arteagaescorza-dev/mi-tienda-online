@@ -62,7 +62,7 @@
 
       <button class="topbar-icon-btn" data-action="toggle-chat" aria-label="Chat entre areas" title="Chat inter-areas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span class="topbar-badge chat-badge">2</span>
+        <span class="topbar-badge chat-badge" data-chat-badge style="display:none;">0</span>
       </button>
 
       <!-- AJUSTES Y CONFIGURACIÓN DEL MÓDULO -->
@@ -156,31 +156,40 @@
     </main>
   </div>
 
-  {{-- CHAT INTER-AREAS --}}
+  {{-- CHAT INTER-AREAS (TASK-COM-01) --}}
   <div class="chat-drawer-container" data-chat-container style="display:none;">
     <div class="chat-backdrop" data-action="close-chat"></div>
     <aside class="chat-drawer">
       <div class="chat-header">
         <div class="chat-header-title">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <div><h3>Comunicacion Inter-Areas</h3><span class="chat-status-sub"><span class="status-indicator-online"></span> Demostracion local</span></div>
+          <div><h3>Comunicacion Inter-Areas</h3><span class="chat-status-sub"><span class="status-indicator-online"></span> En linea - Trazabilidad formal</span></div>
         </div>
         <button class="chat-close-btn" data-action="close-chat" aria-label="Cerrar chat"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
       <div class="chat-channels-bar">
-        <button class="chat-channel-btn active" data-channel="almacen"># almacen-compras</button>
-        <button class="chat-channel-btn" data-channel="ventas"># atencion-ventas</button>
-        <button class="chat-channel-btn" data-channel="logistica"># logistica-guias</button>
-        <button class="chat-channel-btn" data-channel="general"># revops-general</button>
+        <button class="chat-channel-btn active" data-channel="almacen"># almacen-compras <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="almacen" style="display:none;">0</span></button>
+        <button class="chat-channel-btn" data-channel="ventas"># atencion-ventas <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="ventas" style="display:none;">0</span></button>
+        <button class="chat-channel-btn" data-channel="logistica"># logistica-guias <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="logistica" style="display:none;">0</span></button>
+        <button class="chat-channel-btn" data-channel="general"># revops-general <span class="text-[10px] ml-1 px-1 rounded bg-slate-200" data-channel-count="general" style="display:none;">0</span></button>
       </div>
       <div class="chat-messages-wrap" data-chat-messages></div>
-      <div class="chat-context-chips">
-        <span class="chip-label">Etiquetar:</span>
-        <button type="button" class="chat-chip" data-chip="@SKU:">+ SKU</button>
-        <button type="button" class="chat-chip" data-chip="@Pedido:">+ Pedido</button>
+      <div class="chat-context-chips flex items-center justify-between gap-1 px-3 py-1.5 bg-slate-50 border-t border-slate-200 text-xs">
+        <div class="flex items-center gap-1 overflow-x-auto">
+          <span class="chip-label text-slate-500 font-semibold text-[11px]">Etiquetar:</span>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@SKU:">+ SKU</button>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@Pedido:">+ Pedido</button>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@OC:">+ OC</button>
+          <button type="button" class="chat-chip text-[11px] px-1.5 py-0.5 rounded bg-white border border-slate-300 hover:bg-slate-100" data-chip="@Guia:">+ Guia</button>
+        </div>
+        <select class="chat-priority-select text-[11px] px-1.5 py-0.5 rounded border border-slate-300 bg-white" data-chat-priority title="Prioridad operativa">
+          <option value="normal">Normal</option>
+          <option value="high">Alta</option>
+          <option value="urgent">Urgente</option>
+        </select>
       </div>
       <form class="chat-input-bar" data-chat-form>
-        <input type="text" class="chat-input" placeholder="Escribe un mensaje..." data-chat-input required autocomplete="off">
+        <input type="text" class="chat-input" placeholder="Escribe una nota formal..." data-chat-input required autocomplete="off">
         <button type="submit" class="chat-send-btn" aria-label="Enviar mensaje"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
       </form>
     </aside>
