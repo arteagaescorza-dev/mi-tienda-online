@@ -63,6 +63,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/logistica/rma/{rmaRequest}/inspeccionar', [PortalLogisticsController::class, 'inspectRma'])->name('portal.logistics.rma.inspect');
 	Route::post('/admin/logistica/cajas/{packageType}/stock', [PortalLogisticsController::class, 'updatePackageStock'])->name('portal.logistics.packages.stock');
 	Route::post('/admin/logistica/envios/{shipment}/status', [PortalLogisticsController::class, 'updateShipmentStatus'])->name('portal.logistics.shipments.status');
+	Route::post('/admin/logistica/envios/{shipment}/empacar', [PortalLogisticsController::class, 'fulfillPackaging'])->name('portal.logistics.shipments.fulfill_packaging');
 
 	// Hub 2: Tienda & CMS Multiverso
 	Route::post('/admin/tienda-cms/fletes', [PortalStoreController::class, 'updateShippingRule'])->name('portal.store.shipping.update');

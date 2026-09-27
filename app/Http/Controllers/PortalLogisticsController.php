@@ -9,22 +9,28 @@ use App\Models\PackageType;
 use App\Models\RmaRequest;
 use App\Models\RmaInspectionLog;
 use App\Models\FraudRiskAssessment;
+use App\Models\PackagingMovement;
+use App\Services\RevOps\PackagingFulfillmentService;
 use Illuminate\Http\Request;
 
 class PortalLogisticsController extends Controller
 {
+    public function __construct(
+        protected PackagingFulfillmentService $packagingService = new PackagingFulfillmentService()
+    ) {}
+
     public function index(Request $request)
     {
         $ordersCount = Order::count();
 
         // 1. Mesa de Expedición: Bultos en espera de recolección (status 'label_created' o 'packed')
-        $rampShipments = Shipment::with(['order.fraudAssessment'])
+        $rampShipments = Shipment::with(['order.fraudAssessment', 'packageType'])
             ->whereIn('status', ['label_created', 'packed'])
             ->orderBy('id', 'desc')
             ->get();
 
         // 2. Torre de Control & Rastreo: Envíos en tránsito nacional o entregados recientemente
-        $trackingShipments = Shipment::with(['order', 'manifest'])
+        $trackingShipments = Shipment::with(['order', 'manifest', 'packageType'])
             ->whereIn('status', ['in_transit', 'out_for_delivery', 'delivered', 'failed_attempt', 'returned'])
             ->orderBy('id', 'desc')
             ->get();
@@ -36,6 +42,12 @@ class PortalLogisticsController extends Controller
 
         // 4. Catálogo de Cajas & Cubicaje IATA 5000
         $packageTypes = PackageType::orderBy('id')->get();
+
+        // 5. Kardex de Movimientos de Insumos de Empaque (TASK-INT-13)
+        $packagingMovements = PackagingMovement::with(['packageType', 'shipment', 'order', 'user'])
+            ->orderBy('id', 'desc')
+            ->take(12)
+            ->get();
 
         // Manifiestos recientes
         $manifests = ShippingManifest::withCount('shipments')->orderBy('id', 'desc')->take(10)->get();
@@ -62,16 +74,22 @@ class PortalLogisticsController extends Controller
             $custName = $addr['name'] ?? ($s->order?->user?->name ?? 'Cliente Registrado');
             $fraud = $s->order?->fraudAssessment;
             $fraudScore = $fraud ? $fraud->risk_score : 10;
-            $boxName = $s->weight_volumetric_kg > 0.8 ? 'Caja Doble Combo (BOX-G03)' : ($s->weight_volumetric_kg > 0.35 ? 'Caja Estándar Venus (BOX-M02)' : 'Caja Micro Marte (BOX-P01)');
+            
+            $boxName = $s->packageType 
+                ? "{$s->packageType->name} ({$s->packageType->code})"
+                : ($s->weight_volumetric_kg > 0.8 ? 'Caja Doble Combo (BOX-G03)' : ($s->weight_volumetric_kg > 0.35 ? 'Caja Estándar Venus (BOX-M02)' : 'Caja Micro Marte (BOX-P01)'));
 
             return [
                 'id' => 'PKG-' . $s->id,
                 'db_id' => $s->id,
+                'package_type_id' => $s->package_type_id,
+                'package_code' => $s->packageType?->code,
+                'packaging_fulfilled_at' => $s->packaging_fulfilled_at,
                 'order_number' => $s->order?->order_number ?? ('ORD-' . $s->order_id),
                 'customer' => $custName,
                 'destination' => $cityName,
                 'weight_kg' => (float)$s->weight_actual_kg,
-                'dimensions' => $s->weight_volumetric_kg > 0.8 ? '30x20x10 cm' : ($s->weight_volumetric_kg > 0.35 ? '22x15x6 cm' : '18x12x5 cm'),
+                'dimensions' => $s->packageType ? "{$s->packageType->length_cm}x{$s->packageType->width_cm}x{$s->packageType->height_cm} cm" : ($s->weight_volumetric_kg > 0.8 ? '30x20x10 cm' : ($s->weight_volumetric_kg > 0.35 ? '22x15x6 cm' : '18x12x5 cm')),
                 'volumetric_kg' => (float)$s->weight_volumetric_kg,
                 'box_type' => $boxName,
                 'courier' => match ($s->courier) {
@@ -146,6 +164,7 @@ class PortalLogisticsController extends Controller
             'summary' => $summary,
             'packages' => $packages,
             'packageTypes' => $packageTypes,
+            'packagingMovements' => $packagingMovements,
             'trackingList' => $trackingList,
             'rmaRequests' => $rmaRequests,
             'manifests' => $manifests,
@@ -184,6 +203,10 @@ class PortalLogisticsController extends Controller
         ]);
 
         $shipments = Shipment::whereIn('id', $validated['shipment_ids'])->get();
+
+        // Deduccion automatica de cajas e insumos en Kardex (TASK-INT-13)
+        $deductedPackages = $this->packagingService->fulfillBatch($shipments, $request->user());
+
         foreach ($shipments as $shipment) {
             $shipment->update([
                 'manifest_id' => $manifest->id,
@@ -196,8 +219,10 @@ class PortalLogisticsController extends Controller
             }
         }
 
+        $packagingNote = $deductedPackages > 0 ? " y {$deductedPackages} insumos de empaque deducidos en Kardex" : "";
+
         return redirect()->route('portal.logistics')
-            ->with('success', "Manifiesto {$manifestNumber} cerrado con éxito ({$manifest->total_packages} bultos entregados al chofer {$validated['driver_name']}).");
+            ->with('success', "Manifiesto {$manifestNumber} cerrado con éxito ({$manifest->total_packages} bultos entregados al chofer {$validated['driver_name']}{$packagingNote}).");
     }
 
     public function inspectRma(Request $request, RmaRequest $rmaRequest)
@@ -257,12 +282,42 @@ class PortalLogisticsController extends Controller
         $validated = $request->validate([
             'stock_available' => 'required|integer|min:0',
             'unit_cost' => 'required|numeric|min:0',
+            'reorder_point' => 'nullable|integer|min:0',
         ]);
 
-        $packageType->update($validated);
+        $this->packagingService->adjustStock(
+            $packageType,
+            (int)$validated['stock_available'],
+            (float)$validated['unit_cost'],
+            isset($validated['reorder_point']) ? (int)$validated['reorder_point'] : null,
+            $request->user()
+        );
+
+        $rop = $validated['reorder_point'] ?? $packageType->reorder_point;
 
         return redirect()->route('portal.logistics')
-            ->with('success', "Inventario de insumo {$packageType->name} ({$packageType->code}) actualizado a {$validated['stock_available']} unidades.");
+            ->with('success', "Inventario de insumo {$packageType->name} ({$packageType->code}) actualizado a {$validated['stock_available']} unidades (ROP: {$rop}). Asiento registrado en Kardex.");
+    }
+
+    public function fulfillPackaging(Request $request, Shipment $shipment)
+    {
+        $validated = $request->validate([
+            'package_type_id' => 'nullable|exists:package_types,id',
+        ]);
+
+        $packageType = !empty($validated['package_type_id']) 
+            ? PackageType::find($validated['package_type_id']) 
+            : null;
+
+        $movement = $this->packagingService->fulfillShipmentPackaging($shipment, $packageType, $request->user());
+
+        if (!$movement) {
+            return redirect()->route('portal.logistics')
+                ->with('error', "No fue posible deducir el empaque para el envío {$shipment->tracking_number}.");
+        }
+
+        return redirect()->route('portal.logistics')
+            ->with('success', "Empaque asignado y deducido en Kardex: 1 unidad de {$movement->packageType->name} para {$shipment->tracking_number}. Stock restante: {$movement->stock_after}.");
     }
 
     public function updateShipmentStatus(Request $request, Shipment $shipment)

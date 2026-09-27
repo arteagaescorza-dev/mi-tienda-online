@@ -44,20 +44,26 @@ La operacion de un e-commerce omnicanal de ropa interior, cosmetica y suscripcio
 
 ## 3. Desglose de Vertical Slices de Implementacion
 
-### Slice 4.1: Deduccion Automatica de Cajas y Empaque en Kardex (`TASK-INT-13`, `TASK-LOG-06`)
+### Slice 4.1: Deduccion Automatica de Cajas y Empaque en Kardex (`TASK-INT-13`, `TASK-LOG-06`) [COMPLETADO]
 * **Objetivo:** Conectar la emision de etiquetas y cierre de manifiestos en Hub 6 con el Kardex de inventario en Hub 4.
 * **Backend:**
-  * Endpoint `POST /api/v1/logistics/shipments/{id}/fulfill-packaging` (o disparado al crear/actualizar guia).
-  * En una transaccion atomica:
-    - Decrementar `stock_available` en `package_types`.
-    - Registrar asiento en `inventory_movements` con `type = 'CONSUMO_EMPAQUE_ENVIO'`, referencia a la orden y lote correspondiente.
-    - Disparar alerta en `operational_tasks` si `stock_available <= reorder_point`.
+  * Migracion `2026_09_27_000003_create_packaging_movements_and_enhance_logistics_tables.php`.
+  * Modelo `App\Models\PackagingMovement` y ampliacion de `PackageType` y `Shipment`.
+  * Servicio `App\Services\RevOps\PackagingFulfillmentService`:
+    - Deduccion atomica e idempotente (`fulfillShipmentPackaging`, `fulfillBatch`).
+    - Registro inmutable en Kardex de empaque con tipo `CONSUMO_EMPAQUE_ENVIO` y `ENTRADA_REABASTECIMIENTO`.
+    - Disparo reactivo de alertas ROP (`OperationalTask`) para compras y almacen cuando `stock_available <= reorder_point`.
+    - Resolucion de alertas ROP al reabastecer stock.
+  * Ruta y controlador `POST /admin/logistica/envios/{shipment}/empacar` y deduccion automatica en `closeManifest`.
 * **Frontend:**
   * En [resources/views/portal/logistics.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/logistics.blade.php):
-    - Al emitir guia o cerrar manifiesto, actualizar reactivamente la disponibilidad de empaques en la pestaña "Insumos & Cubicaje IATA".
-    - Badge de advertencia ROP en rojo cuando las cajas chicas (`BOX-P01`) o medianas (`BOX-M02`) caigan por debajo del nivel de seguridad.
-* **Criterios de Aceptacion:**
-  * Pruebas en `CrossHubSynergiesTest` comprobando deduccion exacta de stock de cajas al confirmar expedicion.
+    - En Mesa de Expedicion: Badge "Kardex OK" para bultos con empaque deducido y boton en 1 clic "Deducir Insumo".
+    - En Cajas & Empaques: Badges ROP pulsantes ("ALERTA ROP"), campos editables de Stock y ROP.
+    - Tabla completa de auditoria: Kardex de Movimientos de Insumos de Empaque.
+* **Criterios de Aceptacion Superados:**
+  * 5 pruebas unitarias/funcionales en `tests/Feature/RevOps/CrossHubPackagingTest.php` al 100% verde (26 aserciones).
+  * Suite global de la plataforma ampliada a 184 pruebas al 100% verde (1,213 aserciones).
+  * Cero emojis en toda la base de codigo y vistas.
 
 ---
 

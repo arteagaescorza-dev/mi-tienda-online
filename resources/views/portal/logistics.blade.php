@@ -174,6 +174,19 @@
                                     <td class="py-3 px-3">
                                         <span class="text-slate-800 font-medium block">{{ $pkg['box_type'] }}</span>
                                         <span class="text-[10px] text-slate-400 font-mono">{{ $pkg['dimensions'] }}</span>
+                                        @if($pkg['packaging_fulfilled_at'])
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mt-1">
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                Kardex OK
+                                            </span>
+                                        @else
+                                            <form method="POST" action="{{ route('portal.logistics.shipments.fulfill_packaging', $pkg['db_id']) }}" class="inline-block mt-1">
+                                                @csrf
+                                                <button type="submit" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[9px] font-bold border border-indigo-200 transition cursor-pointer" title="Deducir empaque en Kardex">
+                                                    Deducir Insumo
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                     <td class="py-3 px-3">
                                         <span class="font-bold text-slate-900 block font-mono">{{ number_format($pkg['weight_kg'], 2) }} kg</span>
@@ -475,13 +488,14 @@
                     @php
                         $volumeLiters = round(($box->length_cm * $box->width_cm * $box->height_cm) / 1000, 2);
                         $volumetricIata = round(($box->length_cm * $box->width_cm * $box->height_cm) / 5000, 2);
+                        $isLow = $box->stock_available <= ($box->reorder_point ?? 40);
                     @endphp
-                    <div class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl flex flex-col justify-between">
+                    <div class="p-4 bg-slate-50 border {{ $isLow ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-200/60' }} rounded-xl flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <span class="font-mono text-xs font-bold text-indigo-600">{{ $box->code }}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $box->stock_available > 50 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
-                                    {{ $box->stock_available }} en stock
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $isLow ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800' }}">
+                                    {{ $isLow ? 'ALERTA ROP: ' . $box->stock_available : $box->stock_available . ' en stock' }}
                                 </span>
                             </div>
                             <h4 class="text-xs font-bold text-slate-900">{{ $box->name }}</h4>
@@ -497,6 +511,10 @@
                                     <span class="font-mono font-bold">{{ $volumetricIata }} kg</span>
                                 </div>
                                 <div class="flex justify-between">
+                                    <span>Punto Reorden (ROP):</span>
+                                    <span class="font-mono font-bold text-slate-700">{{ $box->reorder_point ?? 40 }} u</span>
+                                </div>
+                                <div class="flex justify-between">
                                     <span>Costo Unitario:</span>
                                     <span class="font-mono font-bold text-emerald-700">MXN ${{ number_format($box->unit_cost, 2) }}</span>
                                 </div>
@@ -507,21 +525,99 @@
                             <form method="POST" action="{{ route('portal.logistics.packages.stock', $box->id) }}" class="flex items-center gap-1.5">
                                 @csrf
                                 <input type="hidden" name="unit_cost" value="{{ $box->unit_cost }}">
-                                <input 
-                                    type="number" 
-                                    name="stock_available" 
-                                    value="{{ $box->stock_available }}" 
-                                    min="0"
-                                    class="w-20 px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 focus:outline-indigo-600"
-                                    title="Ajustar stock de insumos"
-                                >
-                                <button type="submit" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[10px] font-bold transition cursor-pointer">
-                                    Ajustar
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[9px] text-slate-400 font-semibold uppercase">Stock</span>
+                                    <input 
+                                        type="number" 
+                                        name="stock_available" 
+                                        value="{{ $box->stock_available }}" 
+                                        min="0"
+                                        class="w-14 px-1.5 py-1 bg-white border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 focus:outline-indigo-600"
+                                        title="Ajustar stock de insumos"
+                                    >
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[9px] text-slate-400 font-semibold uppercase">ROP</span>
+                                    <input 
+                                        type="number" 
+                                        name="reorder_point" 
+                                        value="{{ $box->reorder_point ?? 40 }}" 
+                                        min="0"
+                                        class="w-12 px-1.5 py-1 bg-white border border-slate-300 rounded text-xs font-mono font-bold text-slate-800 focus:outline-indigo-600"
+                                        title="Punto de reorden (ROP)"
+                                    >
+                                </div>
+                                <button type="submit" class="px-2 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[10px] font-bold transition cursor-pointer shrink-0">
+                                    Guardar
                                 </button>
                             </form>
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            {{-- KARDEX DE MOVIMIENTOS DE INSUMOS DE EMPAQUE (TASK-INT-13) --}}
+            <div class="mt-8 pt-6 border-t border-slate-200/80">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span>Kardex de Movimientos de Insumos de Empaque (Auditoría Inmutable)</span>
+                    </h4>
+                    <span class="text-[11px] text-slate-500 font-medium">Últimos registros de consumo y reabastecimiento</span>
+                </div>
+
+                @if(isset($packagingMovements) && count($packagingMovements) > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                                    <th class="py-2 px-3">Fecha</th>
+                                    <th class="py-2 px-3">Insumo</th>
+                                    <th class="py-2 px-3">Tipo Movimiento</th>
+                                    <th class="py-2 px-3 text-center">Cantidad</th>
+                                    <th class="py-2 px-3 text-center">Stock Anterior</th>
+                                    <th class="py-2 px-3 text-center">Stock Resultante</th>
+                                    <th class="py-2 px-3">Envío / Referencia</th>
+                                    <th class="py-2 px-3">Operador</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach($packagingMovements as $pm)
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-2 px-3 font-mono text-[11px] text-slate-500">{{ $pm->created_at->format('d/m H:i') }}</td>
+                                        <td class="py-2 px-3">
+                                            <span class="font-bold text-slate-900 block">{{ $pm->packageType?->name ?? 'Insumo' }}</span>
+                                            <span class="font-mono text-[10px] text-indigo-600">{{ $pm->packageType?->code }}</span>
+                                        </td>
+                                        <td class="py-2 px-3">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $pm->quantity < 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800' }}">
+                                                {{ $pm->type }}
+                                            </span>
+                                        </td>
+                                        <td class="py-2 px-3 text-center font-mono font-bold {{ $pm->quantity < 0 ? 'text-rose-600' : 'text-emerald-600' }}">
+                                            {{ $pm->quantity > 0 ? '+' . $pm->quantity : $pm->quantity }}
+                                        </td>
+                                        <td class="py-2 px-3 text-center font-mono text-slate-500">{{ $pm->stock_before }} u</td>
+                                        <td class="py-2 px-3 text-center font-mono font-bold text-slate-900">{{ $pm->stock_after }} u</td>
+                                        <td class="py-2 px-3 font-mono text-[11px]">
+                                            @if($pm->shipment)
+                                                <span class="text-indigo-600 block">{{ $pm->shipment->tracking_number }}</span>
+                                                <span class="text-[10px] text-slate-400">{{ $pm->order?->order_number }}</span>
+                                            @else
+                                                <span class="text-slate-500">{{ $pm->notes ?? 'Ajuste manual' }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="py-2 px-3 text-slate-600 text-[11px]">{{ $pm->user?->name ?? 'Sistema Automático' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                        <p class="text-slate-500 text-xs">Aún no se registran movimientos de empaque. Las salidas se generan automáticamente al empacar pedidos o cerrar manifiestos.</p>
+                    </div>
+                @endif
             </div>
         </div>
 
