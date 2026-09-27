@@ -73,9 +73,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/taxes/summary', [FinanceApiController::class, 'getTaxSummary']);
     });
 
-    // 4B. GOBERNANZA & PRIVACIDAD RBAC (TASK-RBAC-02, TASK-RBAC-03)
+    // 4B. GOBERNANZA, PRIVACIDAD RBAC & AUDITORIA MASTER (TASK-RBAC-02, TASK-RBAC-03, TASK-DSH-09)
     Route::prefix('governance')->group(function () {
         Route::post('/roles/switch', [\App\Http\Controllers\PortalAccessController::class, 'switchRole']);
+        Route::get('/audit-logs', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'getAuditLogs']);
+        Route::post('/audit-logs/custom', [\App\Http\Controllers\Api\RevOps\GovernanceApiController::class, 'recordCustomAction']);
     });
 
     // 5. LOGÍSTICA & POST-VENTA (HUB 6)

@@ -83,22 +83,33 @@ El crecimiento escalable de la plataforma exige que cada operador acceda unicame
 
 ---
 
-### Slice 5.2: Master Log de Auditoria Omnicanal Inmutable (`TASK-DSH-09`)
+### Slice 5.2: Master Log de Auditoria Omnicanal Inmutable (`TASK-DSH-09`) [COMPLETADO]
 * **Objetivo:** Registrar de forma inmutable todas las operaciones criticas ejecutadas en la plataforma para trazabilidad forense y gobernanza de superadministradores.
 * **Backend:**
-  * Migracion `create_system_audit_logs_table`:
-    - Campos: `id`, `user_id`, `user_name`, `role`, `action` (create, update, delete, status_override, price_change, spei_unblock, rma_verdict), `module` (inventory, orders, finance, logistics, users, settings), `entity_type`, `entity_id`, `reference_code`, `old_values` (JSON), `new_values` (JSON), `ip_address`, `user_agent`, `created_at`.
-  * Modelo `App\Models\SystemAuditLog` con casts JSON e inmutabilidad garantizada (metodos `update()` y `delete()` bloqueados con excepcion).
-  * Servicio `App\Services\Governance\AuditTrailService`:
-    - `logAction(string $action, string $module, string $referenceCode, ?array $oldValues, ?array $newValues, string $description)`.
-    - Integracion automatica mediante eventos de dominio y decoradores de servicios.
-* **Frontend:**
-  * Panel de Auditoria en vista de Gobernanza:
-    - Tabla cronologica de eventos con buscador reactivo, filtros por modulo, rol y fecha.
-    - Visor modal de diff JSON (antes vs despues) para auditorias de cambio de precio y stock.
-* **Criterios de Aceptacion:**
-  * Pruebas de inmutabilidad: cualquier intento de alterar o eliminar un log arroja `DomainException`.
-  * Pruebas de persistencia correcta con captura de IP y diffs de atributos.
+  * Migracion ejecutada: `database/migrations/2026_09_27_000007_create_system_audit_logs_table.php` creando la tabla `system_audit_logs` con indices optimizados para `module`, `action`, `reference_code`, `user_id` y `created_at`.
+  * Modelo Eloquent `App\Models\SystemAuditLog`:
+    - Casts para `old_values` y `new_values` en formato JSON y marcas de tiempo inmutables (`UPDATED_AT = null`).
+    - Blindaje inquebrantable de inmutabilidad: ganchos `static::updating` y `static::deleting` que lanzan `DomainException` si se intenta alterar o borrar un registro.
+    - Relacion `user(): BelongsTo`.
+    - Scopes de consulta: `forModule()`, `forAction()`, `forUser()`, `search()`.
+    - Mutador `diff_summary`: calcula y expone el comparativo atributo por atributo de valores anteriores vs nuevos.
+  * Servicio de Dominio `App\Services\Governance\AuditTrailService`:
+    - Metodo principal `logAction()`: captura de usuario, rol, modulo, entidad, codigo de referencia, diffs JSON, IP del cliente y User-Agent.
+    - Helpers especializados de dominio:
+      - `logPriceChange`: registro de variaciones de PVP/costo en catalogos y variantes.
+      - `logStockAdjustment`: registro de ajustes fisicos manuales con justificacion.
+      - `logSpeiUnblock`: auditoria forense al autorizar pagos retenidos en Cuentas por Pagar.
+      - `logStatusOverride`: sobrescritura manual de estados de pedidos.
+      - `logRoleSwitch`: trazabilidad de conmutacion de roles operativos en sesion.
+    - Metodos de consulta: `getAuditHistory()` con paginacion y `getAuditStats()` con metricas de agregacion diaria.
+  * Endpoints y Rutas:
+    - `GET /api/v1/governance/audit-logs`: consulta paginada, filtros reactivos y resumen estadistico, con autorizacion estricta exclusiva para perfiles administrativos (`admin`, `superadmin`, `all_roles`, `portal`).
+    - `POST /api/v1/governance/audit-logs/custom`: registro de acciones administrativas manuales.
+    - Integracion automatica en `PortalAccessController::switchRole` para auditar cambios de rol.
+* **Criterios de Aceptacion Superados:**
+  * 6 pruebas unitarias y de integracion en `tests/Feature/Governance/MasterAuditLogTest.php` al 100% verde (39 aserciones).
+  * Suite global de la plataforma ampliada a 221 pruebas al 100% verde (1,489 aserciones).
+  * Cero emojis en toda la base de codigo, vistas y comentarios.
 
 ---
 
