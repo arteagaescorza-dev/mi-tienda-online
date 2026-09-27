@@ -24,17 +24,17 @@
 | `TASK-INV-06` | Control Sanitario: Lotes y Fechas de Caducidad / PAO en Cosmética | **Hub 4 (Inventario)** | **Media** | **Completada (UI)** | Catálogo, Inbound, Kardex, Etiquetas Térmicas |
 | `TASK-INV-07` | Auditoría Cíclica a Ciegas (Blind Cycle Counting) de 3 SKUs Diarios | **Hub 4 (Inventario)** | **Baja** | **Completada (UI)** | Kardex, Ubicaciones |
 | `TASK-INV-08` | Gestión Integral de Ropa Interior, Curaduría Previa Scraping, Vitrina Web y Ajustes de Módulo | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Catálogo, Scraping Torzo, Vitrina Web, Configuración |
-| `TASK-DSH-01` | Vista Intermedia RBAC: Bandeja de Atención a Clientes & Ventas | **Hub 1 (Dashboard)** | **Alta** | **Completada (UI)** | RBAC Global, Hub 3 (CRM) |
-| `TASK-DSH-02` | Embudo Comercial Multiverso Accionable con Gatillos en 1 Clic | **Hub 1 (Dashboard)** | **Alta** | **Completada (UI)** | Multiverso, WhatsApp API |
-| `TASK-DSH-03` | Monitor de Salud del Ecosistema & Telemetría de APIs (System Health) | **Hub 1 (Dashboard)** | **Media** | **Completada (UI)** | Stripe, Torzo Bot, DHL |
-| `TASK-DSH-04` | Generador Dinámico de Tareas Operativas Conectado a Eventos Reales | **Hub 1 (Dashboard)** | **Alta** | **Completada (UI)** | Eventos de Dominio / Tienda |
-| `TASK-DSH-05` | SLA y Semáforo Visual de Envejecimiento de Pedidos (Aging Alert) | **Hub 1 (Dashboard)** | **Alta** | **Completada (UI)** | Mesa de empaque, DHL |
-| `TASK-DSH-06` | Validador Predictivo de Direcciones y Códigos Postales con Riesgo | **Hub 1 (Dashboard)** | **Alta** | **Completada (UI)** | APIs de paquetería / Sepomex |
+| `TASK-DSH-01` | Vista Intermedia RBAC: Bandeja de Atención a Clientes & Ventas | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | RBAC Global, Hub 3 (CRM) |
+| `TASK-DSH-02` | Embudo Comercial Multiverso Accionable con Gatillos en 1 Clic | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Multiverso, WhatsApp API |
+| `TASK-DSH-03` | Monitor de Salud del Ecosistema & Telemetría de APIs (System Health) | **Hub 1 (Dashboard)** | **Media** | **Completada (Full-Stack)** | Stripe, Torzo Bot, DHL |
+| `TASK-DSH-04` | Generador Dinámico de Tareas Operativas Conectado a Eventos Reales | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Eventos de Dominio / Tienda |
+| `TASK-DSH-05` | SLA y Semáforo Visual de Envejecimiento de Pedidos (Aging Alert) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Mesa de empaque, DHL |
+| `TASK-DSH-06` | Validador Predictivo de Direcciones y Códigos Postales con Riesgo | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | APIs de paquetería / Sepomex |
 | `TASK-INT-01` | Saltos Profundos (Deep Links) Prefiltrados de Dashboard a Inventario | **Transversal (H1 $\rightarrow$ H4)** | **Alta** | **Completada (UI)** | Router interno, Filtros Catálogo |
 | `TASK-INT-02` | Trazabilidad de Stock: Comprometido a Despachado / Kardex | **Transversal (H1 $\rightarrow$ H4)** | **Alta** | **Completada (UI)** | Modales de Acción, Kardex |
 | `TASK-INT-03` | Liberación Masiva de Lotes de Suscripción (Batch Fulfillment) | **Transversal (H1 $\rightarrow$ H6)** | **Alta** | **Completada (UI)** | BOM, Pasarelas recurrentes |
 | `TASK-INT-04` | Ficha de Preferencias y Tallas de Suscriptor en Checklist de Empaque | **Transversal (H1 $\rightarrow$ H6)** | **Alta** | **Completada (UI)** | Perfil de suscriptor, Modales |
-| `TASK-INT-05` | Recuperación de Carritos Abandonados con Enlace Tokenizado en 1 Clic | **Transversal (H1 $\rightarrow$ H3)** | **Alta** | **Completada (UI)** | Checkout resume, WhatsApp |
+| `TASK-INT-05` | Recuperación de Carritos Abandonados con Enlace Tokenizado en 1 Clic | **Transversal (H1 $\rightarrow$ H3)** | **Alta** | **Completada (Full-Stack)** | Checkout resume, WhatsApp |
 | `TASK-LOG-01` | Mesa de Expedición Multipaquetera y Cierre de Manifiestos Diarios | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | Órdenes Empacadas, APIs Paquetería |
 | `TASK-LOG-02` | Emisión e Impresión Masiva de Guías Térmicas (100x150mm) con Code128 / QR SVG | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | Manifiesto, Impresoras Térmicas |
 | `TASK-LOG-03` | Torre de Control de Envíos con Telemetría de Tránsito y Alertas de Excepción | **Hub 6 (Logística)** | **Alta** | **Completada (UI)** | Webhooks Paqueterías, Sepomex |
@@ -64,7 +64,7 @@
 | `TASK-PUR-02` | Reasignación de Modales Físicos (Rampa y Surtido Interno) a Almacén y Segregación de Compras | **Hub 1 $\leftrightarrow$ Hub 4 (Compras / Almacén)** | **Alta** | **Completada (UI)** | Modal Rampa Almacén, Modal Surtido Carlos, Exclusión Purchases |
 | `TASK-PUR-03` | Depuración y Especialización del Catálogo para Compras (Existencias, DOH, Costos y Botón PO) | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (UI)** | DOH, Alertas ROP, Costos CPP, Ocultar Auditoría Ciegas |
 | `TASK-PUR-04` | Generador de PO con Impresión PDF Multi-Página, Compensación de Notas de Crédito & Edición de Costo/Prioridad | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (UI)** | Motor @media print Letter, Panel Compensación Discrepancias, Recálculo ROP |
-| `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (UI)** | Analítica RevOps, LLM API, Chat UI |
+| `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Analítica RevOps, LLM API, Chat UI |
 | `TASK-HUB-VND` | Portal Extranet de Proveedores y Fabricantes (B2B Inbound & Órdenes) | **Hub 7 / B2B (Proveedores)** | **Alta** | **Completada (UI)** | Hub 4 Compras, Recepción Inbound |
 | `TASK-SUB-DUN` | Motor de Dunning y Recuperación de Cobros Fallidos en Suscripciones (MRR) | **Transversal (H5 $\leftrightarrow$ H3)** | **Media** | **Completada (UI)** | MRR, Stripe Webhooks, WhatsApp |
 | `TASK-MKT-01` | Dashboard de Telemetría Ads (Meta CAPI, Google Ads, GA4) y Copiloto de Crecimiento | **Hub 3 (Marketing)** | **Alta** | **Completada (UI)** | Meta Graph API, GA4 Measurement, CAPI |

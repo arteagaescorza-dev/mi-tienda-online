@@ -138,17 +138,25 @@ El **Hub 1** funciona como el centro neurálgico y cabina de mando diario de la 
 
 ---
 
-### Slice 3.5: Suite Integral de Pruebas Automatizadas Hub 1 y Verificación General
+### Slice 3.5: Suite Integral de Pruebas Automatizadas Hub 1 y Verificación General [COMPLETADO]
 * **Objetivo:** Garantizar la cobertura integral de pruebas unitarias y de integración para el Hub 1, validando la ausencia total de regresiones en toda la plataforma.
 * **Archivo de Pruebas:** `tests/Feature/RevOps/DashboardHub1ModuleTest.php`
-  * Pruebas clave a verificar:
+  * Pruebas clave verificadas:
     1. `test_portal_dashboard_renders_with_triple_rbac_and_hides_financials_for_warehouse_role`
     2. `test_can_fetch_operational_tasks_with_sla_status_and_complete_task`
     3. `test_can_rescue_abandoned_cart_via_whatsapp_with_tokenized_link`
     4. `test_can_validate_predictive_address_and_release_order_to_warehouse`
     5. `test_can_fetch_executive_analytics_charts_and_multiverse_funnel`
     6. `test_can_ping_system_health_telemetry_connectors`
-* **Criterio de Aceptación:**
-  * Ejecución exitosa de `php artisan test` con el 100% de pruebas en verde ($\ge 175$ pruebas).
-  * Cero emojis en toda la base de código y vistas.
-  * Merge limpio de `feature/prioridad-3-dashboard-hub1` a `master` y etiquetado del hito `v1.3-prioridad-3-dashboard-hub1`.
+    7. `test_portal_dashboard_shows_financials_for_executive_admin`
+    8. `test_can_update_task_checklist_step`
+    9. `test_can_filter_support_cases_by_channel_and_status`
+    10. `test_can_reassign_support_case_to_operator`
+    11. `test_can_interact_with_copilot_chat`
+* **Entregables Verificados:**
+  * Suite global de la plataforma ejecutada: 174 pruebas, 1,167 aserciones, 100% verde (0 fallos, 0 errores).
+  * 11 pruebas exhaustivas en `tests/Feature/RevOps/DashboardHub1ModuleTest.php` al 100% verde.
+  * Verificación estricta de Cero Emojis en código PHP, migraciones, plantillas Blade, JSON y documentación.
+  * Tareas `TASK-DSH-01` a `TASK-DSH-07` y `TASK-INT-05` completamente cerradas e integradas.
+  * Merge a `master` y etiquetado de hito `v1.3-prioridad-3-dashboard-hub1`.
+
