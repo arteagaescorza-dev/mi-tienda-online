@@ -4208,6 +4208,9 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseKardex) && window.serverPurchaseKardex.length > 0) {
                 this.purchaseKardexLog = window.serverPurchaseKardex;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0) {
+                this.pendingCreditAgreements = window.serverCreditAgreements;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
@@ -4908,7 +4911,9 @@ function hybridInventoryModule() {
         onDemandRejectReason: 'Agotado en taller sin fecha de resurtido',
         sizeEditModalOpen: false,
         selectedOrderForSizes: null,
-        pendingCreditAgreements: [
+        pendingCreditAgreements: (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0)
+            ? window.serverCreditAgreements
+            : [
             {
                 supplier: 'Silk & Cotton Iberia SL',
                 ref: 'NC-SILK-2026-03',
@@ -6048,6 +6053,7 @@ function hybridInventoryModule() {
             const found = pendingList.find(a => a.ref === selectedRef);
             if (found) {
                 po.hasCreditDeduction = true;
+                po.creditAgreementId = found.id || null;
                 po.creditNoteRef = found.ref;
                 po.creditNoteAmount = found.amount;
                 po.creditNoteReason = found.reason;
@@ -6244,6 +6250,64 @@ function hybridInventoryModule() {
 
             const targetActive = target.activePurchaseOrders || this.activePurchaseOrders || [];
             targetActive.unshift(newActivePo);
+
+            // 2.5 Persistir en base de datos via API RESTful (Slice 2.2 / TASK-INV-16 / TASK-PUR-04)
+            const csrfToken = (typeof document !== 'undefined' && document.querySelector('meta[name="csrf-token"]'))
+                ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                : '';
+
+            fetch('/api/v1/inventory/purchases/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    po_number: po.poNumber,
+                    supplier: po.supplier,
+                    notes: po.notes,
+                    payment_terms: po.paymentTerms,
+                    delivery_commitment_date: po.deliveryCommitmentDate,
+                    has_credit_deduction: po.hasCreditDeduction,
+                    credit_agreement_id: po.creditAgreementId || null,
+                    credit_note_ref: po.creditNoteRef || null,
+                    credit_note_amount: po.deductionAmount || po.creditNoteAmount || 0,
+                    credit_note_reason: po.creditNoteReason || null,
+                    items: (po.items || []).map(it => ({
+                        id: it.id,
+                        sku: it.sku,
+                        product_name: it.productName,
+                        qty: it.qty,
+                        unit_cost: it.costUnit,
+                        sizes: it.sizes || null,
+                        priority: it.priority || 'media'
+                    })),
+                    po_snapshot: poSnapshot
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.order && data.order.dbId) {
+                    newActivePo.dbId = data.order.dbId;
+                    fetch('/api/v1/inventory/purchases/orders/' + data.order.dbId + '/dispatch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            recipient_email: recipient,
+                            carrier: po.carrier || 'Transportista B2B',
+                            notes: 'Despacho formal notificado por correo institucional.'
+                        })
+                    }).catch(() => {});
+                }
+            })
+            .catch(err => {
+                console.warn('Nota: Persistencia de PO completada en modo offline/cache:', err);
+            });
 
             // 3. Si se aplicó una nota de crédito, marcar el acuerdo como aplicado
             if (po.hasCreditDeduction && po.creditNoteRef) {

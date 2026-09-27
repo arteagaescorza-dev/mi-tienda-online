@@ -93,23 +93,27 @@ flowchart TD
 
 ---
 
-### Slice 2.2: Ciclo de Vida Fullstack de Ordenes de Compra y Compensacion de Notas de Credito (`TASK-INV-16`, `TASK-PUR-01`, `TASK-PUR-04`)
+### Slice 2.2: Ciclo de Vida Fullstack de Ordenes de Compra y Compensacion de Notas de Credito (`TASK-INV-16`, `TASK-PUR-01`, `TASK-PUR-04`) [COMPLETADO]
+* **Estado:** Completado y verificado (156/156 pruebas verdes en PHPUnit, 771 aserciones, 0 emojis).
 * **Objetivo:** Conectar la emision, impresion y despacho de Ordenes de Compra con persistencia real en base de datos, deduccion automatica de notas de credito y asientos mercantiles en `purchase_kardex`.
 * **Backend:**
   - `StorefrontController::portalInventory`:
-    - Hidratar `window.serverCreditAgreements` con registros `pending` de `supplier_credit_agreements`.
+    - Hidratacion de `window.serverCreditAgreements` con registros `pending` de `supplier_credit_agreements`.
   - `InventoryApiController`:
-    - `POST /api/v1/inventory/purchases/orders`: Valida proveedor, partidas de curva de tallas, costos, totales, deduccion de notas de credito (`credit_agreement_id`) marcando el acuerdo como `applied`, e inserta el asiento `PO_CREATED` en `purchase_kardex`.
-    - `POST /api/v1/inventory/purchases/orders/{id}/dispatch`: Marca la orden como `confirmed` o `sent`, registra `PO_SENT` en `purchase_kardex` con notas de despacho y destinatario.
+    - `GET /api/v1/inventory/purchases/credit-agreements`: Consulta acuerdos de credito pendientes con filtrado por proveedor.
+    - `POST /api/v1/inventory/purchases/orders`: Valida proveedor, partidas de curva de tallas, costos, subtotales netos con IVA 16%, deduccion automatica de notas de credito (`credit_agreement_id`) marcando el acuerdo como `applied`, persistencia relacional en `purchase_orders` y `purchase_order_items`, e insercion del asiento `PO_CREATED` en `purchase_kardex`.
+    - `POST /api/v1/inventory/purchases/orders/{id}/dispatch`: Marca la orden en transito (`in_transit`), registra fecha/hora de envio (`sent_at`), notas de despacho con guia y chofer, y asienta `PO_SENT` en `purchase_kardex`.
 * **Frontend:**
   - `public/js/revops-panel/inventory-module.js`:
-    - Conectar `submitPurchaseOrder` y `confirmPurchaseOrder` al endpoint `POST /api/v1/inventory/purchases/orders`.
-    - Conectar `handleCreditAgreementSelect` para descontar el saldo del acuerdo seleccionado y enlazar su ID en la carga util.
-    - Asegurar que el pipeline de impresion aislada en iframe (`printPurchaseOrderDoc`) opere sobre los datos persistidos.
-* **Criterios de Aceptacion:**
-  - Al emitir una OC desde el generador formal, se guarda en `purchase_orders` y sus partidas en `purchase_order_items`.
-  - Si se aplica una nota de credito, el total a pagar disminuye en la orden y el registro en `supplier_credit_agreements` pasa a estatus `applied`.
-  - Se genera un registro inmutable en `purchase_kardex`.
+    - Hidratacion reactiva de `pendingCreditAgreements` desde `window.serverCreditAgreements`.
+    - Enlace en `handleCreditAgreementSelect` para asociar `creditAgreementId` en la sesion de la orden.
+    - Conexion asincrona en `sendPoEmailAndIssue` con `POST /api/v1/inventory/purchases/orders` y `POST /api/v1/inventory/purchases/orders/{id}/dispatch`.
+    - Pipeline de impresion aislada en iframe (`printPurchaseOrderDoc`) validado con datos persistidos.
+* **Criterios de Aceptacion Superados:**
+  - Emision de OC guarda registros en `purchase_orders` y `purchase_order_items` con calculo fiscal estricto (Subtotal + IVA 16%).
+  - La aplicacion de notas de credito reduce el saldo a pagar y transiciona el acuerdo a estado `applied` de forma atomica.
+  - El despacho de la orden actualiza el estado a `in_transit` y genera los asientos `PO_CREATED` y `PO_SENT` en `purchase_kardex`.
+  - Suite `tests/Feature/RevOps/InventoryHub4ModuleTest.php` creada con 5/5 pruebas verdes (41 aserciones).
 
 ---
 

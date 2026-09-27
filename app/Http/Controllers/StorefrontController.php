@@ -554,6 +554,23 @@ class StorefrontController extends Controller
                 'notes' => $k->description,
             ])->values();
 
+        $portalCreditAgreements = \App\Models\SupplierCreditAgreement::query()
+            ->with('supplier')
+            ->where('status', 'pending')
+            ->latest()
+            ->get()
+            ->map(fn ($ca) => [
+                'id' => $ca->id,
+                'supplier_id' => $ca->supplier_id,
+                'supplier' => $ca->supplier?->name ?? 'Proveedor',
+                'ref' => $ca->reference_folio ?: ('NC-' . $ca->id),
+                'amount' => (float) $ca->amount,
+                'reason' => $ca->resolution_notes ?: 'Acuerdo compensatorio por discrepancia',
+                'agreement_type' => $ca->agreement_type,
+                'status' => 'Pendiente de Aplicar',
+                'date' => $ca->created_at ? $ca->created_at->format('d/m/Y') : now()->format('d/m/Y'),
+            ])->values();
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -566,6 +583,7 @@ class StorefrontController extends Controller
             'portalPurchaseOrders' => $portalPurchaseOrders,
             'portalFuturePurchaseOrders' => $portalFuturePurchaseOrders,
             'portalPurchaseKardex' => $portalPurchaseKardex,
+            'portalCreditAgreements' => $portalCreditAgreements,
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()
