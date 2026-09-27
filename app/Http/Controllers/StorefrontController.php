@@ -21,6 +21,8 @@ use App\Models\DunningRetryLog;
 use App\Models\VendorBill;
 use App\Models\ProductBundle;
 use App\Models\CycleCount;
+use App\Models\OperationalTask;
+use App\Models\ShiftLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -359,12 +361,28 @@ class StorefrontController extends Controller
             default => 'executive',
         };
 
+        app(\App\Http\Controllers\Api\RevOps\DashboardApiController::class)->ensureDefaultOperationalTasksExist();
+        $operationalTasks = OperationalTask::query()
+            ->orderByRaw("CASE WHEN priority = 'critical' THEN 1 WHEN priority = 'high' THEN 2 WHEN priority = 'medium' THEN 3 ELSE 4 END")
+            ->orderBy('due_at', 'asc')
+            ->get();
+        $shiftLogs = ShiftLog::query()->latest('id')->limit(15)->get();
+
         $serverDashboardData = [
             'userRole' => $userRole,
             'initialTab' => $initialTab,
             'isWarehouseRole' => $isWarehouse,
             'kpis' => $kpis,
             'alerts' => $this->dashboardAlerts(),
+            'operationalTasks' => $operationalTasks,
+            'shiftLogs' => $shiftLogs->map(fn ($l) => [
+                'id' => $l->id,
+                'event_type' => $l->event_type,
+                'message' => $l->message,
+                'operator_name' => $l->operator_name,
+                'time' => $l->created_at ? $l->created_at->format('h:i A') : now()->format('h:i A'),
+                'created_at' => $l->created_at?->toIso8601String(),
+            ])->values()->all(),
         ];
 
         return view('portal.dashboard', [
@@ -374,6 +392,8 @@ class StorefrontController extends Controller
             'kpis' => $kpis,
             'legacyKpis' => $kpis['executive'],
             'alerts' => $this->dashboardAlerts(),
+            'operationalTasks' => $operationalTasks,
+            'shiftLogs' => $shiftLogs,
             'serverDashboardData' => $serverDashboardData,
         ]);
     }

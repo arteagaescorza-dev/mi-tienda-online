@@ -68,23 +68,28 @@ El **Hub 1** funciona como el centro neurálgico y cabina de mando diario de la 
 
 ---
 
-### Slice 3.2: Action Center Operativo, Checklists Guiadas y Monitor SLA (`TASK-DSH-04`, `TASK-DSH-05`, `TASK-INV-01`)
+### Slice 3.2: Action Center Operativo, Checklists Guiadas y Monitor SLA (`TASK-DSH-04`, `TASK-DSH-05`, `TASK-INV-01`) [COMPLETADO]
 * **Objetivo:** Dotar a la Bandeja Operativa de un centro de resolución de tareas en 1 clic con checklists físicas, semáforo de envejecimiento SLA y registro inmutable en bitácora de turno.
 * **Backend:**
-  * Crear modelo y migración `app/Models/OperationalTask.php` (`operational_tasks`):
-    - Campos: `id`, `category` (`empaque`, `recepcion`, `surtido`, `expedicion`), `title`, `description`, `reference_code`, `status` (`pending`, `completed`), `sla_due_at`, `completed_at`, `completed_by`, `data` (JSON).
+  * Migración `database/migrations/2026_09_27_000001_enhance_operational_tasks_and_shift_logs_tables.php` y modelos `OperationalTask` y `ShiftLog`.
   * Endpoints en `app/Http/Controllers/Api/RevOps/DashboardApiController.php`:
-    - `GET /api/v1/dashboard/tasks` (listado con cálculo de SLA).
-    - `POST /api/v1/dashboard/tasks/{id}/complete` (cierre atómico y registro en bitácora).
+    - `GET /api/v1/dashboard/tasks` (listado dinámico con cálculo de urgencia SLA).
+    - `POST /api/v1/dashboard/tasks/{id}/complete` (cierre atómico y registro cronológico inmutable en bitácora).
+    - `GET /api/v1/dashboard/shift-logs` (historial cronológico de eventos del turno).
+  * Hidratación en `StorefrontController::portalDashboard` inyectando tareas y bitácora en `window.serverDashboardData`.
 * **Frontend:**
-  * Banner superior de Corte Diario DHL (14:00 hrs) con cuenta regresiva y semáforo visual (Verde < 3h, Ámbar 3-5.5h, Rojo > 5.5h con punto pulsante).
-  * Filtros por categoría: *Todas*, *Empaque*, *Recepción*, *Surtido*, *Expedición*.
-  * Modales interactivos `max-w-4xl` a 2 columnas:
+  * Banner superior de Corte Diario DHL (14:00 hrs) con cuenta regresiva dinámica en vivo y semáforo visual de 3 estados (Verde, Ámbar, Rojo pulsante).
+  * Filtros por categoría reactivos: *Todas*, *Empaque*, *Recepción*, *Surtido*, *Expedición*.
+  * Modales interactivos `max-w-4xl` a 2 columnas con checklists operativas y retroalimentación inmediata:
     1. **Picking & Packing (#MIX-1048):** Checklist con ubicación de pasillo/rack (`A-02`, `R-08`), artículos verificados y botón de sellado.
     2. **Recepción Inbound (#OC-2026-003):** Cotejo físico de curva de tallas y precinto.
-    3. **Surtido Interno ROP:** Reubicación de anaquel A-01.
-    4. **Despacho Courier:** Entrega a chofer DHL con firma y manifiesto.
-  * Bitácora inmutable del turno (*Shift Log*) con actualización reactiva en tiempo real.
+    3. **Surtido Interno ROP:** Reubicación de anaquel A-01 desde rack R-04.
+    4. **Despacho Courier:** Entrega a chofer DHL con firma/gafete y liberación de manifiesto.
+  * Bitácora inmutable del turno (*Shift Log*) con inserción reactiva en tiempo real al completar tareas.
+* **Criterios de Aceptacion Superados:**
+  * Pruebas completas en `tests/Feature/RevOps/DashboardHub1ModuleTest.php` al 100% verde (3 pruebas, 110 aserciones).
+  * Suite global de la plataforma ampliada a 166 pruebas al 100% verde (943 aserciones).
+  * Cero emojis en toda la base de código.
 
 ---
 

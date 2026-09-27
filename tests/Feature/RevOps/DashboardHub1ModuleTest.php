@@ -8,6 +8,8 @@ use App\Models\Lead;
 use App\Models\Cart;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
+use App\Models\OperationalTask;
+use App\Models\ShiftLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -88,5 +90,124 @@ class DashboardHub1ModuleTest extends TestCase
             ->assertSee('Leads activos sin responder')
             ->assertSee('Carritos abandonados hoy')
             ->assertSee('Pedidos pausados por dirección');
+    }
+
+    public function test_can_fetch_operational_tasks_with_sla_status_and_complete_task(): void
+    {
+        // 1. Consulta inicial de tareas operativas via API
+        $response = $this->getJson('/api/v1/dashboard/tasks');
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonStructure([
+                'success',
+                'total',
+                'tasks' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'category',
+                        'priority',
+                        'status',
+                        'due_at',
+                        'sla_status',
+                        'due_time_formatted',
+                    ],
+                ],
+            ]);
+
+        $tasks = $response->json('tasks');
+        $this->assertGreaterThanOrEqual(4, count($tasks));
+
+        // 2. Filtrado por categoria (empaque)
+        $empaqueResponse = $this->getJson('/api/v1/dashboard/tasks?category=empaque');
+        $empaqueResponse->assertOk()
+            ->assertJson([
+                'success' => true,
+            ]);
+        $empaqueTasks = $empaqueResponse->json('tasks');
+        $this->assertTrue(collect($empaqueTasks)->every(fn ($t) => $t['category'] === 'empaque'));
+
+        // 3. Completar una tarea operativa
+        $firstTask = $tasks[0];
+        $taskId = $firstTask['id'];
+
+        $completeResponse = $this->postJson("/api/v1/dashboard/tasks/{$taskId}/complete", [
+            'operator_name' => 'Carlos Almacén',
+            'notes' => 'Checklist física verificada y sellada para corte DHL 14:00 hrs.',
+        ]);
+
+        $completeResponse->assertOk()
+            ->assertJson([
+                'success' => true,
+                'task_id' => $taskId,
+                'status' => 'completed',
+                'completed_by' => 'Carlos Almacén',
+            ])
+            ->assertJsonStructure([
+                'success',
+                'task_id',
+                'status',
+                'completed_at',
+                'completed_by',
+                'shift_log' => [
+                    'id',
+                    'message',
+                    'operator_name',
+                    'time',
+                ],
+            ]);
+
+        // Verificacion en base de datos
+        $this->assertDatabaseHas('operational_tasks', [
+            'id' => $taskId,
+            'status' => 'completed',
+            'completed_by' => 'Carlos Almacén',
+        ]);
+
+        $this->assertDatabaseHas('shift_logs', [
+            'operational_task_id' => $taskId,
+            'event_type' => 'task_completed',
+            'operator_name' => 'Carlos Almacén',
+        ]);
+
+        // 4. Verificacion de consulta de bitácora del turno (Shift Logs)
+        $shiftLogResponse = $this->getJson('/api/v1/dashboard/shift-logs');
+        $shiftLogResponse->assertOk()
+            ->assertJson(['success' => true])
+            ->assertJsonStructure([
+                'success',
+                'logs' => [
+                    '*' => [
+                        'id',
+                        'event_type',
+                        'message',
+                        'operator_name',
+                        'time',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_portal_dashboard_hydrates_operational_tasks_and_shift_logs_in_blade(): void
+    {
+        $adminUser = User::factory()->create([
+            'role' => 'portal',
+            'email' => 'operativo.almacen@mitienda.online',
+        ]);
+
+        $response = $this->actingAs($adminUser)->get('/admin/dashboard?role=warehouse');
+
+        $response->assertOk()
+            ->assertSee('window.serverDashboardData', false)
+            ->assertSee('Corte Diario DHL Express (14:00 hrs)')
+            ->assertSee('Tareas Físicas de Bodega & Picking', false)
+            ->assertSee('Bitácora Inmutable del Turno (Shift Log)', false)
+            ->assertSee('Mesa de Picking & Packing: Pedido #MIX-1048', false)
+            ->assertSee('Recepción Inbound en Rampa: Torzo B2B #OC-2026-003', false)
+            ->assertSee('Surtido Interno ROP: Anaquel A-01', false)
+            ->assertSee('Despacho Manifiesto DHL Express (Corte 14:00 hrs)', false);
     }
 }

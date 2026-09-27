@@ -79,7 +79,9 @@ Route::prefix('v1')->group(function () {
 
     // 7. DASHBOARD GENERAL, TAREAS & COPILOTO (HUB 1)
     Route::prefix('dashboard')->group(function () {
+        Route::get('/tasks', [DashboardApiController::class, 'getOperationalTasks']);
         Route::post('/tasks/{id}/complete', [DashboardApiController::class, 'completeTask']);
+        Route::get('/shift-logs', [DashboardApiController::class, 'getShiftLogs']);
         Route::post('/environment/switch', [DashboardApiController::class, 'switchEnvironment']);
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
     });
