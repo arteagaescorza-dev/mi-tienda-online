@@ -64,6 +64,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/shipping-reconciliations/upload-report', [FinanceApiController::class, 'uploadShippingReconciliationReport']);
         Route::post('/shipping-audit/reconcile', [FinanceApiController::class, 'reconcileShippingAudit']);
         Route::post('/shipping-reconciliations/{id}/file-claim', [FinanceApiController::class, 'fileShippingDiscrepancyClaim']);
+
+        // 3-Way Matching Inbound & Retenciones SAT (TASK-INT-07 / TASK-FIN-02)
+        Route::get('/inbound-matching', [FinanceApiController::class, 'getInboundMatchings']);
+        Route::post('/three-way-matching/verify', [FinanceApiController::class, 'verifyThreeWayMatching']);
+        Route::post('/three-way-matching/{id}/debit-note', [FinanceApiController::class, 'issueDebitNote']);
+        Route::post('/three-way-matching/{id}/authorize-spei', [FinanceApiController::class, 'authorizeSpeiPayout']);
+        Route::get('/taxes/summary', [FinanceApiController::class, 'getTaxSummary']);
     });
 
     // 5. LOGÍSTICA & POST-VENTA (HUB 6)

@@ -125,22 +125,39 @@ La operacion de un e-commerce omnicanal de ropa interior, cosmetica y suscripcio
 
 ---
 
-### Slice 4.4: Cotejo de 3 Vias Inbound, Cuentas por Pagar y Retenciones SAT (`TASK-INT-07`, `TASK-INT-19`, `TASK-INT-20`)
+### Slice 4.4: Cotejo de 3 Vias Inbound, Cuentas por Pagar y Retenciones SAT (`TASK-INT-07`, `TASK-INT-19`, `TASK-INT-20`) [COMPLETADO]
 * **Objetivo:** Blindar la tesoreria cruzando la Orden de Compra original con el conteo fisico verificado en rampa y la factura del proveedor antes del pago.
 * **Backend:**
-  * Endpoint `POST /api/v1/finance/three-way-matching/verify`.
-  * Logica de cotejo de 3 vias:
-    - OC original (`PurchaseOrder`) $\leftrightarrow$ Recepcion fisica en rampa (`WarehouseInboundReceipt`) $\leftrightarrow$ Factura proveedor (`VendorBill`).
-    - Si existe discrepancia (faltantes o sobrecostos): emision automatica de Nota de Debito y ajuste al saldo de `vendor_bills`.
-    - Aplicacion de retenciones fiscales mexicanas (IVA 16% trasladado vs acreditable, retencion ISR).
-  * Integracion de liquidaciones B2B de convenios (`AllyClearingSettlement`) como cuentas por pagar centralizadas (`TASK-INT-19`).
+  * Migracion ejecutada: `database/migrations/2026_09_27_000006_create_three_way_matchings_and_tax_ledger_tables.php` creando las tablas `three_way_matchings`, `tax_ledger_entries`, `vendor_shipments`, y agregando llaves de bloqueo y enlace en `vendor_bills`.
+  * Modelos sincronizados:
+    - `App\Models\ThreeWayMatching`: maquina de estados de cotejo (`matched`, `discrepancy_held`, `adjusted_cleared`), relaciones con `PurchaseOrder` y `VendorBill`, metodos de verificacion `isBlocked()`, `isMatched()`.
+    - `App\Models\TaxLedgerEntry`: registro granular de retenciones fiscales mexicanas.
+    - `App\Models\VendorShipment`: enlace logistico de envios de proveedor a rampa.
+    - `App\Models\VendorBill`: enlace a cotejo de 3 vias y bandera booleana `is_spei_blocked`.
+  * Servicios de Dominio:
+    - `App\Services\Finance\ThreeWayMatchingService`:
+      - `evaluateInboundMatch()`: cotejo algoritmico triangular (OC $\leftrightarrow$ Rampa $\leftrightarrow$ Factura Proveedor). Detecta variaciones en unidades aceptables (`warehouse_received_qty - warehouse_damaged_qty`) y precio unitario. Bloquea SPEI (`spei_payout_blocked = true`), calcula nota de debito sugerida y despacha `OperationalTask` (`finance_matching_hold`).
+      - `issueDebitNote()`: emision y aplicacion de nota de debito compensatoria, recalculo de importe neto pagable, levantamiento de bloqueo SPEI y cierre de tarea operativa.
+      - `authorizeSpeiPayout()`: validacion de inviolabilidad de pago; arroja `DomainException` si existe retencion activa. Al aprobarse, marca la factura como `paid` y genera la referencia SPEI.
+      - `syncAllyClearingAsVendorBill()`: centralizacion de saldos de convenios B2B (`TASK-INT-19`) en Cuentas por Pagar.
+    - `App\Services\Finance\TaxCalculationEngineService`:
+      - `computeOrderTaxes()`: motor fiscal SAT (Base Gravable `PVP / 1.16`, 16% IVA Trasladado, 1% ISR retencion Plataformas Tecnologicas Art. 113-A, 8% IVA retencion Art. 18-J).
+      - `getPeriodTaxSummary()`: agregaciones contables de ingresos brutos, IVA neto por pagar al SAT y retenciones acumuladas.
+  * Controladores y rutas:
+    - Web: `StorefrontController::portalFinance`, `verifyThreeWayMatching`, `issueDebitNoteWeb`, `authorizeSpeiPayoutWeb` registrados en `routes/web.php`.
+    - API: `FinanceApiController::getInboundMatchings`, `verifyThreeWayMatching`, `issueDebitNote`, `authorizeSpeiPayout`, `getTaxSummary` registrados en `routes/api.php`.
 * **Frontend:**
-  * En [resources/views/portal/finance.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/finance.blade.php) (Pestaña "Cuentas por Pagar & SPEI"):
-    - Visualizador de cotejo a 3 columnas con lineas sincronizadas.
-    - Indicador de estado del cotejo: *Cotejo Perfecto (3 Vias OK)*, *Discrepancia en Cantidad*, *Discrepancia en Precio*.
-    - Boton "Autorizar Dispersion SPEI" habilitado unicamente con cotejo solventado.
-* **Criterios de Aceptacion:**
-  * Pruebas validando que no se pueda autorizar un pago si existen discrepancias sin nota de debito compensatoria.
+  * En [resources/views/portal/finance.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/finance.blade.php):
+    - Subnav: Pestaña 5 "Cuentas por Pagar & Cotejo 3 Vias" con badge semaforo de discrepancias activas.
+    - Motor Fiscal SAT: Tira de desglose de Base Gravable (PVP / 1.16), IVA 16%, Retenciones 1% ISR y 8% IVA, e IVA Neto al SAT.
+    - 4 Tarjetas KPI: Inbound Auditados, Cotejos Perfectos (3 Vias OK), Retenciones SPEI Activas, Saldo Retenido en Discrepancia.
+    - Formulario de cotejo de 3 vias con precarga de datos de ejemplo (`loadSampleThreeWayMatching`).
+    - Tabla sincronizada a 3 columnas: Orden de Compra $\leftrightarrow$ Recepcion Fisica Rampa $\leftrightarrow$ Factura Proveedor con semaforos de estatus.
+    - Modales interactivos para emision de Notas de Debito y Autorizacion de Dispersion SPEI.
+* **Criterios de Aceptacion Superados:**
+  * 7 pruebas unitarias/funcionales en `tests/Feature/RevOps/CrossHubThreeWayMatchingTest.php` al 100% verde (69 aserciones).
+  * Suite global de la plataforma ampliada a 201 pruebas al 100% verde (1,363 aserciones).
+  * Cero emojis en toda la base de codigo y vistas.
 
 ---
 

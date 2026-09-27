@@ -6,17 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Models\CustomerSubscription;
 use App\Models\OrderFinancialMargin;
 use App\Models\ShippingReconciliation;
+use App\Models\ThreeWayMatching;
 use App\Services\DunningRecoveryService;
 use App\Services\Finance\ShippingInvoiceAuditorService;
+use App\Services\Finance\TaxCalculationEngineService;
+use App\Services\Finance\ThreeWayMatchingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class FinanceApiController extends Controller
 {
+    protected ThreeWayMatchingService $threeWayMatchingService;
+    protected TaxCalculationEngineService $taxEngineService;
+
     public function __construct(
         protected DunningRecoveryService $dunningService,
-        protected ShippingInvoiceAuditorService $shippingAuditorService = new ShippingInvoiceAuditorService()
-    ) {}
+        protected ShippingInvoiceAuditorService $shippingAuditorService = new ShippingInvoiceAuditorService(),
+        ?ThreeWayMatchingService $threeWayMatchingService = null,
+        ?TaxCalculationEngineService $taxEngineService = null
+    ) {
+        $this->threeWayMatchingService = $threeWayMatchingService ?? app(ThreeWayMatchingService::class);
+        $this->taxEngineService = $taxEngineService ?? app(TaxCalculationEngineService::class);
+    }
 
     /**
      * Reintenta el cobro de una suscripción en estado past_due (TASK-SUB-DUN).
@@ -194,5 +205,141 @@ class FinanceApiController extends Controller
             ],
             'message' => 'Expediente formal emitido y retencion preventiva registrada en cuentas por pagar.',
         ]);
+    }
+
+    /**
+     * Consulta el listado y KPIs de cotejo de 3 vias Inbound (TASK-INT-07, Subseccion EE).
+     */
+    public function getInboundMatchings(Request $request): JsonResponse
+    {
+        $matchings = ThreeWayMatching::latest()->get();
+        $discrepancyCount = $matchings->where('match_status', 'discrepancy_held')->count();
+        $matchedCount = $matchings->where('match_status', 'matched')->count();
+        $totalHeld = (float) $matchings->where('spei_payout_blocked', true)->sum('invoice_gross_amount');
+
+        return response()->json([
+            'success' => true,
+            'summary' => [
+                'total_inbound_audited' => $matchings->count(),
+                'matched_count' => $matchedCount,
+                'discrepancy_held_count' => $discrepancyCount,
+                'total_held_amount_mxn' => $totalHeld,
+            ],
+            'records' => $matchings->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'po_code' => $m->po_code,
+                    'supplier_name' => $m->supplier_name,
+                    'po_qty' => $m->po_qty,
+                    'po_amount' => (float) $m->po_total_amount,
+                    'dock_received_qty' => $m->warehouse_received_qty,
+                    'dock_damaged_qty' => $m->warehouse_damaged_qty,
+                    'invoice_qty' => $m->invoice_qty,
+                    'invoice_gross' => (float) $m->invoice_gross_amount,
+                    'match_status' => $m->match_status,
+                    'spei_payout_blocked' => (bool) $m->spei_payout_blocked,
+                    'debit_note_suggested' => (float) $m->debit_note_amount,
+                    'payable_net_amount' => (float) $m->payable_net_amount,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Ejecuta y asienta la evaluacion de cotejo de 3 vias (TASK-INT-07).
+     */
+    public function verifyThreeWayMatching(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'po_code' => 'required|string|max:50',
+            'supplier_id' => 'required|string|max:50',
+            'supplier_name' => 'required|string|max:150',
+            'po_qty' => 'required|integer|min:1',
+            'po_total_amount' => 'required|numeric|min:0',
+            'warehouse_received_qty' => 'required|integer|min:0',
+            'warehouse_damaged_qty' => 'nullable|integer|min:0',
+            'invoice_number' => 'required|string|max:80',
+            'invoice_qty' => 'required|integer|min:1',
+            'invoice_gross_amount' => 'required|numeric|min:0',
+            'inspected_by' => 'nullable|string|max:100',
+        ]);
+
+        $matching = $this->threeWayMatchingService->evaluateInboundMatch(
+            poCode: $validated['po_code'],
+            supplierId: $validated['supplier_id'],
+            supplierName: $validated['supplier_name'],
+            poQty: (int) $validated['po_qty'],
+            poTotal: (float) $validated['po_total_amount'],
+            whReceivedQty: (int) $validated['warehouse_received_qty'],
+            whDamagedQty: (int) ($validated['warehouse_damaged_qty'] ?? 0),
+            invoiceNumber: $validated['invoice_number'],
+            invoiceQty: (int) $validated['invoice_qty'],
+            invoiceGross: (float) $validated['invoice_gross_amount'],
+            inspectedBy: $validated['inspected_by'] ?? 'Rampa Control Central'
+        );
+
+        return response()->json([
+            'success' => true,
+            'matching' => $matching,
+            'message' => $matching->spei_payout_blocked
+                ? 'Discrepancia detectada en cotejo 3 vias. Retencion SPEI activa.'
+                : 'Cotejo de 3 vias exitoso. Pago SPEI habilitado.',
+        ], 200);
+    }
+
+    /**
+     * Emite nota de debito para compensar faltantes o mermas y liberar saldo neto en SPEI.
+     */
+    public function issueDebitNote(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'debit_note_number' => 'required|string|max:80',
+            'debit_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $matching = $this->threeWayMatchingService->issueDebitNote(
+            matchingId: $id,
+            debitNoteNumber: $validated['debit_note_number'],
+            customDebitAmount: isset($validated['debit_amount']) ? (float) $validated['debit_amount'] : null
+        );
+
+        return response()->json([
+            'success' => true,
+            'matching' => $matching,
+            'message' => "Nota de debito {$matching->debit_note_number} emitida. Retencion SPEI liberada.",
+        ]);
+    }
+
+    /**
+     * Autoriza la dispersion SPEI del saldo solventado en Cuentas por Pagar.
+     */
+    public function authorizeSpeiPayout(Request $request, int $id): JsonResponse
+    {
+        $paymentRef = $request->input('payment_reference');
+        try {
+            $matching = $this->threeWayMatchingService->authorizeSpeiPayout($id, $paymentRef);
+
+            return response()->json([
+                'success' => true,
+                'matching' => $matching,
+                'message' => "Dispersion SPEI autorizada para {$matching->po_code}.",
+            ]);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Consulta consolidada del Motor Fiscal SAT (TASK-FIN-02, Subseccion EE).
+     */
+    public function getTaxSummary(Request $request): JsonResponse
+    {
+        $period = $request->input('period', date('Y-m'));
+        $summary = $this->taxEngineService->getPeriodTaxSummary($period);
+
+        return response()->json(array_merge(['success' => true], $summary));
     }
 }

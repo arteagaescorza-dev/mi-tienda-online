@@ -27,7 +27,11 @@ use App\Models\SupportCase;
 use App\Models\ShippingReconciliation;
 use App\Models\ShippingReconciliationItem;
 use App\Models\ShippingDiscrepancyClaim;
+use App\Models\ThreeWayMatching;
+use App\Models\TaxLedgerEntry;
 use App\Services\Finance\ShippingInvoiceAuditorService;
+use App\Services\Finance\ThreeWayMatchingService;
+use App\Services\Finance\TaxCalculationEngineService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -909,6 +913,17 @@ class StorefrontController extends Controller
             'total_claimed_amount' => (float) ShippingDiscrepancyClaim::sum('total_disputed_amount'),
         ];
 
+        // 7. Cotejo de 3 Vias Inbound & Motor Fiscal SAT (TASK-INT-07 / TASK-FIN-02)
+        $threeWayMatchings = ThreeWayMatching::with('vendorBill')->latest()->get();
+        $matchingKpis = [
+            'total_inbound_audited' => $threeWayMatchings->count(),
+            'matched_count' => $threeWayMatchings->where('match_status', 'matched')->count(),
+            'discrepancy_held_count' => $threeWayMatchings->where('match_status', 'discrepancy_held')->count(),
+            'total_held_amount' => (float) $threeWayMatchings->where('spei_payout_blocked', true)->sum('invoice_gross_amount'),
+        ];
+        $taxEngine = app(TaxCalculationEngineService::class);
+        $taxSummary = $taxEngine->getPeriodTaxSummary(date('Y-m'));
+
         $activeTab = $request->query('tab', 'cashflow');
 
         return view('portal.finance', [
@@ -927,6 +942,9 @@ class StorefrontController extends Controller
             'shippingReconciliations' => $shippingReconciliations,
             'shippingClaims' => $shippingClaims,
             'carrierAuditKpis' => $carrierAuditKpis,
+            'threeWayMatchings' => $threeWayMatchings,
+            'matchingKpis' => $matchingKpis,
+            'taxSummary' => $taxSummary,
             'movements' => $movements->take(6)->values(),
         ]);
     }
@@ -988,6 +1006,77 @@ class StorefrontController extends Controller
 
         return redirect()->route('portal.finance', ['tab' => 'shipping_audit'])
             ->with('success', "Expediente formal {$claim->claim_folio} emitido por MXN \${$claim->total_disputed_amount}. Retención preventiva radicada en Cuentas por Pagar.");
+    }
+
+    public function verifyThreeWayMatching(Request $request)
+    {
+        $validated = $request->validate([
+            'po_code' => 'required|string|max:50',
+            'supplier_id' => 'required|string|max:50',
+            'supplier_name' => 'required|string|max:150',
+            'po_qty' => 'required|integer|min:1',
+            'po_total_amount' => 'required|numeric|min:0',
+            'warehouse_received_qty' => 'required|integer|min:0',
+            'warehouse_damaged_qty' => 'nullable|integer|min:0',
+            'invoice_number' => 'required|string|max:80',
+            'invoice_qty' => 'required|integer|min:1',
+            'invoice_gross_amount' => 'required|numeric|min:0',
+            'inspected_by' => 'nullable|string|max:100',
+        ]);
+
+        $service = app(ThreeWayMatchingService::class);
+        $matching = $service->evaluateInboundMatch(
+            poCode: $validated['po_code'],
+            supplierId: $validated['supplier_id'],
+            supplierName: $validated['supplier_name'],
+            poQty: (int) $validated['po_qty'],
+            poTotal: (float) $validated['po_total_amount'],
+            whReceivedQty: (int) $validated['warehouse_received_qty'],
+            whDamagedQty: (int) ($validated['warehouse_damaged_qty'] ?? 0),
+            invoiceNumber: $validated['invoice_number'],
+            invoiceQty: (int) $validated['invoice_qty'],
+            invoiceGross: (float) $validated['invoice_gross_amount'],
+            inspectedBy: $validated['inspected_by'] ?? ($request->user() ? $request->user()->name : 'Rampa Control Central')
+        );
+
+        $msg = $matching->spei_payout_blocked
+            ? "Cotejo {$matching->po_code}: Discrepancia detectada. Retención preventiva de pago SPEI activada (Nota de débito sugerida: MXN \${$matching->debit_note_amount})."
+            : "Cotejo {$matching->po_code}: 3 Vías conciliadas exitosamente. Pago SPEI habilitado.";
+
+        return redirect()->route('portal.finance', ['tab' => 'expenses'])->with('success', $msg);
+    }
+
+    public function issueDebitNoteWeb(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'debit_note_number' => 'required|string|max:80',
+            'debit_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $service = app(ThreeWayMatchingService::class);
+        $matching = $service->issueDebitNote(
+            matchingId: $id,
+            debitNoteNumber: $validated['debit_note_number'],
+            customDebitAmount: isset($validated['debit_amount']) ? (float) $validated['debit_amount'] : null
+        );
+
+        return redirect()->route('portal.finance', ['tab' => 'expenses'])
+            ->with('success', "Nota de débito {$matching->debit_note_number} emitida por MXN \${$matching->debit_note_amount}. Retención SPEI liberada (Monto neto a pagar: MXN \${$matching->payable_net_amount}).");
+    }
+
+    public function authorizeSpeiPayoutWeb(Request $request, int $id)
+    {
+        $paymentRef = $request->input('payment_reference');
+        try {
+            $service = app(ThreeWayMatchingService::class);
+            $matching = $service->authorizeSpeiPayout($id, $paymentRef);
+
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('success', "Dispersión SPEI autorizada para {$matching->po_code} y factura {$matching->invoice_number}.");
+        } catch (\DomainException $e) {
+            return redirect()->route('portal.finance', ['tab' => 'expenses'])
+                ->with('error', $e->getMessage());
+        }
     }
 
     public function reconcilePayoutBatch(PayoutBatch $payoutBatch)
