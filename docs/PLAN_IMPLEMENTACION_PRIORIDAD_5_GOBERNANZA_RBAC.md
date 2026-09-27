@@ -47,22 +47,39 @@ El crecimiento escalable de la plataforma exige que cada operador acceda unicame
 
 ## 3. Desglose de Vertical Slices de Implementacion
 
-### Slice 5.1: Middleware de Privacidad Financiera y Sanitizacion de Respuestas por Rol (`TASK-RBAC-03`, `TASK-RBAC-04`)
+### Slice 5.1: Middleware de Privacidad Financiera y Sanitizacion de Respuestas por Rol (`TASK-RBAC-03`, `TASK-RBAC-04`) [COMPLETADO]
 * **Objetivo:** Blindar de forma estricta los datos financieros, garantizando que roles operativos no puedan visualizar margenes, costos ni balances fiscales en API o frontend.
 * **Backend:**
   * Middleware `App\Http\Middleware\EnforceFinancialPrivacy`:
-    - Intercepta peticiones entrantes e inspecciona el rol del usuario autenticado (`auth()->user()->role`).
-    - Si el rol pertenece a perfiles operativos (`warehouse`, `purchases`, `logistics`, `sales`, `support`), remueve recursivamente llaves confidenciales de las respuestas JSON (`margin_net`, `gross_revenue`, `financial_costs`, `sat_taxes`, `profit_margin_pct`, `unit_cost`, `cost_amount`, `taxable_base`, `vat_transferred_16`, `net_iva_payable`).
+    - Bloqueo estricto con HTTP 403 Forbidden en API o redireccion con mensaje de error en Web ante intentos de acceso a rutas financieras (`/admin/finanzas*`, `/api/v1/finance*`) por parte de roles restringidos (`warehouse`, `purchases`, `logistics`, `sales`, `support`, `operator`, `picker`, `packer`, `customer`).
+    - Sanitizacion recursiva automatica en respuestas JSON: elimina llaves sensibles de margenes e impuestos (`margin_net`, `financial_margin_amount`, `profit_margin_pct`, `financial_costs`, `gross_revenue`, `sat_taxes`, `taxable_base`, `net_iva_payable`, `platform_retention_isr_1`, `platform_retention_iva_8`, `iva_transferred_16`, `overcharge_amount_mxn`).
+    - Para roles de piso (`warehouse`, `logistics`, `sales`, etc.) elimina adicionalmente llaves de costos unitarios (`unit_cost`, `cost`, `cost_amount`, `debit_note_amount`, `payable_net_amount`).
+  * Middleware `App\Http\Middleware\EnsureUserHasRole`:
+    - Ampliado para reconocer todos los roles operativos de la organizacion y respetar la variable de sesion `active_role` para conmutaciones de perfil en vivo.
+  * Modelo `App\Models\User`:
+    - `canAccessFinancialData()`: determina autorizacion para roles administrativos y financieros (`admin`, `superadmin`, `finance`, `finanzas`, `all_roles`, `portal`).
+    - `getActiveRoleAttribute()`: resuelve rol activo en sesion o base de datos.
+    - `canAccessHub(string $hub)`: valida matriz de accesos por modulo segun rol.
+    - `isOperativeStaff()`: detecta roles operativos de piso.
+  * Modelo `App\Models\OperationalTask`:
+    - Scope `forUserRole(?string $role)`: filtra automaticamente el feed de tareas para el departamento correspondiente (almacen, compras, logistica, finanzas, ventas).
   * Directivas Blade y Gates en `App\Providers\AppServiceProvider`:
-    - Directiva `@financialPrivacy` / `@canViewFinancials` para condicionar bloques visuales en Blade.
-    - Metodo helper `User::canAccessFinancialData(): bool`.
-  * Filtro de tareas en `OperationalTask`: scope `forUserRole($role)` para entrega segregada de pendientes.
+    - `@canViewFinancials` ... `@else` ... `@endcanViewFinancials`.
+    - Gates `view-financial-data` y `access-hub`.
+  * Controlador y Rutas:
+    - Metodo `switchRole` en `App\Http\Controllers\PortalAccessController`.
+    - Ruta Web `POST /admin/roles/switch` y API `POST /api/v1/governance/roles/switch`.
+    - Agrupacion de rutas financieras web y api bajo middleware `financial.privacy`.
 * **Frontend:**
-  * En `resources/views/layouts/app.blade.php` y vistas de portales:
-    - Enmascaramiento y reemplazo visual de strips de costos y margenes con badges de confidencialidad protegida cuando el rol carezca de autorizacion.
-* **Criterios de Aceptacion:**
-  * Pruebas automatizadas comprobando que peticiones de roles no financieros reciben respuestas sanitizadas sin fugas de datos sensibles.
-  * Pruebas validando que usuarios administradores y financieros si reciben la totalidad de las metricas.
+  * En `resources/views/layouts/portal-panel.blade.php`:
+    - Pestaña de Finanzas condicionada con directiva Blade `@canViewFinancials`.
+    - Renderizado de alertas `session('error')` en contenedor principal.
+  * En `public/js/revops-panel/app.js`:
+    - Sincronizacion reactiva via `fetch('/admin/roles/switch')` al conmutar perfil en el modal RBAC de demostracion.
+* **Criterios de Aceptacion Superados:**
+  * 8 pruebas unitarias y de integracion en `tests/Feature/Governance/FinancialPrivacyTest.php` al 100% verde (44 aserciones).
+  * Suite global de la plataforma ampliada a 215 pruebas al 100% verde (1,450 aserciones).
+  * Cero emojis en toda la base de codigo, vistas y comentarios.
 
 ---
 

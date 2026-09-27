@@ -140,10 +140,12 @@
             <svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4ZM4 7l8 4 8-4M12 11v10"/></svg>
             <span>4. Inventario &amp; Compras</span>
           </a>
+          @canViewFinancials
           <a class="module-link {{ request()->routeIs('portal.finance') ? 'active' : '' }}" href="{{ route('portal.finance') }}" data-screen="finance" title="Hub 5: Finanzas &amp; Conciliacion">
             <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
             <span>5. Finanzas &amp; Conciliacion</span>
           </a>
+          @endcanViewFinancials
           <a class="module-link {{ request()->routeIs('portal.logistics') ? 'active' : '' }}" href="{{ route('portal.logistics') }}" data-screen="logistics" title="Hub 6: Logística &amp; Post-Venta">
             <svg viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14v10Z"/><circle cx="17" cy="18.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/></svg>
             <span>6. Logística &amp; Envíos</span>
@@ -174,6 +176,9 @@
     <main class="main">
       @if(session('success'))
         <div class="alert alert-success" role="status">{{ session('success') }}</div>
+      @endif
+      @if(session('error'))
+        <div class="alert alert-error bg-rose-50 text-rose-800 border border-rose-200 p-3 rounded-lg mb-4 text-xs font-semibold" role="alert">{{ session('error') }}</div>
       @endif
       @if($errors->any())
         <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>

@@ -38,6 +38,11 @@ class DashboardApiController extends Controller
             $query->where('category', $category);
         }
 
+        $role = $request->query('role') ?: ($request->user() ? $request->user()->active_role : session('active_role'));
+        if ($role) {
+            $query->forUserRole($role);
+        }
+
         $tasks = $query->orderByRaw("CASE WHEN priority = 'critical' THEN 1 WHEN priority = 'high' THEN 2 WHEN priority = 'medium' THEN 3 ELSE 4 END")
             ->orderBy('due_at', 'asc')
             ->get();

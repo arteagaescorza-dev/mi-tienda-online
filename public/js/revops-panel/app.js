@@ -15182,6 +15182,16 @@ function renderRolesList() {
       updateRoleUI();
       if (rolesModal) rolesModal.style.display = 'none';
       showToast(`Rol cambiado a: ${currentRole.roleTitle}`);
+
+      // Sincronizar rol activo en sesion del backend (TASK-RBAC-02, TASK-RBAC-03)
+      fetch('/admin/roles/switch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ role: roleId })
+      }).catch(function() {});
       
       // Re-renderizar la pantalla actual o redirigir al módulo principal del nuevo rol
       if (roleId === 'vendor') {
