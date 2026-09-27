@@ -50,6 +50,7 @@
         window.serverFuturePurchaseOrders = @json($portalFuturePurchaseOrders);
         window.serverPurchaseKardex = @json($portalPurchaseKardex);
         window.serverCreditAgreements = @json($portalCreditAgreements ?? []);
+        window.serverProductBundles = @json($portalProductBundles ?? []);
     </script>
 
     <!-- ========================================================================= -->

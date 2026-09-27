@@ -117,23 +117,30 @@ flowchart TD
 
 ---
 
-### Slice 2.3: Motor Fullstack de Recetas BOM & Combos Virtuales (`TASK-INV-17`, `TASK-INV-03`, `TASK-INT-11`)
-* **Objetivo:** Habilitar el guardado, edicion y auditoria de formulas de ensamblado para suscripciones y combos, con disparo automatico de ordenes de compra por deficit de insumos.
+### Slice 2.3: Motor Fullstack de Recetas BOM & Combos Virtuales (`TASK-INV-17`, `TASK-INV-03`, `TASK-INT-11`) [COMPLETADO]
+* **Estado:** Completado y verificado (160/160 pruebas verdes en PHPUnit, 798 aserciones, 0 emojis).
+* **Objetivo:** Habilitar el guardado, edicion y auditoria de formulas de ensamblado para suscripciones y combos, con calculo de cuello de botella y disparo automatico de ordenes de compra por deficit de insumos.
 * **Backend:**
   - `StorefrontController::portalInventory`:
-    - Hidratar `window.serverProductBundles` con los registros de `product_bundles` y sus relaciones `bundleItems.product`.
-  - `InventoryApiController` (o servicio de dominio `BomService`):
-    - `GET /api/v1/inventory/bundles`: Lista combos activos con sus componentes y calculo de stock maximo ensamblable segun cuello de botella.
-    - `POST /api/v1/inventory/bundles`: Alta/edicion de una receta BOM con sus componentes (`bundle_items`) y cantidades.
-    - `POST /api/v1/inventory/bundles/audit-deficit`: Evalua existencias de insumos contra demanda proyectada de suscripciones, registra en `bom_deficit_procurements` y crea borradores de OCs a proveedores (`#OC-2026-BOM-XXX`).
+    - Hidratacion de `window.serverProductBundles` con los registros de `product_bundles` y sus relaciones `items.product` y `items.variant.inventories`.
+  - `InventoryApiController`:
+    - `GET /api/v1/inventory/bundles`: Lista combos activos con sus componentes y calculo de stock maximo ensamblable segun cuello de botella (`bottleneck_capacity`).
+    - `POST /api/v1/inventory/bundles`: Alta/edicion transaccional de una receta BOM con sincronizacion de componentes (`bundle_items`), cantidades y variantes.
+    - `POST /api/v1/inventory/bundles/audit-deficit`: Evalua existencias de insumos contra demanda proyectada de suscripciones, registra faltantes en `bom_deficit_procurements` y crea ordenes de compra en borrador (`#OC-2026-BOM-XXX`) asociadas a proveedores.
+  - Modelo `BomDeficitProcurement`:
+    - Creado con relaciones `bundle()`, `componentProduct()` y `purchaseOrder()`.
 * **Frontend:**
+  - `resources/views/portal/inventory.blade.php`:
+    - Inyeccion reactiva de `window.serverProductBundles = @json($portalProductBundles ?? []);`.
   - `public/js/revops-panel/inventory-module.js`:
-    - Conectar la Pestana 8 de Ajustes ("Escandallos & Recetas BOM") para guardar y editar formulas contra el backend.
-    - Conectar el modal de auditoria de deficit de insumos para disparar la generacion de OCs reales.
-* **Criterios de Aceptacion:**
+    - Hidratacion en `init()` de `this.productBundles` desde `window.serverProductBundles`.
+    - Conexion en `saveBundleRecipe()` para persistir formulas contra `POST /api/v1/inventory/bundles`.
+    - Conexion en `generateB2BPurchaseOrders()` para registrar auditorias de deficit y generar OCs via `POST /api/v1/inventory/bundles/audit-deficit`.
+* **Criterios de Aceptacion Superados:**
   - Creacion y edicion de recetas BOM persistidas en base de datos.
-  - Calculo en vivo de capacidad de ensamble segun stock del insumo mas escaso.
-  - La auditoria de deficit crea registros en `bom_deficit_procurements` y genera OCs en estado borrador.
+  - Calculo en vivo de capacidad de ensamble segun stock del insumo mas escaso verificado por pruebas unitarias.
+  - La auditoria de deficit crea registros en `bom_deficit_procurements` y genera OCs en estado borrador con partidas `purchase_order_items`.
+  - Suite de pruebas de Laravel ampliada a 160 pruebas al 100% en verde (798 aserciones).
 
 ---
 

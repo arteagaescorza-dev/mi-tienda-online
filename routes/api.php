@@ -36,6 +36,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/purchases/orders/{id}/receive', [InventoryApiController::class, 'receivePurchaseOrder']);
         Route::post('/scraping/pending/{id}/curate', [InventoryApiController::class, 'curateScrapedItem']);
         Route::post('/cycle-counts', [InventoryApiController::class, 'recordCycleCount']);
+        Route::get('/bundles', [InventoryApiController::class, 'getBundles']);
+        Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
+        Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
     });
 
     // 2. CHECKOUT & RESERVA TEMPORAL DE STOCK (TASK-INT-06)

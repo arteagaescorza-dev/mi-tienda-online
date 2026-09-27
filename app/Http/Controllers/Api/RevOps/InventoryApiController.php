@@ -12,6 +12,9 @@ use App\Models\ScrapedPendingItem;
 use App\Models\CycleCount;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\ProductBundle;
+use App\Models\BundleItem;
+use App\Models\BomDeficitProcurement;
 use App\Services\InboundReceiptService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -495,4 +498,398 @@ class InventoryApiController extends Controller
             'details' => $details,
         ]);
     }
+
+    /**
+     * Lista formulas BOM y combos activos calculando capacidad de ensamble por cuello de botella (TASK-INV-17).
+     */
+    public function getBundles(Request $request): JsonResponse
+    {
+        $bundles = ProductBundle::with(['items.product.variants.inventories', 'items.variant.inventories'])
+            ->get()
+            ->map(function ($bundle) {
+                $bottleneckCapacity = null;
+                $components = [];
+
+                foreach ($bundle->items as $item) {
+                    $product = $item->product;
+                    $variant = $item->variant;
+                    $qtyPerBundle = max(1, (int) $item->quantity);
+
+                    if ($variant) {
+                        $available = (int) $variant->inventories->sum(fn ($inv) => max(0, $inv->quantity - $inv->reserved));
+                        $size = data_get($variant->attributes, 'size', 'M');
+                    } elseif ($product) {
+                        $available = (int) $product->variants->sum(function ($v) {
+                            return $v->inventories->sum(fn ($inv) => max(0, $inv->quantity - $inv->reserved));
+                        });
+                        $size = 'M';
+                    } else {
+                        $available = 0;
+                        $size = 'M';
+                    }
+
+                    $capacityForComp = (int) floor($available / $qtyPerBundle);
+                    if ($bottleneckCapacity === null || $capacityForComp < $bottleneckCapacity) {
+                        $bottleneckCapacity = $capacityForComp;
+                    }
+
+                    $components[] = [
+                        'item_id' => $item->id,
+                        'product_id' => $item->product_id,
+                        'variant_id' => $item->product_variant_id,
+                        'sku' => $variant?->sku ?? $product?->sku ?? 'SKU-COMP',
+                        'name' => $product?->title ?? 'Prenda Componente',
+                        'size' => strtolower((string) $size),
+                        'qty' => $qtyPerBundle,
+                        'available_stock' => $available,
+                        'component_capacity' => $capacityForComp,
+                    ];
+                }
+
+                if ($bottleneckCapacity === null) {
+                    $bottleneckCapacity = 0;
+                }
+
+                return [
+                    'id' => $bundle->id,
+                    'sku' => $bundle->slug,
+                    'name' => $bundle->name,
+                    'slug' => $bundle->slug,
+                    'bundle_type' => $bundle->bundle_type,
+                    'type' => $bundle->bundle_type === 'box_subscription' ? 'subscription' : 'promo',
+                    'regular_price' => (float) $bundle->regular_price,
+                    'bundle_price' => (float) $bundle->bundle_price,
+                    'subscription_price' => (float) $bundle->bundle_price,
+                    'is_active' => (bool) $bundle->is_active,
+                    'bottleneck_capacity' => $bottleneckCapacity,
+                    'components' => $components,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'bundles' => $bundles,
+        ]);
+    }
+
+    /**
+     * Guarda o actualiza una receta BOM de ensamble con sus componentes (TASK-INV-03 / TASK-INV-17).
+     */
+    public function storeBundle(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'id' => 'nullable',
+            'bundle_id' => 'nullable',
+            'sku' => 'required|string|max:150',
+            'name' => 'required|string|max:150',
+            'type' => 'nullable|string|max:40',
+            'bundle_type' => 'nullable|string|max:40',
+            'subscription_price' => 'nullable|numeric|min:0',
+            'subscriptionPrice' => 'nullable|numeric|min:0',
+            'bundle_price' => 'nullable|numeric|min:0',
+            'regular_price' => 'nullable|numeric|min:0',
+            'regularPrice' => 'nullable|numeric|min:0',
+            'is_active' => 'nullable|boolean',
+            'isActive' => 'nullable|boolean',
+            'components' => 'required|array|min:1',
+            'components.*.sku' => 'required|string|max:100',
+            'components.*.size' => 'nullable|string|max:20',
+            'components.*.qty' => 'required|integer|min:1',
+        ]);
+
+        return DB::transaction(function () use ($validated) {
+            $cleanSku = strtoupper(trim($validated['sku']));
+            $cleanName = trim($validated['name']);
+
+            $rawType = $validated['bundle_type'] ?? $validated['type'] ?? 'subscription';
+            $bundleType = match ($rawType) {
+                'subscription', 'box_subscription' => 'box_subscription',
+                'promo', 'pack_multiple' => 'pack_multiple',
+                default => 'combo_cross',
+            };
+
+            $bundlePrice = (float) ($validated['bundle_price'] ?? $validated['subscription_price'] ?? $validated['subscriptionPrice'] ?? 0);
+            $regularPrice = (float) ($validated['regular_price'] ?? $validated['regularPrice'] ?? $bundlePrice);
+            $isActive = $validated['is_active'] ?? $validated['isActive'] ?? true;
+
+            $bundle = null;
+            $idCandidate = $validated['id'] ?? $validated['bundle_id'] ?? null;
+            if ($idCandidate && is_numeric($idCandidate)) {
+                $bundle = ProductBundle::find($idCandidate);
+            }
+            if (!$bundle) {
+                $bundle = ProductBundle::where('slug', $cleanSku)->first();
+            }
+            if (!$bundle) {
+                $bundle = new ProductBundle();
+                $bundle->slug = $cleanSku;
+            }
+
+            $bundle->name = $cleanName;
+            $bundle->slug = $cleanSku;
+            $bundle->bundle_type = $bundleType;
+            $bundle->bundle_price = $bundlePrice;
+            $bundle->regular_price = $regularPrice;
+            $bundle->is_active = (bool) $isActive;
+            $bundle->save();
+
+            $bundle->items()->delete();
+
+            foreach ($validated['components'] as $compData) {
+                $compSku = trim($compData['sku']);
+                $compSize = !empty($compData['size']) ? trim($compData['size']) : 'm';
+                $qty = (int) $compData['qty'];
+
+                $product = Product::where('sku', $compSku)->first();
+                if (!$product) {
+                    $product = Product::firstOrCreate(
+                        ['sku' => $compSku],
+                        [
+                            'title' => $compData['name'] ?? ('Prenda ' . $compSku),
+                            'slug' => \Illuminate\Support\Str::slug($compSku . '-' . uniqid()),
+                            'brand' => 'Torzo',
+                            'type' => 'dropship',
+                            'price' => 299.00,
+                            'cost' => 120.00,
+                            'visible' => true,
+                        ]
+                    );
+                }
+
+                $variant = ProductVariant::where('product_id', $product->id)
+                    ->where(function ($q) use ($compSize) {
+                        $q->where('attributes->size', $compSize)
+                          ->orWhere('attributes->size', strtoupper($compSize))
+                          ->orWhere('sku', 'like', "%-{$compSize}");
+                    })
+                    ->first();
+
+                BundleItem::create([
+                    'product_bundle_id' => $bundle->id,
+                    'product_id' => $product->id,
+                    'product_variant_id' => $variant?->id,
+                    'quantity' => $qty,
+                ]);
+            }
+
+            $bundle->load(['items.product', 'items.variant']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Receta BOM guardada exitosamente',
+                'bundle' => [
+                    'id' => $bundle->id,
+                    'sku' => $bundle->slug,
+                    'name' => $bundle->name,
+                    'type' => $bundle->bundle_type === 'box_subscription' ? 'subscription' : 'promo',
+                    'subscriptionPrice' => (float) $bundle->bundle_price,
+                    'regularPrice' => (float) $bundle->regular_price,
+                    'isActive' => (bool) $bundle->is_active,
+                    'components_count' => $bundle->items->count(),
+                ],
+            ], 201);
+        });
+    }
+
+    /**
+     * Audita déficit de insumos BOM contra un lote objetivo y dispara borradores de OC (TASK-INT-11).
+     */
+    public function auditBomDeficit(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'bundle_id' => 'nullable',
+            'bundle_sku' => 'nullable|string',
+            'target_units' => 'nullable|integer|min:1',
+            'target_qty' => 'nullable|integer|min:1',
+            'batch_reference' => 'nullable|string|max:100',
+        ]);
+
+        $targetUnits = (int) ($validated['target_units'] ?? $validated['target_qty'] ?? 1);
+        $bundleIdentifier = $validated['bundle_id'] ?? $validated['bundle_sku'] ?? null;
+
+        if (!$bundleIdentifier) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Debes especificar el ID o SKU de la receta BOM',
+            ], 422);
+        }
+
+        $bundle = is_numeric($bundleIdentifier) 
+            ? ProductBundle::with(['items.product.variants.inventories', 'items.variant.inventories'])->find($bundleIdentifier)
+            : ProductBundle::with(['items.product.variants.inventories', 'items.variant.inventories'])->where('slug', $bundleIdentifier)->first();
+
+        if (!$bundle) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Receta BOM no encontrada en catalogo',
+            ], 404);
+        }
+
+        return DB::transaction(function () use ($bundle, $targetUnits, $validated) {
+            $componentsAnalysis = [];
+            $supplierGroups = [];
+            $totalRequiredPieces = 0;
+            $totalAvailablePieces = 0;
+            $totalDeficitPieces = 0;
+
+            $batchRef = $validated['batch_reference'] ?? ('SUB-BATCH-' . date('Ymd'));
+            $procurementCode = 'BOM-PROC-' . date('Ym') . '-' . rand(100, 999);
+
+            $defaultSupplier = Supplier::first() ?? Supplier::create(['name' => 'Torzo Labs & Textile Co.']);
+
+            foreach ($bundle->items as $item) {
+                $product = $item->product;
+                $variant = $item->variant;
+                $qtyPerBox = max(1, (int) $item->quantity);
+                $requiredQty = $qtyPerBox * $targetUnits;
+
+                if ($variant) {
+                    $available = (int) $variant->inventories->sum(fn ($inv) => max(0, $inv->quantity - $inv->reserved));
+                    $sizeName = data_get($variant->attributes, 'size', 'M');
+                } elseif ($product) {
+                    $available = (int) $product->variants->sum(function ($v) {
+                        return $v->inventories->sum(fn ($inv) => max(0, $inv->quantity - $inv->reserved));
+                    });
+                    $sizeName = 'M';
+                } else {
+                    $available = 0;
+                    $sizeName = 'M';
+                }
+
+                $deficitQty = max(0, $requiredQty - $available);
+                $isCovered = ($deficitQty === 0);
+                $unitCost = (float) ($product?->cost ?? 135.00);
+
+                $totalRequiredPieces += $requiredQty;
+                $totalAvailablePieces += min($available, $requiredQty);
+                $totalDeficitPieces += $deficitQty;
+
+                $supplier = $product?->supplierProducts?->first()?->supplier ?? $defaultSupplier;
+
+                $itemDetail = [
+                    'item_id' => $item->id,
+                    'product_id' => $product?->id,
+                    'variant_id' => $variant?->id,
+                    'sku' => $variant?->sku ?? $product?->sku ?? 'SKU-COMP',
+                    'name' => $product?->title ?? 'Prenda Componente',
+                    'size' => $sizeName,
+                    'qty_per_box' => $qtyPerBox,
+                    'required_qty' => $requiredQty,
+                    'available_stock' => $available,
+                    'deficit_qty' => $deficitQty,
+                    'is_covered' => $isCovered,
+                    'unit_cost' => $unitCost,
+                    'estimated_deficit_cost' => round($deficitQty * $unitCost, 2),
+                    'supplier_id' => $supplier->id,
+                    'supplier_name' => $supplier->name,
+                ];
+
+                $componentsAnalysis[] = $itemDetail;
+
+                if ($deficitQty > 0) {
+                    if (!isset($supplierGroups[$supplier->id])) {
+                        $supplierGroups[$supplier->id] = [
+                            'supplier' => $supplier,
+                            'items' => [],
+                            'total_deficit_units' => 0,
+                            'total_estimated_cost' => 0.0,
+                        ];
+                    }
+                    $supplierGroups[$supplier->id]['items'][] = $itemDetail;
+                    $supplierGroups[$supplier->id]['total_deficit_units'] += $deficitQty;
+                    $supplierGroups[$supplier->id]['total_estimated_cost'] += ($deficitQty * $unitCost);
+
+                    BomDeficitProcurement::create([
+                        'bundle_id' => $bundle->id,
+                        'component_product_id' => $product ? $product->id : 1,
+                        'deficit_units' => $deficitQty,
+                        'status' => 'detected',
+                    ]);
+                }
+            }
+
+            $createdPurchaseOrders = [];
+
+            foreach ($supplierGroups as $supplierId => $group) {
+                $poCode = 'OC-2026-BOM-' . rand(100, 999);
+                while (PurchaseOrder::where('po_number', $poCode)->exists()) {
+                    $poCode = 'OC-2026-BOM-' . rand(1000, 9999);
+                }
+
+                $subtotal = round($group['total_estimated_cost'], 2);
+                $tax = round($subtotal * 0.16, 2);
+                $totalAmount = round($subtotal + $tax, 2);
+
+                $po = PurchaseOrder::create([
+                    'po_number' => $poCode,
+                    'supplier_id' => $supplierId,
+                    'status' => 'draft',
+                    'total_units' => $group['total_deficit_units'],
+                    'subtotal' => $subtotal,
+                    'tax' => $tax,
+                    'total_amount' => $totalAmount,
+                    'currency' => 'MXN',
+                    'estimated_delivery_at' => now()->addDays(7),
+                    'notes' => "Orden generada automaticamente por auditoria de deficit BOM ({$procurementCode}) para lote de {$targetUnits} unidades de {$bundle->name}. Lote: {$batchRef}",
+                ]);
+
+                foreach ($group['items'] as $it) {
+                    PurchaseOrderItem::create([
+                        'purchase_order_id' => $po->id,
+                        'product_id' => $it['product_id'],
+                        'product_variant_id' => $it['variant_id'],
+                        'size_name' => $it['size'],
+                        'quantity_ordered' => $it['deficit_qty'],
+                        'quantity_received' => 0,
+                        'unit_cost' => $it['unit_cost'],
+                        'total_cost' => $it['estimated_deficit_cost'],
+                    ]);
+
+                    BomDeficitProcurement::where('bundle_id', $bundle->id)
+                        ->where('component_product_id', $it['product_id'])
+                        ->where('status', 'detected')
+                        ->whereNull('purchase_order_id')
+                        ->update([
+                            'purchase_order_id' => $po->id,
+                            'status' => 'po_drafted',
+                        ]);
+                }
+
+                $createdPurchaseOrders[] = [
+                    'id' => $po->po_number,
+                    'dbId' => $po->id,
+                    'poCode' => $po->po_number,
+                    'supplierId' => $supplierId,
+                    'supplierName' => $group['supplier']->name,
+                    'totalPieces' => $po->total_units,
+                    'subtotal' => (float) $po->subtotal,
+                    'tax' => (float) $po->tax,
+                    'totalAmount' => (float) $po->total_amount,
+                    'status' => 'draft',
+                    'statusLabel' => 'Borrador BOM',
+                    'notes' => $po->notes,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => count($createdPurchaseOrders) > 0 
+                    ? "Auditoria BOM completada. Se generaron " . count($createdPurchaseOrders) . " orden(es) de compra en borrador."
+                    : "Auditoria BOM completada. El stock actual cubre al 100% la demanda del lote simulado.",
+                'has_deficit' => $totalDeficitPieces > 0,
+                'bundle_id' => $bundle->id,
+                'bundle_sku' => $bundle->slug,
+                'bundle_name' => $bundle->name,
+                'target_units' => $targetUnits,
+                'procurement_code' => $procurementCode,
+                'batch_reference' => $batchRef,
+                'total_required_pieces' => $totalRequiredPieces,
+                'total_available_pieces' => $totalAvailablePieces,
+                'total_deficit_pieces' => $totalDeficitPieces,
+                'components' => $componentsAnalysis,
+                'purchase_orders' => $createdPurchaseOrders,
+            ], 200);
+        });
+    }
 }
+

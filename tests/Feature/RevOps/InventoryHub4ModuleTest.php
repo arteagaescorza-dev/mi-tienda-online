@@ -5,6 +5,9 @@ namespace Tests\Feature\RevOps;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\ProductBundle;
+use App\Models\BundleItem;
+use App\Models\BomDeficitProcurement;
 use App\Models\PurchaseKardex;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -267,4 +270,255 @@ class InventoryHub4ModuleTest extends TestCase
             ->assertSee('Proveedor Acuerdos B2B')
             ->assertSee('window.serverCreditAgreements', false);
     }
+
+    public function test_can_get_bundles_with_bottleneck_capacity(): void
+    {
+        $prod1 = Product::create([
+            'sku' => 'COMP-BOM-001',
+            'title' => 'Boxer Micro-Modal',
+            'slug' => 'boxer-micro-modal',
+            'price' => 350.00,
+            'cost' => 110.00,
+            'type' => 'dropship',
+        ]);
+        $var1 = ProductVariant::create([
+            'product_id' => $prod1->id,
+            'sku' => 'COMP-BOM-001-M',
+            'price' => 350.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+        Inventory::create([
+            'variant_id' => $var1->id,
+            'location' => 'A-01-A',
+            'quantity' => 50,
+            'reserved' => 0,
+        ]);
+
+        $prod2 = Product::create([
+            'sku' => 'COMP-BOM-002',
+            'title' => 'Jabon Intimo pH Balance',
+            'slug' => 'jabon-intimo-ph-balance',
+            'price' => 180.00,
+            'cost' => 60.00,
+            'type' => 'dropship',
+        ]);
+        $var2 = ProductVariant::create([
+            'product_id' => $prod2->id,
+            'sku' => 'COMP-BOM-002-U',
+            'price' => 180.00,
+            'attributes' => ['size' => 'U'],
+        ]);
+        Inventory::create([
+            'variant_id' => $var2->id,
+            'location' => 'C-01-A',
+            'quantity' => 14,
+            'reserved' => 0,
+        ]);
+
+        $bundle = ProductBundle::create([
+            'name' => 'Caja Mensual Marte Nivel 1',
+            'slug' => 'SUB-BOX-MARTE-LVL1',
+            'bundle_type' => 'box_subscription',
+            'regular_price' => 600.00,
+            'bundle_price' => 499.00,
+            'is_active' => true,
+        ]);
+
+        BundleItem::create([
+            'product_bundle_id' => $bundle->id,
+            'product_id' => $prod1->id,
+            'product_variant_id' => $var1->id,
+            'quantity' => 2,
+        ]);
+
+        BundleItem::create([
+            'product_bundle_id' => $bundle->id,
+            'product_id' => $prod2->id,
+            'product_variant_id' => $var2->id,
+            'quantity' => 1,
+        ]);
+
+        // Comp 1: 50 available / 2 per box = 25 boxes
+        // Comp 2: 14 available / 1 per box = 14 boxes -> Bottleneck is 14 boxes!
+
+        $response = $this->getJson('/api/v1/inventory/bundles');
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonFragment([
+                'id' => $bundle->id,
+                'sku' => 'SUB-BOX-MARTE-LVL1',
+                'name' => 'Caja Mensual Marte Nivel 1',
+                'bottleneck_capacity' => 14,
+            ]);
+    }
+
+    public function test_can_store_and_update_bundle_recipe(): void
+    {
+        $product = Product::create([
+            'sku' => 'ITEM-RECIPE-01',
+            'title' => 'Jockstrap Athletic Carbon',
+            'slug' => 'jockstrap-athletic-carbon',
+            'price' => 390.00,
+            'cost' => 130.00,
+            'type' => 'dropship',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'ITEM-RECIPE-01-M',
+            'price' => 390.00,
+            'attributes' => ['size' => 'm'],
+        ]);
+
+        $payload = [
+            'sku' => 'KIT-DEPORTE-PRO',
+            'name' => 'Kit Deportivo Pro Edicion Limitada',
+            'type' => 'promo',
+            'regular_price' => 850.00,
+            'bundle_price' => 699.00,
+            'is_active' => true,
+            'components' => [
+                [
+                    'sku' => 'ITEM-RECIPE-01',
+                    'size' => 'm',
+                    'qty' => 3,
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/inventory/bundles', $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('bundle.sku', 'KIT-DEPORTE-PRO')
+            ->assertJsonPath('bundle.name', 'Kit Deportivo Pro Edicion Limitada')
+            ->assertJsonPath('bundle.components_count', 1);
+
+        $this->assertDatabaseHas('product_bundles', [
+            'slug' => 'KIT-DEPORTE-PRO',
+            'name' => 'Kit Deportivo Pro Edicion Limitada',
+            'bundle_type' => 'pack_multiple',
+            'bundle_price' => 699.00,
+            'regular_price' => 850.00,
+            'is_active' => true,
+        ]);
+
+        $this->assertDatabaseHas('bundle_items', [
+            'product_id' => $product->id,
+            'quantity' => 3,
+        ]);
+    }
+
+    public function test_can_audit_bom_deficit_and_generate_draft_purchase_orders(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Torzo Labs & Textile Co.',
+            'contact_email' => 'produccion@torzolabs.com',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'RAW-TEX-001',
+            'title' => 'Boxer Trunks Modal Seamless',
+            'slug' => 'boxer-trunks-modal-seamless',
+            'price' => 340.00,
+            'cost' => 120.00,
+            'type' => 'dropship',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'RAW-TEX-001-M',
+            'price' => 340.00,
+            'attributes' => ['size' => 'm'],
+        ]);
+
+        // Stock disponible: 15 unidades
+        Inventory::create([
+            'variant_id' => $variant->id,
+            'location' => 'A-01-B',
+            'quantity' => 15,
+            'reserved' => 0,
+        ]);
+
+        $bundle = ProductBundle::create([
+            'name' => 'Caja Mensual Marte Nivel 2: Estilo',
+            'slug' => 'SUB-BOX-MARTE-LVL2',
+            'bundle_type' => 'box_subscription',
+            'regular_price' => 1120.00,
+            'bundle_price' => 899.00,
+            'is_active' => true,
+        ]);
+
+        BundleItem::create([
+            'product_bundle_id' => $bundle->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2, // Requiere 2 piezas por caja
+        ]);
+
+        // Lote objetivo: 20 cajas -> Requiere 40 piezas. Disponibles: 15. Deficit: 25 piezas.
+        $payload = [
+            'bundle_sku' => 'SUB-BOX-MARTE-LVL2',
+            'target_units' => 20,
+            'batch_reference' => 'BATCH-TEST-2026',
+        ];
+
+        $response = $this->postJson('/api/v1/inventory/bundles/audit-deficit', $payload);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('has_deficit', true)
+            ->assertJsonPath('target_units', 20)
+            ->assertJsonPath('total_required_pieces', 40)
+            ->assertJsonPath('total_available_pieces', 15)
+            ->assertJsonPath('total_deficit_pieces', 25);
+
+        // Registro de deficit en base de datos
+        $this->assertDatabaseHas('bom_deficit_procurements', [
+            'bundle_id' => $bundle->id,
+            'component_product_id' => $product->id,
+            'deficit_units' => 25,
+            'status' => 'po_drafted',
+        ]);
+
+        // Creacion automatica de Orden de Compra en borrador
+        $this->assertDatabaseHas('purchase_orders', [
+            'status' => 'draft',
+            'total_units' => 25,
+            'subtotal' => 3000.00, // 25 * 120.00
+            'tax' => 480.00,       // 3000 * 0.16
+            'total_amount' => 3480.00,
+        ]);
+
+        // Partidas de la orden de compra
+        $this->assertDatabaseHas('purchase_order_items', [
+            'product_id' => $product->id,
+            'quantity_ordered' => 25,
+            'unit_cost' => 120.00,
+            'total_cost' => 3000.00,
+        ]);
+    }
+
+    public function test_portal_inventory_hydrates_product_bundles_in_blade(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+
+        $bundle = ProductBundle::create([
+            'name' => 'Caja VIP Total Experiencia',
+            'slug' => 'SUB-BOX-VIP-TEST',
+            'bundle_type' => 'box_subscription',
+            'regular_price' => 1790.00,
+            'bundle_price' => 1399.00,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/inventario-catalogo');
+
+        $response->assertOk()
+            ->assertSee('SUB-BOX-VIP-TEST')
+            ->assertSee('Caja VIP Total Experiencia')
+            ->assertSee('window.serverProductBundles', false);
+    }
 }
+

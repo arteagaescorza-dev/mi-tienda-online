@@ -4211,6 +4211,9 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0) {
                 this.pendingCreditAgreements = window.serverCreditAgreements;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverProductBundles) && window.serverProductBundles.length > 0) {
+                this.productBundles = window.serverProductBundles;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
@@ -8279,6 +8282,37 @@ function hybridInventoryModule() {
                 this.showToast(`Nueva receta BOM creada exitosamente: ${newBundle.name}`, 'success');
             }
 
+            // Persistir de forma asincrona en base de datos
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const payload = {
+                id: this.bundleEditor.isEditing ? this.bundleEditor.bundleId : null,
+                sku: cleanSku,
+                name: this.bundleEditor.form.name.trim(),
+                type: this.bundleEditor.form.type,
+                subscriptionPrice: cleanPrice,
+                regularPrice: cleanRegPrice,
+                isActive: this.bundleEditor.form.isActive,
+                components: this.bundleEditor.form.components
+            };
+            fetch('/api/v1/inventory/bundles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(data => {
+                if (data && data.success && data.bundle && data.bundle.id) {
+                    const item = this.productBundles.find(b => b.id === cleanSku || b.sku === cleanSku || b.id === this.bundleEditor.bundleId);
+                    if (item) {
+                        item.dbId = data.bundle.id;
+                    }
+                }
+            }).catch(err => {
+                console.error('Error al persistir receta BOM en backend:', err);
+            });
+
             this.bundleEditor.isOpen = false;
         },
 
@@ -8506,6 +8540,50 @@ function hybridInventoryModule() {
 
             this.bomDeficitState.lastGeneratedOrders = ordersToCreate;
             this.bomDeficitState.isProcessing = false;
+
+            // Persistir deficit en base de datos y crear OCs borrador en backend
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('/api/v1/inventory/bundles/audit-deficit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    bundle_sku: res.bundleSku,
+                    bundle_id: res.bundleId,
+                    target_units: res.targetQty,
+                    batch_reference: batchRef
+                })
+            }).then(r => r.json()).then(data => {
+                if (data && data.success && Array.isArray(data.purchase_orders) && data.purchase_orders.length > 0) {
+                    data.purchase_orders.forEach(po => {
+                        const exists = this.activePurchaseOrders.some(p => p.id === po.id || p.poCode === po.id);
+                        if (!exists) {
+                            this.activePurchaseOrders.unshift({
+                                id: po.id,
+                                dbId: po.dbId,
+                                supplier: po.supplierName,
+                                supplier_id: po.supplierId,
+                                carrier: 'Paqueteria Express (BOM Guia Pendiente)',
+                                eta: 'En 7 dias',
+                                sku: res.bundleSku,
+                                productName: `Insumos BOM Deficit Lote ${res.targetQty}x ${res.bundleSku}`,
+                                qty: po.totalPieces,
+                                sizes: {},
+                                unitCost: po.totalPieces > 0 ? (po.subtotal / po.totalPieces) : 135.00,
+                                totalCost: po.totalAmount,
+                                date: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
+                                status: 'Borrador',
+                                notes: po.notes
+                            });
+                        }
+                    });
+                }
+            }).catch(err => {
+                console.error('Error al sincronizar auditoria BOM con backend:', err);
+            });
 
             const generatedPoCodes = ordersToCreate.map(o => o.poCode).join(', ');
             this.showToast(`Exito: Se generaron ${ordersToCreate.length} ordenes de compra (${generatedPoCodes}) enviadas a Extranet B2B.`, 'success');
