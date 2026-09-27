@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class AuthModalController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function login(Request $request): JsonResponse|RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
@@ -18,28 +19,47 @@ class AuthModalController extends Controller
         ]);
 
         if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Credenciales invalidas. Verifica tu correo y contrasena.',
-            ], 422);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Credenciales invalidas. Verifica tu correo y contrasena.',
+                ], 422);
+            }
+
+            return back()
+                ->withErrors(['email' => 'Credenciales invalidas. Verifica tu correo y contrasena.'])
+                ->withInput($request->only('email'));
         }
 
         $request->session()->regenerate();
 
-        return response()->json([
-            'message' => 'Sesion iniciada correctamente.',
-            'user' => $this->userPayload($request->user()),
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Sesion iniciada correctamente.',
+                'user' => $this->userPayload($request->user()),
+            ]);
+        }
+
+        $user = $request->user();
+        if ($user && in_array($user->role, ['portal', 'admin'], true)) {
+            return redirect()->intended(route('portal.dashboard'));
+        }
+
+        return redirect()->intended('/');
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request): JsonResponse|RedirectResponse
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Sesion cerrada correctamente.',
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Sesion cerrada correctamente.',
+            ]);
+        }
+
+        return redirect()->route('login');
     }
 
     public function googleLogin(Request $request): JsonResponse

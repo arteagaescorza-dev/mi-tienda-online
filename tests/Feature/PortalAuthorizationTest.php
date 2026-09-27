@@ -171,4 +171,70 @@ class PortalAuthorizationTest extends TestCase
             ->get('/admin/modulos/chatbot')
             ->assertForbidden();
     }
+
+    public function test_login_page_renders_with_form_and_action(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('action="' . route('login') . '"', false)
+            ->assertSee('name="email"', false)
+            ->assertSee('name="password"', false);
+    }
+
+    public function test_portal_user_can_login_via_web_form_and_redirects_to_dashboard(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'operativo@mitienda.test',
+            'password' => bcrypt('secret123'),
+            'role' => 'portal',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'operativo@mitienda.test',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertRedirect(route('portal.dashboard'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_login_fails_with_invalid_credentials_and_redirects_back_with_errors(): void
+    {
+        $response = $this->from('/login')->post('/login', [
+            'email' => 'inexistente@mitienda.test',
+            'password' => 'wrongpass',
+        ]);
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
+    public function test_json_login_returns_json_response(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'api.user@mitienda.test',
+            'password' => bcrypt('secret123'),
+            'role' => 'portal',
+        ]);
+
+        $response = $this->postJson('/auth/login', [
+            'email' => 'api.user@mitienda.test',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('user.email', 'api.user@mitienda.test')
+            ->assertJsonPath('user.type', 'portal');
+    }
+
+    public function test_authenticated_user_can_logout_via_post(): void
+    {
+        $user = User::factory()->create(['role' => 'portal']);
+
+        $response = $this->actingAs($user)->post('/logout');
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
 }

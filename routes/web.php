@@ -81,11 +81,15 @@ Route::post('/portal/aliado/canje/validar', [PortalAlliesController::class, 'val
 Route::get('/portal/aliado/{token}/export-csv', [PortalAlliesController::class, 'exportDoorListCsvByToken'])->name('portal.ally.extranet.export.csv');
 
 Route::get('/login', [PortalAccessController::class, 'userLogin'])->name('login');
+Route::post('/login', [AuthModalController::class, 'login']);
 Route::get('/ingreso/usuario', [PortalAccessController::class, 'userLogin'])->name('portal.user.login');
+Route::post('/ingreso/usuario', [AuthModalController::class, 'login']);
 Route::get('/ingreso/cliente', [PortalAccessController::class, 'clientLogin'])->name('portal.client.login');
+Route::post('/ingreso/cliente', [AuthModalController::class, 'login']);
 
 Route::post('/auth/login', [AuthModalController::class, 'login'])->name('auth.modal.login');
 Route::post('/auth/logout', [AuthModalController::class, 'logout'])->name('auth.modal.logout');
+Route::post('/logout', [AuthModalController::class, 'logout'])->name('logout');
 Route::post('/auth/google/login', [AuthModalController::class, 'googleLogin'])->name('auth.modal.google.login');
 Route::post('/auth/google/register', [AuthModalController::class, 'googleRegister'])->name('auth.modal.google.register');
 

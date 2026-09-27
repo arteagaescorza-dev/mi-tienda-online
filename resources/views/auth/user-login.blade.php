@@ -8,11 +8,17 @@
             <h2>Ingreso de Usuario</h2>
             <p class="muted">Accede al panel comercial para gestionar leads, seguimiento y reportes.</p>
 
-            <form class="stack" method="POST" action="#">
+            @if($errors->any())
+                <div class="alert alert-error" role="alert" style="color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 0.875rem; margin-bottom: 1rem;">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            <form class="stack" method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="field-row">
                     <label for="user-email">Correo corporativo</label>
-                    <input id="user-email" name="email" type="email" placeholder="equipo@mitienda.com" required>
+                    <input id="user-email" name="email" type="email" value="{{ old('email') }}" placeholder="equipo@mitienda.com" required autofocus>
                 </div>
 
                 <div class="field-row">
@@ -25,7 +31,7 @@
                 </div>
             </form>
 
-            <p class="muted auth-note">Demo UI: conecta este formulario al flujo de autenticación cuando lo implementemos.</p>
+            <p class="muted auth-note">Credenciales de acceso al portal RevOps.</p>
         </article>
     </section>
 @endsection

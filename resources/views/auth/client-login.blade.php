@@ -8,11 +8,17 @@
             <h2>Ingreso de Cliente</h2>
             <p class="muted">Revisa pedidos, historial de compras y estado de envío en un solo lugar.</p>
 
-            <form class="stack" method="POST" action="#">
+            @if($errors->any())
+                <div class="alert alert-error" role="alert" style="color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 0.875rem; margin-bottom: 1rem;">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            <form class="stack" method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="field-row">
                     <label for="client-email">Correo de compra</label>
-                    <input id="client-email" name="email" type="email" placeholder="cliente@email.com" required>
+                    <input id="client-email" name="email" type="email" value="{{ old('email') }}" placeholder="cliente@email.com" required autofocus>
                 </div>
 
                 <div class="field-row">
@@ -25,7 +31,7 @@
                 </div>
             </form>
 
-            <p class="muted auth-note">Demo UI: en el siguiente paso podemos activar recuperación de contraseña y registro.</p>
+            <p class="muted auth-note">Acceso a pedidos y compras del cliente.</p>
         </article>
     </section>
 @endsection
