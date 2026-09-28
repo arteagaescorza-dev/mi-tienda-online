@@ -8904,6 +8904,7 @@
                                                 <th class="py-2.5 px-3">Último Scrape</th>
                                                 <th class="py-2.5 px-3 text-center">Items Sincronizados</th>
                                                 <th class="py-2.5 px-3 text-center">Estado</th>
+                                                <th class="py-2.5 px-3 text-center">Extranet Hub 7</th>
                                                 <th class="py-2.5 px-3 text-right">Acciones</th>
                                             </tr>
                                         </thead>
@@ -8960,6 +8961,25 @@
                                                             <span x-text="prov.status === 'connected' ? 'Conectado' : (prov.status === 'maintenance' ? 'Mantenimiento' : (prov.status === 'paused' ? 'Pausado' : 'Archivado'))"></span>
                                                         </span>
                                                     </td>
+                                                    <td class="py-2.5 px-3 text-center">
+                                                        <template x-if="prov.hasExtranetAccess">
+                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                                                <span>Acceso Activo</span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="!prov.hasExtranetAccess">
+                                                            <button 
+                                                                type="button" 
+                                                                @click="inviteProviderToExtranet(prov)" 
+                                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border border-slate-200 transition cursor-pointer"
+                                                                title="Generar credencial de acceso B2B al Extranet de Proveedores (Hub 7)"
+                                                            >
+                                                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                                                <span>Invitar B2B</span>
+                                                            </button>
+                                                        </template>
+                                                    </td>
                                                     <td class="py-2.5 px-3 text-right">
                                                         <div class="inline-flex items-center gap-1">
                                                             <button 
@@ -8995,7 +9015,7 @@
                                                             <template x-if="prov.status === 'archived'">
                                                                 <div class="inline-flex items-center gap-1">
                                                                     <button 
-                                                                        type="button"
+                                                                        type="button" 
                                                                         @click="restoreProvider(prov)"
                                                                         class="px-2 py-1 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition cursor-pointer flex items-center gap-1"
                                                                         title="Restaurar proveedor a estado Conectado"
@@ -9004,7 +9024,7 @@
                                                                         <span>Restaurar</span>
                                                                     </button>
                                                                     <button 
-                                                                        type="button"
+                                                                        type="button" 
                                                                         @click="deleteProvider(prov)"
                                                                         class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                                                                         title="Eliminar definitivamente"
@@ -9018,7 +9038,7 @@
                                                 </tr>
                                             </template>
                                             <tr x-show="filteredProviders.length === 0">
-                                                <td colspan="7" class="py-6 text-center text-slate-400 text-xs">
+                                                <td colspan="8" class="py-6 text-center text-slate-400 text-xs">
                                                     No se encontraron proveedores que coincidan con los filtros seleccionados.
                                                 </td>
                                             </tr>

@@ -915,6 +915,154 @@ class InventoryHub4ModuleTest extends TestCase
         $this->assertNotNull($invG);
         $this->assertEquals(12, $invG->quantity);
     }
+
+    public function test_can_list_suppliers_with_extranet_access_flag(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Textiles El Aguila SA',
+            'contact_name' => 'Roberto Garza',
+            'phone' => '+52 55 1234 5678',
+            'contact_email' => 'ventas@aguila.com',
+            'city' => 'Puebla',
+            'type' => 'local',
+            'status' => 'connected',
+        ]);
+
+        User::create([
+            'name' => 'Roberto Garza',
+            'email' => 'ventas@aguila.com',
+            'password' => bcrypt('password123'),
+            'role' => 'supplier',
+            'supplier_id' => $supplier->id,
+        ]);
+
+        $response = $this->getJson('/api/v1/inventory/suppliers');
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonFragment([
+                'name' => 'Textiles El Aguila SA',
+                'hasExtranetAccess' => true,
+            ]);
+    }
+
+    public function test_can_create_supplier_persisted_in_database(): void
+    {
+        $response = $this->postJson('/api/v1/inventory/suppliers', [
+            'name' => 'Confecciones Finas del Bajio',
+            'tradeName' => 'Bajio Textil',
+            'contactName' => 'Laura Esquivel',
+            'phone' => '+52 477 123 4567',
+            'email' => 'contacto@bajiotextil.com',
+            'city' => 'Leon',
+            'type' => 'workshop',
+            'leadTimeDays' => 4,
+            'paymentTerms' => 'credito_30',
+            'status' => 'connected',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.name', 'Bajio Textil')
+            ->assertJsonPath('data.city', 'Leon')
+            ->assertJsonPath('data.leadTimeDays', 4);
+
+        $this->assertDatabaseHas('suppliers', [
+            'name' => 'Bajio Textil',
+            'contact_name' => 'Laura Esquivel',
+            'phone' => '+52 477 123 4567',
+            'city' => 'Leon',
+            'lead_time_days' => 4,
+            'status' => 'connected',
+        ]);
+    }
+
+    public function test_can_update_supplier_conditions(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Proveedor Original',
+            'contact_name' => 'Mario Gomez',
+            'phone' => '+52 55 9999 8888',
+            'contact_email' => 'mario@original.com',
+            'city' => 'CDMX',
+            'type' => 'wholesale',
+            'status' => 'connected',
+            'lead_time_days' => 5,
+        ]);
+
+        $response = $this->putJson("/api/v1/inventory/suppliers/{$supplier->id}", [
+            'tradeName' => 'Proveedor Editado SA',
+            'city' => 'Monterrey',
+            'leadTimeDays' => 2,
+            'paymentTerms' => 'credito_60',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.name', 'Proveedor Editado SA')
+            ->assertJsonPath('data.city', 'Monterrey')
+            ->assertJsonPath('data.leadTimeDays', 2);
+
+        $supplier->refresh();
+        $this->assertEquals('Proveedor Editado SA', $supplier->name);
+        $this->assertEquals('Monterrey', $supplier->city);
+        $this->assertEquals(2, $supplier->lead_time_days);
+    }
+
+    public function test_can_toggle_supplier_status_and_archive(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Proveedor a Pausar',
+            'contact_name' => 'Ana Soto',
+            'phone' => '+52 55 1111 2222',
+            'contact_email' => 'ana@pausar.com',
+            'status' => 'connected',
+        ]);
+
+        $pauseResponse = $this->postJson("/api/v1/inventory/suppliers/{$supplier->id}/toggle-status", [
+            'status' => 'paused',
+        ]);
+
+        $pauseResponse->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.status', 'paused');
+
+        $supplier->refresh();
+        $this->assertEquals('paused', $supplier->status);
+
+        $archiveResponse = $this->postJson("/api/v1/inventory/suppliers/{$supplier->id}/toggle-status", [
+            'status' => 'archived',
+        ]);
+
+        $archiveResponse->assertOk()
+            ->assertJsonPath('data.status', 'archived');
+
+        $supplier->refresh();
+        $this->assertEquals('archived', $supplier->status);
+    }
+
+    public function test_can_invite_supplier_to_hub7_extranet_creating_user(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Taller Textil B2B Express',
+            'contact_name' => 'Carlos B2B',
+            'phone' => '+52 55 3333 4444',
+            'contact_email' => 'carlos@textilexpress.com',
+            'status' => 'connected',
+        ]);
+
+        $response = $this->postJson("/api/v1/inventory/suppliers/{$supplier->id}/invite-extranet");
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.has_extranet_access', true);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'carlos@textilexpress.com',
+            'role' => 'supplier',
+            'supplier_id' => $supplier->id,
+        ]);
+    }
 }
 
 

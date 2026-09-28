@@ -537,35 +537,41 @@ class StorefrontController extends Controller
             ? now()->parse(SupplierProduct::max('last_checked_at'))->format('d/m/Y H:i')
             : 'Hace 14 min';
 
-        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->orderBy('name')->get();
+        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->with('users')->orderBy('name')->get();
         $portalProviders = $dbSuppliers->map(function ($s) {
-            $isTorzo = str_contains(strtolower($s->name), 'torzo');
+            $hasExtranet = $s->users->where('role', 'supplier')->isNotEmpty();
             return [
                 'id' => 'prov_' . $s->id,
                 'dbId' => $s->id,
-                'vendorCode' => 'VND-' . strtoupper(Str::slug($s->name)) . '-001',
-                'name' => $s->name . ' B2B',
+                'vendorCode' => $s->vendor_code ?: ('VND-' . strtoupper(Str::slug($s->name)) . '-001'),
+                'name' => $s->name,
                 'tradeName' => $s->name,
-                'type' => 'scraper',
-                'typeLabel' => 'Fabricante Mayorista & Scraping B2B',
-                'city' => $isTorzo ? 'CDMX' : 'Guadalajara',
-                'contactName' => $isTorzo ? 'Carlos Mendoza' : 'Atención Mayoristas',
-                'phone' => '+52 55 4182 9901',
+                'type' => $s->type,
+                'typeLabel' => match ($s->type) {
+                    'dropship_scrape' => 'Fabricante Mayorista & Scraping B2B',
+                    'dropship_api' => 'Proveedor API B2B Integrado',
+                    'local' => 'Taller Local & Stock Propio',
+                    default => 'Distribuidor Mayorista',
+                },
+                'city' => $s->city ?: 'CDMX',
+                'contactName' => $s->contact_name ?: 'Atencion a Clientes',
+                'phone' => $s->phone ?: '+52 55 0000 0000',
                 'email' => $s->contact_email ?: ('b2b@' . Str::slug($s->name) . '.com'),
-                'extractionMethod' => 'Headless Scraper (Puppeteer)',
-                'frequency' => 'Automático (Cada 6 hrs)',
+                'extractionMethod' => $s->extraction_method ?: 'Headless Scraper (Puppeteer)',
+                'frequency' => 'Automatico (Cada 6 hrs)',
                 'lastScrapeTime' => 'Hace 18 min',
                 'syncedItemsCount' => (int) $s->supplier_products_count,
-                'status' => 'connected',
-                'leadTimeDays' => $isTorzo ? 3 : 5,
-                'paymentTerms' => 'contado',
-                'slaOnTimePct' => 97.5,
-                'slaFillRatePct' => 98.0,
+                'status' => $s->status ?: 'connected',
+                'leadTimeDays' => (int) ($s->lead_time_days ?: 3),
+                'paymentTerms' => $s->payment_terms ?: 'contado',
+                'slaOnTimePct' => (float) ($s->sla_on_time_pct ?: 97.5),
+                'slaFillRatePct' => (float) ($s->sla_fill_rate_pct ?: 98.0),
                 'totalOrders' => 12,
                 'completedOrders' => 11,
-                'avgDelayDays' => 0.3,
+                'avgDelayDays' => (float) ($s->avg_delay_days ?: 0.3),
                 'isSyncing' => false,
                 'notes' => $s->notes ?: 'Proveedor oficial sincronizado.',
+                'hasExtranetAccess' => $hasExtranet,
             ];
         })->values();
 

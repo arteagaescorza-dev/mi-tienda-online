@@ -7720,7 +7720,7 @@ function hybridInventoryModule() {
             }
         },
 
-        saveProvider() {
+        async saveProvider() {
             if (!this.providerForm.name || !this.providerForm.name.trim()) {
                 this.showToast('El nombre de la empresa es obligatorio.', 'warning');
                 return;
@@ -7734,124 +7734,175 @@ function hybridInventoryModule() {
                 return;
             }
 
-            const typeLabels = {
-                workshop: 'Taller de Confeccion Textil',
-                cosmetics: 'Fabricante de Cosmetica & Skincare',
-                distributor: 'Distribuidor Mayorista',
-                packaging: 'Insumos & Empaque',
-                commercial: 'Proveedor Comercial Directo',
-                scraper: 'Integracion Automatizada Scraper/API'
+            const payload = {
+                name: this.providerForm.name.trim(),
+                tradeName: (this.providerForm.tradeName || this.providerForm.name).trim(),
+                vendorCode: this.providerForm.vendorCode,
+                type: this.providerForm.type || 'workshop',
+                city: this.providerForm.city ? this.providerForm.city.trim() : 'CDMX',
+                contactName: this.providerForm.contactName.trim(),
+                phone: this.providerForm.phone.trim(),
+                email: this.providerForm.email ? this.providerForm.email.trim() : '',
+                leadTimeDays: parseInt(this.providerForm.leadTimeDays, 10) || 3,
+                paymentTerms: this.providerForm.paymentTerms || 'contado',
+                extractionMethod: this.providerForm.extractionMethod || 'Manual / Facturacion Directa',
+                status: this.providerForm.status || 'connected',
+                notes: this.providerForm.notes || ''
             };
 
-            const computedLabel = typeLabels[this.providerForm.type] || this.providerForm.typeLabel || 'Proveedor Comercial';
+            const isCreating = this.isCreatingProvider;
+            const targetId = !isCreating && this.selectedProvider 
+                ? (this.selectedProvider.dbId || String(this.selectedProvider.id).replace('prov_', '')) 
+                : null;
 
-            if (this.isCreatingProvider) {
-                const newId = 'prov_' + Date.now();
-                const codeSuffix = Math.floor(100 + Math.random() * 900);
-                const cleanCode = (this.providerForm.tradeName || this.providerForm.name).replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-                const newProvider = {
-                    id: newId,
-                    vendorCode: 'VND-' + cleanCode + '-' + codeSuffix,
-                    name: this.providerForm.name.trim(),
-                    tradeName: (this.providerForm.tradeName || this.providerForm.name).trim(),
-                    type: this.providerForm.type || 'workshop',
-                    typeLabel: computedLabel,
-                    city: this.providerForm.city ? this.providerForm.city.trim() : 'Nacional',
-                    contactName: this.providerForm.contactName.trim(),
-                    phone: this.providerForm.phone.trim(),
-                    email: this.providerForm.email ? this.providerForm.email.trim() : '',
-                    extractionMethod: this.providerForm.extractionMethod || 'Manual / Facturacion Directa',
-                    frequency: this.providerForm.syncFrequency || 'Manual / On-demand',
-                    lastScrapeTime: 'Recien registrado',
-                    syncedItemsCount: 0,
-                    status: this.providerForm.status || 'connected',
-                    leadTimeDays: parseInt(this.providerForm.leadTimeDays, 10) || 5,
-                    paymentTerms: this.providerForm.paymentTerms || 'credito_30',
-                    slaOnTimePct: 100.0,
-                    slaFillRatePct: 100.0,
-                    totalOrders: 0,
-                    completedOrders: 0,
-                    avgDelayDays: 0.0,
-                    isSyncing: false,
-                    notes: this.providerForm.notes || ''
-                };
-                this.providers.unshift(newProvider);
-                this.providerModalOpen = false;
-                this.showToast('Proveedor ' + newProvider.tradeName + ' registrado exitosamente.', 'success');
-            } else {
-                const target = this.providers.find(p => p.id === this.selectedProvider.id);
-                if (target) {
-                    target.name = this.providerForm.name.trim();
-                    target.tradeName = (this.providerForm.tradeName || this.providerForm.name).trim();
-                    target.type = this.providerForm.type;
-                    target.typeLabel = computedLabel;
-                    target.city = this.providerForm.city ? this.providerForm.city.trim() : target.city;
-                    target.contactName = this.providerForm.contactName.trim();
-                    target.phone = this.providerForm.phone.trim();
-                    target.email = this.providerForm.email ? this.providerForm.email.trim() : target.email;
-                    target.leadTimeDays = parseInt(this.providerForm.leadTimeDays, 10) || target.leadTimeDays;
-                    target.paymentTerms = this.providerForm.paymentTerms;
-                    target.status = this.providerForm.status;
-                    target.notes = this.providerForm.notes || '';
-                    this.selectedProvider = { ...target };
+            const url = isCreating ? '/api/v1/inventory/suppliers' : `/api/v1/inventory/suppliers/${targetId}`;
+            const method = isCreating ? 'POST' : 'PUT';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    const saved = data.data;
+                    if (isCreating) {
+                        this.providers.unshift(saved);
+                        this.providerModalOpen = false;
+                    } else {
+                        const idx = this.providers.findIndex(p => p.id === this.selectedProvider.id);
+                        if (idx !== -1) {
+                            this.providers[idx] = saved;
+                        }
+                        this.selectedProvider = { ...saved };
+                        this.isEditingProvider = false;
+                    }
+                    this.showToast(data.message, 'success');
+                } else {
+                    const msg = data.message || 'Error al guardar proveedor en base de datos.';
+                    this.showToast(msg, 'error');
                 }
-                this.isEditingProvider = false;
-                this.showToast('Datos de ' + (target ? target.tradeName : 'proveedor') + ' actualizados.', 'success');
+            } catch (err) {
+                console.error('Error al guardar proveedor:', err);
+                this.showToast('Error de conexion al guardar el proveedor.', 'error');
             }
         },
 
-        toggleProviderStatus(provider, newStatus) {
+        async toggleProviderStatus(provider, newStatus) {
             const valid = ['connected', 'paused', 'maintenance', 'archived'];
             if (!valid.includes(newStatus)) return;
-            provider.status = newStatus;
-            if (this.selectedProvider && this.selectedProvider.id === provider.id) {
-                this.selectedProvider.status = newStatus;
-                this.providerForm.status = newStatus;
+            const dbId = provider.dbId || String(provider.id).replace('prov_', '');
+
+            try {
+                const response = await fetch(`/api/v1/inventory/suppliers/${dbId}/toggle-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.status === 'success') {
+                    provider.status = newStatus;
+                    if (this.selectedProvider && this.selectedProvider.id === provider.id) {
+                        this.selectedProvider.status = newStatus;
+                        this.providerForm.status = newStatus;
+                    }
+                    const labels = { connected: 'Conectado / Activo', paused: 'Pausado', maintenance: 'En Mantenimiento', archived: 'Archivado' };
+                    this.showToast('Proveedor ' + (provider.tradeName || provider.name) + ': Estado cambiado a ' + labels[newStatus] + '.', 'info');
+                } else {
+                    this.showToast(data.message || 'Error al cambiar estado.', 'error');
+                }
+            } catch (err) {
+                console.error('Error al alternar estado de proveedor:', err);
+                this.showToast('Error de red al cambiar estado del proveedor.', 'error');
             }
-            const labels = { connected: 'Conectado / Activo', paused: 'Pausado', maintenance: 'En Mantenimiento', archived: 'Archivado' };
-            this.showToast('Proveedor ' + provider.tradeName + ': Estado cambiado a ' + labels[newStatus] + '.', 'info');
         },
 
-        archiveProvider(provider) {
+        async archiveProvider(provider) {
             if (!provider) return;
-            provider.status = 'archived';
-            if (this.selectedProvider && this.selectedProvider.id === provider.id) {
-                this.selectedProvider.status = 'archived';
-                this.providerForm.status = 'archived';
-            }
-            const name = provider.tradeName || provider.name;
-            this.showToast('Proveedor "' + name + '" archivado exitosamente. Ahora aparece bajo el filtro Archivados.', 'info');
+            await this.toggleProviderStatus(provider, 'archived');
         },
 
-        restoreProvider(provider) {
+        async restoreProvider(provider) {
             if (!provider) return;
-            provider.status = 'connected';
-            if (this.selectedProvider && this.selectedProvider.id === provider.id) {
-                this.selectedProvider.status = 'connected';
-                this.providerForm.status = 'connected';
-            }
-            const name = provider.tradeName || provider.name;
-            this.showToast('Proveedor "' + name + '" restaurado a estado Conectado.', 'success');
+            await this.toggleProviderStatus(provider, 'connected');
         },
 
-        deleteProvider(provider) {
+        async deleteProvider(provider) {
             if (!provider) return;
-            const hasOrders = (provider.totalOrders || 0) > 0 || (provider.completedOrders || 0) > 0;
-            const inUseCount = (this.products || []).filter(p => (p.supplier === provider.tradeName || p.supplier === provider.name || p.brand === provider.tradeName)).length;
-            if (hasOrders || inUseCount > 0) {
-                const motive = hasOrders 
-                    ? (provider.totalOrders + ' Ã³rdenes de compra registradas') 
-                    : (inUseCount + ' productos vinculados en catÃ¡logo');
-                this.showToast('No es posible eliminar "' + (provider.tradeName || provider.name) + '" porque cuenta con ' + motive + '. Se recomienda archivar el proveedor para conservar la trazabilidad y auditorÃ­a contable.', 'warning');
-                return;
+            const dbId = provider.dbId || String(provider.id).replace('prov_', '');
+
+            try {
+                const response = await fetch(`/api/v1/inventory/suppliers/${dbId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok && data.status === 'success') {
+                    if (data.action === 'archived') {
+                        provider.status = 'archived';
+                        if (this.selectedProvider && this.selectedProvider.id === provider.id) {
+                            this.selectedProvider.status = 'archived';
+                        }
+                    } else {
+                        this.providers = this.providers.filter(p => p.id !== provider.id);
+                        if (this.selectedProvider && this.selectedProvider.id === provider.id) {
+                            this.providerModalOpen = false;
+                            this.selectedProvider = null;
+                        }
+                    }
+                    this.showToast(data.message, 'success');
+                } else {
+                    this.showToast(data.message || 'Error al eliminar el proveedor.', 'error');
+                }
+            } catch (err) {
+                console.error('Error al eliminar proveedor:', err);
+                this.showToast('Error de conexion al eliminar proveedor.', 'error');
             }
-            const name = provider.tradeName || provider.name;
-            this.providers = this.providers.filter(p => p.id !== provider.id);
-            if (this.selectedProvider && this.selectedProvider.id === provider.id) {
-                this.providerModalOpen = false;
-                this.selectedProvider = null;
+        },
+
+        async inviteProviderToExtranet(provider) {
+            if (!provider) return;
+            const dbId = provider.dbId || String(provider.id).replace('prov_', '');
+
+            try {
+                const response = await fetch(`/api/v1/inventory/suppliers/${dbId}/invite-extranet`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok && data.status === 'success') {
+                    provider.hasExtranetAccess = true;
+                    if (this.selectedProvider && this.selectedProvider.id === provider.id) {
+                        this.selectedProvider.hasExtranetAccess = true;
+                    }
+                    this.showToast(data.message, 'success');
+                } else {
+                    this.showToast(data.message || 'Error al generar acceso a Extranet Hub 7.', 'error');
+                }
+            } catch (err) {
+                console.error('Error al invitar a extranet:', err);
+                this.showToast('Error de conexion al generar acceso a Extranet.', 'error');
             }
-            this.showToast('Proveedor "' + name + '" eliminado definitivamente.', 'success');
         },
 
         triggerProviderSync(provider) {

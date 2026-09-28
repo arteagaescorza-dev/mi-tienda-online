@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\RevOps\InventoryApiController;
 use App\Http\Controllers\Api\RevOps\InventorySettingsApiController;
 use App\Http\Controllers\Api\RevOps\ProductSkuAndDuplicateApiController;
+use App\Http\Controllers\Api\RevOps\SupplierApiController;
 use App\Http\Controllers\Api\RevOps\StockReservationApiController;
 use App\Http\Controllers\Api\RevOps\MarketingApiController;
 use App\Http\Controllers\Api\RevOps\FinanceApiController;
@@ -49,6 +50,17 @@ Route::prefix('v1')->group(function () {
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
         Route::post('/adjust', [InventoryApiController::class, 'adjustStock']);
+
+        // GESTION FULLSTACK DE PROVEEDORES & EXTRANET HUB 7 (TASK-PUR-02 / SLICE 4)
+        Route::prefix('suppliers')->group(function () {
+            Route::get('/', [SupplierApiController::class, 'index']);
+            Route::post('/', [SupplierApiController::class, 'store']);
+            Route::get('/{id}', [SupplierApiController::class, 'show']);
+            Route::put('/{id}', [SupplierApiController::class, 'update']);
+            Route::delete('/{id}', [SupplierApiController::class, 'destroy']);
+            Route::post('/{id}/toggle-status', [SupplierApiController::class, 'toggleStatus']);
+            Route::post('/{id}/invite-extranet', [SupplierApiController::class, 'inviteExtranet']);
+        });
 
         // MOTOR INTELIGENTE DE AUTO-SKU, DETECCION DE DUPLICADOS Y COPILOTO IA (TASK-INV-15 / SLICE 2 & 3)
         Route::post('/products/generate-sku', [ProductSkuAndDuplicateApiController::class, 'generateSku']);
