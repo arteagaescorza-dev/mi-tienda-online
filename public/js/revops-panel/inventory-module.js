@@ -6116,6 +6116,34 @@ function hybridInventoryModule() {
             }
         },
 
+        submitDiscrepancyMinute(minuteData) {
+            const csrfToken = (typeof document !== 'undefined' && document.querySelector('meta[name="csrf-token"]'))
+                ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                : '';
+
+            return fetch('/api/v1/inventory/purchases/credit-agreements', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(minuteData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.agreement) {
+                    this.pendingCreditAgreements.unshift(data.agreement);
+                    this.showToast('Minuta de discrepancia ' + data.agreement.ref + ' registrada exitosamente.', 'success');
+                }
+                return data;
+            })
+            .catch(err => {
+                console.error('Error al registrar minuta de discrepancia:', err);
+                this.showToast('Error al registrar la minuta de discrepancia.', 'error');
+            });
+        },
+
         recalculatePoTotals() {
             if (!this.currentPoData) return;
             const po = this.currentPoData;

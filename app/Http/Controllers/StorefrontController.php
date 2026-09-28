@@ -692,6 +692,12 @@ class StorefrontController extends Controller
                 'amount' => (float) $ca->amount,
                 'reason' => $ca->resolution_notes ?: 'Acuerdo compensatorio por discrepancia',
                 'agreement_type' => $ca->agreement_type,
+                'discrepancy_type' => $ca->discrepancy_type,
+                'missing_units' => $ca->missing_units_count,
+                'damaged_units' => $ca->damaged_units_count,
+                'unit_cost' => (float) $ca->unit_cost_applied,
+                'authorized_by' => $ca->authorized_by_vendor_contact,
+                'minutes' => $ca->discrepancy_minutes,
                 'status' => 'Pendiente de Aplicar',
                 'date' => $ca->created_at ? $ca->created_at->format('d/m/Y') : now()->format('d/m/Y'),
             ])->values();
