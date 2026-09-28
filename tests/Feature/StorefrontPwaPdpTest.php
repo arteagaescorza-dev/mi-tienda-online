@@ -109,7 +109,7 @@ class StorefrontPwaPdpTest extends TestCase
             ]);
     }
 
-    public function test_web_product_route_loads_pwa_with_auto_open_product_id(): void
+    public function test_web_product_route_renders_dedicated_full_screen_pdp_without_drawers(): void
     {
         $product = Product::create([
             'sku' => 'PDP-DIRECT-01',
@@ -118,15 +118,41 @@ class StorefrontPwaPdpTest extends TestCase
             'brand' => 'BRIEF/BOXERS',
             'price' => 280.00,
             'visible' => true,
+            'meta' => [
+                'fabric_composition' => '95% Modal Pima / 5% Spandex',
+            ],
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'PDP-DIRECT-01-M',
+            'price' => 280.00,
+            'attributes' => ['size' => 'M'],
+            'visible' => true,
+        ]);
+
+        Inventory::create([
+            'variant_id' => $variant->id,
+            'location' => 'warehouse-central',
+            'quantity' => 12,
+            'reserved' => 2,
+            'type' => 'physical',
         ]);
 
         $response = $this->get('/productos/' . $product->slug);
 
         $response->assertOk();
-        $response->assertViewIs('store.pwa.home');
-        $response->assertSee('window.__AUTO_OPEN_PRODUCT_ID__ = "' . $product->id . '";', false);
-        $response->assertSee('openProductModal("' . $product->id . '");', false);
+        $response->assertViewIs('store.pwa.product-detail');
         $response->assertSee('Boxer Brief Modal Soft');
+        $response->assertSee('PDP-DIRECT-01');
+        $response->assertSee('MXN $280.00');
+        $response->assertSee('95% Modal Pima / 5% Spandex');
+        $response->assertSee('AGREGAR AL CARRITO');
+        $response->assertSee('Guía Oficial de Tallas Torzo');
+        $response->assertSee('Protocolo de Lavado & Cuidado de Prendas');
+        $response->assertSee('Aviso Normativo y Sanitario PROFECO');
+        $response->assertSee('application/ld+json', false);
+        $response->assertDontSee('openProductModal("' . $product->id . '");', false);
     }
 
     public function test_web_product_route_redirects_when_product_not_found(): void
@@ -172,5 +198,26 @@ class StorefrontPwaPdpTest extends TestCase
         preg_match_all('/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{1F700}-\x{1F77F}\x{1F780}-\x{1F7FF}\x{1F800}-\x{1F8FF}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', $content, $matches);
 
         $this->assertCount(0, $matches[0], 'La respuesta del endpoint PDP no debe contener emojis.');
+    }
+
+    public function test_pdp_full_screen_html_has_strictly_zero_emojis_and_supports_multiverse(): void
+    {
+        $product = Product::create([
+            'sku' => 'PDP-EMOJI-HTML',
+            'title' => 'Bikini Contour Multiverse',
+            'slug' => 'bikini-contour-multiverse',
+            'price' => 240.00,
+            'visible' => true,
+        ]);
+
+        $response = $this->get('/productos/' . $product->slug . '?universo=venus');
+        $response->assertOk();
+        $response->assertViewIs('store.pwa.product-detail');
+        $response->assertSee('VENUS');
+
+        $content = $response->getContent();
+        preg_match_all('/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{1F700}-\x{1F77F}\x{1F780}-\x{1F7FF}\x{1F800}-\x{1F8FF}\x{1F900}-\x{1F9FF}\x{1FA00}-\x{1FA6F}\x{1FA70}-\x{1FAFF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', $content, $matches);
+
+        $this->assertCount(0, $matches[0], 'El HTML de la PDP no debe contener emojis bajo la política estricta.');
     }
 }

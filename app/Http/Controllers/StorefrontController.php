@@ -184,6 +184,25 @@ class StorefrontController extends Controller
             $activeUniverse = 'marte';
         }
 
+        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
+        $dbData = array_filter([
+            'brandName' => $storefrontConfig->brand_name,
+            'subTitle' => $storefrontConfig->sub_title,
+            'heroTag' => $storefrontConfig->hero_tag,
+            'heroTitle' => $storefrontConfig->hero_title,
+            'heroSubtitle' => $storefrontConfig->hero_subtitle,
+            'heroCtaText' => $storefrontConfig->hero_cta_text,
+            'heroCtaUrl' => $storefrontConfig->hero_cta_url,
+            'pageTitle' => $storefrontConfig->page_title,
+            'primaryColor' => $storefrontConfig->primary_color,
+            'accentColor' => $storefrontConfig->accent_color,
+            'backgroundColor' => $storefrontConfig->background_color,
+            'surfaceColor' => $storefrontConfig->surface_color,
+            'textColor' => $storefrontConfig->text_color,
+            'customCss' => $storefrontConfig->custom_css,
+            'customJs' => $storefrontConfig->custom_js,
+        ]);
+
         $defaultStorefronts = [
             'marte' => [
                 'brandName' => 'MARTE',
@@ -220,8 +239,15 @@ class StorefrontController extends Controller
         ];
 
         $cachedStorefront = Cache::get('cms_storefront_' . $activeUniverse, []);
-        $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $cachedStorefront);
-        $currentStorefront['pageTitle'] = $dbProduct->title . ' — ' . ($currentStorefront['brandName'] ?? 'MARTE');
+        $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $dbData, $cachedStorefront);
+        $currentStorefront['pageTitle'] = $dbProduct->title . ' — ' . ($currentStorefront['brandName'] ?? 'TORZO');
+
+        $navbarPages = CmsPage::inNavbar()->get();
+        $footerPages = CmsPage::inFooter()->get();
+        $tracking = CmsTrackingSetting::current();
+        $sizeGuideDoc = CmsOfficialDocument::forDocument('torzo_size_guide');
+        $careProtocolDoc = CmsOfficialDocument::forDocument('care_protocol');
+        $profecoDoc = CmsOfficialDocument::forDocument('profeco_sanitary');
 
         $shippingRule = Cache::get('cms_shipping_rule', [
             'freeShippingThreshold' => 999.00,
@@ -237,16 +263,67 @@ class StorefrontController extends Controller
             ['id' => 5, 'text' => 'ATENCIÓN PERSONALIZADA POR WHATSAPP', 'active' => true],
         ]);
 
+        // Cálculo de stock y preparación de variantes
+        $variants = $dbProduct->variants;
+        $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+        $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+        $availableStock = max(0, $totalStock - $totalReserved);
+
+        $image = data_get($dbProduct->meta, 'image') ?: (data_get($dbProduct->meta, 'images.0') ?: '/user-avatar.png');
+        $images = data_get($dbProduct->meta, 'images') ?: [$image];
+
+        $variantList = $variants->map(function ($v) {
+            $qty = (int) $v->inventories->sum('quantity');
+            $res = (int) $v->inventories->sum('reserved');
+            $avail = max(0, $qty - $res);
+            return [
+                'id' => $v->id,
+                'sku' => $v->sku,
+                'size' => strtoupper(trim((string) data_get($v->attributes, 'size', 'M'))),
+                'color' => data_get($v->attributes, 'color', 'Único'),
+                'price' => (float) $v->price,
+                'available' => $avail,
+                'stockLabel' => $avail > 0 ? 'Stock Físico' : 'Bajo Pedido',
+            ];
+        })->values();
+
+        $productPayload = [
+            'id' => (string) $dbProduct->id,
+            'sku' => $dbProduct->sku,
+            'name' => $dbProduct->title,
+            'slug' => $dbProduct->slug,
+            'brand' => $dbProduct->brand ?: 'TORZO',
+            'categoryName' => $dbProduct->brand ?: (data_get($dbProduct->meta, 'category', 'Prenda')),
+            'price' => (float) $dbProduct->price,
+            'price_formatted' => 'MXN $' . number_format((float) $dbProduct->price, 2),
+            'availableStock' => $availableStock,
+            'stockType' => $availableStock > 0 ? 'ready' : 'on_demand',
+            'stockLabel' => $availableStock > 0 ? 'Stock Físico' : 'Bajo Pedido',
+            'image' => $image,
+            'images' => $images,
+            'description' => $dbProduct->description ?: 'Prenda anatómica confeccionada con textiles transpirables de alta elasticidad y costuras planas flatlock para confort total.',
+            'fabricComposition' => data_get($dbProduct->meta, 'fabric_composition', 'Modal Pima peruano / Spandex / Microfibra transpirable.'),
+            'sizes' => $variantList->pluck('size')->unique()->values()->all() ?: ['CH', 'M', 'G', 'XG'],
+            'variants' => $variantList->all(),
+        ];
+
         $pwaProducts = $this->getPwaStoreProducts();
 
-        return view('store.pwa.home', [
+        return view('store.pwa.product-detail', [
+            'product' => $productPayload,
+            'dbProduct' => $dbProduct,
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
+            'navbarPages' => $navbarPages,
+            'footerPages' => $footerPages,
+            'tracking' => $tracking,
+            'sizeGuideDoc' => $sizeGuideDoc,
+            'careProtocolDoc' => $careProtocolDoc,
+            'profecoDoc' => $profecoDoc,
             'shippingRule' => $shippingRule,
             'announcements' => $announcements,
-            'products' => $pwaProducts,
             'initialProducts' => $pwaProducts,
-            'autoOpenProductId' => (string) $dbProduct->id,
+            'autoOpenProductId' => null, // PDP dedicado a pantalla completa: cero drawers
         ]);
     }
 

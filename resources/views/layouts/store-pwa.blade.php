@@ -10,6 +10,45 @@
 
   <title>{{ $currentStorefront['pageTitle'] ?? 'MARTE — Universo Masculino & Multiverso Store' }}</title>
   <meta name="description" content="Colección exclusiva de moda y prendas contemporáneas. Envíos express a todo México. Stock físico y bajo pedido.">
+  @yield('seo')
+
+  @if(isset($tracking) && $tracking->is_active)
+    @if(!empty($tracking->gtm_id))
+      <!-- Google Tag Manager -->
+      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','{{ $tracking->gtm_id }}');</script>
+      <!-- End Google Tag Manager -->
+    @endif
+    @if(!empty($tracking->ga4_measurement_id))
+      <!-- Google Analytics 4 -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id={{ $tracking->ga4_measurement_id }}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ $tracking->ga4_measurement_id }}');
+      </script>
+    @endif
+    @if(!empty($tracking->facebook_pixel_id))
+      <!-- Meta Pixel Code -->
+      <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '{{ $tracking->facebook_pixel_id }}');
+      fbq('track', 'PageView');
+      </script>
+      <!-- End Meta Pixel Code -->
+    @endif
+  @endif
 
   <!-- Manifest PWA Oficial -->
   <link rel="manifest" href="{{ asset('manifest.json') }}">
@@ -49,6 +88,12 @@
   @stack('styles')
 </head>
 <body class="store-body">
+  @if(isset($tracking) && $tracking->is_active && !empty($tracking->gtm_id))
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $tracking->gtm_id }}"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+  @endif
 
   <div class="sticky-header-wrapper">
     <!-- Banner de Bienvenida de Aliados / UTM Atribución (Hub 7 TASK-STR-04) -->
@@ -194,6 +239,15 @@
           <div style="font-size: 0.75rem; color: #71717a;">
             Escribenos por WhatsApp: <strong>+52 55 7510 2015</strong>
           </div>
+        </div>
+
+        <div>
+          <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Pagos y envios</strong>
+          <ul class="footer-link-list">
+            <li><span>Paqueteria nacional express ($149 / Gratis +$999)</span></li>
+            <li><span>Entrega personal discreta y segura</span></li>
+            <li><span>Transferencias directas SPEI BBVA sin comisión</span></li>
+          </ul>
         </div>
 
         <div>

@@ -26,7 +26,16 @@ class CmsOfficialDocument extends Model
 
     public static function getByCode(string $code, $default = null)
     {
-        $doc = static::where('code', $code)->where('is_active', true)->first();
+        $doc = static::forDocument($code);
         return $doc ? $doc->payload : $default;
+    }
+
+    public static function forDocument(string $code): ?self
+    {
+        $upper = strtoupper(trim($code));
+        $lower = strtolower(trim($code));
+        return static::where(function ($q) use ($upper, $lower) {
+            $q->where('code', $upper)->orWhere('code', $lower);
+        })->where('is_active', true)->first();
     }
 }
