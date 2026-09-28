@@ -14,7 +14,7 @@
   <script>tailwind.config = { corePlugins: { preflight: false } };</script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </head>
-<body>
+<body class="collapsed">
   @php($authUser = auth()->user())
   @php($initials = $authUser ? \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($authUser->name, 0, 2)) : 'MR')
   <header class="topbar">
@@ -213,25 +213,115 @@
     </div>
   </div>
 
-  {{-- MODAL DE AJUSTES DEL SISTEMA --}}
-  <div class="modal-backdrop" data-settings-modal style="display:none;">
-    <div class="modal-dialog max-w-2xl">
-      <div class="modal-header">
-        <h3 class="text-sm font-black uppercase tracking-wider text-slate-800">Ajustes del Sistema</h3>
-        <button class="close-icon-btn" data-action="close-settings-modal"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  {{-- AJUSTES DEL SISTEMA (PANTALLA COMPLETA - CERO MODALES) --}}
+  <div id="system-settings-fullscreen" data-settings-fullscreen class="fixed inset-0 z-[95] bg-[#f8fafc] flex flex-col w-screen h-screen overflow-hidden" style="display:none;" role="region" aria-label="Ajustes del Sistema">
+    <!-- Topbar Workstation Header -->
+    <header class="px-6 py-3.5 border-b border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0 shadow-xs">
+      <div class="flex items-center gap-3">
+        <button type="button" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 border border-slate-200 shadow-2xs" data-action="close-settings-fullscreen" title="Volver al Panel">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Volver al Panel</span>
+        </button>
+        <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+        <div class="flex items-center gap-2.5">
+          <span class="p-2 bg-slate-900 text-white rounded-xl shadow-2xs">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-slate-900 m-0">Ajustes del Sistema &amp; Configuración Global</h2>
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[10px] font-bold uppercase tracking-wider border border-slate-300">Pantalla Completa</span>
+            </div>
+            <p class="text-xs text-slate-500 m-0">Parámetros globales: activación de vitrinas del multiverso Terra, conexión del scraper Torzo Bot, reglas de stock y matriz RBAC</p>
+          </div>
+        </div>
       </div>
-      <div class="settings-tabs-bar">
-        <button class="settings-tab active" data-settings-tab="multiverse">Multiverso Terra</button>
-        <button class="settings-tab" data-settings-tab="integrations">APIs &amp; Scraper</button>
-        <button class="settings-tab" data-settings-tab="inventory-rules">Reglas de Stock</button>
-        <button class="settings-tab" data-settings-tab="rbac">Permisos RBAC</button>
+      <div class="flex items-center gap-2">
+        <button type="button" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs" data-action="save-settings">
+          Guardar Ajustes
+        </button>
       </div>
-      <div class="p-5" data-settings-body></div>
-      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
-        <button class="button button-light" data-action="close-settings-modal">Cancelar</button>
-        <button class="button button-quiet" data-action="save-settings">Guardar Ajustes</button>
+    </header>
+
+    <!-- Full-Width Horizontal Tabs Bar -->
+    <div class="px-6 border-b border-slate-200 bg-white flex gap-2 text-xs font-bold overflow-x-auto no-scrollbar shrink-0 shadow-2xs">
+      <button class="settings-tab active border-indigo-600 text-indigo-600 border-b-2 py-3 px-3 cursor-pointer whitespace-nowrap" data-settings-tab="multiverse">Multiverso Terra</button>
+      <button class="settings-tab text-slate-500 hover:text-slate-800 py-3 px-3 border-b-2 border-transparent cursor-pointer whitespace-nowrap" data-settings-tab="integrations">APIs &amp; Scraper</button>
+      <button class="settings-tab text-slate-500 hover:text-slate-800 py-3 px-3 border-b-2 border-transparent cursor-pointer whitespace-nowrap" data-settings-tab="inventory-rules">Reglas de Stock</button>
+      <button class="settings-tab text-slate-500 hover:text-slate-800 py-3 px-3 border-b-2 border-transparent cursor-pointer whitespace-nowrap" data-settings-tab="rbac">Permisos RBAC</button>
+    </div>
+
+    <!-- Full-Screen Scrollable Content Area -->
+    <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f8fafc]">
+      <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-xs p-6" data-settings-body>
+        <!-- Populated via JS -->
       </div>
     </div>
+
+    <!-- Full-Screen Workstation Footer -->
+    <footer class="px-6 py-3 bg-white border-t border-slate-200 flex justify-between items-center shrink-0">
+      <button type="button" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5" data-action="close-settings-fullscreen">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Volver al Panel</span>
+      </button>
+      <button type="button" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs" data-action="save-settings">
+        Guardar Ajustes
+      </button>
+    </footer>
+  </div>
+
+  {{-- AJUSTES DE HUB UNIVERSAL (PANTALLA COMPLETA - APLICA A TODOS LOS HUBS - CERO MODALES) --}}
+  <div id="hub-settings-fullscreen" data-hub-settings-fullscreen class="fixed inset-0 z-[85] bg-[#f8fafc] flex flex-col w-screen h-screen overflow-hidden" style="display:none;" role="region" aria-label="Ajustes del Hub">
+    <!-- Topbar Workstation Header -->
+    <header class="px-6 py-3.5 border-b border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0 shadow-xs">
+      <div class="flex items-center gap-3">
+        <button type="button" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 border border-slate-200 shadow-2xs" data-action="close-hub-settings-fullscreen" title="Volver al Hub">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Volver al Hub</span>
+        </button>
+        <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+        <div class="flex items-center gap-2.5">
+          <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200 shadow-2xs">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-slate-900 m-0" data-hub-settings-title>Ajustes &amp; Configuración del Hub</h2>
+              <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider border border-indigo-200">Pantalla Completa</span>
+            </div>
+            <p class="text-xs text-slate-500 m-0" data-hub-settings-subtitle>Gobernanza operativa, parámetros de visualización, umbrales y reglas del módulo</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs" data-action="save-hub-settings">
+          Guardar Ajustes
+        </button>
+      </div>
+    </header>
+
+    <!-- Full-Width Horizontal Tabs Bar -->
+    <div class="px-6 border-b border-slate-200 bg-white flex gap-2 text-xs font-bold overflow-x-auto no-scrollbar shrink-0 shadow-2xs" data-hub-settings-tabs>
+      <!-- Populated via JS based on current hub -->
+    </div>
+
+    <!-- Full-Screen Scrollable Content Area -->
+    <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f8fafc]">
+      <div class="max-w-6xl mx-auto space-y-6" data-hub-settings-body>
+        <!-- Populated via JS -->
+      </div>
+    </div>
+
+    <!-- Full-Screen Workstation Footer -->
+    <footer class="px-6 py-3 bg-white border-t border-slate-200 flex justify-between items-center shrink-0">
+      <button type="button" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5" data-action="close-hub-settings-fullscreen">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Volver al Hub</span>
+      </button>
+      <button type="button" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs" data-action="save-hub-settings">
+        Guardar Ajustes
+      </button>
+    </footer>
   </div>
 
   {{-- MODAL INFORMATIVO DEL CONMUTADOR DE ENTORNO --}}

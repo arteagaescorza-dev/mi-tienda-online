@@ -8105,59 +8105,61 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- MODAL DE AJUSTES Y CONFIGURACIÓN DEL MÓDULO DE INVENTARIO       -->
+    <!-- AJUSTES Y CONFIGURACIÓN DEL HUB DE INVENTARIO (PANTALLA COMPLETA) -->
     <!-- ============================================================= -->
     <div 
         x-show="moduleSettingsModalOpen" 
-        class="fixed inset-0 z-[80] overflow-y-auto" 
-        style="z-index: 80; display: none;"
-        aria-labelledby="settings-modal-title" 
-        role="dialog" 
-        aria-modal="true"
+        x-transition:enter="transition ease-out duration-200 transform"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150 transform"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[90] bg-[#f8fafc] flex flex-col w-screen h-screen overflow-hidden" 
+        style="z-index: 90; display: none;"
+        aria-labelledby="settings-fullscreen-title" 
+        role="region"
         @keydown.escape.window="moduleSettingsModalOpen = false"
     >
-        <div 
-            x-show="moduleSettingsModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="moduleSettingsModalOpen = false"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-0">
-            <div 
-                x-show="moduleSettingsModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-                class="inline-block w-full max-w-5xl xl:max-w-6xl bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
-                @click.stop
-            >
-                <!-- Modal Header -->
-                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900" id="settings-modal-title">Ajustes y Configuración de Inventario</h3>
-                            <p class="text-xs text-slate-500">Gobernanza de telas, paleta de colores/tornasoles, tonos cosmética, slotting físico, reglas ROP, scraping y vitrinas web</p>
+        <!-- Full-Screen Workstation Topbar Header -->
+        <header class="px-6 py-3.5 border-b border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0 shadow-xs">
+            <div class="flex items-center gap-3">
+                <button 
+                    type="button" 
+                    @click="moduleSettingsModalOpen = false"
+                    class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 border border-slate-200 shadow-2xs"
+                    title="Volver al Inventario"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span>Volver al Inventario</span>
+                </button>
+                <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+                <div class="flex items-center gap-2.5">
+                    <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200 shadow-2xs">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base font-bold text-slate-900 m-0" id="settings-fullscreen-title">Ajustes &amp; Configuración: Hub de Inventario</h2>
+                            <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider border border-indigo-200">Pantalla Completa</span>
                         </div>
+                        <p class="text-xs text-slate-500 m-0">Gobernanza de telas, paleta de colores/tornasoles, tonos cosmética, slotting físico, reglas ROP, curaduría de scraping y curvas de tallas &amp; volúmenes</p>
                     </div>
-                    <button @click="moduleSettingsModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
                 </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button 
+                    type="button" 
+                    @click="moduleSettingsModalOpen = false" 
+                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                    <span>Cerrar Ajustes</span>
+                </button>
+            </div>
+        </header>
 
-                <!-- Settings Tabs Bar (7 Pestañas Ergonómicas en una sola fila) -->
-                <div class="px-6 border-b border-slate-200 bg-slate-50/50 flex gap-2 text-xs font-bold overflow-x-auto no-scrollbar">
+        <!-- Settings Tabs Bar -->
+        <div class="px-6 border-b border-slate-200 bg-white flex gap-2 text-xs font-bold overflow-x-auto no-scrollbar shrink-0 shadow-2xs">
                     <button 
                         type="button" 
                         @click="activeSettingsTab = 'fabrics'" 
@@ -8252,8 +8254,9 @@
                     </button>
                 </div>
 
-                <!-- Settings Body -->
-                <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm">
+        <!-- Full-Screen Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f8fafc]">
+            <div class="max-w-7xl mx-auto space-y-6 text-sm">
                     
                     <!-- TAB 1: TELAS & FIBRAS (CRUD COMPLETO) -->
                     <template x-if="activeSettingsTab === 'fabrics'">
@@ -10030,16 +10033,27 @@
                         </div>
                     </template>
 
-                </div>
-
-                <!-- Modal Footer -->
-                <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-                    <button type="button" @click="moduleSettingsModalOpen = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition cursor-pointer">
-                        Cerrar Ajustes
-                    </button>
-                </div>
             </div>
         </div>
+
+        <!-- Full-Screen Workstation Footer -->
+        <footer class="px-6 py-3 bg-white border-t border-slate-200 flex justify-between items-center shrink-0">
+            <button 
+                type="button" 
+                @click="moduleSettingsModalOpen = false" 
+                class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <span>Volver al Inventario</span>
+            </button>
+            <button 
+                type="button" 
+                @click="moduleSettingsModalOpen = false" 
+                class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+            >
+                Cerrar Ajustes
+            </button>
+        </footer>
     </div>
 
     <!-- ============================================================= -->

@@ -16294,11 +16294,436 @@ function initSystemSettingsView(container, defaultTab = 'multiverse') {
   activateTab(defaultTab);
 }
 
+// GESTION DE AJUSTES DEL SISTEMA EN PANTALLA COMPLETA (REGLA 3: CERO MODALES)
+function openSystemSettingsFullscreen() {
+  const fs = document.getElementById('system-settings-fullscreen');
+  if (fs) {
+    fs.style.display = 'flex';
+    initSystemSettingsView(fs);
+    return;
+  }
+  render('settings');
+}
+
+function closeSystemSettingsFullscreen() {
+  const fs = document.getElementById('system-settings-fullscreen');
+  if (fs) {
+    fs.style.display = 'none';
+  }
+}
+
 if (settingsBtn) {
-  settingsBtn.addEventListener('click', () => {
-    render('settings');
+  settingsBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSystemSettingsFullscreen();
   });
 }
+
+document.querySelectorAll('[data-action="close-settings-fullscreen"]').forEach(btn => {
+  btn.addEventListener('click', closeSystemSettingsFullscreen);
+});
+
+// GESTIÓN UNIVERSAL DE AJUSTES DEL HUB EN PANTALLA COMPLETA (REGLA 1: APLICA A TODOS LOS HUBS - CERO MODALES)
+const UNIVERSAL_HUB_SETTINGS = {
+  dashboard: {
+    kicker: 'Hub 1',
+    title: 'Ajustes & Configuración: Dashboard General',
+    subtitle: 'Telemetría ejecutiva, umbrales de alerta crítica, frecuencia de refresco y KPIs en tiempo real',
+    tabs: [
+      { id: 'telemetry', label: 'Telemetría & KPIs' },
+      { id: 'alerts', label: 'Umbrales & Alertas' },
+      { id: 'widgets', label: 'Widgets Activos' }
+    ],
+    items: {
+      telemetry: [
+        { id: 'dsh_realtime', name: 'Refresco en Tiempo Real de KPIs', desc: 'Polling de órdenes cada 30 segundos vía WebSockets/SSE', active: true, tag: 'Frecuencia: 30s' },
+        { id: 'dsh_fin_metrics', name: 'Métricas Financieras Consolidadas (MRR / GMV)', desc: 'Desglose monetario visible solo para perfiles ejecutivos', active: true, tag: 'Segregación RBAC' },
+        { id: 'dsh_picking_telemetry', name: 'Telemetría de Picking & Surtido', desc: 'Conteo de bultos preparados en mesa de empaque', active: true, tag: 'Operativo' }
+      ],
+      alerts: [
+        { id: 'alt_stockout', name: 'Alerta Roja de Rotura de Stock', desc: 'Disparar notificación prioritaria al llegar a 0 unidades con carritos activos', active: true, tag: 'Crítica' },
+        { id: 'alt_margin_drop', name: 'Alerta de Caída de Margen Bruto (<40%)', desc: 'Avisar a compras cuando el costo del proveedor supere el umbral', active: true, tag: 'Financiera' },
+        { id: 'alt_courier_delay', name: 'Alerta de Paquetes Demorados (>48h sin tracking)', desc: 'Reclamación automática a Skydropx / Fletera', active: false, tag: 'Logística' }
+      ],
+      widgets: [
+        { id: 'wid_revops_pipeline', name: 'Embudo de Conversión & Scoring de Leads', desc: 'Módulo visual del pipeline de ventas en tiempo real', active: true, tag: 'Dashboard Top' },
+        { id: 'wid_live_feed', name: 'Feed de Eventos Operativos & Auditoría', desc: 'Bitácora en vivo de cambios en pedidos e inventario', active: true, tag: 'Columna Derecha' }
+      ]
+    }
+  },
+  store: {
+    kicker: 'Hub 2',
+    title: 'Ajustes & Configuración: Tienda & CMS Multiverso',
+    subtitle: 'Gobernanza de vitrinas de género/identidad, políticas de precios, cupones y banners',
+    tabs: [
+      { id: 'showcases', label: 'Vitrinas Multiverso' },
+      { id: 'pricing', label: 'Reglas de Precios' },
+      { id: 'promotions', label: 'Cupones & Promociones' }
+    ],
+    items: {
+      showcases: [
+        { id: 'sc_terra', name: 'Terra (Vitrina Matriz)', desc: 'Tienda principal multimarca con catálogo general y combos', active: true, tag: 'B2C Matriz' },
+        { id: 'sc_marte', name: 'Marte (Línea Masculina)', desc: 'Ropa interior atlética, grooming, cuidado íntimo y fragancias', active: true, tag: 'B2C Marte' },
+        { id: 'sc_venus', name: 'Venus (Línea Femenina)', desc: 'Lencería, cosmética, skincare y aromas de nicho', active: true, tag: 'B2C Venus' },
+        { id: 'sc_tiresias', name: 'Tiresias / Afrodita (Trans & No Binario)', desc: 'Prendas de compresión segura, binders y cuidado afirmativo', active: true, tag: 'B2C Afirmativo' }
+      ],
+      pricing: [
+        { id: 'pr_psychological', name: 'Redondeo Psicológico a $X9 / $X99', desc: 'Ajuste comercial automático al calcular PVP desde el costo', active: true, tag: 'PVP Automático' },
+        { id: 'pr_min_markup', name: 'Markup Mínimo Obligatorio (2.2x)', desc: 'Bloqueo de publicación si el precio cae bajo el margen meta', active: true, tag: 'Protección Margen' }
+      ],
+      promotions: [
+        { id: 'cp_welcome', name: 'Cupón de Bienvenida BIENVENIDA10', desc: '10% de descuento en primera compra con registro', active: true, tag: 'Activo' },
+        { id: 'cp_combo_ship', name: 'Envío Gratis en Combos >$899 MXN', desc: 'Absorción del flete para carritos con recetas de pack', active: true, tag: 'Logística B2C' }
+      ]
+    }
+  },
+  crm: {
+    kicker: 'Hub 3',
+    title: 'Ajustes & Configuración: Marketing & CRM 360°',
+    subtitle: 'Embudos de scoring, telemetría de ROAS, sincronización WhatsApp y retargeting',
+    tabs: [
+      { id: 'scoring', label: 'Scoring de Leads' },
+      { id: 'whatsapp', label: 'WhatsApp Commerce' },
+      { id: 'abandoned', label: 'Carritos Abandonados' }
+    ],
+    items: {
+      scoring: [
+        { id: 'sc_hot', name: 'Umbral Lead Caliente (Score >= 80)', desc: 'Puntuación para asignación inmediata a ejecutivos de atención', active: true, tag: 'Score 80-100' },
+        { id: 'sc_decay', name: 'Decaimiento de Temperatura por Inactividad', desc: 'Reducción de 5 puntos por cada 48 horas sin interacción', active: true, tag: 'Automático' }
+      ],
+      whatsapp: [
+        { id: 'wa_auto', name: 'Respuesta Automática Inicial con Menú Interactivo', desc: 'Disparo de bienvenida con opciones de vitrina multiverso', active: true, tag: 'Meta API' },
+        { id: 'wa_sync', name: 'Sincronización Periódica de Catálogo con WhatsApp Shop', desc: 'Subida de fotos, variantes y stock disponible cada 1 hora', active: true, tag: 'Meta Commerce' }
+      ],
+      abandoned: [
+        { id: 'rt_cart', name: 'Recordatorio Regresivo de Carrito (1h después)', desc: 'Mensaje con cupón de dinamización si el stock no expiró', active: true, tag: 'Conversión' }
+      ]
+    }
+  },
+  finance: {
+    kicker: 'Hub 5',
+    title: 'Ajustes & Configuración: Finanzas & Conciliación',
+    subtitle: 'Pasarelas SPEI, comisiones Stripe, conciliación bancaria y facturación SAT CFDI 4.0',
+    tabs: [
+      { id: 'gateways', label: 'Pasarelas & Comisiones' },
+      { id: 'taxes', label: 'Fiscal & Facturación SAT' },
+      { id: 'reconciliation', label: 'Conciliación Automática' }
+    ],
+    items: {
+      gateways: [
+        { id: 'gw_stripe', name: 'Pasarela Stripe Tarjetas (3.6% + $3.00 MXN)', desc: 'Cobro con tarjeta de crédito/débito y 3D Secure v2', active: true, tag: 'Producción / Sandbox' },
+        { id: 'gw_spei', name: 'SPEI STP Transferencia Directa', desc: 'Conciliación vía CEP con rastreo Banxico sin comisión fija', active: true, tag: 'B2B & B2C' }
+      ],
+      taxes: [
+        { id: 'tx_cfdi40', name: 'Emisión Automática de CFDI 4.0 con PAC', desc: 'Timbrado fiscal con clave SAT 53102400 (Ropa Interior)', active: true, tag: 'SAT 4.0' },
+        { id: 'tx_iva', name: 'Desglose Formal de IVA (16%) en Comprobantes', desc: 'Cálculo de impuestos trasladados para contabilidad electrónica', active: true, tag: 'Fiscal' }
+      ],
+      reconciliation: [
+        { id: 'rc_daily', name: 'Cotejo de 3 Vías (Pedido - Cobro - Envío)', desc: 'Cierre de ciclo diario a las 23:59 con reporte de discrepancias', active: true, tag: 'Auditoría Diaria' }
+      ]
+    }
+  },
+  logistics: {
+    kicker: 'Hub 6',
+    title: 'Ajustes & Configuración: Logística & Envíos',
+    subtitle: 'Torre de control, couriers integrados, cubicaje de cajas IATA y protocolo RMA',
+    tabs: [
+      { id: 'couriers', label: 'Couriers & Paqueterías' },
+      { id: 'boxes', label: 'Cajas & Cubicaje IATA' },
+      { id: 'rma', label: 'Protocolo RMA' }
+    ],
+    items: {
+      couriers: [
+        { id: 'cr_skydropx', name: 'Agregador Skydropx Multi-Courier', desc: 'Tarificación dinámica entre DHL, FedEx, Estafeta y Paquetexpress', active: true, tag: 'API Skydropx' },
+        { id: 'cr_fedex', name: 'FedEx Express 24h Prioritario', desc: 'Asignación automática para envíos urgentes de alto valor', active: true, tag: 'SLA 24 Horas' }
+      ],
+      boxes: [
+        { id: 'bx_a', name: 'Caja Tipo A - Compacta (20x15x10 cm, máx 1.5kg)', desc: 'Para 1 a 3 prendas de ropa interior o 1 fragancia', active: true, tag: 'Stock: 450 u' },
+        { id: 'bx_b', name: 'Caja Tipo B - Estándar (30x25x15 cm, máx 4.0kg)', desc: 'Para combos, sets de regalo o pedidos de 4 a 10 prendas', active: true, tag: 'Stock: 320 u' }
+      ],
+      rma: [
+        { id: 'rma_sanitary', name: 'Dictamen Sanitario Estricto (PROFECO)', desc: 'Prendas íntimas con empaque violado no admiten reincorporación a stock', active: true, tag: 'Sanidad & Ley' }
+      ]
+    }
+  },
+  allies: {
+    kicker: 'Hub 7',
+    title: 'Ajustes & Configuración: Convenios & Aliados B2B',
+    subtitle: 'Cámara de compensación, comisiones de alianza, acuerdos mayoristas y canje en especie',
+    tabs: [
+      { id: 'terms', label: 'Condiciones de Alianzas' },
+      { id: 'clearing', label: 'Cámara de Compensación' }
+    ],
+    items: {
+      terms: [
+        { id: 'al_gold', name: 'Nivel Oro: 25% Margen de Canje B2B', desc: 'Para aliados de nicho con volumen > 50 unidades mensuales', active: true, tag: 'Convenio Oro' },
+        { id: 'al_silver', name: 'Nivel Plata: 15% Margen de Canje B2B', desc: 'Para gimnasios, spas y barberías aliadas de volumen medio', active: true, tag: 'Convenio Plata' }
+      ],
+      clearing: [
+        { id: 'cl_monthly', name: 'Corte Mensual de Saldos de Canje', desc: 'Dispersión de remanentes el último día de cada mes', active: true, tag: 'SPEI B2B' }
+      ]
+    }
+  },
+  governance: {
+    kicker: 'Hub 8',
+    title: 'Ajustes & Configuración: Gobernanza & RBAC',
+    subtitle: 'Auditoría de acciones operativas, políticas de contraseñas, llaves de API y tokens',
+    tabs: [
+      { id: 'audit', label: 'Políticas de Auditoría' },
+      { id: 'security', label: 'Seguridad & Tokens API' }
+    ],
+    items: {
+      audit: [
+        { id: 'ad_logs', name: 'Registro Inmutable de Modificaciones de Stock', desc: 'Grabación de autor, IP, timestamp y diferencial de unidades', active: true, tag: 'Trazabilidad Total' },
+        { id: 'ad_timeout', name: 'Expiración de Sesión Administrativa (120 min)', desc: 'Cierre forzado en terminales compartidas de almacén', active: true, tag: 'Seguridad' }
+      ],
+      security: [
+        { id: 'sec_tokens', name: 'Rotación Automática de Bearer Tokens (30 días)', desc: 'Reexpedición para scrapers y bots externos', active: true, tag: 'Criptografía' }
+      ]
+    }
+  }
+};
+
+let currentUniversalHubKey = 'dashboard';
+let currentUniversalHubTab = '';
+
+function detectCurrentHubKey() {
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes('/dashboard')) return 'dashboard';
+  if (path.includes('/store')) return 'store';
+  if (path.includes('/marketing') || path.includes('/leads') || path.includes('/scoring')) return 'crm';
+  if (path.includes('/finance')) return 'finance';
+  if (path.includes('/logistics')) return 'logistics';
+  if (path.includes('/allies')) return 'allies';
+  if (path.includes('/governance')) return 'governance';
+  if (typeof currentScreen !== 'undefined' && UNIVERSAL_HUB_SETTINGS[currentScreen]) return currentScreen;
+  return 'dashboard';
+}
+
+function openUniversalHubSettingsFullscreen(hubKey = null) {
+  // Si estamos en Inventario y Alpine está listo, dejamos que Inventario maneje su propio workstation
+  const hasInventoryModule = document.querySelector('[x-data*="hybridInventoryModule"]') || window.inventoryAppInstance;
+  const isInventoryRoute = window.location.pathname.toLowerCase().includes('/inventory');
+  if (isInventoryRoute && hasInventoryModule) {
+    if (window.inventoryAppInstance) {
+      window.inventoryAppInstance.moduleSettingsModalOpen = true;
+    }
+    return;
+  }
+
+  const hubFs = document.getElementById('hub-settings-fullscreen');
+  if (!hubFs) return;
+
+  currentUniversalHubKey = hubKey || detectCurrentHubKey();
+  const conf = UNIVERSAL_HUB_SETTINGS[currentUniversalHubKey] || UNIVERSAL_HUB_SETTINGS.dashboard;
+
+  const titleEl = hubFs.querySelector('[data-hub-settings-title]');
+  const subtitleEl = hubFs.querySelector('[data-hub-settings-subtitle]');
+
+  if (titleEl) titleEl.textContent = conf.title;
+  if (subtitleEl) subtitleEl.textContent = conf.subtitle;
+
+  currentUniversalHubTab = conf.tabs[0] ? conf.tabs[0].id : '';
+
+  renderUniversalHubTabs(hubFs, conf);
+  renderUniversalHubBody(hubFs, conf, currentUniversalHubTab);
+
+  hubFs.style.display = 'flex';
+}
+
+function closeUniversalHubSettingsFullscreen() {
+  const hubFs = document.getElementById('hub-settings-fullscreen');
+  if (hubFs) hubFs.style.display = 'none';
+}
+
+function renderUniversalHubTabs(hubFs, conf) {
+  const tabsEl = hubFs.querySelector('[data-hub-settings-tabs]');
+  if (!tabsEl) return;
+  tabsEl.innerHTML = conf.tabs.map(tab => {
+    const isActive = tab.id === currentUniversalHubTab;
+    return `
+      <button 
+        type="button" 
+        data-hub-tab-btn="${tab.id}" 
+        class="cursor-pointer whitespace-nowrap px-3 py-3 font-bold text-xs ${isActive ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-slate-500 hover:text-slate-800 border-b-2 border-transparent'}"
+      >
+        ${tab.label}
+      </button>
+    `;
+  }).join('');
+
+  tabsEl.querySelectorAll('[data-hub-tab-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentUniversalHubTab = btn.dataset.hubTabBtn;
+      renderUniversalHubTabs(hubFs, conf);
+      renderUniversalHubBody(hubFs, conf, currentUniversalHubTab);
+    });
+  });
+}
+
+function renderUniversalHubBody(hubFs, conf, tabId) {
+  const bodyEl = hubFs.querySelector('[data-hub-settings-body]');
+  if (!bodyEl) return;
+
+  const items = (conf.items && conf.items[tabId]) ? conf.items[tabId] : [];
+
+  let html = `
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+        <div>
+          <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Gobernanza del Módulo</h4>
+          <p class="text-xs text-slate-500">Modifica, activa, desactiva, archiva o crea nuevas reglas para este submódulo.</p>
+        </div>
+        <button 
+          type="button" 
+          data-action="hub-add-param"
+          class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition cursor-pointer shadow-xs flex items-center gap-1.5 shrink-0"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+          <span>+ Agregar Nuevo Parámetro</span>
+        </button>
+      </div>
+
+      <div class="space-y-3" id="hub-items-list">
+  `;
+
+  if (items.length === 0) {
+    html += `
+      <div class="p-8 text-center text-xs text-slate-400 bg-white rounded-xl border border-dashed border-slate-300">
+        No hay parámetros configurados para esta sección. Haz clic en '+ Agregar Nuevo Parámetro'.
+      </div>
+    `;
+  } else {
+    items.forEach((item) => {
+      html += `
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-3 hover:border-slate-300 transition" data-item-id="${item.id}">
+          <div class="flex items-start gap-3 min-w-0">
+            <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5" title="Activar o Desactivar">
+              <input type="checkbox" class="sr-only peer" ${item.active ? 'checked' : ''} data-toggle-item="${item.id}">
+              <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <strong class="text-xs font-bold text-slate-900">${item.name}</strong>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${item.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}">
+                  ${item.active ? 'Activo' : 'Inactivo'}
+                </span>
+                ${item.tag ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">${item.tag}</span>` : ''}
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5 mb-0">${item.desc}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end md:self-center shrink-0">
+            <button 
+              type="button" 
+              class="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 rounded-lg transition cursor-pointer flex items-center gap-1"
+              data-action="edit-item" 
+              data-item-id="${item.id}"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>Modificar</span>
+            </button>
+            <button 
+              type="button" 
+              class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 border border-rose-200 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center gap-1"
+              data-action="archive-item" 
+              data-item-id="${item.id}"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              <span>Archivar</span>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  bodyEl.innerHTML = html;
+
+  // Toggle active/inactive
+  bodyEl.querySelectorAll('[data-toggle-item]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const it = items.find(x => x.id === cb.dataset.toggleItem);
+      if (it) {
+        it.active = cb.checked;
+        showToast(`${it.name}: estado cambiado a ${it.active ? 'Activo' : 'Inactivo'}`);
+        renderUniversalHubBody(hubFs, conf, tabId);
+      }
+    });
+  });
+
+  // Edit item
+  bodyEl.querySelectorAll('[data-action="edit-item"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const it = items.find(x => x.id === btn.dataset.itemId);
+      if (it) {
+        const newName = prompt('Modificar nombre de parámetro:', it.name);
+        if (newName && newName.trim()) {
+          it.name = newName.trim();
+          showToast(`Parámetro actualizado: ${it.name}`);
+          renderUniversalHubBody(hubFs, conf, tabId);
+        }
+      }
+    });
+  });
+
+  // Archive / Delete item
+  bodyEl.querySelectorAll('[data-action="archive-item"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = items.findIndex(x => x.id === btn.dataset.itemId);
+      if (idx !== -1) {
+        const item = items[idx];
+        if (confirm(`¿Deseas archivar/eliminar el parámetro "${item.name}"?`)) {
+          items.splice(idx, 1);
+          showToast(`Parámetro archivado: ${item.name}`);
+          renderUniversalHubBody(hubFs, conf, tabId);
+        }
+      }
+    });
+  });
+
+  // Add new parameter
+  const addBtn = bodyEl.querySelector('[data-action="hub-add-param"]');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const name = prompt('Nombre del nuevo parámetro:');
+      if (!name || !name.trim()) return;
+      const desc = prompt('Descripción operativa del parámetro:') || 'Parámetro personalizado creado por el operador';
+      const newItem = {
+        id: 'custom_' + Date.now(),
+        name: name.trim(),
+        desc: desc.trim(),
+        active: true,
+        tag: 'Personalizado'
+      };
+      items.push(newItem);
+      showToast(`Nuevo parámetro creado: ${newItem.name}`);
+      renderUniversalHubBody(hubFs, conf, tabId);
+    });
+  }
+}
+
+// Conectar listeners de cierre y guardado para Universal Hub Settings
+document.querySelectorAll('[data-action="close-hub-settings-fullscreen"]').forEach(btn => {
+  btn.addEventListener('click', closeUniversalHubSettingsFullscreen);
+});
+
+document.querySelectorAll('[data-action="save-hub-settings"]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    closeUniversalHubSettingsFullscreen();
+    showToast('Ajustes del Hub guardados correctamente');
+  });
+});
+
+// Listener global para window event 'open-module-settings'
+window.addEventListener('open-module-settings', () => {
+  openUniversalHubSettingsFullscreen();
+});
 
 // 13. ACCIONES INTERACTIVAS Y MODALES DEL ACTION CENTER (HUB 1)
 const actionModal = document.querySelector('[data-action-modal]');
