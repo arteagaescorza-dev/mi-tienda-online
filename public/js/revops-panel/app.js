@@ -14832,24 +14832,11 @@ function renderAccessDenied(screenKey, screen) {
 }
 
 // 7. FUNCIÓN PRINCIPAL DE RENDERIZADO
-function render(name = 'inventory') {
-  const resolvedName = screenAliases[name] || name;
-  const screen = screens[resolvedName] || screens.inventory;
-
+function syncTopbarAndSidebar(resolvedName, screen) {
   // Actualizar estado activo en Sidebar
   document.querySelectorAll('.module-link').forEach(link => {
     link.classList.toggle('active', link.dataset.screen === resolvedName);
   });
-
-  // VERIFICACIÓN DE ACCESO POR ROL (RBAC SCREEN GUARD)
-  const allowed = Array.isArray(currentRole.allowedHubs) ? currentRole.allowedHubs : [];
-  const isAllowed = allowed.includes(resolvedName) || currentRole.id === 'admin' || currentRole.id === 'all_roles' || resolvedName === 'settings';
-
-  if (!isAllowed) {
-    renderAccessDenied(resolvedName, screen);
-    closeMobile();
-    return;
-  }
 
   if (resolvedName !== 'settings') {
     window.lastNonSettingsScreen = resolvedName;
@@ -14860,19 +14847,18 @@ function render(name = 'inventory') {
   const hubKickerEl = document.querySelector('[data-hub-kicker]');
   const hubStatusEl = document.querySelector('[data-hub-status]');
 
-  if (hubTitleEl) hubTitleEl.textContent = screen.title;
-  if (hubKickerEl) hubKickerEl.textContent = screen.hubKicker || 'Hub';
+  if (hubTitleEl && screen && screen.title) hubTitleEl.textContent = screen.title;
+  if (hubKickerEl && screen) hubKickerEl.textContent = screen.hubKicker || 'Hub';
 
   // Actualizar botón canónico de Ajustes de Módulo en Navbar
   const moduleSettingsBtn = document.querySelector('[data-action="toggle-module-settings"]');
-  if (moduleSettingsBtn) {
+  if (moduleSettingsBtn && screen) {
     moduleSettingsBtn.title = `Ajustes del Módulo: ${screen.title || 'Inventario'}`;
     moduleSettingsBtn.setAttribute('aria-label', `Ajustes del Módulo: ${screen.title || 'Inventario'}`);
   }
 
   if (hubStatusEl) {
-    hubStatusEl.classList.remove('executive', 'operative');
-    hubStatusEl.classList.remove('sales');
+    hubStatusEl.classList.remove('executive', 'operative', 'sales');
     if (resolvedName === 'dashboard') {
       const effTab = getEffectiveDashboardTab();
       if (effTab === 'sales') {
@@ -14886,14 +14872,17 @@ function render(name = 'inventory') {
         hubStatusEl.classList.add('executive');
       }
     } else if (resolvedName === 'inventory') {
-      hubStatusEl.textContent = '1,736 Piezas en Bodega';
+      const stockBadge = document.querySelector('[data-hub-status]');
+      if (!stockBadge || !stockBadge.textContent || stockBadge.textContent === 'Activo') {
+        hubStatusEl.textContent = 'Operativo';
+      }
       hubStatusEl.classList.add('operative');
     } else if (resolvedName === 'logistics') {
-      const readyCount = logisticsState.packages.filter(p => p.status === 'packed').length;
+      const readyCount = (logisticsState && logisticsState.packages) ? logisticsState.packages.filter(p => p.status === 'packed').length : 0;
       hubStatusEl.textContent = `${readyCount} Bultos Listos para Salida`;
       hubStatusEl.classList.add('operative');
     } else if (resolvedName === 'crm') {
-      const hotCount = marketingState.leads.filter(l => l.score >= 80).length;
+      const hotCount = (marketingState && marketingState.leads) ? marketingState.leads.filter(l => l.score >= 80).length : 0;
       hubStatusEl.textContent = `${hotCount} Hot Leads Listos`;
       hubStatusEl.classList.add('executive');
     } else if (resolvedName === 'finance') {
@@ -14912,32 +14901,82 @@ function render(name = 'inventory') {
       hubStatusEl.textContent = 'Activo';
     }
   }
+}
+
+function isScreenRenderedByBlade(screenName) {
+  const container = document.querySelector('[data-main]') || document.querySelector('main');
+  if (!container) return false;
+  if (screenName === 'inventory' && container.querySelector('[x-data*="hybridInventoryModule"]')) return true;
+  if (screenName === 'dashboard' && container.querySelector('#dashboardAppRoot')) return true;
+  if (screenName === 'vendor' && container.querySelector('[x-data*="vendorExtranetApp"]')) return true;
+  if (screenName === 'allies' && container.querySelector('[x-data*="alliesPortalApp"]')) return true;
+  if (container.dataset && container.dataset.screen && container.dataset.screen === screenName) return true;
+  return false;
+}
+
+function render(name = 'inventory') {
+  const resolvedName = screenAliases[name] || name;
+  const screen = screens[resolvedName] || screens.inventory;
+
+  // VERIFICACIÓN DE ACCESO POR ROL (RBAC SCREEN GUARD)
+  const allowed = Array.isArray(currentRole.allowedHubs) ? currentRole.allowedHubs : [];
+  const isAllowed = allowed.includes(resolvedName) || currentRole.id === 'admin' || currentRole.id === 'all_roles' || resolvedName === 'settings';
+
+  if (!isAllowed) {
+    renderAccessDenied(resolvedName, screen);
+    closeMobile();
+    return;
+  }
+
+  // Sincronizar indicadores de navegación en topbar y sidebar
+  syncTopbarAndSidebar(resolvedName, screen);
+
+  const mainContainer = document.querySelector('[data-main]') || document.querySelector('main');
+  if (!mainContainer) {
+    closeMobile();
+    return;
+  }
+
+  // Si la pantalla solicitada ya fue renderizada por Blade del lado del servidor,
+  // NO destruir el DOM existente, sincronizar y respetar la fuente canónica de Laravel
+  if (isScreenRenderedByBlade(resolvedName)) {
+    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+      window.Alpine.initTree(mainContainer);
+    }
+    closeMobile();
+    return;
+  }
 
   // Renderizar contenido en main (CERO CABECERAS REDUNDANTES, MAXIMO ESPACIO VERTICAL - REGLA 10: TABS PRIMERO, KPIS DEBAJO)
-  if (resolvedName === 'inventory' && typeof window.hybridInventoryBody === 'function') {
-    main.innerHTML = window.hybridInventoryBody();
-    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-      window.Alpine.initTree(main);
+  if (resolvedName === 'inventory') {
+    if (typeof window.hybridInventoryBody === 'function') {
+      mainContainer.innerHTML = window.hybridInventoryBody();
+      if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+        window.Alpine.initTree(mainContainer);
+      }
+    } else {
+      window.location.href = '/admin/inventario-catalogo';
+      return;
     }
   } else if (resolvedName === 'dashboard') {
-    main.innerHTML = dashboardBody();
+    mainContainer.innerHTML = dashboardBody();
   } else if (resolvedName === 'logistics') {
-    main.innerHTML = logisticsBody();
+    mainContainer.innerHTML = logisticsBody();
   } else if (resolvedName === 'crm') {
-    main.innerHTML = marketingBody();
+    mainContainer.innerHTML = marketingBody();
   } else if (resolvedName === 'finance') {
-    main.innerHTML = financeBody();
+    mainContainer.innerHTML = financeBody();
   } else if (resolvedName === 'store') {
-    main.innerHTML = storeBody();
+    mainContainer.innerHTML = storeBody();
   } else if (resolvedName === 'allies') {
-    main.innerHTML = alliesBody();
+    mainContainer.innerHTML = alliesBody();
   } else if (resolvedName === 'vendor') {
-    main.innerHTML = vendorPortalBody();
+    mainContainer.innerHTML = vendorPortalBody();
   } else if (resolvedName === 'settings') {
-    main.innerHTML = systemSettingsBody();
-    initSystemSettingsView(main);
+    mainContainer.innerHTML = systemSettingsBody();
+    initSystemSettingsView(mainContainer);
   } else {
-    main.innerHTML = genericHubBody(screen, resolvedName);
+    mainContainer.innerHTML = genericHubBody(screen, resolvedName);
   }
 
   closeMobile();
@@ -20784,15 +20823,25 @@ document.addEventListener('input', (e) => {
 
 // Inicialización de Alpine.js
 document.addEventListener('alpine:initialized', () => {
-  if (window.Alpine && main && main.querySelector('[x-data]')) {
-    window.Alpine.initTree(main);
+  const container = document.querySelector('[data-main]') || document.querySelector('main');
+  if (window.Alpine && container && container.querySelector('[x-data]')) {
+    window.Alpine.initTree(container);
   }
 });
 
-// Arranque inicial
+// Arranque inicial respetando el renderizado de Blade del servidor
 updateRoleUI();
 renderEnvironmentIndicator();
-render('inventory');
+
+const initialActiveLink = document.querySelector('.module-link.active');
+const currentScreenName = initialActiveLink?.dataset?.screen || 'inventory';
+
+if (isScreenRenderedByBlade(currentScreenName)) {
+  const screenObj = screens[currentScreenName] || screens.inventory;
+  syncTopbarAndSidebar(currentScreenName, screenObj);
+} else {
+  render(currentScreenName);
+}
 
 
 // ==========================================================================

@@ -1,4 +1,4 @@
-// Módulo de Inventario Híbrido y Catálogo para Plataforma RevOps (Ropa Interior B2C)
+// MÃ³dulo de Inventario HÃ­brido y CatÃ¡logo para Plataforma RevOps (Ropa Interior B2C)
 // Desarrollado con Tailwind CSS + Alpine.js
 
 function hybridInventoryModule() {
@@ -76,7 +76,7 @@ function hybridInventoryModule() {
         deepLinkBannerText: '',
         highlightedSku: null,
 
-        // TASK-INT-06: Telemetría de Carritos Simultáneos y Reserva Temporal de Stock (TTL 5m)
+        // TASK-INT-06: TelemetrÃ­a de Carritos SimultÃ¡neos y Reserva Temporal de Stock (TTL 5m)
         stockLocks: [
             {
                 id: 'lock_demo_001',
@@ -105,25 +105,25 @@ function hybridInventoryModule() {
         ],
         stockLocksModalOpen: false,
 
-        // TASK-INV-08 / TASK-INV-11: Catálogo de Telas y Fibras Textiles
+        // TASK-INV-08 / TASK-INV-11: CatÃ¡logo de Telas y Fibras Textiles
         apparelFabrics: [
-            { id: 'algodon_pima', name: 'Algodón Pima', description: 'Fibra natural extra suave de hilo largo de alta durabilidad', is_active: true },
-            { id: 'algodon_peinado', name: 'Algodón Peinado', description: '100% algodón transpirable sin impurezas para uso diario', is_active: true },
-            { id: 'modal', name: 'Modal Seamless', description: 'Fibra celulósica ultra-sedosa con secado rápido y máxima elasticidad', is_active: true },
-            { id: 'elastano', name: 'Elastano / Spandex Fit', description: 'Alta compresión anatómica y memoria elástica activa', is_active: true },
-            { id: 'malla_mesh', name: 'Malla / Mesh Transpirable', description: 'Tejido técnico micro-perforado para ventilación y control térmico', is_active: true },
+            { id: 'algodon_pima', name: 'AlgodÃ³n Pima', description: 'Fibra natural extra suave de hilo largo de alta durabilidad', is_active: true },
+            { id: 'algodon_peinado', name: 'AlgodÃ³n Peinado', description: '100% algodÃ³n transpirable sin impurezas para uso diario', is_active: true },
+            { id: 'modal', name: 'Modal Seamless', description: 'Fibra celulÃ³sica ultra-sedosa con secado rÃ¡pido y mÃ¡xima elasticidad', is_active: true },
+            { id: 'elastano', name: 'Elastano / Spandex Fit', description: 'Alta compresiÃ³n anatÃ³mica y memoria elÃ¡stica activa', is_active: true },
+            { id: 'malla_mesh', name: 'Malla / Mesh Transpirable', description: 'Tejido tÃ©cnico micro-perforado para ventilaciÃ³n y control tÃ©rmico', is_active: true },
             { id: 'microfibra_velvet', name: 'Microfibra Velvet Touch', description: 'Tacto aterciopelado ultraligero que evita rozaduras', is_active: true },
-            { id: 'bambu_eco', name: 'Bambú Eco Air', description: 'Fibra ecológica antibacteriana natural y termorreguladora', is_active: true },
-            { id: 'seda_satin', name: 'Seda / Satín Premium', description: 'Acabado brillante de lujo para lencería de autor', is_active: true }
+            { id: 'bambu_eco', name: 'BambÃº Eco Air', description: 'Fibra ecolÃ³gica antibacteriana natural y termorreguladora', is_active: true },
+            { id: 'seda_satin', name: 'Seda / SatÃ­n Premium', description: 'Acabado brillante de lujo para lencerÃ­a de autor', is_active: true }
         ],
 
-        // TASK-INV-08 / TASK-INV-11: Paleta de Colores Sólidos y Tornasoles Iridiscentes
+        // TASK-INV-08 / TASK-INV-11: Paleta de Colores SÃ³lidos y Tornasoles Iridiscentes
         apparelColors: [
             { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', type: 'solid', is_active: true },
-            { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid', is_active: true },
+            { id: 'blanco', name: 'Blanco Ã“palo', hex: '#f8fafc', type: 'solid', is_active: true },
             { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', type: 'solid', is_active: true },
             { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid', is_active: true },
-            { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', type: 'solid', is_active: true },
+            { id: 'rojo_borgona', name: 'Rojo BorgoÃ±a', hex: '#881337', type: 'solid', is_active: true },
             { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', type: 'solid', is_active: true },
             { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', type: 'solid', is_active: true },
             { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', type: 'solid', is_active: true },
@@ -133,7 +133,7 @@ function hybridInventoryModule() {
             { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', is_active: true }
         ],
 
-        // TASK-INV-08: Staging de Curaduría Previa de Scraping (Validación humana antes de publicar)
+        // TASK-INV-08: Staging de CuradurÃ­a Previa de Scraping (ValidaciÃ³n humana antes de publicar)
         scrapedPendingItems: [
             {
                 id: 'SCRP-PEND-001',
@@ -141,7 +141,7 @@ function hybridInventoryModule() {
                 name: 'Torzo Holographic Prism Jockstrap',
                 brand: 'Torzo B2B',
                 suggestedCategory: 'Jocks',
-                scrapedDescription: 'Prenda suspensorio atlético con elástico reflectante y tejido de malla técnica transpirable con destellos tornasol. Ideal para performance y diseño contemporáneo.',
+                scrapedDescription: 'Prenda suspensorio atlÃ©tico con elÃ¡stico reflectante y tejido de malla tÃ©cnica transpirable con destellos tornasol. Ideal para performance y diseÃ±o contemporÃ¡neo.',
                 originUrl: 'https://torzo.example.com/item/holo-prism-jock',
                 cost: 145.00,
                 suggestedPvp: 390.00,
@@ -160,14 +160,14 @@ function hybridInventoryModule() {
                 name: 'Torzo Bamboo Comfort Trunks Seamless',
                 brand: 'Torzo B2B',
                 suggestedCategory: 'Boxers',
-                scrapedDescription: 'Boxer corto liso elaborado en viscosa de bambú ecológico, costuras planas anti-rozaduras y pretina elástica afelpada para máxima comodidad.',
+                scrapedDescription: 'Boxer corto liso elaborado en viscosa de bambÃº ecolÃ³gico, costuras planas anti-rozaduras y pretina elÃ¡stica afelpada para mÃ¡xima comodidad.',
                 originUrl: 'https://torzo.example.com/item/bamboo-trunks',
                 cost: 120.00,
                 suggestedPvp: 340.00,
                 detectedColorName: 'Verde Militar Oliva',
                 detectedColorHex: '#365314',
                 colorType: 'solid',
-                suggestedFabric: 'Bambú Eco Air',
+                suggestedFabric: 'BambÃº Eco Air',
                 suggestedDesign: 'sin_diseno',
                 suggestedSection: 'basicos',
                 supplierStock: 90,
@@ -175,7 +175,7 @@ function hybridInventoryModule() {
             }
         ],
 
-        // TASK-INV-08 / TASK-INV-11 / TASK-INV-17: Modal de Ajustes y Configuración del Módulo
+        // TASK-INV-08 / TASK-INV-11 / TASK-INV-17: Modal de Ajustes y ConfiguraciÃ³n del MÃ³dulo
         moduleSettingsModalOpen: false,
         activeSettingsTab: 'fabrics', // 'fabrics' | 'colors' | 'shades' | 'slotting' | 'rop' | 'scraping' | 'sections' | 'bundles'
         bundleEditor: {
@@ -213,7 +213,7 @@ function hybridInventoryModule() {
         slotEditState: { isEditing: false, editingCode: null, form: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true } },
         ropSettings: { leadTimeLocal: 3, leadTimeDropship: 5, safetyStockDays: 7, defaultDailySales: 2 },
 
-        // TASK-INV-14: Gestión Configurable de Curvas de Tallas, Volúmenes y Categorías
+        // TASK-INV-14: GestiÃ³n Configurable de Curvas de Tallas, VolÃºmenes y CategorÃ­as
         sizeCurves: [],
         selectedCurveId: null,
         newCurveForm: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true },
@@ -445,7 +445,7 @@ function hybridInventoryModule() {
             notes: ''
         },
 
-        // TASK-INV-08: Modal de Curaduría de Scraping
+        // TASK-INV-08: Modal de CuradurÃ­a de Scraping
         scrapingCurationModalOpen: false,
         curatingItem: null,
 
@@ -462,7 +462,7 @@ function hybridInventoryModule() {
         drawerDiscountPct: 0,
         drawerRegularPrice: 0,
 
-        // Regla 6: Paginación en tablas mediante "Cargar más"
+        // Regla 6: PaginaciÃ³n en tablas mediante "Cargar mÃ¡s"
         visibleCount: 8,
         pageSize: 8,
         isLoadingMore: false,
@@ -471,7 +471,7 @@ function hybridInventoryModule() {
         kardexIsLoadingMore: false,
         _lastFilterQuery: '',
 
-        // Regla 7: Filtros específicos por columna
+        // Regla 7: Filtros especÃ­ficos por columna
         colFilters: {
             sku: '',
             product: '',
@@ -503,17 +503,17 @@ function hybridInventoryModule() {
         confirmPurchaseModalOpen: false,
         purchaseAddedSuccess: false,
         hasAddedPurchaseThisSession: false,
-        // TASK-INV-01 / TASK-INV-11: Catálogo y Estado de Slotting Físico en Bodega
+        // TASK-INV-01 / TASK-INV-11: CatÃ¡logo y Estado de Slotting FÃ­sico en Bodega
         warehouseSlots: [
             { code: 'A-01-A', aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 01 Gaveta Superior', capacity: 100, status: 'active', is_active: true },
             { code: 'A-01-B', aisle: 'A', rack: '01', bin: 'B', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 01 Gaveta Media', capacity: 120, status: 'active', is_active: true },
             { code: 'A-02-A', aisle: 'A', rack: '02', bin: 'A', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 02 Gaveta Superior', capacity: 100, status: 'active', is_active: true },
             { code: 'A-02-B', aisle: 'A', rack: '02', bin: 'B', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 02 Gaveta Media', capacity: 150, status: 'active', is_active: true },
             { code: 'A-03-A', aisle: 'A', rack: '03', bin: 'A', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 03 Gaveta Superior', capacity: 100, status: 'active', is_active: true },
-            { code: 'B-01-A', aisle: 'B', rack: '01', bin: 'A', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 01 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
-            { code: 'B-02-B', aisle: 'B', rack: '02', bin: 'B', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 02 Gaveta Media', capacity: 90, status: 'active', is_active: true },
-            { code: 'B-03-A', aisle: 'B', rack: '03', bin: 'A', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 03 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
-            { code: 'B-04-C', aisle: 'B', rack: '04', bin: 'C', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 04 Gaveta Inferior', capacity: 110, status: 'active', is_active: true },
+            { code: 'B-01-A', aisle: 'B', rack: '01', bin: 'A', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 01 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
+            { code: 'B-02-B', aisle: 'B', rack: '02', bin: 'B', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 02 Gaveta Media', capacity: 90, status: 'active', is_active: true },
+            { code: 'B-03-A', aisle: 'B', rack: '03', bin: 'A', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 03 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
+            { code: 'B-04-C', aisle: 'B', rack: '04', bin: 'C', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 04 Gaveta Inferior', capacity: 110, status: 'active', is_active: true },
             { code: 'C-01-A', aisle: 'C', rack: '01', bin: 'A', zone: 'Skincare & Cuidado', name: 'Pasillo C (Skincare & Cuidado) - Rack 01 Gaveta Climatizada', capacity: 60, status: 'active', is_active: true },
             { code: 'C-02-B', aisle: 'C', rack: '02', bin: 'B', zone: 'Skincare & Cuidado', name: 'Pasillo C (Skincare & Cuidado) - Rack 02 Gaveta Media', capacity: 75, status: 'active', is_active: true },
             { code: 'C-03-A', aisle: 'C', rack: '03', bin: 'A', zone: 'Skincare & Cuidado', name: 'Pasillo C (Skincare & Cuidado) - Rack 03 Gaveta Superior', capacity: 50, status: 'active', is_active: true }
@@ -552,7 +552,7 @@ function hybridInventoryModule() {
             result: null
         },
 
-        // Estado Auditoría Cíclica a Ciegas (TASK-INV-07: 3 SKUs Diarios)
+        // Estado AuditorÃ­a CÃ­clica a Ciegas (TASK-INV-07: 3 SKUs Diarios)
         cycleCountHistory: [],
         cycleCountModal: {
             isOpen: false,
@@ -565,16 +565,16 @@ function hybridInventoryModule() {
             discrepancyReasons: {}, // { [sku]: 'Merma operativa' }
             reconciliationReport: null
         },
-        // TASK-INV-09: Gestor Configurable de Tonos de Cosmética con Swatches y Subtonos
+        // TASK-INV-09: Gestor Configurable de Tonos de CosmÃ©tica con Swatches y Subtonos
         cosmeticShades: [
             { id: 1, code: '01', name: 'Porcelana', hex_color: '#F7D8BE', undertone: 'cool', sort_order: 1, is_active: true },
             { id: 2, code: '02', name: 'Neutro Claro', hex_color: '#EEC29A', undertone: 'neutral', sort_order: 2, is_active: true },
-            { id: 3, code: '03', name: 'Beige Cálido', hex_color: '#D9A577', undertone: 'warm', sort_order: 3, is_active: true },
+            { id: 3, code: '03', name: 'Beige CÃ¡lido', hex_color: '#D9A577', undertone: 'warm', sort_order: 3, is_active: true },
             { id: 4, code: '04', name: 'Canela Dorado', hex_color: '#BD8052', undertone: 'warm', sort_order: 4, is_active: true },
-            { id: 5, code: '05', name: 'Miel Cálido', hex_color: '#9A5B32', undertone: 'warm', sort_order: 5, is_active: true },
-            { id: 6, code: '06', name: 'Ébano Profundo', hex_color: '#6D3C1A', undertone: 'cool', sort_order: 6, is_active: true },
+            { id: 5, code: '05', name: 'Miel CÃ¡lido', hex_color: '#9A5B32', undertone: 'warm', sort_order: 5, is_active: true },
+            { id: 6, code: '06', name: 'Ã‰bano Profundo', hex_color: '#6D3C1A', undertone: 'cool', sort_order: 6, is_active: true },
             { id: 7, code: '07', name: 'Caramelo Neutro', hex_color: '#C68B59', undertone: 'neutral', sort_order: 7, is_active: true },
-            { id: 8, code: '08', name: 'Café Intenso', hex_color: '#542D13', undertone: 'warm', sort_order: 8, is_active: true }
+            { id: 8, code: '08', name: 'CafÃ© Intenso', hex_color: '#542D13', undertone: 'warm', sort_order: 8, is_active: true }
         ],
         cosmeticShadesModal: {
             isOpen: false,
@@ -760,7 +760,7 @@ function hybridInventoryModule() {
         "committedStock": 15,
         "committedSizes": { "ch": 2, "m": 6, "g": 5, "xl": 2 },
         "supplierStock": null,
-        "location": "Rack B-03 / Cajón 1",
+        "location": "Rack B-03 / CajÃ³n 1",
         "status": "En Stock",
         "pvp": 380,
         "cost": 115,
@@ -784,7 +784,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 48,
-        "location": "Almacén Proveedor (Torzo B2B)",
+        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
         "status": "Sincronizado",
         "providerUrl": "https://torzo.example.com/item/mesh-trunk",
         "isScraping": false,
@@ -858,7 +858,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 14,
-        "location": "Almacén Proveedor (Torzo B2B)",
+        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
         "status": "Bajo Stock",
         "providerUrl": "https://torzo.example.com/item/neon-jock",
         "isScraping": false,
@@ -877,7 +877,7 @@ function hybridInventoryModule() {
     {
         "sku": "BX-COT-007",
         "weightedAverageCost": 114.00,
-        "name": "Boxer Algodón Pima Orgánico",
+        "name": "Boxer AlgodÃ³n Pima OrgÃ¡nico",
         "category": "Boxers",
         "type": "propio",
         "localStock": 480,
@@ -932,7 +932,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 0,
-        "location": "Almacén Proveedor (Torzo B2B)",
+        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
         "status": "Agotado",
         "providerUrl": "https://torzo.example.com/item/satin-bikini",
         "isScraping": false,
@@ -975,7 +975,7 @@ function hybridInventoryModule() {
     {
         "sku": "BX-BAM-011",
         "weightedAverageCost": 132.00,
-        "name": "Boxer Brief Bambú Eco Air Flow",
+        "name": "Boxer Brief BambÃº Eco Air Flow",
         "category": "Boxers",
         "type": "propio",
         "localStock": 315,
@@ -1030,7 +1030,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 62,
-        "location": "Almacén Proveedor (Torzo B2B)",
+        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
         "status": "Sincronizado",
         "providerUrl": "https://torzo.example.com/item/air-mesh-brief",
         "isScraping": false,
@@ -1056,7 +1056,7 @@ function hybridInventoryModule() {
         "committedStock": 7,
         "committedSizes": { "ch": 1, "m": 3, "g": 2, "xl": 1 },
         "supplierStock": null,
-        "location": "Rack B-04 / Cajón 2",
+        "location": "Rack B-04 / CajÃ³n 2",
         "status": "En Stock",
         "pvp": 520,
         "cost": 160,
@@ -1073,7 +1073,7 @@ function hybridInventoryModule() {
     {
         "sku": "TG-LACE-015",
         "weightedAverageCost": 71.00,
-        "name": "Tanga Encaje Elástico Black Lace",
+        "name": "Tanga Encaje ElÃ¡stico Black Lace",
         "category": "Tangas",
         "type": "propio",
         "localStock": 140,
@@ -1128,7 +1128,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 35,
-        "location": "Almacén Proveedor (ModaIntima Textil MX)",
+        "location": "AlmacÃ©n Proveedor (ModaIntima Textil MX)",
         "status": "Sincronizado",
         "providerUrl": "https://modaintima.example.com/b2b/thermal-boxer",
         "isScraping": false,
@@ -1202,7 +1202,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 28,
-        "location": "Almacén Proveedor (Torzo B2B)",
+        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
         "status": "Sincronizado",
         "providerUrl": "https://torzo.example.com/item/cyber-stripe",
         "isScraping": false,
@@ -1228,7 +1228,7 @@ function hybridInventoryModule() {
         "committedStock": 8,
         "committedSizes": { "ch": 1, "m": 3, "g": 3, "xl": 1 },
         "supplierStock": null,
-        "location": "Rack B-03 / Cajón 3",
+        "location": "Rack B-03 / CajÃ³n 3",
         "status": "En Stock",
         "pvp": 490,
         "cost": 145,
@@ -1245,7 +1245,7 @@ function hybridInventoryModule() {
     {
         "sku": "TG-COT-022",
         "weightedAverageCost": 52.00,
-        "name": "Tanga Confort Diario Algodón Stretch",
+        "name": "Tanga Confort Diario AlgodÃ³n Stretch",
         "category": "Tangas",
         "type": "propio",
         "localStock": 260,
@@ -1276,7 +1276,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 19,
-        "location": "Almacén Proveedor (Silk & Cotton Iberia SL)",
+        "location": "AlmacÃ©n Proveedor (Silk & Cotton Iberia SL)",
         "status": "Bajo Stock",
         "providerUrl": "https://silkcotton.example.com/items/royal-silk-brief",
         "isScraping": false,
@@ -1295,7 +1295,7 @@ function hybridInventoryModule() {
     {
         "sku": "BX-GEO-024",
         "weightedAverageCost": 119.00,
-        "name": "Boxer Geométrico Edición Pride",
+        "name": "Boxer GeomÃ©trico EdiciÃ³n Pride",
         "category": "Boxers",
         "type": "propio",
         "localStock": 145,
@@ -1407,7 +1407,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BAS-001",
         "weightedAverageCost": 152.5,
         "name": "Base Fluida Mate Alta Cobertura Terra Venus",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 65,
@@ -1442,7 +1442,7 @@ function hybridInventoryModule() {
         "sku": "CSM-COR-002",
         "weightedAverageCost": 98,
         "name": "Corrector Liquido Iluminador HD Anti-Ojeras",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 83,
@@ -1477,7 +1477,7 @@ function hybridInventoryModule() {
         "sku": "CSM-PLV-003",
         "weightedAverageCost": 120,
         "name": "Polvo Compacto Mineral Matificante Ultrafino",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 101,
@@ -1512,7 +1512,7 @@ function hybridInventoryModule() {
         "sku": "CSM-PRM-004",
         "weightedAverageCost": 135,
         "name": "Primer Siliconado Control Poros y Brillo",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 110,
@@ -1547,7 +1547,7 @@ function hybridInventoryModule() {
         "sku": "CSM-TNT-005",
         "weightedAverageCost": 80.5,
         "name": "Tinte Labial y Mejillas Acabado Aterciopelado",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 116,
@@ -1582,7 +1582,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BLS-006",
         "weightedAverageCost": 57,
         "name": "Balsamo Labial Reparador con Color SPF 20",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 119,
@@ -1617,7 +1617,7 @@ function hybridInventoryModule() {
         "sku": "CSM-GEL-007",
         "weightedAverageCost": 72,
         "name": "Gel Fijador de Cejas Transparente Esculpidor",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 104,
@@ -1652,7 +1652,7 @@ function hybridInventoryModule() {
         "sku": "CSM-SRM-008",
         "weightedAverageCost": 172,
         "name": "Serum Iluminador Facial con Vitamina C 10%",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 87,
@@ -1687,7 +1687,7 @@ function hybridInventoryModule() {
         "sku": "CSM-DLN-009",
         "weightedAverageCost": 86.5,
         "name": "Delineador Liquido Carbon Black Waterproof",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 93,
@@ -1722,7 +1722,7 @@ function hybridInventoryModule() {
         "sku": "CSM-ILM-010",
         "weightedAverageCost": 110,
         "name": "Iluminador Liquido Perla Nacarada Multiuso",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 102,
@@ -1757,7 +1757,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BBC-011",
         "weightedAverageCost": 129,
         "name": "BB Cream Perfeccionadora Hidratante SPF 30",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 105,
@@ -1792,7 +1792,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BRZ-012",
         "weightedAverageCost": 104,
         "name": "Bronzer en Barra Moldeador Tono Canela",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 123,
@@ -1827,7 +1827,7 @@ function hybridInventoryModule() {
         "sku": "CSM-SOM-013",
         "weightedAverageCost": 199,
         "name": "Paleta de Sombras Neutros Calidos Terra",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 96,
@@ -1862,7 +1862,7 @@ function hybridInventoryModule() {
         "sku": "CSM-FJD-014",
         "weightedAverageCost": 114.5,
         "name": "Spray Fijador de Maquillaje Acabado Mate",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 114,
@@ -1897,7 +1897,7 @@ function hybridInventoryModule() {
         "sku": "CSM-ACT-015",
         "weightedAverageCost": 138,
         "name": "Aceite Limpiador Desmaquillante de Camelia",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 97,
@@ -1932,7 +1932,7 @@ function hybridInventoryModule() {
         "sku": "CSM-TON-016",
         "weightedAverageCost": 112,
         "name": "Tonico Exfoliante Diario Acido Glicolico 5%",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 91,
@@ -1967,7 +1967,7 @@ function hybridInventoryModule() {
         "sku": "CSM-OJOS-017",
         "weightedAverageCost": 142,
         "name": "Crema Contorno de Ojos Descongestiva Cafeina",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 97,
@@ -2002,7 +2002,7 @@ function hybridInventoryModule() {
         "sku": "CSM-PUR-018",
         "weightedAverageCost": 91,
         "name": "Mascarilla Facial Purificante de Arcilla Rosa",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 115,
@@ -2037,7 +2037,7 @@ function hybridInventoryModule() {
         "sku": "CSM-EXF-019",
         "weightedAverageCost": 52,
         "name": "Exfoliante Labial Suave Azucar Moreno y Miel",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 100,
@@ -2072,7 +2072,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BRM-020",
         "weightedAverageCost": 88,
         "name": "Bruma Hidratante Facial Agua de Rosas 120ml",
-        "category": "Cosmética",
+        "category": "CosmÃ©tica",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 118,
@@ -2107,7 +2107,7 @@ function hybridInventoryModule() {
         "sku": "PRF-MAR-001",
         "weightedAverageCost": 278,
         "name": "Eau de Parfum Marte Noir Cuero y Sandalo",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 65,
@@ -2138,7 +2138,7 @@ function hybridInventoryModule() {
         "sku": "PRF-VEN-002",
         "weightedAverageCost": 265,
         "name": "Eau de Parfum Venus Secret Jazmin y Vainilla",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 78,
@@ -2169,7 +2169,7 @@ function hybridInventoryModule() {
         "sku": "PRF-TIR-003",
         "weightedAverageCost": 295,
         "name": "Eau de Parfum Tiresias Ambar Gris y Cedro",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 91,
@@ -2200,7 +2200,7 @@ function hybridInventoryModule() {
         "sku": "PRF-CIT-004",
         "weightedAverageCost": 188,
         "name": "Agua de Colonia Bergamota de Calabria 100ml",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 104,
@@ -2231,7 +2231,7 @@ function hybridInventoryModule() {
         "sku": "PRF-OUD-005",
         "weightedAverageCost": 398,
         "name": "Extracto de Perfume Oud Real y Cardamomo",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 105,
@@ -2262,7 +2262,7 @@ function hybridInventoryModule() {
         "sku": "PRF-BOS-006",
         "weightedAverageCost": 238,
         "name": "Eau de Parfum Bosque Humedo Musgo y Vetiver",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 98,
@@ -2293,7 +2293,7 @@ function hybridInventoryModule() {
         "sku": "PRF-TRA-007",
         "weightedAverageCost": 139,
         "name": "Decant Travel Pocket Atomizer Set x3 10ml",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 75,
@@ -2324,7 +2324,7 @@ function hybridInventoryModule() {
         "sku": "PRF-MIS-008",
         "weightedAverageCost": 105,
         "name": "Body Mist Refrescante Bambu y Te Blanco",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 88,
@@ -2355,7 +2355,7 @@ function hybridInventoryModule() {
         "sku": "PRF-IRI-009",
         "weightedAverageCost": 345,
         "name": "Perfume Esencia Pura Iris Florentino",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 89,
@@ -2386,7 +2386,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ROL-010",
         "weightedAverageCost": 115,
         "name": "Perfume en Aceite Roll-On Ambar Dorado 15ml",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 102,
@@ -2417,7 +2417,7 @@ function hybridInventoryModule() {
         "sku": "PRF-NER-011",
         "weightedAverageCost": 196,
         "name": "Agua Fresca Neroli Mediterraneo y Azahar",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 95,
@@ -2448,7 +2448,7 @@ function hybridInventoryModule() {
         "sku": "PRF-OCN-012",
         "weightedAverageCost": 228,
         "name": "Eau de Parfum Sal Marina y Algas Atlanticas",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 108,
@@ -2479,7 +2479,7 @@ function hybridInventoryModule() {
         "sku": "PRF-TAB-013",
         "weightedAverageCost": 256,
         "name": "Colonia Amaderada Hoja de Tabaco y Haba Tonka",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 73,
@@ -2510,7 +2510,7 @@ function hybridInventoryModule() {
         "sku": "PRF-SOL-014",
         "weightedAverageCost": 118,
         "name": "Perfume Solido Cuero y Cacao Balsamico 20g",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 86,
@@ -2541,7 +2541,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ORQ-015",
         "weightedAverageCost": 110,
         "name": "Bruma Sensual Orquidea Negra y Pachuli",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 99,
@@ -2572,7 +2572,7 @@ function hybridInventoryModule() {
         "sku": "PRF-CIP-016",
         "weightedAverageCost": 215,
         "name": "Eau de Parfum Cipres de Toscana y Pino Silvestre",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 92,
@@ -2603,7 +2603,7 @@ function hybridInventoryModule() {
         "sku": "PRF-HIG-017",
         "weightedAverageCost": 206,
         "name": "Fragancia Fresca Higo Verde y Corteza de Cedro",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 93,
@@ -2634,7 +2634,7 @@ function hybridInventoryModule() {
         "sku": "PRF-VET-018",
         "weightedAverageCost": 305,
         "name": "Extracto Puro Vetiver de Haiti Ahumado",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 106,
@@ -2665,7 +2665,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ROM-019",
         "weightedAverageCost": 162,
         "name": "Colonia Botanica Romero Silvestre y Toronja",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 83,
@@ -2696,7 +2696,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ECL-020",
         "weightedAverageCost": 362,
         "name": "Perfume Edicion Limitada Eclipse Resina Dorada",
-        "category": "Perfumería",
+        "category": "PerfumerÃ­a",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 96,
@@ -3228,10 +3228,10 @@ function hybridInventoryModule() {
         
 
         // =========================================================================
-        // MÉTODOS DE PRIORIDAD 2: INBOUND, WHATSAPP & KARDEX
+        // MÃ‰TODOS DE PRIORIDAD 2: INBOUND, WHATSAPP & KARDEX
         // =========================================================================
 
-        // [P2.1] Recepción Inbound
+        // [P2.1] RecepciÃ³n Inbound
         openReceiveOrderModal(order) {
             this.receivingOrder = order;
             this.receivingSizes = {
@@ -3242,7 +3242,7 @@ function hybridInventoryModule() {
                 '2xl': (order.sizes && order.sizes['2xl']) || 0,
                 '3xl': (order.sizes && order.sizes['3xl']) || 0
             };
-            this.receivingNotes = 'Cotejo físico conforme. Empaque sellado de origen.';
+            this.receivingNotes = 'Cotejo fÃ­sico conforme. Empaque sellado de origen.';
 
             // Deteccion de Control Sanitario (TASK-INV-06)
             const prod = this.products.find(p => p.sku === order.sku);
@@ -3288,14 +3288,14 @@ function hybridInventoryModule() {
             const totalReceived = this.calculateReceivingTotal();
 
             if (totalReceived <= 0) {
-                this.showToast('Debes ingresar al menos 1 unidad recibida en el cotejo físico.', 'warning');
+                this.showToast('Debes ingresar al menos 1 unidad recibida en el cotejo fÃ­sico.', 'warning');
                 return;
             }
 
             // 1. Actualizar estado de la orden
-            order.status = 'Recibida en Almacén';
+            order.status = 'Recibida en AlmacÃ©n';
 
-            // 2. Incrementar stock del producto en catálogo y recalcular CPP Contable
+            // 2. Incrementar stock del producto en catÃ¡logo y recalcular CPP Contable
             const product = this.products.find(p => p.sku === order.sku);
             let stockBefore = 0;
             let stockAfter = 0;
@@ -3320,7 +3320,7 @@ function hybridInventoryModule() {
                     product.sizes[sz] = (product.sizes[sz] || 0) + (parseInt(this.receivingSizes[sz]) || 0);
                 });
 
-                // Si era dropship y ahora tiene stock físico, se vuelve mixto o propio
+                // Si era dropship y ahora tiene stock fÃ­sico, se vuelve mixto o propio
                 if (product.type === 'dropship' && product.localStock > 0) {
                     product.type = 'mixto';
                 }
@@ -3339,7 +3339,7 @@ function hybridInventoryModule() {
                 const req = this.customerOnDemandRequests.find(r => r.sku === order.sku && r.cartLabel.includes(order.linkedCartId));
                 if (req) {
                     req.verificationStatus = 'confirmado';
-                    req.statusNote = 'Mercancía en Almacén - Listo para Empaque Total';
+                    req.statusNote = 'MercancÃ­a en AlmacÃ©n - Listo para Empaque Total';
                 }
                 this.mixedCartLiberated = {
                     show: true,
@@ -3360,11 +3360,11 @@ function hybridInventoryModule() {
                 stockBefore: stockBefore,
                 stockAfter: stockAfter,
                 reference: 'Orden #' + order.id + ' (' + (order.carrier.split(' ')[0] || 'Inbound') + ')',
-                user: 'Almacén Central (Recepción Inbound)',
-                note: (order.linkedCartId ? ('Recepción de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'Recepción conforme de mercancía en tránsito. ') + 'Valuación CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
+                user: 'AlmacÃ©n Central (RecepciÃ³n Inbound)',
+                note: (order.linkedCartId ? ('RecepciÃ³n de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'RecepciÃ³n conforme de mercancÃ­a en trÃ¡nsito. ') + 'ValuaciÃ³n CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
             });
 
-            // Sincronizar recepción Inbound con backend si la orden tiene persistencia DB
+            // Sincronizar recepciÃ³n Inbound con backend si la orden tiene persistencia DB
             if (order.dbId) {
                 fetch('/api/v1/inventory/purchases/orders/' + order.dbId + '/receive', {
                     method: 'POST',
@@ -3384,7 +3384,7 @@ function hybridInventoryModule() {
             }
 
             this.receiveOrderModalOpen = false;
-            this.showToast('¡' + totalReceived + ' piezas de ' + order.sku + ' ingresadas a almacén exitosamente!', 'success');
+            this.showToast('Â¡' + totalReceived + ' piezas de ' + order.sku + ' ingresadas a almacÃ©n exitosamente!', 'success');
         },
 
         // [P2.2] Generador WhatsApp
@@ -3406,9 +3406,9 @@ function hybridInventoryModule() {
             const lines = [];
             lines.push('*ORDEN DE COMPRA MAYORISTA*');
             lines.push('*Proveedor:* ' + (supplier === 'all' ? 'Consolidado Multimarca' : supplier));
-            lines.push('*Fecha de Emisión:* ' + new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }));
+            lines.push('*Fecha de EmisiÃ³n:* ' + new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }));
             lines.push('*Comprador:* Mi Tienda Online (RevOps Compras)');
-            lines.push('*Destino:* Almacén Central CDMX');
+            lines.push('*Destino:* AlmacÃ©n Central CDMX');
             lines.push('-------------------------------------------');
 
             const filteredOrders = incPlanned ? this.futurePurchaseOrders.filter(o => supplier === 'all' || o.supplier === supplier) : [];
@@ -3423,16 +3423,16 @@ function hybridInventoryModule() {
                     totalUnits += o.qty;
                     totalCost += o.totalCost;
                     lines.push('\n*' + (idx + 1) + '. ' + o.productName + '*');
-                    lines.push('   • SKU: [' + o.sku + ']');
-                    lines.push('   • Cantidad Total: *' + o.qty + ' piezas*');
+                    lines.push('   â€¢ SKU: [' + o.sku + ']');
+                    lines.push('   â€¢ Cantidad Total: *' + o.qty + ' piezas*');
                     if (o.sizes) {
                         const szStr = Object.entries(o.sizes)
                             .filter(([_, v]) => v > 0)
                             .map(([k, v]) => k.toUpperCase() + ': ' + v)
                             .join(' | ');
-                        lines.push('   • Curva de Tallas: [ ' + szStr + ' ]');
+                        lines.push('   â€¢ Curva de Tallas: [ ' + szStr + ' ]');
                     }
-                    lines.push('   • Costo Unitario: ' + this.formatCurrency(o.costUnit) + ' | Subtotal: *' + this.formatCurrency(o.totalCost) + '*');
+                    lines.push('   â€¢ Costo Unitario: ' + this.formatCurrency(o.costUnit) + ' | Subtotal: *' + this.formatCurrency(o.totalCost) + '*');
                 });
                 lines.push('');
             }
@@ -3444,9 +3444,9 @@ function hybridInventoryModule() {
                     totalUnits += r.qty;
                     totalCost += r.totalCost;
                     lines.push('\n*' + (idx + 1) + '. ' + r.productName + '* (Talla: *' + r.size + '*)');
-                    lines.push('   • SKU: [' + r.sku + '] | Cantidad: *' + r.qty + ' ud(s)*');
-                    lines.push('   • Referencia: ' + r.cartLabel + ' (' + r.customerName + ')');
-                    lines.push('   • Subtotal: *' + this.formatCurrency(r.totalCost) + '*');
+                    lines.push('   â€¢ SKU: [' + r.sku + '] | Cantidad: *' + r.qty + ' ud(s)*');
+                    lines.push('   â€¢ Referencia: ' + r.cartLabel + ' (' + r.customerName + ')');
+                    lines.push('   â€¢ Subtotal: *' + this.formatCurrency(r.totalCost) + '*');
                 });
                 lines.push('');
             }
@@ -3454,9 +3454,9 @@ function hybridInventoryModule() {
             lines.push('===========================================');
             lines.push('*RESUMEN TOTAL DE COMPRA:*');
             lines.push('*Total de Piezas:* ' + totalUnits + ' unidades');
-            lines.push('*Inversión Total Estimada:* ' + this.formatCurrency(totalCost));
+            lines.push('*InversiÃ³n Total Estimada:* ' + this.formatCurrency(totalCost));
             lines.push('===========================================');
-            lines.push('*Instrucciones:* Favor de confirmar existencias por talla y enviar cuenta bancaria para liquidación.');
+            lines.push('*Instrucciones:* Favor de confirmar existencias por talla y enviar cuenta bancaria para liquidaciÃ³n.');
 
             return lines.join('\n');
         },
@@ -3466,7 +3466,7 @@ function hybridInventoryModule() {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     this.exportCopiedToast = true;
-                    this.showToast('¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
+                    this.showToast('Â¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
                     setTimeout(() => { this.exportCopiedToast = false; }, 3000);
                 }).catch(() => {
                     this.fallbackCopyText(text);
@@ -3484,11 +3484,11 @@ function hybridInventoryModule() {
             document.execCommand('copy');
             document.body.removeChild(el);
             this.exportCopiedToast = true;
-            this.showToast('¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
+            this.showToast('Â¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
             setTimeout(() => { this.exportCopiedToast = false; }, 3000);
         },
 
-        // Toggle colapso de tarjetas de KPIs (Regla 2 de Diseño UI)
+        // Toggle colapso de tarjetas de KPIs (Regla 2 de DiseÃ±o UI)
         toggleKpis() {
             this.kpisCollapsed = !this.kpisCollapsed;
         },
@@ -3534,7 +3534,7 @@ function hybridInventoryModule() {
         recordOrderDispatch(payload) {
             if (!payload || !payload.items || !Array.isArray(payload.items)) return;
             const orderId = payload.orderId || '#ORD-DESP';
-            const operator = payload.operator || 'Operador Logístico';
+            const operator = payload.operator || 'Operador LogÃ­stico';
             const courier = payload.courier || 'DHL Express';
 
             if (typeof window !== 'undefined') {
@@ -3544,7 +3544,7 @@ function hybridInventoryModule() {
                 }
             }
 
-            // Aliases entre SKUs de tareas Dashboard y catálogo maestro de inventario
+            // Aliases entre SKUs de tareas Dashboard y catÃ¡logo maestro de inventario
             const skuAliases = {
                 'BOX-BAM-001-M': 'BX-MOD-001',
                 'TOR-DRP-002-M': 'JK-ATH-002',
@@ -3588,7 +3588,7 @@ function hybridInventoryModule() {
                         stockAfter: product.localStock,
                         reference: orderId,
                         user: operator,
-                        note: `Despacho de pedido ${orderId} vía ${courier}.${prefNote} Stock comprometido liberado y físico deducido.`
+                        note: `Despacho de pedido ${orderId} vÃ­a ${courier}.${prefNote} Stock comprometido liberado y fÃ­sico deducido.`
                     });
                 } else {
                     this.recordInventoryMovement({
@@ -3601,7 +3601,7 @@ function hybridInventoryModule() {
                         stockAfter: 0,
                         reference: orderId,
                         user: operator,
-                        note: `Despacho de pedido ${orderId} vía ${courier}.${prefNote} Salida registrada sin decremento local.`
+                        note: `Despacho de pedido ${orderId} vÃ­a ${courier}.${prefNote} Salida registrada sin decremento local.`
                     });
                 }
             });
@@ -3611,7 +3611,7 @@ function hybridInventoryModule() {
             }
         },
 
-        // TASK-INT-03: Liberación Masiva de Lotes de Suscripción (Batch Fulfillment en Fecha de Corte)
+        // TASK-INT-03: LiberaciÃ³n Masiva de Lotes de SuscripciÃ³n (Batch Fulfillment en Fecha de Corte)
         recordSubscriptionBatchFulfillment(payload) {
             if (!payload || !payload.batchCode || !payload.componentsDeduction || !Array.isArray(payload.componentsDeduction)) return;
             const batchCode = payload.batchCode;
@@ -3740,10 +3740,10 @@ function hybridInventoryModule() {
         },
 
         // =========================================================================
-        // MÉTODOS DE PRIORIDAD 3: EDICIÓN INLINE & ACCIONES EN LOTE
+        // MÃ‰TODOS DE PRIORIDAD 3: EDICIÃ“N INLINE & ACCIONES EN LOTE
         // =========================================================================
 
-        // [P3.1] Edición Rápida en Línea
+        // [P3.1] EdiciÃ³n RÃ¡pida en LÃ­nea
         startInlineEdit(sku, field, initialValue) {
             this.editingCell = { sku: sku, field: field };
             this.tempEditValue = initialValue;
@@ -3810,7 +3810,7 @@ function hybridInventoryModule() {
 
         exportSelectedToCsv() {
             if (this.selectedSkus.length === 0) {
-                this.showToast('No has seleccionado ningún producto para exportar.', 'warning');
+                this.showToast('No has seleccionado ningÃºn producto para exportar.', 'warning');
                 return;
             }
             const selectedProds = this.products.filter(p => this.selectedSkus.includes(p.sku));
@@ -3845,12 +3845,12 @@ function hybridInventoryModule() {
         },
 
         // =========================================================================
-        // MÉTODOS DE EXPORTACIÓN A MICROSOFT EXCEL (.xlsx / .xls)
+        // MÃ‰TODOS DE EXPORTACIÃ“N A MICROSOFT EXCEL (.xlsx / .xls)
         // =========================================================================
 
         exportSelectedToExcel() {
             if (this.selectedSkus.length === 0) {
-                this.showToast('No has seleccionado ningún producto para exportar.', 'warning');
+                this.showToast('No has seleccionado ningÃºn producto para exportar.', 'warning');
                 return;
             }
             const selectedProds = this.products.filter(p => this.selectedSkus.includes(p.sku));
@@ -3860,9 +3860,9 @@ function hybridInventoryModule() {
             const excelRows = selectedProds.map(p => ({
                 'SKU': p.sku,
                 'Producto': p.name || '',
-                'Categoría': p.category || '',
+                'CategorÃ­a': p.category || '',
                 'Tipo': p.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo',
-                'Stock Físico': p.localStock || 0,
+                'Stock FÃ­sico': p.localStock || 0,
                 'Stock Comprometido': p.committedStock || 0,
                 'Stock Disponible': this.getAvailableStock(p),
                 'Talla CH': (p.sizes && p.sizes.ch) || 0,
@@ -3875,10 +3875,10 @@ function hybridInventoryModule() {
                 'PVP (MXN)': p.pvp || 0,
                 'Margen (%)': this.calculateMarginPercent(p.pvp, p.cost) + '%',
                 'Proveedor': p.provider || p.supplier || 'Torzo B2B',
-                'Ubicación': p.location || 'Rack Principal'
+                'UbicaciÃ³n': p.location || 'Rack Principal'
             }));
 
-            // Si SheetJS (XLSX) está disponible (CDN en index.html)
+            // Si SheetJS (XLSX) estÃ¡ disponible (CDN en index.html)
             if (typeof window !== 'undefined' && window.XLSX) {
                 const ws = window.XLSX.utils.json_to_sheet(excelRows);
                 ws['!cols'] = [
@@ -3888,11 +3888,11 @@ function hybridInventoryModule() {
                     { wch: 18 }, { wch: 12 }, { wch: 12 }, { wch: 22 }, { wch: 18 }
                 ];
                 const wb = window.XLSX.utils.book_new();
-                window.XLSX.utils.book_append_sheet(wb, ws, 'Catálogo Operativo');
+                window.XLSX.utils.book_append_sheet(wb, ws, 'CatÃ¡logo Operativo');
                 window.XLSX.writeFile(wb, fileName + '.xlsx');
             } else {
-                // Fallback XML Spreadsheet para Excel sin requerir librería externa
-                this.downloadExcelHtml(excelRows, 'Catálogo Operativo', fileName + '.xls');
+                // Fallback XML Spreadsheet para Excel sin requerir librerÃ­a externa
+                this.downloadExcelHtml(excelRows, 'CatÃ¡logo Operativo', fileName + '.xls');
             }
 
             this.showToast(selectedProds.length + ' productos exportados a Excel exitosamente.', 'success');
@@ -3904,7 +3904,7 @@ function hybridInventoryModule() {
             const requests = this.customerOnDemandRequests.filter(r => supplierFilter === 'all' || r.supplier === supplierFilter);
 
             if (orders.length === 0 && requests.length === 0) {
-                this.showToast('No hay órdenes ni solicitudes para exportar.', 'warning');
+                this.showToast('No hay Ã³rdenes ni solicitudes para exportar.', 'warning');
                 return;
             }
 
@@ -3932,7 +3932,7 @@ function hybridInventoryModule() {
             const requestsData = requests.map(r => ({
                 'ID Solicitud': r.id,
                 'Cliente': r.customer,
-                'Teléfono': r.phone || '',
+                'TelÃ©fono': r.phone || '',
                 'SKU': r.sku,
                 'Prenda': r.item,
                 'Talla Requerida': r.size,
@@ -3958,11 +3958,11 @@ function hybridInventoryModule() {
                 this.downloadExcelHtml(combinedData, 'Ordenes de Compra', fileName + '.xls');
             }
 
-            this.showToast('Órdenes consolidadas exportadas a Excel exitosamente.', 'success');
+            this.showToast('Ã“rdenes consolidadas exportadas a Excel exitosamente.', 'success');
         },
 
         // =========================================================================
-        // MÉTODOS DE PRIORIDAD 4: ROP / DOH, SCRAPING ALERTS & PARETO ABC
+        // MÃ‰TODOS DE PRIORIDAD 4: ROP / DOH, SCRAPING ALERTS & PARETO ABC
         // =========================================================================
 
         // [P4.1] Motor Predictivo ROP / DOH
@@ -4010,7 +4010,7 @@ function hybridInventoryModule() {
             const xxl = Math.max(0, Math.round(needed * 0.03));
             const xxxl = Math.max(0, needed - (ch + m + g + xl + xxl));
             const cost = product.cost || 120;
-            // Regla de criticidad ROP para asignación de prioridad inicial (editable posteriormente)
+            // Regla de criticidad ROP para asignaciÃ³n de prioridad inicial (editable posteriormente)
             const currentStock = product.stock !== undefined ? product.stock : (product.unitStock || 0);
             const ropThreshold = product.rop || 20;
             let dynamicPriority = 'media';
@@ -4032,7 +4032,7 @@ function hybridInventoryModule() {
                 costUnit: cost,
                 totalCost: needed * cost,
                 priority: dynamicPriority,
-                status: 'Planificada (ROP Automático)',
+                status: 'Planificada (ROP AutomÃ¡tico)',
                 date: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
             };
             this.futurePurchaseOrders.unshift(newOrder);
@@ -4042,16 +4042,16 @@ function hybridInventoryModule() {
         openCreatePOForProduct(product) {
             this.generateROPOrder(product);
             this.activeTab = 'purchases';
-            this.showToast('Redirigiendo a Órdenes de Compra para ' + product.sku, 'info');
+            this.showToast('Redirigiendo a Ã“rdenes de Compra para ' + product.sku, 'info');
         },
 
-        // [P4.2] Métodos del Centro de Scraping Torzo Bot
+        // [P4.2] MÃ©todos del Centro de Scraping Torzo Bot
         triggerScraperQuickCheck() {
             this.isScrapingNow = true;
-            this.showToast('Torzo Bot: Consultando stock y variaciones en catálogo remoto...', 'info');
+            this.showToast('Torzo Bot: Consultando stock y variaciones en catÃ¡logo remoto...', 'info');
             setTimeout(() => {
                 this.isScrapingNow = false;
-                this.lastScrapeTime = 'Recién sincronizado';
+                this.lastScrapeTime = 'ReciÃ©n sincronizado';
                 this.showToast('Scraping completado: 7 mayoristas auditados, 3 alertas vigentes.', 'success');
             }, 1200);
         },
@@ -4089,15 +4089,15 @@ function hybridInventoryModule() {
             alert.resolved = true;
         },
 
-        // [P4.3] Métodos de Filtro Temporal y Análisis ABC (Pareto)
+        // [P4.3] MÃ©todos de Filtro Temporal y AnÃ¡lisis ABC (Pareto)
         setDashboardTimeRange(range) {
             this.dashboardTimeRange = range;
             const labels = {
                 'today': 'Hoy',
-                '7d': 'Últimos 7 Días',
-                '30d': 'Últimos 30 Días',
-                'year': 'Este Año (2026)',
-                'all': 'Histórico Completo'
+                '7d': 'Ãšltimos 7 DÃ­as',
+                '30d': 'Ãšltimos 30 DÃ­as',
+                'year': 'Este AÃ±o (2026)',
+                'all': 'HistÃ³rico Completo'
             };
             this.showToast('Dashboard filtrado para: ' + (labels[range] || range), 'info');
         },
@@ -4122,7 +4122,7 @@ function hybridInventoryModule() {
         filterByAbcFromDashboard(abc) {
             this.abcFilter = abc;
             this.activeTab = 'inventory';
-            this.showToast('Filtrando catálogo por Clase ABC: ' + abc, 'info');
+            this.showToast('Filtrando catÃ¡logo por Clase ABC: ' + abc, 'info');
         },
 
         downloadExcelHtml(rows, sheetName, filename) {
@@ -4197,7 +4197,7 @@ function hybridInventoryModule() {
                 }
             });
             this.bulkCategoryModalOpen = false;
-            this.showToast(count + ' productos reasignados a la categoría ' + targetCat + '.', 'success');
+            this.showToast(count + ' productos reasignados a la categorÃ­a ' + targetCat + '.', 'success');
         },
 
         addSelectedToPurchases() {
@@ -4226,7 +4226,7 @@ function hybridInventoryModule() {
                 }
             });
             this.selectedSkus = [];
-            this.showToast(addedCount + ' lotes añadidos a la Lista de Compras Planificadas.', 'success');
+            this.showToast(addedCount + ' lotes aÃ±adidos a la Lista de Compras Planificadas.', 'success');
         },
 
         init() {
@@ -4302,7 +4302,7 @@ function hybridInventoryModule() {
                     window.addEventListener('open-stock-locks-modal', () => {
                         this.openStockLocksModal();
                     });
-                    // Soporte de impresión formal de Orden de Compra (PO PDF)
+                    // Soporte de impresiÃ³n formal de Orden de Compra (PO PDF)
                     window.addEventListener('beforeprint', () => {
                         const targetInstance = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
                         if (targetInstance && targetInstance.poGeneratorModalOpen) {
@@ -4312,7 +4312,7 @@ function hybridInventoryModule() {
                     window.addEventListener('afterprint', () => {
                         document.body.classList.remove('printing-po-doc');
                     });
-                    // TASK-INT-06: Listeners para telemetría de carritos simultáneos y reservas con TTL
+                    // TASK-INT-06: Listeners para telemetrÃ­a de carritos simultÃ¡neos y reservas con TTL
                     window.addEventListener('stock-lock-acquired', (e) => {
                         if (e && e.detail) {
                             this.handleStockLockAcquired(e.detail);
@@ -4357,7 +4357,7 @@ function hybridInventoryModule() {
                         }
                     });
                 }
-                // TASK-INT-02: Consumir cola de despachos pendientes e históricos si existen
+                // TASK-INT-02: Consumir cola de despachos pendientes e histÃ³ricos si existen
                 if (window.__pendingOrderDispatches && Array.isArray(window.__pendingOrderDispatches)) {
                     while (window.__pendingOrderDispatches.length > 0) {
                         const pendingPayload = window.__pendingOrderDispatches.shift();
@@ -4394,15 +4394,15 @@ function hybridInventoryModule() {
         },
 
         initApparelDefaults() {
-            const fabricList = ['Modal Seamless', 'Algodón Peinado', 'Malla / Mesh Transpirable', 'Elastano / Spandex Fit', 'Microfibra Velvet Touch', 'Bambú Eco Air'];
+            const fabricList = ['Modal Seamless', 'AlgodÃ³n Peinado', 'Malla / Mesh Transpirable', 'Elastano / Spandex Fit', 'Microfibra Velvet Touch', 'BambÃº Eco Air'];
             const colorList = [
                 { name: 'Negro Profundo', hex: '#0f172a', type: 'solid' },
-                { name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid' },
+                { name: 'Blanco Ã“palo', hex: '#f8fafc', type: 'solid' },
                 { name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid' },
                 { name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent' },
                 { name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent' },
                 { name: 'Gris Oxford', hex: '#475569', type: 'solid' },
-                { name: 'Rojo Borgoña', hex: '#881337', type: 'solid' }
+                { name: 'Rojo BorgoÃ±a', hex: '#881337', type: 'solid' }
             ];
             const sectionList = ['basicos', 'disenador', 'temporada', 'general'];
 
@@ -4416,12 +4416,12 @@ function hybridInventoryModule() {
                 }
                 if (p.designType === undefined) p.designType = (idx % 3 === 1) ? 'con_diseno' : 'sin_diseno';
                 if (p.websiteSection === undefined) p.websiteSection = sectionList[idx % sectionList.length];
-                if (p.isPublished === undefined) p.isPublished = idx !== 2; // SKU 3 fuera de catálogo para demostrar
+                if (p.isPublished === undefined) p.isPublished = idx !== 2; // SKU 3 fuera de catÃ¡logo para demostrar
                 if (p.brand === undefined) p.brand = p.type === 'dropship' ? 'Torzo B2B' : (idx % 2 === 0 ? 'ModaIntima Textil MX' : 'Marte RevOps Intimates');
                 if (p.discountPct === undefined) p.discountPct = (idx === 0 || idx === 3) ? 15 : 0;
                 if (p.regularPrice === undefined) p.regularPrice = p.pvp;
                 if (!p.description) {
-                    p.description = `Prenda ergonómica de alta calidad confeccionada con ${p.fabricType}. Diseñada para soporte anatómico óptimo, transpirabilidad duradera y tacto ultrasuave para uso cotidiano.`;
+                    p.description = `Prenda ergonÃ³mica de alta calidad confeccionada con ${p.fabricType}. DiseÃ±ada para soporte anatÃ³mico Ã³ptimo, transpirabilidad duradera y tacto ultrasuave para uso cotidiano.`;
                 }
             });
         },
@@ -4463,7 +4463,7 @@ function hybridInventoryModule() {
             });
         },
 
-        // TASK-INT-01: Métodos de Gestión de Saltos Profundos (Deep Links) Inter-Hub
+        // TASK-INT-01: MÃ©todos de GestiÃ³n de Saltos Profundos (Deep Links) Inter-Hub
         handleDeepLink(options = {}) {
             if (!options) return;
             if (options.tab) {
@@ -4480,7 +4480,7 @@ function hybridInventoryModule() {
             if (options.searchFilter !== undefined && options.searchFilter !== null && options.searchFilter !== '') {
                 this.searchFilter = options.searchFilter;
                 this.deepLinkActive = true;
-                this.deepLinkBannerText = options.bannerMessage || `Filtro activo por búsqueda: "${options.searchFilter}"`;
+                this.deepLinkBannerText = options.bannerMessage || `Filtro activo por bÃºsqueda: "${options.searchFilter}"`;
             }
             if (options.supplierFilter && options.supplierFilter !== 'all') {
                 this.supplierFilter = options.supplierFilter;
@@ -4519,7 +4519,7 @@ function hybridInventoryModule() {
             }
             this.visibleCount = this.pageSize || 8;
             if (typeof showToast === 'function') {
-                showToast('Catálogo completo restablecido sin filtros');
+                showToast('CatÃ¡logo completo restablecido sin filtros');
             }
         },
 
@@ -4613,7 +4613,7 @@ function hybridInventoryModule() {
                     matchesSanitary = !!item.requiresSanitaryControl && this.getDaysUntilExpiration(item.expirationDate) <= 30;
                 }
 
-                // Filtros específicos por columna (Regla 7)
+                // Filtros especÃ­ficos por columna (Regla 7)
                 let matchesCol = true;
                 if (this.colFilters) {
                     if (this.colFilters.sku && this.colFilters.sku.trim() !== '') {
@@ -4728,7 +4728,7 @@ function hybridInventoryModule() {
             }
         },
 
-        // TASK-INV-09: Métodos de Gestión y Renderizado de Tonos de Cosmética
+        // TASK-INV-09: MÃ©todos de GestiÃ³n y Renderizado de Tonos de CosmÃ©tica
         get activeCosmeticShades() {
             return (this.cosmeticShades || []).filter(s => s.is_active);
         },
@@ -4759,8 +4759,8 @@ function hybridInventoryModule() {
         },
 
         getUndertoneLabel(undertone) {
-            if (undertone === 'warm') return 'Cálido';
-            if (undertone === 'cool') return 'Frío';
+            if (undertone === 'warm') return 'CÃ¡lido';
+            if (undertone === 'cool') return 'FrÃ­o';
             return 'Neutro';
         },
 
@@ -4798,7 +4798,7 @@ function hybridInventoryModule() {
         saveCosmeticShade() {
             const form = this.cosmeticShadesModal.form;
             if (!form.code || !form.code.trim() || !form.name || !form.name.trim() || !form.hex_color) {
-                this.showToast('Por favor completa el código, nombre comercial y color hexadecimal.', 'warning');
+                this.showToast('Por favor completa el cÃ³digo, nombre comercial y color hexadecimal.', 'warning');
                 return;
             }
             const cleanCode = form.code.trim();
@@ -4818,7 +4818,7 @@ function hybridInventoryModule() {
             } else {
                 const exists = this.cosmeticShades.some(s => s.code.toLowerCase() === cleanCode.toLowerCase());
                 if (exists) {
-                    this.showToast(`El código de tono ${cleanCode} ya existe. Usa un código único.`, 'warning');
+                    this.showToast(`El cÃ³digo de tono ${cleanCode} ya existe. Usa un cÃ³digo Ãºnico.`, 'warning');
                     return;
                 }
                 const newId = Math.max(0, ...this.cosmeticShades.map(s => s.id)) + 1;
@@ -4832,7 +4832,7 @@ function hybridInventoryModule() {
                     is_active: form.is_active
                 };
                 this.cosmeticShades.push(newShade);
-                this.showToast(`Nuevo tono cosmético ${cleanCode} (${form.name}) registrado exitosamente.`, 'success');
+                this.showToast(`Nuevo tono cosmÃ©tico ${cleanCode} (${form.name}) registrado exitosamente.`, 'success');
             }
             if (typeof window !== 'undefined') {
                 window.cosmeticShadesMaster = this.cosmeticShades;
@@ -4852,7 +4852,7 @@ function hybridInventoryModule() {
             const shade = this.cosmeticShades.find(s => s.id === shadeId);
             if (!shade) return;
             if (this.cosmeticShades.length <= 1) {
-                this.showToast('Debe existir al menos un tono en el catálogo maestro.', 'warning');
+                this.showToast('Debe existir al menos un tono en el catÃ¡logo maestro.', 'warning');
                 return;
             }
             this.cosmeticShades = this.cosmeticShades.filter(s => s.id !== shadeId);
@@ -4864,13 +4864,13 @@ function hybridInventoryModule() {
 
         applyQuickStockAdjustment(item) {
             if (!item.adjustQty || item.adjustQty <= 0) {
-                this.showToast('Ingresa una cantidad válida mayor a 0.', 'info');
+                this.showToast('Ingresa una cantidad vÃ¡lida mayor a 0.', 'info');
                 return;
             }
             const qty = parseInt(item.adjustQty);
             if (item.adjustType === 'add') {
                 item.localStock += qty;
-                this.showToast(`+${qty} uds añadidas a ${item.sku}. Motivo: ${item.adjustReason || 'Entrada regular'}`);
+                this.showToast(`+${qty} uds aÃ±adidas a ${item.sku}. Motivo: ${item.adjustReason || 'Entrada regular'}`);
             } else {
                 if (item.localStock - qty < 0) {
                     this.showToast(`Stock insuficiente: no puedes deducir ${qty} uds de ${item.localStock}.`, 'info');
@@ -4888,7 +4888,7 @@ function hybridInventoryModule() {
 
         rescrapeProduct(item) {
             item.isScraping = true;
-            this.showToast(`Sincronizando con catálogo de Torzo para ${item.sku}...`, 'info');
+            this.showToast(`Sincronizando con catÃ¡logo de Torzo para ${item.sku}...`, 'info');
             setTimeout(() => {
                 item.isScraping = false;
                 const newStock = Math.floor(Math.random() * 40) + 10;
@@ -4900,7 +4900,7 @@ function hybridInventoryModule() {
         },
 
         
-        // --- GESTIÓN DE FUTURAS COMPRAS CON PROVEEDOR ---
+        // --- GESTIÃ“N DE FUTURAS COMPRAS CON PROVEEDOR ---
         purchaseSupplier: 'Torzo B2B',
         purchaseQty: 50,
         purchasePriority: 'alta',
@@ -4980,7 +4980,7 @@ function hybridInventoryModule() {
                 supplier: 'Silk & Cotton Iberia SL',
                 ref: 'NC-SILK-2026-01',
                 amount: 540.00,
-                reason: 'Penalización acordada por demora de 4 días hábiles en recolección de transporte',
+                reason: 'PenalizaciÃ³n acordada por demora de 4 dÃ­as hÃ¡biles en recolecciÃ³n de transporte',
                 date: '02 Sept, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -4988,7 +4988,7 @@ function hybridInventoryModule() {
                 supplier: 'Torzo B2B',
                 ref: 'NC-TORZO-2026-012',
                 amount: 850.00,
-                reason: 'Faltante en muelle rampa Inbound 02 verificado contra remisión #TRZ-889',
+                reason: 'Faltante en muelle rampa Inbound 02 verificado contra remisiÃ³n #TRZ-889',
                 date: '14 Sept, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -4996,7 +4996,7 @@ function hybridInventoryModule() {
                 supplier: 'Torzo B2B',
                 ref: 'NC-TORZO-2026-007',
                 amount: 1420.00,
-                reason: 'Bonificación por volumen trimestral y compensación por merma de tintura en lote anterior',
+                reason: 'BonificaciÃ³n por volumen trimestral y compensaciÃ³n por merma de tintura en lote anterior',
                 date: '28 Ago, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -5004,7 +5004,7 @@ function hybridInventoryModule() {
                 supplier: 'ModaIntima Textil MX',
                 ref: 'NC-MODA-2026-001',
                 amount: 600.00,
-                reason: 'Bonificación comercial acordada por retraso de transporte fletero',
+                reason: 'BonificaciÃ³n comercial acordada por retraso de transporte fletero',
                 date: '10 Sept, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -5024,7 +5024,7 @@ function hybridInventoryModule() {
                 id: 'KDX-PUR-2026-001',
                 timestamp: '05 Sept, 2026 12:45',
                 type: 'PO_EMITIDA',
-                typeLabel: 'Emisión de PO',
+                typeLabel: 'EmisiÃ³n de PO',
                 badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
                 poNumber: 'PO-2026-0041',
                 supplier: 'Torzo B2B',
@@ -5033,7 +5033,7 @@ function hybridInventoryModule() {
                 deltaQty: '+48 uds',
                 totalAmount: 10080.00,
                 user: 'Elena Compras',
-                notes: 'Generación formal de PO enviada a taller con entrega programada en Rampa Central CDMX.'
+                notes: 'GeneraciÃ³n formal de PO enviada a taller con entrega programada en Rampa Central CDMX.'
             },
             {
                 id: 'KDX-PUR-2026-002',
@@ -5069,7 +5069,7 @@ function hybridInventoryModule() {
                 id: 'KDX-PUR-2026-004',
                 timestamp: '04 Sept, 2026 14:00',
                 type: 'RECEPCION_RAMPA',
-                typeLabel: 'Recepción en Rampa',
+                typeLabel: 'RecepciÃ³n en Rampa',
                 badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
                 poNumber: 'PO-2026-0038',
                 supplier: 'Torzo B2B',
@@ -5077,17 +5077,17 @@ function hybridInventoryModule() {
                 productName: 'Jockstrap Athletic Carbon Edition',
                 deltaQty: '+28 uds ingresadas',
                 totalAmount: 3245.00,
-                user: 'Carlos Almacén',
-                notes: 'Ingreso físico a rack A-02 conforme conteo ciego validado.'
+                user: 'Carlos AlmacÃ©n',
+                notes: 'Ingreso fÃ­sico a rack A-02 conforme conteo ciego validado.'
             }
         ],
 
-        // [P2.1] Colección reactiva de Órdenes de Compra Activas (En Tránsito y Almacén)
+        // [P2.1] ColecciÃ³n reactiva de Ã“rdenes de Compra Activas (En TrÃ¡nsito y AlmacÃ©n)
         activePurchaseOrders: [
             {
                 id: 'OC-2026-085',
                 supplier: 'Torzo B2B',
-                carrier: 'FedEx Express (Guía #FX-882910-MX)',
+                carrier: 'FedEx Express (GuÃ­a #FX-882910-MX)',
                 eta: 'Hoy / En Reparto',
                 sku: 'JK-ATH-002',
                 productName: 'Jockstrap Athletic Carbon Edition',
@@ -5103,7 +5103,7 @@ function hybridInventoryModule() {
             {
                 id: 'OC-2026-088',
                 supplier: 'Torzo B2B',
-                carrier: 'DHL Express (Guía #DHL-994012-MX)',
+                carrier: 'DHL Express (GuÃ­a #DHL-994012-MX)',
                 eta: 'Arribo en Sucursal',
                 sku: 'TOR-DRP-003',
                 productName: 'Torzo Mesh Breathable Trunk',
@@ -5114,13 +5114,13 @@ function hybridInventoryModule() {
                 date: '04 Sept, 2026',
                 status: 'En Camino',
                 linkedCartId: '#ORD-4491',
-                linkedCustomer: 'Sofía Albarrán'
+                linkedCustomer: 'SofÃ­a AlbarrÃ¡n'
             },
             {
                 id: 'OC-2026-089',
                 supplier: 'Torzo B2B',
-                carrier: 'Estafeta Terrestre (Guía #EST-440192-MX)',
-                eta: '3 - 5 días hábiles',
+                carrier: 'Estafeta Terrestre (GuÃ­a #EST-440192-MX)',
+                eta: '3 - 5 dÃ­as hÃ¡biles',
                 sku: 'TOR-DRP-006',
                 productName: 'Boxer Mesh Breathable UltraVent',
                 qty: 45,
@@ -5128,32 +5128,32 @@ function hybridInventoryModule() {
                 unitCost: 115.00,
                 totalCost: 5175.00,
                 date: '05 Sept, 2026',
-                status: 'Pendiente Confirmación',
+                status: 'Pendiente ConfirmaciÃ³n',
                 linkedCartId: null,
                 linkedCustomer: null
             }
         ],
 
-        // [P2.1] Estado para Modal de Recepción Inbound
+        // [P2.1] Estado para Modal de RecepciÃ³n Inbound
         receiveOrderModalOpen: false,
         receivingOrder: null,
         receivingSizes: { ch: 0, m: 0, g: 0, xl: 0, '2xl': 0, '3xl': 0 },
-        receivingNotes: 'Cotejo físico conforme. Empaque sellado de origen.',
+        receivingNotes: 'Cotejo fÃ­sico conforme. Empaque sellado de origen.',
         mixedCartLiberated: { show: false, orderId: '', customer: '', item: '', date: '' },
 
-        // [P2.2] Estado para Generador de Órdenes WhatsApp
+        // [P2.2] Estado para Generador de Ã“rdenes WhatsApp
         orderExportModalOpen: false,
         exportSupplierFilter: 'Torzo B2B',
         exportIncludeOnDemand: true,
         exportIncludePlanned: true,
         exportCopiedToast: false,
 
-        // [P2.3] Estado para Kardex & Auditoría Multicanal
+        // [P2.3] Estado para Kardex & AuditorÃ­a Multicanal
         kardexDrawerOpen: false,
         kardexSearch: '',
         kardexFilterType: 'all',
 
-        // [P3.1] Estado para Edición Rápida en Línea (Inline Quick Edit)
+        // [P3.1] Estado para EdiciÃ³n RÃ¡pida en LÃ­nea (Inline Quick Edit)
         editingCell: { sku: null, field: null },
         tempEditValue: null,
         savedCellFeedback: { sku: null, field: null },
@@ -5202,7 +5202,7 @@ function hybridInventoryModule() {
         drawerPaoMonths: 12,
         drawerRequiresSanitaryControl: false,
 
-        // Centro de Auditoría Operativa & Discrepancias B2B (Propuesta 1)
+        // Centro de AuditorÃ­a Operativa & Discrepancias B2B (Propuesta 1)
         isScrapingNow: false,
         scrapingAlerts: [
             {
@@ -5304,20 +5304,20 @@ function hybridInventoryModule() {
                 stockAfter: 284,
                 reference: 'Pedido Mixto #ORD-4491',
                 user: 'Checkout Web',
-                note: 'Prenda física apartada en rack esperando mercancía de Torzo'
+                note: 'Prenda fÃ­sica apartada en rack esperando mercancÃ­a de Torzo'
             },
             {
                 id: 'MOV-2026-099',
                 timestamp: '05 Sept 2026, 17:40',
                 type: 'ENTRADA_COMPRA',
                 sku: 'BX-COT-007',
-                productName: 'Trunk Algodón Orgánico Pack x3',
+                productName: 'Trunk AlgodÃ³n OrgÃ¡nico Pack x3',
                 sizes: { ch: 5, m: 15, g: 15, xl: 5 },
                 delta: 40,
                 stockBefore: 95,
                 stockAfter: 135,
                 reference: 'Orden Compra #OC-2026-079 (DHL)',
-                user: 'Carlos M. (Almacén Central)',
+                user: 'Carlos M. (AlmacÃ©n Central)',
                 note: 'Ingreso por reabastecimiento programado de temporada'
             },
             {
@@ -5332,14 +5332,14 @@ function hybridInventoryModule() {
                 stockAfter: 42,
                 reference: 'TKT-MER-014',
                 user: 'Control de Calidad',
-                note: 'Descostura en elástico reportada en inspección previa a empaque'
+                note: 'Descostura en elÃ¡stico reportada en inspecciÃ³n previa a empaque'
             },
             {
                 id: 'MOV-2026-097',
                 timestamp: '05 Sept 2026, 11:25',
                 type: 'VENTA_DIRECTA',
                 sku: 'TG-SLK-004',
-                productName: 'Tanga Clásica Hilos de Seda',
+                productName: 'Tanga ClÃ¡sica Hilos de Seda',
                 sizes: { ch: 1, m: 2 },
                 delta: -3,
                 stockBefore: 61,
@@ -5359,8 +5359,8 @@ function hybridInventoryModule() {
                 stockBefore: 110,
                 stockAfter: 112,
                 reference: 'AUD-INV-SEMANAL',
-                user: 'Supervisor de Almacén',
-                note: 'Ajuste positivo por conteo físico en gaveta B-04'
+                user: 'Supervisor de AlmacÃ©n',
+                note: 'Ajuste positivo por conteo fÃ­sico en gaveta B-04'
             },
             {
                 id: 'MOV-2026-095',
@@ -5372,8 +5372,8 @@ function hybridInventoryModule() {
                 delta: -3,
                 stockBefore: 38,
                 stockAfter: 35,
-                reference: 'Guía DHL #981273-MX',
-                user: 'Logística Outbound',
+                reference: 'GuÃ­a DHL #981273-MX',
+                user: 'LogÃ­stica Outbound',
                 note: 'Despacho expedido hacia Guadalajara'
             },
             {
@@ -5387,8 +5387,8 @@ function hybridInventoryModule() {
                 stockBefore: 50,
                 stockAfter: 75,
                 reference: 'Orden Compra #OC-2026-074',
-                user: 'Carlos M. (Almacén Central)',
-                note: 'Recepción conforme de pedido a Balam Textil'
+                user: 'Carlos M. (AlmacÃ©n Central)',
+                note: 'RecepciÃ³n conforme de pedido a Balam Textil'
             }
         ],
 
@@ -5401,7 +5401,7 @@ function hybridInventoryModule() {
                 cartType: 'solicitud_pedido',
                 cartLabel: 'Carrito Solicitud Directa',
                 sku: 'BX-DEP-009',
-                productName: 'Bóxer Deportivo Seamless Dry',
+                productName: 'BÃ³xer Deportivo Seamless Dry',
                 size: 'G',
                 qty: 2,
                 supplier: 'Torzo B2B',
@@ -5414,10 +5414,10 @@ function hybridInventoryModule() {
             },
             {
                 id: 'REQ-2026-082',
-                customerName: 'Sofía Albarrán',
+                customerName: 'SofÃ­a AlbarrÃ¡n',
                 customerPhone: '+52 33 9876 5432',
                 cartType: 'mixto_linea_proveedor',
-                cartLabel: 'Carrito Mixto #ORD-4491 (Línea On-Demand)',
+                cartLabel: 'Carrito Mixto #ORD-4491 (LÃ­nea On-Demand)',
                 sku: 'TOR-DRP-003',
                 productName: 'Torzo Mesh Breathable Trunk',
                 size: 'M',
@@ -5475,7 +5475,7 @@ function hybridInventoryModule() {
         },
 
         // ====================================================================
-        // TASK-INT-06: GESTOR DE CARRITOS SIMULTÁNEOS Y RESERVA TEMPORAL (TTL)
+        // TASK-INT-06: GESTOR DE CARRITOS SIMULTÃNEOS Y RESERVA TEMPORAL (TTL)
         // ====================================================================
         get activeStockLocks() {
             const now = Date.now();
@@ -5594,7 +5594,7 @@ function hybridInventoryModule() {
                 .reduce((sum, lock) => sum + (lock.quantity || 0), 0);
         },
 
-        // Motor de Stock de 3 Estados (Fórmula Tripartita: Físico - Comprometido - Bloqueado en Carrito = Disponible)
+        // Motor de Stock de 3 Estados (FÃ³rmula Tripartita: FÃ­sico - Comprometido - Bloqueado en Carrito = Disponible)
         getAvailableStock(product) {
             if (!product) return 0;
             const physical = product.localStock || 0;
@@ -5658,10 +5658,10 @@ function hybridInventoryModule() {
             this.hasAddedPurchaseThisSession = true;
             this.purchaseAddedSuccess = true;
             setTimeout(() => { this.purchaseAddedSuccess = false; }, 4000);
-            this.showToast(qty + ' uds (' + this.selectedProduct.sku + ') añadidas con desglose por tallas a compras.', 'success');
+            this.showToast(qty + ' uds (' + this.selectedProduct.sku + ') aÃ±adidas con desglose por tallas a compras.', 'success');
         },
 
-        // [TASK-INV-16] Métodos reactivos de la bandeja de Compras, PO y Kardex
+        // [TASK-INV-16] MÃ©todos reactivos de la bandeja de Compras, PO y Kardex
         updatePlannedOrderQty(orderId, newQty) {
             const order = this.futurePurchaseOrders.find(o => o.id === orderId);
             if (!order) return;
@@ -5699,7 +5699,7 @@ function hybridInventoryModule() {
                 user: 'Elena Compras',
                 notes: 'Cantidad modificada en compras planificadas. Subtotal recalculado a $' + order.totalCost.toFixed(2) + ' MXN.'
             });
-            this.showToast('Lote ' + order.id + ' actualizado a ' + qty + ' uds. Inversión recalculada.', 'info');
+            this.showToast('Lote ' + order.id + ' actualizado a ' + qty + ' uds. InversiÃ³n recalculada.', 'info');
         },
 
         updatePlannedOrderSize(orderId, sizeKey, val) {
@@ -5757,7 +5757,7 @@ function hybridInventoryModule() {
                 user: 'Elena Compras',
                 notes: 'Costo unitario pactado con fabricante actualizado a $' + cost.toFixed(2) + ' MXN. Subtotal recalculado a $' + order.totalCost.toFixed(2) + ' MXN.'
             });
-            this.showToast('Costo de ' + order.id + ' actualizado a $' + cost.toFixed(2) + ' MXN. Inversión recalculada.', 'info');
+            this.showToast('Costo de ' + order.id + ' actualizado a $' + cost.toFixed(2) + ' MXN. InversiÃ³n recalculada.', 'info');
         },
 
         updatePlannedOrderPriority(orderId, newPriority) {
@@ -5783,11 +5783,11 @@ function hybridInventoryModule() {
             const poNumber = po ? po.poNumber : 'PO-OFICIAL';
             const el = document.getElementById('printablePurchaseOrderDoc');
 
-            // 1. Añadir clase de respaldo en el body principal
+            // 1. AÃ±adir clase de respaldo en el body principal
             document.body.classList.add('printing-po-doc');
 
-            // 2. Método Principal: Impresión vía iFrame Aislado
-            // Desacopla 100% el documento de la jerarquía de modales, flexbox, overflow y transforms GPU de Chromium
+            // 2. MÃ©todo Principal: ImpresiÃ³n vÃ­a iFrame Aislado
+            // Desacopla 100% el documento de la jerarquÃ­a de modales, flexbox, overflow y transforms GPU de Chromium
             if (typeof document !== 'undefined' && el) {
                 try {
                     let printFrame = document.getElementById('poPrintFrame');
@@ -5868,7 +5868,7 @@ function hybridInventoryModule() {
                             printFrame.contentWindow.focus();
                             printFrame.contentWindow.print();
                         } catch (err) {
-                            console.warn('Fallo impresión iframe, recurriendo a window.print()', err);
+                            console.warn('Fallo impresiÃ³n iframe, recurriendo a window.print()', err);
                             if (typeof window !== 'undefined' && window.print) {
                                 window.print();
                             }
@@ -5987,9 +5987,9 @@ function hybridInventoryModule() {
                     map[sup] = {
                         supplier: sup,
                         providerData: prov || null,
-                        leadTime: prov ? (prov.leadTimeDays + ' días') : '4.2 días',
-                        contact: prov ? (prov.contactName + ' (' + prov.phone + ')') : 'Vía Portal B2B',
-                        paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'Crédito 60 días' : (prov.paymentTerms === 'credito_30' ? 'Crédito 30 días' : 'Crédito 15 días')) : 'Crédito 30 días',
+                        leadTime: prov ? (prov.leadTimeDays + ' dÃ­as') : '4.2 dÃ­as',
+                        contact: prov ? (prov.contactName + ' (' + prov.phone + ')') : 'VÃ­a Portal B2B',
+                        paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'CrÃ©dito 60 dÃ­as' : (prov.paymentTerms === 'credito_30' ? 'CrÃ©dito 30 dÃ­as' : 'CrÃ©dito 15 dÃ­as')) : 'CrÃ©dito 30 dÃ­as',
                         moqTarget: moqTarget,
                         totalQty: 0,
                         totalCost: 0,
@@ -6061,9 +6061,9 @@ function hybridInventoryModule() {
             }
             this.recalculatePoTotals();
             if (po.hasCreditDeduction) {
-                this.showToast('Compensación por nota de crédito activada.', 'info');
+                this.showToast('CompensaciÃ³n por nota de crÃ©dito activada.', 'info');
             } else {
-                this.showToast('Compensación desactivada.', 'info');
+                this.showToast('CompensaciÃ³n desactivada.', 'info');
             }
         },
 
@@ -6085,11 +6085,11 @@ function hybridInventoryModule() {
             if (!po) return;
 
             if (!selectedRef || selectedRef === '') {
-                // Deseleccionó compensación
+                // DeseleccionÃ³ compensaciÃ³n
                 po.hasCreditDeduction = false;
                 po.deductionAmount = 0;
                 this.recalculatePoTotals();
-                this.showToast('Compensación por acuerdo desactivada.', 'info');
+                this.showToast('CompensaciÃ³n por acuerdo desactivada.', 'info');
                 return;
             }
 
@@ -6188,7 +6188,7 @@ function hybridInventoryModule() {
             }
 
             if (items.length === 0) {
-                this.showToast('No hay artículos planificados para este proveedor.', 'warning');
+                this.showToast('No hay artÃ­culos planificados para este proveedor.', 'warning');
                 return;
             }
 
@@ -6199,7 +6199,7 @@ function hybridInventoryModule() {
             const total = Math.round((subtotal + iva) * 100) / 100;
             const poNumber = 'PO-2026-' + String(Math.floor(1000 + Math.random() * 9000));
 
-            // Detección automática de acuerdo de nota de crédito pendiente para el proveedor
+            // DetecciÃ³n automÃ¡tica de acuerdo de nota de crÃ©dito pendiente para el proveedor
             const pendingList = (target.pendingCreditAgreements || this.pendingCreditAgreements || []);
             const autoAgreement = pendingList.find(a => (targetSupplier === 'Consolidado Multimarca' || a.supplier === targetSupplier) && a.status === 'Pendiente de Aplicar');
 
@@ -6211,9 +6211,9 @@ function hybridInventoryModule() {
                 contactName: prov ? prov.contactName : 'Ejecutivo de Cuenta B2B',
                 contactPhone: prov ? prov.phone : '+52 55 5555 0100',
                 contactEmail: prov ? prov.email : 'pedidos@proveedor.com',
-                paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'Crédito 60 días' : (prov.paymentTerms === 'credito_30' ? 'Crédito 30 días' : 'Crédito Comercial 15 días')) : 'Crédito Comercial 30 días',
-                deliveryDock: 'Rampa Central Almacén CDMX - Bahía Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
-                deliveryCommitmentDate: '5 días hábiles posteriores a recepción de orden',
+                paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'CrÃ©dito 60 dÃ­as' : (prov.paymentTerms === 'credito_30' ? 'CrÃ©dito 30 dÃ­as' : 'CrÃ©dito Comercial 15 dÃ­as')) : 'CrÃ©dito Comercial 30 dÃ­as',
+                deliveryDock: 'Rampa Central AlmacÃ©n CDMX - BahÃ­a Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
+                deliveryCommitmentDate: '5 dÃ­as hÃ¡biles posteriores a recepciÃ³n de orden',
                 items: items.map(it => ({
                     id: it.id,
                     sku: it.sku,
@@ -6235,8 +6235,8 @@ function hybridInventoryModule() {
                 subtotal: subtotal,
                 iva: iva,
                 total: total,
-                buyerAgent: 'Elena Compras (Coordinación de Abastecimiento RevOps)',
-                notes: 'Favor de confirmar recepción, remitir factura comercial y número de guía fletera a compras@mitienda.com.',
+                buyerAgent: 'Elena Compras (CoordinaciÃ³n de Abastecimiento RevOps)',
+                notes: 'Favor de confirmar recepciÃ³n, remitir factura comercial y nÃºmero de guÃ­a fletera a compras@mitienda.com.',
                 isIssued: false
             };
 
@@ -6257,14 +6257,14 @@ function hybridInventoryModule() {
             const po = target.currentPoData || this.currentPoData;
             if (!po) return;
 
-            const supplierName = po.supplier || 'Taller Confección';
+            const supplierName = po.supplier || 'Taller ConfecciÃ³n';
             const contactEmail = po.contactEmail || 'pedidos@proveedor.com';
             const subject = `[ORDEN DE COMPRA] ${po.poNumber} - Mi Tienda Online / ${supplierName}`;
             let deductionText = '';
             if (po.hasCreditDeduction && po.deductionAmount > 0) {
-                deductionText = `\n\n* COMPENSACIÓN POR NOTA DE CRÉDITO / DISCREPANCIA:\nSe aplicó deducción de $${po.deductionAmount.toFixed(2)} MXN amparada bajo el acuerdo ${po.creditNoteRef} (${po.creditNoteReason}).\nImporte Bruto Partidas: $${(po.grossSubtotal || po.subtotal).toFixed(2)} MXN | Subtotal Neto Liquidable: $${po.subtotal.toFixed(2)} MXN + IVA.\n`;
+                deductionText = `\n\n* COMPENSACIÃ“N POR NOTA DE CRÃ‰DITO / DISCREPANCIA:\nSe aplicÃ³ deducciÃ³n de $${po.deductionAmount.toFixed(2)} MXN amparada bajo el acuerdo ${po.creditNoteRef} (${po.creditNoteReason}).\nImporte Bruto Partidas: $${(po.grossSubtotal || po.subtotal).toFixed(2)} MXN | Subtotal Neto Liquidable: $${po.subtotal.toFixed(2)} MXN + IVA.\n`;
             }
-            const body = `Estimado equipo de ${supplierName},\n\nAdjunto a este correo encontrarán la Orden de Compra formal con folio ${po.poNumber} por un total de ${po.totalPieces} piezas ($${(po.total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN).${deductionText}\nFavor de acusar recibo de este documento, confirmar la fecha estimada de entrega en nuestro muelle de recepción e indicar el número de guía de la fletera asignada una vez despachado el embarque.\n\nCondiciones de Pago: ${po.paymentTerms || 'Crédito Comercial 30 días'}\nMuelle de Recepción: Rampa Central Almacén CDMX - Bahía Inbound 02 (Av. Insurgentes Sur #1898, CDMX)\n\nQuedamos a su disposición para cualquier aclaración técnica o logística.\n\nAtentamente,\n${po.buyerAgent || 'Elena Compras'}\nCoordinación de Abastecimiento RevOps\nMi Tienda Online S.A. de C.V.`;
+            const body = `Estimado equipo de ${supplierName},\n\nAdjunto a este correo encontrarÃ¡n la Orden de Compra formal con folio ${po.poNumber} por un total de ${po.totalPieces} piezas ($${(po.total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN).${deductionText}\nFavor de acusar recibo de este documento, confirmar la fecha estimada de entrega en nuestro muelle de recepciÃ³n e indicar el nÃºmero de guÃ­a de la fletera asignada una vez despachado el embarque.\n\nCondiciones de Pago: ${po.paymentTerms || 'CrÃ©dito Comercial 30 dÃ­as'}\nMuelle de RecepciÃ³n: Rampa Central AlmacÃ©n CDMX - BahÃ­a Inbound 02 (Av. Insurgentes Sur #1898, CDMX)\n\nQuedamos a su disposiciÃ³n para cualquier aclaraciÃ³n tÃ©cnica o logÃ­stica.\n\nAtentamente,\n${po.buyerAgent || 'Elena Compras'}\nCoordinaciÃ³n de Abastecimiento RevOps\nMi Tienda Online S.A. de C.V.`;
 
             const dispatchData = {
                 poNumber: po.poNumber,
@@ -6298,7 +6298,7 @@ function hybridInventoryModule() {
 
             const recipient = emailData ? emailData.to : po.contactEmail;
 
-            // 1. Snapshot inmutable completo de la PO emitida para guardado y reimpresión
+            // 1. Snapshot inmutable completo de la PO emitida para guardado y reimpresiÃ³n
             const poSnapshot = {
                 ...po,
                 isIssued: true,
@@ -6311,10 +6311,10 @@ function hybridInventoryModule() {
                 id: po.poNumber.replace('PO-', 'OC-'),
                 poNumber: po.poNumber,
                 supplier: po.supplier,
-                carrier: 'Transportista B2B (Asignación en curso)',
+                carrier: 'Transportista B2B (AsignaciÃ³n en curso)',
                 eta: po.deliveryCommitmentDate,
                 sku: po.items && po.items.length > 0 ? po.items.map(i => i.sku).join(', ') : 'VARIOS',
-                productName: po.items && po.items.length === 1 ? po.items[0].productName : ((po.items && po.items[0] ? po.items[0].productName : 'Lote Confección') + ' (+' + (po.items.length - 1) + ' adicionales)'),
+                productName: po.items && po.items.length === 1 ? po.items[0].productName : ((po.items && po.items[0] ? po.items[0].productName : 'Lote ConfecciÃ³n') + ' (+' + (po.items.length - 1) + ' adicionales)'),
                 qty: po.totalPieces,
                 sizes: po.items && po.items[0] && po.items[0].sizes ? { ...po.items[0].sizes } : { ch: 0, m: 0, g: 0, xl: 0 },
                 unitCost: po.items && po.items[0] ? po.items[0].costUnit : 0,
@@ -6391,7 +6391,7 @@ function hybridInventoryModule() {
                 console.warn('Nota: Persistencia de PO completada en modo offline/cache:', err);
             });
 
-            // 3. Si se aplicó una nota de crédito, marcar el acuerdo como aplicado
+            // 3. Si se aplicÃ³ una nota de crÃ©dito, marcar el acuerdo como aplicado
             if (po.hasCreditDeduction && po.creditNoteRef) {
                 const agreements = (target.pendingCreditAgreements || this.pendingCreditAgreements || []);
                 const appliedAgr = agreements.find(a => a.ref === po.creditNoteRef);
@@ -6400,39 +6400,39 @@ function hybridInventoryModule() {
                 }
             }
 
-            // 4. Descontar los ítems planificados convertidos
+            // 4. Descontar los Ã­tems planificados convertidos
             const itemIds = (po.items || []).map(i => i.id);
             if (target.futurePurchaseOrders) {
                 target.futurePurchaseOrders = target.futurePurchaseOrders.filter(o => !itemIds.includes(o.id));
             }
             this.futurePurchaseOrders = this.futurePurchaseOrders.filter(o => !itemIds.includes(o.id));
 
-            // 5. Registrar en Kardex de Auditoría de Compras
+            // 5. Registrar en Kardex de AuditorÃ­a de Compras
             target.logPurchaseKardex({
                 type: 'PO_EMITIDA',
-                typeLabel: 'Emisión & Envío PO',
+                typeLabel: 'EmisiÃ³n & EnvÃ­o PO',
                 badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
                 poNumber: po.poNumber,
                 supplier: po.supplier,
                 sku: po.items && po.items[0] ? po.items[0].sku : 'LOTE-VARIOS',
                 productName: 'Orden Oficial ' + po.poNumber + ' (' + po.items.length + ' partidas, ' + po.totalPieces + ' uds)',
-                deltaQty: '+' + po.totalPieces + ' uds (Tránsito)',
+                deltaQty: '+' + po.totalPieces + ' uds (TrÃ¡nsito)',
                 totalAmount: po.total,
                 user: 'Elena Compras',
-                notes: 'PO emitida formalmente y enviada a ' + recipient + ' con snapshot inmutable guardado.' + (po.deductionAmount > 0 ? (' Deducción de $' + po.deductionAmount.toFixed(2) + ' MXN amparada bajo acuerdo ' + po.creditNoteRef + '.') : '')
+                notes: 'PO emitida formalmente y enviada a ' + recipient + ' con snapshot inmutable guardado.' + (po.deductionAmount > 0 ? (' DeducciÃ³n de $' + po.deductionAmount.toFixed(2) + ' MXN amparada bajo acuerdo ' + po.creditNoteRef + '.') : '')
             });
 
-            // 5. Sincronización con Finanzas (TASK-INT-23)
+            // 5. SincronizaciÃ³n con Finanzas (TASK-INT-23)
             if (typeof window.syncPoWithFinanceState === 'function') {
                 window.syncPoWithFinanceState(po);
             }
 
-            // 5.2 Sincronización y Notificación Reactiva al Extranet del Proveedor (TASK-HUB-VND / TASK-PUR-04)
+            // 5.2 SincronizaciÃ³n y NotificaciÃ³n Reactiva al Extranet del Proveedor (TASK-HUB-VND / TASK-PUR-04)
             if (typeof window !== 'undefined' && typeof window.notifyVendorExtranetNewPo === 'function') {
                 window.notifyVendorExtranetNewPo(po);
             }
 
-            // 6. Cerrar modales y enfocar vista de Órdenes Emitidas
+            // 6. Cerrar modales y enfocar vista de Ã“rdenes Emitidas
             target.emailDispatchModalOpen = false;
             this.emailDispatchModalOpen = false;
             target.poGeneratorModalOpen = false;
@@ -6452,7 +6452,7 @@ function hybridInventoryModule() {
             const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
             if (!order) return;
 
-            // Si la orden ya cuenta con su snapshot original emitido, lo recuperamos íntegro
+            // Si la orden ya cuenta con su snapshot original emitido, lo recuperamos Ã­ntegro
             if (order.poSnapshot) {
                 const snapshot = {
                     ...order.poSnapshot,
@@ -6480,9 +6480,9 @@ function hybridInventoryModule() {
                 contactName: prov ? prov.contactName : 'Gerencia Comercial B2B',
                 contactPhone: prov ? prov.phone : '+52 55 5555 0100',
                 contactEmail: prov ? prov.email : 'pedidos@' + order.supplier.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com',
-                paymentTerms: 'Crédito Comercial 30 días contra entrega',
-                deliveryDock: 'Rampa Central Almacén CDMX - Bahía Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
-                deliveryCommitmentDate: order.eta || '3 a 5 días hábiles',
+                paymentTerms: 'CrÃ©dito Comercial 30 dÃ­as contra entrega',
+                deliveryDock: 'Rampa Central AlmacÃ©n CDMX - BahÃ­a Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
+                deliveryCommitmentDate: order.eta || '3 a 5 dÃ­as hÃ¡biles',
                 items: [{
                     id: order.id + '-item',
                     sku: order.sku || 'SKU-INB',
@@ -6496,7 +6496,7 @@ function hybridInventoryModule() {
                 subtotal: sub,
                 iva: iva,
                 total: total,
-                buyerAgent: 'Elena Compras (Coordinación de Abastecimiento RevOps)',
+                buyerAgent: 'Elena Compras (CoordinaciÃ³n de Abastecimiento RevOps)',
                 notes: 'Expediente oficial de orden emitida. Flete asignado: ' + (order.carrier || 'Flete Terrestre') + '.',
                 isIssued: true
             };
@@ -6514,7 +6514,7 @@ function hybridInventoryModule() {
             if (found) {
                 this.viewPoPdfFromActiveOrder(found);
             } else {
-                this.showToast('No se encontró el expediente de la orden ' + poNumber, 'warning');
+                this.showToast('No se encontrÃ³ el expediente de la orden ' + poNumber, 'warning');
             }
         },
 
@@ -6531,9 +6531,9 @@ function hybridInventoryModule() {
         copyTrackingNumber(text) {
             if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text);
-                this.showToast('Número de guía ' + text + ' copiado al portapapeles.', 'success');
+                this.showToast('NÃºmero de guÃ­a ' + text + ' copiado al portapapeles.', 'success');
             } else {
-                this.showToast('Guía: ' + text, 'info');
+                this.showToast('GuÃ­a: ' + text, 'info');
             }
         },
 
@@ -6597,7 +6597,7 @@ function hybridInventoryModule() {
 
         openOnDemandRejectModal(req) {
             this.selectedOnDemandReq = req;
-            this.onDemandRejectReason = 'Agotado en taller de confección sin fecha de resurtido';
+            this.onDemandRejectReason = 'Agotado en taller de confecciÃ³n sin fecha de resurtido';
             this.onDemandRejectModalOpen = true;
         },
 
@@ -6617,11 +6617,11 @@ function hybridInventoryModule() {
                 deltaQty: '0 uds',
                 totalAmount: 0,
                 user: 'Elena Compras',
-                notes: 'Mercancía agotada en fabricante. Notificación enviada a Atención a Clientes (Hub 3): "' + this.onDemandRejectReason + '".'
+                notes: 'MercancÃ­a agotada en fabricante. NotificaciÃ³n enviada a AtenciÃ³n a Clientes (Hub 3): "' + this.onDemandRejectReason + '".'
             });
 
             this.onDemandRejectModalOpen = false;
-            this.showToast('Solicitud ' + req.id + ' marcada como Agotada. Ticket de sustitución despachado a Hub 3.', 'warning');
+            this.showToast('Solicitud ' + req.id + ' marcada como Agotada. Ticket de sustituciÃ³n despachado a Hub 3.', 'warning');
         },
 
         verifyRequestWithSupplier(req) {
@@ -6631,14 +6631,14 @@ function hybridInventoryModule() {
 
         sendPaymentLinkToCustomer(req) {
             req.paymentSent = true;
-            this.showToast('Enlace de pago y confirmación enviado a ' + req.customerName + ' (' + req.customerPhone + ') vía WhatsApp.', 'success');
+            this.showToast('Enlace de pago y confirmaciÃ³n enviado a ' + req.customerName + ' (' + req.customerPhone + ') vÃ­a WhatsApp.', 'success');
         },
 
         convertRequestToPurchaseOrder(req) {
             this.resolveOnDemandToPlanned(req);
         },
 
-        // Kardex de Auditoría de Compras (TASK-INV-16)
+        // Kardex de AuditorÃ­a de Compras (TASK-INV-16)
         logPurchaseKardex(event) {
             const newEntry = {
                 id: 'KDX-PUR-2026-' + String(this.purchaseKardexLog.length + 1).padStart(3, '0'),
@@ -6689,13 +6689,13 @@ function hybridInventoryModule() {
                 prod.isPublished = !prod.isPublished;
                 const msg = prod.isPublished 
                     ? `SKU ${sku} publicado en vitrina web activa.`
-                    : `SKU ${sku} retirado del catálogo público (fuera de catálogo).`;
+                    : `SKU ${sku} retirado del catÃ¡logo pÃºblico (fuera de catÃ¡logo).`;
                 this.showToast(msg, prod.isPublished ? 'success' : 'info');
             }
         },
 
         // =========================================================================
-        // TASK-INV-11: GESTIÓN INTEGRAL DE TELAS, COLORES, SLOTTING Y REGLAS ROP
+        // TASK-INV-11: GESTIÃ“N INTEGRAL DE TELAS, COLORES, SLOTTING Y REGLAS ROP
         // =========================================================================
 
         // --- TELAS & FIBRAS ---
@@ -6711,7 +6711,7 @@ function hybridInventoryModule() {
                 description: this.newFabricForm.description.trim() || 'Fibra textil para indumentaria',
                 is_active: true
             });
-            this.showToast(`Tela "${this.newFabricForm.name.trim()}" registrada con éxito.`, 'success');
+            this.showToast(`Tela "${this.newFabricForm.name.trim()}" registrada con Ã©xito.`, 'success');
             this.newFabricForm = { name: '', description: '' };
         },
 
@@ -6733,7 +6733,7 @@ function hybridInventoryModule() {
 
         saveFabric() {
             if (!this.fabricEditState.form.name || !this.fabricEditState.form.name.trim()) {
-                this.showToast('El nombre de la tela no puede estar vacío.', 'warning');
+                this.showToast('El nombre de la tela no puede estar vacÃ­o.', 'warning');
                 return;
             }
             const idx = this.apparelFabrics.findIndex(f => f.id === this.fabricEditState.editingId);
@@ -6741,7 +6741,7 @@ function hybridInventoryModule() {
                 this.apparelFabrics[idx].name = this.fabricEditState.form.name.trim();
                 this.apparelFabrics[idx].description = this.fabricEditState.form.description.trim();
                 this.apparelFabrics[idx].is_active = this.fabricEditState.form.is_active;
-                this.showToast(`Tela "${this.apparelFabrics[idx].name}" actualizada con éxito.`, 'success');
+                this.showToast(`Tela "${this.apparelFabrics[idx].name}" actualizada con Ã©xito.`, 'success');
             }
             this.cancelEditFabric();
         },
@@ -6757,7 +6757,7 @@ function hybridInventoryModule() {
             if (!fab) return;
             const inUseCount = (this.products || []).filter(p => (p.fabric === fab.name || p.drawerFabricType === fab.name)).length;
             if (inUseCount > 0) {
-                this.showToast(`No es posible eliminar "${fab.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarla.`, 'warning');
+                this.showToast(`No es posible eliminar "${fab.name}" porque estÃ¡ en uso en ${inUseCount} productos. Se recomienda archivarla.`, 'warning');
                 return;
             }
             this.apparelFabrics = this.apparelFabrics.filter(f => f.id !== fabId);
@@ -6817,7 +6817,7 @@ function hybridInventoryModule() {
 
         saveColor() {
             if (!this.colorEditState.form.name || !this.colorEditState.form.name.trim()) {
-                this.showToast('El nombre del color no puede estar vacío.', 'warning');
+                this.showToast('El nombre del color no puede estar vacÃ­o.', 'warning');
                 return;
             }
             const idx = this.apparelColors.findIndex(c => c.id === this.colorEditState.editingId);
@@ -6830,7 +6830,7 @@ function hybridInventoryModule() {
                 this.apparelColors[idx].hex = hexVal;
                 this.apparelColors[idx].type = this.colorEditState.form.type;
                 this.apparelColors[idx].is_active = this.colorEditState.form.is_active;
-                this.showToast(`Color "${this.apparelColors[idx].name}" actualizado con éxito.`, 'success');
+                this.showToast(`Color "${this.apparelColors[idx].name}" actualizado con Ã©xito.`, 'success');
             }
             this.cancelEditColor();
         },
@@ -6846,14 +6846,14 @@ function hybridInventoryModule() {
             if (!col) return;
             const inUseCount = (this.products || []).filter(p => (p.colorName === col.name || p.drawerColorName === col.name)).length;
             if (inUseCount > 0) {
-                this.showToast(`No es posible eliminar "${col.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarlo.`, 'warning');
+                this.showToast(`No es posible eliminar "${col.name}" porque estÃ¡ en uso en ${inUseCount} productos. Se recomienda archivarlo.`, 'warning');
                 return;
             }
             this.apparelColors = this.apparelColors.filter(c => c.id !== colId);
             this.showToast(`Color "${col.name}" eliminado de la paleta.`, 'success');
         },
 
-        // --- SLOTTING FÍSICO (UBICACIONES DE ALMACÉN) ---
+        // --- SLOTTING FÃSICO (UBICACIONES DE ALMACÃ‰N) ---
         getSlotProductCount(slotCode) {
             return (this.products || []).filter(p => (p.location === slotCode || p.location_code === slotCode)).length;
         },
@@ -6871,7 +6871,7 @@ function hybridInventoryModule() {
             const code = `${aisle}-${rack}-${bin}`;
 
             if (this.warehouseSlots.some(s => s.code === code)) {
-                this.showToast(`La ubicación ${code} ya existe en bodega.`, 'warning');
+                this.showToast(`La ubicaciÃ³n ${code} ya existe en bodega.`, 'warning');
                 return;
             }
 
@@ -6890,7 +6890,7 @@ function hybridInventoryModule() {
                 is_active: true
             });
 
-            this.showToast(`Ubicación física ${code} registrada con éxito.`, 'success');
+            this.showToast(`UbicaciÃ³n fÃ­sica ${code} registrada con Ã©xito.`, 'success');
             this.newSlotForm = { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true };
         },
 
@@ -6924,7 +6924,7 @@ function hybridInventoryModule() {
                 s.capacity = parseInt(this.slotEditState.form.capacity) || 100;
                 s.status = this.slotEditState.form.status;
                 s.is_active = this.slotEditState.form.is_active;
-                this.showToast(`Ubicación ${s.code} actualizada con éxito.`, 'success');
+                this.showToast(`UbicaciÃ³n ${s.code} actualizada con Ã©xito.`, 'success');
             }
             this.cancelEditSlot();
         },
@@ -6933,17 +6933,17 @@ function hybridInventoryModule() {
             slot.is_active = !slot.is_active;
             slot.status = slot.is_active ? 'active' : 'archived';
             const statusLabel = slot.is_active ? 'reactivada' : 'archivada';
-            this.showToast(`Ubicación ${slot.code} ${statusLabel} correctamente.`, 'info');
+            this.showToast(`UbicaciÃ³n ${slot.code} ${statusLabel} correctamente.`, 'info');
         },
 
         deleteSlot(slotCode) {
             const prodCount = this.getSlotProductCount(slotCode);
             if (prodCount > 0) {
-                this.showToast(`No es posible eliminar ${slotCode} porque aloja ${prodCount} producto(s). Reasigna los productos primero o archiva la ubicación.`, 'warning');
+                this.showToast(`No es posible eliminar ${slotCode} porque aloja ${prodCount} producto(s). Reasigna los productos primero o archiva la ubicaciÃ³n.`, 'warning');
                 return;
             }
             this.warehouseSlots = this.warehouseSlots.filter(s => s.code !== slotCode);
-            this.showToast(`Ubicación ${slotCode} eliminada del inventario físico.`, 'success');
+            this.showToast(`UbicaciÃ³n ${slotCode} eliminada del inventario fÃ­sico.`, 'success');
         },
 
         // --- PUNTOS DE REORDEN (ROP) ---
@@ -6967,7 +6967,7 @@ function hybridInventoryModule() {
                 if (p.isUnderRop) underCount++;
             });
 
-            this.showToast(`Parámetros ROP guardados. ${this.products.length} productos recalculados en tiempo real (${underCount} en riesgo de quiebre).`, 'success');
+            this.showToast(`ParÃ¡metros ROP guardados. ${this.products.length} productos recalculados en tiempo real (${underCount} en riesgo de quiebre).`, 'success');
         },
 
         // =========================================================================
@@ -7801,9 +7801,9 @@ function hybridInventoryModule() {
             const inUseCount = (this.products || []).filter(p => (p.supplier === provider.tradeName || p.supplier === provider.name || p.brand === provider.tradeName)).length;
             if (hasOrders || inUseCount > 0) {
                 const motive = hasOrders 
-                    ? (provider.totalOrders + ' órdenes de compra registradas') 
-                    : (inUseCount + ' productos vinculados en catálogo');
-                this.showToast('No es posible eliminar "' + (provider.tradeName || provider.name) + '" porque cuenta con ' + motive + '. Se recomienda archivar el proveedor para conservar la trazabilidad y auditoría contable.', 'warning');
+                    ? (provider.totalOrders + ' Ã³rdenes de compra registradas') 
+                    : (inUseCount + ' productos vinculados en catÃ¡logo');
+                this.showToast('No es posible eliminar "' + (provider.tradeName || provider.name) + '" porque cuenta con ' + motive + '. Se recomienda archivar el proveedor para conservar la trazabilidad y auditorÃ­a contable.', 'warning');
                 return;
             }
             const name = provider.tradeName || provider.name;
@@ -7857,7 +7857,7 @@ function hybridInventoryModule() {
                 committedStock: 0,
                 committedSizes: { ch: 0, m: 0, g: 0, xl: 0 },
                 supplierStock: item.supplierStock || 50,
-                location: 'Almacén Proveedor (Torzo B2B)',
+                location: 'AlmacÃ©n Proveedor (Torzo B2B)',
                 status: 'Sincronizado',
                 providerUrl: item.originUrl || 'https://torzo.example.com',
                 isScraping: false,
@@ -7876,7 +7876,7 @@ function hybridInventoryModule() {
             this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== item.id);
             this.scrapingCurationModalOpen = false;
             this.curatingItem = null;
-            this.showToast(`Prenda ${finalSku} curada, validada y publicada en el catálogo.`, 'success');
+            this.showToast(`Prenda ${finalSku} curada, validada y publicada en el catÃ¡logo.`, 'success');
         },
 
         discardScrapedItem(id) {
@@ -7944,7 +7944,7 @@ function hybridInventoryModule() {
             };
             this.drawerOpen = true;
 
-            // Enriquecer reactivamente con el backend si está disponible
+            // Enriquecer reactivamente con el backend si estÃ¡ disponible
             if (product.sku) {
                 fetch(`/api/v1/inventory/products/${encodeURIComponent(product.sku)}/detail`, {
                     headers: { 'Accept': 'application/json' }
@@ -8653,14 +8653,14 @@ function hybridInventoryModule() {
             if (prod) {
                 this.openProductDrawer(prod);
             } else {
-                this.showToast('Producto ' + sku + ' no encontrado en el catálogo.', 'info');
+                this.showToast('Producto ' + sku + ' no encontrado en el catÃ¡logo.', 'info');
             }
         },
 
         openQuickAdjust(sku) {
             this.activeTab = 'inventory';
             this.searchFilter = sku;
-            this.showToast('Filtrando catálogo por SKU: ' + sku + ' para ajuste rápido.', 'info');
+            this.showToast('Filtrando catÃ¡logo por SKU: ' + sku + ' para ajuste rÃ¡pido.', 'info');
         },
 
         calculateProfit() {
@@ -8669,7 +8669,7 @@ function hybridInventoryModule() {
 
         
         // =========================================================================
-        // TASK-INV-04: MÉTODOS DE VALUACIÓN CONTABLE (CPP VS ÚLTIMO COSTO)
+        // TASK-INV-04: MÃ‰TODOS DE VALUACIÃ“N CONTABLE (CPP VS ÃšLTIMO COSTO)
         // =========================================================================
         calculateCPP(currentStock, currentCPP, receivedQty, newCost) {
             const s = Math.max(0, parseInt(currentStock) || 0);
@@ -8885,10 +8885,10 @@ function hybridInventoryModule() {
 
         triggerGlobalRefresh() {
             this.isRefreshing = true;
-            this.showToast('Actualizando métricas de inventario y conexiones...', 'info');
+            this.showToast('Actualizando mÃ©tricas de inventario y conexiones...', 'info');
             setTimeout(() => {
                 this.isRefreshing = false;
-                this.showToast('Inventario y métricas sincronizados con éxito.', 'success');
+                this.showToast('Inventario y mÃ©tricas sincronizados con Ã©xito.', 'success');
             }, 900);
         },
 
@@ -8900,7 +8900,7 @@ function hybridInventoryModule() {
             }, 1600);
         },
 
-        // TASK-INV-01: Métodos de Slotting y Ubicación Física
+        // TASK-INV-01: MÃ©todos de Slotting y UbicaciÃ³n FÃ­sica
         getSlotBadgeClass(location) {
             if (!location || location === 'N/A' || location.includes('Dropship')) {
                 return 'bg-slate-100 text-slate-600 border-slate-200';
@@ -8993,10 +8993,10 @@ function hybridInventoryModule() {
         // METODOS DE AUDITORIA CICLICA A CIEGAS (TASK-INV-07: 3 SKUS DIARIOS)
         // =========================================================================
         openCycleCountModal() {
-            // Seleccionar 3 SKUs físicos de bodega (exclusivamente stock propio con existencias en rack):
-            // 1) 1 SKU Clase A de alta rotación en bodega
-            // 2) 1 SKU de prendas textiles básicas
-            // 3) 1 SKU de categoría sensible (cosmética/cuidado personal)
+            // Seleccionar 3 SKUs fÃ­sicos de bodega (exclusivamente stock propio con existencias en rack):
+            // 1) 1 SKU Clase A de alta rotaciÃ³n en bodega
+            // 2) 1 SKU de prendas textiles bÃ¡sicas
+            // 3) 1 SKU de categorÃ­a sensible (cosmÃ©tica/cuidado personal)
             const propios = this.products.filter(p => p.type === 'propio' && (p.localStock || 0) > 0);
             const skuClaseA = propios.find(p => this.getAbcClass(p) === 'A') || propios[0] || this.products[0];
             const skuTextile = propios.find(p => p.sku !== skuClaseA.sku && !p.requiresSanitaryControl) || propios[1] || this.products[1];
@@ -9167,8 +9167,8 @@ function hybridInventoryModule() {
                             delta: row.diff,
                             stockBefore: stockBefore,
                             stockAfter: stockAfter,
-                            reference: 'Auditoría Diaria (Ciega)',
-                            user: 'Auditor de Almacén (Conteo Cíclico)',
+                            reference: 'AuditorÃ­a Diaria (Ciega)',
+                            user: 'Auditor de AlmacÃ©n (Conteo CÃ­clico)',
                             note: 'Motivo: ' + reason + ' | Discrepancia: ' + (row.diff > 0 ? '+' : '') + row.diff + ' uds'
                         });
 
@@ -9200,7 +9200,7 @@ function hybridInventoryModule() {
                             totalCounted: data.total_units_counted || 0,
                             totalVariance: data.total_variance_units || 0,
                             iraScore: data.ira_accuracy_score || 100,
-                            auditedBy: 'Operador Almacén',
+                            auditedBy: 'Operador AlmacÃ©n',
                             status: data.status || 'reconciled',
                             details: data.details || []
                         });
@@ -9214,9 +9214,9 @@ function hybridInventoryModule() {
             this.cycleCountModal.isOpen = false;
 
             if (adjustedCount > 0) {
-                this.showToast('Auditoría completada: ' + adjustedCount + ' SKU(s) reconciliados en Kardex');
+                this.showToast('AuditorÃ­a completada: ' + adjustedCount + ' SKU(s) reconciliados en Kardex');
             } else {
-                this.showToast('Auditoría completada al 100% de exactitud: Sin discrepancias');
+                this.showToast('AuditorÃ­a completada al 100% de exactitud: Sin discrepancias');
             }
         },
 
@@ -9531,7 +9531,7 @@ function hybridInventoryModule() {
             const index = this.productBundles.findIndex(b => b.id === bundleId);
             if (index === -1) return;
             const name = this.productBundles[index].name;
-            if (confirm(`¿Estas seguro de eliminar la receta BOM "${name}"? Esta accion no se puede deshacer.`)) {
+            if (confirm(`Â¿Estas seguro de eliminar la receta BOM "${name}"? Esta accion no se puede deshacer.`)) {
                 this.productBundles.splice(index, 1);
                 this.showToast(`Receta BOM eliminada: ${name}`, 'info');
             }
@@ -9992,10345 +9992,15 @@ function hybridInventoryModule() {
     };
 }
 function hybridInventoryBody() {
+    // La vista canonica del Hub 4 reside en resources/views/portal/inventory.blade.php
+    // y es renderizada en el servidor por Laravel en la ruta /admin/inventario-catalogo.
+    if (typeof window !== 'undefined' && window.location.pathname !== '/admin/inventario-catalogo') {
+        window.location.href = '/admin/inventario-catalogo';
+    }
     return `
-<div 
-    x-data="hybridInventoryModule()" 
-    x-init="init()"
-    @open-module-settings.window="openModuleSettings()"
-    class="w-full text-slate-800 font-sans antialiased"
->
-    <!-- TOAST NOTIFICATION FLOATING SYSTEM (z-[100] garantiza visibilidad sobre drawers y modales) -->
-    <div 
-        x-show="toast.show" 
-        x-transition:enter="transition ease-out duration-300 transform"
-        x-transition:enter-start="opacity-0 translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200 transform"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-2"
-        class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 max-w-md"
-        style="z-index: 100; display: none;"
-    >
-        <div :class="toast.type === 'success' ? 'text-emerald-400' : 'text-indigo-400'">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
-        <div class="text-sm font-medium" x-text="toast.message"></div>
-        <button @click="toast.show = false" class="text-slate-400 hover:text-white ml-auto cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- PANTALLA PRINCIPAL: CATÁLOGO, COMPRAS, KARDEX & CONCILIACIÓN              -->
-    <!-- ========================================================================= -->
-    <div x-show="inventoryCurrentScreen === 'main'" class="w-full space-y-6">
-
-    <!-- ========================================================================= -->
-    <!-- SECCIÓN 1: PESTAÑAS DE SUBMÓDULOS FIJAS (STICKY SUB-NAVBAR)               -->
-    <!-- ========================================================================= -->
-    <div class="sticky top-0 sm:top-[64px] z-20 bg-[#f8fafc]/95 backdrop-blur-md -mt-6 -mx-6 px-6 pt-3 pb-2 mb-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
-        <!-- PESTAÑAS DE NAVEGACIÓN (Alpine.js) -->
-        <nav class="flex gap-2 -mb-px overflow-x-auto">
-
-                <!-- TAB 1: CATÁLOGO OPERATIVO -->
-                <button 
-                    @click="activeTab = 'inventory'" 
-                    :class="activeTab === 'inventory' 
-                        ? 'border-indigo-600 text-indigo-600 font-semibold bg-white shadow-sm' 
-                        : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'"
-                    class="py-3 px-4 border-b-2 rounded-t-lg text-sm transition-all flex items-center gap-2 cursor-pointer group relative"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    <span>Catálogo Operativo</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-semibold" x-text="products.length"></span>
-                    <!-- Help Icon Tab 2 (Regla 8: Botón ? Universal) -->
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Catálogo Operativo" data-help-title="Pestaña: Catálogo Operativo" data-help-desc="Gestión diaria de existencias locales, ajustes manuales por merma/entrada, re-scraping de Torzo y panel de desglose por talla con calculadora de margen.">?</button>
-                </button>
-
-                <!-- TAB 2: PROVEEDORES & SCRAPING -->
-                <button 
-                    x-show="isTabAllowed('suppliers')"
-                    @click="activeTab = 'suppliers'" 
-                    :class="activeTab === 'suppliers' 
-                        ? 'border-indigo-600 text-indigo-600 font-semibold bg-white shadow-sm' 
-                        : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'"
-                    class="py-3 px-4 border-b-2 rounded-t-lg text-sm transition-all flex items-center gap-2 cursor-pointer group relative"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span>Proveedores & Scraping</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-bold">7 Activos</span>
-                    <!-- Help Icon Tab 3 (Regla 8: Botón ? Universal) -->
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Proveedores y Scraping" data-help-title="Pestaña: Proveedores & Scraping" data-help-desc="Conectores de scrapers (Torzo) y APIs de mayoristas para dropshipping sincronizado y seguimiento de órdenes de compra pendientes.">?</button>
-                </button>
-
-                <!-- TAB 3: COMPRAS & REABASTECIMIENTO -->
-                <button 
-                    x-show="isTabAllowed('purchases')"
-                    @click="activeTab = 'purchases'" 
-                    :class="activeTab === 'purchases' 
-                        ? 'border-indigo-600 text-indigo-600 font-semibold bg-white shadow-sm' 
-                        : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'"
-                    class="py-3 px-4 border-b-2 rounded-t-lg text-sm transition-all flex items-center gap-2 cursor-pointer group relative"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    <span>Compras</span>
-                    <span class="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="futurePurchaseOrders.length + 2"></span>
-                    <!-- Help Icon Tab 4 (Regla 8: Botón ? Universal) -->
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Compras y Reabastecimiento" data-help-title="Pestaña: Compras & Reabastecimiento" data-help-desc="Seguimiento de órdenes de compra pendientes, recepción de mercancía y consolidación de compras planificadas desde el catálogo.">?</button>
-                </button>
-        </nav>
-
-        <!-- ACCIONES RÁPIDAS & CONEXIÓN (A LA MISMA ALTURA QUE LAS PESTAÑAS) -->
-        <div class="flex items-center gap-2.5 pb-2 sm:pb-0 shrink-0">
-            <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-lg text-xs font-medium text-emerald-700">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Torzo Scraper: Conectado</span>
-            </div>
-            <button 
-                @click="triggerGlobalRefresh()" 
-                :disabled="isRefreshing"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 hover:border-slate-300 shadow-xs transition cursor-pointer disabled:opacity-50"
-                style="min-height: unset;"
-                title="Sincronizar inventario y catálogo"
-            >
-                <svg :class="isRefreshing ? 'animate-spin' : ''" class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span x-text="isRefreshing ? 'Actualizando...' : 'Actualizar'"></span>
-            </button>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- PESTAÑA 1: CATÁLOGO OPERATIVO (Vista Principal)                   -->
-    <!-- ================================================================= -->
-    <div x-show="activeTab === 'inventory'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-        
-        <!-- ============================================================= -->
-        <!-- SECCIÓN 2: TARJETAS CON KPIS (CONTRAÍBLES Y EXPANDIBLES)      -->
-        <!-- ============================================================= -->
-        <div class="mb-5">
-            <!-- Barra de control del toggle de KPIs -->
-            <div class="flex items-center justify-between mb-2.5">
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Métricas Clave de Inventario</span>
-                    <template x-if="kpisCollapsed">
-                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md" x-text="'3,674 piezas disponibles | 25 modelos activos | Último scrape: ' + lastScrapeTime"></span>
-                    </template>
-                </div>
-                <button 
-                    type="button" 
-                    @click="toggleKpis()" 
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
-                    :title="kpisCollapsed ? 'Expandir tarjetas de KPIs' : 'Contraer tarjetas de KPIs para ahorrar espacio'"
-                >
-                    <svg :class="kpisCollapsed ? 'rotate-180' : ''" class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                    </svg>
-                    <span x-text="kpisCollapsed ? 'Expandir KPIs' : 'Contraer KPIs'"></span>
-                </button>
-            </div>
-
-            <!-- Contenedor contraíble de las 4 Tarjetas de KPIs -->
-            <div 
-                x-show="!kpisCollapsed" 
-                x-transition:enter="transition ease-out duration-200" 
-                x-transition:enter-start="opacity-0 -translate-y-2" 
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-2"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-            >
-            <!-- KPI 1: Stock Local -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Stock Local</span>
-                        <!-- Help Icon -->
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Inventario Disponible</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Cantidad total de prendas en estantería para despacho de pedidos el mismo día de la compra.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5">3,674 <span class="text-xs font-normal text-slate-500">piezas</span></div>
-                    <div class="text-[11px] text-emerald-600 font-medium">Disponibles para despacho</div>
-                </div>
-            </div>
-
-            <!-- KPI 2: Bajo Pedido -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Bajo Pedido</span>
-                        <!-- Help Icon -->
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Pedidos Dropshipping</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Referencias vendidas que requieren gestión externa con el proveedor para envío directo al cliente.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5">0 <span class="text-xs font-normal text-slate-500">referencias</span></div>
-                    <div class="text-[11px] text-slate-500">Sin rezagos acumulados</div>
-                </div>
-            </div>
-
-            <!-- KPI 3: SKUs Activos -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">SKUs Activos</span>
-                        <!-- Help Icon -->
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Catálogo Habilitado</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Modelos únicos comercializados. Cada uno se multiplica por su matriz de tallas CH, M, G y XL.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5">25 <span class="text-xs font-normal text-slate-500">modelos</span></div>
-                    <div class="text-[11px] text-slate-500">4 tallas x modelo (CH a XL)</div>
-                </div>
-            </div>
-
-            <!-- KPI 4: Último Scrape -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-                <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Último Scrape</span>
-                        <!-- Help Icon (Alineado a la derecha) -->
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Sincronización de Catálogo</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Tiempo transcurrido desde que el bot headless verificó el inventario remoto en la plataforma de Torzo B2B.</p>
-                                <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-lg font-bold text-slate-800 mt-0.5" x-text="lastScrapeTime">Sin registros</div>
-                    <div class="text-[11px] text-emerald-600 font-medium">Torzo Feed Bot activo</div>
-                </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- SECCIÓN 3: FUNCIONALIDADES DEL MÓDULO (ACCIONES OPERATIVAS)   -->
-        <!-- ============================================================= -->
-        <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                </div>
-                <div>
-                    <span class="text-xs font-bold text-slate-800 block leading-tight">Funcionalidades del Módulo</span>
-                    <span class="text-[10px] text-slate-400 block">Acciones de auditoría, combos BOM y gestión de catálogo</span>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <!-- Botón Kardex / Auditoría (Permanente) -->
-                <button 
-                    type="button"
-                    @click.stop="openKardexDrawer()" 
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-lg text-xs font-bold transition border border-slate-200 cursor-pointer"
-                    style="min-height: unset;"
-                    title="Historial de movimientos y kardex contable de auditoría"
-                >
-                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                    <span>Kardex / Auditoría</span>
-                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700" x-text="inventoryMovements.length"></span>
-                </button>
-
-                <!-- Botón Carritos Activos (Permanente: Telemetría de Stock Locks con TTL 5m) -->
-                <button 
-                    type="button"
-                    @click.stop="openStockLocksModal()" 
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 rounded-lg text-xs font-bold transition border border-rose-200 cursor-pointer"
-                    style="min-height: unset;"
-                    title="Telemetría de Carritos Simultáneos y Reserva Temporal de Stock (TTL 5m)"
-                >
-                    <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                    <span>Carritos Activos</span>
-                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold" 
-                          :class="activeStockLocksCount > 0 ? 'bg-rose-200 text-rose-900 animate-pulse' : 'bg-slate-200 text-slate-700'" 
-                          x-text="activeStockLocksCount + ' en espera'"></span>
-                </button>
-
-                <!-- Menú Desplegable "Herramientas de Stock" (TASK-INV-10) -->
-                <div class="relative inline-block text-left" @click.outside="toolsDropdownOpen = false">
-                    <button 
-                        type="button"
-                        @click.stop="toolsDropdownOpen = !toolsDropdownOpen" 
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-lg text-xs font-bold transition border border-slate-200 cursor-pointer"
-                        :class="toolsDropdownOpen ? 'bg-slate-200 ring-2 ring-indigo-500/20' : ''"
-                        style="min-height: unset;"
-                        title="Herramientas de auditoría, fórmulas BOM y balance de insumos"
-                    >
-                        <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Herramientas</span>
-                        <!-- Alerta ámbar si la auditoría ciega está pendiente hoy -->
-                        <span 
-                            class="w-2 h-2 rounded-full" 
-                            :class="cycleCountModal.isCompletedToday ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'"
-                            :title="cycleCountModal.isCompletedToday ? 'Auditoría diaria al día' : 'Auditoría diaria pendiente (3 SKUs)'"
-                        ></span>
-                        <svg class="w-3 h-3 text-slate-400 transition-transform duration-150" :class="toolsDropdownOpen ? 'rotate-180 text-slate-700' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-
-                    <!-- Dropdown Panel -->
-                    <div 
-                        x-show="toolsDropdownOpen" 
-                        x-transition:enter="transition ease-out duration-100"
-                        x-transition:enter-start="transform opacity-0 scale-95"
-                        x-transition:enter-end="transform opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-75"
-                        x-transition:leave-start="transform opacity-100 scale-100"
-                        x-transition:leave-end="transform opacity-0 scale-95"
-                        class="absolute left-0 mt-1.5 w-72 rounded-xl bg-white shadow-xl border border-slate-200 py-1.5 z-50 focus:outline-none"
-                        style="display: none;"
-                    >
-                        <div class="px-3 py-1.5 border-b border-slate-100">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Herramientas Operativas</span>
-                        </div>
-
-                        <!-- Opción 1: Recetas & Combos BOM -->
-                        <button 
-                            type="button" 
-                            @click="toolsDropdownOpen = false; activeSettingsTab = 'bundles'; moduleSettingsModalOpen = true;" 
-                            class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
-                            style="min-height: unset;"
-                        >
-                            <div class="flex items-center gap-2">
-                                <span class="p-1 rounded-md bg-violet-50 text-violet-600 border border-violet-100 group-hover:bg-violet-100 transition">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                    </svg>
-                                </span>
-                                <div>
-                                    <div class="text-xs font-bold text-slate-800">Recetas & Combos BOM</div>
-                                    <div class="text-[10px] text-slate-400">Escandallos y despiece de kits</div>
-                                </div>
-                            </div>
-                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200" x-text="productBundles.length"></span>
-                        </button>
-
-                        <!-- Opción 2: Déficit BOM & OCs B2B -->
-                        <button 
-                            type="button" 
-                            @click="toolsDropdownOpen = false; openBomDeficitModal('SUB-BOX-MARTE-LVL2', 200)" 
-                            class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
-                            style="min-height: unset;"
-                        >
-                            <div class="flex items-center gap-2">
-                                <span class="p-1 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:bg-indigo-100 transition">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                    </svg>
-                                </span>
-                                <div>
-                                    <div class="text-xs font-bold text-slate-800">Déficit BOM & OCs B2B</div>
-                                    <div class="text-[10px] text-slate-400">Disparo automático a mayoristas</div>
-                                </div>
-                            </div>
-                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">Auto OC</span>
-                        </button>
-
-                        <!-- Opción 3: Auditoría Cíclica a Ciegas (Oculta para Compras - TASK-PUR-03) -->
-                        <template x-if="canAccessWarehouseTools()">
-                            <button 
-                                type="button" 
-                                @click="toolsDropdownOpen = false; openCycleCountModal()" 
-                                class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
-                                style="min-height: unset;"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <span class="p-1 rounded-md bg-amber-50 text-amber-600 border border-amber-100 group-hover:bg-amber-100 transition">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                        </svg>
-                                    </span>
-                                    <div>
-                                        <div class="text-xs font-bold text-slate-800">Auditoría Diaria a Ciegas</div>
-                                        <div class="text-[10px] text-slate-400">Conteo exactitud 3 SKUs</div>
-                                    </div>
-                                </div>
-                                <span 
-                                    class="px-1.5 py-0.5 rounded-full text-[10px] font-bold border"
-                                    :class="cycleCountModal.isCompletedToday ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-900 border-amber-200'"
-                                    x-text="cycleCountModal.isCompletedToday ? 'OK' : '3 SKUs'"
-                                ></span>
-                            </button>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Botón Agregar Producto -->
-                <button 
-                    type="button"
-                    @click.stop="openCreateProductDrawer()" 
-                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer group shrink-0"
-                    style="min-height: unset;"
-                >
-                    <svg class="w-3.5 h-3.5 text-indigo-200 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span>Agregar Producto</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- SECCIÓN 4: FILTROS DE LAS TABLAS (BÚSQUEDA Y SEGMENTACIÓN)    -->
-        <!-- ============================================================= -->
-        <div class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[320px]">
-                <!-- Input Búsqueda -->
-                <div class="relative w-full sm:w-60 min-w-[200px]">
-                    <input 
-                        type="text" 
-                        x-model="searchFilter" 
-                        placeholder="Buscar por SKU o modelo..." 
-                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 placeholder-slate-400"
-                    >
-                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </div>
-
-                <!-- Filtro Origen -->
-                <select 
-                    x-model="typeFilter" 
-                    class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-medium"
-                >
-                    <option value="all">Todos los orígenes</option>
-                    <option value="propio">Stock Propio</option>
-                    <option value="dropship">Dropshipping (Torzo)</option>
-                </select>
-
-                <!-- Filtro Clase ABC (Pareto) -->
-                <select 
-                    x-model="abcFilter" 
-                    class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-semibold"
-                >
-                    <option value="all">Clase ABC: Todas</option>
-                    <option value="A">Clase A (Alta Rotación 80%)</option>
-                    <option value="B">Clase B (Complementarios 15%)</option>
-                    <option value="C">Clase C (Cola Larga 5%)</option>
-                </select>
-
-                <!-- Filtro ROP (Punto de Reorden) -->
-                <select 
-                    x-model="ropFilter" 
-                    class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-medium"
-                >
-                    <option value="all">Alerta ROP: Todos</option>
-                    <option value="under_rop">Bajo ROP (Reabastecer Urgente)</option>
-                </select>
-
-                <!-- Filtro Sanitario (TASK-INV-06: Caducidad y Lotes en Cosmética/Fragancias) -->
-                <select 
-                    x-model="sanitaryFilter" 
-                    class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-medium"
-                >
-                    <option value="all">Control Sanitario: Todos</option>
-                    <option value="sanitary_only">Solo Cosmética / Cuidado Personal</option>
-                    <option value="expiring_soon">Por Vencer (&le; 90 días)</option>
-                    <option value="critical">Vencimiento Crítico (&le; 30 días)</option>
-                </select>
-
-                <!-- Help Icon Filtros -->
-                <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                    <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                    <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-60 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Búsqueda & Filtros de Catálogo</div>
-                        <p class="text-[11px] text-slate-200 leading-snug">Filtra instantáneamente por nombre, código SKU o separa las prendas físicas de bodega de las sincronizadas con proveedores.</p>
-                        <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contador de Referencias a la derecha -->
-            <div class="text-xs text-slate-500 font-medium shrink-0">
-                Mostrando <span class="font-bold text-slate-800" x-text="filteredProducts.length"></span> de <span class="font-bold text-slate-800" x-text="products.length"></span> referencias
-            </div>
-        </div>
-
-        <!-- TASK-INT-01: Banner de Salto Profundo Activo (Deep Link Active Banner) -->
-        <div x-show="deepLinkActive" x-cloak class="deep-link-banner" style="display: none;">
-            <div class="deep-link-banner-info">
-                <div class="deep-link-banner-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </div>
-                <div class="deep-link-banner-text">
-                    <strong x-text="deepLinkBannerText">Filtro de Navegación Rápida Activo</strong>
-                    <small>Mostrando registros coincidentes desde el Dashboard General.</small>
-                </div>
-            </div>
-            <button type="button" @click="clearDeepLink()" class="deep-link-banner-btn">
-                Restablecer Catálogo Completo
-            </button>
-        </div>
-
-        <!-- Tabla de Datos (Data Grid Principal) -->
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm w-full min-w-full">
-            <div class="overflow-x-auto rounded-b-xl">
-                <table class="w-full min-w-full text-left border-collapse text-xs sm:text-sm">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                            <th class="py-3 px-3 w-10 text-center">
-                                <input 
-                                    type="checkbox" 
-                                    @change="toggleSelectAll($event.target.checked)" 
-                                    :checked="isAllSelected()"
-                                    class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                    title="Seleccionar todos los productos visibles"
-                                >
-                            </th>
-                            <th class="py-3 px-3 w-12 text-center">Imagen</th>
-                            <th class="py-3 px-3">SKU</th>
-                            <th class="py-3 px-4">Producto & Categoría</th>
-                            <th class="py-3 px-3 text-right">
-                                <div class="inline-flex items-center justify-end gap-1">
-                                    <span>Stock Local</span>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-60 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Motor de Stock de 3 Estados</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Disponible para Venta = Físico en Rack - Comprometido (apartado en preparación o esperando arribo de mayorista en carritos mixtos).</p>
-                                            <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="py-3 px-3 text-right">
-                                <div class="inline-flex items-center justify-end gap-1">
-                                    <span>Stock Prov.</span>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-52 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <p class="text-[10px] text-slate-200">Existencias reportadas en vivo desde la plataforma del proveedor.</p>
-                                            <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="py-3 px-3 text-right">
-                                <div class="inline-flex items-center justify-end gap-1">
-                                    <span>PVP ($)</span>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-52 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Precio Venta Público</div>
-                                            <p class="text-[10px] text-slate-200">Haz clic sobre el precio para editarlo en línea al instante sin abrir el panel lateral.</p>
-                                            <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="py-3 px-3 text-right">
-                                <div class="inline-flex items-center justify-end gap-1">
-                                    <span>Costo ($)</span>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Valuación: Último Costo vs CPP Contable</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">
-                                                <strong>Último Costo:</strong> Precio de adquisición de la orden más reciente.<br>
-                                                <strong>CPP (Costo Promedio Ponderado):</strong> Valuación contable ponderada por existencias en balance general.<br>
-                                                <span class="text-indigo-300 font-mono text-[9px] mt-1 block">CPP = (Stock x CPP + Inbound x Costo) / Total</span>
-                                            </p>
-                                            <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="py-3 px-3 text-center">Margen</th>
-                            <th class="py-3 px-3">Ubicación</th>
-                            <th class="py-3 px-3 min-w-[260px]">
-                                <div class="inline-flex items-center gap-1">
-                                    <span x-text="isPurchasesRole() ? 'Acción Comercial (PO)' : 'Ajuste Rápido de Stock'">Ajuste Rápido de Stock</span>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Formulario Inline de Ajuste</div>
-                                            <p class="text-[10px] text-slate-200">Ingresa o deduce stock al instante por conteos físicos, mermas o devoluciones sin salir de la tabla.</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="py-3 px-3 text-center">Vitrina Web</th>
-                            <th class="py-3 px-3 text-center">Estado / Acciones</th>
-                        </tr>
-
-                        <!-- FILA DE FILTROS POR COLUMNA (REGLA 7) -->
-                        <tr class="bg-slate-100/80 border-b border-slate-200 text-[10px]">
-                            <!-- Col 1: Limpiar filtros si hay activos -->
-                            <td class="py-2 px-1 text-center">
-                                <template x-if="hasActiveColFilters()">
-                                    <button 
-                                        @click="clearColFilters()" 
-                                        title="Limpiar filtros de columna"
-                                        class="p-1 rounded bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </button>
-                                </template>
-                            </td>
-                            <!-- Col 2: Imagen -->
-                            <td class="py-2 px-1 text-center text-slate-400">-</td>
-                            <!-- Col 3: SKU -->
-                            <td class="py-2 px-1">
-                                <input 
-                                    type="text" 
-                                    x-model="colFilters.sku" 
-                                    placeholder="SKU..." 
-                                    class="w-full h-7 px-1.5 text-[11px] border border-slate-300 rounded bg-white font-mono focus:border-indigo-600 focus:outline-none"
-                                >
-                            </td>
-                            <!-- Col 4: Producto -->
-                            <td class="py-2 px-1">
-                                <input 
-                                    type="text" 
-                                    x-model="colFilters.product" 
-                                    placeholder="Nombre / Cat..." 
-                                    class="w-full h-7 px-1.5 text-[11px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none"
-                                >
-                            </td>
-                            <!-- Col 5: Stock Local -->
-                            <td class="py-2 px-1 text-right">
-                                <select 
-                                    x-model="colFilters.stockLocal" 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-medium text-right"
-                                >
-                                    <option value="all">Todo</option>
-                                    <option value="under_rop">Bajo ROP</option>
-                                    <option value="in_stock">&gt; 0 uds</option>
-                                    <option value="zero">Agotado (0)</option>
-                                </select>
-                            </td>
-                            <!-- Col 6: Stock Prov. -->
-                            <td class="py-2 px-1 text-right">
-                                <select 
-                                    x-model="colFilters.stockProv" 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-medium text-right"
-                                >
-                                    <option value="all">Todo</option>
-                                    <option value="available">Con stock</option>
-                                    <option value="none">Sin stock</option>
-                                </select>
-                            </td>
-                            <!-- Col 7: PVP Mínimo -->
-                            <td class="py-2 px-1 text-right">
-                                <input 
-                                    type="number" 
-                                    x-model="colFilters.minPvp" 
-                                    placeholder="Mín $" 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-mono text-right"
-                                >
-                            </td>
-                            <!-- Col 8: Costo Máximo -->
-                            <td class="py-2 px-1 text-right">
-                                <input 
-                                    type="number" 
-                                    x-model="colFilters.maxCost" 
-                                    placeholder="Máx $" 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-mono text-right"
-                                >
-                            </td>
-                            <!-- Col 9: Margen -->
-                            <td class="py-2 px-1 text-center">
-                                <select 
-                                    x-model="colFilters.margin" 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-medium"
-                                >
-                                    <option value="all">Todo</option>
-                                    <option value="high">&ge; 60%</option>
-                                    <option value="mid">40 - 59%</option>
-                                    <option value="low">&lt; 40%</option>
-                                </select>
-                            </td>
-                            <!-- Col 10: Ubicación -->
-                            <td class="py-2 px-1">
-                                <input 
-                                    type="text" 
-                                    x-model="colFilters.location" 
-                                    placeholder="Rack..." 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-mono"
-                                >
-                            </td>
-                            <!-- Col 11: Info -->
-                            <td class="py-2 px-1 text-center text-slate-400 text-[10px]">
-                                <template x-if="hasActiveColFilters()">
-                                    <span class="text-indigo-600 font-bold">Filtro activo</span>
-                                </template>
-                            </td>
-                            <!-- Col Vitrina Web -->
-                            <td class="py-2 px-1 text-center text-slate-400 text-[10px]">-</td>
-                            <!-- Col 12: Estado -->
-                            <td class="py-2 px-1 text-center">
-                                <select 
-                                    x-model="colFilters.status" 
-                                    class="w-full h-7 px-1 text-[10px] border border-slate-300 rounded bg-white focus:border-indigo-600 focus:outline-none font-medium"
-                                >
-                                    <option value="all">Todo</option>
-                                    <option value="En Stock">En Stock</option>
-                                    <option value="Bajo Stock">Bajo Stock</option>
-                                    <option value="Agotado">Agotado</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                        <template x-for="(item, index) in displayedProducts" :key="item.sku">
-                            <tr :class="(selectedSkus.includes(item.sku) ? 'bg-indigo-50/50 hover:bg-indigo-50/70' : 'hover:bg-slate-50/70') + (highlightedSku === item.sku ? ' sku-row-highlight' : '')" class="transition group">
-                                <!-- Columna: CHECKBOX SELECCIÓN MASIVA -->
-                                <td class="py-3.5 px-3 text-center">
-                                    <input 
-                                        type="checkbox" 
-                                        :value="item.sku" 
-                                        x-model="selectedSkus"
-                                        class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                    >
-                                </td>
-
-                                <!-- Columna: IMAGEN -->
-                                <td class="py-3.5 px-4 text-center">
-                                    <div class="relative w-11 h-11 mx-auto rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center cursor-pointer shadow-xs group-hover:shadow transition"
-                                         @click="openProductDrawer(item)">
-                                        <svg class="w-6 h-6 text-slate-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                        </svg>
-                                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white"
-                                              :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-emerald-500'"></span>
-                                    </div>
-                                </td>
-
-                                <!-- Columna: SKU -->
-                                <td class="py-3.5 px-4 font-mono font-bold text-indigo-700">
-                                    <button 
-                                        @click="openProductDrawer(item)" 
-                                        class="hover:underline flex items-center gap-1 text-left cursor-pointer"
-                                        title="Abrir ficha y calculadora de margen"
-                                    >
-                                        <span x-text="item.sku"></span>
-                                        <svg class="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                    </button>
-                                </td>
-
-                                <!-- Columna: PRODUCTO -->
-                                <td class="py-3.5 px-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-slate-900" x-text="item.name"></span>
-                                        <span 
-                                            :class="getAbcBadgeClass(getAbcClass(item))" 
-                                            class="text-[9px] px-1.5 py-0.2 rounded border font-mono shrink-0" 
-                                            :title="'Clase Pareto: ' + getAbcClass(item)"
-                                            x-text="'[' + getAbcClass(item) + ']'"
-                                        ></span>
-                                    </div>
-                                    <div class="flex items-center gap-2 mt-0.5">
-                                        <span class="text-xs text-slate-500" x-text="item.category"></span>
-                                        <span class="text-slate-300">&bull;</span>
-                                        <span class="text-[11px] px-1.5 py-0.2 rounded font-semibold uppercase tracking-wider"
-                                              :class="item.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'"
-                                              x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo'">
-                                        </span>
-                                        <span class="text-slate-300">&bull;</span>
-                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX')"></span>
-                                    </div>
-
-                                    <!-- Swatches Cromáticos de Cosmética (TASK-INV-09) -->
-                                    <template x-if="item.variantDimension === 'shade'">
-                                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                            <span class="text-[10px] font-bold text-pink-700 uppercase tracking-wider mr-0.5">Tonos:</span>
-                                            <template x-for="(qty, shCode) in (item.shades || {})" :key="shCode">
-                                                <div class="inline-flex items-center gap-1 bg-white hover:bg-pink-50/50 border border-slate-200 px-1.5 py-0.5 rounded-full shadow-2xs transition"
-                                                     :title="'Tono ' + (getShadeInfo(shCode)?.code || shCode) + ': ' + (getShadeInfo(shCode)?.name || '') + ' (' + getUndertoneLabel(getShadeInfo(shCode)?.undertone) + ') - ' + qty + ' piezas'">
-                                                    <span class="cosmetic-swatch-20" :style="'background: ' + (getShadeInfo(shCode)?.hex_color || '#E8BEA2')"></span>
-                                                    <span class="text-[10px] font-bold text-slate-700" x-text="getShadeInfo(shCode)?.code || shCode"></span>
-                                                    <span class="text-[9px] px-1 py-0.2 rounded font-semibold"
-                                                          :class="getUndertoneBadgeClass(getShadeInfo(shCode)?.undertone)"
-                                                          x-text="getUndertoneLabel(getShadeInfo(shCode)?.undertone)"></span>
-                                                    <span class="text-[10px] font-mono font-bold text-slate-600 ml-0.5" x-text="qty"></span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
-
-                                    <!-- Badges de Atributos Textiles: Tela, Color/Tornasol, Diseño y Sección -->
-                                    <template x-if="item.variantDimension !== 'shade'">
-                                        <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                                            <!-- Swatch Color & Tornasol -->
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200" :title="'Color: ' + (item.colorName || 'Negro')">
-                                                <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
-                                                <span x-text="item.colorName || 'Negro'"></span>
-                                            </span>
-
-                                            <!-- Badge Tipo de Tela -->
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'Composición textil: ' + (item.fabricType || 'Modal')">
-                                                <span x-text="item.fabricType || 'Modal'"></span>
-                                            </span>
-
-                                            <!-- Badge Variante Diseño -->
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
-                                                  :class="item.designType === 'con_diseno' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600 border border-slate-200'">
-                                                <span x-text="item.designType === 'con_diseno' ? 'Estampado' : 'Liso'"></span>
-                                            </span>
-
-                                            <!-- Badge Sección Web -->
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200"
-                                                  :title="'Sección de vitrina: ' + (item.websiteSection || 'General')">
-                                                <span x-text="item.websiteSection === 'basicos' ? 'Básicos' : (item.websiteSection === 'disenador' ? 'Diseñador' : (item.websiteSection === 'temporada' ? 'Temporada' : 'General'))"></span>
-                                            </span>
-                                        </div>
-                                    </template>
-
-                                    <!-- Indicadores Sanitarios (TASK-INV-06: Lote, Caducidad y PAO) -->
-                                    <template x-if="item.requiresSanitaryControl">
-                                        <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200" :title="'Lote de fabricacion: ' + (item.batchNumber || 'N/A')">
-                                                <span class="text-slate-500 mr-1 font-semibold">Lot:</span>
-                                                <span x-text="item.batchNumber || 'S/L'"></span>
-                                            </span>
-                                            <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium border"
-                                                  :class="getSanitaryBadgeClass(item)"
-                                                  :title="'Caducidad: ' + (item.expirationDate || 'N/A')">
-                                                <svg class="w-2.5 h-2.5 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                <span x-text="getSanitaryBadgeText(item)"></span>
-                                            </span>
-                                            <span x-show="item.paoMonths" class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" :title="'Period After Opening: ' + item.paoMonths + ' meses'">
-                                                <span class="text-purple-600 mr-0.5">PAO</span>
-                                                <span x-text="item.paoMonths + 'M'"></span>
-                                            </span>
-                                        </div>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: STOCK LOCAL (3 ESTADOS: DISPONIBLE, FÍSICO, COMPROMETIDO) -->
-                                <td class="py-3.5 px-3 text-right">
-                                    <div class="flex flex-col items-end">
-                                        <!-- Disponible para venta directa -->
-                                        <div class="flex items-center gap-1">
-                                            <span class="text-sm font-extrabold text-emerald-600" x-text="getAvailableStock(item)"></span>
-                                            <span class="text-[9px] uppercase font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">Disp.</span>
-                                        </div>
-                                        <!-- Físico en rack vs Comprometido -->
-                                        <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                                            <span x-text="item.localStock + ' físico'"></span>
-                                            <template x-if="item.committedStock > 0">
-                                                <span class="text-indigo-600 font-semibold bg-indigo-50 px-1 rounded border border-indigo-100" :title="'Apartado en pedidos/mixtos: ' + item.committedStock"><svg class="w-2.5 h-2.5 inline-block -mt-0.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span x-text="item.committedStock"></span></span>
-                                            </template>
-                                            <template x-if="getLockedStock(item) > 0">
-                                                <span class="badge-stock-locked stock-lock-pulse text-rose-600 font-semibold bg-rose-50 px-1 rounded border border-rose-200" :title="'En Carrito de Compra (TTL 5m): ' + getLockedStock(item)"><svg class="w-2.5 h-2.5 inline-block -mt-0.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span x-text="getLockedStock(item) + ' carrito'"></span></span>
-                                            </template>
-                                        </div>
-                                        <!-- DOH & Alerta ROP -->
-                                        <div class="mt-1 flex items-center gap-1">
-                                            <span 
-                                                :class="getDOHBadgeClass(getDOH(item))"
-                                                class="text-[9px] font-bold px-1.5 py-0.2 rounded border"
-                                                :title="'Días de Inventario Restante (DOH): ' + getDOH(item) + ' días'"
-                                                x-text="getDOH(item) + 'd DOH'"
-                                            ></span>
-                                            <template x-if="isUnderROP(item)">
-                                                <button 
-                                                    type="button" 
-                                                    @click.stop="generateROPOrder(item)"
-                                                    class="text-[9px] font-extrabold bg-rose-600 hover:bg-rose-700 text-white px-1.5 py-0.2 rounded shadow-2xs cursor-pointer animate-pulse"
-                                                    :title="'Bajo Punto de Reorden (ROP=' + getROP(item) + '). Clic para generar orden de reabastecimiento.'"
-                                                >
-                                                    <svg class="w-3 h-3 inline-block -mt-0.5 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>ROP
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <!-- Columna: STOCK PROVEEDOR -->
-                                <td class="py-3.5 px-3 text-right">
-                                    <template x-if="item.supplierStock !== null">
-                                        <div>
-                                            <span class="text-sm font-bold text-emerald-600" x-text="item.supplierStock"></span>
-                                            <span class="text-xs text-slate-400 block">en Torzo</span>
-                                        </div>
-                                    </template>
-                                    <template x-if="item.supplierStock === null">
-                                        <span class="text-xs text-slate-400 italic font-normal">N/A (Local)</span>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: PVP ($) CON EDICIÓN EN LÍNEA -->
-                                <td class="py-3.5 px-3 text-right">
-                                    <template x-if="editingCell.sku === item.sku && editingCell.field === 'pvp'">
-                                        <div class="inline-flex items-center gap-1 justify-end">
-                                            <span class="text-xs text-slate-400 font-bold">$</span>
-                                            <input 
-                                                :id="'inline-input-' + item.sku + '-pvp'"
-                                                type="number" 
-                                                step="1"
-                                                min="0"
-                                                x-model.number="tempEditValue" 
-                                                @keydown.enter="saveInlineEdit(item, 'pvp')" 
-                                                @keydown.escape="cancelInlineEdit()" 
-                                                @blur="saveInlineEdit(item, 'pvp')"
-                                                class="w-20 text-right bg-white border-2 border-indigo-500 rounded px-1.5 py-0.5 text-xs font-bold text-slate-900 shadow-xs focus:outline-none"
-                                            >
-                                            <button 
-                                                type="button" 
-                                                @mousedown.prevent="saveInlineEdit(item, 'pvp')" 
-                                                class="p-1 text-emerald-600 hover:text-emerald-700 rounded hover:bg-emerald-50 cursor-pointer"
-                                                title="Guardar"
-                                            >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <template x-if="!(editingCell.sku === item.sku && editingCell.field === 'pvp')">
-                                        <div 
-                                            class="group/edit inline-flex items-center gap-1 justify-end cursor-pointer hover:bg-slate-100/80 px-1.5 py-0.5 rounded transition"
-                                            @click="startInlineEdit(item.sku, 'pvp', item.pvp)"
-                                            title="Clic para editar PVP"
-                                        >
-                                            <div class="flex flex-col items-end">
-                                                <template x-if="item.discountPct > 0">
-                                                    <div class="flex items-center gap-1 leading-none mb-0.5">
-                                                        <span class="line-through text-[10px] text-slate-400" x-text="'$' + (item.regularPrice ? item.regularPrice.toFixed(2) : item.pvp.toFixed(2))"></span>
-                                                        <span class="text-[9px] font-extrabold bg-rose-100 text-rose-700 px-1 py-0.2 rounded" x-text="'-' + item.discountPct + '%'"></span>
-                                                    </div>
-                                                </template>
-                                                <span class="font-bold" :class="item.discountPct > 0 ? 'text-emerald-700' : 'text-slate-900'" x-text="'$' + (item.discountPct > 0 ? (item.pvp * (1 - item.discountPct / 100)).toFixed(2) : (item.pvp ? item.pvp.toFixed(2) : '0.00'))"></span>
-                                            </div>
-                                            <template x-if="savedCellFeedback.sku === item.sku && savedCellFeedback.field === 'pvp'">
-                                                <span class="text-emerald-600 animate-bounce">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                                                </span>
-                                            </template>
-                                            <template x-if="!(savedCellFeedback.sku === item.sku && savedCellFeedback.field === 'pvp')">
-                                                <svg class="w-3 h-3 text-slate-400 opacity-0 group-hover/edit:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                            </template>
-                                        </div>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: COSTO ($) CON EDICIÓN EN LÍNEA -->
-                                <td class="py-3.5 px-3 text-right">
-                                    <template x-if="canViewFinancialCosts()">
-                                        <div>
-                                            <template x-if="editingCell.sku === item.sku && editingCell.field === 'cost'">
-                                                <div class="inline-flex items-center gap-1 justify-end">
-                                                    <span class="text-xs text-slate-400 font-bold">$</span>
-                                                    <input 
-                                                        :id="'inline-input-' + item.sku + '-cost'"
-                                                        type="number" 
-                                                        step="1"
-                                                        min="0"
-                                                        x-model.number="tempEditValue" 
-                                                        @keydown.enter="saveInlineEdit(item, 'cost')" 
-                                                        @keydown.escape="cancelInlineEdit()" 
-                                                        @blur="saveInlineEdit(item, 'cost')"
-                                                        class="w-20 text-right bg-white border-2 border-indigo-500 rounded px-1.5 py-0.5 text-xs font-bold text-slate-900 shadow-xs focus:outline-none"
-                                                    >
-                                                    <button 
-                                                        type="button" 
-                                                        @mousedown.prevent="saveInlineEdit(item, 'cost')" 
-                                                        class="p-1 text-emerald-600 hover:text-emerald-700 rounded hover:bg-emerald-50 cursor-pointer"
-                                                        title="Guardar"
-                                                    >
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                                    </button>
-                                                </div>
-                                            </template>
-                                            <template x-if="!(editingCell.sku === item.sku && editingCell.field === 'cost')">
-                                                <div 
-                                                    class="group/edit inline-flex flex-col items-end cursor-pointer hover:bg-slate-100/80 px-1.5 py-0.5 rounded transition"
-                                                    @click="startInlineEdit(item.sku, 'cost', item.cost)"
-                                                    title="Clic para editar Último Costo"
-                                                >
-                                                    <div class="inline-flex items-center gap-1 justify-end">
-                                                        <span class="font-medium text-slate-600 text-xs" x-text="'$' + (item.cost ? item.cost.toFixed(2) : '0.00')"></span>
-                                                        <template x-if="savedCellFeedback.sku === item.sku && savedCellFeedback.field === 'cost'">
-                                                            <span class="text-emerald-600 animate-bounce">
-                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                                                            </span>
-                                                        </template>
-                                                        <template x-if="!(savedCellFeedback.sku === item.sku && savedCellFeedback.field === 'cost')">
-                                                            <svg class="w-3 h-3 text-slate-400 opacity-0 group-hover/edit:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                                        </template>
-                                                    </div>
-                                                    <!-- Sub-badge contable CPP -->
-                                                    <div class="text-[10px] text-slate-400 font-mono tracking-tight leading-none mt-0.5" title="Costo Promedio Ponderado (Contable)">
-                                                        CPP: <span class="text-indigo-600 font-semibold" x-text="'$' + (item.weightedAverageCost ? item.weightedAverageCost.toFixed(2) : item.cost.toFixed(2))"></span>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
-                                    <template x-if="!canViewFinancialCosts()">
-                                        <span class="inline-flex items-center gap-1 text-[11px] text-slate-400 font-mono italic bg-slate-100 px-2 py-0.5 rounded border border-slate-200" title="Información financiera reservada">
-                                            <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                            <span>Protegido</span>
-                                        </span>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: MARGEN OPERATIVO (%) (TASK-INV-04: CONTABLE REAL CPP) -->
-                                <td class="py-3.5 px-3 text-center font-mono">
-                                    <template x-if="canViewFinancialCosts()">
-                                        <div class="inline-flex flex-col items-center">
-                                            <span 
-                                                :class="getMarginBadgeClass(calculateRealMarginPercent(item.pvp, item.weightedAverageCost || item.cost))"
-                                                class="inline-block px-2 py-0.5 rounded text-[11px] font-bold border"
-                                                :title="'Margen Contable Real sobre CPP: ' + calculateRealMarginPercent(item.pvp, item.weightedAverageCost || item.cost) + '% (Marginal s/ Costo: ' + calculateMarginPercent(item.pvp, item.cost) + '%)'"
-                                                x-text="calculateRealMarginPercent(item.pvp, item.weightedAverageCost || item.cost) + '%'"
-                                            ></span>
-                                            <div class="text-[9px] text-slate-400 font-sans tracking-tight mt-0.5" x-show="Math.abs((item.weightedAverageCost || item.cost) - item.cost) > 0.05">
-                                                Marginal: <span x-text="calculateMarginPercent(item.pvp, item.cost) + '%'"></span>
-                                            </div>
-                                        </div>
-                                    </template>
-                                    <template x-if="!canViewFinancialCosts()">
-                                        <span class="text-[11px] text-slate-400 font-mono italic bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                                            N/D
-                                        </span>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: UBICACIÓN FÍSICA (SLOTTING: TASK-INV-01) -->
-                                <td class="py-3.5 px-3">
-                                    <template x-if="item.type === 'propio'">
-                                        <button 
-                                            @click="openSlotReassign(item)" 
-                                            :class="getSlotBadgeClass(item.location)"
-                                            class="group/slot inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold border transition cursor-pointer shadow-2xs"
-                                            :title="'Ubicación en bodega: ' + item.location + '. Clic para reasignar slot.'"
-                                        >
-                                            <svg class="w-3.5 h-3.5 opacity-60 group-hover/slot:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                            <span x-text="formatSlotCode(item.location)"></span>
-                                            <svg class="w-2.5 h-2.5 opacity-40 group-hover/slot:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                        </button>
-                                    </template>
-                                    <template x-if="item.type !== 'propio'">
-                                        <span class="text-xs text-slate-400 italic font-normal">Dropship Remoto</span>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: AJUSTE RÁPIDO / ACCIÓN DE COMPRA (TASK-PUR-03) -->
-                                <td class="py-3.5 px-4">
-                                    <!-- VISTA PARA ROL COMPRAS: BOTÓN DIRECTO DE ORDEN DE COMPRA -->
-                                    <template x-if="isPurchasesRole()">
-                                        <div class="flex items-center gap-1.5 justify-end">
-                                            <button 
-                                                type="button" 
-                                                @click.stop="openCreatePOForProduct(item)" 
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition cursor-pointer"
-                                                title="Generar Orden de Compra para este producto"
-                                            >
-                                                <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                <span>+ Generar PO</span>
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                @click.stop="openKardexForRef(item.sku)" 
-                                                class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-medium transition cursor-pointer"
-                                                title="Historial de Movimientos Kardex"
-                                            >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            </button>
-                                        </div>
-                                    </template>
-
-                                    <!-- VISTA PARA ROLES OPERATIVOS / ALMACÉN: FORMULARIO INLINE -->
-                                    <template x-if="!isPurchasesRole()">
-                                        <div>
-                                            <!-- FILA TIPO 1: STOCK PROPIO -->
-                                            <template x-if="item.type === 'propio'">
-                                                <div class="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                                                    <select 
-                                                        x-model="item.adjustType" 
-                                                        class="text-xs py-1 px-1.5 bg-white border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                    >
-                                                        <option value="add">+ Entr.</option>
-                                                        <option value="sub">- Sal.</option>
-                                                    </select>
-
-                                                    <input 
-                                                        type="number" 
-                                                        min="1" 
-                                                        x-model.number="item.adjustQty" 
-                                                        placeholder="Cant." 
-                                                        class="w-14 text-xs py-1 px-1.5 bg-white border border-slate-200 rounded text-center text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                    >
-
-                                                    <input 
-                                                        type="text" 
-                                                        x-model="item.adjustReason" 
-                                                        placeholder="Motivo..." 
-                                                        class="flex-1 text-xs py-1 px-2 bg-white border border-slate-200 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                    >
-
-                                                    <button 
-                                                        @click="applyQuickStockAdjustment(item)" 
-                                                        class="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded transition shadow-xs cursor-pointer"
-                                                        title="Aplicar ajuste"
-                                                    >
-                                                        Aplicar
-                                                    </button>
-                                                </div>
-                                            </template>
-
-                                            <!-- FILA TIPO 2: DROPSHIPPING -->
-                                            <template x-if="item.type === 'dropship'">
-                                                <div class="flex items-center gap-2">
-                                                    <a 
-                                                        :href="item.providerUrl" 
-                                                        target="_blank" 
-                                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition"
-                                                    >
-                                                        <span>Ver en Proveedor</span>
-                                                        <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                                    </a>
-
-                                                    <button 
-                                                        @click="rescrapeProduct(item)" 
-                                                        :disabled="item.isScraping"
-                                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition disabled:opacity-50 cursor-pointer"
-                                                    >
-                                                        <svg :class="item.isScraping ? 'animate-spin' : ''" class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                        <span x-text="item.isScraping ? 'Scraping...' : 'Re-scrape'"></span>
-                                                    </button>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
-                                </td>
-
-                                <!-- Columna: VITRINA WEB (SWITCH PUBLICACIÓN) -->
-                                <td class="py-3.5 px-3 text-center">
-                                    <button 
-                                        type="button" 
-                                        @click.stop="toggleProductPublication(item.sku)"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition border cursor-pointer shadow-3xs"
-                                        :class="item.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'"
-                                        :title="item.isPublished ? 'Publicado en sitio web (visible para clientes). Clic para despublicar.' : 'Fuera de catálogo (oculto). Clic para publicar en sitio web.'"
-                                    >
-                                        <span class="w-2 h-2 rounded-full" :class="item.isPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                                        <span x-text="item.isPublished ? 'En Sitio' : 'Oculto'"></span>
-                                    </button>
-                                </td>
-
-                                <!-- Columna: ESTADO -->
-                                <td class="py-3.5 px-4 text-center">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
-                                              :class="{
-                                                  'bg-emerald-50 text-emerald-700 border border-emerald-200': item.status === 'En Stock' || item.status === 'Sincronizado',
-                                                  'bg-amber-50 text-amber-700 border border-amber-200': item.status === 'Bajo Stock',
-                                                  'bg-rose-50 text-rose-700 border border-rose-200': item.status === 'Agotado'
-                                              }"
-                                              x-text="item.status">
-                                        </span>
-                                        <button 
-                                            type="button"
-                                            @click.stop="openThermalLabelModal(item)"
-                                            title="Imprimir etiqueta térmica Code128 / QR"
-                                            class="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors border border-indigo-200 cursor-pointer shadow-3xs flex items-center justify-center"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- BARRA DE PAGINACIÓN INCREMENTAL: BOTÓN "CARGAR MÁS" -->
-            <div class="p-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div class="text-xs text-slate-500 font-medium">
-                    Mostrando <span class="font-bold text-slate-800" x-text="Math.min(visibleCount, filteredProducts.length)"></span> de <span class="font-bold text-slate-800" x-text="filteredProducts.length"></span> productos
-                </div>
-                <div class="flex items-center gap-2">
-                    <template x-if="visibleCount < filteredProducts.length">
-                        <button 
-                            @click="loadMoreProducts()" 
-                            :disabled="isLoadingMore"
-                            class="px-4 py-2 bg-white border border-slate-300 hover:border-slate-800 rounded-lg text-xs font-bold text-slate-800 hover:bg-slate-50 shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                            <template x-if="!isLoadingMore">
-                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </template>
-                            <template x-if="isLoadingMore">
-                                <svg class="w-4 h-4 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                            </template>
-                            <span x-text="isLoadingMore ? 'Cargando más...' : 'Cargar más'"></span>
-                        </button>
-                    </template>
-                    <template x-if="visibleCount >= filteredProducts.length && filteredProducts.length > 0">
-                        <span class="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                            Todos los productos cargados
-                        </span>
-                    </template>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- PESTAÑA 2: PROVEEDORES & SCRAPING (7 PROVEEDORES + ÓRDENES PLANIFICADAS) -->
-    <div x-show="activeTab === 'suppliers' && isTabAllowed('suppliers')" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-        
-        <!-- 5 KPI Cards Proveedores con Tooltips & Modales de Detalle -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <!-- KPI 1: Proveedores Conectados (Clicable) -->
-            <div 
-                @click="providerKpiModalOpen = true"
-                class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:border-indigo-400 hover:shadow-md transition cursor-pointer group"
-            >
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-indigo-600 transition">Proveedores Conectados</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center" @click.stop>
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Canales Mayoristas Activos</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Empresas fabricantes y distribuidores vinculados mediante Scraper Puppeteer, Webhooks o REST API.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 mt-2">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-xl font-bold text-slate-900" x-text="providers.length + ' Proveedores'">7 Proveedores</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-1" x-text="connectedProvidersCount + ' activos • ' + maintenanceProvidersCount + ' en mant. • ' + pausedProvidersCount + ' pausados' + (archivedProvidersCount > 0 ? (' • ' + archivedProvidersCount + ' archivados') : '')">6 activos • 1 en mantenimiento</p>
-                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold">
-                    <span>Ver desglose y estados</span>
-                    <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- KPI 2: Catálogo Externo Total (Informativo / NO Clicable) -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm cursor-default">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Catálogo Externo Total</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">SKUs Sincronizados</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Referencias activas en servidores de proveedores disponibles para venta sin stock físico en bodega.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-xl font-bold text-slate-900 mt-2" x-text="totalSyncedItemsCount + ' SKUs'">276 SKUs</div>
-                <p class="text-xs text-emerald-600 mt-1 font-medium">Sincronización continua activa</p>
-                <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-400">
-                    Feed remoto B2B normalizado
-                </div>
-            </div>
-
-            <!-- KPI 3: Tiempo de Respuesta / Latencia (Clicable) -->
-            <div 
-                @click="latencyKpiModalOpen = true"
-                class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:border-indigo-400 hover:shadow-md transition cursor-pointer group"
-            >
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-indigo-600 transition">Tiempo de Respuesta</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center" @click.stop>
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Latencia de Conexión</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Tiempo promedio en milisegundos que toma extraer o consultar las existencias de cada mayorista.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-xl font-bold text-slate-900 mt-2">1.18 seg</div>
-                <p class="text-xs text-slate-500 mt-1">Monitoreo de red y Webhooks</p>
-                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold">
-                    <span>Ver telemetría y pings</span>
-                    <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- KPI 4: Discrepancias Detectadas (Clicable) -->
-            <div 
-                @click="discrepancyKpiModalOpen = true"
-                class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:border-amber-400 hover:shadow-md transition cursor-pointer group"
-            >
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-amber-700 transition">Discrepancias Detectadas</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center" @click.stop>
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Alertas de Stock/Costo/SLA</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Divergencias en precios de mayoreo, variantes agotadas en fábrica o demoras de confección.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 mt-2">
-                    <span class="text-xl font-bold text-amber-600" x-text="(scrapingAlerts || []).filter(a => !a.resolved).length + ' Incidentes'">4 Incidentes</span>
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">Auditoría B2B</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-1">Costos, stock y demoras SLA</p>
-                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-amber-700 font-semibold">
-                    <span>Ver historial de auditoría</span>
-                    <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- KPI 5: SLA Promedio Proveedores (Clicable) -->
-            <div 
-                @click="slaKpiModalOpen = true"
-                class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:border-emerald-400 hover:shadow-md transition cursor-pointer group"
-            >
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-emerald-700 transition">SLA Promedio Proveedores</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center" @click.stop>
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-emerald-600 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-emerald-300 text-[11px] mb-0.5">Cumplimiento Acuerdos SLA</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Promedio ponderado de entregas a tiempo (On-Time) y cumplimiento de piezas solicitadas (Fill Rate) en rampa de bodega.</p>
-                            <span class="absolute bottom-full right-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 mt-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span class="text-xl font-bold text-slate-900" x-text="averageSlaScore + '%'">96.4%</span>
-                </div>
-                <p class="text-xs text-emerald-600 mt-1 font-medium">On-Time & Fill Rate Global</p>
-                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-emerald-700 font-semibold">
-                    <span>Scorecard & Ranking SLA</span>
-                    <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- CUERPO PRINCIPAL EN 2 COLUMNAS: CURADURÍA + AUDITORÍA DE DISCREPANCIAS B2B -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 items-start">
-            
-            <!-- COLUMNA 1: BANDEJA DE CURADURÍA DE SCRAPING (STAGING AREA) -->
-            <div class="bg-slate-900 text-white rounded-2xl shadow-md p-6 border border-slate-800 flex flex-col justify-between">
-                <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
-                        <div>
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
-                                <h3 class="text-base font-bold text-white">Bandeja de Curaduría Previa de Scraping</h3>
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30" x-text="scrapedPendingItems.length + ' pendientes'">3 pendientes</span>
-                            </div>
-                            <p class="text-xs text-slate-400 mt-1">Prendas extraídas automáticamente desde proveedores mayoristas pendientes de validación textil antes de publicarse en el catálogo</p>
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-xs text-slate-400">Canal:</span>
-                            <span class="text-xs font-semibold text-indigo-300 bg-indigo-950/60 border border-indigo-800 px-2.5 py-1 rounded-lg">Torzo Official B2B</span>
-                        </div>
-                    </div>
-
-                    <!-- Listado Vertical Ergonómico de Prendas Scrapeadas -->
-                    <div class="space-y-3 mt-4">
-                        <template x-for="item in scrapedPendingItems" :key="item.id">
-                            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-600 transition space-y-3">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs font-mono text-indigo-400 font-semibold" x-text="item.supplierSku || item.suggestedSku"></span>
-                                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-300" x-text="item.brand"></span>
-                                        </div>
-                                        <h4 class="text-sm font-bold text-white mt-1" x-text="item.name"></h4>
-                                    </div>
-                                    <div class="text-right shrink-0">
-                                        <span class="text-[10px] text-slate-400 block uppercase">Costo Fábrica</span>
-                                        <span class="text-sm font-bold text-emerald-400 font-mono" x-text="'$' + (item.scrapedCost || item.cost || 0).toFixed(2)"></span>
-                                    </div>
-                                </div>
-
-                                <!-- Mini Badges de Atributos Detectados por Scraper -->
-                                <div class="flex flex-wrap items-center gap-1.5 text-xs">
-                                    <span class="px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]" x-text="'Cat: ' + item.suggestedCategory"></span>
-                                    <span class="px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]" x-text="'Tela: ' + item.suggestedFabric"></span>
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]">
-                                        <span class="w-2.5 h-2.5 rounded-full border border-white/20" :style="'background-color: ' + item.detectedColorHex"></span>
-                                        <span x-text="item.detectedColorName"></span>
-                                    </span>
-                                    <span class="px-2 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800 text-[11px]" x-text="'Tallas: ' + (Array.isArray(item.availableSizes) ? item.availableSizes.join(', ') : 'CH, M, G, XL')"></span>
-                                </div>
-
-                                <!-- Snippet de descripción scrapeada -->
-                                <p class="text-xs text-slate-300 italic line-clamp-2 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800" x-text="'“' + item.scrapedDescription + '”'"></p>
-
-                                <!-- Botones de Acción de Curaduría -->
-                                <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
-                                    <span class="text-[11px] text-slate-400" x-text="(item.supplierStock || 0) + ' uds en almacén proveedor'"></span>
-                                    <button 
-                                        type="button" 
-                                        @click="openScrapingCuration(item)"
-                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer"
-                                    >
-                                        <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                        <span>Revisar, Curar & Publicar</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="scrapedPendingItems.length === 0">
-                            <div class="py-8 text-center text-slate-400 bg-slate-800/40 rounded-xl border border-slate-800">
-                                <svg class="w-8 h-8 text-emerald-400 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <p class="text-sm font-semibold text-slate-300">Bandeja de curaduría al día</p>
-                                <p class="text-xs text-slate-400 mt-0.5">Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catálogo.</p>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- COLUMNA 2: CENTRO DE AUDITORÍA OPERATIVA & DISCREPANCIAS B2B (PROPUESTA 1 APROBADA) -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                                <h3 class="text-base font-bold text-slate-900">Centro de Auditoría Operativa & Discrepancias B2B</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1">Detección y resolución de variaciones de costo mayorista, quiebres en origen y retrasos de confección</p>
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-xs text-slate-400">Último barrido: <strong class="text-slate-700" x-text="lastScrapeTime"></strong></span>
-                            <button 
-                                type="button" 
-                                @click="triggerScraperQuickCheck()" 
-                                :disabled="isScrapingNow"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
-                            >
-                                <template x-if="!isScrapingNow">
-                                    <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                </template>
-                                <template x-if="isScrapingNow">
-                                    <svg class="w-3.5 h-3.5 text-indigo-200 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                </template>
-                                <span x-text="isScrapingNow ? 'Auditando...' : 'Quick-Check'"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Filtros Rápidos por Categoría de Discrepancia B2B -->
-                    <div class="flex items-center gap-1.5 mt-4 pb-3 border-b border-slate-100 flex-wrap text-xs">
-                        <button 
-                            type="button" 
-                            @click="discrepancyCategoryFilter = 'all'"
-                            :class="discrepancyCategoryFilter === 'all' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer"
-                        >
-                            Todas (<span x-text="(scrapingAlerts || []).length"></span>)
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="discrepancyCategoryFilter = 'costs'"
-                            :class="discrepancyCategoryFilter === 'costs' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer"
-                        >
-                            Costos & Precios (<span x-text="(scrapingAlerts || []).filter(a => a.category === 'costs').length"></span>)
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="discrepancyCategoryFilter = 'stockouts'"
-                            :class="discrepancyCategoryFilter === 'stockouts' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer"
-                        >
-                            Stock & Desabastos (<span x-text="(scrapingAlerts || []).filter(a => a.category === 'stockouts').length"></span>)
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="discrepancyCategoryFilter = 'sla_delays'"
-                            :class="discrepancyCategoryFilter === 'sla_delays' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer"
-                        >
-                            Demoras SLA (<span x-text="(scrapingAlerts || []).filter(a => a.category === 'sla_delays').length"></span>)
-                        </button>
-                    </div>
-
-                    <!-- Feed de Discrepancias Operativas -->
-                    <div class="space-y-3 mt-3">
-                        <template x-for="alert in filteredDiscrepancies" :key="alert.id">
-                            <div 
-                                class="p-3.5 rounded-xl border transition flex flex-col justify-between gap-2.5"
-                                :class="alert.resolved ? 'bg-slate-50/60 border-slate-200 opacity-60' : (alert.severity === 'danger' ? 'bg-rose-50/40 border-rose-200' : (alert.severity === 'warning' ? 'bg-amber-50/40 border-amber-200' : 'bg-emerald-50/40 border-emerald-200'))"
-                            >
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start gap-2.5">
-                                        <span 
-                                            class="p-1.5 rounded-lg shrink-0 mt-0.5"
-                                            :class="alert.severity === 'danger' ? 'bg-rose-100 text-rose-700' : (alert.severity === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')"
-                                        >
-                                            <template x-if="alert.severity === 'danger'">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                            </template>
-                                            <template x-if="alert.severity === 'warning'">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </template>
-                                            <template x-if="alert.severity === 'success' || alert.severity === 'info'">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </template>
-                                        </span>
-                                        <div>
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <span class="font-mono font-bold text-xs text-indigo-700" x-text="alert.sku"></span>
-                                                <span class="text-xs font-bold text-slate-800" x-text="alert.productName"></span>
-                                                <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" x-text="alert.supplier"></span>
-                                                <template x-if="alert.resolved">
-                                                    <span class="px-2 py-0.2 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">Resuelta</span>
-                                                </template>
-                                            </div>
-                                            <p class="text-xs text-slate-600 mt-1 leading-snug" x-text="alert.message"></p>
-                                        </div>
-                                    </div>
-                                    <div class="shrink-0 text-right">
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" :class="alert.severity === 'danger' ? 'bg-rose-100 text-rose-800' : (alert.severity === 'warning' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800')" x-text="alert.impact || 'Alerta'"></span>
-                                    </div>
-                                </div>
-
-                                <!-- Botones de Acción Resolutiva Contextual -->
-                                <div class="pt-2 border-t border-slate-200/60 flex items-center justify-end gap-2 flex-wrap">
-                                    <template x-if="!alert.resolved && alert.category === 'costs'">
-                                        <div class="flex items-center gap-1.5">
-                                            <button 
-                                                type="button" 
-                                                @click="resolveScraperAlert(alert.id, 'discard_variation')"
-                                                class="px-2.5 py-1 text-slate-600 hover:text-slate-800 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-xs font-medium transition cursor-pointer"
-                                            >
-                                                Descartar
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                @click="resolveScraperAlert(alert.id, 'adjust_pvp')"
-                                                class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
-                                            >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                <span>Ajustar Costo y PVP</span>
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <template x-if="!alert.resolved && alert.category === 'stockouts'">
-                                        <div class="flex items-center gap-1.5">
-                                            <button 
-                                                type="button" 
-                                                x-show="alert.type === 'size_stockout'"
-                                                @click="resolveScraperAlert(alert.id, 'pause_variant')"
-                                                class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
-                                            >
-                                                <span>Pausar Variante</span>
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                x-show="alert.type === 'restock_available'"
-                                                @click="resolveScraperAlert(alert.id, 'sync_stock')"
-                                                class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
-                                            >
-                                                <span>Sincronizar Stock Remoto</span>
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <template x-if="!alert.resolved && alert.category === 'sla_delays'">
-                                        <div class="flex items-center gap-1.5">
-                                            <button 
-                                                type="button" 
-                                                @click="resolveScraperAlert(alert.id, 'reschedule_po')"
-                                                class="px-2.5 py-1 text-slate-600 hover:text-slate-800 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-xs font-medium transition cursor-pointer"
-                                            >
-                                                Reprogramar Rampa
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                @click="resolveScraperAlert(alert.id, 'contact_vendor')"
-                                                class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
-                                            >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                                <span>Contactar Proveedor</span>
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="filteredDiscrepancies.length === 0">
-                            <div class="py-6 text-center text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
-                                <svg class="w-7 h-7 text-emerald-500 mx-auto mb-1.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <p class="text-xs font-bold text-slate-700">Sin discrepancias pendientes en esta categoría</p>
-                                <p class="text-[11px] text-slate-400 mt-0.5">Los parámetros comerciales y de entrega de tus proveedores están en regla.</p>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Footer de Acceso Directo a Ajustes -->
-                <div class="pt-4 border-t border-slate-100 mt-5 flex items-center justify-between text-xs text-slate-500">
-                    <span>Gobernanza y conectores en catálogo central</span>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'scraping'; moduleSettingsModalOpen = true;" 
-                        class="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
-                    >
-                        <span>Abrir Proveedores en Ajustes &rarr;</span>
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL ERGONÓMICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="providerModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[90] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
-        >
-            <div 
-                @click.outside="providerModalOpen = false"
-                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
-                <!-- Cabecera del Modal -->
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingProvider ? 'Conectar / Registrar Nuevo Proveedor' : (isEditingProvider ? 'Editar Condiciones: ' + (providerForm.tradeName || providerForm.name) : 'Ficha de Proveedor & Scorecard SLA')"></h3>
-                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confección, fabricante cosmético o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' • ' + providerForm.name : 'Información técnica y comercial')"></p>
-                        </div>
-                    </div>
-                    <button 
-                        type="button" 
-                        @click="providerModalOpen = false" 
-                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        aria-label="Cerrar modal"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Cuerpo del Modal (2 Columnas) -->
-                <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6">
-                    
-                    <!-- Columna Izquierda: Ficha Comercial & Contacto (7 Cols) -->
-                    <div class="md:col-span-7 space-y-4">
-                        <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información General & Contacto</h4>
-                            <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
-                        </div>
-
-                        <!-- Razón Social y Nombre Comercial -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Razón Social *</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.name" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Ej. Confecciones Textiles Puebla SA de CV" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre Comercial / Marca *</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.tradeName" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Ej. ModaIntima MX" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Tipo de Proveedor y Ciudad -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo / Giro Comercial *</label>
-                                <select 
-                                    x-model="providerForm.type" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                                    <option value="workshop">Taller de Confección Textil</option>
-                                    <option value="cosmetics">Fabricante Cosmética & Skincare</option>
-                                    <option value="distributor">Distribuidor Mayorista</option>
-                                    <option value="packaging">Insumos de Empaque & Cajas</option>
-                                    <option value="commercial">Proveedor Comercial Directo</option>
-                                    <option value="scraper">Integración Automatizada (Scraper/API)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / Ubicación</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.city" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Ej. CDMX, Puebla, Guadalajara" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Persona de Contacto, Teléfono y Correo -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Contacto Operativo *</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.contactName" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Nombre completo" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / Teléfono *</label>
-                                <input 
-                                    type="tel" 
-                                    x-model="providerForm.phone" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="+52 55..." 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Pedidos</label>
-                                <input 
-                                    type="email" 
-                                    x-model="providerForm.email" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="pedidos@empresa.com" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Condiciones Comerciales: Lead Time y Plazos de Pago -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (Días)</label>
-                                <div class="flex items-center gap-2">
-                                    <input 
-                                        type="number" 
-                                        min="1" 
-                                        max="90" 
-                                        x-model="providerForm.leadTimeDays" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        class="w-24 px-3 py-1.5 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200 text-center"
-                                    >
-                                    <span class="text-xs text-slate-500">días hábiles a rampa</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Términos de Pago</label>
-                                <select 
-                                    x-model="providerForm.paymentTerms" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    class="w-full px-3 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200"
-                                >
-                                    <option value="contado">Contado / Anticipo 100%</option>
-                                    <option value="credito_15">Crédito Comercial 15 días</option>
-                                    <option value="credito_30">Crédito Comercial 30 días</option>
-                                    <option value="credito_60">Crédito Comercial 60 días</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Notas Operativas -->
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Notas Internas & Acuerdos de Maquila</label>
-                            <textarea 
-                                x-model="providerForm.notes" 
-                                :disabled="!isCreatingProvider && !isEditingProvider"
-                                rows="2" 
-                                placeholder="Detalles de maquila, acuerdos especiales de tela, MOQ o especificaciones..." 
-                                class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-y max-w-full"
-                                style="resize: vertical; max-width: 100%;"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Columna Derecha: Scorecard SLA & Control de Estado (5 Cols) -->
-                    <div class="md:col-span-5 space-y-4">
-                        <div class="border-b border-slate-100 pb-2">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Desempeño SLA & Confiabilidad</h4>
-                        </div>
-
-                        <!-- Modo Proveedor Existente: Scorecard SLA -->
-                        <div x-show="!isCreatingProvider && selectedProvider" class="space-y-4">
-                            <!-- Tarjeta On-Time Delivery -->
-                            <div class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-xs font-bold text-emerald-900">Entregas a Tiempo (On-Time)</span>
-                                    <span class="text-sm font-black text-emerald-700" x-text="(selectedProvider?.slaOnTimePct || 100) + '%'"></span>
-                                </div>
-                                <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaOnTimePct || 100) + '%'"></div>
-                                </div>
-                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">Histórico validado en rampa de recepción contra fecha compromiso de OC.</p>
-                            </div>
-
-                            <!-- Tarjeta Fill Rate (Sin Faltantes) -->
-                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-xs font-bold text-indigo-900">Cumplimiento de Cantidad (Fill Rate)</span>
-                                    <span class="text-sm font-black text-indigo-700" x-text="(selectedProvider?.slaFillRatePct || 100) + '%'"></span>
-                                </div>
-                                <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaFillRatePct || 100) + '%'"></div>
-                                </div>
-                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas físicas recibidas completas sin remanentes pendientes.</p>
-                            </div>
-
-                            <!-- Comparativa Lead Time y Órdenes -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Demora Promedio</span>
-                                    <span class="text-base font-black text-slate-800" x-text="'+' + (selectedProvider?.avgDelayDays || 0) + ' d'"></span>
-                                    <span class="block text-[10px] text-slate-500">sobre fecha pactada</span>
-                                </div>
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Órdenes OCs</span>
-                                    <span class="text-base font-black text-slate-800" x-text="(selectedProvider?.completedOrders || 0) + ' / ' + (selectedProvider?.totalOrders || 0)"></span>
-                                    <span class="block text-[10px] text-slate-500">completadas</span>
-                                </div>
-                            </div>
-
-                            <!-- Selector de Estado Técnico / Operativo -->
-                            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                <label class="block text-[11px] font-bold text-slate-700 mb-2">Estado Operativo en Plataforma</label>
-                                <template x-if="selectedProvider?.status === 'archived'">
-                                    <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 text-center">
-                                        <div class="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                                            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
-                                            <span>Proveedor Archivado / Descontinuado</span>
-                                        </div>
-                                        <p class="text-[10px] text-slate-500 mb-2">No recibe pedidos automáticos ni órdenes de reabastecimiento.</p>
-                                        <button 
-                                            type="button" 
-                                            @click="restoreProvider(selectedProvider)"
-                                            class="w-full py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
-                                        >
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                            <span>Restaurar a Estado Conectado</span>
-                                        </button>
-                                    </div>
-                                </template>
-                                <template x-if="selectedProvider?.status !== 'archived'">
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'connected'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'connected')"
-                                            :class="providerForm.status === 'connected' ? 'bg-emerald-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Conectado
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'maintenance'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'maintenance')"
-                                            :class="providerForm.status === 'maintenance' ? 'bg-amber-500 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Mantenimiento
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'paused'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'paused')"
-                                            :class="providerForm.status === 'paused' ? 'bg-slate-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Pausado
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Modo Alta: Tarjeta informativa de SLA -->
-                        <div x-show="isCreatingProvider" class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 text-slate-700 space-y-2">
-                            <div class="flex items-center gap-2 font-bold text-xs text-indigo-900">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Monitoreo Automático de Desempeño</span>
-                            </div>
-                            <p class="text-xs leading-relaxed text-slate-600">
-                                Al vincular este proveedor comercial o taller, el sistema comenzará a auditar automáticamente sus tiempos de entrega y cumplimiento de piezas en el Kardex de Compras (TASK-INV-16) cada vez que se reciba un lote en la rampa de almacén.
-                            </p>
-                            <div class="pt-2 text-[11px] font-semibold text-slate-500">
-                                Estado inicial recomendado: <span class="text-emerald-700 font-bold">Conectado / Activo</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Pie del Modal: Acciones -->
-                <div class="px-6 py-4 border-t border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span x-show="!isCreatingProvider && !isEditingProvider" class="text-xs text-slate-400 font-mono" x-text="'ID: ' + (selectedProvider?.id || '')"></span>
-                        <template x-if="!isCreatingProvider && !isEditingProvider && selectedProvider">
-                            <div class="inline-flex items-center gap-2 ml-3 pl-3 border-l border-slate-200">
-                                <template x-if="selectedProvider.status !== 'archived'">
-                                    <button 
-                                        type="button" 
-                                        @click="archiveProvider(selectedProvider)" 
-                                        class="px-2.5 py-1 text-xs text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-slate-200 hover:border-amber-200"
-                                        title="Archivar proveedor"
-                                    >
-                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                        <span>Archivar</span>
-                                    </button>
-                                </template>
-                                <template x-if="selectedProvider.status === 'archived'">
-                                    <button 
-                                        type="button" 
-                                        @click="restoreProvider(selectedProvider)" 
-                                        class="px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-emerald-300"
-                                        title="Restaurar proveedor a activo"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>Restaurar</span>
-                                    </button>
-                                </template>
-                                <button 
-                                    type="button" 
-                                    @click="deleteProvider(selectedProvider)" 
-                                    class="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-rose-200"
-                                    title="Eliminar definitivamente de la base de datos"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    <span>Eliminar</span>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="cancelProviderEdit()" 
-                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold rounded-xl hover:bg-slate-200/60 transition cursor-pointer"
-                        >
-                            <span x-text="isCreatingProvider ? 'Cancelar' : (isEditingProvider ? 'Descartar Cambios' : 'Cerrar')"></span>
-                        </button>
-                        <button 
-                            type="button" 
-                            x-show="!isCreatingProvider && !isEditingProvider"
-                            @click="editProviderFromModal()" 
-                            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition border border-indigo-200/80 cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            <span>Editar Condiciones</span>
-                        </button>
-                        <button 
-                            type="button" 
-                            x-show="isCreatingProvider || isEditingProvider"
-                            @click="saveProvider()" 
-                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span x-text="isCreatingProvider ? 'Guardar Proveedor' : 'Guardar Cambios'"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL KPI 1: RED Y ESTADO OPERATIVO DE PROVEEDORES                -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="providerKpiModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
-        >
-            <div @click.outside="providerKpiModalOpen = false" class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-2xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900">Red y Estado Operativo de Proveedores</h3>
-                            <p class="text-xs text-slate-500">Desglose de fabricantes, talleres y mayoristas en plataforma</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="providerKpiModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl text-center">
-                            <span class="text-xs font-bold text-emerald-800 uppercase block">Conectados</span>
-                            <span class="text-lg font-black text-emerald-600" x-text="connectedProvidersCount"></span>
-                        </div>
-                        <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl text-center">
-                            <span class="text-xs font-bold text-amber-800 uppercase block">Mantenimiento</span>
-                            <span class="text-lg font-black text-amber-600" x-text="maintenanceProvidersCount"></span>
-                        </div>
-                        <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl text-center">
-                            <span class="text-xs font-bold text-slate-700 uppercase block">Pausados</span>
-                            <span class="text-lg font-black text-slate-700" x-text="pausedProvidersCount"></span>
-                        </div>
-                        <div class="p-3 bg-slate-200/60 border border-slate-300 rounded-xl text-center">
-                            <span class="text-xs font-bold text-slate-600 uppercase block">Archivados</span>
-                            <span class="text-lg font-black text-slate-600" x-text="archivedProvidersCount"></span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Proveedores Registrados</h4>
-                        <div class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                            <template x-for="p in providers" :key="p.id">
-                                <div class="p-3 bg-white flex items-center justify-between gap-3 text-xs" :class="p.status === 'archived' ? 'opacity-60 bg-slate-50' : ''">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="w-2 h-2 rounded-full shrink-0" :class="{
-                                            'bg-emerald-500': p.status === 'connected',
-                                            'bg-amber-500': p.status === 'maintenance',
-                                            'bg-slate-400': p.status === 'paused',
-                                            'bg-slate-500': p.status === 'archived'
-                                        }"></span>
-                                        <div>
-                                            <div class="font-bold text-slate-900" x-text="p.tradeName || p.name"></div>
-                                            <div class="text-[11px] text-slate-500" x-text="(p.city || 'Nacional') + ' • ' + (p.typeLabel || 'Proveedor')"></div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold" x-text="p.status"></span>
-                                        <div class="text-[10px] text-slate-400 mt-0.5" x-text="'Lead Time: ' + p.leadTimeDays + ' d'"></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-6 py-3 border-t border-slate-200 bg-slate-50/60 flex items-center justify-between">
-                    <button type="button" @click="providerKpiModalOpen = false" class="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer">
-                        Cerrar
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="providerKpiModalOpen = false; activeSettingsTab = 'scraping'; moduleSettingsModalOpen = true;"
-                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
-                    >
-                        <span>Gestionar en Ajustes de Inventario &rarr;</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL KPI 3: DIAGNÓSTICO DE TELEMETRÍA & SALUD DE RED             -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="latencyKpiModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
-        >
-            <div @click.outside="latencyKpiModalOpen = false" class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-2xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900">Diagnóstico de Telemetría & Salud de Red</h3>
-                            <p class="text-xs text-slate-500">Métricas de latencia, ping de APIs y estado de webhooks</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="latencyKpiModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                            <span class="text-xs font-bold text-slate-500 uppercase block">Latencia Media</span>
-                            <span class="text-xl font-black text-slate-900 mt-1 block">1.18 s</span>
-                            <span class="text-[10px] text-emerald-600 font-semibold">Dentro del umbral optimo</span>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                            <span class="text-xs font-bold text-slate-500 uppercase block">Uptime Conectores</span>
-                            <span class="text-xl font-black text-emerald-600 mt-1 block">99.8%</span>
-                            <span class="text-[10px] text-slate-500">Ultimos 30 dias</span>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                            <span class="text-xs font-bold text-slate-500 uppercase block">Tasa de Error HTTP</span>
-                            <span class="text-xl font-black text-indigo-600 mt-1 block">0.2%</span>
-                            <span class="text-[10px] text-slate-500">Reintentos automaticos: 3</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Desglose de Conectividad por Proveedor</h4>
-                        <div class="space-y-2 text-xs">
-                            <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <span class="font-bold text-slate-900">Torzo Puppeteer Scraper</span>
-                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Headless v2.4</span>
-                                </div>
-                                <div class="font-mono text-xs font-semibold text-slate-700">1,420 ms &bull; HTTP 200 OK</div>
-                            </div>
-                            <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <span class="font-bold text-slate-900">Silk & Cotton REST API</span>
-                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">JSON Bearer</span>
-                                </div>
-                                <div class="font-mono text-xs font-semibold text-emerald-600">310 ms &bull; HTTP 200 OK</div>
-                            </div>
-                            <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <span class="font-bold text-slate-900">Lingerie Drop Miami GraphQL</span>
-                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">SSL v3</span>
-                                </div>
-                                <div class="font-mono text-xs font-semibold text-emerald-600">450 ms &bull; HTTP 200 OK</div>
-                            </div>
-                            <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <span class="font-bold text-slate-900">Seamless Tech Endpoint</span>
-                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">API Sync</span>
-                                </div>
-                                <div class="font-mono text-xs font-semibold text-emerald-600">280 ms &bull; HTTP 200 OK</div>
-                            </div>
-                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between opacity-70">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                                    <span class="font-bold text-slate-800">ModaIntima MX & Talleres Locales</span>
-                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">Confeccion Local</span>
-                                </div>
-                                <div class="text-[11px] text-slate-500">Gestion mediante Kardex de Compras (OC)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-6 py-3 border-t border-slate-200 bg-slate-50/60 flex justify-end">
-                    <button type="button" @click="latencyKpiModalOpen = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition cursor-pointer">
-                        Cerrar Diagnostico
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL KPI 4: REGISTRO DE AUDITORÍA DE DISCREPANCIAS B2B           -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="discrepancyKpiModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
-        >
-            <div @click.outside="discrepancyKpiModalOpen = false" class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-3xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900">Registro de Auditoría de Discrepancias B2B</h3>
-                            <p class="text-xs text-slate-500">Historial de alertas de costo, desabastos y demoras en entregas</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="discrepancyKpiModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                    <div class="flex items-center justify-between text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div>
-                            Total Registradas: <span class="font-bold text-slate-900" x-text="(scrapingAlerts || []).length"></span>
-                        </div>
-                        <div class="flex items-center gap-3 font-semibold">
-                            <span class="text-amber-700">Pendientes: <span x-text="(scrapingAlerts || []).filter(a => !a.resolved).length"></span></span>
-                            <span class="text-emerald-700">Resueltas: <span x-text="(scrapingAlerts || []).filter(a => a.resolved).length"></span></span>
-                        </div>
-                    </div>
-
-                    <div class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                        <template x-for="alert in scrapingAlerts" :key="alert.id">
-                            <div class="p-3.5 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs" :class="alert.resolved ? 'bg-slate-50/50 opacity-70' : ''">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-mono font-bold text-indigo-700" x-text="alert.sku"></span>
-                                        <span class="font-bold text-slate-800" x-text="alert.productName"></span>
-                                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200" x-text="alert.supplier"></span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-600 mt-1" x-text="alert.message"></p>
-                                </div>
-                                <div class="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-1">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" :class="alert.resolved ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'" x-text="alert.resolved ? 'Resuelta' : 'Pendiente'"></span>
-                                    <span class="text-[10px] text-slate-500 font-semibold" x-text="alert.impact || 'Alerta'"></span>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-                <div class="px-6 py-3 border-t border-slate-200 bg-slate-50/60 flex justify-end">
-                    <button type="button" @click="discrepancyKpiModalOpen = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition cursor-pointer">
-                        Cerrar Historial
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL KPI 5: SCORECARD GLOBAL DE SLA & RANKING DE CONFIABILIDAD   -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="slaKpiModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
-        >
-            <div @click.outside="slaKpiModalOpen = false" class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900">Scorecard Global de SLA & Ranking de Confiabilidad</h3>
-                            <p class="text-xs text-slate-500">Auditoría formal de cumplimiento en entregas a rampa y completitud de pedidos</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="slaKpiModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                    <!-- Top KPIs del Scorecard -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl text-center">
-                            <span class="text-xs font-bold text-emerald-800 uppercase block">SLA Ponderado</span>
-                            <span class="text-xl font-black text-emerald-700 mt-1 block" x-text="averageSlaScore + '%'">96.4%</span>
-                            <span class="text-[10px] text-emerald-600">Nivel excelente</span>
-                        </div>
-                        <div class="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl text-center">
-                            <span class="text-xs font-bold text-indigo-800 uppercase block">On-Time Promedio</span>
-                            <span class="text-xl font-black text-indigo-700 mt-1 block">95.1%</span>
-                            <span class="text-[10px] text-indigo-600">A tiempo en rampa</span>
-                        </div>
-                        <div class="p-3 bg-blue-50/60 border border-blue-100 rounded-xl text-center">
-                            <span class="text-xs font-bold text-blue-800 uppercase block">Fill Rate Promedio</span>
-                            <span class="text-xl font-black text-blue-700 mt-1 block">97.4%</span>
-                            <span class="text-[10px] text-blue-600">Sin piezas faltantes</span>
-                        </div>
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                            <span class="text-xs font-bold text-slate-600 uppercase block">Órdenes Totales</span>
-                            <span class="text-xl font-black text-slate-800 mt-1 block">96 OCs</span>
-                            <span class="text-[10px] text-slate-500">Histórico auditado</span>
-                        </div>
-                    </div>
-
-                    <!-- Tabla de Ranking de Proveedores -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                                <tr>
-                                    <th class="py-3 px-4">Proveedor & Giro</th>
-                                    <th class="py-3 px-4 text-center">On-Time %</th>
-                                    <th class="py-3 px-4 text-center">Fill Rate %</th>
-                                    <th class="py-3 px-4 text-center">Demora Media</th>
-                                    <th class="py-3 px-4 text-center">Órdenes</th>
-                                    <th class="py-3 px-4 text-right">Confiabilidad</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium">
-                                <template x-for="p in providers.filter(prov => prov.status !== 'archived')" :key="p.id">
-                                    <tr class="hover:bg-slate-50 transition">
-                                        <td class="py-3 px-4">
-                                            <div class="font-bold text-slate-900" x-text="p.tradeName || p.name"></div>
-                                            <div class="text-[10px] text-slate-400" x-text="(p.city || 'Nacional') + ' • ' + (p.typeLabel || 'Proveedor')"></div>
-                                        </td>
-                                        <td class="py-3 px-4 text-center">
-                                            <div class="flex items-center justify-center gap-1.5 font-bold text-slate-800">
-                                                <span x-text="(p.slaOnTimePct || 100) + '%'"></span>
-                                            </div>
-                                            <div class="w-16 bg-slate-200 h-1.5 rounded-full mx-auto mt-1 overflow-hidden">
-                                                <div class="bg-emerald-500 h-1.5 rounded-full" :style="'width: ' + (p.slaOnTimePct || 100) + '%'"></div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3 px-4 text-center">
-                                            <div class="flex items-center justify-center gap-1.5 font-bold text-slate-800">
-                                                <span x-text="(p.slaFillRatePct || 100) + '%'"></span>
-                                            </div>
-                                            <div class="w-16 bg-slate-200 h-1.5 rounded-full mx-auto mt-1 overflow-hidden">
-                                                <div class="bg-indigo-600 h-1.5 rounded-full" :style="'width: ' + (p.slaFillRatePct || 100) + '%'"></div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3 px-4 text-center font-mono text-slate-700" x-text="'+' + (p.avgDelayDays || 0) + ' d'"></td>
-                                        <td class="py-3 px-4 text-center text-slate-600" x-text="(p.completedOrders || 0) + ' / ' + (p.totalOrders || 0)"></td>
-                                        <td class="py-3 px-4 text-right">
-                                            <span 
-                                                class="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                                                :class="{
-                                                    'bg-emerald-100 text-emerald-800': ((p.slaOnTimePct || 100) + (p.slaFillRatePct || 100)) / 2 >= 95,
-                                                    'bg-amber-100 text-amber-800': ((p.slaOnTimePct || 100) + (p.slaFillRatePct || 100)) / 2 >= 90 && ((p.slaOnTimePct || 100) + (p.slaFillRatePct || 100)) / 2 < 95,
-                                                    'bg-rose-100 text-rose-800': ((p.slaOnTimePct || 100) + (p.slaFillRatePct || 100)) / 2 < 90
-                                                }"
-                                                x-text="((p.slaOnTimePct || 100) + (p.slaFillRatePct || 100)) / 2 >= 95 ? 'Excelente' : (((p.slaOnTimePct || 100) + (p.slaFillRatePct || 100)) / 2 >= 90 ? 'Aceptable' : 'Riesgo')">
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="px-6 py-3 border-t border-slate-200 bg-slate-50/60 flex justify-end">
-                    <button type="button" @click="slaKpiModalOpen = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition cursor-pointer">
-                        Cerrar Scorecard
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- PESTAÑA 3: COMPRAS & REABASTECIMIENTO                             -->
-    <!-- ================================================================= -->
-    <div x-show="activeTab === 'purchases' && isTabAllowed('purchases')" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-        
-        <!-- Sub-navegación interna de Compras: Planeación vs Seguimiento Fletero vs On-Demand vs Kardex -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
-            <div class="flex items-center gap-2 flex-wrap">
-                <button 
-                    type="button"
-                    @click="purchasesSubTab = 'reorder'"
-                    :class="purchasesSubTab === 'reorder' 
-                        ? 'bg-indigo-600 text-white font-bold shadow-xs' 
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
-                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
-                    style="min-height: unset;"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    <span>Planeación de Compras (Bandeja MOQ)</span>
-                    <span :class="purchasesSubTab === 'reorder' ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-700'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="futurePurchaseOrders.length"></span>
-                </button>
-                <button 
-                    type="button"
-                    x-show="canAccessInboundTracking()"
-                    @click="purchasesSubTab = 'inbound_tracking'"
-                    :class="purchasesSubTab === 'inbound_tracking' 
-                        ? 'bg-blue-600 text-white font-bold shadow-xs' 
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
-                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
-                    style="min-height: unset;"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                    <span>Órdenes Emitidas & Seguimiento Fletero</span>
-                    <span :class="purchasesSubTab === 'inbound_tracking' ? 'bg-blue-700 text-white' : 'bg-blue-100 text-blue-800'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length"></span>
-                </button>
-                <button 
-                    type="button"
-                    @click="purchasesSubTab = 'on_demand'"
-                    :class="purchasesSubTab === 'on_demand' 
-                        ? 'bg-amber-600 text-white font-bold shadow-xs' 
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
-                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
-                    style="min-height: unset;"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    <span>Solicitudes On-Demand (Carritos de Clientes)</span>
-                    <span :class="purchasesSubTab === 'on_demand' ? 'bg-amber-700 text-white' : 'bg-amber-100 text-amber-800'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="customerOnDemandRequests.length"></span>
-                </button>
-                <button 
-                    type="button"
-                    @click="purchasesSubTab = 'kardex'"
-                    :class="purchasesSubTab === 'kardex' 
-                        ? 'bg-slate-900 text-white font-bold shadow-xs' 
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
-                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
-                    style="min-height: unset;"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span>Kardex de Auditoría de Compras</span>
-                    <span :class="purchasesSubTab === 'kardex' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-700'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="purchaseKardexLog.length"></span>
-                </button>
-            </div>
-            <div class="text-xs text-slate-500 font-medium px-2 shrink-0">
-                <template x-if="purchasesSubTab === 'reorder'">
-                    <span>Planificación de lotes, sugerencias ROP y cálculo de MOQ</span>
-                </template>
-                <template x-if="purchasesSubTab === 'inbound_tracking'">
-                    <span>Telemetría de guías, transportistas y expedientes PO emitidos</span>
-                </template>
-                <template x-if="purchasesSubTab === 'on_demand'">
-                    <span>Backorders y líneas proveedor de carritos mixtos</span>
-                </template>
-                <template x-if="purchasesSubTab === 'kardex'">
-                    <span>Trazabilidad inmutable de OCs, ajustes y resoluciones</span>
-                </template>
-            </div>
-        </div>
-
-        <!-- SUB-VISTA 1: ÓRDENES Y REABASTECIMIENTO MAYORISTA -->
-        <div x-show="purchasesSubTab === 'reorder'" class="space-y-6">
-            
-            <!-- 4 KPI Cards Compras con Tooltips ? (Exclusivo de Planeación) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <!-- KPI 1: Órdenes en Tránsito -->
-                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Órdenes en Tránsito</span>
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                            </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Activas</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Pedidos de compra ya emitidos a mayoristas o fabricantes que se encuentran en preparación o despacho con guía de paquetería.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-xl font-bold text-indigo-600 mt-2">2 Órdenes</div>
-                    <p class="text-xs text-slate-500 mt-1">1 en camino &bull; 1 por confirmar</p>
-                </div>
-
-                <!-- KPI 2: Lotes Planificados -->
-                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lotes Planificados</span>
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                            </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Cola de Futuras Compras</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Artículos agregados desde los Drawers de producto para consolidar pedidos masivos antes de quebrar existencias.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-xl font-bold text-indigo-600 mt-2" x-text="futurePurchaseOrders.length + ' lotes en cola'"></div>
-                    <p class="text-xs text-emerald-600 mt-1 font-medium">Acumulando para MOQ de proveedor</p>
-                </div>
-
-                <!-- KPI 3: Inversión Proyectada -->
-                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Inversión Estimada</span>
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                            </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Compromiso Financiero RevOps</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Costo total proyectado de la reposición planificada en cola calculada a costo mayorista directo.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-xl font-bold text-emerald-600 mt-2" x-text="formatCurrency(futurePurchaseOrders.reduce((acc, o) => acc + (o.totalCost || 0), 0))"></div>
-                    <p class="text-xs text-slate-500 mt-1">Calculado a costo unitario neto</p>
-                </div>
-
-                <!-- KPI 4: Lead Time Promedio -->
-                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lead Time Promedio</span>
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                            </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Tiempo de Reabastecimiento</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Días promedio desde la confirmación de la orden hasta la recepción e ingreso físico a rack en almacén.</p>
-                                <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-xl font-bold text-slate-900 mt-2">4.2 días</div>
-                    <p class="text-xs text-emerald-600 mt-1 font-medium">Logística rápida optimizada</p>
-                </div>
-            </div>
-
-        <!-- [P2.1] BANNER DE CARRITO MIXTO LIBERADO TRAS RECEPCIÓN DE MERCANCÍA -->
-        <template x-if="mixedCartLiberated.show">
-            <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-pulse">
-                <div class="flex items-center gap-3">
-                    <span class="p-2 bg-emerald-100 text-emerald-700 rounded-lg shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    </span>
-                    <div>
-                        <h4 class="text-xs font-bold text-emerald-950 flex items-center gap-2">
-                            <span>¡Carrito Mixto Liberado para Empaque Total!</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-200 text-emerald-900 font-mono font-bold" x-text="mixedCartLiberated.orderId"></span>
-                        </h4>
-                        <p class="text-[11px] text-emerald-800 mt-0.5">
-                            Cliente: <strong x-text="mixedCartLiberated.customer"></strong> &bull; La prenda <strong x-text="mixedCartLiberated.item"></strong> arribó e ingresó a rack. El pedido ya cuenta con todas sus piezas completas.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <button 
-                        type="button" 
-                        @click="showToast('Notificación enviada a la mesa de empaque en Logística (Hub 6)', 'success')" 
-                        class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
-                    >
-                        <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Enviar a Empaque</span>
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="mixedCartLiberated.show = false" 
-                        class="p-1.5 text-emerald-600 hover:text-emerald-800 rounded-lg hover:bg-emerald-100 transition cursor-pointer"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <!-- Tabla: Lista Reactiva de Futuras Compras (Reabastecimiento Planificado - TASK-INV-16) -->
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
-            <div class="p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-200 inline-flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        </span>
-                        <h3 class="text-base font-bold text-slate-900">Lista de Futuras Compras & Reabastecimiento Planificado</h3>
-                        <!-- Help Icon -->
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                            </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Consolidación y Edición en Vivo (TASK-INV-16)</div>
-                                <p class="text-[11px] text-slate-200 leading-snug">Edita cantidades y curva de tallas en tiempo real. Agrupa por fabricante para verificar el MOQ antes de emitir la Orden de Compra oficial en PDF.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Lotes sugeridos acumulados con edición directa de unidades y control de Pedido Mínimo (MOQ)</p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <!-- Selector de Vista: Árbol Agrupado vs Lista Plana -->
-                    <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
-                        <button 
-                            type="button"
-                            @click="purchasesViewMode = 'tree'" 
-                            :class="purchasesViewMode === 'tree' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
-                            class="px-2.5 py-1 rounded-md transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                            <span>Por Proveedor (Árbol)</span>
-                        </button>
-                        <button 
-                            type="button"
-                            @click="purchasesViewMode = 'flat'" 
-                            :class="purchasesViewMode === 'flat' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
-                            class="px-2.5 py-1 rounded-md transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            <span>Lista Plana</span>
-                        </button>
-                    </div>
-
-                    <!-- Botón Generar PO Oficial PDF -->
-                    <button 
-                        type="button"
-                        @click="openPoGenerator('all')" 
-                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
-                        title="Generar e imprimir orden de compra formal en PDF con folio"
-                    >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Generar PO Oficial (PDF)</span>
-                    </button>
-
-                    <!-- Botón Exportar WhatsApp -->
-                    <button 
-                        type="button"
-                        @click="exportPurchaseOrdersToExcel()" 
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
-                    >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        <span>Exportar WhatsApp</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- VISTA 1: ÁRBOL AGRUPADO POR PROVEEDOR (TREE-VIEW) -->
-            <div x-show="purchasesViewMode === 'tree'" class="p-5 space-y-6">
-                <template x-if="futurePurchaseOrders.length === 0">
-                    <div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <p class="text-xs font-semibold text-slate-500">No hay órdenes de compra planificadas en cola. Agrega productos desde el Catálogo con el botón "+ Generar PO" o convierte solicitudes On-Demand.</p>
-                    </div>
-                </template>
-
-                <template x-for="group in getPlannedOrdersBySupplier()" :key="group.supplier">
-                    <div class="bg-slate-50/70 rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
-                        <!-- Cabecera del Proveedor en el Árbol -->
-                        <div class="p-4 bg-white border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div class="flex items-start sm:items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold shrink-0">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="text-sm font-bold text-slate-900" x-text="group.supplier"></h4>
-                                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold" x-text="group.providerData ? group.providerData.vendorCode : 'VND-EXT'"></span>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="'Lead Time: ' + group.leadTime"></span>
-                                    </div>
-                                    <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                                        <span>Contacto: <strong class="text-slate-700" x-text="group.contact"></strong></span>
-                                        <span>•</span>
-                                        <span>Términos: <strong class="text-slate-700" x-text="group.paymentTerms"></strong></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Barra de Progreso MOQ y Subtotales del Proveedor -->
-                            <div class="flex flex-col sm:flex-row sm:items-center gap-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                                <!-- Progreso MOQ -->
-                                <div class="min-w-[180px]">
-                                    <div class="flex items-center justify-between text-[11px] mb-1">
-                                        <span class="font-bold text-slate-600">Progreso Pedido Mínimo (MOQ):</span>
-                                        <span 
-                                            class="font-mono font-extrabold text-[10px]"
-                                            :class="getSupplierMoqProgress(group).isMet ? 'text-emerald-700' : 'text-amber-700'"
-                                            x-text="getSupplierMoqProgress(group).percentage + '%'"
-                                        ></span>
-                                    </div>
-                                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                        <div 
-                                            class="h-2 rounded-full transition-all duration-300"
-                                            :class="getSupplierMoqProgress(group).isMet ? 'bg-emerald-500' : 'bg-amber-500'"
-                                            :style="'width: ' + getSupplierMoqProgress(group).percentage + '%'"
-                                        ></div>
-                                    </div>
-                                    <span class="text-[10px] text-slate-500 block mt-0.5" x-text="getSupplierMoqProgress(group).label"></span>
-                                </div>
-
-                                <!-- Subtotal Piezas e Inversión -->
-                                <div class="text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-2 sm:pt-0 sm:pl-4">
-                                    <div class="text-[11px] text-slate-500">Subtotal del Fabricante</div>
-                                    <div class="text-sm font-extrabold text-slate-900" x-text="formatCurrency(group.totalCost)"></div>
-                                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded" x-text="group.totalQty + ' piezas'"></span>
-                                </div>
-
-                                <!-- Acción Rápida: Emitir PO para este Proveedor -->
-                                <button 
-                                    type="button" 
-                                    @click="openPoGenerator(group.supplier)"
-                                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0"
-                                    title="Emitir orden de compra formal exclusivamente para este proveedor"
-                                >
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    <span>Generar PO (PDF)</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Tabla Anidada de Artículos del Proveedor -->
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-600 text-[10px] uppercase tracking-wider font-semibold">
-                                        <th class="py-2.5 px-4">Lote Ref</th>
-                                        <th class="py-2.5 px-4">Producto & SKU</th>
-                                        <th class="py-2.5 px-4 text-center">Unidades (Editable)</th>
-                                        <th class="py-2.5 px-4 text-center">Curva de Tallas (Editable)</th>
-                                        <th class="py-2.5 px-4 text-right">Costo Unit. (Editable)</th>
-                                        <th class="py-2.5 px-4 text-right">Subtotal MXN</th>
-                                        <th class="py-2.5 px-4 text-center">Prioridad (Editable)</th>
-                                        <th class="py-2.5 px-4 text-right">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200/60 font-medium text-slate-700 bg-white">
-                                    <template x-for="(order, oIdx) in group.items" :key="order.id">
-                                        <tr class="hover:bg-slate-50/80 transition">
-                                            <td class="py-2.5 px-4 font-mono font-bold text-indigo-600 text-xs" x-text="order.id"></td>
-                                            <td class="py-2.5 px-4">
-                                                <span class="font-bold text-slate-900 block" x-text="order.productName"></span>
-                                                <span class="text-slate-400 font-mono text-[10px]" x-text="'SKU: ' + order.sku"></span>
-                                            </td>
-                                            <!-- Edición Directa de Cantidad -->
-                                            <td class="py-2.5 px-4 text-center">
-                                                <div class="inline-flex items-center gap-1">
-                                                    <input 
-                                                        type="number" 
-                                                        min="1" 
-                                                        max="9999"
-                                                        :value="order.qty" 
-                                                        @change="updatePlannedOrderQty(order.id, $event.target.value)" 
-                                                        class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        title="Modificar unidades a comprar (recalcula subtotales e inversión global)"
-                                                    >
-                                                    <span class="text-[11px] text-slate-400 font-medium">uds</span>
-                                                </div>
-                                            </td>
-                                            <!-- Curva de Tallas con Edición Directa / En Línea y Modal Alternativo -->
-                                            <td class="py-2.5 px-4 text-center">
-                                                <!-- MODO 1: VISUALIZACIÓN RÁPIDA DE BADGES CON BOTÓN DE ACTIVACIÓN -->
-                                                <div x-show="!order._editingSizes" class="flex items-center justify-center gap-1 text-[10px] flex-wrap">
-                                                    <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'CH:' + (order.sizes ? (order.sizes.ch || 0) : 0)"></span>
-                                                    <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'M:' + (order.sizes ? (order.sizes.m || 0) : 0)"></span>
-                                                    <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'G:' + (order.sizes ? (order.sizes.g || 0) : 0)"></span>
-                                                    <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'XL:' + (order.sizes ? (order.sizes.xl || 0) : 0)"></span>
-                                                    <template x-if="order.sizes && order.sizes['2xl'] > 0">
-                                                        <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'2XL:' + order.sizes['2xl']"></span>
-                                                    </template>
-                                                    <template x-if="order.sizes && order.sizes['3xl'] > 0">
-                                                        <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'3XL:' + order.sizes['3xl']"></span>
-                                                    </template>
-                                                    <!-- BOTÓN EDITAR EN LÍNEA -->
-                                                    <button 
-                                                        type="button" 
-                                                        @click.stop="order._editingSizes = true"
-                                                        style="min-height: unset; padding: 2px 6px;"
-                                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 border border-indigo-200 hover:border-indigo-600 rounded transition cursor-pointer ml-1"
-                                                        title="Activar edición de curva de tallas en la tabla"
-                                                    >
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                                        <span>Editar</span>
-                                                    </button>
-                                                </div>
-
-                                                <!-- MODO 2: EDICIÓN EN LÍNEA DIRECTA CON INPUTS NUMÉRICOS Y RECALCULO AUTOMÁTICO -->
-                                                <div x-show="order._editingSizes" class="inline-flex flex-wrap items-center justify-center gap-1 p-1 bg-indigo-50/90 border border-indigo-200 rounded-lg shadow-2xs">
-                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
-                                                        <span class="text-[9px] font-bold text-slate-500">CH</span>
-                                                        <input 
-                                                            type="number" 
-                                                            min="0" 
-                                                            max="999" 
-                                                            :value="order.sizes ? (order.sizes.ch || 0) : 0" 
-                                                            @input="updatePlannedOrderSize(order.id, 'ch', $event.target.value)"
-                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
-                                                        >
-                                                    </div>
-                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
-                                                        <span class="text-[9px] font-bold text-indigo-700">M</span>
-                                                        <input 
-                                                            type="number" 
-                                                            min="0" 
-                                                            max="999" 
-                                                            :value="order.sizes ? (order.sizes.m || 0) : 0" 
-                                                            @input="updatePlannedOrderSize(order.id, 'm', $event.target.value)"
-                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
-                                                        >
-                                                    </div>
-                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
-                                                        <span class="text-[9px] font-bold text-indigo-700">G</span>
-                                                        <input 
-                                                            type="number" 
-                                                            min="0" 
-                                                            max="999" 
-                                                            :value="order.sizes ? (order.sizes.g || 0) : 0" 
-                                                            @input="updatePlannedOrderSize(order.id, 'g', $event.target.value)"
-                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
-                                                        >
-                                                    </div>
-                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
-                                                        <span class="text-[9px] font-bold text-slate-500">XL</span>
-                                                        <input 
-                                                            type="number" 
-                                                            min="0" 
-                                                            max="999" 
-                                                            :value="order.sizes ? (order.sizes.xl || 0) : 0" 
-                                                            @input="updatePlannedOrderSize(order.id, 'xl', $event.target.value)"
-                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
-                                                        >
-                                                    </div>
-                                                    <template x-if="order.sizes && order.sizes['2xl'] !== undefined">
-                                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
-                                                            <span class="text-[9px] font-bold text-amber-700">2XL</span>
-                                                            <input 
-                                                                type="number" 
-                                                                min="0" 
-                                                                max="999" 
-                                                                :value="order.sizes['2xl'] || 0" 
-                                                                @input="updatePlannedOrderSize(order.id, '2xl', $event.target.value)"
-                                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
-                                                            >
-                                                        </div>
-                                                    </template>
-                                                    <template x-if="order.sizes && order.sizes['3xl'] !== undefined">
-                                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
-                                                            <span class="text-[9px] font-bold text-amber-700">3XL</span>
-                                                            <input 
-                                                                type="number" 
-                                                                min="0" 
-                                                                max="999" 
-                                                                :value="order.sizes['3xl'] || 0" 
-                                                                @input="updatePlannedOrderSize(order.id, '3xl', $event.target.value)"
-                                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
-                                                            >
-                                                        </div>
-                                                    </template>
-                                                    <!-- BOTÓN GUARDAR Y CERRAR -->
-                                                    <button 
-                                                        type="button" 
-                                                        @click.stop="order._editingSizes = false; showToast('Curva de tallas guardada (' + order.qty + ' uds).', 'success')"
-                                                        style="min-height: unset; padding: 2px 8px;"
-                                                        class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-extrabold transition shadow-2xs cursor-pointer flex items-center gap-1 ml-1"
-                                                        title="Guardar y cerrar edición"
-                                                    >
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                                        <span>Listo</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <!-- Costo Unitario Editable -->
-                                            <td class="py-2.5 px-4 text-right">
-                                                <div class="inline-flex items-center gap-1 justify-end">
-                                                    <span class="text-xs text-slate-400 font-semibold">$</span>
-                                                    <input 
-                                                        type="number" 
-                                                        step="0.50" 
-                                                        min="0" 
-                                                        :value="order.costUnit" 
-                                                        @change="updatePlannedOrderCost(order.id, $event.target.value)" 
-                                                        class="w-20 px-1.5 py-1 text-right font-mono font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        title="Modificar costo unitario pactado con fabricante"
-                                                    >
-                                                    <span class="text-[10px] text-slate-400 font-medium">MXN</span>
-                                                </div>
-                                            </td>
-                                            <!-- Subtotal Recalculado Dinámicamente -->
-                                            <td class="py-2.5 px-4 text-right font-bold text-slate-900 font-mono" x-text="formatCurrency(order.totalCost)"></td>
-                                            <!-- Prioridad Editable (Reglas ROP / Ajuste Manual) -->
-                                            <td class="py-2.5 px-4 text-center">
-                                                <select 
-                                                    :value="order.priority" 
-                                                    @change="updatePlannedOrderPriority(order.id, $event.target.value)"
-                                                    class="text-[10px] font-extrabold uppercase tracking-wider rounded-lg px-2 py-1 border cursor-pointer focus:outline-none transition shadow-2xs font-sans"
-                                                    :class="order.priority === 'critica' ? 'bg-purple-50 text-purple-700 border-purple-300' : (order.priority === 'alta' ? 'bg-rose-50 text-rose-700 border-rose-300' : (order.priority === 'media' ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-emerald-50 text-emerald-700 border-emerald-300'))"
-                                                    title="Prioridad según criticidad ROP o manual"
-                                                >
-                                                    <option value="critica" class="bg-white text-purple-700 font-bold">CRÍTICA</option>
-                                                    <option value="alta" class="bg-white text-rose-700 font-bold">ALTA</option>
-                                                    <option value="media" class="bg-white text-amber-700 font-bold">MEDIA</option>
-                                                    <option value="baja" class="bg-white text-emerald-700 font-bold">BAJA</option>
-                                                </select>
-                                            </td>
-                                            <td class="py-2.5 px-4 text-right">
-                                                <button 
-                                                    type="button"
-                                                    @click="futurePurchaseOrders = futurePurchaseOrders.filter(o => o.id !== order.id); showToast('Partida removida de compras planificadas.', 'info')" 
-                                                    class="text-xs text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
-                                                >
-                                                    Quitar
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </template>
-            </div>
-
-            <!-- VISTA 2: LISTA PLANA CONTINUA -->
-            <div x-show="purchasesViewMode === 'flat'" class="overflow-x-auto rounded-b-xl">
-                <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                            <th class="py-3 px-4">Código Lote</th>
-                            <th class="py-3 px-4">Producto & SKU</th>
-                            <th class="py-3 px-4">Proveedor Asignado</th>
-                            <th class="py-3 px-4 text-center">Unidades (Editable)</th>
-                            <th class="py-3 px-4 text-center">Curva Tallas (Editable)</th>
-                            <th class="py-3 px-4 text-right">Costo Unit. (Editable)</th>
-                            <th class="py-3 px-4 text-right">Inversión Estimada</th>
-                            <th class="py-3 px-4 text-center">Prioridad (Editable)</th>
-                            <th class="py-3 px-4 text-center">Estado</th>
-                            <th class="py-3 px-4 text-right">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                        <template x-for="(order, index) in futurePurchaseOrders" :key="order.id">
-                            <tr class="hover:bg-slate-50 transition">
-                                <td class="py-3.5 px-4 font-mono font-bold text-indigo-600" x-text="order.id"></td>
-                                <td class="py-3.5 px-4">
-                                    <span class="font-bold text-slate-900 block" x-text="order.productName"></span>
-                                    <span class="text-slate-400 font-mono text-[10px]" x-text="'SKU: ' + order.sku"></span>
-                                </td>
-                                <td class="py-3.5 px-4 font-semibold text-slate-800" x-text="order.supplier"></td>
-                                <td class="py-3.5 px-4 text-center">
-                                    <div class="inline-flex items-center gap-1">
-                                        <input 
-                                            type="number" 
-                                            min="1" 
-                                            max="9999"
-                                            :value="order.qty" 
-                                            @change="updatePlannedOrderQty(order.id, $event.target.value)" 
-                                            class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                        <span class="text-[11px] text-slate-400">uds</span>
-                                    </div>
-                                </td>
-                                <td class="py-3.5 px-4 text-center">
-                                    <!-- MODO 1: VISUALIZACIÓN RÁPIDA DE BADGES CON BOTÓN DE ACTIVACIÓN -->
-                                    <div x-show="!order._editingSizes" class="flex items-center justify-center gap-1 text-[10px] flex-wrap">
-                                        <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'CH:' + (order.sizes ? (order.sizes.ch || 0) : 0)"></span>
-                                        <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'M:' + (order.sizes ? (order.sizes.m || 0) : 0)"></span>
-                                        <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'G:' + (order.sizes ? (order.sizes.g || 0) : 0)"></span>
-                                        <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'XL:' + (order.sizes ? (order.sizes.xl || 0) : 0)"></span>
-                                        <template x-if="order.sizes && order.sizes['2xl'] > 0">
-                                            <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'2XL:' + order.sizes['2xl']"></span>
-                                        </template>
-                                        <template x-if="order.sizes && order.sizes['3xl'] > 0">
-                                            <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'3XL:' + order.sizes['3xl']"></span>
-                                        </template>
-                                        <!-- BOTÓN EDITAR EN LÍNEA -->
-                                        <button 
-                                            type="button" 
-                                            @click.stop="order._editingSizes = true"
-                                            style="min-height: unset; padding: 2px 6px;"
-                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 border border-indigo-200 hover:border-indigo-600 rounded transition cursor-pointer ml-1"
-                                            title="Activar edición de curva de tallas en la tabla"
-                                        >
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                            <span>Editar</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- MODO 2: EDICIÓN EN LÍNEA DIRECTA CON INPUTS NUMÉRICOS Y RECALCULO AUTOMÁTICO -->
-                                    <div x-show="order._editingSizes" class="inline-flex flex-wrap items-center justify-center gap-1 p-1 bg-indigo-50/90 border border-indigo-200 rounded-lg shadow-2xs">
-                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
-                                            <span class="text-[9px] font-bold text-slate-500">CH</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                max="999" 
-                                                :value="order.sizes ? (order.sizes.ch || 0) : 0" 
-                                                @input="updatePlannedOrderSize(order.id, 'ch', $event.target.value)"
-                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
-                                            <span class="text-[9px] font-bold text-indigo-700">M</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                max="999" 
-                                                :value="order.sizes ? (order.sizes.m || 0) : 0" 
-                                                @input="updatePlannedOrderSize(order.id, 'm', $event.target.value)"
-                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
-                                            <span class="text-[9px] font-bold text-indigo-700">G</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                max="999" 
-                                                :value="order.sizes ? (order.sizes.g || 0) : 0" 
-                                                @input="updatePlannedOrderSize(order.id, 'g', $event.target.value)"
-                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
-                                            >
-                                        </div>
-                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
-                                            <span class="text-[9px] font-bold text-slate-500">XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                max="999" 
-                                                :value="order.sizes ? (order.sizes.xl || 0) : 0" 
-                                                @input="updatePlannedOrderSize(order.id, 'xl', $event.target.value)"
-                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
-                                            >
-                                        </div>
-                                        <template x-if="order.sizes && order.sizes['2xl'] !== undefined">
-                                            <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
-                                                <span class="text-[9px] font-bold text-amber-700">2XL</span>
-                                                <input 
-                                                    type="number" 
-                                                    min="0" 
-                                                    max="999" 
-                                                    :value="order.sizes['2xl'] || 0" 
-                                                    @input="updatePlannedOrderSize(order.id, '2xl', $event.target.value)"
-                                                    class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
-                                                >
-                                            </div>
-                                        </template>
-                                        <template x-if="order.sizes && order.sizes['3xl'] !== undefined">
-                                            <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
-                                                <span class="text-[9px] font-bold text-amber-700">3XL</span>
-                                                <input 
-                                                    type="number" 
-                                                    min="0" 
-                                                    max="999" 
-                                                    :value="order.sizes['3xl'] || 0" 
-                                                    @input="updatePlannedOrderSize(order.id, '3xl', $event.target.value)"
-                                                    class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
-                                                >
-                                            </div>
-                                        </template>
-                                        <!-- BOTÓN GUARDAR Y CERRAR -->
-                                        <button 
-                                            type="button" 
-                                            @click.stop="order._editingSizes = false; showToast('Curva de tallas guardada (' + order.qty + ' uds).', 'success')"
-                                            style="min-height: unset; padding: 2px 8px;"
-                                            class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-extrabold transition shadow-2xs cursor-pointer flex items-center gap-1 ml-1"
-                                            title="Guardar y cerrar edición"
-                                        >
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                            <span>Listo</span>
-                                        </button>
-                                    </div>
-                                </td>
-                                <!-- Costo Unitario Editable -->
-                                <td class="py-3.5 px-4 text-right">
-                                    <div class="inline-flex items-center gap-1 justify-end">
-                                        <span class="text-xs text-slate-400 font-semibold">$</span>
-                                        <input 
-                                            type="number" 
-                                            step="0.50" 
-                                            min="0" 
-                                            :value="order.costUnit" 
-                                            @change="updatePlannedOrderCost(order.id, $event.target.value)" 
-                                            class="w-20 px-1.5 py-1 text-right font-mono font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            title="Modificar costo unitario pactado con fabricante"
-                                        >
-                                        <span class="text-[10px] text-slate-400 font-medium">MXN</span>
-                                    </div>
-                                </td>
-                                <!-- Inversión Estimada Recalculada -->
-                                <td class="py-3.5 px-4 text-right font-bold text-slate-900 font-mono" x-text="formatCurrency(order.totalCost)"></td>
-                                <!-- Prioridad Editable -->
-                                <td class="py-3.5 px-4 text-center">
-                                    <select 
-                                        :value="order.priority" 
-                                        @change="updatePlannedOrderPriority(order.id, $event.target.value)"
-                                        class="text-[10px] font-extrabold uppercase tracking-wider rounded-lg px-2 py-1 border cursor-pointer focus:outline-none transition shadow-2xs font-sans"
-                                        :class="order.priority === 'critica' ? 'bg-purple-50 text-purple-700 border-purple-300' : (order.priority === 'alta' ? 'bg-rose-50 text-rose-700 border-rose-300' : (order.priority === 'media' ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-emerald-50 text-emerald-700 border-emerald-300'))"
-                                        title="Prioridad según criticidad ROP o manual"
-                                    >
-                                        <option value="critica" class="bg-white text-purple-700 font-bold">CRÍTICA</option>
-                                        <option value="alta" class="bg-white text-rose-700 font-bold">ALTA</option>
-                                        <option value="media" class="bg-white text-amber-700 font-bold">MEDIA</option>
-                                        <option value="baja" class="bg-white text-emerald-700 font-bold">BAJA</option>
-                                    </select>
-                                </td>
-                                <td class="py-3.5 px-4 text-center">
-                                    <span class="inline-flex items-center gap-1 text-xs text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                        <span x-text="order.status"></span>
-                                    </span>
-                                </td>
-                                <td class="py-3.5 px-4 text-right">
-                                    <button 
-                                        type="button"
-                                        @click="futurePurchaseOrders.splice(index, 1); showToast('Ítem removido de la lista de futuras compras.', 'info')" 
-                                        class="text-xs text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
-                                    >
-                                        Quitar
-                                    </button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        </div> <!-- Fin de SUB-VISTA 1 (purchasesSubTab === 'reorder') -->
-
-        <!-- SUB-VISTA 2: ÓRDENES EMITIDAS & SEGUIMIENTO FLETERO (INBOUND TRACKING - EXCLUSIVO COMPRAS) -->
-        <div x-show="purchasesSubTab === 'inbound_tracking' && canAccessInboundTracking()" class="space-y-6" style="display: none;">
-            <!-- KPI Strip de Seguimiento Fletero -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
-                    <div>
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Órdenes en Tránsito</span>
-                        <div class="text-xl font-bold text-blue-600 mt-0.5" x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length + ' Activas'"></div>
-                        <p class="text-[11px] text-slate-400">Despachadas con transportista</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
-                    <div>
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Piezas en Embarque</span>
-                        <div class="text-xl font-bold text-slate-900 mt-0.5" x-text="activePurchaseOrders.reduce((sum, o) => sum + (Number(o.qty) || 0), 0) + ' unidades'"></div>
-                        <p class="text-[11px] text-emerald-600 font-medium">Inventario comprometido</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
-                    <div>
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Inversión Inbound</span>
-                        <div class="text-xl font-bold text-indigo-600 mt-0.5" x-text="formatCurrency(activePurchaseOrders.reduce((sum, o) => sum + (Number(o.totalCost) || 0), 0))"></div>
-                        <p class="text-[11px] text-slate-400">CxP registradas en Hub 5</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
-                    <div>
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Muelle de Descarga</span>
-                        <div class="text-base font-bold text-slate-900 mt-0.5">Rampa 02 Inbound</div>
-                        <p class="text-[11px] text-slate-400">CEDIS Patio Naucalpan</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center shrink-0 border border-slate-200">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabla de Órdenes Emitidas & Seguimiento Fletero -->
-            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
-                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 inline-flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                            </span>
-                            <h3 class="text-base font-bold text-slate-900">Órdenes Emitidas & Seguimiento Fletero (Inbound Tracking)</h3>
-                            <!-- Help Icon -->
-                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-blue-600 transition-colors cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                </span>
-                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-blue-300 text-[11px] mb-0.5">Seguimiento Fletero para Compras</div>
-                                    <p class="text-[10px] text-slate-200 leading-snug">Expedientes de órdenes de compra emitidas oficialmente. Consulta la telemetría de ruta de las paqueterías (DHL, FedEx, Estafeta), visualiza el PDF formal con firmas y da seguimiento previo a la recepción en rampa.</p>
-                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-1">Expedientes de compra oficiales despachados a fabricantes con telemetría de transporte en tránsito a CEDIS.</p>
-                    </div>
-                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-                        <span x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length"></span> Órdenes en Seguimiento
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto rounded-b-xl">
-                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                                <th class="py-3 px-4">Folio PO</th>
-                                <th class="py-3 px-4">Proveedor & Guía Fletera</th>
-                                <th class="py-3 px-4">Prendas & Curvas de Tallas</th>
-                                <th class="py-3 px-4 text-right">Total ($)</th>
-                                <th class="py-3 px-4">Fecha & ETA</th>
-                                <th class="py-3 px-4 text-center">Estado del Flete</th>
-                                <th class="py-3 px-4 text-right">Acciones (Compras)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                            <template x-for="(order, index) in activePurchaseOrders" :key="order.id">
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 whitespace-nowrap" x-text="'#' + order.id"></td>
-                                    <td class="py-3.5 px-4">
-                                        <span class="font-bold text-slate-900 block" x-text="order.supplier"></span>
-                                        <div class="flex items-center gap-1.5 mt-0.5">
-                                            <span class="text-slate-500 text-[11px] font-mono" x-text="order.carrier"></span>
-                                            <button 
-                                                type="button" 
-                                                @click="copyTrackingNumber(order.carrier)" 
-                                                class="text-slate-400 hover:text-slate-600 transition p-0.5 rounded cursor-pointer"
-                                                title="Copiar guía"
-                                            >
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="font-bold text-slate-900" x-text="order.qty + ' unidades'"></span>
-                                            <template x-if="order.linkedCartId">
-                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                                    Pedido Mixto
-                                                </span>
-                                            </template>
-                                        </div>
-                                        <span class="text-slate-600 text-xs block truncate max-w-xs mt-0.5" x-text="order.productName"></span>
-                                        <div class="flex items-center gap-1 mt-1 text-[10px] text-slate-500 flex-wrap">
-                                            <span class="font-medium text-slate-400">Tallas:</span>
-                                            <template x-if="order.sizes">
-                                                <div class="flex items-center gap-1 font-mono">
-                                                    <template x-for="(sQty, sKey) in order.sizes" :key="sKey">
-                                                        <span x-show="sQty > 0" class="px-1 py-0.2 bg-slate-100 rounded text-[10px] text-slate-700 border border-slate-200" x-text="sKey.toUpperCase() + ':' + sQty"></span>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900 whitespace-nowrap" x-text="formatCurrency(order.totalCost)"></td>
-                                    <td class="py-3.5 px-4 whitespace-nowrap">
-                                        <span class="text-slate-700 font-medium block" x-text="order.date"></span>
-                                        <span class="text-[11px] text-indigo-600 font-semibold block" x-text="'ETA: ' + order.eta"></span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                                        <template x-if="order.status === 'En Camino'">
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                                                <span>En Camino</span>
-                                            </span>
-                                        </template>
-                                        <template x-if="order.status === 'Recibida en Almacén'">
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                <span>Recibida en Almacén</span>
-                                            </span>
-                                        </template>
-                                        <template x-if="order.status === 'Pendiente Confirmación' || order.status === 'Pendiente'">
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                <span>Pendiente</span>
-                                            </span>
-                                        </template>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            <button 
-                                                type="button" 
-                                                @click="viewPoPdfFromActiveOrder(order)"
-                                                class="px-2.5 py-1 text-xs font-bold bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 rounded-lg shadow-3xs transition cursor-pointer flex items-center gap-1"
-                                                title="Consultar expediente formal de Orden de Compra y reimprimir documento"
-                                            >
-                                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                                <span>Reimprimir / Ver PDF</span>
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                @click="openCarrierTrackingModal(order)"
-                                                class="px-2.5 py-1 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-3xs transition cursor-pointer flex items-center gap-1"
-                                                title="Ver telemetría y ruta de transportista"
-                                            >
-                                                <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                                                <span>Rastrear Guía</span>
-                                            </button>
-                                            <template x-if="order.status === 'Recibida en Almacén'">
-                                                <button 
-                                                    type="button" 
-                                                    @click="openKardexForRef(order.id)"
-                                                    class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 hover:underline flex items-center justify-end gap-1 cursor-pointer ml-1"
-                                                >
-                                                    <span>Kardex &rarr;</span>
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div> <!-- Fin de SUB-VISTA 2 (purchasesSubTab === 'inbound_tracking') -->
-
-        <!-- SUB-VISTA 3: BANDEJA DE SOLICITUDES ON-DEMAND DE CLIENTES (TASK-INV-16 & TASK-INT-22) -->
-        <div x-show="purchasesSubTab === 'on_demand'" class="space-y-6" style="display: none;">
-            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
-                <div class="p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="p-1.5 bg-amber-50 text-amber-600 rounded-lg border border-amber-200 inline-flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            </span>
-                            <h3 class="text-base font-bold text-slate-900">Bandeja de Solicitudes On-Demand (Carritos de Clientes)</h3>
-                            <!-- Help Icon -->
-                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-amber-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-amber-300 text-[11px] mb-0.5">Atención Rápida On-Demand</div>
-                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas añadidas en 'Carritos para Solicitud de Pedido' o líneas externas de 'Carritos Mixtos'. Valida existencias con el proveedor y pasa a compras planificadas o marca como agotada con aviso automático a Atención a Clientes.</p>
-                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-0.5">Atención y verificación de existencias remotas con temporizador SLA</p>
-                    </div>
-
-                    <!-- Filtros de Estado On-Demand -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
-                            <button 
-                                type="button"
-                                @click="onDemandStatusFilter = 'todas'"
-                                :class="onDemandStatusFilter === 'todas' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                                class="px-2.5 py-1 rounded-md transition cursor-pointer"
-                            >
-                                Todas (<span x-text="customerOnDemandRequests.length"></span>)
-                            </button>
-                            <button 
-                                type="button"
-                                @click="onDemandStatusFilter = 'pendientes'"
-                                :class="onDemandStatusFilter === 'pendientes' ? 'bg-white text-amber-800 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                                class="px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1"
-                            >
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                <span>Por Verificar (<span x-text="customerOnDemandRequests.filter(r => r.verificationStatus === 'pendiente').length"></span>)</span>
-                            </button>
-                            <button 
-                                type="button"
-                                @click="onDemandStatusFilter = 'en_compra'"
-                                :class="onDemandStatusFilter === 'en_compra' ? 'bg-white text-indigo-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                                class="px-2.5 py-1 rounded-md transition cursor-pointer"
-                            >
-                                En Compra (<span x-text="customerOnDemandRequests.filter(r => r.verificationStatus === 'en_compra' || r.verificationStatus === 'confirmado').length"></span>)
-                            </button>
-                            <button 
-                                type="button"
-                                @click="onDemandStatusFilter = 'agotadas'"
-                                :class="onDemandStatusFilter === 'agotadas' ? 'bg-white text-rose-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                                class="px-2.5 py-1 rounded-md transition cursor-pointer"
-                            >
-                                Agotadas (<span x-text="customerOnDemandRequests.filter(r => r.verificationStatus === 'agotado' || r.verificationStatus === 'sin_stock').length"></span>)
-                            </button>
-                        </div>
-
-                        <span class="text-xs text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-bold flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span>SLA Objetivo: &lt; 2h</span>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto rounded-b-xl">
-                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                                <th class="py-3 px-4">Folio Solicitud</th>
-                                <th class="py-3 px-4">Cliente & Contacto</th>
-                                <th class="py-3 px-4">Origen del Carrito</th>
-                                <th class="py-3 px-4">Prenda & Talla</th>
-                                <th class="py-3 px-4">Proveedor / Torzo</th>
-                                <th class="py-3 px-4 text-center">Temporizador SLA</th>
-                                <th class="py-3 px-4 text-center">Estado Verificación</th>
-                                <th class="py-3 px-4 text-right">Acciones Rápidas</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                            <template x-if="filteredOnDemandRequests.length === 0">
-                                <tr>
-                                    <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
-                                        No hay solicitudes bajo este filtro de estado.
-                                    </td>
-                                </tr>
-                            </template>
-                            <template x-for="(req, index) in filteredOnDemandRequests" :key="req.id">
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="py-3.5 px-4 font-mono font-bold text-amber-700" x-text="req.id"></td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900" x-text="req.customerName"></div>
-                                        <div class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.983.536 1.777.818 2.796.818 3.18 0 5.767-2.587 5.767-5.766.001-3.182-2.585-5.766-5.767-5.766zm3.385 8.169c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.072.043.419-.101.824z"/></svg>
-                                            <span x-text="req.customerPhone"></span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <span 
-                                            class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold"
-                                            :class="req.cartType === 'solicitud_pedido' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-indigo-50 text-indigo-800 border border-indigo-200'"
-                                            x-text="req.cartLabel"
-                                        ></span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900" x-text="req.productName"></div>
-                                        <div class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
-                                            <span class="font-mono text-[10px]" x-text="req.sku"></span>
-                                            <span>&bull;</span>
-                                            <span class="font-bold text-indigo-700 bg-indigo-50 px-1.5 rounded" x-text="'Talla ' + req.size"></span>
-                                            <span>&bull;</span>
-                                            <span class="font-semibold text-slate-700" x-text="req.qty + ' pza' + (req.qty > 1 ? 's' : '')"></span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 font-semibold text-slate-800" x-text="req.supplier"></td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">
-                                            <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v6l4 2"/></svg>
-                                            <span x-text="req.slaMinutes + ' min'"></span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <template x-if="req.verificationStatus === 'en_compra' || req.verificationStatus === 'confirmado'">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                                                <span>En Compra Planificada</span>
-                                            </span>
-                                        </template>
-                                        <template x-if="req.verificationStatus === 'pendiente'">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                <span>Por Verificar</span>
-                                            </span>
-                                        </template>
-                                        <template x-if="req.verificationStatus === 'agotado' || req.verificationStatus === 'sin_stock'">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
-                                                <span>Agotado / Sin Stock</span>
-                                            </span>
-                                        </template>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            <!-- Si está pendiente: opciones interactivas completas -->
-                                            <template x-if="req.verificationStatus === 'pendiente'">
-                                                <div class="flex items-center gap-1">
-                                                    <!-- Confirmar y mandar a compras -->
-                                                    <button 
-                                                        type="button" 
-                                                        @click="resolveOnDemandToPlanned(req)" 
-                                                        class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold transition cursor-pointer"
-                                                        style="min-height:unset;"
-                                                        title="Confirmar existencia y agregar a compras planificadas del proveedor"
-                                                    >
-                                                        + A Compras
-                                                    </button>
-                                                    <!-- Marcar agotado -->
-                                                    <button 
-                                                        type="button" 
-                                                        @click="openOnDemandRejectModal(req)" 
-                                                        class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded text-[11px] font-bold transition cursor-pointer"
-                                                        style="min-height:unset;"
-                                                        title="Marcar como agotado y remitir ticket a Atención a Clientes (Hub 3)"
-                                                    >
-                                                        Agotado
-                                                    </button>
-                                                </div>
-                                            </template>
-
-                                            <!-- Si ya está en compra -->
-                                            <template x-if="req.verificationStatus === 'en_compra' || req.verificationStatus === 'confirmado'">
-                                                <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200">
-                                                    En Lote Sugerido
-                                                </span>
-                                            </template>
-
-                                            <!-- Si está agotado -->
-                                            <template x-if="req.verificationStatus === 'agotado' || req.verificationStatus === 'sin_stock'">
-                                                <span class="text-[10px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded font-semibold border border-rose-200">
-                                                    Aviso en Hub 3
-                                                </span>
-                                            </template>
-
-                                            <!-- Acción WhatsApp siempre disponible -->
-                                            <button 
-                                                type="button" 
-                                                @click="sendPaymentLinkToCustomer(req)" 
-                                                class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
-                                                style="min-height:unset;"
-                                                title="Contactar al cliente por WhatsApp"
-                                            >
-                                                <span>WhatsApp</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div> <!-- Fin de SUB-VISTA 2 (purchasesSubTab === 'on_demand') -->
-
-        <!-- SUB-VISTA 3: KARDEX HISTÓRICO DE AUDITORÍA DE COMPRAS (TASK-INV-16) -->
-        <div x-show="purchasesSubTab === 'kardex'" class="space-y-6" style="display: none;">
-            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
-                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="p-1.5 bg-slate-900 text-white rounded-lg inline-flex items-center justify-center shadow-2xs">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            </span>
-                            <h3 class="text-base font-bold text-slate-900">Kardex de Auditoría & Trazabilidad de Compras</h3>
-                            <!-- Help Icon -->
-                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-slate-800 transition-colors cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                </span>
-                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Libro Mayor Inmutable de Compras</div>
-                                    <p class="text-[11px] text-slate-200 leading-snug">Registra cada evento mercantil del submódulo: órdenes formalizadas, cambios de volumen, rechazos On-Demand e ingresos físicos a rampa.</p>
-                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-0.5">Historial cronológico auditado de movimientos comerciales y acuerdos con talleres</p>
-                    </div>
-
-                    <!-- Filtros y Búsqueda del Kardex -->
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="relative">
-                            <input 
-                                type="text" 
-                                x-model="purchaseKardexSearch" 
-                                placeholder="Buscar folio, SKU, proveedor..." 
-                                class="w-56 pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-800"
-                            >
-                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                        <select 
-                            x-model="purchaseKardexFilter" 
-                            class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-800"
-                        >
-                            <option value="all">Todos los Eventos</option>
-                            <option value="PO_EMITIDA">Emisión de PO</option>
-                            <option value="AJUSTE_CANTIDAD">Ajuste de Unidades</option>
-                            <option value="ON_DEMAND_CONVERTIDO">On-Demand a PO</option>
-                            <option value="ON_DEMAND_AGOTADO">On-Demand Rechazado</option>
-                            <option value="RECEPCION_RAMPA">Recepción en Rampa</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto rounded-b-xl">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] uppercase tracking-wider font-semibold">
-                                <th class="py-3 px-4">Folio / Fecha</th>
-                                <th class="py-3 px-4">Tipo de Evento</th>
-                                <th class="py-3 px-4">Proveedor / Taller</th>
-                                <th class="py-3 px-4">Referencia / Ítems</th>
-                                <th class="py-3 px-4 text-center">Variación</th>
-                                <th class="py-3 px-4 text-right">Monto Afectado</th>
-                                <th class="py-3 px-4">Operador</th>
-                                <th class="py-3 px-4">Detalle / Notas</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                            <template x-if="filteredPurchaseKardex.length === 0">
-                                <tr>
-                                    <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
-                                        No se encontraron movimientos que coincidan con los filtros de búsqueda.
-                                    </td>
-                                </tr>
-                            </template>
-                            <template x-for="item in filteredPurchaseKardex" :key="item.id">
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3 px-4">
-                                        <span class="font-mono font-bold text-slate-900 block text-xs" x-text="item.poNumber"></span>
-                                        <span class="text-[10px] text-slate-400 block" x-text="item.timestamp"></span>
-                                        <template x-if="item.type === 'PO_EMITIDA' || (item.poNumber && item.poNumber.startsWith('PO-'))">
-                                            <button 
-                                                type="button" 
-                                                @click="viewPoPdfFromPoNumber(item.poNumber)"
-                                                class="mt-1 px-2 py-0.5 text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded transition cursor-pointer inline-flex items-center gap-1 shadow-3xs"
-                                                title="Consultar expediente formal y reimprimir PO"
-                                            >
-                                                <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                <span>Ver / Reimprimir PO</span>
-                                            </button>
-                                        </template>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span 
-                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
-                                            :class="item.badgeClass || 'bg-slate-50 text-slate-700 border-slate-200'"
-                                            x-text="item.typeLabel || item.type"
-                                        ></span>
-                                    </td>
-                                    <td class="py-3 px-4 font-semibold text-slate-800" x-text="item.supplier"></td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-bold text-slate-900 block" x-text="item.productName"></span>
-                                        <span class="text-slate-400 font-mono text-[10px]" x-text="item.sku"></span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center font-mono font-bold text-xs" x-text="item.deltaQty"></td>
-                                    <td class="py-3 px-4 text-right font-mono font-bold text-slate-900 text-xs" x-text="item.totalAmount > 0 ? formatCurrency(item.totalAmount) : '—'"></td>
-                                    <td class="py-3 px-4">
-                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700">
-                                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                            <span x-text="item.user"></span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4 text-slate-600 text-[11px] max-w-xs truncate" :title="item.notes" x-text="item.notes"></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div> <!-- Fin de SUB-VISTA 3 (purchasesSubTab === 'kardex') -->
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- ================================================================= -->
-    <!-- DRAWER LATERAL EXPANDIDO: TABLA COMPLETA TOP 10 PRODUCTOS         -->
-    <!-- ================================================================= -->
-    <!-- MODAL PANORÁMICO CENTRADO: DETALLE Y EDICIÓN DE SKU (TASK-INV-18) -->
-    <!-- ================================================================= -->
-    <div 
-        id="skuPanoramicModal"
-        x-show="drawerOpen" 
-        class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto" 
-        style="z-index: 60; display: none;"
-        aria-labelledby="sku-panoramic-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="drawerOpen = false"
-    >
-        <!-- Backdrop oscuro con desenfoque suave -->
-        <div 
-            x-show="drawerOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="drawerOpen = false"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
-        ></div>
-
-        <!-- Contenedor Panorámico Centrado max-w-7xl / 95vw -->
-        <div 
-            x-show="drawerOpen"
-            x-transition:enter="transform transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transform transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="relative w-full max-w-7xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-10"
-        >
-            <!-- Header del Modal Panorámico -->
-            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-3">
-                    <span class="px-3 py-1 text-sm font-mono font-bold rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200" x-text="selectedProduct?.sku"></span>
-                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider"
-                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
-                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
-                    </span>
-                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5"
-                          :class="drawerIsPublished ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700 border border-slate-300'">
-                        <span class="w-2 h-2 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                        <span x-text="drawerIsPublished ? 'Publicado en Vitrina' : 'Fuera de Catálogo'"></span>
-                    </span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right hidden sm:block">
-                        <div class="text-sm font-bold text-slate-800" x-text="selectedProduct?.name"></div>
-                        <div class="text-xs text-slate-500" x-text="(drawerBrand || 'Sin Marca') + ' • ' + (selectedProduct?.category || 'General')"></div>
-                    </div>
-                    <button 
-                        @click="drawerOpen = false" 
-                        class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/70 transition cursor-pointer"
-                        title="Cerrar modal (Esc)"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Contenido con Scroll de 3 Columnas -->
-            <div class="p-6 overflow-y-auto flex-1">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- ========================================================= -->
-                    <!-- COLUMNA 1: IDENTIDAD, VITRINA WEB & ATRIBUTOS TEXTILES    -->
-                    <!-- ========================================================= -->
-                    <div class="lg:col-span-4 space-y-5">
-                        <!-- 1. Toggle de Publicación en Tienda Online -->
-                        <div class="p-4 rounded-xl border transition-colors shadow-2xs" :class="drawerIsPublished ? 'bg-emerald-50/80 border-emerald-300' : 'bg-slate-50 border-slate-200'">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                                        <span class="font-bold text-xs uppercase tracking-wider" :class="drawerIsPublished ? 'text-emerald-900' : 'text-slate-700'">Estado en Vitrina Web</span>
-                                    </div>
-                                    <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catálogo (oculta temporalmente del público).'"></p>
-                                </div>
-                                <button 
-                                    type="button" 
-                                    @click="drawerIsPublished = !drawerIsPublished" 
-                                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                    :class="drawerIsPublished ? 'bg-emerald-600' : 'bg-slate-300'"
-                                    title="Alternar publicación"
-                                >
-                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                          :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 2. Catalogación & Proveedor -->
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
-                            
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerBrand" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        placeholder="Ej: Torzo B2B, ModaIntima MX"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
-                                    <select 
-                                        x-model="drawerWebsiteSection" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="basicos">Línea Básicos Esenciales</option>
-                                        <option value="disenador">Línea Diseñador & Autor</option>
-                                        <option value="temporada">Colección Temporada / Drops</option>
-                                        <option value="general">Catálogo General</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Variante de Diseño: Con diseño vs Sin diseño -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de Diseño</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button 
-                                        type="button" 
-                                        @click="drawerDesignType = 'sin_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="drawerDesignType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                    >
-                                        Sin Diseño (Liso / Sólido)
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        @click="drawerDesignType = 'con_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="drawerDesignType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                    >
-                                        Con Diseño (Estampado / Pattern)
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Tipo de Tela & Fibras Textiles -->
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
-                                <button 
-                                    type="button" 
-                                    @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
-                                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                >
-                                    + Nueva Tela
-                                </button>
-                            </div>
-                            <select 
-                                x-model="drawerFabricType" 
-                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                            >
-                                <template x-for="fab in apparelFabrics" :key="fab.id">
-                                    <option :value="fab.name" x-text="fab.name + ' (' + fab.description + ')'"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <!-- 4. Color & Tornasol Iridiscente -->
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Color & Tornasol</label>
-                                <button 
-                                    type="button" 
-                                    @click="activeSettingsTab = 'colors'; moduleSettingsModalOpen = true;"
-                                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                >
-                                    + Nuevo Color/Tornasol
-                                </button>
-                            </div>
-                            
-                            <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
-                                    <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
-                                </div>
-                            </div>
-
-                            <!-- Selector Rápido de Paleta -->
-                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
-                                <template x-for="c in apparelColors" :key="c.id">
-                                    <button 
-                                        type="button" 
-                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
-                                        class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
-                                        :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
-                                        :title="c.name"
-                                    >
-                                        <span class="w-5 h-5 rounded-md border border-slate-300 shadow-3xs" :style="'background: ' + c.hex"></span>
-                                        <span class="text-[9px] font-semibold text-slate-700 truncate w-full text-center" x-text="c.name.split(' ')[0]"></span>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- 5. Descripción Comercial del Producto -->
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-1.5 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Descripción de la Prenda</label>
-                                <span class="text-[10px] text-slate-400">Para vitrina web y curaduría</span>
-                            </div>
-                            <textarea 
-                                x-model="drawerDescription" 
-                                rows="3" 
-                                placeholder="Describe la composición, tacto, silueta y detalles de diseño de la prenda..." 
-                                class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <!-- ========================================================= -->
-                    <!-- COLUMNA 2: EXISTENCIAS, VARIANTES & UBICACIÓN DE BODEGA   -->
-                    <!-- ========================================================= -->
-                    <div class="lg:col-span-4 space-y-5">
-                        <!-- 4 KPIs Reactivos en Caliente (TASK-INV-18) -->
-                        <div class="bg-gradient-to-r from-slate-50 to-indigo-50/40 p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                    <span>Disponibilidad Reactiva en Vivo</span>
-                                </span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">RevOps Live</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-center">
-                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-3xs">
-                                    <span class="text-[10px] text-slate-500 block uppercase font-semibold">Físico en Rack</span>
-                                    <span class="text-lg font-extrabold text-slate-900" x-text="livePhysicalStock()"></span>
-                                </div>
-                                <div class="bg-white p-2.5 rounded-lg border border-amber-200/80 bg-amber-50/30 shadow-3xs">
-                                    <span class="text-[10px] text-amber-700 block uppercase font-semibold">Comprometido</span>
-                                    <span class="text-lg font-extrabold text-amber-600" x-text="selectedProduct ? (selectedProduct.committedStock || 0) : 0"></span>
-                                </div>
-                                <div class="bg-white p-2.5 rounded-lg border border-purple-200/80 bg-purple-50/30 shadow-3xs">
-                                    <span class="text-[10px] text-purple-700 block uppercase font-semibold">Retenido en Locks</span>
-                                    <span class="text-lg font-extrabold text-purple-600" x-text="selectedProduct ? (selectedProduct.lockedStock || 0) : 0"></span>
-                                </div>
-                                <div class="bg-white p-2.5 rounded-lg border border-emerald-300 bg-emerald-50/50 shadow-3xs">
-                                    <span class="text-[10px] text-emerald-700 block uppercase font-bold">Disponible Venta</span>
-                                    <span class="text-lg font-extrabold text-emerald-600" x-text="liveAvailableStock()"></span>
-                                </div>
-                            </div>
-                            <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs">
-                                <span class="text-slate-500 text-[11px]">Trazabilidad de existencias:</span>
-                                <button 
-                                    type="button" 
-                                    @click="openKardexForSku(selectedProduct?.sku)" 
-                                    class="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer text-[11px]"
-                                >
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                    <span>Ver Kardex de este SKU &rarr;</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Matriz de Tallas o Tonos Cosméticos -->
-                        <template x-if="selectedProduct && selectedProduct.variantDimension === 'shade'">
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono Cosmético</label>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-pink-100 text-pink-800 border border-pink-200">Swatches</span>
-                                    </div>
-                                    <span class="text-xs text-slate-500">Total: <strong class="text-pink-700 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
-                                </div>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                    <template x-for="shade in activeCosmeticShades" :key="shade.code">
-                                        <div class="bg-white p-2 rounded-lg border border-slate-200 text-center flex flex-col items-center shadow-2xs hover:border-pink-300 transition">
-                                            <div class="flex items-center gap-1.5 mb-1">
-                                                <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + shade.hex_color"></span>
-                                                <span class="text-xs font-bold text-slate-800" x-text="'Tono ' + shade.code"></span>
-                                            </div>
-                                            <span class="text-[10px] text-slate-500 truncate w-full mb-1" x-text="shade.name"></span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerShades[shade.code]" 
-                                                class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:bg-white focus:ring-1 focus:ring-pink-500 focus:outline-none"
-                                            >
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="!selectedProduct || selectedProduct.variantDimension !== 'shade'">
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Curva de Tallas Activa</label>
-                                    <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
-                                </div>
-
-                                <!-- Fila 1: Tallas Centrales (CH a XL) -->
-                                <div class="grid grid-cols-4 gap-2">
-                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.ch" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
-                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.m" 
-                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
-                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.g" 
-                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.xl" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Fila 2: Tallas Extendidas (Plus Size) -->
-                                <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
-                                    <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                        <span>Tallas Extendidas (Plus Size)</span>
-                                        <span>Volumen reducido</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerSizes['2xl']" 
-                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
-                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerSizes['3xl']" 
-                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Slotting Físico en Almacén -->
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2">
-                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Ubicación Física en Almacén (Slotting)</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <div>
-                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Gaveta Asignada</label>
-                                    <select 
-                                        x-model="drawerLocation" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="">-- Seleccionar Gaveta --</option>
-                                        <template x-for="slot in warehouseSlots" :key="slot.code">
-                                            <option :value="slot.code" x-text="slot.code + ' (' + slot.zone + ')'"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Código Manual / Libre</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerLocation" 
-                                        placeholder="Ej: A-01-B"
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Control Sanitario & Trazabilidad (Un único bloque limpio) -->
-                        <template x-if="selectedProduct && (selectedProduct.requiresSanitaryControl || drawerRequiresSanitaryControl)">
-                            <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                        </span>
-                                        <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
-                                    </div>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-purple-100 text-purple-800 border-purple-200">
-                                        Certificado Sanitario
-                                    </span>
-                                </div>
-
-                                <div class="grid grid-cols-3 gap-2.5">
-                                    <div>
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
-                                        <input 
-                                            type="text" 
-                                            x-model="drawerBatchNumber" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
-                                        <input 
-                                            type="date" 
-                                            x-model="drawerExpirationDate" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
-                                        <select 
-                                            x-model.number="drawerPaoMonths" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                            <option value="6">6 Meses</option>
-                                            <option value="12">12 Meses</option>
-                                            <option value="18">18 Meses</option>
-                                            <option value="24">24 Meses</option>
-                                            <option value="36">36 Meses</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- ========================================================= -->
-                    <!-- COLUMNA 3: MÉTRICAS REVOPS, CALCULADORA & PLAN REORDEN    -->
-                    <!-- ========================================================= -->
-                    <div class="lg:col-span-4 space-y-5">
-                        <!-- Calculadora Ultra-Reactiva de Rentabilidad (TASK-INV-18) -->
-                        <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-lg border border-slate-800 space-y-4">
-                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-                                <div class="flex items-center gap-2">
-                                    <span class="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                    </span>
-                                    <h4 class="font-bold text-sm text-white">Calculadora Reactiva RevOps</h4>
-                                </div>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700/60">En Vivo</span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <!-- Input PVP Regular / Base -->
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-300 block mb-1">PVP Regular</label>
-                                    <div class="relative">
-                                        <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
-                                        <input 
-                                            type="number" 
-                                            step="0.5" 
-                                            x-model.number="drawerRegularPrice" 
-                                            class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Input Descuento (%) -->
-                                <div>
-                                    <label class="text-[11px] font-semibold text-rose-300 block mb-1">Descuento (%)</label>
-                                    <div class="relative">
-                                        <input 
-                                            type="number" 
-                                            step="1" 
-                                            min="0" 
-                                            max="90" 
-                                            x-model.number="drawerDiscountPct" 
-                                            class="w-full bg-slate-800/90 border border-rose-500/40 rounded-lg py-1.5 px-2.5 text-xs font-bold text-rose-300 focus:outline-none focus:ring-1 focus:ring-rose-400"
-                                            placeholder="0%"
-                                        >
-                                        <span class="absolute right-2.5 top-2 text-xs text-rose-400 font-bold">%</span>
-                                    </div>
-                                </div>
-
-                                <!-- Último Costo -->
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-300 block mb-1">Último Costo</label>
-                                    <div class="relative">
-                                        <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
-                                        <input 
-                                            type="number" 
-                                            step="0.5" 
-                                            x-model.number="drawerCost" 
-                                            class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- CPP Contable -->
-                                <div>
-                                    <label class="text-[11px] font-semibold text-indigo-300 block mb-1">CPP Contable</label>
-                                    <div class="relative">
-                                        <span class="absolute left-2.5 top-2 text-xs text-indigo-400">$</span>
-                                        <input 
-                                            type="number" 
-                                            step="0.1" 
-                                            x-model.number="drawerCpp" 
-                                            class="w-full bg-slate-800/90 border border-indigo-700/80 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-indigo-200 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- PVP Efectivo Recalculado -->
-                            <div class="p-2.5 bg-slate-800/90 rounded-xl border border-slate-700 flex items-center justify-between">
-                                <span class="text-xs text-slate-300 font-medium">PVP Efectivo de Venta:</span>
-                                <span class="text-base font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerEffectivePvp())"></span>
-                            </div>
-
-                            <!-- Métricas Reactivas: Utilidad & Márgenes con Semáforo -->
-                            <div class="pt-2 border-t border-slate-800 grid grid-cols-2 gap-2 text-center">
-                                <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
-                                    <span class="text-[10px] text-slate-400 block">Utilidad Real s/ CPP:</span>
-                                    <span class="text-sm font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerUnitProfit())"></span>
-                                </div>
-                                <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
-                                    <span class="text-[10px] text-indigo-300 block font-semibold">Margen Real (CPP):</span>
-                                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                                        <span class="text-sm font-extrabold font-mono" 
-                                              :class="drawerRealMarginPct() >= 40 ? 'text-emerald-400' : (drawerRealMarginPct() >= 25 ? 'text-amber-400' : 'text-rose-400')" 
-                                              x-text="drawerRealMarginPct() + '%'">
-                                        </span>
-                                        <span class="text-[8px] px-1 py-0.2 rounded font-bold uppercase"
-                                              :class="drawerRealMarginPct() >= 40 ? 'bg-emerald-500/20 text-emerald-300' : (drawerRealMarginPct() >= 25 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
-                                              x-text="drawerRealMarginPct() >= 40 ? 'Saludable' : (drawerRealMarginPct() >= 25 ? 'Aceptable' : 'Riesgo')">
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 4. Plan de Reabastecimiento & Futuras Compras -->
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-3">
-                            <div class="flex items-center justify-between pb-2 border-b border-slate-200">
-                                <div class="flex items-center gap-2">
-                                    <span class="p-1 bg-indigo-50 text-indigo-700 rounded-md border border-indigo-200 inline-flex items-center justify-center">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                                    </span>
-                                    <h4 class="font-bold text-xs text-slate-900 uppercase tracking-wider">Plan de Reabastecimiento</h4>
-                                </div>
-                                <template x-if="selectedProduct && isProductInPurchaseList(selectedProduct.sku)">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                        <span x-text="getProductPurchaseCount(selectedProduct.sku) + ' en cola'"></span>
-                                    </span>
-                                </template>
-                            </div>
-
-                            <!-- Selector de Proveedor -->
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Proveedor / Fabricante</label>
-                                <select 
-                                    x-model="purchaseSupplier" 
-                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                >
-                                    <option value="Torzo B2B">Torzo B2B • Headless Scraper (CDMX)</option>
-                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX • Fabricante Nacional SAP (Puebla)</option>
-                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL • Algodón/Modal Orgánico (Barcelona)</option>
-                                    <option value="Lingerie Drop Global">Lingerie Drop Global • Dropshipping Jocks/Bikinis (Miami)</option>
-                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel • Sin Costuras (Medellín)</option>
-                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale • Diseño Autor (Guadalajara)</option>
-                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics • Distribuidor Multimarca (Monterrey)</option>
-                                </select>
-                            </div>
-
-                            <!-- Presets Rápidos (+30, +60, +120) -->
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Reposición por Talla</label>
-                                    <div class="flex items-center gap-1">
-                                        <button type="button" @click="setPurchaseQty(30)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 6px;">+30</button>
-                                        <button type="button" @click="setPurchaseQty(60)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 6px;">+60</button>
-                                        <button type="button" @click="setPurchaseQty(120)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer font-extrabold" style="min-height:unset;padding:2px 6px;">+120 (MOQ)</button>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-4 gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200 text-center">
-                                    <div>
-                                        <span class="text-[9px] font-bold text-slate-500 block">CH</span>
-                                        <input type="number" min="0" x-model.number="purchaseSizes.ch" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-slate-200 rounded py-0.5 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] font-bold text-indigo-700 block">M</span>
-                                        <input type="number" min="0" x-model.number="purchaseSizes.m" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-indigo-200 rounded py-0.5 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] font-bold text-indigo-700 block">G</span>
-                                        <input type="number" min="0" x-model.number="purchaseSizes.g" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-indigo-200 rounded py-0.5 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] font-bold text-slate-500 block">XL</span>
-                                        <input type="number" min="0" x-model.number="purchaseSizes.xl" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-slate-200 rounded py-0.5 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Inversión y Acción de Reorden -->
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div class="bg-white border border-slate-200 rounded-lg p-2">
-                                    <span class="text-[10px] font-semibold text-slate-500 block">Total Piezas:</span>
-                                    <span class="font-extrabold text-slate-900" x-text="purchaseQty + ' uds'"></span>
-                                </div>
-                                <div class="bg-white border border-slate-200 rounded-lg p-2">
-                                    <span class="text-[10px] font-semibold text-slate-500 block">Inversión Estimada:</span>
-                                    <span class="font-extrabold text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></span>
-                                </div>
-                            </div>
-
-                            <button 
-                                type="button" 
-                                @click="addToFuturePurchaseList()" 
-                                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition cursor-pointer"
-                                style="min-height:unset;"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                <span>Añadir a Lista de Futuras Compras</span>
-                            </button>
-
-                            <div 
-                                x-show="purchaseAddedSuccess" 
-                                x-transition 
-                                class="p-2 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-1.5"
-                                style="display: none;"
-                            >
-                                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span class="flex-1 text-[11px]">Añadido a lista de compras</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer del Modal Panorámico -->
-            <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
-                <div class="text-xs text-slate-500 hidden sm:flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                    <span>Los cambios se guardan y recalculan inmediatamente.</span>
-                </div>
-                <div class="flex items-center gap-3 ml-auto">
-                    <button 
-                        @click="drawerOpen = false" 
-                        class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-xl transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="button"
-                        @click="handleSaveDrawerClick()" 
-                        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition cursor-pointer"
-                        style="min-height: unset;"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Guardar Cambios</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-<!-- ================================================================= -->
-    <!-- DRAWER LATERAL: AGREGAR NUEVO PRODUCTO AL CATÁLOGO                -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="newProductDrawerOpen" 
-        class="fixed inset-0 z-[70] overflow-hidden" 
-        style="z-index: 70; display: none;"
-        aria-labelledby="new-product-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="closeCreateProductDrawer()"
-    >
-        <!-- Backdrop oscuro con desenfoque suave -->
-        <div 
-            x-show="newProductDrawerOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="closeCreateProductDrawer()"
-            class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-            <div 
-                x-show="newProductDrawerOpen"
-                x-transition:enter="transform transition ease-out duration-300"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition ease-in duration-200"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                class="w-screen max-w-3xl bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between"
-            >
-                <!-- Header del Drawer -->
-                <div class="p-6 border-b border-slate-200 bg-slate-50/80">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200/80 inline-flex items-center justify-center shadow-2xs">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <h2 class="text-lg font-bold text-slate-900" id="new-product-title">Nuevo Producto</h2>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                        </span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Alta de Producto RevOps</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Registra un nuevo SKU físico o catálogo virtual. El sistema configurará automáticamente la matriz de tallas, la valuación en tiempo real y el monitoreo de margen bruto.</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-slate-500 mt-0.5">Catálogo operativo & matriz de tallas</p>
-                            </div>
-                        </div>
-                        <button 
-                            type="button"
-                            @click="closeCreateProductDrawer()" 
-                            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition cursor-pointer"
-                            aria-label="Cerrar drawer"
-                            style="min-height: unset;"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Contenido con Scroll -->
-                <div class="p-6 space-y-5 overflow-y-auto flex-1 text-sm">
-                    
-                    <!-- 1. Identificación y SKU -->
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Código SKU</label>
-                                <input 
-                                    type="text" 
-                                    x-model="newProduct.sku" 
-                                    placeholder="EJ: BX-AIR-011" 
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Categoría</label>
-                                <select 
-                                    x-model="newProduct.category" 
-                                    @change="onNewProductCategoryChange()"
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <option value="Boxers">Boxers</option>
-                                    <option value="Jocks">Jocks</option>
-                                    <option value="Tangas">Tangas</option>
-                                    <option value="Bikinis">Bikinis</option>
-                                    <option value="Camisillas">Camisillas</option>
-                                    <option value="Cosmética / Skincare">Cosmética / Skincare</option>
-                                    <option value="Perfumería / Fragancias">Perfumería / Fragancias</option>
-                                    <option value="Accesorios & Cuidado">Accesorios & Cuidado</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre del Producto</label>
-                            <input 
-                                type="text" 
-                                x-model="newProduct.name" 
-                                placeholder="Ej: Boxer Brief Bamboo Eco Air" 
-                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                            >
-                        </div>
-
-                        <!-- Marca / Proveedor y Sección Web -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Marca / Proveedor</label>
-                                <input 
-                                    type="text" 
-                                    x-model="newProduct.brand" 
-                                    placeholder="ModaIntima Textil MX" 
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Sección en Tienda Web</label>
-                                <select 
-                                    x-model="newProduct.websiteSection" 
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <option value="basicos">Línea Básicos Esenciales</option>
-                                    <option value="disenador">Línea Diseñador & Autor</option>
-                                    <option value="temporada">Colección Temporada / Drops</option>
-                                    <option value="general">Catálogo General</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Tipo de Tela & Color/Tornasol -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Tipo de Tela</label>
-                                <select 
-                                    x-model="newProduct.fabricType" 
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" x-text="fab.name"></option>
-                                    </template>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Color / Tornasol</label>
-                                <select 
-                                    @change="
-                                        const c = apparelColors.find(x => x.name === $event.target.value);
-                                        if (c) {
-                                            newProduct.colorName = c.name;
-                                            newProduct.colorHex = c.hex;
-                                            newProduct.colorType = c.type;
-                                        }
-                                    "
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <template x-for="col in apparelColors" :key="col.id">
-                                        <option :value="col.name" :selected="col.name === newProduct.colorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                    </template>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Variante de Diseño: Con diseño vs Sin diseño -->
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Variante de Diseño</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button 
-                                    type="button" 
-                                    @click="newProduct.designType = 'sin_diseno'"
-                                    class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                    :class="newProduct.designType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                >
-                                    Sin Diseño (Liso)
-                                </button>
-                                <button 
-                                    type="button" 
-                                    @click="newProduct.designType = 'con_diseno'"
-                                    class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                    :class="newProduct.designType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                >
-                                    Con Diseño (Estampado)
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Descripción de la Prenda -->
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Descripción del Producto</label>
-                            <textarea 
-                                x-model="newProduct.description" 
-                                rows="3" 
-                                placeholder="Describe el corte, ergonomía, suavidad y transpirabilidad..." 
-                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 resize-y max-w-full"
-                                style="resize: vertical; max-width: 100%;"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <!-- 2. Galería Fotográfica del Producto (Hasta 10 imágenes) -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span>Galería del Producto</span>
-                            </label>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" 
-                                  :class="(newProduct.images && newProduct.images.length >= 10) ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'">
-                                <span x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10'"></span>
-                            </span>
-                        </div>
-
-                        <!-- Zona Drag & Drop / Input File -->
-                        <div 
-                            @dragover.prevent="isDraggingImages = true"
-                            @dragleave.prevent="isDraggingImages = false"
-                            @drop.prevent="handleImageDrop($event)"
-                            class="relative border-2 border-dashed rounded-xl p-3 text-center transition-all cursor-pointer"
-                            :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/70 ring-2 ring-indigo-500/20' : 'border-slate-300 hover:border-indigo-400 bg-slate-50/60 hover:bg-white'"
-                            @click="$refs.newProductImageInput.click()"
-                        >
-                            <input 
-                                type="file" 
-                                x-ref="newProductImageInput" 
-                                multiple 
-                                accept="image/jpeg,image/png,image/webp,image/avif" 
-                                @change="handleImageUpload($event)" 
-                                class="hidden"
-                            >
-                            <div class="flex flex-col items-center justify-center gap-1 pointer-events-none">
-                                <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                </div>
-                                <div class="text-xs font-semibold text-slate-700">
-                                    <span class="text-indigo-600 hover:underline">Selecciona archivos</span> o arrastra aquí
-                                </div>
-                                <p class="text-[10px] text-slate-400">Hasta 10 fotos (JPG, PNG, WEBP, AVIF máx. 5 MB)</p>
-                            </div>
-                        </div>
-
-                        <!-- Cuadrícula de Miniaturas -->
-                        <template x-if="newProduct.images && newProduct.images.length > 0">
-                            <div class="grid grid-cols-5 gap-2 pt-1">
-                                <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
-                                    <div class="relative group rounded-lg overflow-hidden border bg-slate-100 aspect-square shadow-2xs transition-all"
-                                         :class="img.is_primary ? 'border-indigo-600 ring-2 ring-indigo-600/30' : 'border-slate-200 hover:border-slate-400'">
-                                        <!-- Imagen -->
-                                        <img :src="img.preview" :alt="img.name || 'Foto ' + (idx + 1)" class="w-full h-full object-cover">
-                                        
-                                        <!-- Badge de Orden (Top Left) -->
-                                        <div class="absolute top-1 left-1 px-1 py-0.2 bg-slate-900/80 text-white text-[9px] font-bold rounded">
-                                            <span x-text="idx + 1"></span>
-                                        </div>
-
-                                        <!-- Botón Eliminar (Top Right) -->
-                                        <button 
-                                            type="button" 
-                                            @click.stop="removeImage(idx)" 
-                                            class="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center opacity-80 group-hover:opacity-100 transition cursor-pointer shadow-xs"
-                                            title="Eliminar fotografía"
-                                            style="min-height: unset;"
-                                        >
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-
-                                        <!-- Badge / Selector de Portada (Bottom) -->
-                                        <template x-if="img.is_primary">
-                                            <span class="absolute inset-x-0 bottom-0 py-0.5 text-[8px] font-bold text-center bg-indigo-600 text-white tracking-wider uppercase">
-                                                Portada
-                                            </span>
-                                        </template>
-                                        <template x-if="!img.is_primary">
-                                            <button 
-                                                type="button" 
-                                                @click.stop="setPrimaryImage(idx)" 
-                                                class="absolute inset-x-0 bottom-0 py-0.5 text-[8px] font-medium text-center bg-slate-900/70 text-slate-200 hover:bg-indigo-600 hover:text-white transition cursor-pointer"
-                                                style="min-height: unset;"
-                                            >
-                                                Principal
-                                            </button>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- 3. Modelo Operativo: Propio vs Dropshipping -->
-                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-2">Modelo Operativo & Abastecimiento</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button 
-                                type="button"
-                                @click="newProduct.type = 'propio'" 
-                                :class="newProduct.type === 'propio' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs ring-1 ring-indigo-600' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-white'"
-                                class="p-2.5 rounded-lg border text-left transition cursor-pointer"
-                                style="min-height: unset;"
-                            >
-                                <div class="font-bold text-xs flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-400'"></span>
-                                    <span>Stock Propio</span>
-                                </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">En bodega física</div>
-                            </button>
-
-                            <button 
-                                type="button"
-                                @click="newProduct.type = 'dropship'" 
-                                :class="newProduct.type === 'dropship' ? 'bg-white border-emerald-600 text-emerald-700 shadow-xs ring-1 ring-emerald-600' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-white'"
-                                class="p-2.5 rounded-lg border text-left transition cursor-pointer"
-                                style="min-height: unset;"
-                            >
-                                <div class="font-bold text-xs flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'dropship' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                                    <span>Dropshipping</span>
-                                </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">Sincronizado vía Feed</div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 4. Dimensión de Variantes & Curva de Stock Inicial (TASK-INV-02) -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Matriz de Variantes & Stock Inicial</label>
-                            <span class="text-xs text-slate-500 font-medium">Total: <strong class="text-indigo-600" x-text="calculateNewProductTotalStock()"></strong> piezas</span>
-                        </div>
-
-                        <!-- Selector de Dimensión de Variantes (4 Píldoras) -->
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-3 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button 
-                                type="button"
-                                @click="newProduct.variantDimension = 'size'"
-                                :class="newProduct.variantDimension === 'size' ? 'bg-white text-indigo-700 font-bold shadow-xs border-slate-300' : 'text-slate-600 hover:text-slate-900 border-transparent'"
-                                class="py-1.5 px-2 rounded-lg text-xs transition text-center cursor-pointer border flex items-center justify-center gap-1"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                <span>Textil (Tallas)</span>
-                            </button>
-
-                            <button 
-                                type="button"
-                                @click="newProduct.variantDimension = 'shade'"
-                                :class="newProduct.variantDimension === 'shade' ? 'bg-white text-pink-700 font-bold shadow-xs border-slate-300' : 'text-slate-600 hover:text-slate-900 border-transparent'"
-                                class="py-1.5 px-2 rounded-lg text-xs transition text-center cursor-pointer border flex items-center justify-center gap-1"
-                            >
-                                <span class="w-2.5 h-2.5 rounded-full bg-pink-400 border border-pink-500"></span>
-                                <span>Cosmética (Tonos)</span>
-                            </button>
-
-                            <button 
-                                type="button"
-                                @click="newProduct.variantDimension = 'volume'"
-                                :class="newProduct.variantDimension === 'volume' ? 'bg-white text-teal-700 font-bold shadow-xs border-slate-300' : 'text-slate-600 hover:text-slate-900 border-transparent'"
-                                class="py-1.5 px-2 rounded-lg text-xs transition text-center cursor-pointer border flex items-center justify-center gap-1"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                                <span>Perfume (Volumen)</span>
-                            </button>
-
-                            <button 
-                                type="button"
-                                @click="newProduct.variantDimension = 'none'"
-                                :class="newProduct.variantDimension === 'none' ? 'bg-white text-slate-900 font-bold shadow-xs border-slate-300' : 'text-slate-600 hover:text-slate-900 border-transparent'"
-                                class="py-1.5 px-2 rounded-lg text-xs transition text-center cursor-pointer border flex items-center justify-center gap-1"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                <span>Unitario (Fijo)</span>
-                            </button>
-                        </div>
-
-                        <!-- 1. CASO TEXTIL: 6 Tallas CH a 3XL -->
-                        <template x-if="newProduct.variantDimension === 'size'">
-                            <div>
-                                <div class="grid grid-cols-6 gap-1.5">
-                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[10px] font-bold text-slate-600 block mb-0.5">CH</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.sizes.ch" 
-                                            class="w-full text-center bg-white border border-slate-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[10px] font-bold text-indigo-700 block mb-0.5">M (Core)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.sizes.m" 
-                                            class="w-full text-center bg-white border border-indigo-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[10px] font-bold text-indigo-700 block mb-0.5">G (Core)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.sizes.g" 
-                                            class="w-full text-center bg-white border border-indigo-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[10px] font-bold text-slate-600 block mb-0.5">XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.sizes.xl" 
-                                            class="w-full text-center bg-white border border-slate-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[10px] font-bold text-slate-600 block mb-0.5">2XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.sizes['2xl']" 
-                                            class="w-full text-center bg-white border border-slate-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[10px] font-bold text-slate-600 block mb-0.5">3XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.sizes['3xl']" 
-                                            class="w-full text-center bg-white border border-slate-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                </div>
-                                <p class="text-[10px] text-slate-400 mt-1.5 leading-snug">Curva textil: Se recomienda concentrar 60-70% del stock en tallas Core (M y G).</p>
-                            </div>
-                        </template>
-
-                        <!-- 2. CASO COSMÉTICA: N Tonos Dinámicos (TASK-INV-09) -->
-                        <template x-if="newProduct.variantDimension === 'shade'">
-                            <div>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    <template x-for="shade in activeCosmeticShades" :key="shade.code">
-                                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center flex flex-col items-center hover:border-pink-300 transition">
-                                            <div class="flex items-center gap-1.5 mb-1">
-                                                <span class="cosmetic-swatch-20" :style="'background: ' + shade.hex_color"></span>
-                                                <span class="text-[10px] font-bold text-slate-700" x-text="'Tono ' + shade.code"></span>
-                                            </div>
-                                            <span class="text-[9px] text-slate-500 truncate w-full mb-0.5" x-text="shade.name"></span>
-                                            <span class="text-[9px] mb-1" :class="getUndertoneBadgeClass(shade.undertone)" x-text="getUndertoneLabel(shade.undertone)"></span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="newProduct.shades[shade.code]" 
-                                                class="w-full text-center bg-white border border-slate-200 rounded py-1 px-0.5 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-pink-500 focus:outline-none"
-                                            >
-                                        </div>
-                                    </template>
-                                </div>
-                                <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200">
-                                    <p class="text-[10px] text-slate-400 leading-snug">Escala cosmética dinámica con muestras cromáticas y subtonos dermatológicos.</p>
-                                    <button type="button" @click="openCosmeticShadesModal()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Gestionar Tonos</button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- 3. CASO PERFUMERÍA: 3 Volúmenes -->
-                        <template x-if="newProduct.variantDimension === 'volume'">
-                            <div>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-xs font-bold text-teal-800 block mb-0.5">10 ml</span>
-                                        <span class="text-[9px] text-slate-400 block mb-1">Formato Travel / Bolsillo</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.volumes.v10" 
-                                            class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-2 rounded-lg border border-teal-200 text-center ring-1 ring-teal-300">
-                                        <span class="text-xs font-bold text-teal-800 block mb-0.5">50 ml (Estándar)</span>
-                                        <span class="text-[9px] text-teal-600 block mb-1">Frasco Regular</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.volumes.v50" 
-                                            class="w-full text-center bg-white border border-teal-300 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-xs font-bold text-teal-800 block mb-0.5">100 ml</span>
-                                        <span class="text-[9px] text-slate-400 block mb-1">Edición Deluxe / Hogar</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="newProduct.volumes.v100" 
-                                            class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
-                                        >
-                                    </div>
-                                </div>
-                                <p class="text-[10px] text-slate-400 mt-1.5 leading-snug">Presentaciones de fragancia: 10ml portátil, 50ml estándar y 100ml deluxe.</p>
-                            </div>
-                        </template>
-
-                        <!-- 4. CASO UNITARIO / SIN VARIANTES -->
-                        <template x-if="newProduct.variantDimension === 'none'">
-                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 flex items-center justify-between">
-                                <div>
-                                    <label class="text-xs font-bold text-slate-800 block">Stock Físico Unitario</label>
-                                    <p class="text-[10px] text-slate-500">Producto sin variantes de talla o tono (ej. accesorio, toalla o monodosis)</p>
-                                </div>
-                                <div class="w-28">
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="newProduct.unitStock" 
-                                        class="w-full text-center bg-white border border-slate-300 rounded-lg py-1.5 px-2 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 focus:outline-none"
-                                    >
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- 5. Ubicación Física en Bodega (Slotting: TASK-INV-01) -->
-                    <template x-if="newProduct.type === 'propio'">
-                        <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <div class="flex items-center justify-between">
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Ubicación Física (Slotting)</label>
-                                <span 
-                                    :class="getSlotBadgeClass(newProduct.location)"
-                                    class="text-xs font-mono font-bold px-2 py-0.5 rounded border"
-                                    x-text="newProduct.location"
-                                ></span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div>
-                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Pasillo</label>
-                                    <select 
-                                        x-model="newProduct.aisle" 
-                                        @change="updateNewProductLocation()"
-                                        class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="A">Pasillo A (Ropa Interior)</option>
-                                        <option value="B">Pasillo B (Atlético & Jocks)</option>
-                                        <option value="C">Pasillo C (Cuidado Personal)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Rack / Módulo</label>
-                                    <select 
-                                        x-model="newProduct.rack" 
-                                        @change="updateNewProductLocation()"
-                                        class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="01">Rack 01</option>
-                                        <option value="02">Rack 02</option>
-                                        <option value="03">Rack 03</option>
-                                        <option value="04">Rack 04</option>
-                                        <option value="05">Rack 05</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Gaveta / Nivel</label>
-                                    <select 
-                                        x-model="newProduct.bin" 
-                                        @change="updateNewProductLocation()"
-                                        class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="A">Gaveta A (Superior)</option>
-                                        <option value="B">Gaveta B (Media)</option>
-                                        <option value="C">Gaveta C (Inferior)</option>
-                                        <option value="D">Gaveta D (Piso)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-slate-400 leading-tight">Estructura de Slot: [Pasillo]-[Rack]-[Gaveta]. El código se sincroniza automáticamente.</p>
-                        </div>
-                    </template>
-
-                    <template x-if="newProduct.type === 'dropship'">
-                        <div class="space-y-3 bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200/80">
-                            <div>
-                                <label class="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block mb-1">Proveedor Asignado</label>
-                                <select 
-                                    x-model="newProduct.provider" 
-                                    class="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                >
-                                    <option value="Torzo B2B">Torzo B2B (Headless Feed)</option>
-                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
-                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel</option>
-                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
-                                    <option value="MicroModal Fabrics Brasil">MicroModal Fabrics Brasil</option>
-                                    <option value="EcoUnderwear Colombia">EcoUnderwear Colombia</option>
-                                    <option value="EuroLuxe Knits Portugal">EuroLuxe Knits Portugal</option>
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block mb-1">Stock Remoto</label>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="newProduct.supplierStock" 
-                                        class="w-full px-3 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-bold text-emerald-800 focus:outline-none"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block mb-1">URL de Monitoreo</label>
-                                    <input 
-                                        type="url" 
-                                        x-model="newProduct.providerUrl" 
-                                        placeholder="https://proveedor.com/item/..." 
-                                        class="w-full px-3 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs text-slate-700 focus:outline-none"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- 6. Calculadora de Margen en Tiempo Real -->
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-4 rounded-xl border border-slate-800">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="font-bold text-xs text-white uppercase tracking-wider">Margen Comercial & Pricing</h4>
-                            <span class="text-[10px] text-indigo-300 font-semibold">Cálculo Reactivo</span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label class="text-[10px] text-slate-300 block mb-1">Precio Venta (PVP)</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-1.5 text-xs text-slate-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.5" 
-                                        x-model.number="newProduct.pvp" 
-                                        class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-300 block mb-1">Costo Unitario</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-1.5 text-xs text-slate-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.5" 
-                                        x-model.number="newProduct.cost" 
-                                        class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
-                            <div>
-                                <span class="text-[10px] text-slate-400 block">Utilidad por Pieza:</span>
-                                <strong class="text-emerald-400 text-sm" x-text="formatCurrency(calculateNewProductProfit())"></strong>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] text-slate-400 block">Margen Bruto:</span>
-                                <div class="flex items-center gap-1.5 justify-end">
-                                    <span class="text-sm font-extrabold" 
-                                          :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
-                                          x-text="calculateNewProductMargin() + '%'">
-                                    </span>
-                                    <span class="text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider"
-                                          :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateNewProductMargin() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
-                                          x-text="calculateNewProductMargin() >= 50 ? 'Saludable' : (calculateNewProductMargin() >= 30 ? 'Aceptable' : 'Riesgo')">
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Footer del Drawer -->
-                <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
-                    <button 
-                        type="button"
-                        @click="closeCreateProductDrawer()" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
-                        style="min-height: unset;"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="button"
-                        @click="saveNewProduct()" 
-                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5"
-                        style="min-height: unset;"
-                    >
-                        <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>Guardar Producto en Catálogo</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL DE CONFIRMACIÓN: AÑADIR A FUTURAS COMPRAS AL GUARDAR        -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="confirmPurchaseModalOpen" 
-        class="fixed inset-0 z-[80] overflow-y-auto"
-        style="z-index: 80; display: none;"
-        aria-labelledby="confirm-purchase-modal-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="confirmPurchaseModalOpen = false"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="confirmPurchaseModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="confirmPurchaseModalOpen = false"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="min-h-full flex items-center justify-center p-4 text-center sm:p-0">
-            <div 
-                x-show="confirmPurchaseModalOpen"
-                x-transition:enter="ease-out duration-300 transform"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200 transform"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative bg-white rounded-2xl p-6 text-left shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden my-8"
-            >
-                <div class="flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0 shadow-2xs">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 leading-6" id="confirm-purchase-modal-title">
-                            ¿Deseas añadir este producto a la lista de compras?
-                        </h3>
-                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                            Tienes configurada una orden de reposición para <strong class="text-indigo-700" x-text="selectedProduct?.sku"></strong> por <strong class="text-slate-900" x-text="(purchaseQty || 0) + ' piezas'"></strong> con el proveedor <strong class="text-slate-900" x-text="purchaseSupplier"></strong> (Inversión estimada: <strong class="text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></strong>).
-                        </p>
-                        <p class="text-xs text-slate-500 mt-1">
-                            ¿Quieres incorporar esta orden a la pestaña <strong>Proveedores & Scraping</strong> al guardar los cambios del producto?
-                        </p>
-                    </div>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-2.5">
-                    <button 
-                        type="button" 
-                        @click="confirmPurchaseModalOpen = false"
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        style="min-height: unset;"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="confirmSaveWithPurchase(false)"
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition cursor-pointer border border-slate-200"
-                        style="min-height: unset;"
-                    >
-                        No, solo guardar producto
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="confirmSaveWithPurchase(true)"
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5"
-                        style="min-height: unset;"
-                    >
-                        <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Sí, añadir a compras y guardar</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ================================================================= -->
-    <!-- MODAL DE REASIGNACIÓN DE SLOT FÍSICO EN BODEGA (TASK-INV-01)      -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="slotReassignModal.isOpen" 
-        class="fixed inset-0 z-[85] overflow-y-auto"
-        style="z-index: 85; display: none;"
-        aria-labelledby="slot-reassign-modal-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="slotReassignModal.isOpen = false"
-    >
-        <div 
-            x-show="slotReassignModal.isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="slotReassignModal.isOpen = false"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="min-h-full flex items-center justify-center p-4 text-center sm:p-0">
-            <div 
-                x-show="slotReassignModal.isOpen"
-                x-transition:enter="ease-out duration-300 transform"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200 transform"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
-                @click.stop
-            >
-                <!-- Cabecera -->
-                <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold tracking-tight text-white">Reasignar Ubicación Física (Slotting)</h3>
-                            <p class="text-[11px] text-slate-400">Actualiza el pasillo, rack o gaveta del producto en bodega</p>
-                        </div>
-                    </div>
-                    <button @click="slotReassignModal.isOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Cuerpo -->
-                <div class="p-6 space-y-4">
-                    <!-- Ficha del Producto -->
-                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
-                        <div>
-                            <div class="font-mono text-xs font-bold text-indigo-600" x-text="slotReassignModal.sku"></div>
-                            <div class="text-xs font-semibold text-slate-900 mt-0.5" x-text="slotReassignModal.productName"></div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] text-slate-400 block uppercase font-semibold">Ubicación Actual</span>
-                            <span class="text-xs font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 mt-0.5 inline-block" x-text="slotReassignModal.currentLocation || 'Sin Asignar'"></span>
-                        </div>
-                    </div>
-
-                    <!-- Selector de Nuevo Slot -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">Nuevo Slot Destino</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="text-[10px] font-semibold text-slate-500 block mb-1">Pasillo</label>
-                                <select 
-                                    x-model="slotReassignModal.selectedAisle"
-                                    class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <option value="A">Pasillo A (Ropa Interior)</option>
-                                    <option value="B">Pasillo B (Atlético & Jocks)</option>
-                                    <option value="C">Pasillo C (Cuidado Personal)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-semibold text-slate-500 block mb-1">Rack / Módulo</label>
-                                <select 
-                                    x-model="slotReassignModal.selectedRack"
-                                    class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <option value="01">Rack 01</option>
-                                    <option value="02">Rack 02</option>
-                                    <option value="03">Rack 03</option>
-                                    <option value="04">Rack 04</option>
-                                    <option value="05">Rack 05</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-semibold text-slate-500 block mb-1">Gaveta / Nivel</label>
-                                <select 
-                                    x-model="slotReassignModal.selectedBin"
-                                    class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                >
-                                    <option value="A">Gaveta A (Superior)</option>
-                                    <option value="B">Gaveta B (Media)</option>
-                                    <option value="C">Gaveta C (Inferior)</option>
-                                    <option value="D">Gaveta D (Piso)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Previsualización del nuevo código -->
-                    <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold text-indigo-900">Código de Slot Resultante:</span>
-                            <span 
-                                :class="getSlotBadgeClass(slotReassignModal.selectedAisle + '-' + slotReassignModal.selectedRack + '-' + slotReassignModal.selectedBin)"
-                                class="text-xs font-mono font-extrabold px-2.5 py-0.5 rounded border"
-                                x-text="slotReassignModal.selectedAisle + '-' + slotReassignModal.selectedRack + '-' + slotReassignModal.selectedBin"
-                            ></span>
-                        </div>
-                        <span class="text-[10px] text-indigo-600 font-medium">Asiento inmutable en Kardex</span>
-                    </div>
-
-                    <!-- Motivo / Notas -->
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Motivo del Movimiento Físico</label>
-                        <input 
-                            type="text" 
-                            x-model="slotReassignModal.notes" 
-                            placeholder="Ej: Reubicación por alta rotación (Clase A), consolidación de racks..."
-                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-medium"
-                        >
-                    </div>
-                </div>
-
-                <!-- Footer Acciones -->
-                <div class="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex items-center justify-end gap-2">
-                    <button 
-                        @click="slotReassignModal.isOpen = false"
-                        type="button" 
-                        class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        @click="saveSlotReassign()"
-                        type="button" 
-                        class="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
-                    >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Confirmar Reubicación</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL DE RECETAS BOM Y ENSAMBLE DE COMBOS (TASK-INV-03)           -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="bundleRecipesModal.isOpen" 
-        class="fixed inset-0 z-[85] overflow-y-auto"
-        style="z-index: 85; display: none;"
-        aria-labelledby="bundle-recipes-modal-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="bundleRecipesModal.isOpen = false"
-    >
-        <div 
-            x-show="bundleRecipesModal.isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="bundleRecipesModal.isOpen = false"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="min-h-full flex items-center justify-center p-4 text-center sm:p-0">
-            <div 
-                x-show="bundleRecipesModal.isOpen"
-                x-transition:enter="ease-out duration-300 transform"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200 transform"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-5xl border border-slate-200 flex flex-col max-h-[90vh]"
-                @click.stop
-            >
-                <!-- Encabezado Modal -->
-                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 px-6 py-4 flex items-center justify-between border-b border-slate-700">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-400/30 flex items-center justify-center text-violet-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 id="bundle-recipes-modal-title" class="text-base font-bold text-white leading-none">Recetas de Ensamble BOM & Combos Virtuales</h3>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/30 text-violet-200 border border-violet-400/40" x-text="productBundles.length + ' Fórmulas'"></span>
-                            </div>
-                            <p class="text-xs text-slate-300 mt-1">Bill of Materials para Cajas de Suscripción Mensual Multiverso y Packs Promocionales</p>
-                        </div>
-                    </div>
-                    <button @click="bundleRecipesModal.isOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Filtros por tipo de combo -->
-                <div class="bg-slate-50 px-6 py-2.5 border-b border-slate-200 flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="bundleRecipesModal.activeFilter = 'all'"
-                            class="px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer"
-                            :class="bundleRecipesModal.activeFilter === 'all' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
-                        >
-                            Todos los Combos
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="bundleRecipesModal.activeFilter = 'subscription'"
-                            class="px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer"
-                            :class="bundleRecipesModal.activeFilter === 'subscription' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
-                        >
-                            Cajas de Suscripción
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="bundleRecipesModal.activeFilter = 'promo'"
-                            class="px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer"
-                            :class="bundleRecipesModal.activeFilter === 'promo' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
-                        >
-                            Packs Promocionales
-                        </button>
-                    </div>
-                    <div class="text-[11px] text-slate-500 font-medium">
-                        Liquidación atómica en Kardex (<code class="font-mono text-indigo-600 font-bold">SALIDA_COMBO_SUSCRIPCION</code>)
-                    </div>
-                </div>
-
-                <!-- Contenido Principal Master-Detail -->
-                <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-100/60">
-                    
-                    <!-- Columna Izquierda: Lista de Combos -->
-                    <div class="lg:col-span-5 space-y-3">
-                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                            <span>Catálogo de Fórmulas BOM</span>
-                            <span class="text-indigo-600 font-mono" x-text="filteredBundles.length + ' activos'"></span>
-                        </div>
-
-                        <template x-for="bundle in filteredBundles" :key="bundle.id">
-                            <div 
-                                @click="bundleRecipesModal.selectedBundleId = bundle.id"
-                                class="p-4 rounded-xl border transition cursor-pointer relative"
-                                :class="bundleRecipesModal.selectedBundleId === bundle.id ? 'bg-white border-indigo-600 ring-2 ring-indigo-500/20 shadow-md' : 'bg-white border-slate-200/80 hover:border-indigo-300 hover:shadow-xs'"
-                            >
-                                <div class="flex items-start justify-between gap-2 mb-1.5">
-                                    <span 
-                                        class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
-                                        :class="{
-                                            'bg-blue-50 text-blue-700 border border-blue-200': bundle.badgeColor === 'blue',
-                                            'bg-indigo-50 text-indigo-700 border border-indigo-200': bundle.badgeColor === 'indigo',
-                                            'bg-purple-50 text-purple-700 border border-purple-200': bundle.badgeColor === 'purple',
-                                            'bg-emerald-50 text-emerald-700 border border-emerald-200': bundle.badgeColor === 'emerald'
-                                        }"
-                                        x-text="bundle.tierName"
-                                    ></span>
-                                    <div class="text-right">
-                                        <div class="text-xs font-bold text-slate-900" x-text="'$' + bundle.subscriptionPrice.toFixed(2) + ' MXN'"></div>
-                                        <div class="text-[10px] text-slate-400 line-through" x-text="'$' + bundle.regularPrice.toFixed(2)"></div>
-                                    </div>
-                                </div>
-
-                                <div class="font-bold text-sm text-slate-900 leading-snug" x-text="bundle.name"></div>
-                                <div class="font-mono text-[11px] text-slate-500 mt-0.5" x-text="bundle.sku"></div>
-
-                                <p class="text-xs text-slate-600 mt-2 leading-relaxed" x-text="bundle.description"></p>
-
-                                <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-                                    <span class="text-slate-500 font-medium">Insumos: <strong class="text-slate-700" x-text="bundle.components.length + ' items'"></strong></span>
-                                    <span 
-                                        class="px-2 py-0.5 rounded-full text-[11px] font-bold"
-                                        :class="calculateBundleStock(bundle) > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (calculateBundleStock(bundle) > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')"
-                                        x-text="calculateBundleStock(bundle) + ' cajas armables'"
-                                    ></span>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Columna Derecha: Detalle de Escandallo y Simulador -->
-                    <div class="lg:col-span-7 space-y-4" x-show="selectedBundle">
-                        <!-- Ficha de Combo Seleccionado -->
-                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-mono text-xs font-bold text-indigo-600" x-text="selectedBundle.sku"></span>
-                                        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.2 rounded border border-emerald-200" x-text="'-' + selectedBundle.discountPct + '% Ahorro'"></span>
-                                    </div>
-                                    <h4 class="text-base font-bold text-slate-900 mt-1" x-text="selectedBundle.name"></h4>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-lg font-bold text-indigo-600" x-text="'$' + selectedBundle.subscriptionPrice.toFixed(2) + ' MXN'"></div>
-                                    <div class="text-[11px] text-slate-500 font-medium">Precio por entrega</div>
-                                </div>
-                            </div>
-
-                            <!-- Barra de Stock Limitante -->
-                            <div class="mt-4 p-3 bg-indigo-50/70 rounded-xl border border-indigo-100 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs font-bold text-slate-800">Capacidad Máxima de Armado Inmediato</div>
-                                        <div class="text-[11px] text-slate-600">Calculado sobre el insumo físico con menor existencia disponible</div>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-lg font-extrabold text-indigo-700" x-text="calculateBundleStock(selectedBundle)"></span>
-                                    <span class="text-xs font-medium text-indigo-900 ml-1">cajas</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tabla de Escandallo (BOM) -->
-                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                                <h5 class="text-xs font-bold uppercase tracking-wider text-slate-700">Fórmula de Insumos Físicos (BOM)</h5>
-                                <span class="text-[11px] text-slate-500">Componentes atómicos a deducir</span>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs border-collapse">
-                                    <thead>
-                                        <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-500 text-[10px] uppercase font-bold tracking-wider">
-                                            <th class="py-2.5 px-3">Insumo Físico</th>
-                                            <th class="py-2.5 px-3">Slot Bodega</th>
-                                            <th class="py-2.5 px-3 text-center">Cant / Caja</th>
-                                            <th class="py-2.5 px-3 text-right">Stock Bodega</th>
-                                            <th class="py-2.5 px-3 text-right">Requerido Lote</th>
-                                            <th class="py-2.5 px-3 text-center">Estatus</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-100">
-                                        <template x-for="comp in selectedBundle.components" :key="comp.sku">
-                                            <tr class="hover:bg-slate-50/60 transition">
-                                                <td class="py-2.5 px-3">
-                                                    <div class="font-bold text-slate-800" x-text="comp.name"></div>
-                                                    <div class="font-mono text-[10px] text-slate-400" x-text="comp.sku + (comp.size ? ' • ' + comp.size.toUpperCase() : '')"></div>
-                                                </td>
-                                                <td class="py-2.5 px-3">
-                                                    <span 
-                                                        class="inline-block px-2 py-0.5 rounded font-mono text-[10px] font-bold"
-                                                        :class="getSlotBadgeClass(comp.location)"
-                                                        x-text="comp.location || 'A-01-A'"
-                                                    ></span>
-                                                </td>
-                                                <td class="py-2.5 px-3 text-center font-bold text-slate-800" x-text="comp.qty + ' ud'"></td>
-                                                <td class="py-2.5 px-3 text-right font-mono font-medium text-slate-700" x-text="getBundleComponentStock(comp.sku, comp.size) + ' uds'"></td>
-                                                <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-600" x-text="(comp.qty * bundleRecipesModal.dispatchQty) + ' uds'"></td>
-                                                <td class="py-2.5 px-3 text-center">
-                                                    <span 
-                                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
-                                                        :class="getBundleComponentStock(comp.sku, comp.size) >= (comp.qty * bundleRecipesModal.dispatchQty) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
-                                                        x-text="getBundleComponentStock(comp.sku, comp.size) >= (comp.qty * bundleRecipesModal.dispatchQty) ? 'Suficiente' : 'Faltante'"
-                                                    ></span>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Panel Simulador de Despacho Masivo & Liquidación Atómica -->
-                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                                <h5 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    <span>Simulador de Despacho Masivo & Liquidación Atómica</span>
-                                </h5>
-                                <span class="text-[10px] text-slate-400 font-mono">POST /api/v1/inventory/bundles/{id}/liquidate</span>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Cajas a Despachar</label>
-                                    <input 
-                                        type="number" 
-                                        min="1" 
-                                        :max="calculateBundleStock(selectedBundle)"
-                                        x-model.number="bundleRecipesModal.dispatchQty"
-                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Referencia de Lote</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="bundleRecipesModal.dispatchReference"
-                                        placeholder="Ej: SUB-BATCH-2026-09A"
-                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Notas de Auditoría</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="bundleRecipesModal.dispatchNotes"
-                                        placeholder="Ej: Ciclo quincenal Marte Nivel 2"
-                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
-                                <div class="text-xs text-slate-600">
-                                    Total insumos a liquidar: <strong class="text-slate-900" x-text="selectedBundle.components.reduce((acc, c) => acc + (c.qty * bundleRecipesModal.dispatchQty), 0) + ' unidades físicas'"></strong>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button 
-                                        type="button" 
-                                        @click="openBomDeficitModal(selectedBundle.id, 200)"
-                                        class="px-3 py-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer flex items-center gap-1.5"
-                                        title="Simular deficit de lote grande y generar ordenes hacia Extranet B2B"
-                                    >
-                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                                        <span>Calcular Deficit Lote (B2B)</span>
-                                    </button>
-                                    <button 
-                                        type="button"
-                                        @click="bundleRecipesModal.isOpen = false; openKardexDrawer();"
-                                        class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                                    >
-                                        Auditar Kardex
-                                    </button>
-                                    <button 
-                                        type="button"
-                                        @click="liquidateBundle(selectedBundle.id, bundleRecipesModal.dispatchQty, bundleRecipesModal.dispatchReference, bundleRecipesModal.dispatchNotes)"
-                                        class="px-4 py-1.5 text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
-                                        :disabled="bundleRecipesModal.dispatchQty <= 0 || bundleRecipesModal.dispatchQty > calculateBundleStock(selectedBundle)"
-                                        :class="bundleRecipesModal.dispatchQty <= 0 || bundleRecipesModal.dispatchQty > calculateBundleStock(selectedBundle) ? 'opacity-50 cursor-not-allowed' : ''"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        <span>Despachar y Liquidar en Kardex</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Modal -->
-                <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                    <div class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        <span>Calculo predictivo ROP y deduccion atomica inmutable segun especificacion backend Fase 3.5</span>
-                    </div>
-                    <button 
-                        @click="bundleRecipesModal.isOpen = false"
-                        type="button" 
-                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                    >
-                        Cerrar Ventana
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL DE AUDITORIA DE DEFICIT BOM & OCS B2B (TASK-INT-11)          -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="bomDeficitState.isOpen" 
-        class="fixed inset-0 z-[90] overflow-y-auto"
-        style="z-index: 90; display: none;"
-        aria-labelledby="bom-deficit-modal-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="closeBomDeficitModal()"
-    >
-        <div 
-            x-show="bomDeficitState.isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="closeBomDeficitModal()"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="min-h-full flex items-center justify-center p-4 text-center sm:p-0">
-            <div 
-                x-show="bomDeficitState.isOpen"
-                x-transition:enter="ease-out duration-300 transform"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200 transform"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-5xl border border-slate-200 flex flex-col max-h-[92vh]"
-                @click.stop
-            >
-                <!-- Encabezado Modal -->
-                <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-4 flex items-center justify-between border-b border-indigo-900">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 id="bom-deficit-modal-title" class="text-base font-bold text-white leading-none">Auditoria de Deficit BOM & Disparo Automatico B2B</h3>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">TASK-INT-11</span>
-                            </div>
-                            <p class="text-xs text-slate-300 mt-1">Calculo reactivo de faltantes de insumos por lote y emision de Ordenes de Compra divididas por taller</p>
-                        </div>
-                    </div>
-                    <button @click="closeBomDeficitModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Barra de Parametros del Lote -->
-                <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                    <div class="sm:col-span-4">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">Formula / Combo Seleccionado</label>
-                        <select 
-                            x-model="bomDeficitState.selectedBundleId" 
-                            @change="calculateLotDeficit()"
-                            class="w-full text-xs font-semibold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                        >
-                            <template x-for="b in productBundles" :key="b.id">
-                                <option :value="b.id" x-text="b.sku + ' - ' + b.name"></option>
-                            </template>
-                        </select>
-                    </div>
-
-                    <div class="sm:col-span-3">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">Cajas a Fabricar (Lote)</label>
-                        <div class="relative">
-                            <input 
-                                type="number" 
-                                min="1" 
-                                max="1000"
-                                x-model.number="bomDeficitState.targetQty" 
-                                @input="calculateLotDeficit()"
-                                class="w-full text-xs font-bold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                            >
-                            <span class="absolute right-2.5 top-1.5 text-[10px] text-slate-400 font-semibold">cajas</span>
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-3">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">Referencia de Lote</label>
-                        <input 
-                            type="text" 
-                            x-model="bomDeficitState.batchReference"
-                            placeholder="SUB-BATCH-2026-09A"
-                            class="w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                        >
-                    </div>
-
-                    <div class="sm:col-span-2 flex items-end">
-                        <button 
-                            type="button" 
-                            @click="calculateLotDeficit()"
-                            class="w-full px-3 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                        >
-                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            <span>Recalcular</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Resumen de KPIs de Balance -->
-                <template x-if="bomDeficitState.result">
-                    <div class="px-6 py-3 bg-indigo-50/50 border-b border-indigo-100 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 block">Objetivo de Ensamble</span>
-                            <div class="text-base font-extrabold text-slate-900 mt-0.5" x-text="bomDeficitState.result.targetQty + ' Cajas'"></div>
-                            <span class="text-[10px] text-slate-500 font-mono" x-text="bomDeficitState.result.bundleSku"></span>
-                        </div>
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 block">Insumos Requeridos</span>
-                            <div class="text-base font-extrabold text-slate-900 mt-0.5" x-text="bomDeficitState.result.totalRequiredPieces + ' uds'"></div>
-                            <span class="text-[10px] text-indigo-600 font-medium" x-text="bomDeficitState.result.totalAvailablePieces + ' disponibles'"></span>
-                        </div>
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 block">Deficit Fisico</span>
-                            <div class="text-base font-extrabold mt-0.5" :class="bomDeficitState.result.totalDeficitPieces > 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="bomDeficitState.result.totalDeficitPieces + ' piezas'"></div>
-                            <span class="text-[10px] font-semibold" :class="bomDeficitState.result.totalDeficitPieces > 0 ? 'text-rose-500' : 'text-emerald-600'" x-text="bomDeficitState.result.totalDeficitPieces > 0 ? 'Insumos Faltantes' : 'Lote Cubierto al 100%'"></span>
-                        </div>
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 block">Inversion Reposicion</span>
-                            <div class="text-base font-extrabold text-indigo-700 mt-0.5" x-text="'$' + Object.values(bomDeficitState.result.supplierGroups).reduce((acc, g) => acc + g.totalEstimatedCost, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 }) + ' MXN'"></div>
-                            <span class="text-[10px] text-slate-500" x-text="Object.keys(bomDeficitState.result.supplierGroups).length + ' talleres receptores'"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Contenido Principal: Analisis a 2 Columnas -->
-                <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-100/60">
-                    
-                    <!-- Columna 1: Auditoria Insumo por Insumo (BOM Breakdown) -->
-                    <div class="lg:col-span-6 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">1. Balance de Insumos Fisicos</span>
-                            <span class="text-[11px] text-slate-500 font-mono">Existencia vs Requerimiento</span>
-                        </div>
-
-                        <template x-if="bomDeficitState.result">
-                            <div class="space-y-2.5">
-                                <template x-for="comp in bomDeficitState.result.components" :key="comp.sku">
-                                    <div 
-                                        class="bom-deficit-card p-3 rounded-xl border bg-white shadow-2xs transition"
-                                        :class="comp.deficitQty > 0 ? 'deficit' : 'covered'"
-                                    >
-                                        <div class="flex items-start justify-between gap-2">
-                                            <div>
-                                                <div class="font-bold text-xs text-slate-900" x-text="comp.name"></div>
-                                                <div class="text-[11px] font-mono text-slate-500 flex items-center gap-2 mt-0.5">
-                                                    <span x-text="comp.sku + (comp.size !== 'std' ? ' • ' + comp.size.toUpperCase() : '')"></span>
-                                                    <span class="text-slate-400">|</span>
-                                                    <span class="text-indigo-600 font-medium" x-text="comp.supplierName"></span>
-                                                </div>
-                                            </div>
-                                            <span 
-                                                class="badge-bom-deficit" 
-                                                x-show="comp.deficitQty > 0"
-                                                x-text="'-' + comp.deficitQty + ' Faltantes'"
-                                            ></span>
-                                            <span 
-                                                class="badge-bom-covered" 
-                                                x-show="comp.deficitQty === 0"
-                                                x-text="'Stock Cubierto'"
-                                            ></span>
-                                        </div>
-
-                                        <div class="mt-2 pt-2 border-t border-slate-100 grid grid-cols-4 gap-2 text-center text-xs">
-                                            <div class="bg-slate-50 p-1.5 rounded">
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase block">Cant/Caja</span>
-                                                <span class="font-bold text-slate-700 font-mono" x-text="comp.qtyPerBox + ' ud'"></span>
-                                            </div>
-                                            <div class="bg-slate-50 p-1.5 rounded">
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase block">Bodega</span>
-                                                <span class="font-bold text-slate-700 font-mono" x-text="comp.availableStock + ' uds'"></span>
-                                            </div>
-                                            <div class="bg-slate-50 p-1.5 rounded">
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase block">Requerido</span>
-                                                <span class="font-bold text-indigo-700 font-mono" x-text="comp.requiredQty + ' uds'"></span>
-                                            </div>
-                                            <div class="p-1.5 rounded" :class="comp.deficitQty > 0 ? 'bg-rose-100/70 text-rose-800' : 'bg-emerald-100/70 text-emerald-800'">
-                                                <span class="text-[9px] font-bold uppercase block">Deficit</span>
-                                                <span class="font-extrabold font-mono" x-text="comp.deficitQty + ' uds'"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Columna 2: Generador de Ordenes de Compra a Extranet B2B -->
-                    <div class="lg:col-span-6 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">2. Ordenes Planificadas por Taller</span>
-                            <span class="text-[11px] text-slate-500 font-mono">Extranet B2B (Hub 7)</span>
-                        </div>
-
-                        <template x-if="bomDeficitState.result">
-                            <div class="space-y-4">
-                                <template x-for="(group, sId) in bomDeficitState.result.supplierGroups" :key="sId">
-                                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
-                                        <div class="supplier-group-header">
-                                            <div class="flex items-center gap-2">
-                                                <span x-text="group.supplierName"></span>
-                                                <span class="text-[9px] px-1.5 py-0.2 bg-indigo-500/40 text-indigo-200 rounded font-mono" x-text="group.supplierId"></span>
-                                            </div>
-                                            <span class="font-mono text-xs" x-text="group.totalDeficitPieces + ' pzas por comprar'"></span>
-                                        </div>
-
-                                        <div class="p-3.5 space-y-2.5">
-                                            <div class="flex items-center justify-between text-xs">
-                                                <span class="text-slate-500">Categoria Maquila:</span>
-                                                <span class="font-semibold text-slate-800" x-text="group.category"></span>
-                                            </div>
-                                            <div class="flex items-center justify-between text-xs">
-                                                <span class="text-slate-500">Insumos incluidos en OC:</span>
-                                                <span class="font-mono font-bold text-slate-800" x-text="group.items.filter(i => i.deficitQty > 0).length + ' SKUs deficitarios'"></span>
-                                            </div>
-                                            <div class="flex items-center justify-between text-xs">
-                                                <span class="text-slate-500">Monto estimado de la orden:</span>
-                                                <span class="font-mono font-bold text-indigo-700 text-sm" x-text="'$' + group.totalEstimatedCost.toLocaleString('es-MX', { minimumFractionDigits: 2 }) + ' MXN'"></span>
-                                            </div>
-
-                                            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200/60 text-[11px] space-y-1">
-                                                <div class="font-bold text-slate-600 uppercase text-[9px] tracking-wider">Desglose de Piezas Faltantes:</div>
-                                                <template x-for="item in group.items" :key="item.sku">
-                                                    <div class="flex items-center justify-between font-mono" x-show="item.deficitQty > 0">
-                                                        <span class="text-slate-600 truncate max-w-[200px]" x-text="item.name + ' (' + item.sku + ')'"></span>
-                                                        <span class="text-rose-600 font-bold" x-text="item.deficitQty + ' uds'"></span>
-                                                    </div>
-                                                </template>
-                                                <div x-show="group.totalDeficitPieces === 0" class="text-emerald-700 font-semibold text-center py-1">
-                                                    Sin deficit para este proveedor. Stock de bodega suficiente.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- Estado de Ordenes Generadas Feedback -->
-                                <template x-if="bomDeficitState.lastGeneratedOrders && bomDeficitState.lastGeneratedOrders.length > 0">
-                                    <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
-                                        <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs">
-                                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            <span>Ordenes de Compra Inyectadas en Extranet B2B</span>
-                                        </div>
-                                        <div class="text-[11px] text-emerald-700">
-                                            Folio de auditoria: <strong class="font-mono text-slate-900" x-text="bomDeficitState.lastProcurementCode"></strong>
-                                        </div>
-                                        <div class="space-y-1.5 pt-1">
-                                            <template x-for="genPo in bomDeficitState.lastGeneratedOrders" :key="genPo.poCode">
-                                                <div class="bg-white p-2 rounded border border-emerald-200 flex items-center justify-between text-xs">
-                                                    <div>
-                                                        <span class="font-mono font-bold text-indigo-700" x-text="genPo.poCode"></span>
-                                                        <span class="text-slate-500 text-[10px] ml-1.5" x-text="'(' + genPo.supplierName + ')'"></span>
-                                                    </div>
-                                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold" x-text="genPo.totalPieces + ' pzas • En Taller'"></span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- Boton de Generacion en 1 Clic -->
-                                <div class="pt-2">
-                                    <button 
-                                        type="button"
-                                        @click="generateB2BPurchaseOrders()"
-                                        class="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        :disabled="bomDeficitState.isProcessing || !bomDeficitState.result || !bomDeficitState.result.hasDeficit"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                        <span x-text="bomDeficitState.isProcessing ? 'Generando Ordenes...' : 'Generar OCs y Enviar a Portal de Proveedores en 1 Clic'"></span>
-                                    </button>
-                                    <p class="text-[10px] text-slate-500 text-center mt-1.5">
-                                        Publica borradores en Extranet B2B y crea tareas de monitoreo de entrega en Action Center Hub 1.
-                                    </p>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Footer Modal -->
-                <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                    <div class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        <span>Integracion inter-hub con Extranet B2B (Fase 9) y Action Center Hub 1 segun especificacion Fase 3.5</span>
-                    </div>
-                    <button 
-                        @click="closeBomDeficitModal()"
-                        type="button" 
-                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                    >
-                        Cerrar Ventana
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL DE TONOS DE COSMETICA (TASK-INV-09)                         -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="cosmeticShadesModal.isOpen" 
-        class="fixed inset-0 z-[75] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="closeCosmeticShadesModal()"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="cosmeticShadesModal.isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="closeCosmeticShadesModal()"
-        ></div>
-
-        <!-- Dialog modal -->
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <div 
-                x-show="cosmeticShadesModal.isOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl border border-slate-200"
-                @click.stop
-            >
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-pink-900 via-pink-800 to-slate-900 px-6 py-4 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-pink-500/20 border border-pink-400/30 flex items-center justify-center text-pink-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold tracking-tight">Catálogo Maestro de Tonos de Cosmética</h3>
-                            <p class="text-xs text-pink-200/80">Gestión de muestras cromáticas HEX, subtonos dermatológicos y disponibilidad operativa</p>
-                        </div>
-                    </div>
-                    <button @click="closeCosmeticShadesModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Body en 2 Columnas -->
-                <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50/50">
-                    <!-- Formulario de Registro / Edición (col-span-5) -->
-                    <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col gap-4">
-                        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider" x-text="cosmeticShadesModal.isEditing ? 'Editar Tono ' + cosmeticShadesModal.form.code : 'Registrar Nuevo Tono'"></h4>
-                            <span class="text-[10px] font-semibold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-100" x-text="cosmeticShadesModal.isEditing ? 'Modo Edición' : 'Nuevo Registro'"></span>
-                        </div>
-
-                        <!-- Código del Tono -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Código Identificador</label>
-                            <input 
-                                type="text" 
-                                x-model="cosmeticShadesModal.form.code" 
-                                placeholder="Ej. 07 o C-01" 
-                                class="w-full text-xs font-bold px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 uppercase transition"
-                            >
-                            <p class="text-[10px] text-slate-400 mt-1">Identificador único alfanumérico para el desglose de inventario.</p>
-                        </div>
-
-                        <!-- Nombre Comercial -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre Comercial del Tono</label>
-                            <input 
-                                type="text" 
-                                x-model="cosmeticShadesModal.form.name" 
-                                placeholder="Ej. Beige Almendra, Bronce Cálido" 
-                                class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition"
-                            >
-                        </div>
-
-                        <!-- Selector Cromático HEX -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Muestra Cromática (Color HEX)</label>
-                            <div class="flex items-center gap-3">
-                                <input 
-                                    type="color" 
-                                    x-model="cosmeticShadesModal.form.hex_color" 
-                                    class="w-10 h-10 rounded-lg cursor-pointer border border-slate-300 p-0.5 bg-white shadow-2xs flex-shrink-0"
-                                >
-                                <input 
-                                    type="text" 
-                                    x-model="cosmeticShadesModal.form.hex_color" 
-                                    placeholder="#E8BEA2" 
-                                    maxlength="7"
-                                    class="flex-1 text-xs font-mono uppercase px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Previsualización en Vivo -->
-                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center gap-3">
-                            <span class="cosmetic-swatch-preview w-8 h-8 rounded-full border border-black/15 shadow-xs flex-shrink-0" :style="'background: ' + (cosmeticShadesModal.form.hex_color || '#E8BEA2')"></span>
-                            <div class="min-w-0 flex-1">
-                                <div class="text-xs font-bold text-slate-800 truncate" x-text="cosmeticShadesModal.form.code ? ('Tono ' + cosmeticShadesModal.form.code + ' - ' + (cosmeticShadesModal.form.name || 'Sin nombre')) : 'Vista Previa'"></div>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="text-[10px] font-mono text-slate-500" x-text="cosmeticShadesModal.form.hex_color || '#E8BEA2'"></span>
-                                    <span class="text-[9px] px-1.5 py-0.2 rounded font-semibold" :class="getUndertoneBadgeClass(cosmeticShadesModal.form.undertone)" x-text="getUndertoneLabel(cosmeticShadesModal.form.undertone)"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Subtono Dermatológico -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Subtono Dermatológico</label>
-                            <select 
-                                x-model="cosmeticShadesModal.form.undertone" 
-                                class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white transition"
-                            >
-                                <option value="warm">Cálido (Warm / Dorado / Melocotón)</option>
-                                <option value="cool">Frío (Cool / Rosado / Azulado)</option>
-                                <option value="neutral">Neutro (Neutral / Equilibrado)</option>
-                            </select>
-                        </div>
-
-                        <!-- Estado Activo -->
-                        <div class="pt-1">
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input 
-                                    type="checkbox" 
-                                    x-model="cosmeticShadesModal.form.is_active" 
-                                    class="rounded border-slate-300 text-pink-600 focus:ring-pink-500 w-4 h-4 cursor-pointer"
-                                >
-                                <span class="text-xs font-medium text-slate-700">Tono activo en producción y catálogo</span>
-                            </label>
-                        </div>
-
-                        <!-- Botones de Acción -->
-                        <div class="flex items-center gap-2 pt-2">
-                            <button 
-                                type="button" 
-                                @click="saveCosmeticShade()" 
-                                class="flex-1 py-2 px-4 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-lg transition shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span x-text="cosmeticShadesModal.isEditing ? 'Actualizar Tono' : 'Guardar Tono'"></span>
-                            </button>
-                            <button 
-                                x-show="cosmeticShadesModal.isEditing" 
-                                type="button" 
-                                @click="cosmeticShadesModal.isEditing = false; cosmeticShadesModal.editingId = null; cosmeticShadesModal.form = { code: '', name: '', hex_color: '#E8BEA2', undertone: 'neutral', is_active: true };" 
-                                class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-lg transition cursor-pointer"
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Lista / Cuadrícula de Tonos Existentes (col-span-7) -->
-                    <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Tonos Configurados</h4>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200" x-text="cosmeticShades.length + ' en catálogo'"></span>
-                            </div>
-                            <span class="text-[11px] text-slate-400" x-text="activeCosmeticShades.length + ' activos para venta'"></span>
-                        </div>
-
-                        <!-- Grid de Tonos con Scroll -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
-                            <template x-for="shade in cosmeticShades" :key="shade.id">
-                                <div 
-                                    class="cosmetic-shade-card p-2.5 rounded-xl border transition flex items-center justify-between"
-                                    :class="cosmeticShadesModal.editingId === shade.id ? 'border-pink-500 bg-pink-50/30 ring-1 ring-pink-500/20' : (shade.is_active ? 'border-slate-200 bg-white hover:border-pink-300' : 'border-slate-200 bg-slate-50 opacity-60 hover:opacity-100')"
-                                >
-                                    <div class="flex items-center gap-2.5 min-w-0">
-                                        <span class="cosmetic-swatch-20 flex-shrink-0" :style="'background: ' + shade.hex_color"></span>
-                                        <div class="min-w-0">
-                                            <div class="flex items-center gap-1.5">
-                                                <span class="text-xs font-bold text-slate-800" x-text="'Tono ' + shade.code"></span>
-                                                <span class="text-[9px] px-1.5 py-0.2 rounded font-semibold" :class="getUndertoneBadgeClass(shade.undertone)" x-text="getUndertoneLabel(shade.undertone)"></span>
-                                            </div>
-                                            <div class="text-[11px] text-slate-500 truncate max-w-[130px]" x-text="shade.name"></div>
-                                            <div class="text-[10px] font-mono text-slate-400" x-text="shade.hex_color"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <!-- Botón Activar / Pausar -->
-                                        <button 
-                                            type="button" 
-                                            @click="toggleCosmeticShadeStatus(shade)" 
-                                            :class="shade.is_active ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200' : 'text-slate-500 bg-slate-100 hover:bg-slate-200 border-slate-200'" 
-                                            class="px-1.5 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer"
-                                            :title="shade.is_active ? 'Desactivar de producción' : 'Activar en producción'"
-                                        >
-                                            <span x-text="shade.is_active ? 'Activo' : 'Pausa'"></span>
-                                        </button>
-                                        <!-- Botón Editar -->
-                                        <button 
-                                            type="button" 
-                                            @click="editCosmeticShade(shade)" 
-                                            class="p-1 text-slate-400 hover:text-indigo-600 rounded transition cursor-pointer"
-                                            title="Editar información del tono"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-                                        <!-- Botón Eliminar -->
-                                        <button 
-                                            type="button" 
-                                            @click="deleteCosmeticShade(shade.id)" 
-                                            class="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
-                                            title="Eliminar tono del catálogo"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                    <div class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Sincronización atómica con matrices de inventario y selectores cromáticos del storefront</span>
-                    </div>
-                    <button 
-                        @click="closeCosmeticShadesModal()" 
-                        type="button" 
-                        class="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                    >
-                        Cerrar Ventana
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL DE CARANCELES / TELEMETRÍA DE CARRITOS SIMULTÁNEOS (TASK-INT-06) -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="stockLocksModalOpen" 
-        class="fixed inset-0 z-[80] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="closeStockLocksModal()"
-    >
-        <!-- Backdrop -->
-        <div 
-            x-show="stockLocksModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="closeStockLocksModal()"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="stockLocksModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-4xl text-left align-middle transition-all transform bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
-            >
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-rose-50 via-slate-50 to-white px-6 py-4 border-b border-rose-100 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 shadow-xs">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Carritos Simultáneos y Reservas Activas de Stock</h3>
-                            <p class="text-xs text-slate-500 font-medium mt-0.5">Telemetría en tiempo real de prendas retenidas con TTL configurable de 5 minutos</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="cleanExpiredLocks()" 
-                            class="px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition cursor-pointer flex items-center gap-1"
-                            title="Purgar reservas expiradas"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            <span>Refrescar TTL</span>
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="closeStockLocksModal()" 
-                            class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Resumen KPI Bar -->
-                <div class="grid grid-cols-3 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-200 text-center">
-                    <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Sesiones / Carritos Activos</div>
-                        <div class="text-lg font-black text-rose-600 mt-0.5" x-text="activeStockLocksCount"></div>
-                    </div>
-                    <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Prendas Totales Bloqueadas</div>
-                        <div class="text-lg font-black text-amber-600 mt-0.5" x-text="activeLockedUnitsTotal + ' uds'"></div>
-                    </div>
-                    <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Tiempo Límite Estándar</div>
-                        <div class="text-lg font-black text-slate-800 mt-0.5">5 Minutos (300s)</div>
-                    </div>
-                </div>
-
-                <!-- Tabla de Bloqueos -->
-                <div class="p-6 max-h-[50vh] overflow-y-auto">
-                    <template x-if="activeStockLocksCount === 0">
-                        <div class="text-center py-10 text-slate-400">
-                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                            <p class="text-sm font-bold text-slate-700">No hay carritos activos con stock bloqueado en este momento.</p>
-                            <p class="text-xs text-slate-500 mt-1">El 100% de las unidades disponibles están libres para venta inmediata.</p>
-                        </div>
-                    </template>
-                    <template x-if="activeStockLocksCount > 0">
-                        <div class="overflow-x-auto rounded-lg border border-slate-200">
-                            <table class="w-full text-xs text-left border-collapse stock-locks-table">
-                                <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
-                                    <tr>
-                                        <th class="p-2.5">Sesión / Origen</th>
-                                        <th class="p-2.5">Prenda / SKU</th>
-                                        <th class="p-2.5 text-center">Talla</th>
-                                        <th class="p-2.5 text-center">Cantidad</th>
-                                        <th class="p-2.5 text-center">TTL Restante</th>
-                                        <th class="p-2.5 text-right">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200 bg-white">
-                                    <template x-for="lock in activeStockLocks" :key="lock.id">
-                                        <tr class="hover:bg-rose-50/40 transition">
-                                            <td class="p-2.5">
-                                                <div class="font-mono font-bold text-slate-800" x-text="lock.sessionId"></div>
-                                                <div class="text-[10px] text-slate-400" x-text="lock.ipAddress || 'Storefront'"></div>
-                                            </td>
-                                            <td class="p-2.5">
-                                                <div class="font-bold text-slate-900" x-text="lock.name"></div>
-                                                <div class="font-mono text-[10px] text-indigo-600" x-text="lock.sku"></div>
-                                            </td>
-                                            <td class="p-2.5 text-center">
-                                                <span class="px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-700" x-text="String(lock.size).toUpperCase()"></span>
-                                            </td>
-                                            <td class="p-2.5 text-center">
-                                                <span class="font-extrabold text-slate-900" x-text="lock.quantity"></span>
-                                            </td>
-                                            <td class="p-2.5 text-center">
-                                                <span class="badge-stock-locked stock-lock-pulse px-2 py-0.5 rounded font-mono font-bold" x-text="formatLockTimer(lock.expiresAt)"></span>
-                                            </td>
-                                            <td class="p-2.5 text-right">
-                                                <button 
-                                                    type="button" 
-                                                    @click="forceReleaseLock(lock.id)" 
-                                                    class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[10px] font-bold transition shadow-2xs cursor-pointer"
-                                                    title="Liberar inmediatamente al stock disponible"
-                                                >
-                                                    Liberar
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Footer -->
-                <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                    <div class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span>El stock bloqueado en carrito se descuenta temporalmente del catálogo público para evitar sobreventas simultáneas.</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <template x-if="activeStockLocksCount > 0">
-                            <button 
-                                type="button" 
-                                @click="releaseAllStockLocks()" 
-                                class="px-3 py-1 text-xs font-bold text-rose-700 hover:text-rose-900 hover:bg-rose-100 rounded-lg transition cursor-pointer"
-                            >
-                                Liberar Todos
-                            </button>
-                        </template>
-                        <button 
-                            @click="closeStockLocksModal()" 
-                            type="button" 
-                            class="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        >
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL DE RECEPCIÓN DE MERCANCÍA (INBOUND RECEIPT & COTEJO FÍSICO) -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="receiveOrderModalOpen" 
-        class="fixed inset-0 z-[75] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="receiveOrderModalOpen = false"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="receiveOrderModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="receiveOrderModalOpen = false"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="receiveOrderModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-2xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <!-- Header del Modal -->
-                <div class="px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <span>Recepción Inbound de Mercancía</span>
-                                <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-indigo-500/30 text-indigo-200 border border-indigo-400/40" x-text="receivingOrder ? '#' + receivingOrder.id : ''"></span>
-                            </h3>
-                            <p class="text-xs text-slate-300">Cotejo físico e ingreso inmediato a existencias de rack</p>
-                        </div>
-                    </div>
-                    <button @click="receiveOrderModalOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Contenido del Modal -->
-                <div class="p-6 space-y-5">
-                    <!-- Tarjeta Info Orden -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
-                        <div>
-                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Proveedor</span>
-                            <span class="font-bold text-slate-800" x-text="receivingOrder?.supplier"></span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Transportista / Guía</span>
-                            <span class="font-medium text-slate-700 truncate block" x-text="receivingOrder?.carrier"></span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Piezas Esperadas</span>
-                            <span class="font-bold text-indigo-600 text-sm" x-text="receivingOrder ? receivingOrder.qty + ' uds' : '0'"></span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Inversión Lote</span>
-                            <template x-if="canViewFinancialCosts()">
-                                <span class="font-bold text-slate-800" x-text="receivingOrder ? '$' + receivingOrder.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2}) : '$0.00'"></span>
-                            </template>
-                            <template x-if="!canViewFinancialCosts()">
-                                <span class="text-slate-400 font-mono italic text-[11px]" title="Información financiera reservada">Protegido</span>
-                            </template>
-                        </div>
-                    </div>
-
-                    <!-- Producto a Recibir -->
-                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-center justify-between">
-                        <div>
-                            <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">Artículo que ingresa</span>
-                            <h4 class="font-bold text-slate-900 text-sm" x-text="receivingOrder?.productName"></h4>
-                            <span class="text-xs text-slate-500 font-mono" x-text="'SKU: ' + (receivingOrder?.sku || '')"></span>
-                        </div>
-                        <button 
-                            type="button" 
-                            @click="setReceivingSizesFull()"
-                            class="px-3 py-1 bg-white hover:bg-slate-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 shadow-3xs transition cursor-pointer"
-                        >
-                            <svg class="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>100% Recibido Conforme
-                        </button>
-                    </div>
-
-                    <!-- Matriz de Tallas a Cotejar -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Cotejo Físico por Talla (Piezas Recibidas en Mano)</label>
-                            <span class="text-xs font-bold text-indigo-600">Total a Ingresar: <span x-text="calculateReceivingTotal()"></span> / <span x-text="receivingOrder?.qty || 0"></span> uds</span>
-                        </div>
-                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                                <span class="text-[11px] font-bold text-slate-600 block mb-1">CH</span>
-                                <span class="text-[10px] text-slate-400 block mb-1">Esp: <span x-text="receivingOrder?.sizes?.ch || 0"></span></span>
-                                <input type="number" min="0" x-model.number="receivingSizes.ch" class="w-full text-center bg-white border border-slate-200 rounded py-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                                <span class="text-[11px] font-bold text-indigo-600 inline-flex items-center justify-center gap-0.5 mb-1">M <svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-                                <span class="text-[10px] text-slate-400 block mb-1">Esp: <span x-text="receivingOrder?.sizes?.m || 0"></span></span>
-                                <input type="number" min="0" x-model.number="receivingSizes.m" class="w-full text-center bg-white border border-indigo-300 rounded py-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                                <span class="text-[11px] font-bold text-indigo-600 inline-flex items-center justify-center gap-0.5 mb-1">G <svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-                                <span class="text-[10px] text-slate-400 block mb-1">Esp: <span x-text="receivingOrder?.sizes?.g || 0"></span></span>
-                                <input type="number" min="0" x-model.number="receivingSizes.g" class="w-full text-center bg-white border border-indigo-300 rounded py-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                                <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
-                                <span class="text-[10px] text-slate-400 block mb-1">Esp: <span x-text="receivingOrder?.sizes?.xl || 0"></span></span>
-                                <input type="number" min="0" x-model.number="receivingSizes.xl" class="w-full text-center bg-white border border-slate-200 rounded py-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                                <span class="text-[11px] font-bold text-purple-700 block mb-1">2XL</span>
-                                <span class="text-[10px] text-slate-400 block mb-1">Esp: <span x-text="receivingOrder?.sizes?.['2xl'] || 0"></span></span>
-                                <input type="number" min="0" x-model.number="receivingSizes['2xl']" class="w-full text-center bg-white border border-slate-200 rounded py-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center">
-                                <span class="text-[11px] font-bold text-purple-700 block mb-1">3XL</span>
-                                <span class="text-[10px] text-slate-400 block mb-1">Esp: <span x-text="receivingOrder?.sizes?.['3xl'] || 0"></span></span>
-                                <input type="number" min="0" x-model.number="receivingSizes['3xl']" class="w-full text-center bg-white border border-slate-200 rounded py-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Control Sanitario en Recepcion Inbound (TASK-INV-06) -->
-                    <template x-if="receivingRequiresSanitary">
-                        <div class="p-3.5 bg-purple-50/70 rounded-xl border border-purple-200 text-xs space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    </span>
-                                    <div>
-                                        <span class="font-bold text-purple-900 block">Trazabilidad Sanitaria Inbound</span>
-                                        <span class="text-[10px] text-purple-700">Normativa Sanitaria DIGEMID / Farmacovigilancia y Cosmetica</span>
-                                    </div>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-200/70 text-purple-800 font-mono">Lote Obligatorio</span>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div>
-                                    <label class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block mb-1">Lote de Fabricacion</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="receivingBatchNumber" 
-                                        placeholder="LOT-2026-XXXX"
-                                        class="w-full text-xs font-mono font-bold px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:outline-none text-purple-900"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block mb-1">Fecha de Caducidad</label>
-                                    <input 
-                                        type="date" 
-                                        x-model="receivingExpirationDate" 
-                                        class="w-full text-xs font-medium px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:outline-none text-slate-800"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block mb-1">PAO (Meses tras Apertura)</label>
-                                    <select 
-                                        x-model.number="receivingPaoMonths" 
-                                        class="w-full text-xs font-medium px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:outline-none text-slate-800"
-                                    >
-                                        <option value="6">6 Meses (6M)</option>
-                                        <option value="12">12 Meses (12M)</option>
-                                        <option value="18">18 Meses (18M)</option>
-                                        <option value="24">24 Meses (24M)</option>
-                                        <option value="36">36 Meses (36M)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Control Sanitario en Recepcion Inbound (TASK-INV-06) -->
-                    <template x-if="receivingRequiresSanitary">
-                        <div class="p-3.5 bg-purple-50/70 rounded-xl border border-purple-200 text-xs space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    </span>
-                                    <div>
-                                        <span class="font-bold text-purple-900 block">Trazabilidad Sanitaria Inbound</span>
-                                        <span class="text-[10px] text-purple-700">Normativa Sanitaria DIGEMID / Farmacovigilancia y Cosmetica</span>
-                                    </div>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-200/70 text-purple-800 font-mono">Lote Obligatorio</span>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div>
-                                    <label class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block mb-1">Lote de Fabricacion</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="receivingBatchNumber" 
-                                        placeholder="LOT-2026-XXXX"
-                                        class="w-full text-xs font-mono font-bold px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:outline-none text-purple-900"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block mb-1">Fecha de Caducidad</label>
-                                    <input 
-                                        type="date" 
-                                        x-model="receivingExpirationDate" 
-                                        class="w-full text-xs font-medium px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:outline-none text-slate-800"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block mb-1">PAO (Meses tras Apertura)</label>
-                                    <select 
-                                        x-model.number="receivingPaoMonths" 
-                                        class="w-full text-xs font-medium px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:outline-none text-slate-800"
-                                    >
-                                        <option value="6">6 Meses (6M)</option>
-                                        <option value="12">12 Meses (12M)</option>
-                                        <option value="18">18 Meses (18M)</option>
-                                        <option value="24">24 Meses (24M)</option>
-                                        <option value="36">36 Meses (36M)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Impacto en Valuación Contable: CPP (TASK-INV-04) -->
-                    <div class="p-3.5 bg-slate-900 text-white rounded-xl border border-slate-800 text-xs">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="p-1 bg-indigo-500/20 text-indigo-400 rounded border border-indigo-500/30">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                </span>
-                                <span class="font-bold text-slate-200">Impacto en Valuación Contable (CPP)</span>
-                            </div>
-                            <span class="text-[10px] text-indigo-300 font-mono">Fórmula Oficial CPP</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700/60">
-                                <span class="text-[10px] text-slate-400 block">CPP Anterior</span>
-                                <span class="font-bold text-slate-200 text-xs font-mono" x-text="'$' + (getInboundCurrentCpp().toFixed(2)) + ' MXN'"></span>
-                            </div>
-                            <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700/60">
-                                <span class="text-[10px] text-slate-400 block">Costo Lote Entrante</span>
-                                <span class="font-bold text-amber-400 text-xs font-mono" x-text="'$' + (getInboundUnitCost().toFixed(2)) + ' MXN'"></span>
-                            </div>
-                            <div class="bg-indigo-950/80 p-2 rounded-lg border border-indigo-700/60">
-                                <span class="text-[10px] text-indigo-300 block font-bold">Nuevo CPP Estimado</span>
-                                <span class="font-extrabold text-emerald-400 text-xs font-mono" x-text="'$' + (getEstimatedInboundCPP().toFixed(2)) + ' MXN'"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Aviso de Carrito Mixto si aplica -->
-                    <template x-if="receivingOrder && receivingOrder.linkedCartId">
-                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-xs">
-                            <span class="text-amber-600 mt-0.5 flex items-center justify-center w-5 h-5 bg-amber-100 rounded-full"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
-                            <div>
-                                <span class="font-bold text-amber-900 block">¡Atención de Liberación Inmediata!</span>
-                                <p class="text-amber-800 leading-relaxed text-[11px]">
-                                    Esta orden contiene la pieza solicitada por <strong><span x-text="receivingOrder.linkedCustomer"></span></strong> en el <strong><span x-text="receivingOrder.linkedCartId"></span></strong>. Al confirmar el ingreso, el carrito mixto se desbloqueará automáticamente y se notificará a Logística para empaque y despacho total.
-                                </p>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Notas e Incidencias -->
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Notas de Recepción / Estado del Paquete</label>
-                        <input type="text" x-model="receivingNotes" placeholder="Ej. Embalaje intacto, precintos de seguridad verificados" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-700">
-                    </div>
-                </div>
-
-                <!-- Footer del Modal -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <button 
-                        type="button" 
-                        @click="receiveOrderModalOpen = false" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="openInboundBatchLabels()" 
-                            class="px-4 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                            title="Confirmar recepcion e imprimir lote de etiquetas termicas para todas las piezas recibidas"
-                        >
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span>Confirmar e Imprimir Etiquetas</span>
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="confirmInboundReceipt()" 
-                            class="px-5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                        >
-                            <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Confirmar e Ingresar a Almacén</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL GENERADOR DE ORDEN DE COMPRA FORMAL PARA WHATSAPP           -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="orderExportModalOpen" 
-        class="fixed inset-0 z-[75] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="orderExportModalOpen = false"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="orderExportModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="orderExportModalOpen = false"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="orderExportModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-3xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <!-- Header WhatsApp -->
-                <div class="px-6 py-4 bg-gradient-to-r from-emerald-800 to-teal-900 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-500/30 border border-emerald-400/30 flex items-center justify-center text-emerald-200">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-white">Generador de Orden de Compra para WhatsApp</h3>
-                            <p class="text-xs text-emerald-200">Formato estructurado con emojis y viñetas para envío rápido a mayoristas</p>
-                        </div>
-                    </div>
-                    <button @click="orderExportModalOpen = false" class="text-emerald-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Contenido del Modal -->
-                <div class="p-6 space-y-4">
-                    <!-- Filtros y Opciones de Exportación -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                        <div class="flex items-center gap-2">
-                            <label class="text-xs font-bold text-slate-700">Proveedor:</label>
-                            <select x-model="exportSupplierFilter" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-                                <option value="Torzo B2B">Torzo B2B (Mayorista)</option>
-                                <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
-                                <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
-                                <option value="all">Consolidado Multimarca (Todos)</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-4 text-xs">
-                            <label class="flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
-                                <input type="checkbox" x-model="exportIncludePlanned" class="rounded text-emerald-600 focus:ring-emerald-500">
-                                <span>Planificadas (<span x-text="futurePurchaseOrders.filter(o => exportSupplierFilter === 'all' || o.supplier === exportSupplierFilter).length"></span>)</span>
-                            </label>
-                            <label class="flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
-                                <input type="checkbox" x-model="exportIncludeOnDemand" class="rounded text-emerald-600 focus:ring-emerald-500">
-                                <span>On-Demand (<span x-text="customerOnDemandRequests.filter(r => exportSupplierFilter === 'all' || r.supplier === exportSupplierFilter).length"></span>)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Caja de Previsualización Monospace -->
-                    <div class="relative">
-                        <div class="absolute top-3 right-3 z-10 flex items-center gap-2">
-                            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">WhatsApp Markdown</span>
-                        </div>
-                        <textarea 
-                            readonly 
-                            rows="13"
-                            :value="getExportOrderText()" 
-                            class="w-full font-mono text-xs p-4 bg-slate-900 text-emerald-300 rounded-xl border border-slate-800 shadow-inner focus:outline-none select-all leading-relaxed resize-y max-w-full"
-                            style="resize: vertical; max-width: 100%;"
-                        ></textarea>
-                    </div>
-                </div>
-
-                <!-- Footer con Acciones -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button 
-                        type="button" 
-                        @click="orderExportModalOpen = false" 
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cerrar
-                    </button>
-                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
-                        <button 
-                            type="button" 
-                            @click="window.print()" 
-                            class="px-3.5 py-2 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 shadow-3xs transition cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span>Imprimir / PDF</span>
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="copyOrderTextToClipboard()" 
-                            class="px-5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                        >
-                            <template x-if="!exportCopiedToast">
-                                <span class="flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                                    <span>Copiar para WhatsApp</span>
-                                </span>
-                            </template>
-                            <template x-if="exportCopiedToast">
-                                <span class="flex items-center gap-1.5 text-white">
-                                    <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span>¡Copiado con Éxito!</span>
-                                </span>
-                            </template>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL 1: GENERADOR FORMAL DE ORDEN DE COMPRA (PO EN PDF)          -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="poGeneratorModalOpen" 
-        class="fixed inset-0 z-[95] overflow-y-auto po-modal-wrapper print:static print:overflow-visible" 
-        :style="poGeneratorModalOpen ? 'display: block !important; z-index: 95;' : 'display: none !important;'"
-        style="display: none;"
-        @keydown.escape.window="closePoGenerator()"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="poGeneratorModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity po-backdrop-dark no-print print:hidden"
-            @click="closePoGenerator()"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4 po-modal-centering print:block print:p-0 print:m-0 print:min-h-0">
-            <div 
-                x-show="poGeneratorModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-4xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative po-modal-card print:border-none print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-full print:max-w-none print:overflow-visible print:static"
-                @click.stop
-            >
-                <!-- Header de la PO (no print) -->
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 po-modal-header no-print print:hidden">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-white">Orden de Compra Formal (Expediente PO)</h3>
-                                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30" x-text="currentPoData ? currentPoData.poNumber : 'PO-2026-0000'"></span>
-                            </div>
-                            <p class="text-xs text-slate-400">Documento mercantil oficial para emisión a fabricante, registro de compromiso y recepción en rampa</p>
-                        </div>
-                    </div>
-                    <button @click="closePoGenerator()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Panel de Acuerdos de Notas de Crédito & Discrepancias (no-print) -->
-                <template x-if="currentPoData">
-                    <div class="bg-amber-50/70 border-b border-amber-200/80 px-6 py-4 po-discrepancy-panel no-print print:hidden">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                            <div class="flex items-start gap-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-700 shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-slate-800">Recuperación de Acuerdos por Discrepancias Previas</span>
-                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">Notas de Crédito & Compensación</span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-600 mt-0.5">Aplica descuentos acordados por faltantes en muelle, penalizaciones o defectos textiles en entregas anteriores.</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition select-none"
-                                    :class="currentPoData.hasCreditDeduction ? 'bg-amber-100/90 border-amber-300 text-amber-900 shadow-3xs' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'">
-                                    <input type="checkbox" :checked="currentPoData.hasCreditDeduction" @change="togglePoCreditDeduction()" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
-                                    <span>Aplicar deducción a esta orden</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- LISTA DESPLEGABLE DE ACUERDOS PENDIENTES POR CONCILIAR (Adaptable a cada acuerdo) -->
-                        <div class="mt-3 pt-3 border-t border-amber-200/60">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
-                                <label class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span>Lista Desplegable de Acuerdos Pendientes por Conciliar:</span>
-                                </label>
-                                <span class="text-[10px] text-amber-800 font-semibold" x-text="getPendingAgreementsForCurrentPo().length + ' acuerdo(s) registrados para ' + currentPoData.supplier"></span>
-                            </div>
-
-                            <select 
-                                class="w-full bg-white border-2 border-amber-300 hover:border-amber-400 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none transition shadow-2xs cursor-pointer"
-                                @change="handleCreditAgreementSelect($event.target.value)"
-                            >
-                                <option value="" :selected="!currentPoData.hasCreditDeduction">-- Sin compensación / No aplicar acuerdo en esta orden --</option>
-                                <template x-for="agr in getPendingAgreementsForCurrentPo()" :key="agr.ref">
-                                    <option 
-                                        :value="agr.ref" 
-                                        :selected="currentPoData.hasCreditDeduction && currentPoData.creditNoteRef === agr.ref"
-                                        x-text="agr.ref + ' • ' + formatCurrency(agr.amount) + ' • ' + agr.reason"
-                                    ></option>
-                                </template>
-                                <option value="manual" :selected="currentPoData.hasCreditDeduction && !getPendingAgreementsForCurrentPo().some(a => a.ref === currentPoData.creditNoteRef)">-- Captura Manual Personalizada (Otro Acuerdo) --</option>
-                            </select>
-                        </div>
-
-                        <!-- Campos editables si la deducción está activa -->
-                        <div x-show="currentPoData.hasCreditDeduction" class="mt-3 pt-3 border-t border-amber-200/60 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">Folio del Acuerdo / Nota de Crédito:</label>
-                                <input 
-                                    type="text" 
-                                    x-model="currentPoData.creditNoteRef" 
-                                    placeholder="Ej. NC-TORZO-2026-012"
-                                    class="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:ring-1 focus:ring-amber-500 focus:outline-none"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">Monto a Compensar ($ MXN):</label>
-                                <input 
-                                    type="number" 
-                                    step="0.01" 
-                                    min="0"
-                                    x-model.number="currentPoData.creditNoteAmount" 
-                                    @input="recalculatePoTotals()"
-                                    class="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-900 focus:ring-1 focus:ring-amber-500 focus:outline-none"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">Causa / Discrepancia Citada:</label>
-                                <input 
-                                    type="text" 
-                                    x-model="currentPoData.creditNoteReason" 
-                                    placeholder="Ej. Faltante en muelle rampa Inbound 02"
-                                    class="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-amber-500 focus:outline-none"
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Documento Imprimible (PO Sheet) -->
-                <template x-if="currentPoData">
-                    <div class="p-8 space-y-6 max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible text-slate-800 font-sans" id="printablePurchaseOrderDoc">
-                        <!-- Membrete Corporativo -->
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between pb-6 border-b-2 border-slate-900 gap-4">
-                            <div>
-                                <div class="text-xs font-bold uppercase tracking-widest text-indigo-600">División de Abastecimiento & Compras</div>
-                                <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">MI TIENDA ONLINE S.A. DE C.V.</h1>
-                                <p class="text-xs text-slate-600 mt-1">RFC: <strong>MTO-240815-9K2</strong> • Régimen General de Ley Personas Morales</p>
-                                <p class="text-xs text-slate-500">Av. Insurgentes Sur #1898, Piso 4, Col. Florida, Alcaldía Álvaro Obregón, C.P. 01030, CDMX</p>
-                                <p class="text-xs text-slate-500">Tel: +52 55 8421 9000 • Email: compras@mitienda.com</p>
-                            </div>
-                            <div class="text-right sm:min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 block">Folio de Orden de Compra</span>
-                                <span class="text-xl font-mono font-black text-slate-900 block" x-text="currentPoData.poNumber"></span>
-                                <div class="mt-2 pt-2 border-t border-slate-200 text-xs text-slate-600">
-                                    <div>Fecha: <strong class="text-slate-900" x-text="currentPoData.date"></strong></div>
-                                    <div class="text-emerald-700 font-semibold mt-0.5">Estatus: Emitida / Aprobada</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bloque 2 Columnas: Datos del Proveedor y Condiciones de Entrega -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                            <!-- Datos del Proveedor -->
-                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Datos del Fabricante / Proveedor</span>
-                                <div class="text-sm font-bold text-slate-900" x-text="currentPoData.supplier"></div>
-                                <div class="text-slate-600">Código Proveedor: <strong class="font-mono text-slate-800" x-text="currentPoData.vendorCode"></strong></div>
-                                <div class="text-slate-600">Contacto: <span class="font-medium text-slate-800" x-text="currentPoData.contactName"></span></div>
-                                <div class="text-slate-600">Teléfono: <span class="font-mono text-slate-800" x-text="currentPoData.contactPhone"></span></div>
-                                <div class="text-slate-600">Correo Comercial: <span class="text-slate-800" x-text="currentPoData.contactEmail"></span></div>
-                                <div class="text-indigo-800 font-semibold pt-1">Términos de Pago: <span class="font-bold" x-text="currentPoData.paymentTerms"></span></div>
-                            </div>
-
-                            <!-- Condiciones Logísticas y Rampa -->
-                            <div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-1">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block mb-2">Condiciones Logísticas & Entrega</span>
-                                <div class="text-slate-700">Muelle de Recepción: <strong class="text-slate-900 block" x-text="currentPoData.deliveryDock"></strong></div>
-                                <div class="text-slate-700 mt-1">Fecha Compromiso de Entrega: <strong class="text-indigo-800 block" x-text="currentPoData.deliveryCommitmentDate"></strong></div>
-                                <div class="text-slate-700 mt-1">Horario de Rampa: <span class="text-slate-900 font-medium">Lunes a Viernes 07:00 a 14:00 hrs</span></div>
-                                <div class="text-[11px] text-slate-500 mt-2 italic">Requisito obligatorio: Acompañar el embarque con remisión física y copia de esta PO para cotejo ciego de piezas en rampa.</div>
-                            </div>
-                        </div>
-
-                        <!-- Tabla Detallada de Partidas y Curvas de Tallas -->
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead class="bg-slate-100 text-slate-700 uppercase tracking-wider font-bold text-[10px] border-b border-slate-200">
-                                    <tr>
-                                        <th class="py-2.5 px-3 text-center">Partida</th>
-                                        <th class="py-2.5 px-3">Código SKU</th>
-                                        <th class="py-2.5 px-3">Descripción de la Prenda</th>
-                                        <th class="py-2.5 px-3 text-center">Curva de Tallas</th>
-                                        <th class="py-2.5 px-3 text-center">Cantidad</th>
-                                        <th class="py-2.5 px-3 text-right">Precio Unit. Pactado</th>
-                                        <th class="py-2.5 px-3 text-right">Importe Total MXN</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200 font-medium">
-                                    <template x-for="(item, idx) in currentPoData.items" :key="idx">
-                                        <tr class="hover:bg-slate-50/50">
-                                            <td class="py-3 px-3 text-center font-bold text-slate-400" x-text="idx + 1"></td>
-                                            <td class="py-3 px-3 font-mono font-bold text-indigo-700" x-text="item.sku"></td>
-                                            <td class="py-3 px-3 font-bold text-slate-900" x-text="item.productName"></td>
-                                            <td class="py-3 px-3 text-center">
-                                                <div class="flex items-center justify-center gap-1 font-mono text-[10px]">
-                                                    <span class="px-1 bg-slate-100 border border-slate-200 rounded" x-text="'CH:' + (item.sizes ? (item.sizes.ch || 0) : 0)"></span>
-                                                    <span class="px-1 bg-indigo-50 border border-indigo-200 rounded font-bold text-indigo-700" x-text="'M:' + (item.sizes ? (item.sizes.m || 0) : 0)"></span>
-                                                    <span class="px-1 bg-indigo-50 border border-indigo-200 rounded font-bold text-indigo-700" x-text="'G:' + (item.sizes ? (item.sizes.g || 0) : 0)"></span>
-                                                    <span class="px-1 bg-slate-100 border border-slate-200 rounded" x-text="'XL:' + (item.sizes ? (item.sizes.xl || 0) : 0)"></span>
-                                                    <template x-if="item.sizes && item.sizes['2xl'] > 0">
-                                                        <span class="px-1 bg-amber-50 border border-amber-200 rounded font-bold text-amber-800" x-text="'2XL:' + item.sizes['2xl']"></span>
-                                                    </template>
-                                                </div>
-                                            </td>
-                                            <td class="py-3 px-3 text-center font-bold text-slate-900" x-text="item.qty + ' uds'"></td>
-                                            <td class="py-3 px-3 text-right font-mono text-slate-700" x-text="formatCurrency(item.costUnit)"></td>
-                                            <td class="py-3 px-3 text-right font-bold font-mono text-slate-900" x-text="formatCurrency(item.totalCost)"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Resumen Económico -->
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pt-2">
-                            <div class="sm:max-w-md text-[11px] text-slate-500 space-y-1">
-                                <strong class="text-slate-700 block">Notas Comerciales & Cláusula de Aceptación:</strong>
-                                <p class="leading-relaxed">1. Todo embarque recibido en muelle será cotejado a ciegas por el personal de Almacén contra las cantidades y curva de tallas detalladas en esta orden.</p>
-                                <p class="leading-relaxed">2. Las piezas con merma textil o discrepancias cuantitativas serán sujetas a Nota de Crédito o retención en el cotejo de 3 vías de Finanzas (TASK-INT-07).</p>
-                                <p class="leading-relaxed font-semibold text-slate-600">3. Favor de confirmar número de guía fletera a compras@mitienda.com en cuanto el transporte sea recolectado.</p>
-                                <template x-if="currentPoData.hasCreditDeduction && currentPoData.deductionAmount > 0">
-                                    <p class="leading-relaxed text-amber-900 bg-amber-50/80 p-2.5 rounded-lg border border-amber-200 mt-2 font-medium">
-                                        4. <strong>Acuerdo de Compensación Comercial:</strong> Se aplica una deducción líquida de <strong x-text="formatCurrency(currentPoData.deductionAmount)"></strong> amparada bajo el acuerdo <span class="font-mono font-bold" x-text="currentPoData.creditNoteRef"></span> correspondiente a: <em x-text="currentPoData.creditNoteReason"></em>. Dicho importe se descuenta directamente de la liquidación de la presente orden mercantil.
-                                    </p>
-                                </template>
-                            </div>
-
-                            <div class="min-w-[260px] bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-slate-600 font-medium">Total de Unidades:</span>
-                                    <span class="font-bold text-slate-900 font-mono" x-text="currentPoData.totalPieces + ' piezas'"></span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-slate-600 font-medium">Importe Bruto Partidas:</span>
-                                    <span class="font-bold text-slate-900 font-mono" x-text="formatCurrency(currentPoData.grossSubtotal || currentPoData.subtotal)"></span>
-                                </div>
-                                <template x-if="currentPoData.hasCreditDeduction && currentPoData.deductionAmount > 0">
-                                    <div class="flex items-start justify-between text-amber-900 bg-amber-100/70 p-2 rounded-lg border border-amber-200/90">
-                                        <div>
-                                            <div class="font-bold text-[11px]">(-) Nota de Crédito / Deducción:</div>
-                                            <div class="text-[10px] font-mono opacity-80" x-text="currentPoData.creditNoteRef"></div>
-                                        </div>
-                                        <span class="font-bold font-mono text-amber-900" x-text="'-' + formatCurrency(currentPoData.deductionAmount)"></span>
-                                    </div>
-                                </template>
-                                <div class="flex items-center justify-between pt-1 border-t border-slate-200">
-                                    <span class="text-slate-600 font-medium">Subtotal Gravable Neto:</span>
-                                    <span class="font-bold text-slate-900 font-mono" x-text="formatCurrency(currentPoData.subtotal)"></span>
-                                </div>
-                                <div class="flex items-center justify-between text-slate-600">
-                                    <span>IVA Trasladado (16%):</span>
-                                    <span class="font-mono" x-text="formatCurrency(currentPoData.iva)"></span>
-                                </div>
-                                <div class="border-t-2 border-slate-300 pt-2 flex items-center justify-between text-sm">
-                                    <span class="font-black text-slate-900">Total Orden de Compra:</span>
-                                    <span class="font-black text-indigo-700 font-mono text-base" x-text="formatCurrency(currentPoData.total)"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bloque de Firmas -->
-                        <div class="grid grid-cols-2 gap-12 pt-10 text-center text-xs">
-                            <div class="border-t border-slate-400 pt-3">
-                                <span class="font-bold text-slate-900 block" x-text="currentPoData.buyerAgent"></span>
-                                <span class="text-[11px] text-slate-500">Autorización Comercial de Compra • Mi Tienda Online</span>
-                            </div>
-                            <div class="border-t border-slate-400 pt-3">
-                                <span class="font-bold text-slate-900 block" x-text="currentPoData.supplier"></span>
-                                <span class="text-[11px] text-slate-500">Acuse de Recibo y Aceptación de Taller / Fabricante</span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Footer del Modal con Acciones -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 po-modal-footer no-print print:hidden">
-                    <button 
-                        type="button" 
-                        @click="closePoGenerator()" 
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cerrar Borrador
-                    </button>
-                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
-                        <button 
-                            type="button" 
-                            @click="printPurchaseOrderDoc()" 
-                            class="px-4 py-2 text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-300 shadow-3xs transition cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span>Imprimir / Descargar PDF</span>
-                        </button>
-                        <template x-if="currentPoData && !currentPoData.isIssued">
-                            <button 
-                                type="button" 
-                                @click="openEmailDispatchModal()" 
-                                class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                                title="Preparar correo de despacho con la PO adjunta y emitir formalmente"
-                            >
-                                <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <span>Emitir y Enviar por Correo al Proveedor</span>
-                            </button>
-                        </template>
-                        <template x-if="currentPoData && currentPoData.isIssued">
-                            <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-3xs">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span>Orden Emitida Oficialmente (Hub 5 Comprometido)</span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL 1.2: DESPACHO Y ENVÍO DE ORDEN DE COMPRA POR CORREO         -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="emailDispatchModalOpen" 
-        class="fixed inset-0 z-[100] overflow-y-auto" 
-        :style="emailDispatchModalOpen ? 'display: block !important; z-index: 100;' : 'display: none !important;'"
-        style="display: none;"
-        @keydown.escape.window="closeEmailDispatchModal()"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="emailDispatchModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="closeEmailDispatchModal()"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="emailDispatchModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-2xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative z-10"
-                @click.stop
-            >
-                <!-- Header del Modal de Correo -->
-                <div class="px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-white">Despacho de Orden de Compra por Correo</h3>
-                                <template x-if="emailDispatchData">
-                                    <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30" x-text="emailDispatchData.poNumber"></span>
-                                </template>
-                            </div>
-                            <p class="text-xs text-indigo-200">Revisa los datos de envío, personaliza el mensaje y confirma la transmisión al proveedor</p>
-                        </div>
-                    </div>
-                    <button @click="closeEmailDispatchModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Formulario de Correo -->
-                <template x-if="emailDispatchData">
-                    <div class="p-6 space-y-4 text-xs font-sans text-slate-700">
-                        <!-- Destinatario (Para) -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Para (Correo del Fabricante / Taller):</label>
-                                <input 
-                                    type="email" 
-                                    x-model="emailDispatchData.to" 
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                                    placeholder="contacto@proveedor.com"
-                                >
-                            </div>
-                            <div>
-                                <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Con Copia (CC Operativo):</label>
-                                <input 
-                                    type="text" 
-                                    x-model="emailDispatchData.cc" 
-                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                                    placeholder="compras@mitienda.com, logistica@mitienda.com"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Asunto -->
-                        <div>
-                            <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Asunto del Mensaje:</label>
-                            <input 
-                                type="text" 
-                                x-model="emailDispatchData.subject" 
-                                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                            >
-                        </div>
-
-                        <!-- Cuerpo del Mensaje (Vertical resize only) -->
-                        <div>
-                            <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Cuerpo del Mensaje (Instrucciones & Términos):</label>
-                            <textarea 
-                                x-model="emailDispatchData.body" 
-                                rows="7" 
-                                class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs leading-relaxed text-slate-800 font-sans focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 resize-y max-w-full"
-                                style="resize: vertical; max-width: 100%;"
-                            ></textarea>
-                        </div>
-
-                        <!-- Card de Adjunto PDF & Notificación Extranet B2B -->
-                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-black text-xs shrink-0">
-                                    PDF
-                                </div>
-                                <div>
-                                    <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5 flex-wrap">
-                                        <span x-text="emailDispatchData.fileName"></span>
-                                        <span class="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold">Adjunto Generado</span>
-                                        <span class="px-1.5 py-0.2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-[10px] font-bold">Extranet B2B Sincronizado</span>
-                                    </div>
-                                    <div class="text-[11px] text-slate-500 mt-0.5" x-text="emailDispatchData.pieces + ' unidades • Total: ' + formatCurrency(emailDispatchData.total) + ' • Notificación automática a Extranet Proveedores'"></div>
-                                </div>
-                            </div>
-                            <span class="text-xs font-semibold text-indigo-600 shrink-0">Firmado & Vinculado</span>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Footer del Modal de Correo -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button 
-                        type="button" 
-                        @click="closeEmailDispatchModal()" 
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Volver a la Orden
-                    </button>
-                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
-                        <button 
-                            type="button" 
-                            @click="sendPoEmailAndIssue()" 
-                            class="w-full sm:w-auto px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
-                        >
-                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                            <span>Confirmar y Enviar Correo al Fabricante</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL 1.5: TELEMETRÍA FLETERA & RASTREO DE GUÍA INBOUND (TASK-INV-16) -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="carrierTrackingModalOpen" 
-        class="fixed inset-0 z-[86] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="closeCarrierTrackingModal()"
-    >
-        <div 
-            x-show="carrierTrackingModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" 
-            @click="closeCarrierTrackingModal()"
-        ></div>
-
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <div 
-                x-show="carrierTrackingModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200"
-                @click.stop
-            >
-                <!-- Header del Modal -->
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-blue-500/30 border border-blue-400/30 flex items-center justify-center text-blue-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-white">Telemetría de Ruta Fletera (Inbound)</h3>
-                                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30" x-text="selectedTrackingOrder ? '#' + selectedTrackingOrder.id : ''"></span>
-                            </div>
-                            <p class="text-xs text-slate-400">Rastreo y tiempos de tránsito del transporte en ruta a CEDIS Naucalpan</p>
-                        </div>
-                    </div>
-                    <button @click="closeCarrierTrackingModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Contenido de Telemetría -->
-                <template x-if="selectedTrackingOrder">
-                    <div class="p-6 space-y-6">
-                        <!-- Ficha de la Guía y Transportista -->
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Transportista Asignado</span>
-                                <span class="text-sm font-bold text-slate-900 block mt-0.5" x-text="selectedTrackingOrder.carrier"></span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs text-slate-600">Proveedor: <strong class="text-slate-800" x-text="selectedTrackingOrder.supplier"></strong></span>
-                                    <span class="text-slate-300">&bull;</span>
-                                    <span class="text-xs text-slate-600">Lote: <strong class="text-slate-800" x-text="selectedTrackingOrder.qty + ' uds'"></strong></span>
-                                </div>
-                            </div>
-                            <div class="sm:text-right">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Fecha Estimada (ETA)</span>
-                                <span class="text-sm font-black text-indigo-700 block mt-0.5" x-text="selectedTrackingOrder.eta"></span>
-                                <span class="text-[11px] text-emerald-600 font-semibold inline-flex items-center gap-1 mt-0.5">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span>Tránsito Normal (Sin demoras)</span>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Línea de Tiempo de Hitos (Timeline) -->
-                        <div class="space-y-4">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Hitos de Despacho & Arribo a Muelle</h4>
-                            
-                            <div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                                <!-- Hito 1: Recolección en Taller -->
-                                <div class="relative">
-                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-100 flex items-center justify-center">
-                                        <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                                    </span>
-                                    <div>
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-bold text-slate-900">1. Recolección & Manifiesto en Origen</span>
-                                            <span class="text-slate-400 font-mono text-[11px]" x-text="selectedTrackingOrder.date"></span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Bultos precintados en taller mayorista y entregados al transportista con guía oficial.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Hito 2: En Tránsito Carretero / Aéreo -->
-                                <div class="relative">
-                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-blue-600 ring-4 ring-blue-100 flex items-center justify-center">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                    </span>
-                                    <div>
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-bold text-blue-900">2. En Tránsito Interurbano</span>
-                                            <span class="text-blue-600 font-mono text-[11px] font-semibold">En Curso</span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Unidad en ruta hacia centro de distribución metropolitano con telemetría activa.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Hito 3: Arribo a Patio Naucalpan -->
-                                <div class="relative">
-                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-slate-300 ring-4 ring-slate-100"></span>
-                                    <div>
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-bold text-slate-700">3. Arribo a Patio de Maniobras Naucalpan</span>
-                                            <span class="text-slate-400 text-[11px]" x-text="'ETA: ' + selectedTrackingOrder.eta"></span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-400 mt-0.5">Ingreso al predio para validación de sellos de seguridad fleteros.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Hito 4: Descarga en Rampa 02 -->
-                                <div class="relative">
-                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-slate-300 ring-4 ring-slate-100"></span>
-                                    <div>
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-bold text-slate-700">4. Descarga & Cotejo Físico a Ciegas (Carlos Almacén)</span>
-                                            <span class="text-slate-400 text-[11px]">Rampa 02 Inbound</span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-400 mt-0.5">Recepción física, inspección textil por tallas e ingreso formal a existencias de rack.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Banner Informativo para Compras -->
-                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
-                            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <div>
-                                <span class="font-bold block">Protocolo Operativo de Compras:</span>
-                                <span>Elena Compras monitorea esta telemetría para notificar al proveedor en caso de atrasos. Una vez descargado en rampa, Carlos Almacén realizará el conteo físico a ciegas en Hub 6.</span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Footer del Modal -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button 
-                        type="button" 
-                        @click="closeCarrierTrackingModal()" 
-                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cerrar
-                    </button>
-                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
-                        <button 
-                            type="button" 
-                            @click="closeCarrierTrackingModal(); if(selectedTrackingOrder) viewPoPdfFromActiveOrder(selectedTrackingOrder);" 
-                            class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span>Ver Expediente PO (PDF)</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL 2: RECHAZO ON-DEMAND Y AVISO A HUB 3 (TASK-INT-22)          -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="onDemandRejectModalOpen" 
-        class="fixed inset-0 z-[85] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="onDemandRejectModalOpen = false"
-    >
-        <div 
-            x-show="onDemandRejectModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="onDemandRejectModalOpen = false"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="onDemandRejectModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-                class="inline-block w-full max-w-lg bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <div class="px-6 py-4 bg-rose-50 border-b border-rose-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-rose-100 text-rose-700 rounded-xl border border-rose-200 shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-sm font-bold text-rose-950">Marcar Prenda On-Demand como Agotada</h3>
-                            <p class="text-xs text-rose-700">Resolución comercial y disparo de alerta hacia Atención a Clientes</p>
-                        </div>
-                    </div>
-                    <button @click="onDemandRejectModalOpen = false" class="text-rose-400 hover:text-rose-700 p-1.5 rounded-lg transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <template x-if="selectedOnDemandReq">
-                    <div class="p-6 space-y-4 text-xs">
-                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                            <div class="flex items-center justify-between">
-                                <span class="font-mono font-bold text-slate-800" x-text="selectedOnDemandReq.id"></span>
-                                <span class="font-bold text-slate-900" x-text="selectedOnDemandReq.customerName"></span>
-                            </div>
-                            <div class="text-slate-700 font-medium" x-text="selectedOnDemandReq.productName"></div>
-                            <div class="text-slate-500 flex items-center gap-2">
-                                <span x-text="'SKU: ' + selectedOnDemandReq.sku"></span>
-                                <span>•</span>
-                                <span class="font-bold text-indigo-700" x-text="'Talla ' + selectedOnDemandReq.size"></span>
-                                <span>•</span>
-                                <span x-text="'Proveedor: ' + selectedOnDemandReq.supplier"></span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Motivo del Agotamiento / Cancelación</label>
-                            <!-- REGLA DE TEXTAREA: SOLO EXPANSIÓN VERTICAL -->
-                            <textarea 
-                                x-model="onDemandRejectReason"
-                                rows="3"
-                                placeholder="Indica detalles para el ejecutivo de atención a clientes (ej. Sin tela en taller, descontinuado, etc.)..."
-                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500 resize-y max-w-full"
-                                style="resize: vertical; max-width: 100%;"
-                            ></textarea>
-                        </div>
-
-                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 leading-snug text-[11px]">
-                            <strong class="font-bold block text-amber-950 mb-0.5">Sinergia Automática Hub 3 (TASK-INT-22):</strong>
-                            Al confirmar, la solicitud pasará a estatus 'Agotada' en compras y se creará una tarea inmediata en la Bandeja de Atención a Clientes para contactar a <span class="font-bold" x-text="selectedOnDemandReq.customerName"></span> y sugerirle un producto sustituto disponible en bodega.
-                        </div>
-                    </div>
-                </template>
-
-                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
-                    <button 
-                        type="button" 
-                        @click="onDemandRejectModalOpen = false" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="confirmRejectOnDemand()" 
-                        class="px-5 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-sm transition cursor-pointer flex items-center gap-1.5"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        <span>Confirmar Rechazo y Notificar Hub 3</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL 3: AJUSTE GRANULAR DE CURVA DE TALLAS                       -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="sizeEditModalOpen" 
-        :style="sizeEditModalOpen ? 'display: block !important;' : 'display: none !important;'"
-        class="fixed inset-0 z-[95] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="closeSizeEditModal()"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="sizeEditModalOpen"
-            :style="sizeEditModalOpen ? 'display: block !important;' : 'display: none !important;'"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="closeSizeEditModal()"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4 relative z-10">
-            <div 
-                x-show="sizeEditModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-md bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-                    <div>
-                        <h3 class="text-sm font-bold text-white">Editar Curva de Tallas</h3>
-                        <p class="text-xs text-slate-400">Distribución de piezas a ordenar por talla comercial</p>
-                    </div>
-                    <button @click="closeSizeEditModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <template x-if="selectedOrderForSizes">
-                    <div class="p-6 space-y-4 text-xs">
-                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                            <span class="font-mono font-bold text-indigo-600 block text-[11px]" x-text="selectedOrderForSizes.sku"></span>
-                            <h4 class="font-bold text-slate-900 text-sm mt-0.5" x-text="selectedOrderForSizes.productName"></h4>
-                            <span class="text-slate-500 text-[11px]" x-text="'Proveedor: ' + selectedOrderForSizes.supplier"></span>
-                        </div>
-
-                        <!-- Grilla de Tallas -->
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1 text-center">Talla CH</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    max="999" 
-                                    x-model.number="selectedOrderForSizes.sizes.ch" 
-                                    class="w-full text-center font-bold text-xs py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-1 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-indigo-700 mb-1 text-center">Talla M</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    max="999" 
-                                    x-model.number="selectedOrderForSizes.sizes.m" 
-                                    class="w-full text-center font-bold text-xs py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-lg focus:bg-white focus:ring-1 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-indigo-700 mb-1 text-center">Talla G</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    max="999" 
-                                    x-model.number="selectedOrderForSizes.sizes.g" 
-                                    class="w-full text-center font-bold text-xs py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-lg focus:bg-white focus:ring-1 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1 text-center">Talla XL</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    max="999" 
-                                    x-model.number="selectedOrderForSizes.sizes.xl" 
-                                    class="w-full text-center font-bold text-xs py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-1 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-amber-700 mb-1 text-center">Talla 2XL</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    max="999" 
-                                    x-model.number="selectedOrderForSizes.sizes['2xl']" 
-                                    class="w-full text-center font-bold text-xs py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-1 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-amber-700 mb-1 text-center">Talla 3XL</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    max="999" 
-                                    x-model.number="selectedOrderForSizes.sizes['3xl']" 
-                                    class="w-full text-center font-bold text-xs py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-1 focus:ring-indigo-500"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Resumen Total Recalculado -->
-                        <div class="p-3 bg-indigo-50 rounded-xl border border-indigo-100 flex items-center justify-between text-xs">
-                            <span class="font-bold text-indigo-950">Suma Total de Piezas:</span>
-                            <span class="font-black text-indigo-700 font-mono text-sm" x-text="Object.values(selectedOrderForSizes.sizes || {}).reduce((s, v) => s + (parseInt(v) || 0), 0) + ' uds'"></span>
-                        </div>
-                    </div>
-                </template>
-
-                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
-                    <button 
-                        type="button" 
-                        @click="closeSizeEditModal()" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="saveOrderSizesFromModal()" 
-                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition cursor-pointer"
-                    >
-                        Guardar Curva
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- DRAWER LATERAL: KARDEX & AUDITORÍA DE MOVIMIENTOS MULTICANAL      -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="kardexDrawerOpen" 
-        class="fixed inset-0 z-[70] overflow-hidden" 
-        style="display: none;"
-        @keydown.escape.window="kardexDrawerOpen = false"
-    >
-        <!-- Backdrop oscuro -->
-        <div 
-            x-show="kardexDrawerOpen"
-            x-transition:enter="ease-in-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in-out duration-300"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="kardexDrawerOpen = false"
-        ></div>
-
-        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div 
-                x-show="kardexDrawerOpen"
-                x-transition:enter="transform transition ease-in-out duration-300"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition ease-in-out duration-300"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                class="w-screen max-w-full bg-white shadow-2xl flex flex-col pointer-events-auto"
-                @click.stop
-            >
-                <!-- Header del Kardex -->
-                <div class="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-slate-800">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-white">Kardex & Auditoría de Movimientos</h3>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40" x-text="inventoryMovements.length + ' asientos'"></span>
-                            </div>
-                            <p class="text-xs text-slate-300">Trazabilidad inmutable de entradas, salidas, reservas y mermas (Espejo de <code class="text-indigo-300 font-mono text-[10px]">inventory_movements</code> en Laravel)</p>
-                        </div>
-                    </div>
-                    <button @click="kardexDrawerOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- KPIs de Kardex -->
-                <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-3xs">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Entradas x Compra</span>
-                        <span class="text-base font-black text-emerald-600">
-                            +<span x-text="inventoryMovements.filter(m => m.type === 'ENTRADA_COMPRA').reduce((acc, m) => acc + (m.delta || 0), 0)"></span> uds
-                        </span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-3xs">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Ventas / Despachos</span>
-                        <span class="text-base font-black text-blue-600">
-                            <span x-text="inventoryMovements.filter(m => m.type === 'VENTA_DIRECTA' || m.type === 'SALIDA_VENTA' || m.type === 'SALIDA_DESPACHO').reduce((acc, m) => acc + (m.delta || 0), 0)"></span> uds
-                        </span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-3xs">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Reservas Mixtas</span>
-                        <span class="text-base font-black text-amber-600">
-                            <span x-text="inventoryMovements.filter(m => m.type === 'RESERVA_MIXTA').length"></span> pedidos
-                        </span>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-3xs">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Mermas / Ajustes</span>
-                        <span class="text-base font-black text-rose-600">
-                            <span x-text="inventoryMovements.filter(m => m.type === 'AJUSTE_MERMA').reduce((acc, m) => acc + (m.delta || 0), 0)"></span> uds
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Filtros del Kardex -->
-                <div class="p-4 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 flex-1 max-w-sm">
-                        <div class="relative w-full">
-                            <input 
-                                type="text" 
-                                x-model="kardexSearch" 
-                                placeholder="Buscar por SKU, producto o documento..." 
-                                class="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                            >
-                            <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                        <template x-if="kardexSearch">
-                            <button @click="kardexSearch = ''" class="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5" aria-label="Limpiar búsqueda"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                        </template>
-                    </div>
-                    <div class="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
-                        <button 
-                            @click="kardexFilterType = 'all'" 
-                            :class="kardexFilterType === 'all' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Todos
-                        </button>
-                        <button 
-                            @click="kardexFilterType = 'ENTRADA_COMPRA'" 
-                            :class="kardexFilterType === 'ENTRADA_COMPRA' ? 'bg-emerald-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Entradas
-                        </button>
-                        <button 
-                            @click="kardexFilterType = 'VENTA_DIRECTA'" 
-                            :class="kardexFilterType === 'VENTA_DIRECTA' ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Ventas
-                        </button>
-                        <button 
-                            @click="kardexFilterType = 'SALIDA_VENTA'" 
-                            :class="kardexFilterType === 'SALIDA_VENTA' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Despachos
-                        </button>
-                        <button 
-                            @click="kardexFilterType = 'SALIDA_COMBO_SUSCRIPCION'" 
-                            :class="kardexFilterType === 'SALIDA_COMBO_SUSCRIPCION' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Suscripciones (BOM)
-                        </button>
-                        <button 
-                            @click="kardexFilterType = 'RESERVA_MIXTA'" 
-                            :class="kardexFilterType === 'RESERVA_MIXTA' ? 'bg-amber-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Reservas
-                        </button>
-                        <button 
-                            @click="kardexFilterType = 'AJUSTE_MERMA'" 
-                            :class="kardexFilterType === 'AJUSTE_MERMA' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                            class="px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0 text-[11px]"
-                        >
-                            Mermas
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tabla de Asientos del Kardex -->
-                <div class="flex-1 overflow-y-auto">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-50 sticky top-0 border-b border-slate-200 text-slate-500 text-[10px] uppercase tracking-wider font-semibold z-10">
-                            <tr>
-                                <th class="py-2.5 px-4">Fecha / ID</th>
-                                <th class="py-2.5 px-4">Tipo Movimiento</th>
-                                <th class="py-2.5 px-4">Producto & SKU</th>
-                                <th class="py-2.5 px-4 text-center">Tallas</th>
-                                <th class="py-2.5 px-4 text-center">Variación</th>
-                                <th class="py-2.5 px-4 text-center">Saldo Físico</th>
-                                <th class="py-2.5 px-4">Referencia / Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-slate-700">
-                            <template x-for="(mov, index) in displayedKardexMovements" :key="mov.id">
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3 px-4">
-                                        <span class="font-mono font-bold text-slate-900 block" x-text="mov.id"></span>
-                                        <span class="text-[10px] text-slate-400 block" x-text="mov.timestamp"></span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span :class="getMovementBadgeClass(mov.type)" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border" x-text="getMovementLabel(mov.type)"></span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-bold text-slate-900 block truncate max-w-[200px]" x-text="mov.productName"></span>
-                                        <span class="font-mono text-[10px] text-slate-400 block" x-text="mov.sku"></span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center font-mono text-[10px]">
-                                        <template x-if="mov.sizes">
-                                            <div class="inline-flex flex-wrap gap-1 justify-center max-w-[120px]">
-                                                <template x-for="(qty, sz) in mov.sizes" :key="sz">
-                                                    <span x-show="qty > 0" class="px-1 py-0.2 bg-slate-100 rounded text-slate-600 font-semibold" x-text="sz.toUpperCase() + ':' + qty"></span>
-                                                </template>
-                                            </div>
-                                        </template>
-                                    </td>
-                                    <td class="py-3 px-4 text-center">
-                                        <span 
-                                            :class="mov.delta > 0 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : (mov.delta < 0 ? 'text-rose-700 bg-rose-50 border-rose-200' : 'text-amber-700 bg-amber-50 border-amber-200')" 
-                                            class="inline-block px-2 py-0.5 rounded font-mono font-bold text-xs border"
-                                            x-text="(mov.delta > 0 ? '+' : '') + mov.delta + ' uds'"
-                                        ></span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center font-mono">
-                                        <span class="text-slate-400 text-[10px]" x-text="mov.stockBefore"></span>
-                                        <span class="text-slate-400 text-[10px]"> &rarr; </span>
-                                        <span class="font-bold text-slate-900" x-text="mov.stockAfter"></span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <span class="font-semibold text-slate-800 text-[11px] block" x-text="mov.reference"></span>
-                                        <span class="text-[10px] text-slate-500 block truncate max-w-[150px]" x-text="mov.user"></span>
-                                    </td>
-                                </tr>
-                            </template>
-                            <template x-if="filteredMovements.length === 0">
-                                <tr>
-                                    <td colspan="7" class="py-10 text-center text-slate-400">
-                                        No se encontraron movimientos para el filtro seleccionado.
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Footer del Kardex con Paginación Cargar más -->
-                <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                    <div class="text-slate-500">
-                        Mostrando <strong class="text-slate-800" x-text="Math.min(kardexVisibleCount, filteredMovements.length)"></strong> de <strong class="text-slate-800" x-text="filteredMovements.length"></strong> asientos de auditoría
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <template x-if="kardexVisibleCount < filteredMovements.length">
-                            <button 
-                                @click="loadMoreKardex()" 
-                                :disabled="kardexIsLoadingMore"
-                                class="px-3 py-1.5 bg-white border border-slate-300 hover:border-slate-800 rounded-md text-xs font-bold text-slate-800 transition cursor-pointer flex items-center gap-1.5"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                <span x-text="kardexIsLoadingMore ? 'Cargando...' : 'Cargar más'"></span>
-                            </button>
-                        </template>
-                        <button 
-                            type="button" 
-                            @click="kardexDrawerOpen = false" 
-                            class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-bold transition cursor-pointer"
-                        >
-                            Cerrar Kardex
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- BARRA FLOTANTE DE ACCIONES EN LOTE (FLOATING BULK ACTIONS TOOLBAR)-->
-    <!-- ================================================================= -->
-    <div 
-        x-show="selectedSkus.length > 0" 
-        x-transition:enter="transition ease-out duration-300 transform"
-        x-transition:enter-start="opacity-0 translate-y-6 scale-95"
-        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-        x-transition:leave="transition ease-in duration-200 transform"
-        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-        x-transition:leave-end="opacity-0 translate-y-6 scale-95"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-wrap items-center gap-2 sm:gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700/80 max-w-4xl"
-        style="display: none;"
-    >
-        <!-- Contador de Selección -->
-        <div class="flex items-center gap-2 pr-3 border-r border-slate-700">
-            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-black text-xs inline-flex items-center justify-center shadow-xs" x-text="selectedSkus.length"></span>
-            <span class="text-xs font-bold text-slate-200 hidden sm:inline">Seleccionados</span>
-        </div>
-
-        <!-- Botón 1: Exportar CSV -->
-        <button 
-            type="button" 
-            @click="exportSelectedToCsv()"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-            title="Exportar selección a CSV plano"
-        >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <span>Exportar CSV</span>
-        </button>
-
-        <!-- Botón 1B: Exportar Excel -->
-        <button 
-            type="button" 
-            @click="exportSelectedToExcel()"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-green-400 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-            title="Exportar selección a hoja de cálculo Microsoft Excel (.xlsx / .xls)"
-        >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <span>Exportar Excel</span>
-        </button>
-
-        <!-- Botón 2: Cambiar Proveedor -->
-        <button 
-            type="button" 
-            @click="openBulkProviderModal()"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-        >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-            <span>Proveedor</span>
-        </button>
-
-        <!-- Botón 3: Cambiar Categoría -->
-        <button 
-            type="button" 
-            @click="openBulkCategoryModal()"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-        >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-            <span>Categoría</span>
-        </button>
-
-        <!-- Botón 4: Añadir a Compras en Lote -->
-        <button 
-            type="button" 
-            @click="addSelectedToPurchases()"
-            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
-        >
-            <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            <span>Añadir a Compras</span>
-        </button>
-
-        <!-- Botón 5: Etiquetas Térmicas Lote (TASK-INV-05) -->
-        <button 
-            type="button" 
-            @click="openBulkLabelsModal()"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-xl text-xs font-bold transition border border-slate-700 cursor-pointer shadow-3xs"
-            title="Imprimir etiquetas termicas Code128 para los productos seleccionados"
-        >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            <span>Etiquetas Térmicas</span>
-        </button>
-
-        <!-- Botón 5: Limpiar Selección -->
-        <button 
-            type="button" 
-            @click="clearSelection()"
-            class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer ml-1"
-            title="Desmarcar todos"
-        >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL MASIVO: REASIGNAR PROVEEDOR EN LOTE                         -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="bulkProviderModalOpen" 
-        class="fixed inset-0 z-[75] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="bulkProviderModalOpen = false"
-    >
-        <div 
-            x-show="bulkProviderModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="bulkProviderModalOpen = false"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="bulkProviderModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-md bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <span>Reasignar Proveedor en Lote</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] bg-indigo-600 text-white" x-text="selectedSkus.length + ' ítems'"></span>
-                    </h3>
-                    <button @click="bulkProviderModalOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4 text-xs">
-                    <p class="text-slate-600">
-                        Selecciona el nuevo proveedor mayorista para los <strong x-text="selectedSkus.length"></strong> productos seleccionados:
-                    </p>
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Nuevo Proveedor:</label>
-                        <select x-model="bulkTargetProvider" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            <option value="Torzo B2B">Torzo B2B (Mayorista)</option>
-                            <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL</option>
-                            <option value="ModaIntima Textil MX">ModaIntima Textil MX</option>
-                            <option value="Balam Textil">Balam Textil</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 text-xs">
-                    <button type="button" @click="bulkProviderModalOpen = false" class="px-3.5 py-1.5 text-slate-600 hover:text-slate-800 font-semibold cursor-pointer">Cancelar</button>
-                    <button type="button" @click="applyBulkProvider()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-xs cursor-pointer">Aplicar Cambio</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL MASIVO: REASIGNAR CATEGORÍA EN LOTE                         -->
-    <!-- ================================================================= -->
-    <div 
-        x-show="bulkCategoryModalOpen" 
-        class="fixed inset-0 z-[75] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="bulkCategoryModalOpen = false"
-    >
-        <div 
-            x-show="bulkCategoryModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            @click="bulkCategoryModalOpen = false"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="bulkCategoryModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-md bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <span>Reasignar Categoría en Lote</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] bg-amber-600 text-white" x-text="selectedSkus.length + ' ítems'"></span>
-                    </h3>
-                    <button @click="bulkCategoryModalOpen = false" class="text-slate-400 hover:text-white p-1 rounded-lg">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4 text-xs">
-                    <p class="text-slate-600">
-                        Selecciona la nueva categoría comercial para los <strong x-text="selectedSkus.length"></strong> productos seleccionados:
-                    </p>
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Nueva Categoría:</label>
-                        <select x-model="bulkTargetCategory" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            <option value="Boxers">Boxers</option>
-                            <option value="Jocks">Jocks</option>
-                            <option value="Tangas">Tangas</option>
-                            <option value="Bikinis">Bikinis</option>
-                            <option value="Camisillas">Camisillas</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 text-xs">
-                    <button type="button" @click="bulkCategoryModalOpen = false" class="px-3.5 py-1.5 text-slate-600 hover:text-slate-800 font-semibold cursor-pointer">Cancelar</button>
-                    <button type="button" @click="applyBulkCategory()" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-xs cursor-pointer">Aplicar Cambio</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL 9: GENERADOR DE ETIQUETAS TÉRMICAS (CODE128 / QR) TASK-INV-05-->
-    <!-- ================================================================= -->
-    <div 
-        x-show="thermalLabelModal.isOpen" 
-        class="fixed inset-0 z-[80] overflow-y-auto" 
-        style="display: none;"
-        @keydown.escape.window="closeThermalLabelModal()"
-    >
-        <!-- Backdrop -->
-        <div 
-            x-show="thermalLabelModal.isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity"
-            @click="closeThermalLabelModal()"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="thermalLabelModal.isOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-2xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative"
-                @click.stop
-            >
-                <!-- Header del Modal -->
-                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                                <span>Etiquetas Térmicas de Bodega</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">Code128 + QR</span>
-                            </h3>
-                            <p class="text-[11px] text-slate-400" x-text="thermalLabelModal.isBatch ? thermalLabelModal.batchTitle : (thermalLabelModal.sku + ' - ' + thermalLabelModal.productName)"></p>
-                        </div>
-                    </div>
-                    <button @click="closeThermalLabelModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Barra de Configuración de Impresión -->
-                <div class="p-6 bg-slate-50 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Formato Térmico:</label>
-                        <select x-model="thermalLabelModal.labelFormat" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                            <option value="50x30">50 x 30 mm (Estándar Prenda/Rack)</option>
-                            <option value="100x50">100 x 50 mm (Caja / Bulto / Pallet)</option>
-                        </select>
-                    </div>
-
-                    <template x-if="!thermalLabelModal.isBatch">
-                        <div>
-                            <label class="font-bold text-slate-700 block mb-1">
-                                <span x-text="thermalLabelModal.variantType === 'shade' ? 'Tono Seleccionado:' : (thermalLabelModal.variantType === 'volume' ? 'Volumen Seleccionado:' : (thermalLabelModal.variantType === 'unit' ? 'Tipo:' : 'Talla Seleccionada:'))"></span>
-                            </label>
-                            <select x-model="thermalLabelModal.selectedVariant" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-bold text-slate-800 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                                <template x-for="v in thermalLabelModal.availableVariants" :key="v">
-                                    <option :value="v" x-text="v"></option>
-                                </template>
-                            </select>
-                        </div>
-                    </template>
-
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">
-                            <span x-text="thermalLabelModal.isBatch ? 'Copias Totales en Lote:' : 'Número de Copias:'"></span>
-                        </label>
-                        <div class="flex items-center gap-1.5">
-                            <template x-if="!thermalLabelModal.isBatch">
-                                <button type="button" @click="thermalLabelModal.copies = Math.max(1, thermalLabelModal.copies - 1)" class="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 flex items-center justify-center cursor-pointer">-</button>
-                            </template>
-                            <input 
-                                type="number" 
-                                min="1" 
-                                :disabled="thermalLabelModal.isBatch"
-                                x-model.number="thermalLabelModal.copies" 
-                                class="w-full bg-white border border-slate-300 rounded-lg p-2 text-center font-bold text-slate-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-500"
-                            >
-                            <template x-if="!thermalLabelModal.isBatch">
-                                <button type="button" @click="thermalLabelModal.copies++" class="w-8 h-8 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 flex items-center justify-center cursor-pointer">+</button>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contenedor de Previsualización Térmica Física -->
-                <div class="p-6 bg-slate-200/70 overflow-y-auto max-h-[380px] flex flex-col items-center justify-center">
-                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Previsualización de Etiqueta Térmica</p>
-
-                    <!-- ÁREA IMPRIMIBLE (TARGET DE IMPRESIÓN AISLADA) -->
-                    <div id="thermal-print-area" class="w-full flex flex-col items-center gap-4">
-                        <!-- Vista individual -->
-                        <template x-if="!thermalLabelModal.isBatch">
-                            <div 
-                                class="bg-white border-2 border-dashed border-slate-400 p-4 rounded-xl shadow-md flex flex-col justify-between transition-all"
-                                :class="thermalLabelModal.labelFormat === '100x50' ? 'w-[400px] min-h-[220px]' : 'w-[320px] min-h-[175px]'"
-                            >
-                                <div class="flex items-center justify-between border-b border-slate-800/20 pb-1.5 mb-1.5">
-                                    <div class="text-[10px] font-black tracking-widest text-slate-900">MI TIENDA ONLINE</div>
-                                    <div class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono" x-text="'SLOT: ' + thermalLabelModal.location"></div>
-                                </div>
-                                <div class="mb-2">
-                                    <div class="text-xs font-black text-slate-900 leading-snug line-clamp-1" x-text="thermalLabelModal.productName"></div>
-                                    <div class="flex items-center justify-between mt-1">
-                                        <div class="inline-block px-2 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-black text-slate-900 font-mono">
-                                            <span x-text="thermalLabelModal.variantType === 'shade' ? 'TONO: ' : (thermalLabelModal.variantType === 'volume' ? 'VOL: ' : (thermalLabelModal.variantType === 'unit' ? 'ITEM: ' : 'TALLA: '))"></span>
-                                            <span x-text="thermalLabelModal.selectedVariant"></span>
-                                        </div>
-                                        <div class="text-[11px] font-bold text-slate-900 font-mono" x-text="'PVP: $' + Number(thermalLabelModal.pvp || 0).toFixed(2)"></div>
-                                    </div>
-                                    <!-- Informacion Sanitaria en Etiqueta (TASK-INV-06) -->
-                                    <template x-if="thermalLabelModal.requiresSanitaryControl">
-                                        <div class="flex items-center justify-between text-[9px] font-mono text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 mt-1">
-                                            <span>LOT: <strong class="text-slate-900" x-text="thermalLabelModal.batchNumber || 'S/L'"></strong></span>
-                                            <span>EXP: <strong class="text-slate-900" x-text="thermalLabelModal.expirationDate || 'N/A'"></strong></span>
-                                            <span x-show="thermalLabelModal.paoMonths">PAO: <strong class="text-slate-900" x-text="thermalLabelModal.paoMonths + 'M'"></strong></span>
-                                        </div>
-                                    </template>
-                                </div>
-                                <div class="flex items-center justify-between gap-3 pt-1 border-t border-slate-800/20">
-                                    <div class="flex-1 text-center">
-                                        <div class="w-full flex justify-center overflow-hidden" x-html="generateBarcodeSvg(thermalLabelModal.sku)"></div>
-                                        <div class="text-[10px] font-mono font-bold tracking-widest text-slate-800 mt-0.5" x-text="thermalLabelModal.sku"></div>
-                                    </div>
-                                    <template x-if="thermalLabelModal.includeQr">
-                                        <div class="w-12 h-12 border border-slate-800 p-0.5 rounded bg-white flex items-center justify-center shrink-0">
-                                            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm13-2h3v2h-3v-2zm-5 0h2v3h-2v-3zm2 3h3v2h-3v-2zm2 2h2v2h-2v-2zm-4 0h2v2h-2v-2zm-2-2h2v2h-2v-2zm7 2h2v2h-2v-2zm0-5h3v2h-3v-2z"/>
-                                            </svg>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Vista en Lote (Batch Items) -->
-                        <template x-if="thermalLabelModal.isBatch">
-                            <div class="w-full space-y-3">
-                                <div class="p-3 bg-white rounded-xl border border-slate-300 text-xs">
-                                    <div class="font-bold text-slate-800 mb-1 flex items-center justify-between">
-                                        <span>Desglose de Etiquetas en este Lote:</span>
-                                        <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-bold rounded" x-text="getBatchTotalPieces() + ' etiquetas totales'"></span>
-                                    </div>
-                                    <div class="max-h-36 overflow-y-auto divide-y divide-slate-100">
-                                        <template x-for="(bItem, idx) in thermalLabelModal.batchItems" :key="idx">
-                                            <div class="py-1.5 flex items-center justify-between text-[11px]">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="font-mono font-bold text-slate-900" x-text="bItem.sku"></span>
-                                                    <span class="text-slate-500 truncate max-w-[200px]" x-text="bItem.name"></span>
-                                                    <span class="px-1.5 py-0.2 bg-slate-100 font-mono font-bold text-slate-700 rounded text-[10px]" x-text="bItem.variant"></span>
-                                                </div>
-                                                <div class="flex items-center gap-3">
-                                                    <span class="text-[10px] text-slate-400 font-mono" x-text="'Slot: ' + bItem.location"></span>
-                                                    <span class="font-bold text-indigo-600" x-text="bItem.qty + ' etiq.'"></span>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- Previsualización de muestra del lote -->
-                                <div class="bg-white border-2 border-dashed border-slate-400 p-4 rounded-xl shadow-md w-[320px] mx-auto min-h-[175px] flex flex-col justify-between">
-                                    <div class="flex items-center justify-between border-b border-slate-800/20 pb-1.5 mb-1.5">
-                                        <div class="text-[10px] font-black tracking-widest text-slate-900">MI TIENDA ONLINE</div>
-                                        <div class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono" x-text="'SLOT: ' + (thermalLabelModal.batchItems[0] ? thermalLabelModal.batchItems[0].location : 'A-01-A')"></div>
-                                    </div>
-                                    <div class="mb-2">
-                                        <div class="text-xs font-black text-slate-900 leading-snug line-clamp-1" x-text="thermalLabelModal.batchItems[0] ? thermalLabelModal.batchItems[0].name : thermalLabelModal.productName"></div>
-                                        <div class="flex items-center justify-between mt-1">
-                                            <div class="inline-block px-2 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-black text-slate-900 font-mono">
-                                                <span>VAR: </span>
-                                                <span x-text="thermalLabelModal.batchItems[0] ? thermalLabelModal.batchItems[0].variant : 'CORE'"></span>
-                                            </div>
-                                            <div class="text-[11px] font-bold text-slate-900 font-mono" x-text="'PVP: $' + Number((thermalLabelModal.batchItems[0] ? thermalLabelModal.batchItems[0].pvp : thermalLabelModal.pvp) || 0).toFixed(2)"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between gap-3 pt-1 border-t border-slate-800/20">
-                                        <div class="flex-1 text-center">
-                                            <div class="w-full flex justify-center overflow-hidden" x-html="generateBarcodeSvg(thermalLabelModal.batchItems[0] ? thermalLabelModal.batchItems[0].sku : thermalLabelModal.sku)"></div>
-                                            <div class="text-[10px] font-mono font-bold tracking-widest text-slate-800 mt-0.5" x-text="thermalLabelModal.batchItems[0] ? thermalLabelModal.batchItems[0].sku : thermalLabelModal.sku"></div>
-                                        </div>
-                                        <div class="w-12 h-12 border border-slate-800 p-0.5 rounded bg-white flex items-center justify-center shrink-0">
-                                            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm13-2h3v2h-3v-2zm-5 0h2v3h-2v-3zm2 3h3v2h-3v-2zm2 2h2v2h-2v-2zm-4 0h2v2h-2v-2zm-2-2h2v2h-2v-2zm7 2h2v2h-2v-2zm0-5h3v2h-3v-2z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Footer del Modal con Acción de Impresión Térmica -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div class="text-[11px] text-slate-500">
-                        Compatible con Zebra ZD/GX, Rollo, Xprinter, Dymo o impresion laser/hoja adhesiva.
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="closeThermalLabelModal()" 
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                        >
-                            Cerrar
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="printThermalLabels()" 
-                            class="px-5 py-2 text-xs font-bold bg-slate-900 hover:bg-black text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                        >
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span x-text="'Imprimir ' + (thermalLabelModal.isBatch ? getBatchTotalPieces() : thermalLabelModal.copies) + ' Etiqueta(s)'"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- ========================================================================= -->
-    <!-- MODAL OPERATIVO: AUDITORIA CICLICA A CIEGAS (TASK-INV-07: 3 SKUS DIARIOS) -->
-    <!-- ========================================================================= -->
-    <div 
-        x-show="cycleCountModal.isOpen" 
-        class="fixed inset-0 z-[80] overflow-y-auto" 
-        style="z-index: 80; display: none;"
-        @keydown.escape.window="closeCycleCountModal()"
-    >
-        <!-- Backdrop -->
-        <div 
-            x-show="cycleCountModal.isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity"
-            @click="closeCycleCountModal()"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
-            <div 
-                x-show="cycleCountModal.isOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="inline-block w-full max-w-2xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative flex flex-col max-h-[90vh]"
-                @click.stop
-            >
-            <!-- Header Modal -->
-            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-sm font-bold text-white tracking-wide">Auditoría Cíclica a Ciegas</h3>
-                            <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-mono">TASK-INV-07</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Conteo ciego de 3 SKUs diarios para exactitud física (WMS Best Practice)</p>
-                    </div>
-                </div>
-                <button 
-                    type="button" 
-                    @click="closeCycleCountModal()"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <!-- Paso 1: Conteo Ciego (step === 'count') -->
-            <template x-if="cycleCountModal.step === 'count'">
-                <div class="p-6 space-y-5 overflow-y-auto flex-1">
-                    <!-- Selector de los 3 SKUs (Pestañas de SKU) -->
-                    <div class="flex items-center gap-2 border-b border-slate-200 pb-3">
-                        <template x-for="(sample, idx) in cycleCountModal.sampleItems" :key="sample.sku">
-                            <button 
-                                type="button" 
-                                @click="cycleCountModal.activeSkuIndex = idx"
-                                class="flex-1 py-2 px-3 rounded-xl border text-left transition cursor-pointer flex items-center justify-between"
-                                :class="cycleCountModal.activeSkuIndex === idx ? 'bg-indigo-50 border-indigo-300 text-indigo-900 shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
-                            >
-                                <div class="min-w-0 pr-2">
-                                    <div class="text-[10px] uppercase tracking-wider font-bold" :class="cycleCountModal.activeSkuIndex === idx ? 'text-indigo-600' : 'text-slate-400'" x-text="'Muestra ' + (idx + 1) + ' / 3'"></div>
-                                    <div class="font-mono font-black text-xs truncate" x-text="sample.sku"></div>
-                                </div>
-                                <div class="shrink-0">
-                                    <template x-if="getCycleCountItemTotal(sample.sku) > 0 || (cycleCountModal.counts[sample.sku] && cycleCountModal.counts[sample.sku].isCounted)">
-                                        <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-black">&#10003;</span>
-                                    </template>
-                                    <template x-if="!(getCycleCountItemTotal(sample.sku) > 0 || (cycleCountModal.counts[sample.sku] && cycleCountModal.counts[sample.sku].isCounted))">
-                                        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-bold" x-text="idx + 1"></span>
-                                    </template>
-                                </div>
-                            </button>
-                        </template>
-                    </div>
-
-                    <!-- Ficha del Producto Activo -->
-                    <template x-if="cycleCountActiveItem">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-mono font-black text-sm text-indigo-700" x-text="cycleCountActiveItem.sku"></span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-200 text-slate-700" x-text="cycleCountActiveItem.category"></span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-indigo-100 text-indigo-800" x-text="'Clase [' + getAbcClass(cycleCountActiveItem) + ']'"></span>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-sm leading-tight" x-text="cycleCountActiveItem.name"></h4>
-                                <p class="text-xs text-slate-500">Acude a la ubicación señalada y cuenta físicamente las unidades en anaquel.</p>
-                            </div>
-                            <!-- Tarjeta de Ubicación Física (Slotting: TASK-INV-01) -->
-                            <div class="bg-white border border-slate-300 rounded-xl p-3 shadow-xs flex flex-col items-center justify-center min-w-[140px] text-center">
-                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Ubicación / Slot</span>
-                                <div class="font-mono font-black text-base text-slate-900 mt-0.5" x-text="cycleCountActiveItem.location || 'A-01-A'"></div>
-                                <span class="text-[9px] text-indigo-600 font-semibold mt-0.5">Pasillo - Rack - Nivel</span>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Formulario de Conteo Ciego (Stock Oculto) -->
-                    <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-xs">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                                <span class="text-xs font-bold text-slate-800">Conteo Físico Ciego en Anaquel</span>
-                            </div>
-                            <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">Stock del sistema oculto para evitar sesgo</span>
-                        </div>
-
-                        <!-- Matriz Textil (Curva CH a 3XL) -->
-                        <template x-if="cycleCountActiveItem && (!cycleCountActiveItem.variantDimension || cycleCountActiveItem.variantDimension === 'size')">
-                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-                                <template x-for="sz in ['ch', 'm', 'g', 'xl', '2xl', '3xl']" :key="sz">
-                                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
-                                        <label class="text-[11px] font-black uppercase text-slate-700 block mb-1" x-text="sz"></label>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            placeholder="0"
-                                            x-model.number="cycleCountModal.counts[cycleCountActiveItem.sku].sizes[sz]"
-                                            class="w-full h-8 px-1.5 text-center font-bold text-sm bg-white border border-slate-300 rounded focus:border-indigo-600 focus:outline-none"
-                                        >
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                        <!-- Matriz Cosmética (Tonos 01 a 06) -->
-                        <template x-if="cycleCountActiveItem && cycleCountActiveItem.variantDimension === 'shade'">
-                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-                                <template x-for="sh in ['t01', 't02', 't03', 't04', 't05', 't06']" :key="sh">
-                                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
-                                        <label class="text-[11px] font-black uppercase text-slate-700 block mb-1" x-text="sh.toUpperCase()"></label>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            placeholder="0"
-                                            x-model.number="cycleCountModal.counts[cycleCountActiveItem.sku].shades[sh]"
-                                            class="w-full h-8 px-1.5 text-center font-bold text-sm bg-white border border-slate-300 rounded focus:border-indigo-600 focus:outline-none"
-                                        >
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                        <!-- Matriz Perfumería (Volúmenes 10ml, 50ml, 100ml) -->
-                        <template x-if="cycleCountActiveItem && cycleCountActiveItem.variantDimension === 'volume'">
-                            <div class="grid grid-cols-3 gap-3">
-                                <template x-for="vol in ['v10', 'v50', 'v100']" :key="vol">
-                                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
-                                        <label class="text-[11px] font-black uppercase text-slate-700 block mb-1" x-text="vol === 'v10' ? '10ml' : (vol === 'v50' ? '50ml' : '100ml')"></label>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            placeholder="0"
-                                            x-model.number="cycleCountModal.counts[cycleCountActiveItem.sku].volumes[vol]"
-                                            class="w-full h-8 px-1.5 text-center font-bold text-sm bg-white border border-slate-300 rounded focus:border-indigo-600 focus:outline-none"
-                                        >
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                        <!-- Matriz Unitario / Accesorios -->
-                        <template x-if="cycleCountActiveItem && cycleCountActiveItem.variantDimension === 'none'">
-                            <div class="max-w-xs mx-auto text-center py-2">
-                                <label class="text-xs font-bold text-slate-700 block mb-1">Piezas Físicas Totales</label>
-                                <input 
-                                    type="number" 
-                                    min="0" 
-                                    placeholder="0"
-                                    x-model.number="cycleCountModal.counts[cycleCountActiveItem.sku].unitQty"
-                                    class="w-32 h-10 mx-auto text-center font-black text-lg bg-white border border-slate-300 rounded-lg focus:border-indigo-600 focus:outline-none"
-                                >
-                            </div>
-                        </template>
-
-                        <!-- Subtotal Contado del SKU Actual -->
-                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                            <span class="text-slate-500">Total físico registrado para este SKU:</span>
-                            <span class="font-mono font-black text-sm text-indigo-700" x-text="getCycleCountItemTotal(cycleCountActiveItem ? cycleCountActiveItem.sku : '') + ' piezas'"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Paso 1 -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <button 
-                        type="button" 
-                        @click="closeCycleCountModal()" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button"
-                            x-show="cycleCountModal.activeSkuIndex > 0"
-                            @click="cycleCountModal.activeSkuIndex--"
-                            class="px-3 py-2 text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 rounded-lg border border-slate-300 transition cursor-pointer"
-                        >
-                            &larr; Anterior SKU
-                        </button>
-                        <button 
-                            type="button"
-                            x-show="cycleCountModal.activeSkuIndex < 2"
-                            @click="cycleCountModal.activeSkuIndex++"
-                            class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition cursor-pointer"
-                        >
-                            Siguiente SKU &rarr;
-                        </button>
-                        <button 
-                            type="button"
-                            x-show="cycleCountModal.activeSkuIndex === 2"
-                            @click="submitBlindCounts()"
-                            class="px-5 py-2 text-xs font-bold bg-slate-900 hover:bg-black text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                        >
-                            <span>Revelar y Comparar &rarr;</span>
-                        </button>
-                    </div>
-                </div>
-            </template>
-
-            <!-- Paso 2: Reconciliación y Revelación de Discrepancias (step === 'reconcile') -->
-            <template x-if="cycleCountModal.step === 'reconcile'">
-                <div class="p-6 space-y-5 overflow-y-auto flex-1">
-                    <!-- Resumen Semafórico Superior -->
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="p-3 rounded-xl border bg-slate-50 border-slate-200 text-center">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">SKUs Auditados</span>
-                            <span class="text-lg font-black text-slate-800 font-mono">3 / 3</span>
-                        </div>
-                        <div class="p-3 rounded-xl border text-center" :class="cycleCountReport.totalDiscrepancy === 0 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'">
-                            <span class="text-[10px] font-bold uppercase tracking-wider block">Discrepancia Neta</span>
-                            <span class="text-lg font-black font-mono" x-text="(cycleCountReport.totalDiscrepancy > 0 ? '+' : '') + cycleCountReport.totalDiscrepancy + ' pzs'"></span>
-                        </div>
-                        <div class="p-3 rounded-xl border text-center" :class="cycleCountReport.accuracyRate >= 98 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-200 text-amber-800'">
-                            <span class="text-[10px] font-bold uppercase tracking-wider block">Exactitud (IRA)</span>
-                            <span class="text-lg font-black font-mono" x-text="cycleCountReport.accuracyRate.toFixed(1) + '%'"></span>
-                        </div>
-                    </div>
-
-                    <!-- Tabla de Discrepancias por SKU -->
-                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead class="bg-slate-100 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                                <tr>
-                                    <th class="py-2.5 px-3">SKU & Producto</th>
-                                    <th class="py-2.5 px-2 text-center">Slot</th>
-                                    <th class="py-2.5 px-2 text-right">Físico</th>
-                                    <th class="py-2.5 px-2 text-right">Sistema</th>
-                                    <th class="py-2.5 px-2 text-right">Diferencia</th>
-                                    <th class="py-2.5 px-3">Motivo de Discrepancia</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <template x-for="row in cycleCountReport.rows" :key="row.sku">
-                                    <tr class="hover:bg-slate-50/70 transition">
-                                        <td class="py-3 px-3">
-                                            <div class="font-mono font-bold text-slate-900" x-text="row.sku"></div>
-                                            <div class="text-[11px] text-slate-500 truncate max-w-[180px]" x-text="row.name"></div>
-                                        </td>
-                                        <td class="py-3 px-2 text-center font-mono font-semibold text-slate-600 text-[11px]" x-text="row.location"></td>
-                                        <td class="py-3 px-2 text-right font-mono font-black text-slate-900" x-text="row.physical"></td>
-                                        <td class="py-3 px-2 text-right font-mono text-slate-500" x-text="row.system"></td>
-                                        <td class="py-3 px-2 text-right font-mono font-bold" :class="row.diff === 0 ? 'text-emerald-600' : (row.diff < 0 ? 'text-rose-600' : 'text-amber-600')">
-                                            <span x-text="(row.diff > 0 ? '+' : '') + row.diff"></span>
-                                        </td>
-                                        <td class="py-3 px-3">
-                                            <template x-if="row.diff !== 0">
-                                                <select 
-                                                    x-model="cycleCountModal.discrepancyReasons[row.sku]"
-                                                    class="w-full text-xs py-1 px-2 border border-slate-300 rounded bg-white font-medium focus:border-indigo-600 focus:outline-none"
-                                                >
-                                                    <option value="Merma operativa">Merma operativa</option>
-                                                    <option value="Error de conteo previo">Error de conteo previo</option>
-                                                    <option value="Producto dañado en rack">Producto dañado en rack</option>
-                                                    <option value="Ubicación cruzada">Ubicación cruzada</option>
-                                                </select>
-                                            </template>
-                                            <template x-if="row.diff === 0">
-                                                <span class="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                                    <span>Conteo Exacto</span>
-                                                </span>
-                                            </template>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Nota de Advertencia sobre Asientos en Kardex -->
-                    <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-indigo-900 flex items-start gap-2">
-                        <svg class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <p class="leading-relaxed">
-                            Al confirmar la reconciliación, el sistema ajustará automáticamente el stock físico local en el catálogo y generará asientos contables inmutables con tipo <strong>AJUSTE_AUDITORIA_CIEGA</strong> en el Kardex.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Footer Paso 2 -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <button 
-                        type="button" 
-                        @click="cycleCountModal.step = 'count'" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        &larr; Re-contar
-                    </button>
-                    <button 
-                        type="button"
-                        @click="confirmCycleCountReconciliation()"
-                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
-                    >
-                        <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Confirmar y Conciliar en Kardex</span>
-                    </button>
-                </div>
-            </template>
-            </div>
-        </div>
-    </div>
-
-    </div> <!-- FIN DE PANTALLA PRINCIPAL (inventoryCurrentScreen === 'main') -->
-
-    <!-- ============================================================= -->
-    <!-- PANTALLA COMPLETA DE AJUSTES Y CONFIGURACIÓN DEL MÓDULO        -->
-    <!-- (REGLA: TODOS LOS AJUSTES SE MUESTRAN COMO PANTALLA, NO MODALES) -->
-    <!-- ============================================================= -->
-    <div 
-        x-show="inventoryCurrentScreen === 'settings' || moduleSettingsModalOpen" 
-        class="w-full space-y-6 animate-fadeIn"
-        style="display: none;"
-    >
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <!-- Header de Ajustes con botón Volver al Catálogo -->
-            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <button 
-                        type="button" 
-                        @click="closeModuleSettings()"
-                        class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        <span>Volver al Catálogo</span>
-                    </button>
-                    <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900" id="settings-modal-title">Ajustes y Configuración de Inventario</h3>
-                            <p class="text-xs text-slate-500">Gobernanza de telas, paleta de colores/tornasoles, tonos cosmética, slotting físico, reglas ROP, scraping y vitrinas web</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button 
-                        type="button" 
-                        @click="closeModuleSettings()"
-                        class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
-                    >
-                        Listo / Guardar Ajustes
-                    </button>
-                </div>
-            </div>
-
-
-                <!-- Settings Tabs Bar (7 Pestañas Ergonómicas en una sola fila) -->
-                <div class="px-6 border-b border-slate-200 bg-slate-50/50 flex gap-2 text-xs font-bold overflow-x-auto no-scrollbar">
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'fabrics'" 
-                        :class="activeSettingsTab === 'fabrics' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Telas & Fibras
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'colors'" 
-                        :class="activeSettingsTab === 'colors' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Colores & Tornasoles
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'shades'" 
-                        :class="activeSettingsTab === 'shades' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Tonos Cosmética
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'slotting'" 
-                        :class="activeSettingsTab === 'slotting' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Slotting & Ubicaciones
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'rop'" 
-                        :class="activeSettingsTab === 'rop' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Puntos de Reorden (ROP)
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'scraping'" 
-                        :class="activeSettingsTab === 'scraping' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Proveedores & Scrapers
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'sections'" 
-                        class="cursor-pointer whitespace-nowrap px-2"
-                    >
-                        Vitrinas Web
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="activeSettingsTab = 'bundles'" 
-                        :class="activeSettingsTab === 'bundles' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
-                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
-                    >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                        <span>Recetas BOM & Combos</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'bundles' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="productBundles.filter(b => b.isActive !== false).length"></span>
-                    </button>
-                </div>
-
-                <!-- Settings Body -->
-                <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm">
-                    
-                    <!-- TAB 1: TELAS & FIBRAS (CRUD COMPLETO) -->
-                    <template x-if="activeSettingsTab === 'fabrics'">
-                        <div class="space-y-4">
-                            <!-- Formulario de Alta / Edición de Tela -->
-                            <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="fabricEditState.isEditing ? 'Editar Tipo de Tela: ' + fabricEditState.form.name : 'Dar de Alta Nuevo Tipo de Tela'"></h4>
-                                    <span x-show="fabricEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Tela</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.name : newFabricForm.name" placeholder="Ej: Modal Peinado Premium" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propiedad Textil</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.description : newFabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rápido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <template x-if="!fabricEditState.isEditing">
-                                        <button type="button" @click="addNewFabric()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            Guardar Tipo de Tela
-                                        </button>
-                                    </template>
-                                    <template x-if="fabricEditState.isEditing">
-                                        <div class="flex items-center gap-2">
-                                            <button type="button" @click="saveFabric()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                                Actualizar Tela
-                                            </button>
-                                            <button type="button" @click="cancelEditFabric()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Tabla de Telas con Acciones CRUD -->
-                            <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-                                <table class="w-full text-left text-xs border-collapse">
-                                    <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                                        <tr>
-                                            <th class="py-2.5 px-3">Tipo de Tela / Fibra</th>
-                                            <th class="py-2.5 px-3">Propiedades Textiles</th>
-                                            <th class="py-2.5 px-3 text-center">Estado</th>
-                                            <th class="py-2.5 px-3 text-right">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-100">
-                                        <template x-for="fab in apparelFabrics" :key="fab.id">
-                                            <tr class="hover:bg-slate-50 transition" :class="fab.is_active === false ? 'opacity-60 bg-slate-50/50' : ''">
-                                                <td class="py-2.5 px-3 font-bold text-slate-900" x-text="fab.name"></td>
-                                                <td class="py-2.5 px-3 text-slate-600" x-text="fab.description"></td>
-                                                <td class="py-2.5 px-3 text-center">
-                                                    <span 
-                                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
-                                                        :class="fab.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300'"
-                                                        x-text="fab.is_active !== false ? 'Activo' : 'Archivado'"
-                                                    ></span>
-                                                </td>
-                                                <td class="py-2.5 px-3 text-right">
-                                                    <div class="inline-flex items-center gap-1.5">
-                                                        <button 
-                                                            type="button" 
-                                                            @click="editFabric(fab)" 
-                                                            class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            title="Editar tela"
-                                                        >
-                                                            Editar
-                                                        </button>
-                                                        <button 
-                                                            type="button" 
-                                                            @click="toggleArchiveFabric(fab)" 
-                                                            class="px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            :class="fab.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'"
-                                                            x-text="fab.is_active !== false ? 'Archivar' : 'Restaurar'"
-                                                        ></button>
-                                                        <button 
-                                                            type="button" 
-                                                            @click="deleteFabric(fab.id)" 
-                                                            class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            title="Eliminar tela permanentemente"
-                                                        >
-                                                            Eliminar
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 2: COLORES & TORNASOLES (CRUD COMPLETO) -->
-                    <template x-if="activeSettingsTab === 'colors'">
-                        <div class="space-y-4">
-                            <!-- Formulario Alta / Edición Color -->
-                            <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="colorEditState.isEditing ? 'Editar Color: ' + colorEditState.form.name : 'Registrar Nuevo Color o Tornasol'"></h4>
-                                    <span x-show="colorEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Color</label>
-                                        <input type="text" x-model="colorEditState.isEditing ? colorEditState.form.name : newColorForm.name" placeholder="Ej: Esmeralda Aurora" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Tipo de Color</label>
-                                        <select x-model="colorEditState.isEditing ? colorEditState.form.type : newColorForm.type" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <option value="solid">Sólido (Un solo tono HEX)</option>
-                                            <option value="iridescent">Tornasol Iridiscente (Degradado)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <template x-if="(colorEditState.isEditing ? colorEditState.form.type : newColorForm.type) === 'solid'">
-                                            <div>
-                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código HEX</label>
-                                                <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.hex : newColorForm.hex" class="w-full h-8 px-1 py-0.5 bg-white border border-slate-300 rounded-lg cursor-pointer">
-                                            </div>
-                                        </template>
-                                        <template x-if="(colorEditState.isEditing ? colorEditState.form.type : newColorForm.type) === 'iridescent'">
-                                            <div class="flex items-center gap-1">
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 1</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor1 : newColorForm.gradientColor1" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 2</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor2 : newColorForm.gradientColor2" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 3</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor3 : newColorForm.gradientColor3" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <template x-if="!colorEditState.isEditing">
-                                        <button type="button" @click="addNewColor()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            Agregar a la Paleta
-                                        </button>
-                                    </template>
-                                    <template x-if="colorEditState.isEditing">
-                                        <div class="flex items-center gap-2">
-                                            <button type="button" @click="saveColor()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                                Actualizar Color
-                                            </button>
-                                            <button type="button" @click="cancelEditColor()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Grilla de Colores Sólidos y Tornasoles con Acciones -->
-                            <div>
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2">Paleta de Colores en Plataforma</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    <template x-for="col in apparelColors" :key="col.id">
-                                        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2.5" :class="col.is_active === false ? 'opacity-60' : ''">
-                                            <div class="flex items-center gap-2.5 min-w-0">
-                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + col.hex"></span>
-                                                <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></div>
-                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-1 shrink-0">
-                                                <button type="button" @click="editColor(col)" class="p-1 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-200 transition cursor-pointer" title="Editar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                                </button>
-                                                <button type="button" @click="toggleArchiveColor(col)" class="p-1 rounded transition cursor-pointer" :class="col.is_active !== false ? 'text-amber-700 hover:bg-amber-100' : 'text-emerald-700 hover:bg-emerald-100'" :title="col.is_active !== false ? 'Archivar' : 'Restaurar'">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
-                                                </button>
-                                                <button type="button" @click="deleteColor(col.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 3: TONOS DE COSMÉTICA (INTEGRADO EN AJUSTES - TASK-INV-09 / TASK-INV-11) -->
-                    <template x-if="activeSettingsTab === 'shades'">
-                        <div class="space-y-4">
-                            <!-- Formulario Alta / Edición Tono Cosmética -->
-                            <div class="bg-pink-50/60 p-4 rounded-xl border border-pink-200 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-pink-900" x-text="cosmeticShadesModal.isEditing ? 'Editar Tono: ' + cosmeticShadesModal.form.code : 'Registrar Nuevo Tono de Cosmética'"></h4>
-                                    <span x-show="cosmeticShadesModal.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-pink-900 border border-pink-200">Modo Edición</span>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código (ej. 01, 09)</label>
-                                        <input type="text" x-model="cosmeticShadesModal.form.code" placeholder="09" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500 font-mono">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Tono</label>
-                                        <input type="text" x-model="cosmeticShadesModal.form.name" placeholder="Ej: Vainilla Cálido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Color HEX</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="color" x-model="cosmeticShadesModal.form.hex_color" class="w-8 h-8 rounded border border-slate-300 cursor-pointer">
-                                            <input type="text" x-model="cosmeticShadesModal.form.hex_color" class="flex-1 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-mono">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Subtono</label>
-                                        <select x-model="cosmeticShadesModal.form.undertone" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500">
-                                            <option value="warm">Cálido</option>
-                                            <option value="cool">Frío</option>
-                                            <option value="neutral">Neutro</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-between pt-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-full border border-black/15 shadow-xs shrink-0" :style="'background: ' + (cosmeticShadesModal.form.hex_color || '#E8BEA2')"></span>
-                                        <span class="text-xs text-slate-600">Vista Previa Swatch</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" @click="saveCosmeticShade()" class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            <span x-text="cosmeticShadesModal.isEditing ? 'Actualizar Tono' : 'Guardar Tono'"></span>
-                                        </button>
-                                        <button x-show="cosmeticShadesModal.isEditing" type="button" @click="cosmeticShadesModal.isEditing = false; cosmeticShadesModal.editingId = null;" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Listado de Tonos Cosmética -->
-                            <div>
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2">Tonos Cosmética Registrados (<span x-text="cosmeticShades.length"></span>)</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    <template x-for="shade in cosmeticShades" :key="shade.id">
-                                        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2.5" :class="!shade.is_active ? 'opacity-60' : ''">
-                                            <div class="flex items-center gap-2.5 min-w-0">
-                                                <span class="w-7 h-7 rounded-full border border-black/15 shadow-xs shrink-0" :style="'background: ' + shade.hex_color"></span>
-                                                <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate">
-                                                        <span class="font-mono text-slate-500" x-text="shade.code + ' - '"></span>
-                                                        <span x-text="shade.name"></span>
-                                                    </div>
-                                                    <div class="text-[10px] text-slate-400 font-mono" x-text="shade.hex_color + ' &bull; ' + (shade.undertone || 'neutro')"></div>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-1 shrink-0">
-                                                <button type="button" @click="toggleCosmeticShadeStatus(shade)" class="px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer" :class="shade.is_active ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-300'" x-text="shade.is_active ? 'Activo' : 'Inactivo'"></button>
-                                                <button type="button" @click="editCosmeticShade(shade)" class="p-1 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-200 transition cursor-pointer" title="Editar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                                </button>
-                                                <button type="button" @click="deleteCosmeticShade(shade.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 4: SLOTTING FÍSICO & UBICACIONES (NUEVA PESTAÑA CRUD - TASK-INV-11) -->
-                    <template x-if="activeSettingsTab === 'slotting'">
-                        <div class="space-y-4">
-                            <!-- Formulario Alta / Edición de Ubicación -->
-                            <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="slotEditState.isEditing ? 'Editar Ubicación: ' + slotEditState.editingCode : 'Registrar Nueva Ubicación Física de Almacén'"></h4>
-                                    <span x-show="slotEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
-                                </div>
-                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Pasillo (A-Z)</label>
-                                        <input type="text" maxlength="2" x-model="slotEditState.isEditing ? slotEditState.form.aisle : newSlotForm.aisle" :disabled="slotEditState.isEditing" placeholder="A" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg uppercase font-bold text-center">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Rack (01-99)</label>
-                                        <input type="text" maxlength="2" x-model="slotEditState.isEditing ? slotEditState.form.rack : newSlotForm.rack" :disabled="slotEditState.isEditing" placeholder="01" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-mono text-center">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Gaveta / Nivel</label>
-                                        <input type="text" maxlength="2" x-model="slotEditState.isEditing ? slotEditState.form.bin : newSlotForm.bin" :disabled="slotEditState.isEditing" placeholder="A" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg uppercase font-bold text-center">
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Zona Operativa</label>
-                                        <select x-model="slotEditState.isEditing ? slotEditState.form.zone : newSlotForm.zone" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg">
-                                            <option value="Ropa Interior">Ropa Interior</option>
-                                            <option value="Atlético & Jocks">Atlético & Jocks</option>
-                                            <option value="Skincare & Cuidado">Skincare & Cuidado</option>
-                                            <option value="General">General</option>
-                                            <option value="Cuarentena / RMA">Cuarentena / RMA</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Capacidad Máx.</label>
-                                        <input type="number" min="10" max="1000" x-model="slotEditState.isEditing ? slotEditState.form.capacity : newSlotForm.capacity" placeholder="100" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg text-center font-bold">
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <template x-if="!slotEditState.isEditing">
-                                        <button type="button" @click="addNewSlot()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            Guardar Ubicación
-                                        </button>
-                                    </template>
-                                    <template x-if="slotEditState.isEditing">
-                                        <div class="flex items-center gap-2">
-                                            <button type="button" @click="saveSlot()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                                Actualizar Ubicación
-                                            </button>
-                                            <button type="button" @click="cancelEditSlot()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Tabla de Ubicaciones Físicas -->
-                            <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-                                <table class="w-full text-left text-xs border-collapse">
-                                    <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                                        <tr>
-                                            <th class="py-2.5 px-3">Código Slot</th>
-                                            <th class="py-2.5 px-3">Zona Operativa</th>
-                                            <th class="py-2.5 px-3 text-center">Ocupación / Capacidad</th>
-                                            <th class="py-2.5 px-3 text-center">SKUs</th>
-                                            <th class="py-2.5 px-3 text-center">Estado</th>
-                                            <th class="py-2.5 px-3 text-right">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-100">
-                                        <template x-for="slot in warehouseSlots" :key="slot.code">
-                                            <tr class="hover:bg-slate-50 transition" :class="slot.is_active === false ? 'opacity-60 bg-slate-50/50' : ''">
-                                                <td class="py-2.5 px-3 font-mono font-black text-indigo-700" x-text="slot.code"></td>
-                                                <td class="py-2.5 px-3 text-slate-700 font-semibold" x-text="slot.zone || 'General'"></td>
-                                                <td class="py-2.5 px-3 text-center font-mono">
-                                                    <span class="font-bold text-slate-900" x-text="getSlotOccupiedUnits(slot.code)"></span>
-                                                    <span class="text-slate-400" x-text="' / ' + (slot.capacity || 100) + ' pzs'"></span>
-                                                </td>
-                                                <td class="py-2.5 px-3 text-center">
-                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200" x-text="getSlotProductCount(slot.code) + ' SKUs'"></span>
-                                                </td>
-                                                <td class="py-2.5 px-3 text-center">
-                                                    <span 
-                                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
-                                                        :class="slot.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300'"
-                                                        x-text="slot.is_active !== false ? 'Activo' : 'Archivado'"
-                                                    ></span>
-                                                </td>
-                                                <td class="py-2.5 px-3 text-right">
-                                                    <div class="inline-flex items-center gap-1.5">
-                                                        <button 
-                                                            type="button" 
-                                                            @click="editSlot(slot)" 
-                                                            class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            title="Editar ubicación"
-                                                        >
-                                                            Editar
-                                                        </button>
-                                                        <button 
-                                                            type="button" 
-                                                            @click="toggleArchiveSlot(slot)" 
-                                                            class="px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            :class="slot.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'"
-                                                            x-text="slot.is_active !== false ? 'Archivar' : 'Restaurar'"
-                                                        ></button>
-                                                        <button 
-                                                            type="button" 
-                                                            @click="deleteSlot(slot.code)" 
-                                                            class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-bold transition cursor-pointer"
-                                                            title="Eliminar ubicación"
-                                                        >
-                                                            Eliminar
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 5: REGLAS DE ROP (NUMÉRICOS EDITABLES & RECÁLCULO EN VIVO - TASK-INV-11) -->
-                    <template x-if="activeSettingsTab === 'rop'">
-                        <div class="space-y-4">
-                            <div class="p-5 bg-indigo-50/60 rounded-xl border border-indigo-200 space-y-4">
-                                <div>
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900">Fórmula de Punto de Reorden (ROP RevOps)</h4>
-                                    <p class="text-xs text-slate-600 mt-1">
-                                        ROP = (Venta Diaria Promedio &times; Lead Time Días) + Días de Stock de Seguridad. Ajusta los parámetros operacionales y lanza el recálculo asíncrono en caliente sobre todo el catálogo.
-                                    </p>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Lead Time Local (Días)</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="1" max="60" x-model.number="ropSettings.leadTimeLocal" class="w-full px-3 py-1.5 text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <span class="text-xs text-slate-400 font-semibold">días</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Lead Time Dropship (Días)</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="1" max="90" x-model.number="ropSettings.leadTimeDropship" class="w-full px-3 py-1.5 text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <span class="text-xs text-slate-400 font-semibold">días</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Stock de Seguridad (Días)</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="1" max="60" x-model.number="ropSettings.safetyStockDays" class="w-full px-3 py-1.5 text-sm font-extrabold text-indigo-600 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <span class="text-xs text-slate-400 font-semibold">días</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                        <label class="text-[10px] font-bold text-slate-500 block uppercase mb-1">Venta Diaria Estándar</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="0.5" max="100" step="0.5" x-model.number="ropSettings.defaultDailySales" class="w-full px-3 py-1.5 text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                            <span class="text-xs text-slate-400 font-semibold">pzs/d</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-between pt-2">
-                                    <div class="text-xs text-slate-500">
-                                        Al guardar, se recalcula inmediatamente el umbral de alerta en las tablas operativas de bodega y en el Kardex.
-                                    </div>
-                                    <button 
-                                        type="button" 
-                                        @click="saveRopSettings()" 
-                                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>Guardar y Recalcular ROP Inmediatamente</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 6: PROVEEDORES & SCRAPERS CONFIGURADOS (CRUD COMPLETO Y PARÁMETROS) -->
-                    <template x-if="activeSettingsTab === 'scraping'">
-                        <div class="space-y-5">
-                            <!-- Parámetros Torzo Bot Headless -->
-                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Parámetros de Extracción Torzo Bot</h4>
-                                    <span class="text-[10px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Torzo Bot v2.4 Headless</span>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Frecuencia de Extracción Global</label>
-                                        <select class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg">
-                                            <option>Cada 15 minutos (Recomendado)</option>
-                                            <option>Cada 30 minutos</option>
-                                            <option>Cada 1 hora</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Margen Mínimo Sugerido s/ Catálogo</label>
-                                        <input type="text" value="50% s/ PVP" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tabla Completa: Proveedores & Scrapers Configurados -->
-                            <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
-                                <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/50">
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <h4 class="text-sm font-bold text-slate-900">Proveedores & Scrapers Configurados</h4>
-                                            <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold" x-text="providers.length + ' en catálogo'"></span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Gestión de conectores automatizados, talleres de confección y condiciones comerciales</p>
-                                    </div>
-                                    <button 
-                                        type="button"
-                                        @click="openCreateProviderModal()" 
-                                        class="px-3.5 py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5 shadow-xs"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        <span>+ Conectar Proveedor</span>
-                                    </button>
-                                </div>
-
-                                <!-- Filtros y Buscador de Proveedores en Ajustes -->
-                                <div class="px-4 py-2.5 bg-white border-b border-slate-200/80 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-                                    <div class="relative flex-1 max-w-sm">
-                                        <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                        </span>
-                                        <input 
-                                            type="text" 
-                                            x-model="providerSearch" 
-                                            placeholder="Buscar por nombre, código o ciudad..." 
-                                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500 text-slate-700"
-                                        >
-                                    </div>
-                                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                                        <div class="flex items-center gap-1 text-xs text-slate-500">
-                                            <span class="font-medium">Estado:</span>
-                                            <select x-model="providerStatusFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
-                                                <option value="all">Todos los estados</option>
-                                                <option value="connected">Conectados / Activos</option>
-                                                <option value="maintenance">En Mantenimiento</option>
-                                                <option value="paused">Pausados / Inactivos</option>
-                                                <option value="archived">Archivados / Descontinuados</option>
-                                            </select>
-                                        </div>
-                                        <div class="flex items-center gap-1 text-xs text-slate-500">
-                                            <span class="font-medium">Tipo:</span>
-                                            <select x-model="providerTypeFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
-                                                <option value="all">Todos los tipos</option>
-                                                <option value="scraper">Scrapers & APIs</option>
-                                                <option value="workshop">Talleres Confección</option>
-                                                <option value="distributor">Distribuidores</option>
-                                                <option value="commercial">Comerciales Directos</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Tabla con Registros Reactivos -->
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse text-xs">
-                                        <thead>
-                                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                                                <th class="py-2.5 px-3">Proveedor</th>
-                                                <th class="py-2.5 px-3">Método de Extracción</th>
-                                                <th class="py-2.5 px-3">Frecuencia</th>
-                                                <th class="py-2.5 px-3">Último Scrape</th>
-                                                <th class="py-2.5 px-3 text-center">Items Sincronizados</th>
-                                                <th class="py-2.5 px-3 text-center">Estado</th>
-                                                <th class="py-2.5 px-3 text-right">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                                            <template x-for="prov in filteredProviders" :key="prov.id">
-                                                <tr class="hover:bg-slate-50 transition" :class="prov.status === 'archived' ? 'opacity-70 bg-slate-50/40' : ''">
-                                                    <td class="py-2.5 px-3">
-                                                        <div class="flex items-center gap-2">
-                                                            <span 
-                                                                class="w-2 h-2 rounded-full shrink-0"
-                                                                :class="{
-                                                                    'bg-emerald-500': prov.status === 'connected',
-                                                                    'bg-amber-500': prov.status === 'maintenance',
-                                                                    'bg-slate-300': prov.status === 'paused',
-                                                                    'bg-slate-400': prov.status === 'archived'
-                                                                }"
-                                                            ></span>
-                                                            <div>
-                                                                <div class="flex items-center gap-1.5">
-                                                                    <span class="font-bold text-slate-900" x-text="prov.tradeName || prov.name"></span>
-                                                                    <span class="font-mono text-[10px] px-1 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200" x-text="prov.vendorCode"></span>
-                                                                    <span x-show="prov.status === 'archived'" class="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 font-semibold">Archivado</span>
-                                                                </div>
-                                                                <span class="text-[10px] text-slate-400 font-normal block" x-text="(prov.city || 'Nacional') + ' • ' + (prov.typeLabel || 'Proveedor')"></span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600" x-text="prov.extractionMethod"></td>
-                                                    <td class="py-2.5 px-3 text-slate-600">
-                                                        <span class="block text-xs" x-text="prov.frequency"></span>
-                                                        <span class="text-[10px] text-slate-400" x-text="'Lead Time: ' + prov.leadTimeDays + ' d'"></span>
-                                                    </td>
-                                                    <td class="py-2.5 px-3 text-slate-500" x-text="prov.lastScrapeTime"></td>
-                                                    <td class="py-2.5 px-3 text-center font-bold text-slate-800" x-text="(prov.syncedItemsCount || 0) + ' SKUs'"></td>
-                                                    <td class="py-2.5 px-3 text-center">
-                                                        <span 
-                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border"
-                                                            :class="{
-                                                                'bg-emerald-50 text-emerald-700 border-emerald-200': prov.status === 'connected',
-                                                                'bg-amber-50 text-amber-700 border-amber-200': prov.status === 'maintenance',
-                                                                'bg-slate-100 text-slate-600 border-slate-200': prov.status === 'paused',
-                                                                'bg-slate-200 text-slate-600 border-slate-300': prov.status === 'archived'
-                                                            }"
-                                                        >
-                                                            <span 
-                                                                class="w-1.5 h-1.5 rounded-full"
-                                                                :class="{
-                                                                    'bg-emerald-500': prov.status === 'connected',
-                                                                    'bg-amber-500': prov.status === 'maintenance',
-                                                                    'bg-slate-400': prov.status === 'paused',
-                                                                    'bg-slate-500': prov.status === 'archived'
-                                                                }"
-                                                            ></span>
-                                                            <span x-text="prov.status === 'connected' ? 'Conectado' : (prov.status === 'maintenance' ? 'Mantenimiento' : (prov.status === 'paused' ? 'Pausado' : 'Archivado'))"></span>
-                                                        </span>
-                                                    </td>
-                                                    <td class="py-2.5 px-3 text-right">
-                                                        <div class="inline-flex items-center gap-1">
-                                                            <button 
-                                                                type="button"
-                                                                @click="openProviderDetails(prov)" 
-                                                                class="px-2 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer shadow-3xs"
-                                                                title="Ver ficha técnica, condiciones comerciales y Scorecard de SLA"
-                                                            >
-                                                                Detalles / SLA
-                                                            </button>
-                                                            <template x-if="prov.status !== 'archived'">
-                                                                <div class="inline-flex items-center gap-1">
-                                                                    <button 
-                                                                        type="button"
-                                                                        x-show="prov.type === 'scraper' || prov.extractionMethod.includes('API') || prov.extractionMethod.includes('Webhook')"
-                                                                        @click="triggerProviderSync(prov)" 
-                                                                        :disabled="prov.status === 'paused' || prov.isSyncing"
-                                                                        class="px-2 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                                                                    >
-                                                                        <svg x-show="prov.isSyncing" class="w-3 h-3 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                                        <span x-text="prov.isSyncing ? 'Sync...' : 'Forzar Sync'"></span>
-                                                                    </button>
-                                                                    <button 
-                                                                        type="button"
-                                                                        @click="archiveProvider(prov)"
-                                                                        class="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
-                                                                        title="Archivar proveedor"
-                                                                    >
-                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                                                    </button>
-                                                                </div>
-                                                            </template>
-                                                            <template x-if="prov.status === 'archived'">
-                                                                <div class="inline-flex items-center gap-1">
-                                                                    <button 
-                                                                        type="button"
-                                                                        @click="restoreProvider(prov)"
-                                                                        class="px-2 py-1 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition cursor-pointer flex items-center gap-1"
-                                                                        title="Restaurar proveedor a estado Conectado"
-                                                                    >
-                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                                        <span>Restaurar</span>
-                                                                    </button>
-                                                                    <button 
-                                                                        type="button"
-                                                                        @click="deleteProvider(prov)"
-                                                                        class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                                                                        title="Eliminar definitivamente"
-                                                                    >
-                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                                    </button>
-                                                                </div>
-                                                            </template>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                            <tr x-show="filteredProviders.length === 0">
-                                                <td colspan="7" class="py-6 text-center text-slate-400 text-xs">
-                                                    No se encontraron proveedores que coincidan con los filtros seleccionados.
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 7: SECCIONES WEB -->
-                    <template x-if="activeSettingsTab === 'sections'">
-                        <div class="space-y-4">
-                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Secciones del Sitio Web E-Commerce</h4>
-                                <ul class="space-y-2 text-xs">
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea Básicos Esenciales</span>
-                                        <span class="text-slate-400">Prendas lisas de alta rotación</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea Diseñador & Autor</span>
-                                        <span class="text-slate-400">Prendas con diseño, estampados y tornasoles</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Colección Temporada / Drops</span>
-                                        <span class="text-slate-400">Lanzamientos de edición limitada</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Catálogo General</span>
-                                        <span class="text-slate-400">Vitrina multiverso estándar</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- TAB 8: RECETAS DE ENSAMBLE BOM & COMBOS VIRTUALES (CRUD COMPLETO) -->
-                    <template x-if="activeSettingsTab === 'bundles'">
-                        <div class="space-y-5">
-                            <!-- Cabecera de la Sección -->
-                            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-5 rounded-xl border border-slate-700 text-white flex items-center justify-between flex-wrap gap-4 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <h4 class="text-base font-bold text-white leading-none">Gestor de Recetas BOM & Combos Virtuales</h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30" x-text="productBundles.length + ' Fórmulas'"></span>
-                                        </div>
-                                        <p class="text-xs text-slate-300 mt-1">Configuración y despiece de cajas de suscripción y packs promocionales. El almacenista decide qué prendas componen cada fórmula y sus proporciones unitarias.</p>
-                                    </div>
-                                </div>
-                                <button 
-                                    type="button" 
-                                    @click="openNewBundleModal()" 
-                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer shrink-0"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                    <span>+ Nueva Receta / Combo</span>
-                                </button>
-                            </div>
-
-                            <!-- KPIs Resumen de Fórmulas -->
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Fórmulas BOM</span>
-                                    <span class="text-xl font-black text-slate-900 mt-0.5 block" x-text="productBundles.length"></span>
-                                    <span class="text-[10px] text-slate-500 font-medium">Catálogo completo</span>
-                                </div>
-                                <div class="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">Recetas Activas</span>
-                                    <span class="text-xl font-black text-emerald-700 mt-0.5 block" x-text="productBundles.filter(b => b.isActive !== false).length"></span>
-                                    <span class="text-[10px] text-emerald-600 font-medium">En comercialización</span>
-                                </div>
-                                <div class="bg-amber-50/50 p-3.5 rounded-xl border border-amber-200 shadow-2xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">Recetas Archivadas</span>
-                                    <span class="text-xl font-black text-amber-700 mt-0.5 block" x-text="productBundles.filter(b => b.isActive === false).length"></span>
-                                    <span class="text-[10px] text-amber-600 font-medium">Pausadas / histórico</span>
-                                </div>
-                                <div class="bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-200 shadow-2xs">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 block">Insumos Físicos</span>
-                                    <span class="text-xl font-black text-indigo-700 mt-0.5 block" x-text="productBundles.reduce((acc, b) => acc + (b.components ? b.components.length : 0), 0)"></span>
-                                    <span class="text-[10px] text-indigo-600 font-medium">Prendas vinculadas</span>
-                                </div>
-                            </div>
-
-                            <!-- Filtros y Barra de Búsqueda -->
-                            <div class="flex items-center justify-between flex-wrap gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <!-- Filtro Estado -->
-                                    <div class="flex items-center bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
-                                        <button 
-                                            type="button" 
-                                            @click="bundleEditor.filterStatus = 'active'" 
-                                            class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
-                                            :class="bundleEditor.filterStatus === 'active' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
-                                        >
-                                            Activas (<span x-text="productBundles.filter(b => b.isActive !== false).length"></span>)
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="bundleEditor.filterStatus = 'archived'" 
-                                            class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
-                                            :class="bundleEditor.filterStatus === 'archived' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
-                                        >
-                                            Archivadas (<span x-text="productBundles.filter(b => b.isActive === false).length"></span>)
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="bundleEditor.filterStatus = 'all'" 
-                                            class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
-                                            :class="bundleEditor.filterStatus === 'all' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
-                                        >
-                                            Todas
-                                        </button>
-                                    </div>
-
-                                    <!-- Filtro Tipo -->
-                                    <div class="flex items-center bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
-                                        <button 
-                                            type="button" 
-                                            @click="bundleEditor.filterType = 'all'" 
-                                            class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
-                                            :class="bundleEditor.filterType === 'all' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
-                                        >
-                                            Todos los Tipos
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="bundleEditor.filterType = 'subscription'" 
-                                            class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
-                                            :class="bundleEditor.filterType === 'subscription' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
-                                        >
-                                            Cajas Suscripción
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="bundleEditor.filterType = 'promo'" 
-                                            class="px-2.5 py-1 text-xs font-bold rounded-md transition cursor-pointer"
-                                            :class="bundleEditor.filterType === 'promo' ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
-                                        >
-                                            Packs Promocionales
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Buscador -->
-                                <div class="relative min-w-[240px]">
-                                    <input 
-                                        type="text" 
-                                        x-model="bundleEditor.searchQuery" 
-                                        placeholder="Buscar por SKU, combo o prenda..." 
-                                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-2xs"
-                                    >
-                                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                </div>
-                            </div>
-
-                            <!-- Listado de Tarjetas de Recetas BOM -->
-                            <div class="space-y-4">
-                                <template x-for="bundle in getFilteredProductBundles()" :key="bundle.id">
-                                    <div 
-                                        class="p-4 bg-white rounded-xl border transition-all shadow-xs"
-                                        :class="bundle.isActive === false ? 'border-dashed border-slate-300 bg-slate-50/60 opacity-80' : 'border-slate-200 hover:border-indigo-300 hover:shadow-sm'"
-                                    >
-                                        <div class="flex items-start justify-between flex-wrap gap-3 pb-3 border-b border-slate-100">
-                                            <div class="flex items-start gap-3">
-                                                <div 
-                                                    class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                                                    :class="bundle.type === 'subscription' ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                                </div>
-                                                <div>
-                                                    <div class="flex items-center gap-2 flex-wrap">
-                                                        <span class="text-xs font-mono font-bold text-slate-500" x-text="bundle.sku || bundle.id"></span>
-                                                        <span 
-                                                            class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
-                                                            :class="bundle.type === 'subscription' ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'"
-                                                            x-text="bundle.type === 'subscription' ? 'Caja Suscripción' : 'Pack Promocional'"
-                                                        ></span>
-                                                        <span 
-                                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                                                            :class="bundle.isActive !== false ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-200 text-slate-600'"
-                                                            x-text="bundle.isActive !== false ? 'Activa' : 'Archivada'"
-                                                        ></span>
-                                                        <template x-if="bundle.discountPct > 0">
-                                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200" x-text="'-' + bundle.discountPct + '% Ahorro'"></span>
-                                                        </template>
-                                                    </div>
-                                                    <h5 class="text-sm font-bold text-slate-900 mt-1 mb-0.5" x-text="bundle.name"></h5>
-                                                    <p class="text-xs text-slate-500 m-0" x-text="bundle.description"></p>
-                                                </div>
-                                            </div>
-
-                                            <!-- Precios & Capacidad -->
-                                            <div class="flex items-center gap-4 text-right shrink-0">
-                                                <div>
-                                                    <div class="text-base font-extrabold text-indigo-700" x-text="'$' + (bundle.subscriptionPrice || 0).toFixed(2) + ' MXN'"></div>
-                                                    <template x-if="bundle.regularPrice > bundle.subscriptionPrice">
-                                                        <div class="text-[11px] text-slate-400 line-through" x-text="'$' + (bundle.regularPrice || 0).toFixed(2)"></div>
-                                                    </template>
-                                                </div>
-
-                                                <!-- Capacidad de Armado Inmediato -->
-                                                <div class="p-2.5 rounded-xl border bg-slate-50 min-w-[140px] text-center"
-                                                    :class="calculateBundleStock(bundle) > 5 ? 'border-emerald-200 bg-emerald-50/40' : (calculateBundleStock(bundle) > 0 ? 'border-amber-200 bg-amber-50/40' : 'border-rose-200 bg-rose-50/40')"
-                                                >
-                                                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block">Capacidad Inmediata</span>
-                                                    <div class="flex items-center justify-center gap-1.5 mt-0.5">
-                                                        <span 
-                                                            class="w-2 h-2 rounded-full"
-                                                            :class="calculateBundleStock(bundle) > 5 ? 'bg-emerald-500' : (calculateBundleStock(bundle) > 0 ? 'bg-amber-500' : 'bg-rose-500')"
-                                                        ></span>
-                                                        <strong 
-                                                            class="text-sm font-black"
-                                                            :class="calculateBundleStock(bundle) > 5 ? 'text-emerald-800' : (calculateBundleStock(bundle) > 0 ? 'text-amber-800' : 'text-rose-800')"
-                                                            x-text="calculateBundleStock(bundle) + ' cajas'"
-                                                        ></strong>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Desglose de Insumos Físicos de la Fórmula BOM (Decisión del Almacenista) -->
-                                        <div class="mt-3">
-                                            <div class="flex items-center justify-between mb-2">
-                                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                                    <span>Prendas Físicas que Componen la Fórmula BOM</span>
-                                                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600" x-text="(bundle.components ? bundle.components.length : 0) + ' items'"></span>
-                                                </span>
-                                                <span class="text-[10px] text-slate-400">Deducción atómica en Kardex por cada caja ensamblada</span>
-                                            </div>
-
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                                                <template x-for="(comp, cIdx) in (bundle.components || [])" :key="cIdx">
-                                                    <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between gap-2 text-xs">
-                                                        <div>
-                                                            <div class="font-bold text-slate-800 flex items-center gap-1.5">
-                                                                <span class="font-mono text-indigo-600" x-text="comp.sku"></span>
-                                                                <span class="text-slate-400">&bull;</span>
-                                                                <span class="uppercase text-[10px] px-1 py-0.2 bg-white rounded border border-slate-200 font-semibold text-slate-700" x-text="'Talla: ' + (comp.size || 'M')"></span>
-                                                            </div>
-                                                            <div class="text-[11px] text-slate-600 truncate max-w-[200px]" x-text="comp.name"></div>
-                                                            <div class="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                                                                <span>Rack:</span>
-                                                                <span class="font-mono font-semibold text-slate-600" x-text="comp.location || 'A-01-A'"></span>
-                                                                <span>&bull;</span>
-                                                                <span>Stock físico:</span>
-                                                                <strong 
-                                                                    :class="getBundleComponentStock(comp.sku, comp.size) >= comp.qty ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'"
-                                                                    x-text="getBundleComponentStock(comp.sku, comp.size) + ' uds'"
-                                                                ></strong>
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-right shrink-0">
-                                                            <span class="px-2 py-1 rounded-md bg-white border border-slate-200 text-indigo-900 font-mono font-bold text-xs shadow-2xs block" x-text="comp.qty + ' ud/caja'"></span>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-
-                                        <!-- Barra de Acciones de la Receta -->
-                                        <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-                                            <div class="text-[11px] text-slate-400 font-medium">
-                                                ID Fórmula: <span class="font-mono" x-text="bundle.id"></span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <!-- Botón Editar -->
-                                                <button 
-                                                    type="button" 
-                                                    @click="openEditBundleModal(bundle.id)" 
-                                                    class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                                                >
-                                                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                    <span>Editar Receta & Insumos</span>
-                                                </button>
-
-                                                <!-- Botón Archivar / Reactivar -->
-                                                <button 
-                                                    type="button" 
-                                                    @click="archiveBundleRecipe(bundle.id)" 
-                                                    class="px-3 py-1.5 text-xs font-bold rounded-lg border shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                                                    :class="bundle.isActive !== false ? 'text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-200' : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'"
-                                                >
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                                    <span x-text="bundle.isActive !== false ? 'Archivar' : 'Reactivar'"></span>
-                                                </button>
-
-                                                <!-- Botón Eliminar -->
-                                                <button 
-                                                    type="button" 
-                                                    @click="deleteBundleRecipe(bundle.id)" 
-                                                    class="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
-                                                >
-                                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                    <span>Eliminar</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- Empty State -->
-                                <template x-if="getFilteredProductBundles().length === 0">
-                                    <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                                        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                        </div>
-                                        <h5 class="text-sm font-bold text-slate-800">No se encontraron recetas con los filtros seleccionados</h5>
-                                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Puedes modificar los criterios de filtro o dar de alta una nueva fórmula BOM con el botón superior.</p>
-                                        <button 
-                                            type="button" 
-                                            @click="openNewBundleModal()" 
-                                            class="mt-3 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg shadow-2xs transition cursor-pointer"
-                                        >
-                                            + Crear Nueva Receta
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <!-- ========================================================= -->
-                            <!-- SUB-MODAL / EDITOR DE RECETA BOM (DECISIÓN DEL ALMACENISTA) -->
-                            <!-- ========================================================= -->
-                            <div 
-                                x-show="bundleEditor.isOpen" 
-                                class="fixed inset-0 z-[95] overflow-y-auto" 
-                                style="z-index: 95; display: none;"
-                                @keydown.escape.window="bundleEditor.isOpen = false"
-                            >
-                                <!-- Backdrop -->
-                                <div 
-                                    x-show="bundleEditor.isOpen"
-                                    x-transition:enter="ease-out duration-300"
-                                    x-transition:enter-start="opacity-0"
-                                    x-transition:enter-end="opacity-100"
-                                    x-transition:leave="ease-in duration-200"
-                                    x-transition:leave-start="opacity-100"
-                                    x-transition:leave-end="opacity-0"
-                                    @click="bundleEditor.isOpen = false"
-                                    class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity cursor-pointer"
-                                ></div>
-
-                                <div class="min-h-screen px-4 text-center flex items-center justify-center p-0">
-                                    <div 
-                                        x-show="bundleEditor.isOpen"
-                                        x-transition:enter="ease-out duration-300"
-                                        x-transition:enter-start="opacity-0 scale-95"
-                                        x-transition:enter-end="opacity-100 scale-100"
-                                        x-transition:leave="ease-in duration-200"
-                                        x-transition:leave-start="opacity-100 scale-100"
-                                        x-transition:leave-end="opacity-0 scale-95"
-                                        class="inline-block w-full max-w-4xl bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
-                                        @click.stop
-                                    >
-                                        <!-- Header Editor -->
-                                        <div class="px-6 py-4 border-b border-slate-700 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white flex items-center justify-between">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                </div>
-                                                <div>
-                                                    <h3 class="text-base font-bold text-white leading-none" x-text="bundleEditor.isEditing ? 'Editar Receta BOM: ' + bundleEditor.form.name : 'Nueva Receta de Ensamble BOM & Combo'"></h3>
-                                                    <p class="text-xs text-indigo-200 mt-1">El almacenista selecciona qué prendas físicas componen este combo y las proporciones a deducir en Kardex.</p>
-                                                </div>
-                                            </div>
-                                            <button @click="bundleEditor.isOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                            </button>
-                                        </div>
-
-                                        <!-- Body Editor -->
-                                        <div class="p-6 space-y-5 max-h-[75vh] overflow-y-auto text-sm">
-                                            <!-- Sección 1: Datos Generales del Combo -->
-                                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-2">
-                                                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                                                    <span>1. Identidad Comercial del Combo</span>
-                                                </h4>
-                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                    <div>
-                                                        <label class="block text-xs font-bold text-slate-700 mb-1">SKU Padre del Combo *</label>
-                                                        <input 
-                                                            type="text" 
-                                                            x-model="bundleEditor.form.sku" 
-                                                            placeholder="ej. SUB-BOX-MARTE-LVL1" 
-                                                            class="w-full px-3 py-1.5 text-xs font-mono font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase"
-                                                            :disabled="bundleEditor.isEditing"
-                                                        >
-                                                        <span class="text-[10px] text-slate-400 mt-0.5 block">Identificador inmutable para pedidos y guías</span>
-                                                    </div>
-                                                    <div class="sm:col-span-2">
-                                                        <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial de la Receta / Kit *</label>
-                                                        <input 
-                                                            type="text" 
-                                                            x-model="bundleEditor.form.name" 
-                                                            placeholder="ej. Caja Mensual Marte Nivel 2: Estilo & Cuidado" 
-                                                            class="w-full px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                    </div>
-                                                </div>
-
-                                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3">
-                                                    <div>
-                                                        <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Combo</label>
-                                                        <select 
-                                                            x-model="bundleEditor.form.type" 
-                                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                            <option value="subscription">Caja de Suscripción</option>
-                                                            <option value="promo">Pack Promocional</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio de Venta ($ MXN) *</label>
-                                                        <input 
-                                                            type="number" 
-                                                            step="0.01" 
-                                                            x-model.number="bundleEditor.form.subscriptionPrice" 
-                                                            class="w-full px-3 py-1.5 text-xs font-bold text-indigo-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio Regular de Referencia</label>
-                                                        <input 
-                                                            type="number" 
-                                                            step="0.01" 
-                                                            x-model.number="bundleEditor.form.regularPrice" 
-                                                            class="w-full px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-xs font-bold text-slate-700 mb-1">Nivel / Sub-etiqueta</label>
-                                                        <input 
-                                                            type="text" 
-                                                            x-model="bundleEditor.form.tierName" 
-                                                            placeholder="ej. Nivel 2: Estilo" 
-                                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                    </div>
-                                                </div>
-
-                                                <div class="mt-3">
-                                                    <label class="block text-xs font-bold text-slate-700 mb-1">Descripción para el Equipo de Empaque</label>
-                                                    <textarea 
-                                                        x-model="bundleEditor.form.description" 
-                                                        rows="2" 
-                                                        placeholder="Instrucciones de ensamble, presentación y características del kit..."
-                                                        class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y max-w-full"
-                                                        style="resize: vertical; max-width: 100%;"
-                                                    ></textarea>
-                                                </div>
-                                            </div>
-
-                                            <!-- Sección 2: Selección de Prendas Físicas (Decisión del Almacenista) -->
-                                            <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-200">
-                                                <div class="flex items-center justify-between pb-2 mb-3 border-b border-indigo-200/60">
-                                                    <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-950 flex items-center gap-2">
-                                                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                                                        <span>2. Selección de Prendas Insumo (Decisión del Almacenista)</span>
-                                                    </h4>
-                                                    <span class="text-[11px] text-indigo-800 font-semibold">Elige del catálogo operativo qué prendas integran la caja</span>
-                                                </div>
-
-                                                <!-- Selector de Prenda -->
-                                                <div class="bg-white p-3 rounded-lg border border-indigo-200 shadow-2xs grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
-                                                    <div class="sm:col-span-6">
-                                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Prenda del Catálogo Operativo</label>
-                                                        <select 
-                                                            x-model="bundleEditor.newComponent.sku" 
-                                                            class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                            <template x-for="prod in products" :key="prod.sku">
-                                                                <option :value="prod.sku" x-text="'[' + prod.sku + '] ' + prod.name + ' • Stock Rack: ' + prod.localStock + ' uds (' + (prod.location || 'Rack') + ')'"></option>
-                                                            </template>
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="sm:col-span-2">
-                                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Talla / Variante</label>
-                                                        <select 
-                                                            x-model="bundleEditor.newComponent.size" 
-                                                            class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 uppercase font-mono"
-                                                        >
-                                                            <option value="ch">CH</option>
-                                                            <option value="m">M</option>
-                                                            <option value="g">G</option>
-                                                            <option value="xl">XL</option>
-                                                            <option value="unit">Estándar / Única</option>
-                                                            <option value="v10">V10 (Cosmética)</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="sm:col-span-2">
-                                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Cant / Caja</label>
-                                                        <input 
-                                                            type="number" 
-                                                            min="1" 
-                                                            max="20" 
-                                                            x-model.number="bundleEditor.newComponent.qty" 
-                                                            class="w-full px-2.5 py-1.5 text-xs font-bold text-center bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                        >
-                                                    </div>
-
-                                                    <div class="sm:col-span-2">
-                                                        <button 
-                                                            type="button" 
-                                                            @click="addBundleComponentToForm()" 
-                                                            class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg shadow-2xs transition flex items-center justify-center gap-1 cursor-pointer"
-                                                        >
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                                            <span>Asignar</span>
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Tabla de Prendas Asignadas -->
-                                                <div class="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
-                                                    <table class="min-w-full divide-y divide-slate-200 text-xs">
-                                                        <thead class="bg-slate-50 font-bold text-slate-600">
-                                                            <tr>
-                                                                <th class="py-2 px-3 text-left">SKU Prenda</th>
-                                                                <th class="py-2 px-3 text-left">Nombre del Producto</th>
-                                                                <th class="py-2 px-3 text-center">Talla</th>
-                                                                <th class="py-2 px-3 text-left">Ubicación Rack</th>
-                                                                <th class="py-2 px-3 text-right">Stock Disponible</th>
-                                                                <th class="py-2 px-3 text-center">Cant / Caja</th>
-                                                                <th class="py-2 px-3 text-center">Acción</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="divide-y divide-slate-100">
-                                                            <template x-for="(comp, cIdx) in bundleEditor.form.components" :key="cIdx">
-                                                                <tr class="hover:bg-slate-50/80">
-                                                                    <td class="py-2 px-3 font-mono font-bold text-indigo-600" x-text="comp.sku"></td>
-                                                                    <td class="py-2 px-3 text-slate-800 font-semibold" x-text="comp.name"></td>
-                                                                    <td class="py-2 px-3 text-center uppercase font-mono font-bold text-slate-600" x-text="comp.size || 'M'"></td>
-                                                                    <td class="py-2 px-3 text-slate-500 font-mono" x-text="comp.location || 'A-01-A'"></td>
-                                                                    <td class="py-2 px-3 text-right font-mono font-bold"
-                                                                        :class="getBundleComponentStock(comp.sku, comp.size) >= comp.qty ? 'text-emerald-700' : 'text-rose-700'"
-                                                                        x-text="getBundleComponentStock(comp.sku, comp.size) + ' uds'"
-                                                                    ></td>
-                                                                    <td class="py-2 px-3 text-center">
-                                                                        <input 
-                                                                            type="number" 
-                                                                            min="1" 
-                                                                            max="20" 
-                                                                            x-model.number="comp.qty" 
-                                                                            class="w-14 py-0.5 px-1 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                                        >
-                                                                    </td>
-                                                                    <td class="py-2 px-3 text-center">
-                                                                        <button 
-                                                                            type="button" 
-                                                                            @click="removeBundleComponentFromForm(cIdx)" 
-                                                                            class="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition cursor-pointer"
-                                                                            title="Quitar prenda de la receta"
-                                                                        >
-                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            </template>
-                                                        </tbody>
-                                                    </table>
-
-                                                    <!-- Si no hay componentes -->
-                                                    <template x-if="!bundleEditor.form.components || bundleEditor.form.components.length === 0">
-                                                        <div class="p-6 text-center text-slate-400 bg-slate-50/50">
-                                                            <svg class="w-6 h-6 mx-auto mb-1 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                                            <span class="font-bold text-slate-600 block text-xs">Aún no has agregado prendas a esta receta</span>
-                                                            <span class="text-[11px] text-slate-500">Selecciona una prenda del catálogo en el cuadro superior y presiona "Asignar".</span>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Footer Editor -->
-                                        <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                                            <div class="text-xs text-slate-500">
-                                                <span class="font-bold text-slate-700" x-text="bundleEditor.form.components.length + ' prendas asignadas'"></span>
-                                                <span>a esta receta BOM</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <button 
-                                                    type="button" 
-                                                    @click="bundleEditor.isOpen = false" 
-                                                    class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                                <button 
-                                                    type="button" 
-                                                    @click="saveBundleRecipe()" 
-                                                    class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
-                                                >
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                                    <span x-text="bundleEditor.isEditing ? 'Guardar Cambios de Receta' : 'Crear Receta BOM'"></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                </div>
-
-                <!-- Settings Card Footer -->
-                <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                    <button type="button" @click="closeModuleSettings()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer">
-                        &larr; Volver al Catálogo
-                    </button>
-                    <button type="button" @click="closeModuleSettings()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs">
-                        Listo / Guardar Ajustes
-                    </button>
-                </div>
-            </div>
-    </div> <!-- Fin de PANTALLA COMPLETA DE AJUSTES (inventoryCurrentScreen === 'settings') -->
-
-    <!-- ============================================================= -->
-    <!-- MODAL DE CURADURÍA PREVIA DE SCRAPING                          -->
-    <!-- ============================================================= -->
-    <div 
-        x-show="scrapingCurationModalOpen" 
-        class="fixed inset-0 z-[85] overflow-y-auto" 
-        style="z-index: 85; display: none;"
-        aria-labelledby="curation-modal-title" 
-        role="dialog" 
-        aria-modal="true"
-        @keydown.escape.window="scrapingCurationModalOpen = false"
-    >
-        <div 
-            x-show="scrapingCurationModalOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="scrapingCurationModalOpen = false"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <div class="min-h-screen px-4 text-center flex items-center justify-center p-0">
-            <div 
-                x-show="scrapingCurationModalOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-                class="inline-block w-full max-w-3xl bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
-                @click.stop
-            >
-                <!-- Curation Header -->
-                <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-500/20 text-indigo-300 rounded-xl border border-indigo-500/30">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-white" id="curation-modal-title">Validación & Curaduría de Prenda Scrapeada</h3>
-                            <p class="text-xs text-indigo-200">Revisa la descripción y asigna color exacto, tela y sección antes de publicar</p>
-                        </div>
-                    </div>
-                    <button @click="scrapingCurationModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Curation Body -->
-                <template x-if="curatingItem">
-                    <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm">
-                        <!-- Top Banner de la prenda -->
-                        <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                            <div>
-                                <span class="text-xs font-mono font-bold text-indigo-600" x-text="curatingItem.suggestedSku"></span>
-                                <h4 class="font-bold text-slate-900 text-base mt-0.5" x-text="curatingItem.name"></h4>
-                                <span class="text-xs text-slate-500" x-text="'Proveedor: ' + curatingItem.brand + ' • ' + curatingItem.suggestedCategory"></span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Costo Mayorista</span>
-                                <span class="text-lg font-extrabold text-emerald-600 font-mono" x-text="'$' + curatingItem.cost.toFixed(2)"></span>
-                            </div>
-                        </div>
-
-                        <!-- 1. Validación / Edición de la Descripción Scrapeada -->
-                        <div>
-                            <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Descripción del Producto (Validación Humana)</label>
-                            <textarea 
-                                x-model="curatingItem.scrapedDescription" 
-                                rows="3" 
-                                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y max-w-full"
-                                style="resize: vertical; max-width: 100%;"
-                                placeholder="Verifica que la descripción técnica y comercial sea correcta..."
-                            ></textarea>
-                        </div>
-
-                        <!-- 2. Selección de Color / Tornasol & Tipo de Tela -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Selector de Color / Tornasol -->
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Tornasol Exacto</label>
-                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
-                                    <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0" :style="'background: ' + curatingItem.detectedColorHex"></span>
-                                    <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
-                                </div>
-                                <select 
-                                    @change="
-                                        const c = apparelColors.find(x => x.name === $event.target.value);
-                                        if (c) {
-                                            curatingItem.detectedColorName = c.name;
-                                            curatingItem.detectedColorHex = c.hex;
-                                            curatingItem.colorType = c.type;
-                                        }
-                                    "
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <template x-for="col in apparelColors" :key="col.id">
-                                        <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- Selector de Tela -->
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela</label>
-                                <select 
-                                    x-model="curatingItem.suggestedFabric" 
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" x-text="fab.name"></option>
-                                    </template>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 3. Diseño & Sección Web -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Variante Diseño -->
-                            <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Variante de Diseño</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button 
-                                        type="button" 
-                                        @click="curatingItem.suggestedDesign = 'sin_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
-                                    >
-                                        Sin Diseño (Liso)
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        @click="curatingItem.suggestedDesign = 'con_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
-                                    >
-                                        Con Diseño (Pattern)
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Sección Web -->
-                            <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Sección Web de Publicación</label>
-                                <select 
-                                    x-model="curatingItem.suggestedSection" 
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <option value="basicos">Línea Básicos Esenciales</option>
-                                    <option value="disenador">Línea Diseñador & Autor</option>
-                                    <option value="temporada">Colección Temporada</option>
-                                    <option value="general">Catálogo General</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 4. PVP Sugerido & Margen Calculado -->
-                        <div class="p-3.5 bg-slate-900 text-white rounded-xl border border-slate-800 flex items-center justify-between">
-                            <div>
-                                <label class="text-[11px] text-slate-400 block">PVP Venta al Público</label>
-                                <div class="flex items-center gap-1 mt-0.5">
-                                    <span class="text-slate-400 text-sm">$</span>
-                                    <input type="number" x-model.number="curatingItem.suggestedPvp" class="w-24 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm font-bold text-white font-mono">
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[11px] text-slate-400 block">Margen Comercial Estimado</span>
-                                <span class="text-base font-extrabold text-emerald-400 font-mono" x-text="(((curatingItem.suggestedPvp - curatingItem.cost) / curatingItem.suggestedPvp) * 100).toFixed(1) + '%'"></span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Curation Footer -->
-                <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <button 
-                        type="button" 
-                        @click="discardScrapedItem(curatingItem.id)" 
-                        class="px-4 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition cursor-pointer"
-                    >
-                        Descartar Prenda
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="scrapingCurationModalOpen = false" 
-                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold transition cursor-pointer"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            type="button" 
-                            @click="approveScrapedItem()" 
-                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Aprobar y Publicar en Catálogo</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<div class="p-8 text-center text-slate-500 font-sans">
+    <div class="inline-block animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full mb-3"></div>
+    <div class="text-sm font-semibold text-slate-700">Cargando modulo de inventario y compras...</div>
 </div>
     `;
 }

@@ -159,7 +159,7 @@
       </div>
     </aside>
 
-    <main class="main">
+    <main class="main" data-main>
       @if(session('success'))
         <div class="alert alert-success" role="status">{{ session('success') }}</div>
       @endif
