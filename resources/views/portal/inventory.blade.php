@@ -147,7 +147,7 @@
                 <div class="flex items-center gap-2">
                     <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Métricas Clave de Inventario</span>
                     <template x-if="kpisCollapsed">
-                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md" x-text="'3,674 piezas disponibles | 25 modelos activos | Último scrape: ' + lastScrapeTime"></span>
+                        <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md" x-text="products.reduce((acc, p) => acc + (p.localStock || 0), 0).toLocaleString() + ' piezas disponibles | ' + products.length + ' modelos activos | Último scrape: ' + (lastScrapeTime || 'Al día')"></span>
                     </template>
                 </div>
                 <button 
@@ -192,7 +192,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5"><span x-text="products.reduce((acc, p) => acc + (p.localStock || 0), 0).toLocaleString() + ' piezas'">{{ $summary['stock_local'] }}</span></div>
+                    <div class="text-2xl font-bold text-slate-900 mt-0.5"><span x-text="products.reduce((acc, p) => acc + (p.localStock || 0), 0).toLocaleString() + ' piezas'">{{ $summary['stock_local'] ?? '0 piezas' }}</span></div>
                     <div class="text-[11px] text-emerald-600 font-medium">Disponibles para despacho</div>
                 </div>
             </div>
@@ -210,13 +210,13 @@
                             <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
                             <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                 <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Pedidos Dropshipping</div>
-                                <p class="text-[10px] text-slate-200 leading-snug">Referencias vendidas que requieren gestión externa con el proveedor para envío directo al cliente.</p>
+                                <p class="text-[10px] text-slate-200 leading-snug">Referencias de mayoristas y catálogo extendido disponibles bajo solicitud directa.</p>
                                 <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                             </div>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5">0 <span class="text-xs font-normal text-slate-500">referencias</span></div>
-                    <div class="text-[11px] text-slate-500">Sin rezagos acumulados</div>
+                    <div class="text-2xl font-bold text-slate-900 mt-0.5"><span x-text="products.filter(p => p.type === 'dropship' || (p.supplierStock && p.supplierStock > 0)).length">{{ $summary['bajo_pedido'] ?? '0 referencias' }}</span> <span class="text-xs font-normal text-slate-500">referencias</span></div>
+                    <div class="text-[11px] text-slate-500">Disponibilidad en mayoristas</div>
                 </div>
             </div>
 
@@ -238,8 +238,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-slate-900 mt-0.5">25 <span class="text-xs font-normal text-slate-500">modelos</span></div>
-                    <div class="text-[11px] text-slate-500">4 tallas x modelo (CH a XL)</div>
+                    <div class="text-2xl font-bold text-slate-900 mt-0.5"><span x-text="products.length">{{ $summary['skus_activos'] ?? '0 modelos' }}</span> <span class="text-xs font-normal text-slate-500">modelos</span></div>
+                    <div class="text-[11px] text-slate-500">Matriz de variantes activas</div>
                 </div>
             </div>
 
@@ -261,7 +261,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-lg font-bold text-slate-800 mt-0.5" x-text="lastScrapeTime">Sin registros</div>
+                    <div class="text-lg font-bold text-slate-800 mt-0.5" x-text="lastScrapeTime">{{ $summary['last_scrape'] ?? 'Sin registros' }}</div>
                     <div class="text-[11px] text-emerald-600 font-medium">Torzo Feed Bot activo</div>
                 </div>
             </div>
@@ -3072,46 +3072,46 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-xl font-extrabold text-slate-900 mt-1 block">$1,104,800 <span class="text-xs text-slate-400 font-normal">MXN</span></span>
-                            <div class="text-[10px] text-emerald-600 font-medium mt-0.5">64.2% del volumen total de ventas</div>
+                            <span class="text-xl font-extrabold text-slate-900 mt-1 block">$<span x-text="(getTopTenMetrics().totalRevenue).toLocaleString()"></span> <span class="text-xs text-slate-400 font-normal">MXN</span></span>
+                            <div class="text-[10px] text-emerald-600 font-medium mt-0.5">Volumen consolidado en catálogo</div>
                         </div>
 
                         <!-- KPI 2: Unidades Vendidas -->
                         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
                             <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Unidades Vendidas</span>
+                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Unidades Disponibles</span>
                                 <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                     <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                                     </span>
                                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Prendas Despachadas Top 10</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Total de piezas vendidas entre los 10 modelos líderes, promediando 289 unidades por SKU con alta tasa de rotación en inventario.</p>
+                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Prendas en Stock Top 10</div>
+                                        <p class="text-[10px] text-slate-200 leading-snug">Total de piezas disponibles entre los 10 modelos líderes para atención inmediata de pedidos.</p>
                                         <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-xl font-extrabold text-indigo-600 mt-1 block">2,890 <span class="text-xs text-slate-400 font-normal">piezas</span></span>
-                            <div class="text-[10px] text-slate-500 mt-0.5">Promedio 289 uds por SKU</div>
+                            <span class="text-xl font-extrabold text-indigo-600 mt-1 block"><span x-text="(getTopTenMetrics().totalUnits).toLocaleString()"></span> <span class="text-xs text-slate-400 font-normal">piezas</span></span>
+                            <div class="text-[10px] text-slate-500 mt-0.5">Disponibilidad en almacén</div>
                         </div>
 
                         <!-- KPI 3: Talla Central Más Vendida -->
                         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
                             <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Talla Central Más Vendida</span>
+                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Talla Central Dominante</span>
                                 <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                     <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                                     </span>
                                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                         <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva Dominante de Tallas</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">La talla M (Mediana) concentra el 44.5% de los pedidos totales. Priorizar su aprovisionamiento evita quiebres en el segmento core de clientes.</p>
+                                        <p class="text-[10px] text-slate-200 leading-snug">La talla con mayor concentración de existencias y demanda en catálogo para evitar quiebres.</p>
                                         <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-xl font-extrabold text-indigo-900 mt-1 block">M &bull; Mediana</span>
-                            <div class="text-[10px] text-indigo-600 font-medium mt-0.5">Concentra el 44.5% de compras</div>
+                            <span class="text-xl font-extrabold text-indigo-900 mt-1 block"><span x-text="getTopTenMetrics().topSize + ' • Principal'"></span></span>
+                            <div class="text-[10px] text-indigo-600 font-medium mt-0.5"><span x-text="'Concentra el ' + getTopTenMetrics().topSizePct + '% del volumen'"></span></div>
                         </div>
 
                         <!-- KPI 4: Margen Bruto Promedio -->
@@ -3124,12 +3124,12 @@
                                     </span>
                                     <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                         <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Rentabilidad Comercial Ponderada</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Margen comercial ponderado combinando confección propia (65%-73%) y dropshipping (57%-63%). Se ubica en un rango óptimo y saludable (>50%).</p>
+                                        <p class="text-[10px] text-slate-200 leading-snug">Margen comercial ponderado combinando confección propia y dropshipping. Rango saludable superior al 50%.</p>
                                         <span class="absolute bottom-full right-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-xl font-extrabold text-emerald-600 mt-1 block">66.0% <span class="text-xs text-slate-400 font-normal">RevOps</span></span>
+                            <span class="text-xl font-extrabold text-emerald-600 mt-1 block"><span x-text="getTopTenMetrics().avgMargin + '%'"></span> <span class="text-xs text-slate-400 font-normal">RevOps</span></span>
                             <div class="text-[10px] text-emerald-700 font-medium mt-0.5">Rango saludable (&gt;50%)</div>
                         </div>
                     </div>
@@ -3227,561 +3227,65 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
                                 
-                                <!-- ITEM 1 (ORO) -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">1</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Boxer Trunks Modal Seamless</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BX-MOD-001</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">Boxers</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs" title="Talla Top 1: 45% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-indigo-600 font-normal">45%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 35% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">35%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">520 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-indigo-600 rounded-full" style="width: 100%"></div>
+                                <template x-for="(item, index) in getTopTenProducts()" :key="item.sku">
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        <td class="py-3.5 px-3 text-center">
+                                            <span class="w-6 h-6 rounded-full font-extrabold text-xs inline-flex items-center justify-center shadow-xs"
+                                                  :class="index === 0 ? 'bg-amber-100 text-amber-800 border border-amber-300' : (index === 1 ? 'bg-slate-200 text-slate-700 border border-slate-300' : (index === 2 ? 'bg-amber-50 text-amber-900 border border-amber-400' : 'bg-slate-100 text-slate-600 border border-slate-200'))"
+                                                  x-text="index + 1"></span>
+                                        </td>
+                                        <td class="py-3.5 px-4">
+                                            <div class="font-bold text-slate-900 text-sm" x-text="item.name"></div>
+                                            <div class="text-[11px] font-mono text-indigo-600 font-medium" x-text="'SKU: ' + item.sku"></div>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80" x-text="item.category || 'General'"></span>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                                <template x-for="sz in getTopSizesForProduct(item)" :key="sz.size">
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-bold text-xs bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                        <span x-text="sz.size"></span> <span class="text-[10px] text-indigo-500 font-normal" x-text="sz.pct + '%'"></span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="getTopSizesForProduct(item).length === 0">
+                                                    <span class="text-xs text-slate-400">N/A</span>
+                                                </template>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$218,400</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $420 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            65.5% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        284 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('BX-MOD-001')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 2 (PLATA) -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">2</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Boxer Algodón Pima Orgánico</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BX-COT-007</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">Boxers</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs" title="Talla Top 1: 42% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-indigo-600 font-normal">42%</span>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
+                                                  :class="item.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
+                                                <span class="w-1.5 h-1.5 rounded-full" :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-emerald-500'"></span>
+                                                <span x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropshipping'"></span>
                                             </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 38% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">38%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">460 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-indigo-600 rounded-full" style="width: 88%"></div>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <span class="font-bold text-slate-900" x-text="((item.localStock || 0) + (item.committedStock || 0)).toLocaleString() + ' uds'"></span>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$179,400</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $390 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            69.2% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        480 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('BX-COT-007')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 3 (BRONCE) -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-800 border border-orange-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">3</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Jockstrap Athletic Carbon Edition</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: JK-ATH-002</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">Jocks</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs" title="Talla Top 1: 50% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-blue-600 font-normal">50%</span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right">
+                                            <div class="font-bold text-slate-900" x-text="'$' + (((item.localStock || 0) + (item.committedStock || 0)) * (item.pvp || 0)).toLocaleString()"></div>
+                                            <div class="text-[10px] text-slate-400" x-text="'PVP: $' + (item.pvp || 0) + ' MXN'"></div>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <span x-text="getProductMargin(item) + '%'"></span>
                                             </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 30% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">30%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">395 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-blue-600 rounded-full" style="width: 76%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$150,100</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $380 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            69.7% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        198 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('JK-ATH-002')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 4 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">4</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Torzo Mesh Breathable Trunk</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TOR-DRP-003</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">Boxers</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs" title="Talla Top 1: 40% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-indigo-600 font-normal">40%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 35% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">35%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dropship (Torzo)
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">310 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-indigo-600 rounded-full" style="width: 60%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$151,900</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $490 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            57.1% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <span class="font-bold text-emerald-700">48 <span class="text-xs font-normal text-emerald-600">sincronizadas</span></span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TOR-DRP-003')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 5 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">5</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Tanga Microfibra Velvet Touch</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TG-SLK-004</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200/80">Tangas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200 shadow-2xs" title="Talla Top 1: 45% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-fuchsia-600 font-normal">45%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 40% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">40%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">285 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-fuchsia-600 rounded-full" style="width: 55%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$82,650</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $290 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            73.1% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        154 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TG-SLK-004')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 6 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">6</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Jockstrap Pro-Gym Wide Band</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: JK-PRO-010</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">Jocks</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs" title="Talla Top 1: 44% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-blue-600 font-normal">44%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 38% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">38%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">240 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-blue-600 rounded-full" style="width: 46%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$86,400</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $360 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            69.4% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        88 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('JK-PRO-010')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 7 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">7</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Tanga Extreme Minimalist Straps</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TG-EXT-008</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200/80">Tangas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200 shadow-2xs" title="Talla Top 1: 48% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-fuchsia-600 font-normal">48%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 38% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">38%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">215 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-fuchsia-600 rounded-full" style="width: 41%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$55,900</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $260 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            76.2% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        218 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TG-EXT-008')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 8 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">8</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Bikini Sport Performance Brief</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BK-FIT-005</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">Bikinis</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs" title="Talla Top 1: 46% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-amber-600 font-normal">46%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 32% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-slate-500 font-normal">32%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">190 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-amber-600 rounded-full" style="width: 37%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$60,800</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $320 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            70.3% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        122 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('BK-FIT-005')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 9 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">9</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Torzo Neon Glow Athletic Jock</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TOR-DRP-006</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">Jocks</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs" title="Talla Top 1: 48% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-blue-600 font-normal">48%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 34% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">34%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dropship (Torzo)
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">165 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-blue-600 rounded-full" style="width: 32%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$74,250</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $450 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            56.7% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            14 piezas
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TOR-DRP-006')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 10 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">10</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Torzo Signature Satin Bikini</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TOR-DRP-009</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">Bikinis</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs" title="Talla Top 1: 42% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-amber-600 font-normal">42%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 40% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">40%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dropship (Torzo)
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">110 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-amber-600 rounded-full" style="width: 21%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$45,100</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $410 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            57.3% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            Agotado
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TOR-DRP-009')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                            </tbody>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-right font-bold text-slate-900">
+                                            <span x-text="(item.localStock || 0)"></span> <span class="text-xs font-normal text-slate-500">piezas</span>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <button type="button" @click="openProductDrawer(item)" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                <span>Detalle</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                </tbody>
                         </table>
                     </div>
                 </div>
