@@ -101,6 +101,17 @@
 | `TASK-DSH-09` | Master Kardex Global y Log de Auditoría Omnicanal para Superadministradores | **Hub 1 (Dashboard)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 1 Auditoría, `system_audit_logs`, Tag v1.5 |
 | `TASK-SYS-01` | Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | Sidebar Footer, Hub 8 Pantalla Completa, Tag v1.5 |
 | `TASK-COM-01` | Mensajería Interdepartamental Operativa con Detección Automática de Folios | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | `interdepartmental_messages`, Chat Drawer, Tag v1.5 |
+| `TASK-H2-01` | DDL & Capa de Persistencia Relacional CMS (Base de Datos) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | Migraciones MySQL, Eloquent |
+| `TASK-H2-02` | Motor Drag & Drop de Secciones en Hub 2 (Categorías, Tags, Custom) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `SortableJS`, `TASK-H2-01` |
+| `TASK-H2-03` | Gestor de Documentos Oficiales (Tallas Torzo, Cuidados, PROFECO) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-01` |
+| `TASK-H2-04` | CMS de Páginas Dinámicas & Sincronización Navbar | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-01`, View Composers |
+| `TASK-H2-05` | Motor de Paletas Globales & Variables CSS (`:root`) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-01`, Estilos Globales |
+| `TASK-H2-06` | Renderizador Modular de Secciones en Storefront PWA | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-02`, `TASK-H2-05` |
+| `TASK-H2-07` | CMS de Blog / Revista Digital & SEO Schema | **Hub 2 (CMS & Tienda Real)** | **Media** | **Planificada** | `TASK-H2-01`, Schema JSON-LD |
+| `TASK-H2-08` | Ficha de Producto (PDP) a Pantalla Completa Dedicada (Sin Drawers) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | Hub 4 Inventario, Blade Standalone |
+| `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | **Hub 2 (CMS & Tienda Real)** | **Media** | **Planificada** | Hub 4 Categorías & Familias |
+| `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | DataLayer, Meta Graph API |
+| `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | PHPUnit, Core Web Vitals |
 
 ---
 
