@@ -42,9 +42,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
 
-        // MOTOR INTELIGENTE DE AUTO-SKU Y DETECCION DE DUPLICADOS (TASK-INV-15 / SLICE 2)
+        // MOTOR INTELIGENTE DE AUTO-SKU, DETECCION DE DUPLICADOS Y COPILOTO IA (TASK-INV-15 / SLICE 2 & 3)
         Route::post('/products/generate-sku', [ProductSkuAndDuplicateApiController::class, 'generateSku']);
         Route::post('/products/check-duplicate', [ProductSkuAndDuplicateApiController::class, 'checkDuplicate']);
+        Route::post('/products/generate-description', [ProductSkuAndDuplicateApiController::class, 'generateDescription']);
 
         // GESTOR DE AJUSTES DE INVENTARIO: TALLAS, VOLUMENES Y CATEGORIAS (TASK-INV-14)
         Route::prefix('settings')->group(function () {

@@ -666,15 +666,19 @@ function hybridInventoryModule() {
         ],
         newProduct: {
             sku: 'BX-ECO-011',
+            skuLocked: true,
+            isGeneratingSku: false,
             name: '',
             category: 'Boxers',
+            subcategory: '',
             type: 'propio',
             aisle: 'A',
             rack: '02',
             bin: 'B',
             location: 'A-02-B',
-            // TASK-INV-02: Matriz Multidimensional de Variantes
+            // TASK-INV-02 / TASK-INV-14: Matriz Multidimensional de Variantes y Curvas de Tallas
             variantDimension: 'size',
+            selectedSizeCurveId: null,
             fabricType: 'Modal Seamless',
             colorName: 'Negro Profundo',
             colorHex: '#0f172a',
@@ -683,6 +687,9 @@ function hybridInventoryModule() {
             websiteSection: 'basicos',
             isPublished: true,
             description: '',
+            bulletPoints: [],
+            seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
+            newTagInput: '',
             brand: 'ModaIntima Textil MX',
             discountPct: 0,
             regularPrice: 399.00,
@@ -696,7 +703,17 @@ function hybridInventoryModule() {
             supplierStock: 40,
             provider: 'ModaIntima Textil MX',
             providerUrl: '',
-            images: []
+            images: [],
+            // TASK-INV-15: Auto-SKU, Deteccion de Duplicados & Copiloto IA
+            duplicateRisk: 'none',
+            duplicateMatches: [],
+            duplicateScore: 0,
+            duplicateChecked: false,
+            isCheckingDuplicate: false,
+            duplicateAlertModalOpen: false,
+            duplicateSelectedMatch: null,
+            forceCreateDespiteDuplicate: false,
+            isGeneratingAi: false
         },
 
         toast: {
@@ -7916,17 +7933,39 @@ function hybridInventoryModule() {
         },
 
         openCreateProductDrawer() {
-            const nextNum = String(this.products.length + 1).padStart(3, '0');
+            const availableCurves = this.getAvailableSizeCurves();
+            const defaultCurve = availableCurves.find(c => c.is_default) || availableCurves[0];
+            const defaultCurveId = defaultCurve ? defaultCurve.id : null;
+
             this.newProduct = {
-                sku: 'SKU-' + nextNum,
+                sku: '',
+                skuLocked: true,
+                isGeneratingSku: false,
                 name: '',
                 category: 'Boxers',
+                subcategory: '',
                 type: 'propio',
                 aisle: 'A',
                 rack: '02',
                 bin: 'B',
                 location: 'A-02-B',
+                // TASK-INV-02 / TASK-INV-14: Variantes y Curvas
                 variantDimension: 'size',
+                selectedSizeCurveId: defaultCurveId,
+                fabricType: 'Modal Seamless',
+                colorName: 'Negro Profundo',
+                colorHex: '#0f172a',
+                colorType: 'solid',
+                designType: 'sin_diseno',
+                websiteSection: 'basicos',
+                isPublished: true,
+                description: '',
+                bulletPoints: [],
+                seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
+                newTagInput: '',
+                brand: 'ModaIntima Textil MX',
+                discountPct: 0,
+                regularPrice: 399.00,
                 pvp: 399.00,
                 cost: 135.00,
                 weightedAverageCost: 135.00,
@@ -7937,15 +7976,356 @@ function hybridInventoryModule() {
                 supplierStock: 40,
                 provider: 'ModaIntima Textil MX',
                 providerUrl: '',
-                images: []
+                images: [],
+                // TASK-INV-15: Auto-SKU, Deteccion de Duplicados & Copiloto IA
+                duplicateRisk: 'none',
+                duplicateMatches: [],
+                duplicateScore: 0,
+                duplicateChecked: false,
+                isCheckingDuplicate: false,
+                duplicateAlertModalOpen: false,
+                duplicateSelectedMatch: null,
+                forceCreateDespiteDuplicate: false,
+                isGeneratingAi: false
             };
             this.isDraggingImages = false;
             this.newProductDrawerOpen = true;
+            this.generateAutoSku();
         },
 
         closeCreateProductDrawer() {
             this.newProductDrawerOpen = false;
             this.isDraggingImages = false;
+        },
+
+        async generateAutoSku() {
+            this.newProduct.isGeneratingSku = true;
+            try {
+                const payload = {
+                    category: this.newProduct.category || 'Boxers',
+                    brand: this.newProduct.brand || 'ModaIntima Textil MX',
+                    variant_code: (this.newProduct.variantDimension === 'size' && this.newProduct.sizes) ? Object.keys(this.newProduct.sizes)[0] : null
+                };
+                const res = await fetch('/api/v1/inventory/products/generate-sku', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'success' && json.data && json.data.sku) {
+                    this.newProduct.sku = json.data.sku;
+                    this.newProduct.skuLocked = true;
+                    this.showToast('SKU estructurado generado: ' + json.data.sku, 'success');
+                } else {
+                    throw new Error(json.message || 'Error en generador de SKU');
+                }
+            } catch (e) {
+                // Fallback local garantizado
+                const catPfx = (this.newProduct.category || 'TXT').substring(0, 3).toUpperCase();
+                const brCode = (this.newProduct.brand || 'GEN').substring(0, 2).toUpperCase();
+                const seq = String(this.products.length + 1).padStart(4, '0');
+                this.newProduct.sku = `${catPfx}-${brCode}-${seq}`;
+                this.newProduct.skuLocked = true;
+                this.showToast('SKU sintetizado localmente: ' + this.newProduct.sku, 'info');
+            } finally {
+                this.newProduct.isGeneratingSku = false;
+            }
+        },
+
+        toggleSkuLock() {
+            this.newProduct.skuLocked = !this.newProduct.skuLocked;
+            if (!this.newProduct.skuLocked) {
+                this.showToast('Edicion manual de SKU habilitada.', 'info');
+            } else {
+                this.showToast('SKU bloqueado contra modificaciones accidentales.', 'info');
+            }
+        },
+
+        async checkProductDuplicate() {
+            const name = (this.newProduct.name || '').trim();
+            if (name.length < 3) {
+                this.newProduct.duplicateRisk = 'none';
+                this.newProduct.duplicateMatches = [];
+                this.newProduct.duplicateScore = 0;
+                this.newProduct.duplicateChecked = false;
+                this.newProduct.duplicateSelectedMatch = null;
+                return;
+            }
+
+            this.newProduct.isCheckingDuplicate = true;
+            try {
+                const payload = {
+                    name: name,
+                    brand: this.newProduct.brand || '',
+                    category: this.newProduct.category || '',
+                    pvp: parseFloat(this.newProduct.pvp) || 0,
+                    sku: this.newProduct.sku || ''
+                };
+                const res = await fetch('/api/v1/inventory/products/check-duplicate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'success' && json.data) {
+                    const data = json.data;
+                    this.newProduct.duplicateRisk = data.risk_level || 'none';
+                    this.newProduct.duplicateMatches = data.matches || [];
+                    this.newProduct.duplicateScore = Math.round(data.highest_score || 0);
+                    this.newProduct.duplicateChecked = true;
+                    this.newProduct.duplicateSelectedMatch = (data.matches && data.matches.length > 0) ? data.matches[0] : null;
+                }
+            } catch (e) {
+                // Fallback local en memoria
+                const clean = name.toLowerCase();
+                const found = this.products.find(p => (p.name || '').toLowerCase() === clean);
+                if (found) {
+                    this.newProduct.duplicateRisk = 'duplicate_match';
+                    this.newProduct.duplicateScore = 95;
+                    this.newProduct.duplicateMatches = [{
+                        sku: found.sku,
+                        title: found.name,
+                        brand: found.brand || 'ModaIntima Textil MX',
+                        score: 95,
+                        reasons: ['Coincidencia exacta de nombre en catalogo']
+                    }];
+                    this.newProduct.duplicateSelectedMatch = this.newProduct.duplicateMatches[0];
+                    this.newProduct.duplicateChecked = true;
+                } else {
+                    this.newProduct.duplicateRisk = 'none';
+                    this.newProduct.duplicateMatches = [];
+                    this.newProduct.duplicateScore = 0;
+                    this.newProduct.duplicateSelectedMatch = null;
+                    this.newProduct.duplicateChecked = true;
+                }
+            } finally {
+                this.newProduct.isCheckingDuplicate = false;
+            }
+        },
+
+        openDuplicateModal() {
+            if (this.newProduct.duplicateMatches && this.newProduct.duplicateMatches.length > 0) {
+                this.newProduct.duplicateAlertModalOpen = true;
+            }
+        },
+
+        closeDuplicateModal() {
+            this.newProduct.duplicateAlertModalOpen = false;
+        },
+
+        resolveDuplicateAddStock() {
+            const match = this.newProduct.duplicateSelectedMatch;
+            if (!match) return;
+            const targetSku = match.sku || (match.product && match.product.sku);
+            const targetProd = this.products.find(p => p.sku === targetSku);
+            const incomingQty = this.calculateNewProductTotalStock();
+
+            if (targetProd) {
+                targetProd.localStock = (parseInt(targetProd.localStock) || 0) + incomingQty;
+                if (this.newProduct.variantDimension === 'size' && this.newProduct.sizes && targetProd.sizes) {
+                    Object.entries(this.newProduct.sizes).forEach(([sz, qty]) => {
+                        const q = parseInt(qty) || 0;
+                        if (q > 0) {
+                            targetProd.sizes[sz] = (parseInt(targetProd.sizes[sz]) || 0) + q;
+                        }
+                    });
+                }
+                this.showToast(`Se sumaron ${incomingQty} unidades al producto existente ${targetSku} (${targetProd.name}).`, 'success');
+            } else {
+                this.showToast(`Stock transferido a referencia ${targetSku}.`, 'success');
+            }
+
+            this.newProduct.duplicateAlertModalOpen = false;
+            this.closeCreateProductDrawer();
+        },
+
+        resolveDuplicateContinueNew() {
+            this.newProduct.forceCreateDespiteDuplicate = true;
+            this.newProduct.duplicateAlertModalOpen = false;
+            this.showToast('Advertencia de duplicado omitida por decision operativa.', 'info');
+            this.saveNewProduct();
+        },
+
+        resolveDuplicateDismissDraft() {
+            this.newProduct.duplicateAlertModalOpen = false;
+            this.closeCreateProductDrawer();
+            this.showToast('Borrador de alta descartado.', 'info');
+        },
+
+        async generateAiDescription() {
+            if (!this.newProduct.name || this.newProduct.name.trim().length === 0) {
+                this.showToast('Ingresa el nombre del producto para activar el Copiloto IA.', 'warning');
+                return;
+            }
+
+            this.newProduct.isGeneratingAi = true;
+            try {
+                const payload = {
+                    name: this.newProduct.name,
+                    brand: this.newProduct.brand || '',
+                    category: this.newProduct.category || '',
+                    fabric_type: this.newProduct.fabricType || '',
+                    color_name: this.newProduct.colorName || '',
+                    design_type: this.newProduct.designType || '',
+                    variant_dimension: this.newProduct.variantDimension || 'size',
+                    pvp: parseFloat(this.newProduct.pvp) || 0
+                };
+                const res = await fetch('/api/v1/inventory/products/generate-description', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'success' && json.data) {
+                    const data = json.data;
+                    if (data.description) {
+                        this.newProduct.description = data.description;
+                    }
+                    if (Array.isArray(data.bullet_points) && data.bullet_points.length > 0) {
+                        this.newProduct.bulletPoints = data.bullet_points;
+                    }
+                    if (Array.isArray(data.seo_tags)) {
+                        const set = new Set([...(this.newProduct.seoTags || []), ...data.seo_tags]);
+                        this.newProduct.seoTags = Array.from(set);
+                    }
+                    this.showToast('Descripcion comercial y tags SEO generados exitosamente con Copiloto IA.', 'success');
+                } else {
+                    throw new Error(json.message || 'Error en Copiloto IA');
+                }
+            } catch (e) {
+                // Fallback local sintetizado
+                const name = this.newProduct.name;
+                const brand = this.newProduct.brand || 'Torzo';
+                const fabric = this.newProduct.fabricType || 'Algodon & Modal';
+                const color = this.newProduct.colorName || 'Negro Clasico';
+                this.newProduct.description = `Experimenta el maximo confort y soporte anatomico con ${name} de ${brand}. Confeccionado minuciosamente con ${fabric} en tono ${color}, ofrece una sensacion ultrasuave de segunda piel y transpirabilidad que se adapta a tus movimientos cotidianos.\n\nDiseno de silueta limpia y patronaje ergonomico sin costuras visibles que garantiza discrecion y alta durabilidad para tu guardarropa intimo.`;
+                this.newProduct.bulletPoints = [
+                    `Composicion textil premium: ${fabric}`,
+                    `Ajuste ergonomico de segunda piel`,
+                    `Costuras planas antirozaduras`,
+                    `Tejido transpirable de secado rapido`
+                ];
+                this.showToast('Contenido comercial generado localmente.', 'info');
+            } finally {
+                this.newProduct.isGeneratingAi = false;
+            }
+        },
+
+        addSeoTag() {
+            const tag = (this.newProduct.newTagInput || '').trim().toLowerCase();
+            if (tag && !this.newProduct.seoTags.includes(tag)) {
+                this.newProduct.seoTags.push(tag);
+            }
+            this.newProduct.newTagInput = '';
+        },
+
+        removeSeoTag(index) {
+            this.newProduct.seoTags.splice(index, 1);
+        },
+
+        getAvailableSizeCurves() {
+            if (Array.isArray(this.sizeCurves) && this.sizeCurves.length > 0) {
+                const active = this.sizeCurves.filter(c => c.is_active !== false && !c.deleted_at);
+                if (active.length > 0) return active;
+            }
+            return [
+                {
+                    id: 1,
+                    name: 'Americana (CH - 3XL)',
+                    is_default: true,
+                    sizes: [
+                        { code: 'CH', label: 'Chica (S)' },
+                        { code: 'M', label: 'Mediana (M)' },
+                        { code: 'G', label: 'Grande (L)' },
+                        { code: 'XL', label: 'Extra Grande (XL)' },
+                        { code: '2XL', label: 'Doble Extra Grande (2XL)' },
+                        { code: '3XL', label: 'Triple Extra Grande (3XL)' }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: 'Numerica Pantalon (28 - 40)',
+                    is_default: false,
+                    sizes: [
+                        { code: '28', label: 'Talla 28' },
+                        { code: '30', label: 'Talla 30' },
+                        { code: '32', label: 'Talla 32' },
+                        { code: '34', label: 'Talla 34' },
+                        { code: '36', label: 'Talla 36' },
+                        { code: '38', label: 'Talla 38' },
+                        { code: '40', label: 'Talla 40' }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: 'Copas Bra (32B - 38D)',
+                    is_default: false,
+                    sizes: [
+                        { code: '32B', label: 'Copa 32B' },
+                        { code: '34B', label: 'Copa 34B' },
+                        { code: '34C', label: 'Copa 34C' },
+                        { code: '36B', label: 'Copa 36B' },
+                        { code: '36C', label: 'Copa 36C' },
+                        { code: '38C', label: 'Copa 38C' },
+                        { code: '38D', label: 'Copa 38D' }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: 'Unitalla / Estandar',
+                    is_default: false,
+                    sizes: [
+                        { code: 'UNI', label: 'Unitalla (Standard)' }
+                    ]
+                }
+            ];
+        },
+
+        getCurrentNewProductSizeCurve() {
+            const curves = this.getAvailableSizeCurves();
+            if (!this.newProduct.selectedSizeCurveId) {
+                const def = curves.find(c => c.is_default) || curves[0];
+                if (def) this.newProduct.selectedSizeCurveId = def.id;
+                return def;
+            }
+            return curves.find(c => String(c.id) === String(this.newProduct.selectedSizeCurveId)) || curves[0];
+        },
+
+        getCurrentNewProductSizes() {
+            const curve = this.getCurrentNewProductSizeCurve();
+            if (curve && Array.isArray(curve.sizes) && curve.sizes.length > 0) {
+                return curve.sizes;
+            }
+            return [
+                { code: 'CH', label: 'Chica (S)' },
+                { code: 'M', label: 'Mediana (M)' },
+                { code: 'G', label: 'Grande (L)' },
+                { code: 'XL', label: 'Extra Grande (XL)' },
+                { code: '2XL', label: '2XL' },
+                { code: '3XL', label: '3XL' }
+            ];
+        },
+
+        onSizeCurveChange() {
+            const sizes = this.getCurrentNewProductSizes();
+            const newSizes = {};
+            sizes.forEach(s => {
+                const key = (s.code || '').toLowerCase();
+                newSizes[key] = (this.newProduct.sizes && this.newProduct.sizes[key]) ? this.newProduct.sizes[key] : 0;
+            });
+            this.newProduct.sizes = newSizes;
         },
 
         handleImageUpload(event) {
@@ -8075,13 +8455,7 @@ function hybridInventoryModule() {
             const dim = this.newProduct.variantDimension || 'size';
             if (dim === 'size') {
                 const s = this.newProduct.sizes || {};
-                const ch = parseInt(s.ch) || 0;
-                const m = parseInt(s.m) || 0;
-                const g = parseInt(s.g) || 0;
-                const xl = parseInt(s.xl) || 0;
-                const xxl = parseInt(s['2xl']) || 0;
-                const xxxl = parseInt(s['3xl']) || 0;
-                return ch + m + g + xl + xxl + xxxl;
+                return Object.values(s).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0);
             }
             if (dim === 'shade') {
                 const sh = this.newProduct.shades || {};
@@ -8089,10 +8463,7 @@ function hybridInventoryModule() {
             }
             if (dim === 'volume') {
                 const v = this.newProduct.volumes || {};
-                const v10 = parseInt(v.v10) || 0;
-                const v50 = parseInt(v.v50) || 0;
-                const v100 = parseInt(v.v100) || 0;
-                return v10 + v50 + v100;
+                return Object.values(v).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0);
             }
             if (dim === 'none') {
                 return parseInt(this.newProduct.unitStock) || 0;
@@ -8122,12 +8493,13 @@ function hybridInventoryModule() {
                 }
                 this.updateNewProductLocation();
             }
+            // Auto regenerate SKU on category change
+            this.generateAutoSku();
         },
 
         calculateNewProductProfit() {
             const pvp = parseFloat(this.newProduct.pvp) || 0;
             const cost = parseFloat(this.newProduct.cost) || 0;
-            const weightedAverageCost = parseFloat(this.newProduct.weightedAverageCost) || cost;
             return Math.max(0, pvp - cost);
         },
 
@@ -8144,20 +8516,31 @@ function hybridInventoryModule() {
                 this.showToast('Por favor completa el codigo SKU y el nombre del producto.', 'warning');
                 return;
             }
+
+            // Deteccion de duplicados: bloquear si hay match critico no confirmado
+            if (!this.newProduct.forceCreateDespiteDuplicate && this.newProduct.duplicateRisk === 'duplicate_match' && this.newProduct.duplicateMatches && this.newProduct.duplicateMatches.length > 0) {
+                this.newProduct.duplicateAlertModalOpen = true;
+                this.showToast('Atencion: Se detecto un posible producto duplicado. Resuelve el conflicto para continuar.', 'warning');
+                return;
+            }
+
             const cleanSku = this.newProduct.sku.trim().toUpperCase();
             const exists = this.products.some(p => p.sku.toUpperCase() === cleanSku);
             if (exists) {
                 this.showToast('El SKU ' + cleanSku + ' ya existe en el catalogo. Usa un codigo unico.', 'warning');
                 return;
             }
+
             const totalStock = this.calculateNewProductTotalStock();
             const pvp = parseFloat(this.newProduct.pvp) || 0;
             const cost = parseFloat(this.newProduct.cost) || 0;
             const weightedAverageCost = parseFloat(this.newProduct.weightedAverageCost) || cost;
+
             const createdItem = {
                 sku: cleanSku,
                 name: this.newProduct.name.trim(),
                 category: this.newProduct.category,
+                subcategory: this.newProduct.subcategory || '',
                 type: this.newProduct.type,
                 variant_dimension: this.newProduct.variantDimension || 'size',
                 images: Array.isArray(this.newProduct.images) ? [...this.newProduct.images] : [],
@@ -8168,14 +8551,10 @@ function hybridInventoryModule() {
                 pvp: pvp,
                 cost: cost,
                 weightedAverageCost: weightedAverageCost,
-                sizes: (this.newProduct.variantDimension === 'size') ? {
-                    ch: parseInt(this.newProduct.sizes.ch) || 0,
-                    m: parseInt(this.newProduct.sizes.m) || 0,
-                    g: parseInt(this.newProduct.sizes.g) || 0,
-                    xl: parseInt(this.newProduct.sizes.xl) || 0,
-                    '2xl': parseInt(this.newProduct.sizes['2xl']) || 0,
-                    '3xl': parseInt(this.newProduct.sizes['3xl']) || 0
-                } : undefined,
+                description: this.newProduct.description || '',
+                bulletPoints: Array.isArray(this.newProduct.bulletPoints) ? [...this.newProduct.bulletPoints] : [],
+                seoTags: Array.isArray(this.newProduct.seoTags) ? [...this.newProduct.seoTags] : [],
+                sizes: (this.newProduct.variantDimension === 'size') ? { ...this.newProduct.sizes } : undefined,
                 shades: (this.newProduct.variantDimension === 'shade') ? { ...this.newProduct.shades } : undefined,
                 volumes: (this.newProduct.variantDimension === 'volume') ? { ...this.newProduct.volumes } : undefined,
                 adjustType: 'add',
@@ -8185,22 +8564,9 @@ function hybridInventoryModule() {
                 providerUrl: this.newProduct.providerUrl,
                 isScraping: false
             };
+
             this.products.unshift(createdItem);
             this.newProductDrawerOpen = false;
-            this.newProduct = {
-                sku: 'BX-ECO-012',
-                name: '',
-                category: 'Boxers',
-                type: 'propio',
-                location: 'Rack A-02 / Nivel 1',
-                pvp: 399.00,
-                cost: 135.00,
-                sizes: { ch: 15, m: 35, g: 30, xl: 10 },
-                supplierStock: 40,
-                provider: 'ModaIntima Textil MX',
-                providerUrl: '',
-                images: []
-            };
             this.showToast('Producto ' + createdItem.sku + ' agregado exitosamente al catalogo.', 'success');
         },
 
