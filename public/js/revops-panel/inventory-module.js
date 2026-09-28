@@ -4862,28 +4862,67 @@ function hybridInventoryModule() {
             this.showToast(`Tono ${shade.code} (${shade.name}) eliminado correctamente.`, 'success');
         },
 
-        applyQuickStockAdjustment(item) {
+        async applyQuickStockAdjustment(item) {
             if (!item.adjustQty || item.adjustQty <= 0) {
-                this.showToast('Ingresa una cantidad vÃ¡lida mayor a 0.', 'info');
+                this.showToast('Ingresa una cantidad valida mayor a 0.', 'info');
                 return;
             }
             const qty = parseInt(item.adjustQty);
-            if (item.adjustType === 'add') {
-                item.localStock += qty;
-                this.showToast(`+${qty} uds aÃ±adidas a ${item.sku}. Motivo: ${item.adjustReason || 'Entrada regular'}`);
-            } else {
-                if (item.localStock - qty < 0) {
-                    this.showToast(`Stock insuficiente: no puedes deducir ${qty} uds de ${item.localStock}.`, 'info');
-                    return;
-                }
-                item.localStock -= qty;
-                this.showToast(`-${qty} uds deducidas de ${item.sku}. Motivo: ${item.adjustReason || 'Salida regular'}`);
+            const type = item.adjustType || 'add';
+            const reason = item.adjustReason || (type === 'add' ? 'Entrada rapida de almacen' : 'Salida rapida de almacen');
+
+            if (type === 'sub' && item.localStock - qty < 0) {
+                this.showToast(`Stock insuficiente: no puedes deducir ${qty} uds de ${item.localStock}.`, 'warning');
+                return;
             }
-            if (item.localStock === 0) item.status = 'Agotado';
-            else if (item.localStock < 25) item.status = 'Bajo Stock';
-            else item.status = 'En Stock';
-            item.adjustQty = '';
-            item.adjustReason = '';
+
+            item.isAdjusting = true;
+
+            try {
+                const response = await fetch('/api/v1/inventory/adjust', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({
+                        sku: item.sku,
+                        type: type,
+                        quantity: qty,
+                        reason: reason
+                    })
+                });
+
+                const resData = await response.json();
+
+                if (response.ok && resData.status === 'success') {
+                    if (resData.data && typeof resData.data.new_local_stock !== 'undefined') {
+                        item.localStock = resData.data.new_local_stock;
+                        if (resData.data.sizes) {
+                            item.sizes = resData.data.sizes;
+                        }
+                    } else {
+                        item.localStock = (type === 'add') ? item.localStock + qty : item.localStock - qty;
+                    }
+
+                    if (item.localStock === 0) item.status = 'Agotado';
+                    else if (item.localStock < 25) item.status = 'Bajo Stock';
+                    else item.status = 'Saludable';
+
+                    item.adjustQty = '';
+                    item.adjustReason = '';
+                    this.showToast(resData.message || 'Stock actualizado correctamente.', 'success');
+                } else {
+                    const errorMsg = resData.message || 'Error al registrar el ajuste de stock en el servidor.';
+                    this.showToast(errorMsg, 'error');
+                }
+            } catch (err) {
+                console.error('Error al registrar ajuste de stock:', err);
+                this.showToast('Error de red al intentar registrar el ajuste de stock.', 'error');
+            } finally {
+                item.isAdjusting = false;
+            }
         },
 
         rescrapeProduct(item) {

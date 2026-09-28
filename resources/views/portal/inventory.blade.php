@@ -1112,10 +1112,12 @@
 
                                             <button 
                                                 @click="applyQuickStockAdjustment(item)" 
-                                                class="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded transition shadow-xs cursor-pointer"
+                                                :disabled="item.isAdjusting"
+                                                class="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded transition shadow-xs cursor-pointer inline-flex items-center gap-1 shrink-0"
                                                 title="Aplicar ajuste"
                                             >
-                                                Aplicar
+                                                <svg x-show="item.isAdjusting" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                <span x-text="item.isAdjusting ? '...' : 'Aplicar'"></span>
                                             </button>
                                         </div>
                                     </template>

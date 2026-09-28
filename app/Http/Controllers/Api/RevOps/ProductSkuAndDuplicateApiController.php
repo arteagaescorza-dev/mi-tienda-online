@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api\RevOps;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use App\Services\Inventory\DuplicateDetectionService;
 use App\Services\Inventory\ProductAiCopilotService;
 use App\Services\Inventory\SkuGeneratorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductSkuAndDuplicateApiController extends Controller
@@ -285,43 +289,89 @@ class ProductSkuAndDuplicateApiController extends Controller
             'provider_url' => $validated['provider_url'] ?? ($existingMeta['provider_url'] ?? ''),
         ]);
 
-        if ($product) {
-            $product->update([
-                'title' => $title,
-                'brand' => $validated['brand'] ?? $product->brand,
-                'price' => $pvp,
-                'cost' => $cost,
-                'type' => $dbType,
-                'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : $product->visible,
-                'description' => $validated['description'] ?? $product->description,
-                'meta' => $newMeta,
-            ]);
-        } else {
-            $product = Product::create([
-                'sku' => $cleanSku,
-                'title' => $title,
-                'slug' => Str::slug($title) . '-' . strtolower($cleanSku),
-                'brand' => $validated['brand'] ?? 'Generico',
-                'price' => $pvp,
-                'cost' => $cost,
-                'type' => $dbType,
-                'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : true,
-                'description' => $validated['description'] ?? '',
-                'meta' => $newMeta,
-            ]);
-        }
+        return DB::transaction(function () use ($product, $cleanSku, $title, $validated, $pvp, $cost, $dbType, $newMeta, $effectivePrice, $localStock, $marginPct) {
+            if ($product) {
+                $product->update([
+                    'title' => $title,
+                    'brand' => $validated['brand'] ?? $product->brand,
+                    'price' => $pvp,
+                    'cost' => $cost,
+                    'type' => $dbType,
+                    'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : $product->visible,
+                    'description' => $validated['description'] ?? $product->description,
+                    'meta' => $newMeta,
+                ]);
+            } else {
+                $product = Product::create([
+                    'sku' => $cleanSku,
+                    'title' => $title,
+                    'slug' => Str::slug($title) . '-' . strtolower($cleanSku),
+                    'brand' => $validated['brand'] ?? 'Generico',
+                    'price' => $pvp,
+                    'cost' => $cost,
+                    'type' => $dbType,
+                    'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : true,
+                    'description' => $validated['description'] ?? '',
+                    'meta' => $newMeta,
+                ]);
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => "Producto {$cleanSku} actualizado correctamente en el catalogo.",
-            'data' => [
-                'sku' => $product->sku,
-                'title' => $product->title,
-                'effective_price' => $effectivePrice,
-                'local_stock' => $localStock,
-                'margin_pct' => $marginPct,
-                'updated_at' => $product->updated_at->toIso8601String(),
-            ],
-        ]);
+            if (! empty($validated['sizes']) && is_array($validated['sizes'])) {
+                $product->load('variants.inventories');
+                foreach ($validated['sizes'] as $szKey => $targetQty) {
+                    $cleanSz = strtolower(trim((string) $szKey));
+                    $targetQty = max(0, (int) $targetQty);
+
+                    $variant = $product->variants->first(function ($v) use ($cleanSz) {
+                        return strtolower(trim((string) data_get($v->attributes, 'size', ''))) === $cleanSz;
+                    });
+
+                    if (! $variant) {
+                        $variant = ProductVariant::create([
+                            'product_id' => $product->id,
+                            'sku' => $product->sku . '-' . strtoupper($cleanSz),
+                            'price' => $pvp,
+                            'cost' => $cost,
+                            'attributes' => ['size' => strtoupper($cleanSz)],
+                        ]);
+                    }
+
+                    $inv = Inventory::query()->lockForUpdate()->firstOrCreate(
+                        ['variant_id' => $variant->id, 'location' => 'warehouse-1'],
+                        ['quantity' => 0, 'reserved' => 0, 'type' => 'physical']
+                    );
+
+                    $currentQty = (int) $inv->quantity;
+                    $diff = $targetQty - $currentQty;
+
+                    if ($diff !== 0) {
+                        $inv->quantity = $targetQty;
+                        $inv->save();
+
+                        InventoryMovement::create([
+                            'inventory_id' => $inv->id,
+                            'user_id' => auth()->id(),
+                            'quantity' => $diff,
+                            'quantity_before' => $currentQty,
+                            'quantity_after' => $targetQty,
+                            'reason' => "Ajuste de talla '{$cleanSz}' desde edicion integral de SKU ({$product->sku})",
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Producto {$cleanSku} actualizado correctamente en el catalogo.",
+                'data' => [
+                    'sku' => $product->sku,
+                    'title' => $product->title,
+                    'effective_price' => $effectivePrice,
+                    'local_stock' => $localStock,
+                    'margin_pct' => $marginPct,
+                    'updated_at' => $product->updated_at->toIso8601String(),
+                ],
+            ]);
+        });
     }
 }

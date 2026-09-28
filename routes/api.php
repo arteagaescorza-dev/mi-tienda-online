@@ -48,6 +48,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/bundles', [InventoryApiController::class, 'getBundles']);
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
+        Route::post('/adjust', [InventoryApiController::class, 'adjustStock']);
 
         // MOTOR INTELIGENTE DE AUTO-SKU, DETECCION DE DUPLICADOS Y COPILOTO IA (TASK-INV-15 / SLICE 2 & 3)
         Route::post('/products/generate-sku', [ProductSkuAndDuplicateApiController::class, 'generateSku']);

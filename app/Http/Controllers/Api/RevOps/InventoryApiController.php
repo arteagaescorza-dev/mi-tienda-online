@@ -878,6 +878,157 @@ class InventoryApiController extends Controller
     }
 
     /**
+     * Ajuste rapido de stock con persistencia inmutable en Kardex (TASK-INV-02 / SLICE 3).
+     */
+    public function adjustStock(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'sku' => 'required|string|max:100',
+            'type' => 'required|string|in:add,sub,increase,decrease',
+            'quantity' => 'required|integer|min:1',
+            'reason' => 'nullable|string|max:255',
+            'variant_id' => 'nullable|integer',
+            'size' => 'nullable|string|max:20',
+        ]);
+
+        return DB::transaction(function () use ($validated, $request) {
+            $sku = trim((string) $validated['sku']);
+            $product = Product::with(['variants.inventories'])->where('sku', $sku)->first();
+
+            if (! $product) {
+                $variant = ProductVariant::with(['inventories', 'product.variants.inventories'])->where('sku', $sku)->first();
+                if ($variant) {
+                    $product = $variant->product;
+                }
+            }
+
+            if (! $product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Producto con SKU '{$sku}' no encontrado.",
+                ], 404);
+            }
+
+            $delta = in_array($validated['type'], ['add', 'increase'])
+                ? (int) $validated['quantity']
+                : -(int) $validated['quantity'];
+
+            $targetVariant = null;
+
+            if (! empty($validated['variant_id'])) {
+                $targetVariant = $product->variants->firstWhere('id', (int) $validated['variant_id']);
+            }
+
+            if (! $targetVariant && ! empty($validated['size'])) {
+                $searchSize = strtolower(trim((string) $validated['size']));
+                $targetVariant = $product->variants->first(function ($v) use ($searchSize) {
+                    $sz = strtolower(trim((string) data_get($v->attributes, 'size', '')));
+                    return $sz === $searchSize;
+                });
+            }
+
+            if (! $targetVariant) {
+                if ($delta < 0) {
+                    $targetVariant = $product->variants->first(function ($v) use ($delta) {
+                        $inv = $v->inventories->first();
+                        $avail = $inv ? ($inv->quantity - $inv->reserved) : 0;
+                        return $avail >= abs($delta);
+                    });
+                }
+                if (! $targetVariant) {
+                    $targetVariant = $product->variants->first();
+                }
+            }
+
+            if (! $targetVariant) {
+                $targetVariant = ProductVariant::create([
+                    'product_id' => $product->id,
+                    'sku' => $product->sku . '-STD',
+                    'price' => $product->price,
+                    'cost' => $product->cost,
+                    'attributes' => ['size' => 'U'],
+                ]);
+            }
+
+            $inventory = Inventory::query()->lockForUpdate()->firstOrCreate(
+                ['variant_id' => $targetVariant->id, 'location' => 'warehouse-1'],
+                ['quantity' => 0, 'reserved' => 0, 'type' => 'physical']
+            );
+
+            $available = $inventory->quantity - $inventory->reserved;
+            if ($delta < 0 && $available < abs($delta)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Stock insuficiente en variante ({$targetVariant->sku}): disponible {$available} uds, se intentaron deducir " . abs($delta) . " uds.",
+                ], 422);
+            }
+
+            $before = (int) $inventory->quantity;
+            $after = $before + $delta;
+            $inventory->quantity = $after;
+            $inventory->save();
+
+            $reasonText = trim((string) ($validated['reason'] ?? ''));
+            if ($reasonText === '') {
+                $reasonText = $delta > 0
+                    ? "Ajuste rapido: Entrada manual de almacen (+{$delta} uds)"
+                    : "Ajuste rapido: Salida/Merma manual de almacen ({$delta} uds)";
+            }
+            if (strlen($reasonText) > 250) {
+                $reasonText = substr($reasonText, 0, 247) . '...';
+            }
+
+            $movement = InventoryMovement::create([
+                'inventory_id' => $inventory->id,
+                'user_id' => auth()->id(),
+                'quantity' => $delta,
+                'quantity_before' => $before,
+                'quantity_after' => $after,
+                'reason' => $reasonText,
+            ]);
+
+            $product->load(['variants.inventories']);
+            $totalStock = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+            $totalReserved = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+            $availableStock = max(0, $totalStock - $totalReserved);
+
+            $sizes = [];
+            foreach ($product->variants as $v) {
+                $rawSize = data_get($v->attributes, 'size', 'u');
+                $sizeKey = strtolower(trim((string) $rawSize));
+                $vQty = (int) $v->inventories->sum('quantity');
+                $vRes = (int) $v->inventories->sum('reserved');
+                $sizes[$sizeKey] = max(0, $vQty - $vRes);
+            }
+
+            $meta = is_array($product->meta) ? $product->meta : [];
+            $meta['sizes'] = $sizes;
+            $meta['local_stock'] = $availableStock;
+            $product->meta = $meta;
+            $product->save();
+
+            $actionWord = $delta > 0 ? 'anadieron' : 'dedujeron';
+            $absDelta = abs($delta);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Se {$actionWord} {$absDelta} uds a {$product->sku}. Nuevo stock fisico: {$availableStock} uds.",
+                'data' => [
+                    'sku' => $product->sku,
+                    'variant_sku' => $targetVariant->sku,
+                    'previous_stock' => $before,
+                    'new_variant_stock' => $after,
+                    'new_local_stock' => $availableStock,
+                    'delta' => $delta,
+                    'sizes' => $sizes,
+                    'movement_id' => $movement->id,
+                    'reason' => $reasonText,
+                ],
+            ]);
+        });
+    }
+
+    /**
      * Lista formulas BOM y combos activos calculando capacidad de ensamble por cuello de botella (TASK-INV-17).
      */
     public function getBundles(Request $request): JsonResponse

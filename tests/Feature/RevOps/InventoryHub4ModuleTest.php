@@ -737,6 +737,184 @@ class InventoryHub4ModuleTest extends TestCase
             ->assertSee('window.serverCycleCounts', false)
             ->assertSee('Auditor Certificado');
     }
+
+    public function test_can_adjust_stock_increase_and_persist_kardex_movement(): void
+    {
+        $product = Product::create([
+            'sku' => 'TEST-ADJ-001',
+            'title' => 'Boxer Test Ajuste',
+            'slug' => 'boxer-test-ajuste',
+            'price' => 250.00,
+            'cost' => 120.00,
+            'type' => 'physical',
+            'visible' => true,
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'TEST-ADJ-001-M',
+            'price' => 250.00,
+            'cost' => 120.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        $inventory = Inventory::create([
+            'variant_id' => $variant->id,
+            'location' => 'warehouse-1',
+            'quantity' => 20,
+            'reserved' => 0,
+            'type' => 'physical',
+        ]);
+
+        $response = $this->postJson('/api/v1/inventory/adjust', [
+            'sku' => 'TEST-ADJ-001',
+            'type' => 'add',
+            'quantity' => 15,
+            'reason' => 'Entrada rapida de recepcion',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.previous_stock', 20)
+            ->assertJsonPath('data.new_variant_stock', 35)
+            ->assertJsonPath('data.new_local_stock', 35)
+            ->assertJsonPath('data.delta', 15);
+
+        $inventory->refresh();
+        $this->assertEquals(35, $inventory->quantity);
+
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_id' => $inventory->id,
+            'quantity' => 15,
+            'quantity_before' => 20,
+            'quantity_after' => 35,
+            'reason' => 'Entrada rapida de recepcion',
+        ]);
+    }
+
+    public function test_can_adjust_stock_decrease_and_prevent_negative_stock(): void
+    {
+        $product = Product::create([
+            'sku' => 'TEST-ADJ-002',
+            'title' => 'Boxer Test Salida',
+            'slug' => 'boxer-test-salida',
+            'price' => 250.00,
+            'cost' => 120.00,
+            'type' => 'physical',
+            'visible' => true,
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'TEST-ADJ-002-CH',
+            'price' => 250.00,
+            'cost' => 120.00,
+            'attributes' => ['size' => 'CH'],
+        ]);
+
+        $inventory = Inventory::create([
+            'variant_id' => $variant->id,
+            'location' => 'warehouse-1',
+            'quantity' => 10,
+            'reserved' => 2,
+            'type' => 'physical',
+        ]);
+
+        $failResponse = $this->postJson('/api/v1/inventory/adjust', [
+            'sku' => 'TEST-ADJ-002',
+            'type' => 'sub',
+            'quantity' => 9,
+            'reason' => 'Salida excesiva',
+        ]);
+
+        $failResponse->assertStatus(422)
+            ->assertJsonPath('status', 'error');
+
+        $okResponse = $this->postJson('/api/v1/inventory/adjust', [
+            'sku' => 'TEST-ADJ-002',
+            'type' => 'sub',
+            'quantity' => 5,
+            'reason' => 'Merma operativa de empaque',
+        ]);
+
+        $okResponse->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.previous_stock', 10)
+            ->assertJsonPath('data.new_variant_stock', 5)
+            ->assertJsonPath('data.delta', -5);
+
+        $inventory->refresh();
+        $this->assertEquals(5, $inventory->quantity);
+
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_id' => $inventory->id,
+            'quantity' => -5,
+            'quantity_before' => 10,
+            'quantity_after' => 5,
+            'reason' => 'Merma operativa de empaque',
+        ]);
+    }
+
+    public function test_panoramic_modal_update_complete_persists_sizes_and_kardex(): void
+    {
+        $product = Product::create([
+            'sku' => 'TEST-ADJ-003',
+            'title' => 'Boxer Panoramic Modal',
+            'slug' => 'boxer-panoramic-modal',
+            'price' => 300.00,
+            'cost' => 150.00,
+            'type' => 'physical',
+            'visible' => true,
+        ]);
+
+        $variantM = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'TEST-ADJ-003-M',
+            'price' => 300.00,
+            'cost' => 150.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        $invM = Inventory::create([
+            'variant_id' => $variantM->id,
+            'location' => 'warehouse-1',
+            'quantity' => 10,
+            'reserved' => 0,
+            'type' => 'physical',
+        ]);
+
+        $response = $this->putJson('/api/v1/inventory/products/TEST-ADJ-003/update-complete', [
+            'title' => 'Boxer Panoramic Modal Editado',
+            'pvp' => 320.00,
+            'cost' => 150.00,
+            'sizes' => [
+                'm' => 18,
+                'g' => 12,
+            ],
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $invM->refresh();
+        $this->assertEquals(18, $invM->quantity);
+
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_id' => $invM->id,
+            'quantity' => 8,
+            'quantity_before' => 10,
+            'quantity_after' => 18,
+        ]);
+
+        $variantG = ProductVariant::where('product_id', $product->id)
+            ->where('sku', 'TEST-ADJ-003-G')
+            ->first();
+        $this->assertNotNull($variantG);
+
+        $invG = Inventory::where('variant_id', $variantG->id)->first();
+        $this->assertNotNull($invG);
+        $this->assertEquals(12, $invG->quantity);
+    }
 }
 
 
