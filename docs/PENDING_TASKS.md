@@ -112,6 +112,9 @@
 | `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | **Hub 2 (CMS & Tienda Real)** | **Media** | **Planificada** | Hub 4 Categorías & Familias |
 | `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | DataLayer, Meta Graph API |
 | `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | PHPUnit, Core Web Vitals |
+| `TASK-H2-12` | Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Pendiente (Prioridad Inmediata)** | SortableJS, Layout W-Full, Feedback Háptico |
+| `TASK-H2-13` | Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2 | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Pendiente (Prioridad Inmediata)** | Subnav JS, TabPanels, DOM State |
+| `TASK-H2-14` | Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real | **Tienda Pública (Storefront D2C)** | **Alta** | **Pendiente (Prioridad Inmediata)** | `store-pwa.js`, Tarjetas Catálogo, Rutas PDP |
 
 ---
 
@@ -1633,3 +1636,44 @@ graph TD
   - **5. Edición en Línea de Costo Unitario y Prioridad ROP:**
     * Celdas editables en Tree View y Flat View con recálculo dinámico de subtotales, totales de proveedor y prioridad reactiva según quiebre de stock.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [INVENTORY_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/INVENTORY_ROADMAP.md) (Item 18) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md) (Sección 3.4 y 3.4c).
+
+---
+
+### `TASK-H2-12`: Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2)
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Pendiente**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 1):**
+  1. **Layout Estrecho y Desbordado:** El bloque de "Secciones Modulares del Home" se está renderizando constreñido a una columna lateral estrecha (`max-w` insuficiente o jerarquía flex/grid anidada en el contenedor izquierdo), provocando que la tabla se colapse horizontalmente a menos del 25% del ancho de pantalla.
+  2. **Truncamiento de Cabeceras:** La columna de posición se recorta a "POSICI", ocultando el resto de datos clave (Nombre, Tipo, Vitrina, Estado, Acciones) detrás de una barra de desplazamiento horizontal anti-ergonómica.
+  3. **Falta de Reactividad e Interactividad Drag & Drop:** Las filas no ofrecen drag handles intuitivos con cursor de agarre (`grab`/`grabbing`), ni interacción táctil/ratón fluida (SortableJS real con animación de desplazamiento y feedback visual), dependiendo únicamente de botones discretos con flechas.
+* **Solución de UI/UX & Arquitectura Requerida:**
+  - Extraer el gestor de secciones fuera de la columna izquierda y ubicarlo como una sección de **ancho completo (`w-full max-w-7xl mx-auto`)** con separación visual clara y tarjetas volumétricas.
+  - Implementar drag handles dedicados (icono de 6 puntos `dots-six-vertical`) con librería SortableJS nativa inicializada sobre `#sectionsSortableBody`.
+  - Animación de arrastre (`ghostClass`, `chosenClass`), persistencia asíncrona automática debounced al soltar la fila hacia `/admin/tienda-cms/secciones/reorder`, con toast de confirmación instantáneo.
+
+---
+
+### `TASK-H2-13`: Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Pendiente**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulos 2 al 8
+* **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 2):**
+  1. **Pantallas en Blanco al Conmutar:** Al hacer clic en cualquiera de las siguientes 7 pestañas (*2. Banners & Marquesinas*, *3. Reglas Comerciales & Fletes*, *4. Contenido Editorial & Tallas*, *5. Páginas & Navbar*, *6. Revista Digital*, *7. Tracking & Analítica*, *8. Filtros Catálogo*), el área de trabajo se muestra totalmente vacía debajo de las tarjetas de KPIs.
+  2. **Falla en la Alternancia de Estados:** La lógica de conmutación de paneles (`tabPanels`) y las clases de visualización (`hidden` vs `active`) presentan desacople con los estilos CSS del panel o colisionan con escuchas de eventos residuales en el cliente.
+* **Solución de UI/UX & Arquitectura Requerida:**
+  - Auditar la alternancia del DOM asegurando que cada uno de los contenedores (`storeBannersPanel`, `storeShippingPanel`, `storeEditorialPanel`, `storePagesPanel`, `storeMagazinePanel`, `storeTrackingPanel`, `storeFiltersPanel`) mantenga `display: block` cuando está activo y `display: none` cuando está inactivo, sin depender de clases conflictivas de frameworks externos.
+  - Sincronizar el estado del selector en la URL (`?tab=banners`, `?tab=shipping`, etc.) para permitir recargas y persistencia de navegación directa sin pérdida de estado.
+  - Verificar que los componentes internos de cada pestaña (formularios, tablas de banners, simulador de elasticidad, tablas de páginas y revista, inputs de tracking y switches de filtros) se rendericen completos con tipografía y espaciado formal RevOps.
+
+---
+
+### `TASK-H2-14`: Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Pendiente**
+* **Módulo / Hub Destino:** Tienda Pública D2C PWA (`storefront`)
+* **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 3):**
+  1. **Persistencia de Ficha Modal en Desktop:** Al hacer clic sobre cualquier tarjeta de prenda en el catálogo o vitrina pública (ej. *Tanga Licra Azul Rey*), el sistema continúa abriendo una ventana modal superpuesta con backdrop oscuro y botón de cierre (`✕`).
+  2. **Persistencia de Drawer en Móvil:** En viewports móviles, la interacción levanta un bottom sheet deslizable en lugar de transferir la navegación.
+  3. **Desconexión con la Ruta Canónica:** No se ejecuta la redirección nativa hacia la vista a pantalla completa dedicada `/productos/{slug}` ([product-detail.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/store/pwa/product-detail.blade.php)), impidiendo el aprovechamiento de la ergonomía full-screen, SEO de producto y URL compartible.
+* **Solución de UI/UX & Arquitectura Requerida:**
+  - En los scripts del storefront (`store-pwa.js` y plantillas Blade de tarjetas de producto en el home/catálogo), sustituir el disparador `openProductModal(id)` por enlaces `<a href="/productos/${slug}">` directos con navegación estándar.
+  - Eliminar o desacoplar el contenedor modal `#productModal` y drawer `#productDrawer` para visitas directas a productos, asegurando que el flujo de compra inicie siempre desde la PDP a pantalla completa con selector de tallas y sticky bottom bar.
+
