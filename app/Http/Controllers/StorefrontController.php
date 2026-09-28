@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SupplierProduct;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Cart;
 use App\Models\Inventory;
@@ -769,6 +770,53 @@ class StorefrontController extends Controller
                 ];
             })->values();
 
+        $portalOnDemandRequests = OrderItem::query()
+            ->with(['order.user', 'variant.product.supplierProducts.supplier', 'supplier'])
+            ->whereHas('order', function ($q) {
+                $q->whereIn('status', ['pending', 'processing', 'confirmed', 'paid']);
+            })
+            ->whereHas('variant.product', function ($q) {
+                $q->whereIn('type', ['dropship', 'both']);
+            })
+            ->where('fulfillment_status', '!=', 'fulfilled')
+            ->latest()
+            ->limit(30)
+            ->get()
+            ->map(function ($item) {
+                $product = $item->variant?->product;
+                $order = $item->order;
+                $supplier = $item->supplier ?: ($product?->supplierProducts?->first()?->supplier);
+                $customerName = $order?->shipping_address['name'] ?? ($order?->user?->name ?? 'Cliente');
+                $customerPhone = $order?->shipping_address['phone'] ?? ($order?->user?->phone ?? 'S/T');
+                $cartType = ($order?->order_type === 'mixed') ? 'mixto_linea_proveedor' : 'solicitud_pedido';
+                $cartLabel = ($order?->order_type === 'mixed') 
+                    ? "Carrito Mixto #{$order?->order_number} (Linea On-Demand)"
+                    : "Pedido #{$order?->order_number} (Bajo Demanda)";
+
+                $costUnit = (float) ($item->variant?->cost ?? ($product?->cost ?? 0));
+                $qty = (int) $item->quantity;
+
+                return [
+                    'id' => 'REQ-' . ($order?->order_number ?? $item->id),
+                    'order_id' => $order?->id,
+                    'customerName' => $customerName,
+                    'customerPhone' => $customerPhone,
+                    'cartType' => $cartType,
+                    'cartLabel' => $cartLabel,
+                    'sku' => $product?->sku ?? 'SKU-N/A',
+                    'productName' => $product?->title ?? 'Producto Bajo Demanda',
+                    'size' => $item->variant?->attributes['size'] ?? ($item->variant?->attributes['volume'] ?? 'M'),
+                    'qty' => $qty,
+                    'supplier' => $supplier?->name ?? 'Torzo B2B',
+                    'costUnit' => $costUnit,
+                    'totalCost' => round($qty * $costUnit, 2),
+                    'slaMinutes' => 60,
+                    'verificationStatus' => 'pendiente',
+                    'paymentSent' => false,
+                    'date' => $item->created_at ? $item->created_at->diffForHumans() : 'Reciente',
+                ];
+            })->values();
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -784,6 +832,7 @@ class StorefrontController extends Controller
             'portalCreditAgreements' => $portalCreditAgreements,
             'portalProductBundles' => $portalProductBundles,
             'portalCycleCounts' => $portalCycleCounts,
+            'portalOnDemandRequests' => $portalOnDemandRequests,
             'portalSizeCurves' => $portalSizeCurves,
             'portalFragranceVolumes' => $portalFragranceVolumes,
             'portalCategories' => $portalCategories,

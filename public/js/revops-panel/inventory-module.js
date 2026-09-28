@@ -4265,6 +4265,9 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverCategories) && window.serverCategories.length > 0) {
                 this.categoriesTree = window.serverCategories;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverOnDemandRequests) && window.serverOnDemandRequests.length > 0) {
+                this.customerOnDemandRequests = window.serverOnDemandRequests;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
@@ -5432,7 +5435,9 @@ function hybridInventoryModule() {
         ],
 
         // BANDEJA ON-DEMAND: Solicitudes originadas en Carritos Bajo Pedido y Mixtos
-        customerOnDemandRequests: [
+        customerOnDemandRequests: (typeof window !== 'undefined' && Array.isArray(window.serverOnDemandRequests) && window.serverOnDemandRequests.length > 0)
+            ? window.serverOnDemandRequests
+            : [
             {
                 id: 'REQ-2026-081',
                 customerName: 'Carlos Mendoza',
@@ -8661,7 +8666,7 @@ function hybridInventoryModule() {
             return Math.max(0, m).toFixed(1);
         },
 
-        saveNewProduct() {
+        async saveNewProduct() {
             if (!this.newProduct.sku || !this.newProduct.sku.trim() || !this.newProduct.name || !this.newProduct.name.trim()) {
                 this.showToast('Por favor completa el codigo SKU y el nombre del producto.', 'warning');
                 return;
@@ -8685,6 +8690,41 @@ function hybridInventoryModule() {
             const pvp = parseFloat(this.newProduct.pvp) || 0;
             const cost = parseFloat(this.newProduct.cost) || 0;
             const weightedAverageCost = parseFloat(this.newProduct.weightedAverageCost) || cost;
+
+            const payload = {
+                sku: cleanSku,
+                name: this.newProduct.name.trim(),
+                title: this.newProduct.name.trim(),
+                category: this.newProduct.category,
+                subcategory: this.newProduct.subcategory || '',
+                type: this.newProduct.type,
+                brand: this.newProduct.brand || 'ModaIntima Textil MX',
+                location: this.newProduct.location || 'A-02-B',
+                pvp: pvp,
+                regular_price: parseFloat(this.newProduct.regularPrice) || pvp,
+                discount_pct: parseFloat(this.newProduct.discountPct) || 0,
+                cost: cost,
+                weighted_average_cost: weightedAverageCost,
+                fabric_type: this.newProduct.fabricType || '',
+                color_name: this.newProduct.colorName || '',
+                color_hex: this.newProduct.colorHex || '#0f172a',
+                color_type: this.newProduct.colorType || 'solid',
+                design_type: this.newProduct.designType || 'sin_diseno',
+                website_section: this.newProduct.websiteSection || 'basicos',
+                is_published: !!this.newProduct.isPublished,
+                description: this.newProduct.description || '',
+                bullet_points: Array.isArray(this.newProduct.bulletPoints) ? [...this.newProduct.bulletPoints] : [],
+                seo_tags: Array.isArray(this.newProduct.seoTags) ? [...this.newProduct.seoTags] : [],
+                sizes: (this.newProduct.variantDimension === 'size') ? { ...this.newProduct.sizes } : undefined,
+                shades: (this.newProduct.variantDimension === 'shade') ? { ...this.newProduct.shades } : undefined,
+                volumes: (this.newProduct.variantDimension === 'volume') ? { ...this.newProduct.volumes } : undefined,
+                requires_sanitary_control: !!this.newProduct.requiresSanitaryControl,
+                batch_number: this.newProduct.batchNumber || null,
+                expiration_date: this.newProduct.expirationDate || null,
+                pao_months: parseInt(this.newProduct.paoMonths) || 12,
+                provider: this.newProduct.provider || 'Torzo B2B',
+                provider_url: this.newProduct.providerUrl || '',
+            };
 
             const createdItem = {
                 sku: cleanSku,
@@ -8715,9 +8755,33 @@ function hybridInventoryModule() {
                 isScraping: false
             };
 
-            this.products.unshift(createdItem);
-            this.newProductDrawerOpen = false;
-            this.showToast('Producto ' + createdItem.sku + ' agregado exitosamente al catalogo.', 'success');
+            try {
+                const response = await fetch('/api/v1/inventory/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const resData = await response.json();
+                if (response.ok && resData.status === 'success') {
+                    if (resData.data?.id) {
+                        createdItem.id = resData.data.id;
+                    }
+                    this.products.unshift(createdItem);
+                    this.newProductDrawerOpen = false;
+                    this.showToast('Producto ' + createdItem.sku + ' creado y persistido exitosamente en el catalogo.', 'success');
+                } else {
+                    this.showToast(resData.message || 'Error al persistir el nuevo producto.', 'error');
+                }
+            } catch (err) {
+                console.error('Error creando producto:', err);
+                this.products.unshift(createdItem);
+                this.newProductDrawerOpen = false;
+                this.showToast('Producto ' + createdItem.sku + ' registrado localmente.', 'info');
+            }
         },
 
         sidebarWasExpanded: false,

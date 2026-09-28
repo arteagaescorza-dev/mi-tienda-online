@@ -55,6 +55,7 @@
         window.serverSizeCurves = @json($portalSizeCurves ?? []);
         window.serverFragranceVolumes = @json($portalFragranceVolumes ?? []);
         window.serverCategories = @json($portalCategories ?? []);
+        window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
     </script>
 
     <!-- ========================================================================= -->
@@ -3998,8 +3999,9 @@
     <!-- (TASK-INV-15: Auto-SKU, Detección de Duplicados & Copiloto IA)     -->
     <!-- ================================================================= -->
     <div 
+        id="newProductPanoramicModal"
         x-show="newProductDrawerOpen" 
-        class="fixed inset-0 z-[70] overflow-hidden" 
+        class="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 overflow-y-auto" 
         style="z-index: 70; display: none;"
         aria-labelledby="new-product-title" 
         role="dialog" 
@@ -4016,20 +4018,20 @@
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             @click="closeCreateProductDrawer()"
-            class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity cursor-pointer"
+            class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity cursor-pointer"
         ></div>
 
-        <div class="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
-            <div 
-                x-show="newProductDrawerOpen"
-                x-transition:enter="transform transition ease-out duration-300"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition ease-in duration-200"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                class="w-screen max-w-6xl xl:max-w-7xl 2xl:max-w-[1550px] bg-slate-50 shadow-2xl border-l border-slate-200 flex flex-col justify-between h-full"
-            >
+        <!-- Contenedor Panoramico Centrado max-w-7xl / 95vw -->
+        <div 
+            x-show="newProductDrawerOpen"
+            x-transition:enter="transform transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transform transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="relative w-full max-w-7xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-10"
+        >
                 <!-- Header de la Workstation -->
                 <div class="p-5 border-b border-slate-200 bg-white shadow-2xs">
                     <div class="flex items-center justify-between">
@@ -4740,7 +4742,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- ================================================================= -->
     <!-- MODAL DE RESOLUCIÓN DE DUPLICADOS EN CATÁLOGO (TASK-INV-15)       -->

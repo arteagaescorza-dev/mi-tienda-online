@@ -21,6 +21,8 @@ use App\Models\ShiftLog;
 use App\Models\WarehouseRampEntry;
 use App\Models\VendorBill;
 use App\Models\ThreeWayMatching;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -1377,6 +1379,151 @@ class InventoryHub4ModuleTest extends TestCase
             'spei_payout_blocked' => true,
             'warehouse_received_qty' => 5,
         ]);
+    }
+
+    public function test_can_store_new_product_with_variants_and_initial_inventory(): void
+    {
+        $payload = [
+            'sku' => 'TEST-NEW-SKU-01',
+            'name' => 'Boxer Microfibra Alta Gama',
+            'category' => 'Boxers',
+            'type' => 'propio',
+            'pvp' => 350.00,
+            'cost' => 120.00,
+            'weighted_average_cost' => 120.00,
+            'sizes' => [
+                'ch' => 5,
+                'm' => 10,
+                'g' => 8,
+            ],
+            'fabric_type' => 'Microfibra Dry',
+            'color_name' => 'Azul Marino',
+            'location' => 'B-02-C',
+        ];
+
+        $response = $this->postJson('/api/v1/inventory/products', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.sku', 'TEST-NEW-SKU-01')
+            ->assertJsonPath('data.local_stock', 23);
+
+        $this->assertDatabaseHas('products', [
+            'sku' => 'TEST-NEW-SKU-01',
+            'title' => 'Boxer Microfibra Alta Gama',
+            'type' => 'physical',
+            'price' => 350.00,
+            'cost' => 120.00,
+        ]);
+
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => 'TEST-NEW-SKU-01-CH',
+            'price' => 350.00,
+        ]);
+
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => 'TEST-NEW-SKU-01-M',
+            'price' => 350.00,
+        ]);
+
+        $this->assertDatabaseHas('inventory_movements', [
+            'quantity' => 10,
+            'quantity_before' => 0,
+            'quantity_after' => 10,
+        ]);
+    }
+
+    public function test_store_product_validates_unique_sku_and_required_fields(): void
+    {
+        Product::create([
+            'sku' => 'DUPLICATE-SKU-01',
+            'title' => 'Producto Existente',
+            'slug' => 'producto-existente',
+            'price' => 199.00,
+            'cost' => 50.00,
+        ]);
+
+        // Intento con SKU duplicado
+        $responseDuplicate = $this->postJson('/api/v1/inventory/products', [
+            'sku' => 'DUPLICATE-SKU-01',
+            'name' => 'Otro Producto',
+            'pvp' => 200.00,
+            'cost' => 60.00,
+        ]);
+
+        $responseDuplicate->assertStatus(422)
+            ->assertJsonValidationErrors(['sku']);
+
+        // Intento sin campos requeridos
+        $responseMissing = $this->postJson('/api/v1/inventory/products', []);
+        $responseMissing->assertStatus(422)
+            ->assertJsonValidationErrors(['sku', 'pvp', 'cost']);
+    }
+
+    public function test_portal_inventory_loads_real_on_demand_requests_from_orders(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Proveedor OnDemand Express',
+            'type' => 'wholesale',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'DRP-SHIRT-001',
+            'title' => 'Camisa Lino Cuello Mao',
+            'slug' => 'camisa-lino-cuello-mao',
+            'price' => 699.00,
+            'cost' => 280.00,
+            'type' => 'dropship',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'DRP-SHIRT-001-M',
+            'price' => 699.00,
+            'cost' => 280.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        $user = User::factory()->create([
+            'name' => 'Alejandro Valdes',
+            'email' => 'alejandro@example.com',
+        ]);
+
+        $order = Order::create([
+            'order_number' => 'ORD-ONDEMAND-901',
+            'user_id' => $user->id,
+            'status' => 'processing',
+            'order_type' => 'mixed',
+            'total' => 1400.00,
+            'shipping_address' => [
+                'name' => 'Alejandro Valdes',
+                'phone' => '+52 55 9988 7766',
+            ],
+        ]);
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'variant_id' => $variant->id,
+            'quantity' => 2,
+            'unit_price' => 699.00,
+            'line_total' => 1398.00,
+            'supplier_id' => $supplier->id,
+            'fulfillment_status' => 'waiting',
+        ]);
+
+        $portalUser = User::factory()->create(['role' => 'portal']);
+        $response = $this->actingAs($portalUser)->get(route('portal.inventory'));
+
+        $response->assertOk();
+        $portalOnDemand = $response->viewData('portalOnDemandRequests');
+        $this->assertNotEmpty($portalOnDemand);
+
+        $firstReq = collect($portalOnDemand)->firstWhere('sku', 'DRP-SHIRT-001');
+        $this->assertNotNull($firstReq);
+        $this->assertEquals('Alejandro Valdes', $firstReq['customerName']);
+        $this->assertEquals(2, $firstReq['qty']);
+        $this->assertEquals(280.00, $firstReq['costUnit']);
+        $this->assertEquals(560.00, $firstReq['totalCost']);
     }
 }
 

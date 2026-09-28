@@ -207,6 +207,170 @@ class ProductSkuAndDuplicateApiController extends Controller
     }
 
     /**
+     * Da de alta un nuevo producto comercial en el catalogo con sus variantes e inventario fisico inicial (TASK-INV-15 / SLICE 6).
+     */
+    public function storeProduct(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'sku' => 'required|string|max:100|unique:products,sku',
+            'title' => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'brand' => 'nullable|string|max:100',
+            'category' => 'nullable|string|max:100',
+            'subcategory' => 'nullable|string|max:100',
+            'type' => 'nullable|string|in:propio,physical,dropship,both',
+            'pvp' => 'required|numeric|min:0',
+            'regular_price' => 'nullable|numeric|min:0',
+            'discount_pct' => 'nullable|numeric|min:0|max:100',
+            'cost' => 'required|numeric|min:0',
+            'weighted_average_cost' => 'nullable|numeric|min:0',
+            'sizes' => 'nullable|array',
+            'shades' => 'nullable|array',
+            'volumes' => 'nullable|array',
+            'location' => 'nullable|string|max:100',
+            'fabric_type' => 'nullable|string|max:100',
+            'color_name' => 'nullable|string|max:100',
+            'color_hex' => 'nullable|string|max:20',
+            'color_type' => 'nullable|string|max:50',
+            'design_type' => 'nullable|string|max:50',
+            'website_section' => 'nullable|string|max:50',
+            'is_published' => 'nullable|boolean',
+            'description' => 'nullable|string',
+            'bullet_points' => 'nullable|array',
+            'seo_tags' => 'nullable|array',
+            'requires_sanitary_control' => 'nullable|boolean',
+            'batch_number' => 'nullable|string|max:100',
+            'expiration_date' => 'nullable|string|max:50',
+            'pao_months' => 'nullable|integer|min:0',
+            'provider' => 'nullable|string|max:100',
+            'provider_url' => 'nullable|string|max:255',
+        ]);
+
+        $cleanSku = trim(strtoupper($validated['sku']));
+        $title = $validated['title'] ?? ($validated['name'] ?? 'Nuevo Producto');
+        $rawType = $validated['type'] ?? 'physical';
+        $dbType = ($rawType === 'propio') ? 'physical' : $rawType;
+
+        $pvp = (float) $validated['pvp'];
+        $cost = (float) $validated['cost'];
+        $discountPct = (float) ($validated['discount_pct'] ?? 0);
+        $regularPrice = (float) ($validated['regular_price'] ?? $pvp);
+        $effectivePrice = $discountPct > 0 ? round($pvp * (1 - ($discountPct / 100)), 2) : $pvp;
+        $cpp = isset($validated['weighted_average_cost']) ? (float) $validated['weighted_average_cost'] : $cost;
+        $marginPct = $effectivePrice > 0 ? round((($effectivePrice - $cpp) / $effectivePrice) * 100, 1) : 0.0;
+
+        $sizes = $validated['sizes'] ?? [];
+        $localStock = ($dbType === 'physical' || $dbType === 'both') ? array_sum(array_map('intval', $sizes)) : 0;
+
+        $meta = [
+            'category' => $validated['category'] ?? 'General',
+            'subcategory' => $validated['subcategory'] ?? '',
+            'regular_price' => $regularPrice,
+            'discount_pct' => $discountPct,
+            'effective_price' => $effectivePrice,
+            'weighted_average_cost' => $cpp,
+            'sizes' => $sizes,
+            'shades' => $validated['shades'] ?? [],
+            'volumes' => $validated['volumes'] ?? [],
+            'local_stock' => $localStock,
+            'location' => $validated['location'] ?? 'A-01-A',
+            'fabric_type' => $validated['fabric_type'] ?? '',
+            'color_name' => $validated['color_name'] ?? '',
+            'color_hex' => $validated['color_hex'] ?? '#0f172a',
+            'color_type' => $validated['color_type'] ?? 'solid',
+            'design_type' => $validated['design_type'] ?? 'sin_diseno',
+            'website_section' => $validated['website_section'] ?? 'basicos',
+            'bullet_points' => $validated['bullet_points'] ?? [],
+            'seo_tags' => $validated['seo_tags'] ?? [],
+            'requires_sanitary_control' => (bool) ($validated['requires_sanitary_control'] ?? false),
+            'batch_number' => $validated['batch_number'] ?? null,
+            'expiration_date' => $validated['expiration_date'] ?? null,
+            'pao_months' => $validated['pao_months'] ?? 12,
+            'provider' => $validated['provider'] ?? 'ModaIntima Textil MX',
+            'provider_url' => $validated['provider_url'] ?? '',
+        ];
+
+        return DB::transaction(function () use ($cleanSku, $title, $validated, $pvp, $cost, $dbType, $meta, $effectivePrice, $localStock, $marginPct, $sizes) {
+            $product = Product::create([
+                'sku' => $cleanSku,
+                'title' => $title,
+                'slug' => Str::slug($title) . '-' . strtolower($cleanSku),
+                'brand' => $validated['brand'] ?? 'Generico',
+                'price' => $pvp,
+                'cost' => $cost,
+                'type' => $dbType,
+                'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : true,
+                'description' => $validated['description'] ?? '',
+                'meta' => $meta,
+            ]);
+
+            if (!empty($sizes) && is_array($sizes)) {
+                foreach ($sizes as $szKey => $qty) {
+                    $cleanSz = strtolower(trim((string) $szKey));
+                    $targetQty = max(0, (int) $qty);
+
+                    $variant = ProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku' => $product->sku . '-' . strtoupper($cleanSz),
+                        'price' => $pvp,
+                        'cost' => $cost,
+                        'attributes' => ['size' => strtoupper($cleanSz)],
+                    ]);
+
+                    $inv = Inventory::create([
+                        'variant_id' => $variant->id,
+                        'location' => $validated['location'] ?? 'warehouse-1',
+                        'quantity' => $targetQty,
+                        'reserved' => 0,
+                        'type' => 'physical',
+                    ]);
+
+                    if ($targetQty > 0) {
+                        InventoryMovement::create([
+                            'inventory_id' => $inv->id,
+                            'user_id' => auth()->id(),
+                            'quantity' => $targetQty,
+                            'quantity_before' => 0,
+                            'quantity_after' => $targetQty,
+                            'reason' => "Alta de catalogo inicial para SKU {$product->sku} talla {$cleanSz}",
+                        ]);
+                    }
+                }
+            } else {
+                $variant = ProductVariant::create([
+                    'product_id' => $product->id,
+                    'sku' => $product->sku . '-STD',
+                    'price' => $pvp,
+                    'cost' => $cost,
+                    'attributes' => ['size' => 'STD'],
+                ]);
+
+                Inventory::create([
+                    'variant_id' => $variant->id,
+                    'location' => $validated['location'] ?? 'warehouse-1',
+                    'quantity' => 0,
+                    'reserved' => 0,
+                    'type' => 'physical',
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Producto {$cleanSku} creado exitosamente en el catalogo.",
+                'data' => [
+                    'id' => $product->id,
+                    'sku' => $product->sku,
+                    'title' => $product->title,
+                    'effective_price' => $effectivePrice,
+                    'local_stock' => $localStock,
+                    'margin_pct' => $marginPct,
+                    'created_at' => $product->created_at->toIso8601String(),
+                ],
+            ], 201);
+        });
+    }
+
+    /**
      * Actualiza integralmente los datos comerciales, existencias y costos de un SKU (TASK-INV-18).
      */
     public function updateComplete(Request $request, string $sku): JsonResponse
