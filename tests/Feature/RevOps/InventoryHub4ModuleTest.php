@@ -16,6 +16,11 @@ use App\Models\SupplierCreditAgreement;
 use App\Models\User;
 use App\Models\CycleCount;
 use App\Models\InventoryMovement;
+use App\Models\OperationalTask;
+use App\Models\ShiftLog;
+use App\Models\WarehouseRampEntry;
+use App\Models\VendorBill;
+use App\Models\ThreeWayMatching;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -1063,6 +1068,317 @@ class InventoryHub4ModuleTest extends TestCase
             'supplier_id' => $supplier->id,
         ]);
     }
+
+    public function test_inbound_receipt_completes_hub1_operational_task_and_creates_shift_log(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Proveedor Textil Central',
+            'type' => 'wholesale',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'TSHIRT-PIMA-001',
+            'title' => 'Playera Pima Blanco',
+            'slug' => 'playera-pima-blanco',
+            'price' => 299.00,
+            'cost' => 100.00,
+            'type' => 'dropship',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'TSHIRT-PIMA-001-M',
+            'price' => 299.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-HUB1-2026-001',
+            'supplier_id' => $supplier->id,
+            'status' => 'confirmed',
+            'total_units' => 10,
+            'subtotal' => 1000.00,
+            'tax' => 160.00,
+            'total_amount' => 1160.00,
+        ]);
+
+        $poItem = PurchaseOrderItem::create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'size_name' => 'M',
+            'quantity_ordered' => 10,
+            'quantity_received' => 0,
+            'unit_cost' => 100.00,
+            'total_cost' => 1000.00,
+        ]);
+
+        // Simular tarea creada por despacho previo en Hub 1
+        $task = OperationalTask::create([
+            'title' => 'Recepcion Inbound en Rampa: PO-HUB1-2026-001 (10 uds)',
+            'category' => 'almacen',
+            'priority' => 'high',
+            'assigned_role' => 'warehouse',
+            'status' => 'pending',
+            'reference_code' => $po->po_number,
+            'action_payload' => [
+                'purchase_order_id' => $po->id,
+                'po_number' => $po->po_number,
+            ],
+        ]);
+
+        $response = $this->postJson("/api/v1/inventory/purchases/orders/{$po->id}/receive", [
+            'items' => [$poItem->id => 10],
+            'notes' => 'Conteo fisico conforme en rampa',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', 'received')
+            ->assertJsonPath('units_received', 10);
+
+        // Verificar que la tarea de Hub 1 se completo
+        $task->refresh();
+        $this->assertEquals('completed', $task->status);
+        $this->assertNotNull($task->completed_at);
+
+        // Verificar registro en Bitacora de Turno (ShiftLog)
+        $this->assertDatabaseHas('shift_logs', [
+            'operational_task_id' => $task->id,
+            'event_type' => 'inbound_received',
+        ]);
+    }
+
+    public function test_inbound_receipt_releases_hub6_dock_ramp_entry(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Laboratorio Cosmetico B2B',
+            'type' => 'wholesale',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'SERUM-VIT-C-01',
+            'title' => 'Serum Vitamina C 30ml',
+            'slug' => 'serum-vitamina-c-30ml',
+            'price' => 450.00,
+            'cost' => 150.00,
+            'type' => 'physical',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'SERUM-VIT-C-01-STD',
+            'price' => 450.00,
+            'attributes' => ['volume' => '30ml'],
+        ]);
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-HUB6-7788',
+            'supplier_id' => $supplier->id,
+            'status' => 'in_transit',
+            'carrier' => 'Paquetexpress',
+            'tracking_number' => 'PEX-99887766',
+            'total_units' => 15,
+            'subtotal' => 2250.00,
+            'tax' => 360.00,
+            'total_amount' => 2610.00,
+        ]);
+
+        $poItem = PurchaseOrderItem::create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'size_name' => '30ml',
+            'quantity_ordered' => 15,
+            'quantity_received' => 0,
+            'unit_cost' => 150.00,
+            'total_cost' => 2250.00,
+        ]);
+
+        // Simular entrada en rampa de Hub 6
+        $rampEntry = WarehouseRampEntry::create([
+            'entry_folio' => 'RAMP-POHUB67788-001',
+            'carrier_or_supplier' => 'Paquetexpress / Laboratorio Cosmetico B2B',
+            'driver_name' => 'Juan Chofer',
+            'status' => 'in_dock',
+            'packages_received_count' => 0,
+            'docked_at' => now()->subHour(),
+        ]);
+
+        $response = $this->postJson("/api/v1/inventory/purchases/orders/{$po->id}/receive", [
+            'items' => [$poItem->id => 15],
+            'notes' => 'Descarga completa en muelle',
+            'batch_number' => 'LOTE-2026-C1',
+            'expiration_date' => '2028-12-31',
+            'pao_months' => 12,
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        // Verificar liberacion de rampa en Hub 6
+        $rampEntry->refresh();
+        $this->assertEquals('unloaded', $rampEntry->status);
+        $this->assertNotNull($rampEntry->cleared_at);
+        $this->assertEquals(15, $rampEntry->packages_received_count);
+    }
+
+    public function test_inbound_receipt_generates_hub5_vendor_bill_and_three_way_matching(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Taller de Confeccion Guadalajara',
+            'type' => 'wholesale',
+            'payment_terms' => 'credito_30',
+            'credentials' => [
+                'bank_name' => 'BBVA Bancomer',
+                'bank_clabe' => '012180001234567890',
+            ],
+        ]);
+
+        $product = Product::create([
+            'sku' => 'PANT-CHINO-001',
+            'title' => 'Pantalon Chino Beige',
+            'slug' => 'pantalon-chino-beige',
+            'price' => 599.00,
+            'cost' => 200.00,
+            'type' => 'physical',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'PANT-CHINO-001-32',
+            'price' => 599.00,
+            'attributes' => ['size' => '32'],
+        ]);
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-HUB5-3322',
+            'supplier_id' => $supplier->id,
+            'status' => 'confirmed',
+            'total_units' => 8,
+            'subtotal' => 1600.00,
+            'tax' => 256.00,
+            'total_amount' => 1856.00,
+            'credit_deduction_amount' => 100.00, // NC previa aplicada
+        ]);
+
+        $poItem = PurchaseOrderItem::create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'size_name' => '32',
+            'quantity_ordered' => 8,
+            'quantity_received' => 0,
+            'unit_cost' => 200.00,
+            'total_cost' => 1600.00,
+        ]);
+
+        $response = $this->postJson("/api/v1/inventory/purchases/orders/{$po->id}/receive", [
+            'items' => [$poItem->id => 8],
+            'notes' => 'Recepcion integral con nota de credito aplicada',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        // 1600 cost + 256 tax = 1856 - 100 NC = 1756 neto
+        $this->assertDatabaseHas('vendor_bills', [
+            'supplier_id' => $supplier->id,
+            'vendor_name' => 'Taller de Confeccion Guadalajara',
+            'amount' => 1756.00,
+            'status' => 'pending',
+            'is_spei_blocked' => false,
+        ]);
+
+        // Verificar 3-way matching en Hub 5
+        $this->assertDatabaseHas('three_way_matchings', [
+            'po_code' => 'PO-HUB5-3322',
+            'match_status' => 'matched',
+            'spei_payout_blocked' => false,
+            'warehouse_received_qty' => 8,
+            'payable_net_amount' => 1756.00,
+        ]);
+    }
+
+    public function test_inbound_partial_receipt_marks_task_in_progress_and_discrepancy_held(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Fabrica Calzado Leon',
+            'type' => 'wholesale',
+            'payment_terms' => 'contado',
+        ]);
+
+        $product = Product::create([
+            'sku' => 'SHOES-OXFORD-01',
+            'title' => 'Zapatos Oxford Cuero Cafe',
+            'slug' => 'zapatos-oxford-cuero-cafe',
+            'price' => 1299.00,
+            'cost' => 600.00,
+            'type' => 'physical',
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'SHOES-OXFORD-01-27',
+            'price' => 1299.00,
+            'attributes' => ['size' => '27'],
+        ]);
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-PARTIAL-5544',
+            'supplier_id' => $supplier->id,
+            'status' => 'confirmed',
+            'total_units' => 20,
+            'subtotal' => 12000.00,
+            'tax' => 1920.00,
+            'total_amount' => 13920.00,
+        ]);
+
+        $poItem = PurchaseOrderItem::create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'size_name' => '27',
+            'quantity_ordered' => 20,
+            'quantity_received' => 0,
+            'unit_cost' => 600.00,
+            'total_cost' => 12000.00,
+        ]);
+
+        $task = OperationalTask::create([
+            'title' => 'Recepcion Inbound: PO-PARTIAL-5544 (20 uds)',
+            'category' => 'almacen',
+            'priority' => 'normal',
+            'assigned_role' => 'warehouse',
+            'status' => 'pending',
+            'reference_code' => $po->po_number,
+        ]);
+
+        // Recepcion parcial: solo 5 de 20
+        $response = $this->postJson("/api/v1/inventory/purchases/orders/{$po->id}/receive", [
+            'items' => [$poItem->id => 5],
+            'notes' => 'Arribo parcial: proveedor dividio envio',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', 'partially_received')
+            ->assertJsonPath('units_received', 5);
+
+        // Tarea debe estar in_progress en Hub 1, no completed
+        $task->refresh();
+        $this->assertEquals('in_progress', $task->status);
+        $this->assertNull($task->completed_at);
+
+        // 3-Way matching debe retener SPEI por recepcion parcial
+        $this->assertDatabaseHas('three_way_matchings', [
+            'po_code' => 'PO-PARTIAL-5544',
+            'match_status' => 'discrepancy_held',
+            'spei_payout_blocked' => true,
+            'warehouse_received_qty' => 5,
+        ]);
+    }
 }
+
 
 
