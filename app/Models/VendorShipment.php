@@ -18,4 +18,14 @@ class VendorShipment extends Model
         'dispatched_at'     => 'datetime',
         'delivered_at'      => 'datetime',
     ];
+
+    public function purchaseOrder()
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'po_id');
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
 }

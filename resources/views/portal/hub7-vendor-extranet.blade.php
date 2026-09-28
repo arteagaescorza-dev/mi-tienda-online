@@ -251,6 +251,23 @@
                                         >
                                             Confirmar
                                         </button>
+                                        {{-- BOTON DESPACHAR / REMISION --}}
+                                        <button 
+                                            type="button" 
+                                            x-show="order.status === 'confirmed' || order.status === 'sent'" 
+                                            @click="openDispatchModal(order)" 
+                                            class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[11px] transition-colors cursor-pointer"
+                                            title="Registrar remision y aviso de despacho a bodega"
+                                        >
+                                            Despachar
+                                        </button>
+                                        <span 
+                                            x-show="order.status === 'in_transit'" 
+                                            class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-bold text-[10px]"
+                                            title="Envio en ruta a bodega central"
+                                        >
+                                            En Ruta
+                                        </span>
                                         {{-- BOTON IMPRIMIR / PDF --}}
                                         <a 
                                             :href="'/admin/extranet/proveedores/ordenes/' + order.id + '/imprimir'" 
@@ -481,6 +498,175 @@
         </div>
     </div>
 
+    {{-- MODAL A PANTALLA COMPLETA: REGISTRO DE REMISIÓN / DESPACHO FLETERO (TASK-INT-20) --}}
+    <div 
+        x-show="isDispatchModalOpen" 
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex flex-col bg-slate-900/80 backdrop-blur-md overflow-y-auto p-4 sm:p-6"
+        style="display: none;"
+    >
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-3xl w-full mx-auto my-auto flex flex-col overflow-hidden">
+            {{-- HEADER DEL MODAL --}}
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span class="px-2 py-0.5 text-xs font-bold rounded-md bg-indigo-500 text-white">AVISO DE EMBARQUE</span>
+                    <h3 class="text-base font-bold" x-text="dispatchOrderData ? ('Despachar ' + dispatchOrderData.po_number) : ''"></h3>
+                </div>
+                <button 
+                    type="button" 
+                    @click="isDispatchModalOpen = false" 
+                    class="text-slate-400 hover:text-white transition-colors cursor-pointer text-xl font-bold"
+                >
+                    &times;
+                </button>
+            </div>
+
+            {{-- FORMULARIO DE DESPACHO --}}
+            <form @submit.prevent="submitDispatch()" class="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
+                    <span class="font-bold block mb-1">Sincronizacion Automatica con Rampa de Bodega:</span>
+                    Este registro notificara inmediatamente a la rampa de recepcion en Hub 4 y asignara una tarea operativa al jefe de almacen para preparar la descarga.
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <label for="carrierNameInput" class="font-bold text-slate-700 block mb-1">Empresa Fletera / Transportista: *</label>
+                        <input 
+                            id="carrierNameInput"
+                            type="text" 
+                            x-model="dispatchForm.carrier_name" 
+                            list="carrierOptions"
+                            placeholder="Ej. Transportes Castores, Tres Guerras, DHL..." 
+                            required 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        >
+                        <datalist id="carrierOptions">
+                            <option value="Transportes Castores">
+                            <option value="Transportes Tres Guerras">
+                            <option value="Paquetexpress">
+                            <option value="Fletera Propia / Chofer Local">
+                            <option value="DHL Express Mexico">
+                            <option value="Estafeta Carga">
+                            <option value="FedEx Freight">
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label for="trackingNumberInput" class="font-bold text-slate-700 block mb-1">Numero de Guia Fletera / Rastreo: *</label>
+                        <input 
+                            id="trackingNumberInput"
+                            type="text" 
+                            x-model="dispatchForm.tracking_number" 
+                            placeholder="Ej. CAS-88492019-MX" 
+                            required 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="remissionNumberInput" class="font-bold text-slate-700 block mb-1">Folio de Remision Interna del Taller:</label>
+                        <input 
+                            id="remissionNumberInput"
+                            type="text" 
+                            x-model="dispatchForm.remission_number" 
+                            placeholder="Ej. REM-2026-094" 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="packagesCountInput" class="font-bold text-slate-700 block mb-1">Cantidad de Bultos / Cajas: *</label>
+                        <input 
+                            id="packagesCountInput"
+                            type="number" 
+                            min="1" 
+                            x-model.number="dispatchForm.packages_count" 
+                            required 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-bold"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="dispatchedUnitsInput" class="font-bold text-slate-700 block mb-1">Piezas / Prendas Despachadas:</label>
+                        <input 
+                            id="dispatchedUnitsInput"
+                            type="number" 
+                            min="1" 
+                            x-model.number="dispatchForm.dispatched_units" 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-bold"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="estimatedArrivalInput" class="font-bold text-slate-700 block mb-1">Fecha Estimada de Llegada a Rampa:</label>
+                        <input 
+                            id="estimatedArrivalInput"
+                            type="date" 
+                            x-model="dispatchForm.estimated_arrival_date" 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="driverNameInput" class="font-bold text-slate-700 block mb-1">Nombre del Operador / Conductor:</label>
+                        <input 
+                            id="driverNameInput"
+                            type="text" 
+                            x-model="dispatchForm.driver_name" 
+                            placeholder="Opcional" 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="licensePlateInput" class="font-bold text-slate-700 block mb-1">Placas del Vehiculo:</label>
+                        <input 
+                            id="licensePlateInput"
+                            type="text" 
+                            x-model="dispatchForm.license_plate" 
+                            placeholder="Opcional" 
+                            class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono uppercase"
+                        >
+                    </div>
+                </div>
+
+                <div class="text-xs">
+                    <label for="dispatchNotesInput" class="font-bold text-slate-700 block mb-1">Instrucciones Especiales / Notas para Almacen:</label>
+                    <textarea 
+                        id="dispatchNotesInput"
+                        x-model="dispatchForm.notes" 
+                        rows="2" 
+                        placeholder="Ej. Cajas rotuladas con lote 26-B. Requiere patin hidraulico para descarga."
+                        class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                    ></textarea>
+                </div>
+
+                {{-- FOOTER DEL MODAL FORMULARIO --}}
+                <div class="pt-4 border-t border-slate-200 flex items-center justify-between">
+                    <button 
+                        type="button" 
+                        @click="isDispatchModalOpen = false" 
+                        class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit" 
+                        :disabled="isSubmittingDispatch" 
+                        class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                        <span x-text="isSubmittingDispatch ? 'Registrando Despacho...' : 'Confirmar Despacho & Notificar a Rampa'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -493,6 +679,22 @@ function vendorExtranetApp(config) {
         statusFilter: 'all',
         selectedOrder: null,
         isDetailModalOpen: false,
+
+        // Estado para modal de despacho fletero
+        isDispatchModalOpen: false,
+        dispatchOrderData: null,
+        isSubmittingDispatch: false,
+        dispatchForm: {
+            carrier_name: '',
+            tracking_number: '',
+            remission_number: '',
+            packages_count: 1,
+            dispatched_units: 0,
+            driver_name: '',
+            license_plate: '',
+            estimated_arrival_date: '',
+            notes: ''
+        },
 
         init() {
             // Asegurar sidebar contraido por defecto (regla de interfaz)
@@ -514,6 +716,57 @@ function vendorExtranetApp(config) {
         openOrderDetail(order) {
             this.selectedOrder = order;
             this.isDetailModalOpen = true;
+        },
+
+        openDispatchModal(order) {
+            this.dispatchOrderData = order;
+            this.dispatchForm = {
+                carrier_name: '',
+                tracking_number: '',
+                remission_number: 'REM-' + new Date().getFullYear() + '-' + String(Math.floor(100 + Math.random() * 900)),
+                packages_count: 1,
+                dispatched_units: order.total_units || 0,
+                driver_name: '',
+                license_plate: '',
+                estimated_arrival_date: '',
+                notes: ''
+            };
+            this.isDispatchModalOpen = true;
+        },
+
+        submitDispatch() {
+            if (!this.dispatchOrderData) return;
+            this.isSubmittingDispatch = true;
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            fetch('/api/v1/hub7/vendor/orders/' + this.dispatchOrderData.id + '/dispatch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(this.dispatchForm)
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.isSubmittingDispatch = false;
+                if (data && data.success) {
+                    this.dispatchOrderData.status = 'in_transit';
+                    this.dispatchOrderData.carrier = this.dispatchForm.carrier_name;
+                    this.dispatchOrderData.tracking_number = this.dispatchForm.tracking_number;
+                    this.isDispatchModalOpen = false;
+                    alert(data.message || 'Despacho registrado exitosamente.');
+                } else {
+                    alert(data.message || 'Error al registrar el despacho.');
+                }
+            })
+            .catch(err => {
+                this.isSubmittingDispatch = false;
+                console.error('Error al registrar despacho:', err);
+                alert('Ocurrio un error de comunicacion con el servidor.');
+            });
         },
 
         confirmOrder(order) {

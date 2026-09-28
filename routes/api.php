@@ -157,11 +157,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/{id}/export-csv', [AlliesApiController::class, 'exportDoorListCsv']);
     });
 
-    // 6.1. EXTRANET PROVEEDORES & FABRICANTES (HUB 7 - TASK-HUB-VND)
+    // 6.1. EXTRANET PROVEEDORES & FABRICANTES (HUB 7 - TASK-HUB-VND / TASK-INT-20)
     Route::prefix('hub7/vendor')->group(function () {
         Route::get('/orders', [PortalVendorController::class, 'getOrders']);
         Route::get('/orders/{id}', [PortalVendorController::class, 'getOrderDetail']);
         Route::post('/orders/{id}/confirm', [PortalVendorController::class, 'confirmOrder']);
+        Route::post('/orders/{id}/dispatch', [PortalVendorController::class, 'dispatchOrder']);
+        Route::get('/orders/{id}/shipment', [PortalVendorController::class, 'getShipment']);
         Route::get('/credit-agreements', [PortalVendorController::class, 'getCreditAgreements']);
     });
 

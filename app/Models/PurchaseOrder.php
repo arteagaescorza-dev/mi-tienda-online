@@ -44,5 +44,15 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(PurchaseKardex::class);
     }
+
+    public function vendorShipments(): HasMany
+    {
+        return $this->hasMany(VendorShipment::class, 'po_id');
+    }
+
+    public function latestVendorShipment()
+    {
+        return $this->hasOne(VendorShipment::class, 'po_id')->latestOfMany();
+    }
 }
 
