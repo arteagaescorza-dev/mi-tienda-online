@@ -9,6 +9,8 @@ use App\Models\Product;
 use App\Models\CmsStorefrontConfig;
 use App\Models\CmsSection;
 use App\Models\CmsPage;
+use App\Models\CmsBlogPost;
+use App\Models\CmsCatalogFilter;
 use App\Models\CmsOfficialDocument;
 use App\Models\CmsTrackingSetting;
 use App\Models\Cart;
@@ -144,6 +146,7 @@ class StorefrontController extends Controller
             'sections' => $sections,
             'navbarPages' => $navbarPages,
             'footerPages' => $footerPages,
+            'tracking' => $trackingSettings,
             'trackingSettings' => $trackingSettings,
             'officialDocs' => $officialDocs,
             'products' => $pwaProducts,
@@ -324,6 +327,128 @@ class StorefrontController extends Controller
             'announcements' => $announcements,
             'initialProducts' => $pwaProducts,
             'autoOpenProductId' => null, // PDP dedicado a pantalla completa: cero drawers
+        ]);
+    }
+
+    /**
+     * Catálogo / Feed de artículos de Revista Digital (Blog CMS).
+     */
+    public function magazineIndex(Request $request)
+    {
+        $activeUniverse = strtolower((string) $request->query('universo', 'marte'));
+        if (! in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
+            $activeUniverse = 'marte';
+        }
+
+        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
+        $currentStorefront = [
+            'brandName' => $storefrontConfig->brand_name ?? 'TORZO',
+            'pageTitle' => 'Revista Digital // Multiverso Textil & Bienestar',
+            'primaryColor' => $storefrontConfig->primary_color,
+            'accentColor' => $storefrontConfig->accent_color,
+            'backgroundColor' => $storefrontConfig->background_color,
+            'surfaceColor' => $storefrontConfig->surface_color,
+            'textColor' => $storefrontConfig->text_color,
+        ];
+
+        $posts = CmsBlogPost::published()->get();
+        $categories = $posts->pluck('category_name')->filter()->unique()->values();
+        $navbarPages = CmsPage::inNavbar()->get();
+        $footerPages = CmsPage::inFooter()->get();
+        $tracking = CmsTrackingSetting::current();
+
+        return view('store.pwa.magazine', [
+            'posts' => $posts,
+            'categories' => $categories,
+            'activeUniverse' => $activeUniverse,
+            'currentStorefront' => $currentStorefront,
+            'navbarPages' => $navbarPages,
+            'footerPages' => $footerPages,
+            'tracking' => $tracking,
+        ]);
+    }
+
+    /**
+     * Ficha de lectura completa de artículo de Revista Digital.
+     */
+    public function magazinePost(string $slug)
+    {
+        $activeUniverse = strtolower((string) request()->query('universo', 'marte'));
+        if (! in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
+            $activeUniverse = 'marte';
+        }
+
+        $post = CmsBlogPost::published()->where('slug', $slug)->firstOrFail();
+
+        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
+        $currentStorefront = [
+            'brandName' => $storefrontConfig->brand_name ?? 'TORZO',
+            'pageTitle' => $post->title . ' — Revista Digital',
+            'primaryColor' => $storefrontConfig->primary_color,
+            'accentColor' => $storefrontConfig->accent_color,
+            'backgroundColor' => $storefrontConfig->background_color,
+            'surfaceColor' => $storefrontConfig->surface_color,
+            'textColor' => $storefrontConfig->text_color,
+        ];
+
+        $relatedPosts = CmsBlogPost::published()
+            ->where('id', '!=', $post->id)
+            ->where('category_name', $post->category_name)
+            ->take(3)
+            ->get();
+        if ($relatedPosts->isEmpty()) {
+            $relatedPosts = CmsBlogPost::published()->where('id', '!=', $post->id)->take(3)->get();
+        }
+
+        $navbarPages = CmsPage::inNavbar()->get();
+        $footerPages = CmsPage::inFooter()->get();
+        $tracking = CmsTrackingSetting::current();
+
+        return view('store.pwa.magazine-post', [
+            'post' => $post,
+            'relatedPosts' => $relatedPosts,
+            'activeUniverse' => $activeUniverse,
+            'currentStorefront' => $currentStorefront,
+            'navbarPages' => $navbarPages,
+            'footerPages' => $footerPages,
+            'tracking' => $tracking,
+        ]);
+    }
+
+    /**
+     * Página institucional CMS sincronizada en el Navbar/Footer.
+     */
+    public function cmsPage(string $slug)
+    {
+        $activeUniverse = strtolower((string) request()->query('universo', 'marte'));
+        if (! in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
+            $activeUniverse = 'marte';
+        }
+
+        $page = CmsPage::active()->where('slug', $slug)->firstOrFail();
+
+        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
+        $currentStorefront = [
+            'brandName' => $storefrontConfig->brand_name ?? 'TORZO',
+            'pageTitle' => ($page->seo_title ?: $page->title) . ' — ' . ($storefrontConfig->brand_name ?? 'TORZO'),
+            'primaryColor' => $storefrontConfig->primary_color,
+            'accentColor' => $storefrontConfig->accent_color,
+            'backgroundColor' => $storefrontConfig->background_color,
+            'surfaceColor' => $storefrontConfig->surface_color,
+            'textColor' => $storefrontConfig->text_color,
+        ];
+
+        $navbarPages = CmsPage::inNavbar()->get();
+        $footerPages = CmsPage::inFooter()->get();
+        $tracking = CmsTrackingSetting::current();
+
+        return view('store.pwa.page', [
+            'page' => $page,
+            'activeUniverse' => $activeUniverse,
+            'currentStorefront' => $currentStorefront,
+            'navbarPages' => $navbarPages,
+            'footerPages' => $footerPages,
+            'tracking' => $tracking,
         ]);
     }
 

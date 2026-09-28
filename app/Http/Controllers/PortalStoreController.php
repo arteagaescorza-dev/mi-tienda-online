@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\CmsBlogPost;
+use App\Models\CmsCatalogFilter;
 use App\Models\CmsOfficialDocument;
+use App\Models\CmsPage;
 use App\Models\CmsSection;
 use App\Models\CmsStorefrontConfig;
+use App\Models\CmsTrackingSetting;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -220,6 +224,12 @@ class PortalStoreController extends Controller
         $categories = Category::select('id', 'name', 'slug')->get();
         $brands = Product::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand');
 
+        // 9. Páginas CMS, Blog Revista Digital, Tracking y Filtros
+        $pages = CmsPage::orderBy('navbar_order')->get();
+        $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
+        $tracking = CmsTrackingSetting::current();
+        $catalogFilters = CmsCatalogFilter::orderBy('sort_order')->get();
+
         return view('portal.store', [
             'storefronts' => $storefronts,
             'activeUniverse' => 'marte',
@@ -234,6 +244,10 @@ class PortalStoreController extends Controller
             'sizeGuide' => $sizeGuide,
             'careProtocols' => $careProtocols,
             'profecoNotice' => $profecoNotice,
+            'pages' => $pages,
+            'blogPosts' => $blogPosts,
+            'tracking' => $tracking,
+            'catalogFilters' => $catalogFilters,
         ]);
     }
 
@@ -504,5 +518,209 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', "Documento oficial '{$doc->title}' actualizado correctamente.");
+    }
+
+    /**
+     * Crear una página CMS.
+     */
+    public function storePage(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_pages,slug',
+            'icon' => 'nullable|string|max:50',
+            'content_html' => 'required|string',
+            'show_in_navbar' => 'nullable|boolean',
+            'navbar_order' => 'nullable|integer',
+            'show_in_footer' => 'nullable|boolean',
+            'footer_order' => 'nullable|integer',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string',
+            'status' => 'nullable|in:active,draft',
+        ]);
+
+        $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
+        $validated['show_in_footer'] = $request->boolean('show_in_footer');
+        $validated['status'] = $validated['status'] ?? 'active';
+
+        $page = CmsPage::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'page' => $page]);
+        }
+
+        return back()->with('success', "Página CMS '{$page->title}' creada exitosamente.");
+    }
+
+    /**
+     * Actualizar una página CMS.
+     */
+    public function updatePage(Request $request, CmsPage $page)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_pages,slug,' . $page->id,
+            'icon' => 'nullable|string|max:50',
+            'content_html' => 'required|string',
+            'show_in_navbar' => 'nullable|boolean',
+            'navbar_order' => 'nullable|integer',
+            'show_in_footer' => 'nullable|boolean',
+            'footer_order' => 'nullable|integer',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string',
+            'status' => 'nullable|in:active,draft',
+        ]);
+
+        $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
+        $validated['show_in_footer'] = $request->boolean('show_in_footer');
+        $page->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'page' => $page]);
+        }
+
+        return back()->with('success', "Página CMS '{$page->title}' actualizada exitosamente.");
+    }
+
+    /**
+     * Eliminar una página CMS.
+     */
+    public function destroyPage(CmsPage $page)
+    {
+        $page->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Página CMS eliminada.');
+    }
+
+    /**
+     * Crear artículo del blog para Revista Digital.
+     */
+    public function storeBlogPost(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_blog_posts,slug',
+            'category_name' => 'required|string|max:100',
+            'tags' => 'nullable',
+            'author_name' => 'nullable|string|max:100',
+            'reading_time_minutes' => 'nullable|integer|min:1',
+            'excerpt' => 'required|string',
+            'body' => 'required|string',
+            'status' => 'nullable|in:published,draft',
+        ]);
+
+        if (is_string($request->input('tags'))) {
+            $validated['tags'] = array_filter(array_map('trim', explode(',', $request->input('tags'))));
+        }
+        $validated['status'] = $validated['status'] ?? 'published';
+        if ($validated['status'] === 'published') {
+            $validated['published_at'] = now();
+        }
+
+        $post = CmsBlogPost::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'post' => $post]);
+        }
+
+        return back()->with('success', "Artículo '{$post->title}' publicado exitosamente.");
+    }
+
+    /**
+     * Actualizar artículo del blog.
+     */
+    public function updateBlogPost(Request $request, CmsBlogPost $post)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_blog_posts,slug,' . $post->id,
+            'category_name' => 'required|string|max:100',
+            'tags' => 'nullable',
+            'author_name' => 'nullable|string|max:100',
+            'reading_time_minutes' => 'nullable|integer|min:1',
+            'excerpt' => 'required|string',
+            'body' => 'required|string',
+            'status' => 'nullable|in:published,draft',
+        ]);
+
+        if (is_string($request->input('tags'))) {
+            $validated['tags'] = array_filter(array_map('trim', explode(',', $request->input('tags'))));
+        }
+
+        $post->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'post' => $post]);
+        }
+
+        return back()->with('success', "Artículo '{$post->title}' actualizado exitosamente.");
+    }
+
+    /**
+     * Eliminar artículo del blog.
+     */
+    public function destroyBlogPost(CmsBlogPost $post)
+    {
+        $post->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Artículo del blog eliminado.');
+    }
+
+    /**
+     * Actualizar configuración de tracking (GTM, GA4, Meta Pixel & CAPI).
+     */
+    public function updateTracking(Request $request)
+    {
+        $validated = $request->validate([
+            'gtm_id' => 'nullable|string|max:50',
+            'ga4_measurement_id' => 'nullable|string|max:50',
+            'facebook_pixel_id' => 'nullable|string|max:50',
+            'facebook_capi_token' => 'nullable|string',
+            'facebook_test_event_code' => 'nullable|string|max:50',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $tracking = CmsTrackingSetting::current();
+        $validated['is_active'] = $request->boolean('is_active');
+        $tracking->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'tracking' => $tracking]);
+        }
+
+        return back()->with('success', 'Configuración de tracking y analítica actualizada.');
+    }
+
+    /**
+     * Actualizar configuración y orden de filtros del catálogo.
+     */
+    public function updateFilters(Request $request)
+    {
+        $filtersData = $request->input('filters', []);
+
+        foreach ($filtersData as $id => $data) {
+            $filter = CmsCatalogFilter::find($id);
+            if ($filter) {
+                $filter->update([
+                    'label' => $data['label'] ?? $filter->label,
+                    'sort_order' => isset($data['sort_order']) ? (int) $data['sort_order'] : $filter->sort_order,
+                    'is_visible' => !empty($data['is_visible']),
+                ]);
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Filtros del catálogo actualizados correctamente.');
     }
 }

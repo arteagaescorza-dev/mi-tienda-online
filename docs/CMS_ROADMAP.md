@@ -29,17 +29,17 @@ El **Hub 2: Tienda & CMS Multiverso** es el centro de control editorial y de dis
 | `TASK-INT-18` | Reglas Comerciales, Umbral Envío Gratis & Simulador de Flete | Submódulo 3: Fletes & Reglas | **Completada (UI Mock)** | **Alta** | Hub 5 Finanzas, Margen Neto |
 | `TASK-INT-10` | Capa Editorial Desacoplada, Guía de Tallas Torzo & Cuidados | Submódulo 4: Contenido Editorial | **Completada (UI Mock)** | **Alta** | Hub 4 Inventario, Hub 6 RMA |
 | `TASK-STR-01` | Storefront D2C PWA Mobile-First & Conexión al Navbar RevOps (Ref: `pop`) | Storefront Público D2C | **Completada (UI Mock)** | **Alta** | `pop/index.html`, Navbar RevOps |
-| `TASK-H2-01` | DDL & Capa de Persistencia Relacional CMS (Base de Datos) | Backend Core | **Planificada** | **Alta** | Migraciones MySQL |
-| `TASK-H2-02` | Motor Drag & Drop de Secciones en Hub 2 (Categorías, Tags, Custom) | Submódulo 1: Editor Visual | **Planificada** | **Alta** | SortableJS, TASK-H2-01 |
-| `TASK-H2-03` | Gestor de Documentos Oficiales (Tallas Torzo, Cuidados, PROFECO) | Submódulo 4: Contenido Editorial | **Planificada** | **Alta** | TASK-H2-01 |
-| `TASK-H2-04` | CMS de Páginas Dinámicas & Sincronización Navbar | Páginas & Navegación | **Planificada** | **Alta** | TASK-H2-01 |
-| `TASK-H2-05` | Motor de Paletas Globales & Variables CSS (`:root`) | Estilos Globales | **Planificada** | **Alta** | TASK-H2-01 |
-| `TASK-H2-06` | Renderizador Modular de Secciones en Storefront PWA | Storefront PWA Mobile-First | **Planificada** | **Alta** | TASK-H2-02, TASK-H2-05 |
-| `TASK-H2-07` | CMS de Blog / Revista Digital & SEO Schema | Revista Digital | **Planificada** | **Media** | TASK-H2-01 |
-| `TASK-H2-08` | Ficha de Producto (PDP) a Pantalla Completa Dedicada (Sin Drawers) | Storefront PDP (`/productos/{slug}`) | **Planificada** | **Alta** | Hub 4 Inventario |
-| `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | Catálogo PWA | **Planificada** | **Media** | Hub 4 Categorías |
-| `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | Analytics & Tracking | **Planificada** | **Alta** | Layout PWA, Checkout |
-| `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | Calidad & QA | **Planificada** | **Alta** | PHPUnit, Lighthouse |
+| `TASK-H2-01` | DDL & Capa de Persistencia Relacional CMS (Base de Datos) | Backend Core | **Completada** | **Alta** | Migraciones MySQL |
+| `TASK-H2-02` | Motor Drag & Drop de Secciones en Hub 2 (Categorías, Tags, Custom) | Submódulo 1: Editor Visual | **Completada** | **Alta** | SortableJS, TASK-H2-01 |
+| `TASK-H2-03` | Gestor de Documentos Oficiales (Tallas Torzo, Cuidados, PROFECO) | Submódulo 4: Contenido Editorial | **Completada** | **Alta** | TASK-H2-01 |
+| `TASK-H2-04` | CMS de Páginas Dinámicas & Sincronización Navbar | Páginas & Navegación | **Completada** | **Alta** | TASK-H2-01 |
+| `TASK-H2-05` | Motor de Paletas Globales & Variables CSS (`:root`) | Estilos Globales | **Completada** | **Alta** | TASK-H2-01 |
+| `TASK-H2-06` | Renderizador Modular de Secciones en Storefront PWA | Storefront PWA Mobile-First | **Completada** | **Alta** | TASK-H2-02, TASK-H2-05 |
+| `TASK-H2-07` | CMS de Blog / Revista Digital & SEO Schema | Revista Digital | **Completada** | **Media** | TASK-H2-01 |
+| `TASK-H2-08` | Ficha de Producto (PDP) a Pantalla Completa Dedicada (Sin Drawers) | Storefront PDP (`/productos/{slug}`) | **Completada** | **Alta** | Hub 4 Inventario |
+| `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | Catálogo PWA | **Completada** | **Media** | Hub 4 Categorías |
+| `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | Analytics & Tracking | **Completada** | **Alta** | Layout PWA, Checkout |
+| `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | Calidad & QA | **Completada** | **Alta** | PHPUnit, Lighthouse |
 
 ---
 

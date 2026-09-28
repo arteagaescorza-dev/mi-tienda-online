@@ -12,6 +12,9 @@ use App\Http\Controllers\StorefrontController;
 Route::get('/', [StorefrontController::class, 'home'])->name('store.home');
 Route::get('/productos', [StorefrontController::class, 'products'])->name('store.products');
 Route::get('/productos/{slug}', [StorefrontController::class, 'product'])->name('store.product');
+Route::get('/revista', [StorefrontController::class, 'magazineIndex'])->name('store.magazine');
+Route::get('/revista/{slug}', [StorefrontController::class, 'magazinePost'])->name('store.magazine.post');
+Route::get('/pagina/{slug}', [StorefrontController::class, 'cmsPage'])->name('store.page');
 Route::get('/categorias', [StorefrontController::class, 'categories'])->name('store.categories');
 Route::get('/ofertas', [StorefrontController::class, 'offers'])->name('store.offers');
 Route::get('/nosotros', [StorefrontController::class, 'about'])->name('store.about');
@@ -93,6 +96,14 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/tienda-cms/secciones/{section}/toggle', [PortalStoreController::class, 'toggleSection'])->name('portal.store.sections.toggle');
 	Route::delete('/admin/tienda-cms/secciones/{section}', [PortalStoreController::class, 'destroySection'])->name('portal.store.sections.destroy');
 	Route::post('/admin/tienda-cms/documentos/{code}', [PortalStoreController::class, 'updateDocument'])->name('portal.store.documents.update');
+	Route::post('/admin/tienda-cms/paginas', [PortalStoreController::class, 'storePage'])->name('portal.store.pages.store');
+	Route::put('/admin/tienda-cms/paginas/{page}', [PortalStoreController::class, 'updatePage'])->name('portal.store.pages.update');
+	Route::delete('/admin/tienda-cms/paginas/{page}', [PortalStoreController::class, 'destroyPage'])->name('portal.store.pages.destroy');
+	Route::post('/admin/tienda-cms/blog', [PortalStoreController::class, 'storeBlogPost'])->name('portal.store.blog.store');
+	Route::put('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'updateBlogPost'])->name('portal.store.blog.update');
+	Route::delete('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'destroyBlogPost'])->name('portal.store.blog.destroy');
+	Route::post('/admin/tienda-cms/tracking', [PortalStoreController::class, 'updateTracking'])->name('portal.store.tracking.update');
+	Route::post('/admin/tienda-cms/filtros', [PortalStoreController::class, 'updateFilters'])->name('portal.store.filters.update');
 
 	// Hub 7: Convenios & Aliados
 	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');

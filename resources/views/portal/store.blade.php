@@ -62,6 +62,34 @@
                 <span class="store-subnav-count">Guía Torzo</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Contenido Editorial" data-help-title="Contenido Editorial &amp; Tallas" data-help-desc="Guía anatómica de tallas textiles Torzo, protocolos de cuidado y aviso sanitario PROFECO (TASK-INT-10).">?</button>
             </button>
+
+            <!-- TAB 5: PÁGINAS CMS & NAVBAR -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>5. Páginas &amp; Navbar</span>
+                <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
+            </button>
+
+            <!-- TAB 6: REVISTA DIGITAL (BLOG) -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="magazine" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <span>6. Revista Digital</span>
+                <span class="store-subnav-count">{{ $blogPosts->count() ?? 0 }} Artículos</span>
+            </button>
+
+            <!-- TAB 7: TRACKING & PIXELS -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="tracking" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <span>7. Tracking &amp; Analítica</span>
+                <span class="store-subnav-count">{{ ($tracking && $tracking->is_active) ? 'Activo' : 'Pausado' }}</span>
+            </button>
+
+            <!-- TAB 8: FILTROS DE CATÁLOGO -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="filters" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <span>8. Filtros Catálogo</span>
+                <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
+            </button>
         </nav>
 
         <div class="flex items-center gap-3 text-xs pb-2 sm:pb-0">
@@ -693,6 +721,291 @@
     <!-- FIN SUBMÓDULO 4 -->
 
     <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 5: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
+    <!-- ========================================================================= -->
+    <div id="storePagesPanel" class="tab-panel hidden">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span>Páginas Institucionales Sincronizadas en el Navbar</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Crea páginas con contenido enriquecido, slugs limpios y sincronización automática en la cabecera y pie de la tienda.</p>
+                </div>
+                <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createPageModal" type="button">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Nueva Página</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+                            <th class="py-2.5 px-3">Título &amp; Slug</th>
+                            <th class="py-2.5 px-3 text-center">En Navbar</th>
+                            <th class="py-2.5 px-3 text-center">En Footer</th>
+                            <th class="py-2.5 px-3 text-center">Estado</th>
+                            <th class="py-2.5 px-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($pages as $pg)
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-3">
+                                    <strong class="font-bold text-slate-900 block">{{ $pg->title }}</strong>
+                                    <span class="text-[11px] font-mono text-slate-400">/pagina/{{ $pg->slug }}</span>
+                                </td>
+                                <td class="py-3 px-3 text-center">
+                                    @if($pg->show_in_navbar)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Sí (Pos #{{ $pg->navbar_order ?? 0 }})</span>
+                                    @else
+                                        <span class="text-slate-400 text-[11px]">No</span>
+                                    @endif
+                                </td>
+                                <td class="py-3 px-3 text-center">
+                                    @if($pg->show_in_footer)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Sí (Pos #{{ $pg->footer_order ?? 0 }})</span>
+                                    @else
+                                        <span class="text-slate-400 text-[11px]">No</span>
+                                    @endif
+                                </td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $pg->status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ strtoupper($pg->status) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ url('/pagina/' . $pg->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
+                                        <form method="POST" action="{{ route('portal.store.pages.destroy', $pg->id) }}" onsubmit="return confirm('¿Eliminar esta página CMS definitivamente?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-6 text-center text-slate-400 text-xs">No hay páginas institucionales registradas aún.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- FIN SUBMÓDULO 5 -->
+
+    <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 6: CMS BLOG & REVISTA DIGITAL (TASK-H2-06)                      -->
+    <!-- ========================================================================= -->
+    <div id="storeMagazinePanel" class="tab-panel hidden">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <span>Revista Digital // Artículos y Publicaciones Editoriales</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Publica notas técnicas, guías de ajuste y artículos de bienestar que impulsan el SEO orgánico del ecosistema.</p>
+                </div>
+                <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createBlogModal" type="button">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Nuevo Artículo</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+                            <th class="py-2.5 px-3">Artículo &amp; Slug</th>
+                            <th class="py-2.5 px-3">Categoría</th>
+                            <th class="py-2.5 px-3">Autor</th>
+                            <th class="py-2.5 px-3 text-center">Lectura</th>
+                            <th class="py-2.5 px-3 text-center">Estado</th>
+                            <th class="py-2.5 px-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($blogPosts as $bp)
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-3">
+                                    <strong class="font-bold text-slate-900 block">{{ $bp->title }}</strong>
+                                    <span class="text-[11px] font-mono text-slate-400">/revista/{{ $bp->slug }}</span>
+                                </td>
+                                <td class="py-3 px-3">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ $bp->category_name }}</span>
+                                </td>
+                                <td class="py-3 px-3 text-slate-600">{{ $bp->author_name ?? 'Editorial' }}</td>
+                                <td class="py-3 px-3 text-center text-slate-500">{{ $bp->reading_time_minutes ?? 3 }} min</td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $bp->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                                        {{ strtoupper($bp->status) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ url('/revista/' . $bp->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
+                                        <form method="POST" action="{{ route('portal.store.blog.destroy', $bp->id) }}" onsubmit="return confirm('¿Eliminar este artículo del blog?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay artículos publicados en la revista digital aún.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- FIN SUBMÓDULO 6 -->
+
+    <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 7: TRACKING & ANALÍTICA (TASK-H2-11)                            -->
+    <!-- ========================================================================= -->
+    <div id="storeTrackingPanel" class="tab-panel hidden">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-3xl">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>Suite de Medición: GTM, GA4, Meta Pixel &amp; CAPI</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Inyección automática de tags analíticos y tokens server-side en el storefront y checkout.</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ ($tracking && $tracking->is_active) ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                    {{ ($tracking && $tracking->is_active) ? 'Rastreo Activo' : 'Rastreo Desactivado' }}
+                </span>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.tracking.update') }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Google Tag Manager (GTM ID)</label>
+                        <input type="text" name="gtm_id" value="{{ old('gtm_id', $tracking->gtm_id ?? '') }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="GTM-XXXXXXX">
+                        <small class="text-[10px] text-slate-400">Inyecta script en el head y noscript en el body.</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Google Analytics 4 (Measurement ID)</label>
+                        <input type="text" name="ga4_measurement_id" value="{{ old('ga4_measurement_id', $tracking->ga4_measurement_id ?? '') }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="G-XXXXXXXXXX">
+                        <small class="text-[10px] text-slate-400">Medición de eventos de compra y tráfico multiverso.</small>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Facebook / Meta Pixel ID</label>
+                        <input type="text" name="facebook_pixel_id" value="{{ old('facebook_pixel_id', $tracking->facebook_pixel_id ?? '') }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="123456789012345">
+                        <small class="text-[10px] text-slate-400">Pixel client-side para audiencias de retargeting.</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Test Event Code (Meta Graph API)</label>
+                        <input type="text" name="facebook_test_event_code" value="{{ old('facebook_test_event_code', $tracking->facebook_test_event_code ?? '') }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="TEST12345">
+                        <small class="text-[10px] text-slate-400">Código de pruebas del Administrador de Eventos.</small>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Meta Conversions API (CAPI Access Token)</label>
+                    <textarea name="facebook_capi_token" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="EAA... Token de acceso de larga duración">{{ old('facebook_capi_token', $tracking->facebook_capi_token ?? '') }}</textarea>
+                    <small class="text-[10px] text-slate-400">Utilizado por el backend en CheckoutController para registrar Purchase sin bloqueadores de anuncios.</small>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <input type="checkbox" name="is_active" id="trackingIsActive" value="1" {{ ($tracking && $tracking->is_active) ? 'checked' : '' }} class="rounded text-indigo-600">
+                    <label for="trackingIsActive" class="font-bold text-slate-800">Activar inyección de etiquetas de seguimiento en Storefront</label>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end">
+                    <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer">
+                        Guardar Configuración de Tracking
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- FIN SUBMÓDULO 7 -->
+
+    <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 8: FILTROS DE CATÁLOGO (TASK-H2-09)                             -->
+    <!-- ========================================================================= -->
+    <div id="storeFiltersPanel" class="tab-panel hidden">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-4xl">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        <span>Editor de Filtros y Facetas del Catálogo</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Configura la visibilidad, nombres y orden jerárquico de los filtros de la tienda PWA.</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.filters.update') }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+                                <th class="py-2.5 px-3">Clave de Filtro</th>
+                                <th class="py-2.5 px-3">Etiqueta Pública</th>
+                                <th class="py-2.5 px-3 text-center">Tipo de Control</th>
+                                <th class="py-2.5 px-3 text-center">Orden</th>
+                                <th class="py-2.5 px-3 text-center">Visible</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse($catalogFilters as $flt)
+                                <tr>
+                                    <td class="py-2.5 px-3 font-mono font-bold text-slate-800">
+                                        {{ $flt->filter_key }}
+                                    </td>
+                                    <td class="py-2.5 px-3">
+                                        <input type="text" name="filters[{{ $flt->id }}][label]" value="{{ $flt->label }}" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </td>
+                                    <td class="py-2.5 px-3 text-center">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ strtoupper($flt->display_type) }}</span>
+                                    </td>
+                                    <td class="py-2.5 px-3 text-center">
+                                        <input type="number" name="filters[{{ $flt->id }}][sort_order]" value="{{ $flt->sort_order }}" class="w-16 px-2 py-1 border border-slate-200 rounded-lg text-center text-xs">
+                                    </td>
+                                    <td class="py-2.5 px-3 text-center">
+                                        <input type="checkbox" name="filters[{{ $flt->id }}][is_visible]" value="1" {{ $flt->is_visible ? 'checked' : '' }} class="rounded text-indigo-600">
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-6 text-center text-slate-400">No hay filtros configurados en la base de datos.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end">
+                    <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer">
+                        Guardar Filtros del Catálogo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- FIN SUBMÓDULO 8 -->
+
+    <!-- ========================================================================= -->
     <!-- MODALES DE CONTROL OPERATIVO CMS                                          -->
     <!-- ========================================================================= -->
 
@@ -921,6 +1234,161 @@
         </div>
     </div>
 
+    <!-- 5. MODAL CREAR PÁGINA CMS (TASK-H2-03) -->
+    <div id="createPageModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Crear Nueva Página Institucional</span>
+                </h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="createPageModal">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.pages.store') }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Título de la Página</label>
+                        <input type="text" name="title" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Política de Envíos Seguros">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                        <input type="text" name="slug" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="envios-seguros">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Contenido de la Página (HTML o Texto)</label>
+                    <textarea name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="<p>Todos nuestros envíos viajan en empaque neutro y sellado...</p>"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="show_in_navbar" value="1" class="rounded text-indigo-600">
+                            <span>Sincronizar en Navbar Superior</span>
+                        </label>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden en Navbar</label>
+                            <input type="number" name="navbar_order" value="0" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="show_in_footer" value="1" checked class="rounded text-indigo-600">
+                            <span>Mostrar en Footer</span>
+                        </label>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden en Footer</label>
+                            <input type="number" name="footer_order" value="0" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Meta Título (SEO)</label>
+                        <input type="text" name="meta_title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Título para buscadores">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Estado de Publicación</label>
+                        <select name="status" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="active">Activo (Visible al público)</option>
+                            <option value="draft">Borrador (Oculto)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Meta Descripción (SEO)</label>
+                    <textarea name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve resumen optimizado para Google (máx 160 caracteres)"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createPageModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer">Guardar Página</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. MODAL CREAR ARTÍCULO BLOG / REVISTA DIGITAL (TASK-H2-06) -->
+    <div id="createBlogModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Crear Nuevo Artículo Editorial // Revista Digital</span>
+                </h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="createBlogModal">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.blog.store') }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Título del Artículo</label>
+                        <input type="text" name="title" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: La revolución de las fibras de modal en underwear">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Categoría Editorial</label>
+                        <input type="text" name="category_name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Innovación Textil">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                        <input type="text" name="slug" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="revolucion-fibras-modal">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Autor</label>
+                        <input type="text" name="author_name" value="Editorial Multiverso" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tiempo de Lectura (min)</label>
+                        <input type="number" name="reading_time_minutes" value="4" min="1" max="60" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Extracto / Bajada (Resumen visible en catálogo)</label>
+                    <textarea name="excerpt" rows="2" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve introducción para enganchar al lector..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Cuerpo Completo del Artículo (HTML o Texto)</label>
+                    <textarea name="body" rows="8" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="<p>En los últimos años, la confección íntima ha experimentado una transformación profunda...</p>"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Meta Título (SEO)</label>
+                        <input type="text" name="meta_title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Título SEO">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Estado</label>
+                        <select name="status" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="published">Publicado (Visible inmediatamente)</option>
+                            <option value="draft">Borrador (Solo visible en admin)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Meta Descripción (SEO)</label>
+                    <textarea name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Descripción optimizada para Google"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createBlogModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer">Publicar en Revista</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Formularios Ocultos para Acciones Rápidas --}}
     <form id="toggleAnnouncementForm" method="POST" action="{{ route('portal.store.announcement.toggle') }}" style="display:none;">
         @csrf
@@ -948,7 +1416,11 @@ document.addEventListener('DOMContentLoaded', function () {
         'visual': document.getElementById('storeVisualPanel'),
         'banners': document.getElementById('storeBannersPanel'),
         'shipping': document.getElementById('storeShippingPanel'),
-        'editorial': document.getElementById('storeEditorialPanel')
+        'editorial': document.getElementById('storeEditorialPanel'),
+        'pages': document.getElementById('storePagesPanel'),
+        'magazine': document.getElementById('storeMagazinePanel'),
+        'tracking': document.getElementById('storeTrackingPanel'),
+        'filters': document.getElementById('storeFiltersPanel')
     };
 
     const tabButtons = document.querySelectorAll('[data-action="switch-store-tab"]');
@@ -1205,6 +1677,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalButtons = document.querySelectorAll('[data-action^="open-"]');
     modalButtons.forEach(btn => {
         btn.addEventListener('click', function () {
+            const modalTarget = this.getAttribute('data-modal');
+            if (modalTarget) {
+                const m = document.getElementById(modalTarget);
+                if (m) m.classList.remove('hidden');
+                return;
+            }
             const action = this.getAttribute('data-action');
             if (action === 'open-create-section-modal') {
                 const m = document.getElementById('createSectionModal');
