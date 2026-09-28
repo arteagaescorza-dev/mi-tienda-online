@@ -112,7 +112,7 @@
 | `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | **Hub 2 (CMS & Tienda Real)** | **Media** | **Planificada** | Hub 4 Categorías & Familias |
 | `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | DataLayer, Meta Graph API |
 | `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | PHPUnit, Core Web Vitals |
-| `TASK-H2-12` | Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Pendiente (Prioridad Inmediata)** | SortableJS, Layout W-Full, Feedback Háptico |
+| `TASK-H2-12` | Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (UI & SortableJS)** | SortableJS, Layout W-Full, Feedback Háptico |
 | `TASK-H2-13` | Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2 | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Pendiente (Prioridad Inmediata)** | Subnav JS, TabPanels, DOM State |
 | `TASK-H2-14` | Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real | **Tienda Pública (Storefront D2C)** | **Alta** | **Pendiente (Prioridad Inmediata)** | `store-pwa.js`, Tarjetas Catálogo, Rutas PDP |
 
@@ -1640,7 +1640,7 @@ graph TD
 ---
 
 ### `TASK-H2-12`: Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2)
-* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Pendiente**
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (UI & SortableJS)**
 * **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
 * **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 1):**
   1. **Layout Estrecho y Desbordado:** El bloque de "Secciones Modulares del Home" se está renderizando constreñido a una columna lateral estrecha (`max-w` insuficiente o jerarquía flex/grid anidada en el contenedor izquierdo), provocando que la tabla se colapse horizontalmente a menos del 25% del ancho de pantalla.

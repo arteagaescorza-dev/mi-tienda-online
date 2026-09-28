@@ -323,92 +323,111 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- GESTOR DE SECCIONES MODULARES DEL HOME (DRAG & DROP) -->
-        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
-                        <span>Secciones Modulares del Home (Drag &amp; Drop Reordenable)</span>
-                    </h3>
-                    <p class="text-xs text-slate-500">Organiza, crea, activa o archiva secciones dinámicas basadas en categorías de Hub 4, familias o código HTML/CSS custom.</p>
-                </div>
-                <button class="button button-quiet py-1.5 px-3 text-xs font-bold bg-slate-900 text-white rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer" data-action="open-create-section-modal" type="button">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    <!-- GESTOR DE SECCIONES MODULARES DEL HOME (DRAG & DROP) -->
+    <div class="w-full bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 mt-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-3">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    <span>Secciones Modulares del Home (Drag &amp; Drop Reordenable)</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Arrastra y suelta las filas para cambiar su posición en la plantilla. Se sincroniza en tiempo real con la tienda.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="reorderSyncStatus" class="text-[11px] font-semibold text-emerald-600 hidden flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Orden sincronizado</span>
+                </span>
+                <button class="button button-quiet py-2 px-3 text-xs font-bold bg-slate-900 text-white rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer hover:bg-slate-800 transition" data-action="open-create-section-modal" type="button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>Crear Nueva Sección</span>
                 </button>
             </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse" id="sectionsTable">
-                    <thead>
-                        <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                            <th class="p-3 font-semibold text-center w-24">Posición</th>
-                            <th class="p-3 font-semibold">Nombre &amp; Título</th>
-                            <th class="p-3 font-semibold">Tipo de Sección</th>
-                            <th class="p-3 font-semibold">Vitrina Destino</th>
-                            <th class="p-3 font-semibold text-center">Estado</th>
-                            <th class="p-3 font-semibold text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100" id="sectionsSortableBody">
-                        @forelse($sections as $sec)
-                            <tr class="hover:bg-slate-50/70 transition-colors" data-section-id="{{ $sec->id }}">
-                                <td class="p-3 text-center">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <button type="button" class="btn-move-section p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer" data-action="move-section-up" data-section-id="{{ $sec->id }}" title="Mover arriba">&#9650;</button>
-                                        <span class="font-mono font-bold text-slate-700 section-order-badge">#{{ $sec->sort_order }}</span>
-                                        <button type="button" class="btn-move-section p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer" data-action="move-section-down" data-section-id="{{ $sec->id }}" title="Mover abajo">&#9660;</button>
-                                    </div>
-                                </td>
-                                <td class="p-3">
-                                    <strong class="text-slate-900 block font-semibold">{{ $sec->name }}</strong>
-                                    <span class="text-slate-500 text-[11px] block mt-0.5 truncate max-w-sm">{{ $sec->title ?? 'Sin título visible' }}</span>
-                                </td>
-                                <td class="p-3">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                        {{ $sec->type }}
-                                    </span>
-                                </td>
-                                <td class="p-3">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{
-                                        $sec->universe === 'marte' ? 'bg-blue-100 text-blue-800' :
-                                        ($sec->universe === 'venus' ? 'bg-pink-100 text-pink-800' :
-                                        ($sec->universe === 'tiresias' ? 'bg-purple-100 text-purple-800' :
-                                        ($sec->universe === 'terra' ? 'bg-sky-100 text-sky-800' :
-                                        'bg-slate-100 text-slate-800')))
-                                    }}">
-                                        {{ $sec->universe }}
-                                    </span>
-                                </td>
-                                <td class="p-3 text-center">
-                                    @if($sec->status === 'active')
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Activa</span>
-                                    @else
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600">Borrador</span>
-                                    @endif
-                                </td>
-                                <td class="p-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button class="button button-light py-1 px-2 text-[11px] rounded shadow-2xs cursor-pointer" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button">
-                                             {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
-                                        </button>
-                                        <button class="button button-light py-1 px-2 text-[11px] text-rose-600 hover:bg-rose-50 rounded shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button">
-                                            Eliminar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="p-6 text-center text-slate-400">No hay secciones registradas en el CMS.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
         </div>
+
+        <div class="w-full overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse min-w-[700px]" id="sectionsTable">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-500 uppercase tracking-wider bg-slate-50/75">
+                        <th class="py-3 px-3 font-bold text-center w-32">Reordenar</th>
+                        <th class="py-3 px-4 font-bold">Nombre &amp; Título</th>
+                        <th class="py-3 px-3 font-bold w-44">Tipo de Sección</th>
+                        <th class="py-3 px-3 font-bold w-36">Vitrina Destino</th>
+                        <th class="py-3 px-3 font-bold text-center w-28">Estado</th>
+                        <th class="py-3 px-4 font-bold text-right w-40">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="sectionsSortableBody">
+                    @forelse($sections as $sec)
+                        <tr class="hover:bg-slate-50/80 transition-colors select-none" data-section-id="{{ $sec->id }}">
+                            <td class="py-3 px-3 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <div class="drag-handle p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded cursor-grab active:cursor-grabbing transition" title="Arrastra para reordenar">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="9" cy="5" r="1.5"/>
+                                            <circle cx="9" cy="12" r="1.5"/>
+                                            <circle cx="9" cy="19" r="1.5"/>
+                                            <circle cx="15" cy="5" r="1.5"/>
+                                            <circle cx="15" cy="12" r="1.5"/>
+                                            <circle cx="15" cy="19" r="1.5"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 section-order-badge">#{{ $sec->sort_order }}</span>
+                                    <div class="flex flex-col gap-0.5">
+                                        <button type="button" class="btn-move-section p-0.5 hover:bg-slate-200 rounded text-[9px] text-slate-500 cursor-pointer leading-none" data-action="move-section-up" data-section-id="{{ $sec->id }}" title="Mover arriba">&#9650;</button>
+                                        <button type="button" class="btn-move-section p-0.5 hover:bg-slate-200 rounded text-[9px] text-slate-500 cursor-pointer leading-none" data-action="move-section-down" data-section-id="{{ $sec->id }}" title="Mover abajo">&#9660;</button>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <strong class="text-slate-900 block font-semibold text-xs">{{ $sec->name }}</strong>
+                                <span class="text-slate-500 text-[11px] block mt-0.5 truncate max-w-md">{{ $sec->title ?? 'Sin título visible' }}</span>
+                            </td>
+                            <td class="py-3 px-3">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    {{ $sec->type }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-3">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase {{
+                                    $sec->universe === 'marte' ? 'bg-blue-100 text-blue-800' :
+                                    ($sec->universe === 'venus' ? 'bg-pink-100 text-pink-800' :
+                                    ($sec->universe === 'tiresias' ? 'bg-purple-100 text-purple-800' :
+                                    ($sec->universe === 'terra' ? 'bg-sky-100 text-sky-800' :
+                                    'bg-slate-100 text-slate-800')))
+                                }}">
+                                    {{ $sec->universe }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-3 text-center">
+                                @if($sec->status === 'active')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Activa</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">Borrador</span>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="button button-light py-1 px-2.5 text-[11px] font-semibold rounded-lg shadow-2xs cursor-pointer hover:bg-slate-100" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button">
+                                         {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
+                                    </button>
+                                    <button class="button button-light py-1 px-2.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded-lg shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-400 text-xs">No hay secciones registradas en el CMS para esta vitrina.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
     </div>
     <!-- FIN SUBMÓDULO 1: EDITOR VISUAL -->
 
@@ -1406,6 +1425,9 @@
     </form>
 </div>
 
+{{-- SORTABLEJS PARA DRAG & DROP ERGONÓMICO EN VIVO --}}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
 {{-- SCRIPT REACTIVO OPERATIVO TIENDA & CMS MULTIVERSO (VANILLA JS LIGERO) --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -1729,6 +1751,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Reordenamiento interactivo de secciones
     const sectionsBody = document.getElementById('sectionsSortableBody');
+    const syncBadge = document.getElementById('reorderSyncStatus');
 
     function syncSectionsOrder() {
         if (!sectionsBody) return;
@@ -1741,6 +1764,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (badge) badge.textContent = `#${idx + 1}`;
         });
 
+        if (syncBadge) {
+            syncBadge.classList.remove('hidden');
+            syncBadge.className = 'text-[11px] font-semibold text-indigo-600 flex items-center gap-1.5 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200 animate-pulse';
+            syncBadge.innerHTML = `
+                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                <span>Sincronizando orden...</span>
+            `;
+        }
+
         fetch('{{ route("portal.store.sections.reorder") }}', {
             method: 'POST',
             headers: {
@@ -1750,9 +1782,36 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({ order })
         }).then(res => res.json()).then(data => {
-            console.log('Secciones reordenadas exitosamente:', data);
+            if (syncBadge) {
+                syncBadge.className = 'text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200';
+                syncBadge.innerHTML = `
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Orden guardado exitosamente</span>
+                `;
+                setTimeout(() => {
+                    syncBadge.classList.add('hidden');
+                }, 3000);
+            }
         }).catch(err => {
             console.error('Error al sincronizar orden de secciones:', err);
+            if (syncBadge) {
+                syncBadge.className = 'text-[11px] font-semibold text-rose-700 flex items-center gap-1.5 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200';
+                syncBadge.innerHTML = `<span>Error al guardar orden</span>`;
+            }
+        });
+    }
+
+    // Inicializar SortableJS para Drag & Drop Real
+    if (typeof Sortable !== 'undefined' && sectionsBody) {
+        new Sortable(sectionsBody, {
+            handle: '.drag-handle',
+            animation: 200,
+            ghostClass: 'bg-indigo-50/80',
+            chosenClass: 'bg-indigo-100/60',
+            dragClass: 'shadow-2xl',
+            onEnd: function () {
+                syncSectionsOrder();
+            }
         });
     }
 
