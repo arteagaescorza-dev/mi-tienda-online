@@ -47,28 +47,76 @@ class CmsStorefrontConfig extends Model
     public static function forUniverse(string $universe): self
     {
         $normalized = strtolower(trim($universe));
-        if (!in_array($normalized, ['marte', 'venus', 'tiresias', 'terra'])) {
-            $normalized = 'marte';
-        }
-
-        return static::firstOrCreate(
-            ['universe' => $normalized],
-            [
-                'brand_name' => strtoupper($normalized),
-                'sub_title' => 'UNIVERSO ' . strtoupper($normalized),
-                'hero_tag' => strtoupper($normalized) . ' // COLECCIÓN OFICIAL TORZO',
-                'hero_title' => 'DISEÑO, COMODIDAD Y FIRMEZA SIN CENSURA',
-                'hero_subtitle' => 'Textiles premium de modal y bambú diseñados para la máxima libertad de movimiento y soporte atlético.',
+        $universeDefaults = [
+            'marte' => [
+                'brand_name' => 'MARTE',
+                'sub_title' => 'UNIVERSO MASCULINO',
+                'hero_tag' => 'MARTE // COLECCIÓN OFICIAL TORZO',
+                'hero_title' => 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA',
+                'hero_subtitle' => 'Diseño textil anatómico con modal pima, costuras planas y microfibras de alta transpirabilidad. Envíos express a todo México.',
                 'hero_cta_text' => 'VER COLECCIÓN',
-                'hero_cta_url' => '/productos?universo=' . $normalized,
-                'page_title' => strtoupper($normalized) . ' — Tienda Oficial',
-                'primary_color' => $normalized === 'venus' ? '#1c1917' : ($normalized === 'tiresias' ? '#0f172a' : '#09090b'),
-                'accent_color' => $normalized === 'venus' ? '#db2777' : ($normalized === 'tiresias' ? '#8b5cf6' : ($normalized === 'terra' ? '#0284c7' : '#4f46e5')),
-                'background_color' => $normalized === 'venus' ? '#fff1f2' : ($normalized === 'tiresias' ? '#faf5ff' : '#fafafa'),
+                'hero_cta_url' => '/?universo=marte',
+                'page_title' => 'MARTE — Universo Masculino & Multiverso Store',
+                'primary_color' => '#09090b',
+                'accent_color' => '#4f46e5',
+                'background_color' => '#fafafa',
                 'surface_color' => '#ffffff',
                 'text_color' => '#0f172a',
                 'is_active' => true,
-            ]
+            ],
+            'venus' => [
+                'brand_name' => 'VENUS',
+                'sub_title' => 'LENCERÍA & BEAUTY',
+                'hero_tag' => 'VENUS // LENCERÍA DE AUTOR & SILUETAS',
+                'hero_title' => 'LENCERÍA DE AUTOR & SILUETAS SENSORIALES',
+                'hero_subtitle' => 'Encajes finos, satín italiano y fórmulas limpias de cuidado personal pensadas para tu bienestar diario.',
+                'hero_cta_text' => 'VER COLECCIÓN',
+                'hero_cta_url' => '/?universo=venus',
+                'page_title' => 'VENUS — Lencería de Autor & Beauty',
+                'primary_color' => '#1c1917',
+                'accent_color' => '#db2777',
+                'background_color' => '#fff1f2',
+                'surface_color' => '#ffffff',
+                'text_color' => '#0f172a',
+                'is_active' => true,
+            ],
+            'tiresias' => [
+                'brand_name' => 'TIRESIAS',
+                'sub_title' => 'MODA AFIRMATIVA',
+                'hero_tag' => 'TIRESIAS // AFIRMATIVA & NO BINARIO',
+                'hero_title' => 'LIBERTAD DE EXPRESIÓN Y AJUSTE SEGURO',
+                'hero_subtitle' => 'Prendas afirmativas confeccionadas con ingeniería textil transpirable de compresión médica segura.',
+                'hero_cta_text' => 'VER COLECCIÓN',
+                'hero_cta_url' => '/?universo=tiresias',
+                'page_title' => 'TIRESIAS — Moda Afirmativa & Binders',
+                'primary_color' => '#0f172a',
+                'accent_color' => '#8b5cf6',
+                'background_color' => '#faf5ff',
+                'surface_color' => '#ffffff',
+                'text_color' => '#0f172a',
+                'is_active' => true,
+            ],
+            'terra' => [
+                'brand_name' => 'TERRA',
+                'sub_title' => 'ECOSISTEMA GLOBAL',
+                'hero_tag' => 'TERRA // CATÁLOGO GLOBAL CONSOLIDADO',
+                'hero_title' => 'EL ECOSISTEMA COMPLETO DE MODA ÍNTIMA Y ESTILO',
+                'hero_subtitle' => 'Catálogo unificado, membresías mensuales recurrentes y fórmulas de autocuidado para todas las identidades.',
+                'hero_cta_text' => 'VER CATÁLOGO GLOBAL',
+                'hero_cta_url' => '/?universo=terra',
+                'page_title' => 'TERRA — Ecosistema Multiverso Store',
+                'primary_color' => '#09090b',
+                'accent_color' => '#0284c7',
+                'background_color' => '#fafafa',
+                'surface_color' => '#ffffff',
+                'text_color' => '#0f172a',
+                'is_active' => true,
+            ],
+        ];
+
+        return static::firstOrCreate(
+            ['universe' => $normalized],
+            $universeDefaults[$normalized] ?? $universeDefaults['marte']
         );
     }
 }

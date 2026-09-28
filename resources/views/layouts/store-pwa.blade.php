@@ -22,6 +22,30 @@
 
   <!-- Estilos Mobile-First & Desktop Adaptive Namespaced -->
   <link rel="stylesheet" href="{{ asset('css/store-pwa.css') }}">
+
+  <!-- Variables CSS Semánticas de Marca y Colores de Hub 2 -->
+  <style id="hub2DynamicTheme">
+    :root {
+      @if(isset($currentStorefront['primaryColor']))
+        --brand-primary: {{ $currentStorefront['primaryColor'] }};
+      @endif
+      @if(isset($currentStorefront['accentColor']))
+        --brand-accent: {{ $currentStorefront['accentColor'] }};
+      @endif
+      @if(isset($currentStorefront['backgroundColor']))
+        --brand-bg: {{ $currentStorefront['backgroundColor'] }};
+      @endif
+      @if(isset($currentStorefront['surfaceColor']))
+        --brand-surface: {{ $currentStorefront['surfaceColor'] }};
+      @endif
+      @if(isset($currentStorefront['textColor']))
+        --brand-text: {{ $currentStorefront['textColor'] }};
+      @endif
+    }
+    @if(!empty($currentStorefront['customCss']))
+      {!! $currentStorefront['customCss'] !!}
+    @endif
+  </style>
   @stack('styles')
 </head>
 <body class="store-body">
@@ -85,6 +109,11 @@
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">CATÁLOGO</a>
           <a href="#" class="nav-link-item" data-action="open-filter-drawer" style="color: #dc2626;">OFERTAS</a>
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">NOVEDADES</a>
+          @if(!empty($navbarPages))
+            @foreach($navbarPages as $np)
+              <a href="{{ url('/' . $np->slug) }}" class="nav-link-item">{{ strtoupper($np->title) }}</a>
+            @endforeach
+          @endif
         </nav>
 
         <!-- Acciones Desktop -->
@@ -179,12 +208,17 @@
         </div>
 
         <div>
-          <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Pagos y envios</strong>
+          <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Información &amp; Legal</strong>
           <ul class="footer-link-list">
-            <li><span>Paqueteria nacional</span></li>
-            <li><span>Entrega personal</span></li>
-            <li><span>BBVA CLABE: 012180004708283787</span></li>
-            <li><span>Guía de Tallas Anatómicas</span></li>
+            @if(!empty($footerPages) && $footerPages->isNotEmpty())
+              @foreach($footerPages as $fp)
+                <li><a href="{{ url('/' . $fp->slug) }}" style="color: inherit; text-decoration: none;">{{ $fp->title }}</a></li>
+              @endforeach
+            @else
+              <li><a href="/privacidad" style="color: inherit; text-decoration: none;">Aviso de Privacidad</a></li>
+              <li><a href="/cookies" style="color: inherit; text-decoration: none;">Política de Cookies</a></li>
+              <li><a href="#" data-action="open-size-guide" style="color: inherit; text-decoration: none;">Guía de Tallas Anatómicas</a></li>
+            @endif
           </ul>
 
           <!-- Acceso al Panel RevOps -->

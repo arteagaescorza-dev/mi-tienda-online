@@ -6,6 +6,11 @@ use App\Models\SupplierProduct;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\CmsStorefrontConfig;
+use App\Models\CmsSection;
+use App\Models\CmsPage;
+use App\Models\CmsOfficialDocument;
+use App\Models\CmsTrackingSetting;
 use App\Models\Cart;
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
@@ -82,8 +87,27 @@ class StorefrontController extends Controller
             ],
         ];
 
+        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
+        $dbData = array_filter([
+            'brandName' => $storefrontConfig->brand_name,
+            'subTitle' => $storefrontConfig->sub_title,
+            'heroTag' => $storefrontConfig->hero_tag,
+            'heroTitle' => $storefrontConfig->hero_title,
+            'heroSubtitle' => $storefrontConfig->hero_subtitle,
+            'heroCtaText' => $storefrontConfig->hero_cta_text,
+            'heroCtaUrl' => $storefrontConfig->hero_cta_url,
+            'pageTitle' => $storefrontConfig->page_title,
+            'primaryColor' => $storefrontConfig->primary_color,
+            'accentColor' => $storefrontConfig->accent_color,
+            'backgroundColor' => $storefrontConfig->background_color,
+            'surfaceColor' => $storefrontConfig->surface_color,
+            'textColor' => $storefrontConfig->text_color,
+            'customCss' => $storefrontConfig->custom_css,
+            'customJs' => $storefrontConfig->custom_js,
+        ]);
+
         $cachedStorefront = Cache::get('cms_storefront_' . $activeUniverse, []);
-        $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $cachedStorefront);
+        $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $dbData, $cachedStorefront);
 
         $shippingRule = Cache::get('cms_shipping_rule', [
             'freeShippingThreshold' => 999.00,
@@ -99,13 +123,29 @@ class StorefrontController extends Controller
             ['id' => 5, 'text' => 'ATENCIÓN PERSONALIZADA POR WHATSAPP', 'active' => true],
         ]);
 
+        $sections = CmsSection::active()
+            ->forUniverse($activeUniverse)
+            ->orderBy('sort_order')
+            ->get();
+
+        $navbarPages = CmsPage::inNavbar()->get();
+        $footerPages = CmsPage::inFooter()->get();
+        $trackingSettings = CmsTrackingSetting::current();
+        $officialDocs = CmsOfficialDocument::where('is_active', true)->get()->keyBy('code');
+
         $pwaProducts = $this->getPwaStoreProducts();
 
         return view('store.pwa.home', [
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
+            'storefrontConfig' => $storefrontConfig,
             'shippingRule' => $shippingRule,
             'announcements' => $announcements,
+            'sections' => $sections,
+            'navbarPages' => $navbarPages,
+            'footerPages' => $footerPages,
+            'trackingSettings' => $trackingSettings,
+            'officialDocs' => $officialDocs,
             'products' => $pwaProducts,
             'initialProducts' => $pwaProducts,
         ]);
