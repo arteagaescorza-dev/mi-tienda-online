@@ -300,6 +300,92 @@
 
     <!-- SUBMÓDULO 2: BANNERS & MARQUESINAS -->
     <div id="storeBannersPanel" class="tab-panel hidden">
+        <!-- GESTOR DE SECCIONES MODULARES DEL HOME (DRAG & DROP) -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        <span>Secciones Modulares del Home (Drag &amp; Drop Reordenable)</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Organiza, crea, activa o archiva secciones dinámicas basadas en categorías de Hub 4, familias o código HTML/CSS custom.</p>
+                </div>
+                <button class="button button-quiet py-1.5 px-3 text-xs font-bold bg-slate-900 text-white rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer" data-action="open-create-section-modal" type="button">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Crear Nueva Sección</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse" id="sectionsTable">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/50">
+                            <th class="p-3 font-semibold text-center w-24">Posición</th>
+                            <th class="p-3 font-semibold">Nombre &amp; Título</th>
+                            <th class="p-3 font-semibold">Tipo de Sección</th>
+                            <th class="p-3 font-semibold">Vitrina Destino</th>
+                            <th class="p-3 font-semibold text-center">Estado</th>
+                            <th class="p-3 font-semibold text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="sectionsSortableBody">
+                        @forelse($sections as $sec)
+                            <tr class="hover:bg-slate-50/70 transition-colors" data-section-id="{{ $sec->id }}">
+                                <td class="p-3 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button type="button" class="btn-move-section p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer" data-action="move-section-up" data-section-id="{{ $sec->id }}" title="Mover arriba">&#9650;</button>
+                                        <span class="font-mono font-bold text-slate-700 section-order-badge">#{{ $sec->sort_order }}</span>
+                                        <button type="button" class="btn-move-section p-1 hover:bg-slate-200 rounded text-slate-500 cursor-pointer" data-action="move-section-down" data-section-id="{{ $sec->id }}" title="Mover abajo">&#9660;</button>
+                                    </div>
+                                </td>
+                                <td class="p-3">
+                                    <strong class="text-slate-900 block font-semibold">{{ $sec->name }}</strong>
+                                    <span class="text-slate-500 text-[11px] block mt-0.5 truncate max-w-sm">{{ $sec->title ?? 'Sin título visible' }}</span>
+                                </td>
+                                <td class="p-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        {{ $sec->type }}
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{
+                                        $sec->universe === 'marte' ? 'bg-blue-100 text-blue-800' :
+                                        ($sec->universe === 'venus' ? 'bg-pink-100 text-pink-800' :
+                                        ($sec->universe === 'tiresias' ? 'bg-purple-100 text-purple-800' :
+                                        ($sec->universe === 'terra' ? 'bg-sky-100 text-sky-800' :
+                                        'bg-slate-100 text-slate-800')))
+                                    }}">
+                                        {{ $sec->universe }}
+                                    </span>
+                                </td>
+                                <td class="p-3 text-center">
+                                    @if($sec->status === 'active')
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Activa</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600">Borrador</span>
+                                    @endif
+                                </td>
+                                <td class="p-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="button button-light py-1 px-2 text-[11px] rounded shadow-2xs cursor-pointer" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button">
+                                            {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
+                                        </button>
+                                        <button class="button button-light py-1 px-2 text-[11px] text-rose-600 hover:bg-rose-50 rounded shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button">
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-slate-400">No hay secciones registradas en el CMS.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
                 <div>
@@ -524,10 +610,15 @@
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                         <span>Guía Oficial de Tallas Textiles Torzo (TASK-INT-10)</span>
                     </h3>
-                <p class="text-xs text-slate-500">Matriz interactiva de medidas anatómicas desplegada en la ficha de producto (PDP) de boxers, jocks y bralettes.</p>
+                    <p class="text-xs text-slate-500">Matriz interactiva de medidas anatómicas desplegada en la ficha de producto (PDP) de boxers, jocks y bralettes.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-slate-900 text-white rounded-lg cursor-pointer" data-action="open-edit-size-guide-modal" type="button">
+                        Editar Guía
+                    </button>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Guía de Tallas" data-help-title="Guía de Tallas" data-help-desc="Medidas de cintura y cadera tomadas en reposo sobre cinta métrica flexible.">?</button>
+                </div>
             </div>
-            <button class="section-help-btn" type="button" aria-label="Ayuda Guía de Tallas" data-help-title="Guía de Tallas" data-help-desc="Medidas de cintura y cadera tomadas en reposo sobre cinta métrica flexible.">?</button>
-        </div>
 
         <div class="overflow-x-auto mb-6">
             <table class="size-guide-table w-full text-xs text-left">
@@ -564,7 +655,7 @@
             <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
                     <h4 class="text-xs font-bold text-slate-900">Protocolos de Cuidado de Ropa Delicada</h4>
-                    <span class="text-[10px] text-slate-400 font-semibold">3 Fibras</span>
+                    <button class="text-indigo-600 hover:text-indigo-800 text-[11px] font-bold cursor-pointer" data-action="open-edit-care-modal" type="button">Editar Protocolos</button>
                 </div>
                 <div class="space-y-2.5 text-xs">
                     @foreach($careProtocols as $c)
@@ -586,7 +677,7 @@
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#059669" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         <span>Aviso Normativo y Sanitario PROFECO</span>
                     </h4>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Blindado</span>
+                    <button class="text-indigo-600 hover:text-indigo-800 text-[11px] font-bold cursor-pointer" data-action="open-edit-profeco-modal" type="button">Editar Aviso</button>
                 </div>
                 <div class="space-y-3 text-xs">
                     <p class="text-slate-600 text-[11px] leading-relaxed">
@@ -601,12 +692,248 @@
     </div>
     <!-- FIN SUBMÓDULO 4 -->
 
-    {{-- Formularios Ocultos para Banners y Marquesinas --}}
+    <!-- ========================================================================= -->
+    <!-- MODALES DE CONTROL OPERATIVO CMS                                          -->
+    <!-- ========================================================================= -->
+
+    <!-- 1. MODAL CREAR SECCIÓN MODULAR -->
+    <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Crear Nueva Sección Modular para el Home</span>
+                </h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.sections.store') }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nombre Interno</label>
+                        <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Curaduría Verano Jocks">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Vitrina / Universo Destino</label>
+                        <select name="universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="all">Todas las vitrinas (Global)</option>
+                            <option value="marte">Marte (Masculino)</option>
+                            <option value="venus">Venus (Femenino)</option>
+                            <option value="tiresias">Tiresias (Afirmativo)</option>
+                            <option value="terra">Terra (Unisex/Matriz)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección</label>
+                    <select name="type" id="sectionTypeSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        <option value="categories_grid">Cuadrícula de Categorías (Hub 4)</option>
+                        <option value="curated_products">Prendas Destacadas / Colección (Hub 4)</option>
+                        <option value="family_showcase">Vitrina de Familias Textiles</option>
+                        <option value="tags_cloud">Nube de Tags / Estilos</option>
+                        <option value="editorial_banner">Banner Editorial / Promoción</option>
+                        <option value="brand_pillars">Pilares de Marca (Garantías)</option>
+                        <option value="custom_html_css_js">Bloque Custom (HTML, CSS y JS libre)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
+                        <input type="text" name="title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS PREMIUM">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
+                        <input type="text" name="badge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
+                    <input type="text" name="subtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
+                </div>
+
+                <!-- SELECTOR TAXONOMÍAS DE HUB 4 -->
+                <div id="taxonomySectionOptions" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                    <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Filtro de Catálogo (Hub 4)</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Filtrar por Categoría</label>
+                            <select name="query_rules[category_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todas las categorías</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Filtrar por Marca</label>
+                            <select name="query_rules[brand]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todas las marcas</option>
+                                @foreach($brands as $br)
+                                    <option value="{{ $br }}">{{ $br }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EDITOR CUSTOM HTML/CSS/JS (CONDICIONAL) -->
+                <div id="customCodeSectionOptions" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3 hidden">
+                    <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
+                        <textarea name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<div class='mi-banner'>...</div>"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
+                            <textarea name="custom_css" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder=".mi-banner { color: red; }"></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
+                            <textarea name="custom_js" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="console.log('banner cargado');"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createSectionModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer">Guardar y Añadir Sección</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MODAL EDITAR GUÍA DE TALLAS TORZO -->
+    <div id="editSizeGuideModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900">Editar Guía Oficial de Tallas Textiles Torzo</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editSizeGuideModal">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'SIZE_GUIDE_TORZO']) }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="space-y-3">
+                    @foreach($sizeGuide as $idx => $s)
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-5 gap-2 items-center">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-0.5">Talla</label>
+                                <input type="text" name="payload[{{ $idx }}][size]" value="{{ $s['size'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded font-bold text-xs">
+                                <input type="hidden" name="payload[{{ $idx }}][isCore]" value="{{ !empty($s['isCore']) ? 1 : 0 }}">
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 mb-0.5">Cintura (cm)</label>
+                                <input type="text" name="payload[{{ $idx }}][waistCm]" value="{{ $s['waistCm'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 mb-0.5">Cadera (cm)</label>
+                                <input type="text" name="payload[{{ $idx }}][hipsCm]" value="{{ $s['hipsCm'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 mb-0.5">Pantalón</label>
+                                <input type="text" name="payload[{{ $idx }}][pantsSize]" value="{{ $s['pantsSize'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-xs font-mono font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 mb-0.5">Consejo Calce</label>
+                                <input type="text" name="payload[{{ $idx }}][advice]" value="{{ $s['advice'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-[11px]">
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editSizeGuideModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg cursor-pointer">Guardar Matriz de Tallas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. MODAL EDITAR PROTOCOLOS DE CUIDADO -->
+    <div id="editCareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900">Editar Protocolos Oficiales de Preservación Textil</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editCareModal">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'CARE_PROTOCOLS']) }}" class="space-y-4 text-xs">
+                @csrf
+                <div class="space-y-3">
+                    @foreach($careProtocols as $idx => $c)
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div>
+                                <label class="block font-bold text-slate-800 mb-1">Fibra / Prenda</label>
+                                <input type="text" name="payload[{{ $idx }}][fiber]" value="{{ $c['fiber'] }}" class="w-full px-3 py-1.5 border border-slate-200 rounded font-bold text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-slate-700 mb-1">Regla de Lavado</label>
+                                <textarea name="payload[{{ $idx }}][rule]" rows="2" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs">{{ $c['rule'] }}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-amber-800 font-semibold mb-1">Advertencia de Cuidado</label>
+                                <input type="text" name="payload[{{ $idx }}][warning]" value="{{ $c['warning'] }}" class="w-full px-3 py-1.5 border border-amber-200 bg-amber-50/50 rounded text-xs text-amber-900">
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editCareModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg cursor-pointer">Guardar Protocolos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. MODAL EDITAR AVISO SANITARIO PROFECO -->
+    <div id="editProfecoModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900">Editar Aviso Normativo y Sanitario PROFECO</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editProfecoModal">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'PROFECO_SANITARY_NOTICE']) }}" class="space-y-4 text-xs">
+                @csrf
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Fundamento Legal</label>
+                    <input type="text" name="payload[legal_basis]" value="{{ $profecoNotice['legal_basis'] ?? '' }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Declaración de Higiene / No Retorno</label>
+                    <textarea name="payload[statement]" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs leading-relaxed">{{ $profecoNotice['statement'] ?? '' }}</textarea>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Garantía de Empaque Discreto</label>
+                    <input type="text" name="payload[discreet_shipping]" value="{{ $profecoNotice['discreet_shipping'] ?? '' }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editProfecoModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg cursor-pointer">Guardar Aviso Sanitario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Formularios Ocultos para Acciones Rápidas --}}
     <form id="toggleAnnouncementForm" method="POST" action="{{ route('portal.store.announcement.toggle') }}" style="display:none;">
         @csrf
     </form>
     <form id="toggleBannerForm" method="POST" style="display:none;">
         @csrf
+    </form>
+    <form id="toggleSectionForm" method="POST" style="display:none;">
+        @csrf
+    </form>
+    <form id="deleteSectionForm" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 
@@ -869,6 +1196,122 @@ document.addEventListener('DOMContentLoaded', function () {
                     p.textContent = isHealthy
                         ? 'El umbral actual protege el margen operativo por encima del umbral mínimo de viabilidad (30% EBITDA) absorbiendo costos de paquetería sin comprometer flujo de caja.'
                         : 'Precaución: El umbral simulado compromete el margen neto debido a que una alta proporción de órdenes diluye la utilidad frente al flete courier de $145 MXN.';
+                }
+            }
+        });
+    }
+
+    // 6. GESTOR DE SECCIONES MODULARES (REORDENAMIENTO Y MODALES)
+    const modalButtons = document.querySelectorAll('[data-action^="open-"]');
+    modalButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const action = this.getAttribute('data-action');
+            if (action === 'open-create-section-modal') {
+                const m = document.getElementById('createSectionModal');
+                if (m) m.classList.remove('hidden');
+            } else if (action === 'open-edit-size-guide-modal') {
+                const m = document.getElementById('editSizeGuideModal');
+                if (m) m.classList.remove('hidden');
+            } else if (action === 'open-edit-care-modal') {
+                const m = document.getElementById('editCareModal');
+                if (m) m.classList.remove('hidden');
+            } else if (action === 'open-edit-profeco-modal') {
+                const m = document.getElementById('editProfecoModal');
+                if (m) m.classList.remove('hidden');
+            }
+        });
+    });
+
+    const closeButtons = document.querySelectorAll('[data-action="close-modal"]');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const modalId = this.getAttribute('data-modal');
+            const m = document.getElementById(modalId);
+            if (m) m.classList.add('hidden');
+        });
+    });
+
+    // Toggle de opciones condicionales en el modal de secciones
+    const sectionTypeSelect = document.getElementById('sectionTypeSelect');
+    const taxonomyOpts = document.getElementById('taxonomySectionOptions');
+    const customCodeOpts = document.getElementById('customCodeSectionOptions');
+
+    if (sectionTypeSelect) {
+        sectionTypeSelect.addEventListener('change', function () {
+            if (this.value === 'custom_html_css_js') {
+                if (taxonomyOpts) taxonomyOpts.classList.add('hidden');
+                if (customCodeOpts) customCodeOpts.classList.remove('hidden');
+            } else {
+                if (taxonomyOpts) taxonomyOpts.classList.remove('hidden');
+                if (customCodeOpts) customCodeOpts.classList.add('hidden');
+            }
+        });
+    }
+
+    // Reordenamiento interactivo de secciones
+    const sectionsBody = document.getElementById('sectionsSortableBody');
+
+    function syncSectionsOrder() {
+        if (!sectionsBody) return;
+        const rows = sectionsBody.querySelectorAll('tr[data-section-id]');
+        const order = [];
+        rows.forEach((row, idx) => {
+            const id = parseInt(row.getAttribute('data-section-id'));
+            order.push(id);
+            const badge = row.querySelector('.section-order-badge');
+            if (badge) badge.textContent = `#${idx + 1}`;
+        });
+
+        fetch('{{ route("portal.store.sections.reorder") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ order })
+        }).then(res => res.json()).then(data => {
+            console.log('Secciones reordenadas exitosamente:', data);
+        }).catch(err => {
+            console.error('Error al sincronizar orden de secciones:', err);
+        });
+    }
+
+    if (sectionsBody) {
+        sectionsBody.addEventListener('click', function (e) {
+            const moveUpBtn = e.target.closest('[data-action="move-section-up"]');
+            const moveDownBtn = e.target.closest('[data-action="move-section-down"]');
+            const toggleBtn = e.target.closest('[data-action="toggle-section-status"]');
+            const deleteBtn = e.target.closest('[data-action="delete-section"]');
+
+            if (moveUpBtn) {
+                const tr = moveUpBtn.closest('tr');
+                if (tr && tr.previousElementSibling) {
+                    tr.parentNode.insertBefore(tr, tr.previousElementSibling);
+                    syncSectionsOrder();
+                }
+            } else if (moveDownBtn) {
+                const tr = moveDownBtn.closest('tr');
+                if (tr && tr.nextElementSibling) {
+                    tr.parentNode.insertBefore(tr.nextElementSibling, tr);
+                    syncSectionsOrder();
+                }
+            } else if (toggleBtn) {
+                const secId = toggleBtn.getAttribute('data-section-id');
+                const form = document.getElementById('toggleSectionForm');
+                if (form && secId) {
+                    form.action = `/admin/tienda-cms/secciones/${secId}/toggle`;
+                    form.submit();
+                }
+            } else if (deleteBtn) {
+                const secId = deleteBtn.getAttribute('data-section-id');
+                const secName = deleteBtn.getAttribute('data-section-name');
+                if (confirm(`¿Estás seguro de eliminar la sección "${secName}"?`)) {
+                    const form = document.getElementById('deleteSectionForm');
+                    if (form && secId) {
+                        form.action = `/admin/tienda-cms/secciones/${secId}`;
+                        form.submit();
+                    }
                 }
             }
         });

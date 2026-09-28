@@ -88,6 +88,11 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/tienda-cms/banners/{bannerId}/toggle', [PortalStoreController::class, 'toggleBanner'])->name('portal.store.banners.toggle');
 	Route::post('/admin/tienda-cms/marquesina/toggle', [PortalStoreController::class, 'toggleAnnouncement'])->name('portal.store.announcement.toggle');
 	Route::post('/admin/tienda-cms/vitrinas/{universe}', [PortalStoreController::class, 'updateStorefront'])->name('portal.store.vitrinas.update');
+	Route::post('/admin/tienda-cms/secciones', [PortalStoreController::class, 'storeSection'])->name('portal.store.sections.store');
+	Route::post('/admin/tienda-cms/secciones/reorder', [PortalStoreController::class, 'reorderSections'])->name('portal.store.sections.reorder');
+	Route::post('/admin/tienda-cms/secciones/{section}/toggle', [PortalStoreController::class, 'toggleSection'])->name('portal.store.sections.toggle');
+	Route::delete('/admin/tienda-cms/secciones/{section}', [PortalStoreController::class, 'destroySection'])->name('portal.store.sections.destroy');
+	Route::post('/admin/tienda-cms/documentos/{code}', [PortalStoreController::class, 'updateDocument'])->name('portal.store.documents.update');
 
 	// Hub 7: Convenios & Aliados
 	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');
