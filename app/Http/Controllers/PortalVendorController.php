@@ -319,7 +319,7 @@ class PortalVendorController extends Controller
         $task = OperationalTask::create([
             'title' => "Recepcion Inbound en Rampa: {$order->po_number} ({$dispatchedUnits} uds)",
             'category' => 'almacen',
-            'priority' => ($order->priority === 'critical' || $order->priority === 'urgent') ? 'critical' : 'high',
+            'priority' => in_array($order->priority, ['critical', 'critica', 'urgent', 'alta'], true) ? 'critical' : 'high',
             'assigned_role' => 'warehouse',
             'status' => 'pending',
             'sla_minutes_limit' => 240,
