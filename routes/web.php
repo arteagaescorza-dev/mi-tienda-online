@@ -95,6 +95,14 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv');
 });
 
+// Hub 7: Extranet de Proveedores & Fabricantes (TASK-HUB-VND)
+use App\Http\Controllers\PortalVendorController;
+
+Route::middleware(['auth', 'entity.isolation:vendor'])->group(function () {
+	Route::get('/admin/extranet/proveedores', [PortalVendorController::class, 'index'])->name('portal.vendor.extranet');
+	Route::get('/admin/extranet/proveedores/ordenes/{id}/imprimir', [PortalVendorController::class, 'printOrder'])->name('portal.vendor.orders.print');
+});
+
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');
 Route::post('/portal/aliado/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.ally.extranet.validate');
 Route::get('/portal/aliado/{token}/export-csv', [PortalAlliesController::class, 'exportDoorListCsvByToken'])->name('portal.ally.extranet.export.csv');

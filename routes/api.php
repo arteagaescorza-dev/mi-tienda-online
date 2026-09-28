@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\RevOps\LogisticsApiController;
 use App\Http\Controllers\Api\RevOps\AlliesApiController;
 use App\Http\Controllers\Api\RevOps\DashboardApiController;
 use App\Http\Controllers\Api\StorefrontApiController;
+use App\Http\Controllers\PortalVendorController;
 
 // =========================================================================
 // STOREFRONT D2C PUBLIC API ENDPOINTS
@@ -154,6 +155,14 @@ Route::prefix('v1')->group(function () {
         Route::post('/{id}/settle', [AlliesApiController::class, 'executeSettlement']);
         Route::post('/validate-voucher', [AlliesApiController::class, 'validateVoucher']);
         Route::get('/{id}/export-csv', [AlliesApiController::class, 'exportDoorListCsv']);
+    });
+
+    // 6.1. EXTRANET PROVEEDORES & FABRICANTES (HUB 7 - TASK-HUB-VND)
+    Route::prefix('hub7/vendor')->group(function () {
+        Route::get('/orders', [PortalVendorController::class, 'getOrders']);
+        Route::get('/orders/{id}', [PortalVendorController::class, 'getOrderDetail']);
+        Route::post('/orders/{id}/confirm', [PortalVendorController::class, 'confirmOrder']);
+        Route::get('/credit-agreements', [PortalVendorController::class, 'getCreditAgreements']);
     });
 
     // 7. DASHBOARD GENERAL, TAREAS & COPILOTO (HUB 1)

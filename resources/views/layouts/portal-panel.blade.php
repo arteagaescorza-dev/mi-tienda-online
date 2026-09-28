@@ -93,40 +93,53 @@
       <div class="sidebar-nav-container">
         <div class="sidebar-heading"><span>Hubs Operativos</span><button class="collapse-button" data-action="collapse" aria-label="Contraer modulos">&lsaquo;</button></div>
         <nav class="module-nav" aria-label="Hubs operativos">
-          <a class="module-link {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}" href="{{ route('portal.dashboard') }}" data-screen="dashboard" title="Hub 1: Dashboard General">
-            <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-            <span>1. Dashboard General</span>
-          </a>
-          <a class="module-link {{ request()->routeIs('portal.store') ? 'active' : '' }}" href="{{ route('portal.store') }}" data-screen="store" title="Hub 2: Tienda &amp; CMS Multiverso">
-            <svg viewBox="0 0 24 24"><path d="m4 8 8-4 8 4-8 4-8-4Zm0 0v8l8 4 8-4V8M12 12v8"/><circle cx="12" cy="12" r="2"/></svg>
-            <span>2. Tienda &amp; CMS</span>
-          </a>
-          <a class="module-link {{ request()->routeIs('portal.marketing') || request()->routeIs('leads.*') || request()->routeIs('portal.scoring') ? 'active' : '' }}" href="{{ route('portal.marketing') }}" data-screen="crm" title="Hub 3: Marketing &amp; CRM 360°">
-            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span>3. Marketing &amp; CRM</span>
-          </a>
-          <a class="module-link {{ request()->routeIs('portal.inventory') ? 'active' : '' }}" href="{{ route('portal.inventory') }}" data-screen="inventory" title="Hub 4: Inventario &amp; Cadena de Suministro">
-            <svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4ZM4 7l8 4 8-4M12 11v10"/></svg>
-            <span>4. Inventario &amp; Compras</span>
-          </a>
-          @canViewFinancials
-          <a class="module-link {{ request()->routeIs('portal.finance') ? 'active' : '' }}" href="{{ route('portal.finance') }}" data-screen="finance" title="Hub 5: Finanzas &amp; Conciliacion">
-            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
-            <span>5. Finanzas &amp; Conciliacion</span>
-          </a>
-          @endcanViewFinancials
-          <a class="module-link {{ request()->routeIs('portal.logistics') ? 'active' : '' }}" href="{{ route('portal.logistics') }}" data-screen="logistics" title="Hub 6: Logística &amp; Post-Venta">
-            <svg viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14v10Z"/><circle cx="17" cy="18.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/></svg>
-            <span>6. Logística &amp; Envíos</span>
-          </a>
-          <a class="module-link {{ request()->routeIs('portal.allies') ? 'active' : '' }}" href="{{ route('portal.allies') }}" data-screen="allies" title="Hub 7: Convenios &amp; Aliados">
-            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="12" y1="1" x2="12" y2="7"/></svg>
-            <span>7. Convenios &amp; Aliados</span>
-          </a>
-          <a class="module-link {{ request()->routeIs('portal.governance') ? 'active' : '' }}" href="{{ route('portal.governance') }}" data-screen="governance" title="Hub 8: Gobernanza, Auditoria &amp; RBAC">
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>8. Gobernanza &amp; RBAC</span>
-          </a>
+          @php($activeRole = session('active_role') ?: ($authUser ? ($authUser->active_role ?? $authUser->role) : 'guest'))
+          @if($activeRole === 'vendor')
+            <a class="module-link {{ request()->routeIs('portal.vendor.*') ? 'active' : '' }}" href="{{ route('portal.vendor.extranet') }}" data-screen="vendor-extranet" title="Hub 7: Extranet de Proveedores & Fabricantes">
+              <svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4ZM4 7l8 4 8-4M12 11v10"/></svg>
+              <span>7. Extranet Proveedor</span>
+            </a>
+          @elseif($activeRole === 'ally')
+            <a class="module-link {{ request()->routeIs('portal.allies') ? 'active' : '' }}" href="{{ route('portal.allies') }}" data-screen="allies" title="Hub 7: Extranet de Aliados">
+              <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="12" y1="1" x2="12" y2="7"/></svg>
+              <span>7. Extranet Aliado</span>
+            </a>
+          @else
+            <a class="module-link {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}" href="{{ route('portal.dashboard') }}" data-screen="dashboard" title="Hub 1: Dashboard General">
+              <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+              <span>1. Dashboard General</span>
+            </a>
+            <a class="module-link {{ request()->routeIs('portal.store') ? 'active' : '' }}" href="{{ route('portal.store') }}" data-screen="store" title="Hub 2: Tienda &amp; CMS Multiverso">
+              <svg viewBox="0 0 24 24"><path d="m4 8 8-4 8 4-8 4-8-4Zm0 0v8l8 4 8-4V8M12 12v8"/><circle cx="12" cy="12" r="2"/></svg>
+              <span>2. Tienda &amp; CMS</span>
+            </a>
+            <a class="module-link {{ request()->routeIs('portal.marketing') || request()->routeIs('leads.*') || request()->routeIs('portal.scoring') ? 'active' : '' }}" href="{{ route('portal.marketing') }}" data-screen="crm" title="Hub 3: Marketing &amp; CRM 360°">
+              <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>3. Marketing &amp; CRM</span>
+            </a>
+            <a class="module-link {{ request()->routeIs('portal.inventory') ? 'active' : '' }}" href="{{ route('portal.inventory') }}" data-screen="inventory" title="Hub 4: Inventario &amp; Cadena de Suministro">
+              <svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4ZM4 7l8 4 8-4M12 11v10"/></svg>
+              <span>4. Inventario &amp; Compras</span>
+            </a>
+            @canViewFinancials
+            <a class="module-link {{ request()->routeIs('portal.finance') ? 'active' : '' }}" href="{{ route('portal.finance') }}" data-screen="finance" title="Hub 5: Finanzas &amp; Conciliacion">
+              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
+              <span>5. Finanzas &amp; Conciliacion</span>
+            </a>
+            @endcanViewFinancials
+            <a class="module-link {{ request()->routeIs('portal.logistics') ? 'active' : '' }}" href="{{ route('portal.logistics') }}" data-screen="logistics" title="Hub 6: Logística &amp; Post-Venta">
+              <svg viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14v10Z"/><circle cx="17" cy="18.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/></svg>
+              <span>6. Logística &amp; Envíos</span>
+            </a>
+            <a class="module-link {{ request()->routeIs('portal.allies') || request()->routeIs('portal.vendor.*') ? 'active' : '' }}" href="{{ route('portal.allies') }}" data-screen="allies" title="Hub 7: Convenios, Aliados &amp; Extranets B2B">
+              <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="12" y1="1" x2="12" y2="7"/></svg>
+              <span>7. Convenios &amp; Extranets</span>
+            </a>
+            <a class="module-link {{ request()->routeIs('portal.governance') ? 'active' : '' }}" href="{{ route('portal.governance') }}" data-screen="governance" title="Hub 8: Gobernanza, Auditoria &amp; RBAC">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>8. Gobernanza &amp; RBAC</span>
+            </a>
+          @endif
         </nav>
       </div>
 
