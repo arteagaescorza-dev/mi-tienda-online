@@ -17,11 +17,22 @@ class PurchaseOrder extends Model
         'sent_at' => 'datetime',
         'estimated_delivery_at' => 'datetime',
         'received_at' => 'datetime',
+        'po_snapshot' => 'array',
+        'subtotal' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'gross_subtotal' => 'decimal:2',
+        'credit_deduction_amount' => 'decimal:2',
     ];
 
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function creditAgreement(): BelongsTo
+    {
+        return $this->belongsTo(SupplierCreditAgreement::class, 'credit_agreement_id');
     }
 
     public function items(): HasMany
@@ -34,3 +45,4 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseKardex::class);
     }
 }
+

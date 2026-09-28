@@ -67,6 +67,84 @@ class InventoryApiController extends Controller
     }
 
     /**
+     * Consulta lista de Ordenes de Compra registradas en BD (TASK-INV-16).
+     */
+    public function getPurchaseOrders(Request $request): JsonResponse
+    {
+        $query = PurchaseOrder::query()
+            ->with(['supplier', 'items.product', 'items.variant', 'creditAgreement'])
+            ->latest();
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->integer('supplier_id'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        if ($request->filled('search')) {
+            $search = '%' . $request->string('search')->toString() . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('po_number', 'like', $search)
+                  ->orWhere('notes', 'like', $search)
+                  ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', $search));
+            });
+        }
+
+        $orders = $query->paginate($request->integer('per_page', 25));
+
+        return response()->json([
+            'success' => true,
+            'data' => $orders->items(),
+            'current_page' => $orders->currentPage(),
+            'last_page' => $orders->lastPage(),
+            'total' => $orders->total(),
+        ]);
+    }
+
+    /**
+     * Consulta detalle completo de una Orden de Compra (TASK-INV-16 / TASK-PUR-04).
+     */
+    public function getPurchaseOrderDetail(int $id): JsonResponse
+    {
+        $po = PurchaseOrder::with(['supplier', 'items.product', 'items.variant', 'creditAgreement', 'kardex'])->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'order' => $po,
+        ]);
+    }
+
+    /**
+     * Consulta bitacora inmutable de compras (Purchase Kardex) (TASK-PUR-04).
+     */
+    public function getPurchaseKardex(Request $request): JsonResponse
+    {
+        $query = PurchaseKardex::query()
+            ->with(['supplier', 'purchaseOrder'])
+            ->latest();
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->integer('supplier_id'));
+        }
+
+        if ($request->filled('movement_type')) {
+            $query->where('movement_type', $request->string('movement_type')->toString());
+        }
+
+        $kardex = $query->paginate($request->integer('per_page', 25));
+
+        return response()->json([
+            'success' => true,
+            'data' => $kardex->items(),
+            'current_page' => $kardex->currentPage(),
+            'last_page' => $kardex->lastPage(),
+            'total' => $kardex->total(),
+        ]);
+    }
+
+    /**
      * Emite formalmente una Orden de Compra con deduccion de notas de credito y Kardex (TASK-INV-16 / TASK-PUR-04).
      */
     public function storePurchaseOrder(Request $request): JsonResponse
@@ -78,6 +156,7 @@ class InventoryApiController extends Controller
             'notes' => 'nullable|string|max:1000',
             'delivery_commitment_date' => 'nullable|string|max:100',
             'payment_terms' => 'nullable|string|max:100',
+            'priority' => 'nullable|string|max:30',
             'has_credit_deduction' => 'nullable|boolean',
             'credit_agreement_id' => 'nullable|integer',
             'credit_note_ref' => 'nullable|string|max:50',
@@ -234,17 +313,43 @@ class InventoryApiController extends Controller
                 );
             }
 
+            $poPriority = strtolower($validated['priority'] ?? $validated['items'][0]['priority'] ?? 'media');
+            if (!in_array($poPriority, ['baja', 'media', 'alta', 'critica'])) {
+                $poPriority = 'media';
+            }
+
+            $poSnapshotData = $validated['po_snapshot'] ?? [
+                'po_number' => $poNumber,
+                'supplier_name' => $supplier->name,
+                'supplier_contact' => $supplier->contact_email,
+                'priority' => $poPriority,
+                'total_units' => $totalUnits,
+                'gross_subtotal' => $grossSubtotal,
+                'credit_deduction' => $deductionAmount,
+                'credit_agreement_ref' => $appliedAgreement?->reference_folio,
+                'taxable_subtotal' => $taxableSubtotal,
+                'tax' => $tax,
+                'total_amount' => $totalAmount,
+                'items' => $preparedItems,
+                'created_at' => now()->toIso8601String(),
+            ];
+
             $po = PurchaseOrder::create([
                 'po_number' => $poNumber,
                 'supplier_id' => $supplier->id,
+                'credit_agreement_id' => $appliedAgreement?->id,
                 'status' => 'confirmed',
+                'priority' => $poPriority,
                 'total_units' => $totalUnits,
+                'gross_subtotal' => $grossSubtotal,
+                'credit_deduction_amount' => $deductionAmount,
                 'subtotal' => $taxableSubtotal,
                 'tax' => $tax,
                 'total_amount' => $totalAmount,
                 'currency' => 'MXN',
                 'sent_at' => now(),
                 'notes' => $poNotes,
+                'po_snapshot' => $poSnapshotData,
             ]);
 
             if ($appliedAgreement) {
@@ -319,6 +424,12 @@ class InventoryApiController extends Controller
 
         $po->status = 'in_transit';
         $po->sent_at = now();
+        if (!empty($validated['carrier'])) {
+            $po->carrier = $validated['carrier'];
+        }
+        if (!empty($validated['tracking_number'])) {
+            $po->tracking_number = $validated['tracking_number'];
+        }
 
         $dispatchNote = sprintf(
             'Despacho formal notificado a %s%s%s',

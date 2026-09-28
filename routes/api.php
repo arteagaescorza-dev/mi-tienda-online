@@ -33,6 +33,9 @@ Route::prefix('v1')->group(function () {
     // 1. INVENTARIO & COMPRAS (HUB 4)
     Route::prefix('inventory')->group(function () {
         Route::get('/purchases/credit-agreements', [InventoryApiController::class, 'getCreditAgreements']);
+        Route::get('/purchases/orders', [InventoryApiController::class, 'getPurchaseOrders']);
+        Route::get('/purchases/orders/{id}', [InventoryApiController::class, 'getPurchaseOrderDetail']);
+        Route::get('/purchases/kardex', [InventoryApiController::class, 'getPurchaseKardex']);
         Route::post('/purchases/orders', [InventoryApiController::class, 'storePurchaseOrder']);
         Route::post('/purchases/orders/{id}/dispatch', [InventoryApiController::class, 'dispatchPurchaseOrder']);
         Route::post('/purchases/orders/{id}/receive', [InventoryApiController::class, 'receivePurchaseOrder']);
