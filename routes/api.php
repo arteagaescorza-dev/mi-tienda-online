@@ -47,6 +47,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/products/check-duplicate', [ProductSkuAndDuplicateApiController::class, 'checkDuplicate']);
         Route::post('/products/generate-description', [ProductSkuAndDuplicateApiController::class, 'generateDescription']);
 
+        // MODAL PANORAMICO CENTRADO DE DETALLE Y ACTUALIZACION INTEGRAL DE SKU (TASK-INV-18 / SLICE 4)
+        Route::get('/products/{sku}/detail', [ProductSkuAndDuplicateApiController::class, 'getSkuDetail']);
+        Route::put('/products/{sku}/update-complete', [ProductSkuAndDuplicateApiController::class, 'updateComplete']);
+
         // GESTOR DE AJUSTES DE INVENTARIO: TALLAS, VOLUMENES Y CATEGORIAS (TASK-INV-14)
         Route::prefix('settings')->group(function () {
             Route::get('/size-curves', [InventorySettingsApiController::class, 'getSizeCurves']);

@@ -3803,15 +3803,18 @@
         </div>
     </div>
 
-    <!-- DRAWER LATERAL (Off-canvas animado con Alpine.js)                 -->
+    <!-- ================================================================= -->
+    <!-- MODAL PANORÁMICO CENTRADO: DETALLE Y EDICIÓN DE SKU (TASK-INV-18) -->
     <!-- ================================================================= -->
     <div 
+        id="skuPanoramicModal"
         x-show="drawerOpen" 
-        class="fixed inset-0 z-[60] overflow-hidden" 
+        class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto" 
         style="z-index: 60; display: none;"
-        aria-labelledby="slide-over-title" 
+        aria-labelledby="sku-panoramic-title" 
         role="dialog" 
         aria-modal="true"
+        @keydown.escape.window="drawerOpen = false"
     >
         <!-- Backdrop oscuro con desenfoque suave -->
         <div 
@@ -3823,798 +3826,662 @@
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             @click="drawerOpen = false"
-            class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         ></div>
 
-        <div class="fixed inset-y-0 right-0 w-screen max-w-full flex pointer-events-none">
-            <div 
-                x-show="drawerOpen"
-                x-transition:enter="transform transition ease-out duration-300"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition ease-in duration-200"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                class="w-screen max-w-4xl bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between"
-            >
-                <!-- Header del Drawer -->
-                <div class="p-6 border-b border-slate-200 bg-slate-50/70">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-xs font-mono font-bold rounded bg-indigo-100 text-indigo-700" x-text="selectedProduct?.sku"></span>
-                            <span class="text-xs px-2 py-0.5 rounded font-semibold uppercase tracking-wider"
-                                  :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'"
-                                  x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
-                            </span>
-                        </div>
-                        <button @click="drawerOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-
-                    <div class="flex items-center justify-between mt-3">
-                        <h2 class="text-xl font-bold text-slate-900" x-text="selectedProduct?.name"></h2>
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700" x-text="drawerBrand"></span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-0.5" x-text="selectedProduct?.category"></p>
+        <!-- Contenedor Panorámico Centrado max-w-7xl / 95vw -->
+        <div 
+            x-show="drawerOpen"
+            x-transition:enter="transform transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transform transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="relative w-full max-w-7xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-10"
+        >
+            <!-- Header del Modal Panorámico -->
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 text-sm font-mono font-bold rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200" x-text="selectedProduct?.sku"></span>
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider"
+                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
+                    </span>
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5"
+                          :class="drawerIsPublished ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700 border border-slate-300'">
+                        <span class="w-2 h-2 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                        <span x-text="drawerIsPublished ? 'Publicado en Vitrina' : 'Fuera de Catálogo'"></span>
+                    </span>
                 </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-sm font-bold text-slate-800" x-text="selectedProduct?.name"></div>
+                        <div class="text-xs text-slate-500" x-text="(drawerBrand || 'Sin Marca') + ' • ' + (selectedProduct?.category || 'General')"></div>
+                    </div>
+                    <button 
+                        @click="drawerOpen = false" 
+                        class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/70 transition cursor-pointer"
+                        title="Cerrar modal (Esc)"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
 
-                <!-- Contenido con Scroll del Drawer -->
-                <div class="p-6 overflow-y-auto flex-1 text-sm">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- ========================================================= -->
-                        <!-- COLUMNA IZQUIERDA: VITRINA WEB, ATRIBUTOS TEXTILES & CURA -->
-                        <!-- ========================================================= -->
-                        <div class="space-y-5">
-                            <!-- 1. Toggle de Publicación en Tienda Online -->
-                            <div class="p-4 rounded-xl border transition-colors shadow-2xs" :class="drawerIsPublished ? 'bg-emerald-50/80 border-emerald-300' : 'bg-slate-50 border-slate-200'">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="w-2.5 h-2.5 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                                            <span class="font-bold text-xs uppercase tracking-wider" :class="drawerIsPublished ? 'text-emerald-900' : 'text-slate-700'">Estado en Vitrina Web</span>
-                                        </div>
-                                        <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catálogo (oculta temporalmente del público).'"></p>
+            <!-- Contenido con Scroll de 3 Columnas -->
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- ========================================================= -->
+                    <!-- COLUMNA 1: IDENTIDAD, VITRINA WEB & ATRIBUTOS TEXTILES    -->
+                    <!-- ========================================================= -->
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- 1. Toggle de Publicación en Tienda Online -->
+                        <div class="p-4 rounded-xl border transition-colors shadow-2xs" :class="drawerIsPublished ? 'bg-emerald-50/80 border-emerald-300' : 'bg-slate-50 border-slate-200'">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                                        <span class="font-bold text-xs uppercase tracking-wider" :class="drawerIsPublished ? 'text-emerald-900' : 'text-slate-700'">Estado en Vitrina Web</span>
                                     </div>
-                                    <button 
-                                        type="button" 
-                                        @click="drawerIsPublished = !drawerIsPublished" 
-                                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                        :class="drawerIsPublished ? 'bg-emerald-600' : 'bg-slate-300'"
-                                        title="Alternar publicación"
+                                    <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catálogo (oculta temporalmente del público).'"></p>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    @click="drawerIsPublished = !drawerIsPublished" 
+                                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                    :class="drawerIsPublished ? 'bg-emerald-600' : 'bg-slate-300'"
+                                    title="Alternar publicación"
+                                >
+                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                          :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Catalogación & Proveedor -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="drawerBrand" 
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        placeholder="Ej: Torzo B2B, ModaIntima MX"
                                     >
-                                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                              :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
-                                    </button>
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
+                                    <select 
+                                        x-model="drawerWebsiteSection" 
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="basicos">Línea Básicos Esenciales</option>
+                                        <option value="disenador">Línea Diseñador & Autor</option>
+                                        <option value="temporada">Colección Temporada / Drops</option>
+                                        <option value="general">Catálogo General</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- 2. Marca o Proveedor & Sección del Sitio Web -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
-                                
-                                <div class="grid grid-cols-2 gap-3">
+                            <!-- Variante de Diseño: Con diseño vs Sin diseño -->
+                            <div>
+                                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de Diseño</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button 
+                                        type="button" 
+                                        @click="drawerDesignType = 'sin_diseno'"
+                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
+                                        :class="drawerDesignType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
+                                    >
+                                        Sin Diseño (Liso / Sólido)
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="drawerDesignType = 'con_diseno'"
+                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
+                                        :class="drawerDesignType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
+                                    >
+                                        Con Diseño (Estampado / Pattern)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Tipo de Tela & Fibras Textiles -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
+                                <button 
+                                    type="button" 
+                                    @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
+                                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                >
+                                    + Nueva Tela
+                                </button>
+                            </div>
+                            <select 
+                                x-model="drawerFabricType" 
+                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            >
+                                <template x-for="fab in apparelFabrics" :key="fab.id">
+                                    <option :value="fab.name" x-text="fab.name + ' (' + fab.description + ')'"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- 4. Color & Tornasol Iridiscente -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Color & Tornasol</label>
+                                <button 
+                                    type="button" 
+                                    @click="activeSettingsTab = 'colors'; moduleSettingsModalOpen = true;"
+                                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                >
+                                    + Nuevo Color/Tornasol
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
+                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
+                                    <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
+                                </div>
+                            </div>
+
+                            <!-- Selector Rápido de Paleta -->
+                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
+                                <template x-for="c in apparelColors" :key="c.id">
+                                    <button 
+                                        type="button" 
+                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
+                                        class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
+                                        :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
+                                        :title="c.name"
+                                    >
+                                        <span class="w-5 h-5 rounded-md border border-slate-300 shadow-3xs" :style="'background: ' + c.hex"></span>
+                                        <span class="text-[9px] font-semibold text-slate-700 truncate w-full text-center" x-text="c.name.split(' ')[0]"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- 5. Descripción Comercial del Producto -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-1.5 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Descripción de la Prenda</label>
+                                <span class="text-[10px] text-slate-400">Para vitrina web y curaduría</span>
+                            </div>
+                            <textarea 
+                                x-model="drawerDescription" 
+                                rows="3" 
+                                placeholder="Describe la composición, tacto, silueta y detalles de diseño de la prenda..." 
+                                class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================= -->
+                    <!-- COLUMNA 2: EXISTENCIAS, VARIANTES & UBICACIÓN DE BODEGA   -->
+                    <!-- ========================================================= -->
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- 4 KPIs Reactivos en Caliente (TASK-INV-18) -->
+                        <div class="bg-gradient-to-r from-slate-50 to-indigo-50/40 p-4 rounded-xl border border-slate-200/90 shadow-2xs">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                    <span>Disponibilidad Reactiva en Vivo</span>
+                                </span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">RevOps Live</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-center">
+                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-3xs">
+                                    <span class="text-[10px] text-slate-500 block uppercase font-semibold">Físico en Rack</span>
+                                    <span class="text-lg font-extrabold text-slate-900" x-text="livePhysicalStock()"></span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-amber-200/80 bg-amber-50/30 shadow-3xs">
+                                    <span class="text-[10px] text-amber-700 block uppercase font-semibold">Comprometido</span>
+                                    <span class="text-lg font-extrabold text-amber-600" x-text="selectedProduct ? (selectedProduct.committedStock || 0) : 0"></span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-purple-200/80 bg-purple-50/30 shadow-3xs">
+                                    <span class="text-[10px] text-purple-700 block uppercase font-semibold">Retenido en Locks</span>
+                                    <span class="text-lg font-extrabold text-purple-600" x-text="selectedProduct ? (selectedProduct.lockedStock || 0) : 0"></span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-emerald-300 bg-emerald-50/50 shadow-3xs">
+                                    <span class="text-[10px] text-emerald-700 block uppercase font-bold">Disponible Venta</span>
+                                    <span class="text-lg font-extrabold text-emerald-600" x-text="liveAvailableStock()"></span>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs">
+                                <span class="text-slate-500 text-[11px]">Trazabilidad de existencias:</span>
+                                <button 
+                                    type="button" 
+                                    @click="openKardexForSku(selectedProduct?.sku)" 
+                                    class="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer text-[11px]"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                    <span>Ver Kardex de este SKU &rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Matriz de Tallas o Tonos Cosméticos -->
+                        <template x-if="selectedProduct && selectedProduct.variantDimension === 'shade'">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono Cosmético</label>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-pink-100 text-pink-800 border border-pink-200">Swatches</span>
+                                    </div>
+                                    <span class="text-xs text-slate-500">Total: <strong class="text-pink-700 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <template x-for="shade in activeCosmeticShades" :key="shade.code">
+                                        <div class="bg-white p-2 rounded-lg border border-slate-200 text-center flex flex-col items-center shadow-2xs hover:border-pink-300 transition">
+                                            <div class="flex items-center gap-1.5 mb-1">
+                                                <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + shade.hex_color"></span>
+                                                <span class="text-xs font-bold text-slate-800" x-text="'Tono ' + shade.code"></span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-500 truncate w-full mb-1" x-text="shade.name"></span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                x-model.number="drawerShades[shade.code]" 
+                                                class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:bg-white focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                            >
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="!selectedProduct || selectedProduct.variantDimension !== 'shade'">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Curva de Tallas Activa</label>
+                                    <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
+                                </div>
+
+                                <!-- Fila 1: Tallas Centrales (CH a XL) -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.ch" 
+                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.m" 
+                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.g" 
+                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.xl" 
+                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                </div>
+
+                                <!-- Fila 2: Tallas Extendidas (Plus Size) -->
+                                <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
+                                    <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                        <span>Tallas Extendidas (Plus Size)</span>
+                                        <span>Volumen reducido</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                            <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                x-model.number="drawerSizes['2xl']" 
+                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                            <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                x-model.number="drawerSizes['3xl']" 
+                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Slotting Físico en Almacén -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2">
+                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Ubicación Física en Almacén (Slotting)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Gaveta Asignada</label>
+                                    <select 
+                                        x-model="drawerLocation" 
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="">-- Seleccionar Gaveta --</option>
+                                        <template x-for="slot in warehouseSlots" :key="slot.code">
+                                            <option :value="slot.code" x-text="slot.code + ' (' + slot.zone + ')'"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Código Manual / Libre</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="drawerLocation" 
+                                        placeholder="Ej: A-01-B"
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Control Sanitario & Trazabilidad (Un único bloque limpio) -->
+                        <template x-if="selectedProduct && (selectedProduct.requiresSanitaryControl || drawerRequiresSanitaryControl)">
+                            <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        </span>
+                                        <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
+                                    </div>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-purple-100 text-purple-800 border-purple-200">
+                                        Certificado Sanitario
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-2.5">
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
                                         <input 
                                             type="text" 
-                                            x-model="drawerBrand" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            placeholder="Ej: Torzo B2B, ModaIntima MX"
+                                            x-model="drawerBatchNumber" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         >
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
-                                        <select 
-                                            x-model="drawerWebsiteSection" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
+                                        <input 
+                                            type="date" 
+                                            x-model="drawerExpirationDate" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         >
-                                            <option value="basicos">Línea Básicos Esenciales</option>
-                                            <option value="disenador">Línea Diseñador & Autor</option>
-                                            <option value="temporada">Colección Temporada / Drops</option>
-                                            <option value="general">Catálogo General</option>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
+                                        <select 
+                                            x-model.number="drawerPaoMonths" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                            <option value="6">6 Meses</option>
+                                            <option value="12">12 Meses</option>
+                                            <option value="18">18 Meses</option>
+                                            <option value="24">24 Meses</option>
+                                            <option value="36">36 Meses</option>
                                         </select>
                                     </div>
                                 </div>
-
-                                <!-- Variante de Diseño: Con diseño vs Sin diseño -->
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de Diseño</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button 
-                                            type="button" 
-                                            @click="drawerDesignType = 'sin_diseno'"
-                                            class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                            :class="drawerDesignType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                        >
-                                            Sin Diseño (Liso / Sólido)
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="drawerDesignType = 'con_diseno'"
-                                            class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                            :class="drawerDesignType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                        >
-                                            Con Diseño (Estampado / Pattern)
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
-
-                            <!-- 3. Tipo de Tela & Fibras Textiles -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2 shadow-2xs">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
-                                    <button 
-                                        type="button" 
-                                        @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
-                                        class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                    >
-                                        + Nueva Tela
-                                    </button>
-                                </div>
-                                <select 
-                                    x-model="drawerFabricType" 
-                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" x-text="fab.name + ' (' + fab.description + ')'"></option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- 4. Color & Tornasol Iridiscente -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Color & Tornasol</label>
-                                    <button 
-                                        type="button" 
-                                        @click="activeSettingsTab = 'colors'; moduleSettingsModalOpen = true;"
-                                        class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                    >
-                                        + Nuevo Color/Tornasol
-                                    </button>
-                                </div>
-                                
-                                <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                                    <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
-                                        <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Selector Rápido de Paleta -->
-                                <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
-                                    <template x-for="c in apparelColors" :key="c.id">
-                                        <button 
-                                            type="button" 
-                                            @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
-                                            class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
-                                            :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
-                                            :title="c.name"
-                                        >
-                                            <span class="w-5 h-5 rounded-md border border-slate-300 shadow-3xs" :style="'background: ' + c.hex"></span>
-                                            <span class="text-[9px] font-semibold text-slate-700 truncate w-full text-center" x-text="c.name.split(' ')[0]"></span>
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- 5. Descripción del Producto -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-1.5 shadow-2xs">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Descripción de la Prenda</label>
-                                    <span class="text-[10px] text-slate-400">Para vitrina web y curaduría</span>
-                                </div>
-                                <textarea 
-                                    x-model="drawerDescription" 
-                                    rows="4" 
-                                    placeholder="Describe la composición, tacto, silueta y detalles de diseño de la prenda..." 
-                                    class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                ></textarea>
-                            </div>
-                        </div>
-                        <!-- ========================================================= -->
-                        <!-- COLUMNA DERECHA: EXISTENCIAS, SLOTTING, MARGEN & REORDEN   -->
-                        <!-- ========================================================= -->
-                        <div class="space-y-6">
-                            <!-- Tarjeta Resumen 3 Estados: Físico vs Comprometido vs Disponible -->
-                    <div class="bg-gradient-to-r from-slate-50 to-indigo-50/40 p-3.5 rounded-xl border border-slate-200/90 shadow-2xs">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                <span>Disponibilidad Real (RevOps)</span>
-                            </span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">En Venta Activa</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-3xs">
-                                <span class="text-[10px] text-slate-500 block uppercase font-medium">Físico en Rack</span>
-                                <span class="text-base font-extrabold text-slate-900" x-text="selectedProduct ? selectedProduct.localStock : 0"></span>
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-3xs">
-                                <span class="text-[10px] text-slate-500 block uppercase font-medium">Comprometido</span>
-                                <span class="text-base font-extrabold text-amber-600 flex items-center justify-center gap-0.5">
-                                    <svg class="w-3 h-3 inline-block text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                    <span x-text="selectedProduct ? (selectedProduct.committedStock || 0) : 0"></span>
-                                </span>
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-emerald-200 bg-emerald-50/30 shadow-3xs">
-                                <span class="text-[10px] text-emerald-700 block uppercase font-bold">Disponible Venta</span>
-                                <span class="text-base font-extrabold text-emerald-600" x-text="selectedProduct ? getAvailableStock(selectedProduct) : 0"></span>
-                            </div>
-                        </div>
-                        <p class="text-[10px] text-slate-500 mt-2 text-center">
-                            Apartados en empaque de carritos directos o esperando arribo de proveedor en carritos mixtos.
-                        </p>
-                        <div class="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
-                            <span class="text-slate-500 text-[11px]">Trazabilidad de existencias:</span>
-                            <button 
-                                type="button" 
-                                @click="openKardexForSku(selectedProduct.sku)" 
-                                class="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer text-[11px]"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                <span>Ver Kardex de este SKU &rarr;</span>
-                            </button>
-                        </div>
+                        </template>
                     </div>
-                    
-                    <!-- 1. Desglose de Stock por Talla o Tono Cosmético (TASK-INV-09) -->
-                    <template x-if="selectedProduct && selectedProduct.variantDimension === 'shade'">
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                            <div class="flex items-center justify-between mb-3">
+
+                    <!-- ========================================================= -->
+                    <!-- COLUMNA 3: MÉTRICAS REVOPS, CALCULADORA & PLAN REORDEN    -->
+                    <!-- ========================================================= -->
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- Calculadora Ultra-Reactiva de Rentabilidad (TASK-INV-18) -->
+                        <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-lg border border-slate-800 space-y-4">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
                                 <div class="flex items-center gap-2">
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono Cosmético</label>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-pink-100 text-pink-800 border border-pink-200">Swatches & Subtonos</span>
+                                    <span class="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    </span>
+                                    <h4 class="font-bold text-sm text-white">Calculadora Reactiva RevOps</h4>
                                 </div>
-                                <span class="text-xs text-slate-500">Total: <strong class="text-pink-700 font-bold" x-text="totalProductStockCount()"></strong> piezas</span>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700/60">En Vivo</span>
                             </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                <template x-for="shade in activeCosmeticShades" :key="shade.code">
-                                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center flex flex-col items-center shadow-2xs hover:border-pink-300 transition">
-                                        <div class="flex items-center gap-1.5 mb-1">
-                                            <span class="cosmetic-swatch-20" :style="'background: ' + shade.hex_color"></span>
-                                            <span class="text-xs font-bold text-slate-800" x-text="'Tono ' + shade.code"></span>
-                                        </div>
-                                        <span class="text-[10px] text-slate-500 truncate w-full mb-1" x-text="shade.name"></span>
-                                        <span class="text-[9px] mb-1.5" :class="getUndertoneBadgeClass(shade.undertone)" x-text="getUndertoneLabel(shade.undertone)"></span>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Input PVP Regular / Base -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-300 block mb-1">PVP Regular</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
                                         <input 
                                             type="number" 
-                                            min="0" 
-                                            x-model.number="drawerShades[shade.code]" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:bg-white focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                            step="0.5" 
+                                            x-model.number="drawerRegularPrice" 
+                                            class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                                         >
                                     </div>
+                                </div>
+
+                                <!-- Input Descuento (%) -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-rose-300 block mb-1">Descuento (%)</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            step="1" 
+                                            min="0" 
+                                            max="90" 
+                                            x-model.number="drawerDiscountPct" 
+                                            class="w-full bg-slate-800/90 border border-rose-500/40 rounded-lg py-1.5 px-2.5 text-xs font-bold text-rose-300 focus:outline-none focus:ring-1 focus:ring-rose-400"
+                                            placeholder="0%"
+                                        >
+                                        <span class="absolute right-2.5 top-2 text-xs text-rose-400 font-bold">%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Último Costo -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-300 block mb-1">Último Costo</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.5" 
+                                            x-model.number="drawerCost" 
+                                            class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                                        >
+                                    </div>
+                                </div>
+
+                                <!-- CPP Contable -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-indigo-300 block mb-1">CPP Contable</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-xs text-indigo-400">$</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.1" 
+                                            x-model.number="drawerCpp" 
+                                            class="w-full bg-slate-800/90 border border-indigo-700/80 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-indigo-200 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PVP Efectivo Recalculado -->
+                            <div class="p-2.5 bg-slate-800/90 rounded-xl border border-slate-700 flex items-center justify-between">
+                                <span class="text-xs text-slate-300 font-medium">PVP Efectivo de Venta:</span>
+                                <span class="text-base font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerEffectivePvp())"></span>
+                            </div>
+
+                            <!-- Métricas Reactivas: Utilidad & Márgenes con Semáforo -->
+                            <div class="pt-2 border-t border-slate-800 grid grid-cols-2 gap-2 text-center">
+                                <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
+                                    <span class="text-[10px] text-slate-400 block">Utilidad Real s/ CPP:</span>
+                                    <span class="text-sm font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerUnitProfit())"></span>
+                                </div>
+                                <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
+                                    <span class="text-[10px] text-indigo-300 block font-semibold">Margen Real (CPP):</span>
+                                    <div class="flex items-center justify-center gap-1 mt-0.5">
+                                        <span class="text-sm font-extrabold font-mono" 
+                                              :class="drawerRealMarginPct() >= 40 ? 'text-emerald-400' : (drawerRealMarginPct() >= 25 ? 'text-amber-400' : 'text-rose-400')" 
+                                              x-text="drawerRealMarginPct() + '%'">
+                                        </span>
+                                        <span class="text-[8px] px-1 py-0.2 rounded font-bold uppercase"
+                                              :class="drawerRealMarginPct() >= 40 ? 'bg-emerald-500/20 text-emerald-300' : (drawerRealMarginPct() >= 25 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
+                                              x-text="drawerRealMarginPct() >= 40 ? 'Saludable' : (drawerRealMarginPct() >= 25 ? 'Aceptable' : 'Riesgo')">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Plan de Reabastecimiento & Futuras Compras -->
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1 bg-indigo-50 text-indigo-700 rounded-md border border-indigo-200 inline-flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                    </span>
+                                    <h4 class="font-bold text-xs text-slate-900 uppercase tracking-wider">Plan de Reabastecimiento</h4>
+                                </div>
+                                <template x-if="selectedProduct && isProductInPurchaseList(selectedProduct.sku)">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                        <span x-text="getProductPurchaseCount(selectedProduct.sku) + ' en cola'"></span>
+                                    </span>
                                 </template>
                             </div>
-                            <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-200/80">
-                                <span class="text-[10px] text-slate-400">Tonos configurables dinámicamente con código HEX y subtono.</span>
-                                <button type="button" @click="openCosmeticShadesModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Gestionar Tonos</button>
-                            </div>
-                        </div>
-                    </template>
 
-                    <template x-if="!selectedProduct || selectedProduct.variantDimension !== 'shade'">
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex items-center gap-1.5">
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Inventario por Talla</label>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva de Tallas</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Desglose de existencias por talla para evitar que quiebres en tallas centrales (M, G) bloqueen la conversión del modelo.</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600" x-text="totalSizesCount()"></strong> piezas</span>
-                            </div>
-
-                            <div class="grid grid-cols-4 gap-2.5">
-                                <!-- Talla CH -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">CH (S)</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.ch" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-
-                                <!-- Talla M -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">M</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.m" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-
-                                <!-- Talla G -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">G (L)</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.g" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-
-                                <!-- Talla XL -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">XL</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.xl" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- 2. Ubicación en Bodega -->
-                    <div>
-                        <div class="flex items-center gap-1.5 mb-2">
-                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Ubicación Física en Almacén</label>
-                            <!-- Help Icon -->
-                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Dirección de Rack</div>
-                                    <p class="text-[10px] text-slate-200 leading-snug">Identificador exacto de pasillo, rack y gaveta para guiar al equipo de picking y empaque de pedidos.</p>
-                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <input 
-                            type="text" 
-                            x-model="drawerLocation" 
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                        >
-                    </div>
-
-                    <!-- Control Sanitario & Trazabilidad (TASK-INV-06) -->
-                    <template x-if="selectedProduct && selectedProduct.requiresSanitaryControl">
-                        <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    </span>
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border" :class="getSanitaryBadgeClass(selectedProduct)">
-                                    <span x-text="getSanitaryBadgeText(selectedProduct)"></span>
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-2.5">
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerBatchNumber" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
-                                    <input 
-                                        type="date" 
-                                        x-model="drawerExpirationDate" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
-                                    <select 
-                                        x-model.number="drawerPaoMonths" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="6">6 Meses</option>
-                                        <option value="12">12 Meses</option>
-                                        <option value="18">18 Meses</option>
-                                        <option value="24">24 Meses</option>
-                                        <option value="36">36 Meses</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Control Sanitario & Trazabilidad (TASK-INV-06) -->
-                    <template x-if="selectedProduct && selectedProduct.requiresSanitaryControl">
-                        <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    </span>
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border" :class="getSanitaryBadgeClass(selectedProduct)">
-                                    <span x-text="getSanitaryBadgeText(selectedProduct)"></span>
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-2.5">
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerBatchNumber" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
-                                    <input 
-                                        type="date" 
-                                        x-model="drawerExpirationDate" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
-                                    <select 
-                                        x-model.number="drawerPaoMonths" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="6">6 Meses</option>
-                                        <option value="12">12 Meses</option>
-                                        <option value="18">18 Meses</option>
-                                        <option value="24">24 Meses</option>
-                                        <option value="36">36 Meses</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- 3. Calculadora Reactiva de Margen (PVP - Costo = Margen) -->
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-lg border border-slate-800">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                </span>
-                                <div class="flex items-center gap-1.5">
-                                    <h4 class="font-bold text-sm text-white">Calculadora Reactiva de Margen</h4>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-indigo-300 hover:text-white transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-950 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Calculadora RevOps de Rentabilidad</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Calcula la ganancia bruta y el porcentaje de margen sobre PVP en tiempo real: Saludable (>50%), Aceptable (30-50%) o Riesgo (<30%).</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-950"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">RevOps Unit</span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <!-- Input PVP Regular -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-slate-300 block mb-1">PVP Regular (Lista)</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.5" 
-                                        x-model.number="drawerPvp" 
-                                        class="w-full bg-slate-800/80 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Input Descuento (%) -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-rose-300 block mb-1">Descuento Activo (%)</label>
-                                <div class="relative">
-                                    <input 
-                                        type="number" 
-                                        step="1" 
-                                        min="0" 
-                                        max="90" 
-                                        x-model.number="drawerDiscountPct" 
-                                        class="w-full bg-slate-800/80 border border-rose-500/40 rounded-lg py-1.5 px-2.5 text-sm font-bold text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400"
-                                        placeholder="0%"
-                                    >
-                                    <span class="absolute right-2.5 top-2 text-xs text-rose-400 font-bold">%</span>
-                                </div>
-                            </div>
-
-                            <!-- Input Último Costo -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-slate-300 block mb-1">Último Costo Compra</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.5" 
-                                        x-model.number="drawerCost" 
-                                        class="w-full bg-slate-800/80 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Input CPP Contable -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-indigo-300 block mb-1">Costo Promedio (CPP)</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-2 text-xs text-indigo-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.1" 
-                                        x-model.number="drawerCpp" 
-                                        class="w-full bg-slate-800/80 border border-indigo-700/80 rounded-lg py-1.5 pl-6 pr-2 text-sm font-bold text-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Resultados en Tiempo Real con Comparativa Contable -->
-                        <div class="pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <span class="text-[11px] text-slate-400 block">Utilidad Real s/ CPP:</span>
-                                <div class="text-base font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerPvp - drawerCpp)"></div>
-                                <span class="text-[10px] text-slate-500 block font-mono">Marginal: <span x-text="formatCurrency(calculateProfit())"></span></span>
-                            </div>
-
-                            <div>
-                                <span class="text-[11px] text-indigo-300 block font-semibold">Margen Real (CPP):</span>
-                                <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-base font-extrabold font-mono" 
-                                          :class="calculateRealMarginPercent() >= 50 ? 'text-emerald-400' : (calculateRealMarginPercent() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
-                                          x-text="calculateRealMarginPercent() + '%'">
-                                    </span>
-                                    <span class="text-[9px] px-1 py-0.5 rounded font-bold uppercase tracking-wider"
-                                          :class="calculateRealMarginPercent() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateRealMarginPercent() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
-                                          x-text="calculateRealMarginPercent() >= 50 ? 'Saludable' : (calculateRealMarginPercent() >= 30 ? 'Aceptable' : 'Riesgo')">
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span class="text-[11px] text-slate-400 block">Margen Marginal (Costo):</span>
-                                <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-base font-bold text-slate-300 font-mono" x-text="calculateMarginPercent() + '%'"></span>
-                                    <span class="text-[10px] text-slate-400 font-mono" x-text="'Dif: ' + (getMarginDifference() > 0 ? '+' : '') + getMarginDifference() + '%'"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 4. PLAN DE REABASTECIMIENTO & FUTURAS COMPRAS CON PROVEEDOR -->
-                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/90 shadow-xs">
-                        <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-200">
-                            <div class="flex items-center gap-2">
-                                <span class="p-1.5 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200/80 inline-flex items-center justify-center shadow-2xs">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                    </svg>
-                                </span>
-                                <div>
-                                    <div class="flex items-center gap-1.5">
-                                        <h4 class="font-bold text-sm text-slate-900">Plan de Reabastecimiento con Proveedor</h4>
-                                        <!-- Help Icon -->
-                                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                            </span>
-                                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Planificadas RevOps</div>
-                                                <p class="text-[10px] text-slate-200 leading-snug">Permite programar lotes de reabastecimiento antes de quebrar stock, acumulando volumen para alcanzar MOQ (pedido mínimo) o mejores tarifas mayoristas.</p>
-                                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="text-[11px] text-slate-500">Añadir a lista de compras para consolidar orden con fabricante</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Badge indicador si el SKU ya está en la lista -->
-                            <template x-if="selectedProduct && isProductInPurchaseList(selectedProduct.sku)">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                    <span x-text="getProductPurchaseCount(selectedProduct.sku) + ' uds en cola'"></span>
-                                </span>
-                            </template>
-                        </div>
-
-                        <div class="space-y-3.5">
                             <!-- Selector de Proveedor -->
                             <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Proveedor Asignado / Fabricante</label>
+                                <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Proveedor / Fabricante</label>
                                 <select 
                                     x-model="purchaseSupplier" 
-                                    class="w-full bg-white border border-slate-200 rounded-lg py-2 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                 >
-                                    <option value="Torzo B2B">Torzo B2B &bull; Headless Scraper (CDMX)</option>
-                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX &bull; Fabricante Nacional SAP (Puebla)</option>
-                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL &bull; Algodón/Modal Orgánico (Barcelona)</option>
-                                    <option value="Lingerie Drop Global">Lingerie Drop Global &bull; Dropshipping Jocks/Bikinis (Miami)</option>
-                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel &bull; Sin Costuras (Medellín)</option>
-                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale &bull; Diseño Autor (Guadalajara)</option>
-                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics &bull; Distribuidor Multimarca (Monterrey)</option>
+                                    <option value="Torzo B2B">Torzo B2B • Headless Scraper (CDMX)</option>
+                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX • Fabricante Nacional SAP (Puebla)</option>
+                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL • Algodón/Modal Orgánico (Barcelona)</option>
+                                    <option value="Lingerie Drop Global">Lingerie Drop Global • Dropshipping Jocks/Bikinis (Miami)</option>
+                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel • Sin Costuras (Medellín)</option>
+                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale • Diseño Autor (Guadalajara)</option>
+                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics • Distribuidor Multimarca (Monterrey)</option>
                                 </select>
                             </div>
 
-                            <!-- Matriz Reactiva de Tallas & Presets Rápidos -->
+                            <!-- Presets Rápidos (+30, +60, +120) -->
                             <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Matriz de Reposición por Talla</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Reposición por Talla</label>
                                     <div class="flex items-center gap-1">
-                                        <button type="button" @click="setPurchaseQty(30)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 8px;">+30</button>
-                                        <button type="button" @click="setPurchaseQty(60)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 8px;">+60</button>
-                                        <button type="button" @click="setPurchaseQty(120)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer font-extrabold" style="min-height:unset;padding:2px 8px;">+120 (MOQ)</button>
+                                        <button type="button" @click="setPurchaseQty(30)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 6px;">+30</button>
+                                        <button type="button" @click="setPurchaseQty(60)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 6px;">+60</button>
+                                        <button type="button" @click="setPurchaseQty(120)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer font-extrabold" style="min-height:unset;padding:2px 6px;">+120 (MOQ)</button>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-slate-500 block mb-1">CH</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.ch" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-slate-200 rounded-lg py-1 px-1 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
+                                <div class="grid grid-cols-4 gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200 text-center">
+                                    <div>
+                                        <span class="text-[9px] font-bold text-slate-500 block">CH</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.ch" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-slate-200 rounded py-0.5 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-indigo-700 inline-flex items-center justify-center gap-0.5 mb-1">M <svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.m" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-indigo-200 rounded-lg py-1 px-1 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
+                                    <div>
+                                        <span class="text-[9px] font-bold text-indigo-700 block">M</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.m" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-indigo-200 rounded py-0.5 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-indigo-700 inline-flex items-center justify-center gap-0.5 mb-1">G <svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.g" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-indigo-200 rounded-lg py-1 px-1 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
+                                    <div>
+                                        <span class="text-[9px] font-bold text-indigo-700 block">G</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.g" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-indigo-200 rounded py-0.5 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-slate-500 block mb-1">XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.xl" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-slate-200 rounded-lg py-1 px-1 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Fila Plus Size para Reorden: 2XL y 3XL -->
-                                <div class="mt-2 p-2 bg-slate-50/70 rounded-lg border border-slate-200/80">
-                                    <div class="flex items-center justify-between mb-1 px-0.5">
-                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tallas Extendidas (Plus Size)</span>
-                                        <span class="text-[10px] text-slate-400">Poco volumen</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="bg-white p-1 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-[10px] font-bold text-slate-600 pl-1">2XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="purchaseSizes['2xl']" 
-                                                @input="updatePurchaseTotalFromSizes()"
-                                                class="w-16 bg-slate-50 border border-slate-200 rounded py-0.5 px-1 text-center text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
-                                        <div class="bg-white p-1 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-[10px] font-bold text-slate-600 pl-1">3XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="purchaseSizes['3xl']" 
-                                                @input="updatePurchaseTotalFromSizes()"
-                                                class="w-16 bg-slate-50 border border-slate-200 rounded py-0.5 px-1 text-center text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1.5 px-0.5">
-                                    <span>Total calculado: <strong class="text-indigo-600 font-bold" x-text="purchaseQty"></strong> piezas</span>
-                                    <span class="text-slate-400 text-[10px] inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Tallas de mayor rotación</span>
-                                </div>
-                            </div>
-
-                            <!-- Prioridad e Inversión Estimada -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Prioridad de Reposición</label>
-                                    <select 
-                                        x-model="purchasePriority" 
-                                        class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
-                                        <option value="alta">Alta (Riesgo &lt; 7 días)</option>
-                                        <option value="media">Media (Curva habitual)</option>
-                                        <option value="baja">Baja (Lote programado)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Inversión Estimada</label>
-                                    <div class="bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-extrabold text-emerald-700 flex items-center justify-between">
-                                        <span x-text="formatCurrency(calculatePurchaseTotal())"></span>
-                                        <span class="text-[10px] font-normal text-slate-400">PVP Costo</span>
+                                    <div>
+                                        <span class="text-[9px] font-bold text-slate-500 block">XL</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.xl" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-slate-200 rounded py-0.5 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Botón Acción: Añadir a Lista de Compras -->
+                            <!-- Inversión y Acción de Reorden -->
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-white border border-slate-200 rounded-lg p-2">
+                                    <span class="text-[10px] font-semibold text-slate-500 block">Total Piezas:</span>
+                                    <span class="font-extrabold text-slate-900" x-text="purchaseQty + ' uds'"></span>
+                                </div>
+                                <div class="bg-white border border-slate-200 rounded-lg p-2">
+                                    <span class="text-[10px] font-semibold text-slate-500 block">Inversión Estimada:</span>
+                                    <span class="font-extrabold text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></span>
+                                </div>
+                            </div>
+
                             <button 
                                 type="button" 
                                 @click="addToFuturePurchaseList()" 
-                                class="w-full mt-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer group"
+                                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition cursor-pointer"
                                 style="min-height:unset;"
                             >
-                                <svg class="w-4 h-4 text-indigo-200 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                 <span>Añadir a Lista de Futuras Compras</span>
                             </button>
 
-                            <!-- Mensaje de confirmación en línea inmediato dentro del drawer -->
                             <div 
                                 x-show="purchaseAddedSuccess" 
-                                x-transition:enter="transition ease-out duration-200 transform"
-                                x-transition:enter-start="opacity-0 -translate-y-1"
-                                x-transition:enter-end="opacity-100 translate-y-0"
-                                x-transition:leave="transition ease-in duration-150 transform"
-                                x-transition:leave-start="opacity-100 translate-y-0"
-                                x-transition:leave-end="opacity-0 -translate-y-1"
-                                class="mt-2.5 p-2.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-2xs"
+                                x-transition 
+                                class="p-2 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-1.5"
                                 style="display: none;"
                             >
                                 <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span class="flex-1 leading-tight">¡Añadido exitosamente a la lista de futuras compras!</span>
-                                <span class="text-[10px] bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded font-bold shrink-0">En Proveedores</span>
+                                <span class="flex-1 text-[11px]">Añadido a lista de compras</span>
                             </div>
                         </div>
                     </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
 
-
-                <!-- Footer del Drawer -->
-                <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
+            <!-- Footer del Modal Panorámico -->
+            <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                <div class="text-xs text-slate-500 hidden sm:flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <span>Los cambios se guardan y recalculan inmediatamente.</span>
+                </div>
+                <div class="flex items-center gap-3 ml-auto">
                     <button 
                         @click="drawerOpen = false" 
-                        class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
+                        class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-xl transition cursor-pointer"
                     >
                         Cancelar
                     </button>
                     <button 
                         type="button"
                         @click="handleSaveDrawerClick()" 
-                        class="px-5 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition cursor-pointer"
                         style="min-height: unset;"
                     >
-                        Guardar Cambios
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Guardar Cambios</span>
                     </button>
                 </div>
             </div>
