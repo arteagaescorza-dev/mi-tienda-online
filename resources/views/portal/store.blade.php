@@ -323,11 +323,7 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- FIN SUBMÓDULO 1: EDITOR VISUAL -->
 
-    <!-- SUBMÓDULO 2: BANNERS & MARQUESINAS -->
-    <div id="storeBannersPanel" class="tab-panel hidden">
         <!-- GESTOR DE SECCIONES MODULARES DEL HOME (DRAG & DROP) -->
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
@@ -396,7 +392,7 @@
                                 <td class="p-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <button class="button button-light py-1 px-2 text-[11px] rounded shadow-2xs cursor-pointer" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button">
-                                            {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
+                                             {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
                                         </button>
                                         <button class="button button-light py-1 px-2 text-[11px] text-rose-600 hover:bg-rose-50 rounded shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button">
                                             Eliminar
@@ -413,6 +409,11 @@
                 </table>
             </div>
         </div>
+    </div>
+    <!-- FIN SUBMÓDULO 1: EDITOR VISUAL -->
+
+    <!-- SUBMÓDULO 2: BANNERS & MARQUESINAS -->
+    <div id="storeBannersPanel" class="tab-panel hidden">
 
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">

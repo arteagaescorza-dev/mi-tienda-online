@@ -11439,8 +11439,12 @@ function renderStoreEditorialTab(subnavBar) {
   `;
 }
 
-// Delegación de eventos para Hub 2: Tienda & CMS
+// Delegación de eventos para Hub 2: Tienda & CMS (Solo activo si NO fue renderizado por Blade)
 document.addEventListener('click', (e) => {
+  if (document.getElementById('storeAppRoot')) {
+    return;
+  }
+
   const switchTabBtn = e.target.closest('[data-action="switch-store-tab"]');
   if (switchTabBtn) {
     switchStoreTab(switchTabBtn.dataset.tab);
@@ -11485,6 +11489,10 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('input', (e) => {
+  if (document.getElementById('storeAppRoot')) {
+    return;
+  }
+
   const slider = e.target.closest('[data-action="simulate-threshold-slider"]');
   if (slider) {
     simulateShippingThreshold(slider.value);
@@ -14968,6 +14976,10 @@ function render(name = 'inventory') {
   } else if (resolvedName === 'finance') {
     mainContainer.innerHTML = financeBody();
   } else if (resolvedName === 'store') {
+    if (document.getElementById('storeAppRoot')) {
+      closeMobile();
+      return;
+    }
     mainContainer.innerHTML = storeBody();
   } else if (resolvedName === 'allies') {
     mainContainer.innerHTML = alliesBody();
@@ -14991,6 +15003,9 @@ function closeMobile() {
 // 8. MANEJO DE NAVEGACIÓN EN SIDEBAR
 document.querySelectorAll('.module-link').forEach(link => {
   link.addEventListener('click', () => {
+    if (link.dataset.screen === 'store' && document.getElementById('storeAppRoot')) {
+      return;
+    }
     render(link.dataset.screen);
   });
 });
