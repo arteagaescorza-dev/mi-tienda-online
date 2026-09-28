@@ -152,18 +152,21 @@ flowchart TD
 
 ---
 
-### Slice 4: Pantalla Extranet de Proveedores en Hub 7 (`TASK-HUB-VND`)
-* **Objetivo:** Construir la interfaz dedicada para fabricantes y talleres dentro del Hub 7, supeditada al proveedor asociado en sesion.
+### Slice 4: Pantalla Extranet de Proveedores en Hub 7 (`TASK-HUB-VND`) (COMPLETADO)
+* **Objetivo:** Construir la interfaz dedicada para fabricantes y talleres dentro del Hub 7, supeditada al proveedor asociado en sesion (`users.supplier_id`), con consulta de OCs, expedientes de partidas, confirmacion de recepcion, documentos imprimibles y bitacora de minutas.
 * **Backend:**
-  - `VendorPortalController`: Controlador dedicado para el Hub 7 Extranet.
-  - Endpoints RESTful:
-    - `GET /api/v1/hub7/vendor/dashboard`: 4 KPIs contextuales (OCs en cola, piezas en costura/ensamble, remisiones despachadas, saldo de notas de credito).
+  - `PortalVendorController`: Controlador dedicado para la Extranet B2B en Hub 7.
+  - Endpoints RESTful y Web:
+    - `GET /admin/extranet/proveedores`: Pantalla principal del taller con KPIs, bandeja de OCs y minutas.
+    - `GET /admin/extranet/proveedores/ordenes/{id}/imprimir`: Vista imprimible formal con `@media print`, snapshot inmutable y Clausula 4 de compensacion mercantil.
     - `GET /api/v1/hub7/vendor/orders`: Listado de OCs asignadas al proveedor con filtros por estatus.
-    - `GET /api/v1/hub7/vendor/orders/{id}/pdf`: Descarga del PDF formal de compra con ficha tecnica y curvas de tallas.
+    - `GET /api/v1/hub7/vendor/orders/{id}`: Detalle completo de partidas por talla y color con validacion estricta de aislamiento.
+    - `POST /api/v1/hub7/vendor/orders/{id}/confirm`: Confirmacion de recepcion por parte del confeccionista con asiento inmutable `PO_CONFIRMED_BY_VENDOR` en `purchase_kardex`.
+    - `GET /api/v1/hub7/vendor/credit-agreements`: Consulta de minutas de discrepancia del proveedor.
 * **Frontend:**
-  - Vista Blade: `resources/views/portal/hub7-vendor-extranet.blade.php`.
-  - Diseno ergonomico sin emojis: tarjetas KPI de alto contraste, tabla de OCs con barra de progreso de produccion, visor de especificaciones tecnicas y boton para confirmar recepcion de orden.
-* **Pruebas:** `tests/Feature/Hub7/VendorExtranetOrdersTest.php` evaluando la carga de datos del taller, descarga de documentos y proteccion de acceso.
+  - Vistas Blade: `resources/views/portal/hub7-vendor-extranet.blade.php` y `resources/views/portal/vendor-po-print.blade.php`.
+  - Diseno ergonomico sin emojis: 6 tarjetas KPI, modal a pantalla completa para ficha tecnica y partidas de corte, sidebar contraido por defecto (`collapsed`) y filtrado dinamico de modulos en sidebar segun el rol del usuario autenticado.
+* **Pruebas:** `tests/Feature/Portal/VendorExtranetTest.php` (11/11 tests pasando, 29 aserciones).
 
 ---
 
