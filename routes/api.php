@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\RevOps\InventoryApiController;
 use App\Http\Controllers\Api\RevOps\InventorySettingsApiController;
+use App\Http\Controllers\Api\RevOps\ProductSkuAndDuplicateApiController;
 use App\Http\Controllers\Api\RevOps\StockReservationApiController;
 use App\Http\Controllers\Api\RevOps\MarketingApiController;
 use App\Http\Controllers\Api\RevOps\FinanceApiController;
@@ -40,6 +41,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/bundles', [InventoryApiController::class, 'getBundles']);
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
+
+        // MOTOR INTELIGENTE DE AUTO-SKU Y DETECCION DE DUPLICADOS (TASK-INV-15 / SLICE 2)
+        Route::post('/products/generate-sku', [ProductSkuAndDuplicateApiController::class, 'generateSku']);
+        Route::post('/products/check-duplicate', [ProductSkuAndDuplicateApiController::class, 'checkDuplicate']);
 
         // GESTOR DE AJUSTES DE INVENTARIO: TALLAS, VOLUMENES Y CATEGORIAS (TASK-INV-14)
         Route::prefix('settings')->group(function () {
