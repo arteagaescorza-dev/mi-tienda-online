@@ -260,7 +260,16 @@ class ProductSkuAndDuplicateApiController extends Controller
         $marginPct = $effectivePrice > 0 ? round((($effectivePrice - $cpp) / $effectivePrice) * 100, 1) : 0.0;
 
         $sizes = $validated['sizes'] ?? [];
-        $localStock = ($dbType === 'physical' || $dbType === 'both') ? array_sum(array_map('intval', $sizes)) : 0;
+        $localStock = 0;
+        if (($dbType === 'physical' || $dbType === 'both') && is_array($sizes)) {
+            foreach ($sizes as $sKey => $sVal) {
+                if (is_array($sVal)) {
+                    $localStock += max(0, (int) ($sVal['stock'] ?? $sVal['quantity'] ?? 0));
+                } else {
+                    $localStock += max(0, (int) $sVal);
+                }
+            }
+        }
 
         $meta = [
             'category' => $validated['category'] ?? 'General',
@@ -306,8 +315,13 @@ class ProductSkuAndDuplicateApiController extends Controller
 
             if (!empty($sizes) && is_array($sizes)) {
                 foreach ($sizes as $szKey => $qty) {
-                    $cleanSz = strtolower(trim((string) $szKey));
-                    $targetQty = max(0, (int) $qty);
+                    if (is_array($qty)) {
+                        $cleanSz = strtolower(trim((string) ($qty['name'] ?? $qty['size'] ?? $szKey)));
+                        $targetQty = max(0, (int) ($qty['stock'] ?? $qty['quantity'] ?? 0));
+                    } else {
+                        $cleanSz = strtolower(trim((string) $szKey));
+                        $targetQty = max(0, (int) $qty);
+                    }
 
                     $variant = ProductVariant::create([
                         'product_id' => $product->id,

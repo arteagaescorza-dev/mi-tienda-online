@@ -131,4 +131,46 @@ class ProductCreationDrawerTest extends TestCase
 
         $this->assertMatchesRegularExpression('/^TXT-TB-\d{4}-M$/', $response->json('data.sku'));
     }
+
+    public function test_can_store_product_via_panoramic_modal_endpoint(): void
+    {
+        $payload = [
+            'sku' => 'MOD-PAN-9999-L',
+            'name' => 'Boxer Panoramic Test',
+            'brand' => 'Torzo Tech',
+            'category' => 'Boxers',
+            'pvp' => 450.00,
+            'cost' => 180.00,
+            'type' => 'physical',
+            'stock' => 25,
+            'sizes' => [
+                ['name' => 'L', 'stock' => 25],
+            ],
+            'fabric_type' => 'Microfibra',
+            'color_name' => 'Negro',
+            'location' => 'RACK-B-01',
+        ];
+
+        $response = $this->actingAs($this->user)->postJson('/api/v1/inventory/products', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.sku', 'MOD-PAN-9999-L')
+            ->assertJsonPath('data.title', 'Boxer Panoramic Test');
+
+        $this->assertDatabaseHas('products', [
+            'sku' => 'MOD-PAN-9999-L',
+            'title' => 'Boxer Panoramic Test',
+            'brand' => 'Torzo Tech',
+            'price' => 450.00,
+            'cost' => 180.00,
+            'type' => 'physical',
+        ]);
+
+        $this->assertDatabaseHas('product_variants', [
+            'sku' => 'MOD-PAN-9999-L-L',
+            'price' => 450.00,
+        ]);
+    }
 }
+

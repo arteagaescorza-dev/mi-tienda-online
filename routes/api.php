@@ -62,6 +62,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/{id}/invite-extranet', [SupplierApiController::class, 'inviteExtranet']);
         });
 
+        // ALTA DE PRODUCTO DESDE MODAL PANORAMICO (TASK-INV-20 / SLICE 6)
+        Route::post('/products', [ProductSkuAndDuplicateApiController::class, 'storeProduct']);
+
         // MOTOR INTELIGENTE DE AUTO-SKU, DETECCION DE DUPLICADOS Y COPILOTO IA (TASK-INV-15 / SLICE 2 & 3)
         Route::post('/products/generate-sku', [ProductSkuAndDuplicateApiController::class, 'generateSku']);
         Route::post('/products/check-duplicate', [ProductSkuAndDuplicateApiController::class, 'checkDuplicate']);
