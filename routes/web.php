@@ -51,7 +51,13 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/inventario/{inventory}/movimientos', [InventoryMovementController::class, 'store'])->name('portal.inventory.movements.store');
 	Route::post('/admin/proveedores/{supplier}/sincronizar', [SupplierSyncController::class, 'store'])->name('portal.suppliers.sync');
 	Route::post('/admin/proveedores/{supplier}/colores', [SupplierColorMappingController::class, 'store'])->name('portal.suppliers.colors.store');
+});
+
+Route::middleware('auth')->group(function () {
 	Route::post('/admin/roles/switch', [PortalAccessController::class, 'switchRole'])->name('portal.roles.switch');
+});
+
+Route::middleware(['auth', 'role:portal'])->group(function () {
 
 	Route::middleware('financial.privacy')->group(function () {
 		Route::get('/admin/finanzas', [StorefrontController::class, 'portalFinance'])->name('portal.finance');
