@@ -14910,6 +14910,7 @@ function isScreenRenderedByBlade(screenName) {
   if (screenName === 'dashboard' && container.querySelector('#dashboardAppRoot')) return true;
   if (screenName === 'vendor' && container.querySelector('[x-data*="vendorExtranetApp"]')) return true;
   if (screenName === 'allies' && container.querySelector('[x-data*="alliesPortalApp"]')) return true;
+  if (screenName === 'store' && (container.querySelector('#storeAppRoot') || container.querySelector('[data-screen="store"]'))) return true;
   if (container.dataset && container.dataset.screen && container.dataset.screen === screenName) return true;
   return false;
 }
