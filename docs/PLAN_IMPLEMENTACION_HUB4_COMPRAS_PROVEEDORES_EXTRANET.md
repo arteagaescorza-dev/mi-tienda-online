@@ -170,19 +170,22 @@ flowchart TD
 
 ---
 
-### Slice 5: Remisiones Fleteras B2B y Sincronizacion con Rampa Hub 4 (`TASK-INT-20`)
-* **Objetivo:** Permitir al proveedor registrar el despacho fletero de una orden y notificar automaticamente a la rampa de almacen central.
+### Slice 5: Remisiones Fleteras B2B y Sincronizacion con Rampa Hub 4 (`TASK-INT-20`) (COMPLETADO)
+* **Objetivo:** Permitir al proveedor registrar el despacho fletero de una orden y notificar automaticamente a la rampa de recepcion en Hub 4 y al jefe de almacen en Hub 1.
 * **Backend:**
-  - Modelo y migracion `vendor_shipments`.
-  - Endpoint `POST /api/v1/hub7/vendor/shipments`: Captura numero de remision, fletera, guia, bultos y chofer.
-  - Evento de dominio `VendorShipmentDispatched`:
-    - Inserta registro en `warehouse_ramp_entries` de Hub 4 con estatus `expected`.
-    - Genera tarea prioritaria en Hub 1 (`OperationalTask`) para el Almacenista: *"Llegada Prevista Fletera: Remision REM-XXXX de Torzo Labs"*.
-    - Actualiza estatus de la PO a `in_transit` y genera asiento en `purchase_kardex`.
+  - Modelo `VendorShipment` (`vendor_shipments`) con relaciones bidireccionales con `PurchaseOrder` y `Supplier`.
+  - Endpoint `POST /api/v1/hub7/vendor/orders/{id}/dispatch`:
+    - Valida que la orden pertenezca al `supplier_id` del usuario (aislamiento B2B).
+    - Registra el envio en `vendor_shipments` con numero de remision, fletera, guia, bultos y conductor.
+    - Sincroniza la entrada programada en `warehouse_ramp_entries` (Hub 4) con estatus `in_dock`.
+    - Genera tarea prioritaria en Hub 1 (`OperationalTask`) para el almacenista (`assigned_role = 'warehouse'`).
+    - Actualiza el estatus de la PO a `in_transit` con `carrier` y `tracking_number`.
+    - Genera asiento inmutable en `purchase_kardex` con `movement_type = 'PO_DISPATCHED_BY_VENDOR'`.
+  - Endpoint `GET /api/v1/hub7/vendor/orders/{id}/shipment`: Consulta del expediente de transporte y guia.
 * **Frontend:**
-  - Modal de Despacho y Remision en la Extranet del Proveedor (Hub 7).
-  - Reflejo reactivo en la vista de Rampa de Almacen en Hub 4.
-* **Pruebas:** `tests/Feature/Hub7/VendorShipmentRampSyncTest.php` validando la creacion de la remision, insercion en rampa y notificacion en Hub 1.
+  - Boton reactivo de "Despachar" en la bandeja de OCs de Hub 7.
+  - Modal a pantalla completa para captura de aviso de embarque y remision con autollenado inteligente.
+* **Pruebas:** `tests/Feature/Inventory/VendorShipmentRampSyncTest.php` (6/6 tests pasando, 17 aserciones).
 
 ---
 
