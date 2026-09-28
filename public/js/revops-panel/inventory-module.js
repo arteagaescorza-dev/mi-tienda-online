@@ -213,6 +213,22 @@ function hybridInventoryModule() {
         slotEditState: { isEditing: false, editingCode: null, form: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true } },
         ropSettings: { leadTimeLocal: 3, leadTimeDropship: 5, safetyStockDays: 7, defaultDailySales: 2 },
 
+        // TASK-INV-14: Gestión Configurable de Curvas de Tallas, Volúmenes y Categorías
+        sizeCurves: [],
+        selectedCurveId: null,
+        newCurveForm: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true },
+        curveEditState: { isEditing: false, editingId: null, form: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true } },
+        newSizeForm: { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true },
+        sizeEditState: { isEditing: false, editingId: null, form: { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true } },
+
+        fragranceVolumes: [],
+        newVolumeForm: { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true },
+        volumeEditState: { isEditing: false, editingId: null, form: { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true } },
+
+        categoriesTree: [],
+        newCategoryForm: { name: '', description: '', parent_id: '', is_active: true },
+        categoryEditState: { isEditing: false, editingId: null, form: { name: '', description: '', parent_id: '', is_active: true } },
+
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
         providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
             ? window.serverSuppliers
@@ -650,15 +666,19 @@ function hybridInventoryModule() {
         ],
         newProduct: {
             sku: 'BX-ECO-011',
+            skuLocked: true,
+            isGeneratingSku: false,
             name: '',
             category: 'Boxers',
+            subcategory: '',
             type: 'propio',
             aisle: 'A',
             rack: '02',
             bin: 'B',
             location: 'A-02-B',
-            // TASK-INV-02: Matriz Multidimensional de Variantes
+            // TASK-INV-02 / TASK-INV-14: Matriz Multidimensional de Variantes y Curvas de Tallas
             variantDimension: 'size',
+            selectedSizeCurveId: null,
             fabricType: 'Modal Seamless',
             colorName: 'Negro Profundo',
             colorHex: '#0f172a',
@@ -667,6 +687,9 @@ function hybridInventoryModule() {
             websiteSection: 'basicos',
             isPublished: true,
             description: '',
+            bulletPoints: [],
+            seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
+            newTagInput: '',
             brand: 'ModaIntima Textil MX',
             discountPct: 0,
             regularPrice: 399.00,
@@ -680,7 +703,17 @@ function hybridInventoryModule() {
             supplierStock: 40,
             provider: 'ModaIntima Textil MX',
             providerUrl: '',
-            images: []
+            images: [],
+            // TASK-INV-15: Auto-SKU, Deteccion de Duplicados & Copiloto IA
+            duplicateRisk: 'none',
+            duplicateMatches: [],
+            duplicateScore: 0,
+            duplicateChecked: false,
+            isCheckingDuplicate: false,
+            duplicateAlertModalOpen: false,
+            duplicateSelectedMatch: null,
+            forceCreateDespiteDuplicate: false,
+            isGeneratingAi: false
         },
 
         toast: {
@@ -4221,6 +4254,17 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverCycleCounts) && window.serverCycleCounts.length > 0) {
                 this.cycleCountHistory = window.serverCycleCounts;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverSizeCurves) && window.serverSizeCurves.length > 0) {
+                this.sizeCurves = window.serverSizeCurves;
+                const def = this.sizeCurves.find(c => c.is_default) || this.sizeCurves[0];
+                if (def) this.selectedCurveId = def.id;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverFragranceVolumes) && window.serverFragranceVolumes.length > 0) {
+                this.fragranceVolumes = window.serverFragranceVolumes;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCategories) && window.serverCategories.length > 0) {
+                this.categoriesTree = window.serverCategories;
+            }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
             }
@@ -6591,12 +6635,7 @@ function hybridInventoryModule() {
         },
 
         handleSaveDrawerClick() {
-            const qty = parseInt(this.purchaseQty) || 0;
-            if (!this.hasAddedPurchaseThisSession && qty > 0) {
-                this.confirmPurchaseModalOpen = true;
-            } else {
-                this.saveDrawerChanges();
-            }
+            this.saveDrawerChanges();
         },
 
         confirmSaveWithPurchase(addPurchase) {
@@ -6901,6 +6940,620 @@ function hybridInventoryModule() {
             });
 
             this.showToast(`Parámetros ROP guardados. ${this.products.length} productos recalculados en tiempo real (${underCount} en riesgo de quiebre).`, 'success');
+        },
+
+        // =========================================================================
+        // TASK-INV-14: CURVAS DE TALLAS, VOLUMENES Y CATEGORIAS (UNIVERSAL CRUD)
+        // =========================================================================
+
+        get selectedCurve() {
+            if (!this.selectedCurveId && this.sizeCurves && this.sizeCurves.length > 0) {
+                const def = this.sizeCurves.find(c => c.is_default) || this.sizeCurves[0];
+                this.selectedCurveId = def ? def.id : null;
+            }
+            return (this.sizeCurves || []).find(c => c.id === this.selectedCurveId) || null;
+        },
+
+        get flatCategories() {
+            return (this.categoriesTree || []).map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                slug: cat.slug
+            }));
+        },
+
+        selectCurve(curveId) {
+            this.selectedCurveId = curveId;
+            this.cancelEditCurve();
+            this.cancelEditSize();
+        },
+
+        // --- CURVAS DE TALLAS CRUD ---
+        async addNewCurve() {
+            const name = (this.newCurveForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa un nombre valido para la curva de tallas.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch('/api/v1/inventory/settings/size-curves', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(this.newCurveForm)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al crear la curva de tallas.', 'warning');
+                    return;
+                }
+                this.sizeCurves.push(data.data);
+                this.selectedCurveId = data.data.id;
+                this.newCurveForm = { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true };
+                this.showToast(`Curva "${data.data.name}" creada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error de comunicacion con el servidor.', 'warning');
+            }
+        },
+
+        editCurve(curve) {
+            this.curveEditState.isEditing = true;
+            this.curveEditState.editingId = curve.id;
+            this.curveEditState.form = {
+                name: curve.name,
+                category_scope: curve.category_scope || 'textil',
+                description: curve.description || '',
+                is_default: Boolean(curve.is_default),
+                is_active: curve.is_active !== false
+            };
+        },
+
+        cancelEditCurve() {
+            this.curveEditState.isEditing = false;
+            this.curveEditState.editingId = null;
+            this.curveEditState.form = { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true };
+        },
+
+        async saveCurve() {
+            const name = (this.curveEditState.form.name || '').trim();
+            if (!name) {
+                this.showToast('El nombre de la curva no puede estar vacio.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${this.curveEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(this.curveEditState.form)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar la curva.', 'warning');
+                    return;
+                }
+                const idx = this.sizeCurves.findIndex(c => c.id === this.curveEditState.editingId);
+                if (idx !== -1) {
+                    this.sizeCurves[idx] = data.data;
+                }
+                this.cancelEditCurve();
+                this.showToast(`Curva "${data.data.name}" actualizada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al guardar la curva.', 'warning');
+            }
+        },
+
+        async toggleActiveCurve(curve) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${curve.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    curve.is_active = data.data.is_active;
+                    this.showToast(`Curva "${curve.name}" ${curve.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado de la curva.', 'warning');
+            }
+        },
+
+        async archiveCurve(curve) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(curve.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/size-curves/${curve.id}/restore`
+                    : `/api/v1/inventory/settings/size-curves/${curve.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    curve.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Curva "${curve.name}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al modificar archivo de la curva.', 'warning');
+            }
+        },
+
+        async deleteCurve(curveId) {
+            if (!confirm('Deseas eliminar permanentemente esta curva de tallas?')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${curveId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    this.sizeCurves = this.sizeCurves.filter(c => c.id !== curveId);
+                    if (this.selectedCurveId === curveId) {
+                        this.selectedCurveId = this.sizeCurves.length > 0 ? this.sizeCurves[0].id : null;
+                    }
+                    this.showToast('Curva de tallas eliminada permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar la curva.', 'warning');
+            }
+        },
+
+        // --- TALLAS INDIVIDUALES CRUD ---
+        async addNewSize() {
+            if (!this.selectedCurveId) {
+                this.showToast('Selecciona primero una curva de tallas.', 'warning');
+                return;
+            }
+            const code = (this.newSizeForm.code || '').trim();
+            if (!code) {
+                this.showToast('Ingresa el codigo de talla (ej: XS, 32, XL).', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    ...this.newSizeForm,
+                    label: (this.newSizeForm.label || '').trim() || code,
+                    sort_order: parseInt(this.newSizeForm.sort_order) || 1
+                };
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${this.selectedCurveId}/sizes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al agregar talla.', 'warning');
+                    return;
+                }
+                const curve = this.selectedCurve;
+                if (curve) {
+                    if (!Array.isArray(curve.sizes)) curve.sizes = [];
+                    curve.sizes.push(data.data);
+                    curve.sizes.sort((a, b) => a.sort_order - b.sort_order);
+                }
+                this.newSizeForm = { code: '', label: '', sort_order: (curve?.sizes?.length || 0) + 1, waist_min_cm: null, waist_max_cm: null, is_active: true };
+                this.showToast(`Talla "${data.data.code}" registrada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al agregar talla.', 'warning');
+            }
+        },
+
+        editSize(size) {
+            this.sizeEditState.isEditing = true;
+            this.sizeEditState.editingId = size.id;
+            this.sizeEditState.form = {
+                code: size.code,
+                label: size.label || size.code,
+                sort_order: size.sort_order || 1,
+                waist_min_cm: size.waist_min_cm,
+                waist_max_cm: size.waist_max_cm,
+                is_active: size.is_active !== false
+            };
+        },
+
+        cancelEditSize() {
+            this.sizeEditState.isEditing = false;
+            this.sizeEditState.editingId = null;
+            this.sizeEditState.form = { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true };
+        },
+
+        async saveSize() {
+            const code = (this.sizeEditState.form.code || '').trim();
+            if (!code) {
+                this.showToast('El codigo de talla no puede estar vacio.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${this.sizeEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(this.sizeEditState.form)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar talla.', 'warning');
+                    return;
+                }
+                const curve = this.selectedCurve;
+                if (curve && Array.isArray(curve.sizes)) {
+                    const idx = curve.sizes.findIndex(s => s.id === this.sizeEditState.editingId);
+                    if (idx !== -1) {
+                        curve.sizes[idx] = data.data;
+                        curve.sizes.sort((a, b) => a.sort_order - b.sort_order);
+                    }
+                }
+                this.cancelEditSize();
+                this.showToast(`Talla "${data.data.code}" actualizada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al guardar talla.', 'warning');
+            }
+        },
+
+        async toggleActiveSize(size) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${size.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    size.is_active = data.data.is_active;
+                    this.showToast(`Talla "${size.code}" ${size.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado de talla.', 'warning');
+            }
+        },
+
+        async archiveSize(size) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(size.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/sizes/${size.id}/restore`
+                    : `/api/v1/inventory/settings/sizes/${size.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    size.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Talla "${size.code}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al archivar talla.', 'warning');
+            }
+        },
+
+        async deleteSize(sizeId) {
+            if (!confirm('Deseas eliminar permanentemente esta talla?')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${sizeId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    const curve = this.selectedCurve;
+                    if (curve && Array.isArray(curve.sizes)) {
+                        curve.sizes = curve.sizes.filter(s => s.id !== sizeId);
+                    }
+                    this.showToast('Talla eliminada permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar talla.', 'warning');
+            }
+        },
+
+        // --- VOLUMENES DE PERFUMERIA CRUD ---
+        async addNewVolume() {
+            const val = parseFloat(this.newVolumeForm.value);
+            if (!val || val <= 0) {
+                this.showToast('Ingresa un valor numerico valido para el volumen (ej: 50, 100).', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    ...this.newVolumeForm,
+                    value: val,
+                    label: (this.newVolumeForm.label || '').trim() || `${val}${this.newVolumeForm.unit || 'ml'}`
+                };
+                const res = await fetch('/api/v1/inventory/settings/volumes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al agregar volumen.', 'warning');
+                    return;
+                }
+                this.fragranceVolumes.push(data.data);
+                this.fragranceVolumes.sort((a, b) => a.sort_order - b.sort_order || a.value - b.value);
+                this.newVolumeForm = { value: 100, unit: 'ml', label: '', description: '', sort_order: this.fragranceVolumes.length + 1, is_active: true };
+                this.showToast(`Volumen "${data.data.label}" registrado con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al crear volumen.', 'warning');
+            }
+        },
+
+        editVolume(vol) {
+            this.volumeEditState.isEditing = true;
+            this.volumeEditState.editingId = vol.id;
+            this.volumeEditState.form = {
+                value: vol.value,
+                unit: vol.unit || 'ml',
+                label: vol.label || '',
+                description: vol.description || '',
+                sort_order: vol.sort_order || 1,
+                is_active: vol.is_active !== false
+            };
+        },
+
+        cancelEditVolume() {
+            this.volumeEditState.isEditing = false;
+            this.volumeEditState.editingId = null;
+            this.volumeEditState.form = { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true };
+        },
+
+        async saveVolume() {
+            const val = parseFloat(this.volumeEditState.form.value);
+            if (!val || val <= 0) {
+                this.showToast('El volumen debe ser un numero mayor a 0.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    ...this.volumeEditState.form,
+                    value: val,
+                    label: (this.volumeEditState.form.label || '').trim() || `${val}${this.volumeEditState.form.unit || 'ml'}`
+                };
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${this.volumeEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar volumen.', 'warning');
+                    return;
+                }
+                const idx = this.fragranceVolumes.findIndex(v => v.id === this.volumeEditState.editingId);
+                if (idx !== -1) {
+                    this.fragranceVolumes[idx] = data.data;
+                    this.fragranceVolumes.sort((a, b) => a.sort_order - b.sort_order || a.value - b.value);
+                }
+                this.cancelEditVolume();
+                this.showToast(`Volumen "${data.data.label}" actualizado con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al actualizar volumen.', 'warning');
+            }
+        },
+
+        async toggleActiveVolume(vol) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${vol.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    vol.is_active = data.data.is_active;
+                    this.showToast(`Volumen "${vol.label}" ${vol.is_active ? 'activado' : 'desactivado'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado del volumen.', 'warning');
+            }
+        },
+
+        async archiveVolume(vol) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(vol.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/volumes/${vol.id}/restore`
+                    : `/api/v1/inventory/settings/volumes/${vol.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    vol.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Volumen "${vol.label}" ${isArchived ? 'restaurado' : 'archivado'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al archivar volumen.', 'warning');
+            }
+        },
+
+        async deleteVolume(volId) {
+            if (!confirm('Deseas eliminar permanentemente este volumen de perfumeria?')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${volId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    this.fragranceVolumes = this.fragranceVolumes.filter(v => v.id !== volId);
+                    this.showToast('Volumen eliminado permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar volumen.', 'warning');
+            }
+        },
+
+        // --- CATEGORIAS & SUBCATEGORIAS CRUD ---
+        async addNewCategory() {
+            const name = (this.newCategoryForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa un nombre para la categoria o subcategoria.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    name: name,
+                    description: (this.newCategoryForm.description || '').trim() || null,
+                    parent_id: this.newCategoryForm.parent_id ? parseInt(this.newCategoryForm.parent_id) : null,
+                    is_active: this.newCategoryForm.is_active !== false
+                };
+                const res = await fetch('/api/v1/inventory/settings/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al crear categoria.', 'warning');
+                    return;
+                }
+                if (payload.parent_id) {
+                    const parent = this.categoriesTree.find(c => c.id === payload.parent_id);
+                    if (parent) {
+                        if (!Array.isArray(parent.children)) parent.children = [];
+                        parent.children.push(data.data);
+                    } else {
+                        await this.reloadCategoriesTree();
+                    }
+                } else {
+                    data.data.children = [];
+                    this.categoriesTree.push(data.data);
+                }
+                this.newCategoryForm = { name: '', description: '', parent_id: '', is_active: true };
+                this.showToast(`Categoria "${data.data.name}" registrada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al crear categoria.', 'warning');
+            }
+        },
+
+        editCategory(cat) {
+            this.categoryEditState.isEditing = true;
+            this.categoryEditState.editingId = cat.id;
+            this.categoryEditState.form = {
+                name: cat.name,
+                description: cat.description || '',
+                parent_id: cat.parent_id ? String(cat.parent_id) : '',
+                is_active: cat.is_active !== false
+            };
+        },
+
+        cancelEditCategory() {
+            this.categoryEditState.isEditing = false;
+            this.categoryEditState.editingId = null;
+            this.categoryEditState.form = { name: '', description: '', parent_id: '', is_active: true };
+        },
+
+        async saveCategory() {
+            const name = (this.categoryEditState.form.name || '').trim();
+            if (!name) {
+                this.showToast('El nombre de la categoria no puede estar vacio.', 'warning');
+                return;
+            }
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    name: name,
+                    description: (this.categoryEditState.form.description || '').trim() || null,
+                    parent_id: this.categoryEditState.form.parent_id ? parseInt(this.categoryEditState.form.parent_id) : null,
+                    is_active: this.categoryEditState.form.is_active !== false
+                };
+                const res = await fetch(`/api/v1/inventory/settings/categories/${this.categoryEditState.editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al actualizar categoria.', 'warning');
+                    return;
+                }
+                await this.reloadCategoriesTree();
+                this.cancelEditCategory();
+                this.showToast(`Categoria "${data.data.name}" actualizada con exito.`, 'success');
+            } catch (err) {
+                this.showToast('Error al guardar categoria.', 'warning');
+            }
+        },
+
+        async toggleActiveCategory(cat) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/categories/${cat.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    cat.is_active = data.data.is_active;
+                    this.showToast(`Categoria "${cat.name}" ${cat.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al alternar estado de categoria.', 'warning');
+            }
+        },
+
+        async archiveCategory(cat) {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const isArchived = Boolean(cat.deleted_at);
+                const url = isArchived 
+                    ? `/api/v1/inventory/settings/categories/${cat.id}/restore`
+                    : `/api/v1/inventory/settings/categories/${cat.id}/archive`;
+                const method = isArchived ? 'POST' : 'DELETE';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    cat.deleted_at = isArchived ? null : new Date().toISOString();
+                    this.showToast(`Categoria "${cat.name}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                }
+            } catch (err) {
+                this.showToast('Error al archivar categoria.', 'warning');
+            }
+        },
+
+        async deleteCategory(catId) {
+            if (!confirm('Deseas eliminar permanentemente esta categoria? Sus subcategorias seran desacopladas a la raiz.')) return;
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/categories/${catId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                });
+                if (res.ok) {
+                    await this.reloadCategoriesTree();
+                    this.showToast('Categoria eliminada permanentemente.', 'success');
+                }
+            } catch (err) {
+                this.showToast('Error al eliminar categoria.', 'warning');
+            }
+        },
+
+        async reloadCategoriesTree() {
+            try {
+                const res = await fetch('/api/v1/inventory/settings/categories?include_archived=1', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.categoriesTree = data.data || [];
+                }
+            } catch (err) {
+                console.error('Error al recargar arbol de categorias', err);
+            }
         },
 
         // --- TASK-INV-13: GESTOR DE PROVEEDORES & CONTROL DE ESTADOS ---
@@ -7209,27 +7862,34 @@ function hybridInventoryModule() {
             this.selectedProduct = product;
             this.purchaseAddedSuccess = false;
             this.hasAddedPurchaseThisSession = false;
-            this.drawerSizes = { ...product.sizes };
+            this.drawerSizes = {
+                ch: product.sizes?.ch || 0,
+                m: product.sizes?.m || 0,
+                g: product.sizes?.g || 0,
+                xl: product.sizes?.xl || 0,
+                '2xl': product.sizes?.['2xl'] || 0,
+                '3xl': product.sizes?.['3xl'] || 0
+            };
             this.drawerShades = product.shades ? { ...product.shades } : {};
-            this.drawerLocation = product.location;
-            this.drawerPvp = product.pvp;
-            this.drawerCost = product.cost;
-            this.drawerCpp = product.weightedAverageCost || product.cost || 0;
-            this.drawerBatchNumber = product.batchNumber || '';
-            this.drawerExpirationDate = product.expirationDate || '';
-            this.drawerPaoMonths = product.paoMonths || 12;
-            this.drawerRequiresSanitaryControl = !!product.requiresSanitaryControl;
-            this.drawerFabricType = product.fabricType || 'Modal Seamless';
-            this.drawerColorName = product.colorName || 'Negro Profundo';
-            this.drawerColorHex = product.colorHex || '#0f172a';
-            this.drawerColorType = product.colorType || 'solid';
-            this.drawerDesignType = product.designType || 'sin_diseno';
-            this.drawerWebsiteSection = product.websiteSection || 'basicos';
-            this.drawerIsPublished = product.isPublished !== undefined ? product.isPublished : true;
+            this.drawerLocation = product.location || '';
+            this.drawerRegularPrice = parseFloat(product.regularPrice || product.regular_price || product.pvp || 0);
+            this.drawerDiscountPct = parseFloat(product.discountPct || product.discount_pct || 0);
+            this.drawerPvp = parseFloat(product.pvp || this.drawerRegularPrice);
+            this.drawerCost = parseFloat(product.cost || 0);
+            this.drawerCpp = parseFloat(product.weightedAverageCost || product.cpp || product.cost || 0);
+            this.drawerBatchNumber = product.batchNumber || product.batch_number || '';
+            this.drawerExpirationDate = product.expirationDate || product.expiration_date || '';
+            this.drawerPaoMonths = parseInt(product.paoMonths || product.pao_months) || 12;
+            this.drawerRequiresSanitaryControl = !!(product.requiresSanitaryControl || product.requires_sanitary_control);
+            this.drawerFabricType = product.fabricType || product.fabric_type || 'Modal Seamless';
+            this.drawerColorName = product.colorName || product.color_name || 'Negro Profundo';
+            this.drawerColorHex = product.colorHex || product.color_hex || '#0f172a';
+            this.drawerColorType = product.colorType || product.color_type || 'solid';
+            this.drawerDesignType = product.designType || product.design_type || 'sin_diseno';
+            this.drawerWebsiteSection = product.websiteSection || product.website_section || 'basicos';
+            this.drawerIsPublished = product.isPublished !== undefined ? product.isPublished : (product.is_published !== undefined ? product.is_published : true);
             this.drawerDescription = product.description || '';
             this.drawerBrand = product.brand || (product.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX');
-            this.drawerDiscountPct = product.discountPct || 0;
-            this.drawerRegularPrice = product.regularPrice || product.pvp || 0;
 
             // Sugerir proveedor y cantidades para futura orden
             if (product.type === 'dropship') {
@@ -7255,6 +7915,36 @@ function hybridInventoryModule() {
                 '3xl': (product.sizes && product.sizes['3xl']) ? Math.min(2, Math.round(this.purchaseQty * 0.01)) : 0
             };
             this.drawerOpen = true;
+
+            // Enriquecer reactivamente con el backend si está disponible
+            if (product.sku) {
+                fetch(`/api/v1/inventory/products/${encodeURIComponent(product.sku)}/detail`, {
+                    headers: { 'Accept': 'application/json' }
+                }).then(res => res.ok ? res.json() : null).then(data => {
+                    if (data && data.product && this.selectedProduct && this.selectedProduct.sku === product.sku) {
+                        if (data.product.sizes) {
+                            this.drawerSizes = { ...this.drawerSizes, ...data.product.sizes };
+                        }
+                        if (data.product.shades) {
+                            this.drawerShades = { ...this.drawerShades, ...data.product.shades };
+                        }
+                        if (data.product.regular_price) {
+                            this.drawerRegularPrice = parseFloat(data.product.regular_price);
+                        }
+                        if (data.product.discount_pct !== undefined) {
+                            this.drawerDiscountPct = parseFloat(data.product.discount_pct);
+                        }
+                        if (data.product.cpp !== undefined) {
+                            this.drawerCpp = parseFloat(data.product.cpp);
+                        }
+                        if (data.stock) {
+                            this.selectedProduct.localStock = data.stock.physical;
+                            this.selectedProduct.committedStock = data.stock.committed;
+                            this.selectedProduct.lockedStock = data.stock.locked;
+                        }
+                    }
+                }).catch(() => {});
+            }
         },
 
         totalSizesCount() {
@@ -7275,17 +7965,39 @@ function hybridInventoryModule() {
         },
 
         openCreateProductDrawer() {
-            const nextNum = String(this.products.length + 1).padStart(3, '0');
+            const availableCurves = this.getAvailableSizeCurves();
+            const defaultCurve = availableCurves.find(c => c.is_default) || availableCurves[0];
+            const defaultCurveId = defaultCurve ? defaultCurve.id : null;
+
             this.newProduct = {
-                sku: 'SKU-' + nextNum,
+                sku: '',
+                skuLocked: true,
+                isGeneratingSku: false,
                 name: '',
                 category: 'Boxers',
+                subcategory: '',
                 type: 'propio',
                 aisle: 'A',
                 rack: '02',
                 bin: 'B',
                 location: 'A-02-B',
+                // TASK-INV-02 / TASK-INV-14: Variantes y Curvas
                 variantDimension: 'size',
+                selectedSizeCurveId: defaultCurveId,
+                fabricType: 'Modal Seamless',
+                colorName: 'Negro Profundo',
+                colorHex: '#0f172a',
+                colorType: 'solid',
+                designType: 'sin_diseno',
+                websiteSection: 'basicos',
+                isPublished: true,
+                description: '',
+                bulletPoints: [],
+                seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
+                newTagInput: '',
+                brand: 'ModaIntima Textil MX',
+                discountPct: 0,
+                regularPrice: 399.00,
                 pvp: 399.00,
                 cost: 135.00,
                 weightedAverageCost: 135.00,
@@ -7296,15 +8008,356 @@ function hybridInventoryModule() {
                 supplierStock: 40,
                 provider: 'ModaIntima Textil MX',
                 providerUrl: '',
-                images: []
+                images: [],
+                // TASK-INV-15: Auto-SKU, Deteccion de Duplicados & Copiloto IA
+                duplicateRisk: 'none',
+                duplicateMatches: [],
+                duplicateScore: 0,
+                duplicateChecked: false,
+                isCheckingDuplicate: false,
+                duplicateAlertModalOpen: false,
+                duplicateSelectedMatch: null,
+                forceCreateDespiteDuplicate: false,
+                isGeneratingAi: false
             };
             this.isDraggingImages = false;
             this.newProductDrawerOpen = true;
+            this.generateAutoSku();
         },
 
         closeCreateProductDrawer() {
             this.newProductDrawerOpen = false;
             this.isDraggingImages = false;
+        },
+
+        async generateAutoSku() {
+            this.newProduct.isGeneratingSku = true;
+            try {
+                const payload = {
+                    category: this.newProduct.category || 'Boxers',
+                    brand: this.newProduct.brand || 'ModaIntima Textil MX',
+                    variant_code: (this.newProduct.variantDimension === 'size' && this.newProduct.sizes) ? Object.keys(this.newProduct.sizes)[0] : null
+                };
+                const res = await fetch('/api/v1/inventory/products/generate-sku', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'success' && json.data && json.data.sku) {
+                    this.newProduct.sku = json.data.sku;
+                    this.newProduct.skuLocked = true;
+                    this.showToast('SKU estructurado generado: ' + json.data.sku, 'success');
+                } else {
+                    throw new Error(json.message || 'Error en generador de SKU');
+                }
+            } catch (e) {
+                // Fallback local garantizado
+                const catPfx = (this.newProduct.category || 'TXT').substring(0, 3).toUpperCase();
+                const brCode = (this.newProduct.brand || 'GEN').substring(0, 2).toUpperCase();
+                const seq = String(this.products.length + 1).padStart(4, '0');
+                this.newProduct.sku = `${catPfx}-${brCode}-${seq}`;
+                this.newProduct.skuLocked = true;
+                this.showToast('SKU sintetizado localmente: ' + this.newProduct.sku, 'info');
+            } finally {
+                this.newProduct.isGeneratingSku = false;
+            }
+        },
+
+        toggleSkuLock() {
+            this.newProduct.skuLocked = !this.newProduct.skuLocked;
+            if (!this.newProduct.skuLocked) {
+                this.showToast('Edicion manual de SKU habilitada.', 'info');
+            } else {
+                this.showToast('SKU bloqueado contra modificaciones accidentales.', 'info');
+            }
+        },
+
+        async checkProductDuplicate() {
+            const name = (this.newProduct.name || '').trim();
+            if (name.length < 3) {
+                this.newProduct.duplicateRisk = 'none';
+                this.newProduct.duplicateMatches = [];
+                this.newProduct.duplicateScore = 0;
+                this.newProduct.duplicateChecked = false;
+                this.newProduct.duplicateSelectedMatch = null;
+                return;
+            }
+
+            this.newProduct.isCheckingDuplicate = true;
+            try {
+                const payload = {
+                    name: name,
+                    brand: this.newProduct.brand || '',
+                    category: this.newProduct.category || '',
+                    pvp: parseFloat(this.newProduct.pvp) || 0,
+                    sku: this.newProduct.sku || ''
+                };
+                const res = await fetch('/api/v1/inventory/products/check-duplicate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'success' && json.data) {
+                    const data = json.data;
+                    this.newProduct.duplicateRisk = data.risk_level || 'none';
+                    this.newProduct.duplicateMatches = data.matches || [];
+                    this.newProduct.duplicateScore = Math.round(data.highest_score || 0);
+                    this.newProduct.duplicateChecked = true;
+                    this.newProduct.duplicateSelectedMatch = (data.matches && data.matches.length > 0) ? data.matches[0] : null;
+                }
+            } catch (e) {
+                // Fallback local en memoria
+                const clean = name.toLowerCase();
+                const found = this.products.find(p => (p.name || '').toLowerCase() === clean);
+                if (found) {
+                    this.newProduct.duplicateRisk = 'duplicate_match';
+                    this.newProduct.duplicateScore = 95;
+                    this.newProduct.duplicateMatches = [{
+                        sku: found.sku,
+                        title: found.name,
+                        brand: found.brand || 'ModaIntima Textil MX',
+                        score: 95,
+                        reasons: ['Coincidencia exacta de nombre en catalogo']
+                    }];
+                    this.newProduct.duplicateSelectedMatch = this.newProduct.duplicateMatches[0];
+                    this.newProduct.duplicateChecked = true;
+                } else {
+                    this.newProduct.duplicateRisk = 'none';
+                    this.newProduct.duplicateMatches = [];
+                    this.newProduct.duplicateScore = 0;
+                    this.newProduct.duplicateSelectedMatch = null;
+                    this.newProduct.duplicateChecked = true;
+                }
+            } finally {
+                this.newProduct.isCheckingDuplicate = false;
+            }
+        },
+
+        openDuplicateModal() {
+            if (this.newProduct.duplicateMatches && this.newProduct.duplicateMatches.length > 0) {
+                this.newProduct.duplicateAlertModalOpen = true;
+            }
+        },
+
+        closeDuplicateModal() {
+            this.newProduct.duplicateAlertModalOpen = false;
+        },
+
+        resolveDuplicateAddStock() {
+            const match = this.newProduct.duplicateSelectedMatch;
+            if (!match) return;
+            const targetSku = match.sku || (match.product && match.product.sku);
+            const targetProd = this.products.find(p => p.sku === targetSku);
+            const incomingQty = this.calculateNewProductTotalStock();
+
+            if (targetProd) {
+                targetProd.localStock = (parseInt(targetProd.localStock) || 0) + incomingQty;
+                if (this.newProduct.variantDimension === 'size' && this.newProduct.sizes && targetProd.sizes) {
+                    Object.entries(this.newProduct.sizes).forEach(([sz, qty]) => {
+                        const q = parseInt(qty) || 0;
+                        if (q > 0) {
+                            targetProd.sizes[sz] = (parseInt(targetProd.sizes[sz]) || 0) + q;
+                        }
+                    });
+                }
+                this.showToast(`Se sumaron ${incomingQty} unidades al producto existente ${targetSku} (${targetProd.name}).`, 'success');
+            } else {
+                this.showToast(`Stock transferido a referencia ${targetSku}.`, 'success');
+            }
+
+            this.newProduct.duplicateAlertModalOpen = false;
+            this.closeCreateProductDrawer();
+        },
+
+        resolveDuplicateContinueNew() {
+            this.newProduct.forceCreateDespiteDuplicate = true;
+            this.newProduct.duplicateAlertModalOpen = false;
+            this.showToast('Advertencia de duplicado omitida por decision operativa.', 'info');
+            this.saveNewProduct();
+        },
+
+        resolveDuplicateDismissDraft() {
+            this.newProduct.duplicateAlertModalOpen = false;
+            this.closeCreateProductDrawer();
+            this.showToast('Borrador de alta descartado.', 'info');
+        },
+
+        async generateAiDescription() {
+            if (!this.newProduct.name || this.newProduct.name.trim().length === 0) {
+                this.showToast('Ingresa el nombre del producto para activar el Copiloto IA.', 'warning');
+                return;
+            }
+
+            this.newProduct.isGeneratingAi = true;
+            try {
+                const payload = {
+                    name: this.newProduct.name,
+                    brand: this.newProduct.brand || '',
+                    category: this.newProduct.category || '',
+                    fabric_type: this.newProduct.fabricType || '',
+                    color_name: this.newProduct.colorName || '',
+                    design_type: this.newProduct.designType || '',
+                    variant_dimension: this.newProduct.variantDimension || 'size',
+                    pvp: parseFloat(this.newProduct.pvp) || 0
+                };
+                const res = await fetch('/api/v1/inventory/products/generate-description', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'success' && json.data) {
+                    const data = json.data;
+                    if (data.description) {
+                        this.newProduct.description = data.description;
+                    }
+                    if (Array.isArray(data.bullet_points) && data.bullet_points.length > 0) {
+                        this.newProduct.bulletPoints = data.bullet_points;
+                    }
+                    if (Array.isArray(data.seo_tags)) {
+                        const set = new Set([...(this.newProduct.seoTags || []), ...data.seo_tags]);
+                        this.newProduct.seoTags = Array.from(set);
+                    }
+                    this.showToast('Descripcion comercial y tags SEO generados exitosamente con Copiloto IA.', 'success');
+                } else {
+                    throw new Error(json.message || 'Error en Copiloto IA');
+                }
+            } catch (e) {
+                // Fallback local sintetizado
+                const name = this.newProduct.name;
+                const brand = this.newProduct.brand || 'Torzo';
+                const fabric = this.newProduct.fabricType || 'Algodon & Modal';
+                const color = this.newProduct.colorName || 'Negro Clasico';
+                this.newProduct.description = `Experimenta el maximo confort y soporte anatomico con ${name} de ${brand}. Confeccionado minuciosamente con ${fabric} en tono ${color}, ofrece una sensacion ultrasuave de segunda piel y transpirabilidad que se adapta a tus movimientos cotidianos.\n\nDiseno de silueta limpia y patronaje ergonomico sin costuras visibles que garantiza discrecion y alta durabilidad para tu guardarropa intimo.`;
+                this.newProduct.bulletPoints = [
+                    `Composicion textil premium: ${fabric}`,
+                    `Ajuste ergonomico de segunda piel`,
+                    `Costuras planas antirozaduras`,
+                    `Tejido transpirable de secado rapido`
+                ];
+                this.showToast('Contenido comercial generado localmente.', 'info');
+            } finally {
+                this.newProduct.isGeneratingAi = false;
+            }
+        },
+
+        addSeoTag() {
+            const tag = (this.newProduct.newTagInput || '').trim().toLowerCase();
+            if (tag && !this.newProduct.seoTags.includes(tag)) {
+                this.newProduct.seoTags.push(tag);
+            }
+            this.newProduct.newTagInput = '';
+        },
+
+        removeSeoTag(index) {
+            this.newProduct.seoTags.splice(index, 1);
+        },
+
+        getAvailableSizeCurves() {
+            if (Array.isArray(this.sizeCurves) && this.sizeCurves.length > 0) {
+                const active = this.sizeCurves.filter(c => c.is_active !== false && !c.deleted_at);
+                if (active.length > 0) return active;
+            }
+            return [
+                {
+                    id: 1,
+                    name: 'Americana (CH - 3XL)',
+                    is_default: true,
+                    sizes: [
+                        { code: 'CH', label: 'Chica (S)' },
+                        { code: 'M', label: 'Mediana (M)' },
+                        { code: 'G', label: 'Grande (L)' },
+                        { code: 'XL', label: 'Extra Grande (XL)' },
+                        { code: '2XL', label: 'Doble Extra Grande (2XL)' },
+                        { code: '3XL', label: 'Triple Extra Grande (3XL)' }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: 'Numerica Pantalon (28 - 40)',
+                    is_default: false,
+                    sizes: [
+                        { code: '28', label: 'Talla 28' },
+                        { code: '30', label: 'Talla 30' },
+                        { code: '32', label: 'Talla 32' },
+                        { code: '34', label: 'Talla 34' },
+                        { code: '36', label: 'Talla 36' },
+                        { code: '38', label: 'Talla 38' },
+                        { code: '40', label: 'Talla 40' }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: 'Copas Bra (32B - 38D)',
+                    is_default: false,
+                    sizes: [
+                        { code: '32B', label: 'Copa 32B' },
+                        { code: '34B', label: 'Copa 34B' },
+                        { code: '34C', label: 'Copa 34C' },
+                        { code: '36B', label: 'Copa 36B' },
+                        { code: '36C', label: 'Copa 36C' },
+                        { code: '38C', label: 'Copa 38C' },
+                        { code: '38D', label: 'Copa 38D' }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: 'Unitalla / Estandar',
+                    is_default: false,
+                    sizes: [
+                        { code: 'UNI', label: 'Unitalla (Standard)' }
+                    ]
+                }
+            ];
+        },
+
+        getCurrentNewProductSizeCurve() {
+            const curves = this.getAvailableSizeCurves();
+            if (!this.newProduct.selectedSizeCurveId) {
+                const def = curves.find(c => c.is_default) || curves[0];
+                if (def) this.newProduct.selectedSizeCurveId = def.id;
+                return def;
+            }
+            return curves.find(c => String(c.id) === String(this.newProduct.selectedSizeCurveId)) || curves[0];
+        },
+
+        getCurrentNewProductSizes() {
+            const curve = this.getCurrentNewProductSizeCurve();
+            if (curve && Array.isArray(curve.sizes) && curve.sizes.length > 0) {
+                return curve.sizes;
+            }
+            return [
+                { code: 'CH', label: 'Chica (S)' },
+                { code: 'M', label: 'Mediana (M)' },
+                { code: 'G', label: 'Grande (L)' },
+                { code: 'XL', label: 'Extra Grande (XL)' },
+                { code: '2XL', label: '2XL' },
+                { code: '3XL', label: '3XL' }
+            ];
+        },
+
+        onSizeCurveChange() {
+            const sizes = this.getCurrentNewProductSizes();
+            const newSizes = {};
+            sizes.forEach(s => {
+                const key = (s.code || '').toLowerCase();
+                newSizes[key] = (this.newProduct.sizes && this.newProduct.sizes[key]) ? this.newProduct.sizes[key] : 0;
+            });
+            this.newProduct.sizes = newSizes;
         },
 
         handleImageUpload(event) {
@@ -7434,13 +8487,7 @@ function hybridInventoryModule() {
             const dim = this.newProduct.variantDimension || 'size';
             if (dim === 'size') {
                 const s = this.newProduct.sizes || {};
-                const ch = parseInt(s.ch) || 0;
-                const m = parseInt(s.m) || 0;
-                const g = parseInt(s.g) || 0;
-                const xl = parseInt(s.xl) || 0;
-                const xxl = parseInt(s['2xl']) || 0;
-                const xxxl = parseInt(s['3xl']) || 0;
-                return ch + m + g + xl + xxl + xxxl;
+                return Object.values(s).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0);
             }
             if (dim === 'shade') {
                 const sh = this.newProduct.shades || {};
@@ -7448,10 +8495,7 @@ function hybridInventoryModule() {
             }
             if (dim === 'volume') {
                 const v = this.newProduct.volumes || {};
-                const v10 = parseInt(v.v10) || 0;
-                const v50 = parseInt(v.v50) || 0;
-                const v100 = parseInt(v.v100) || 0;
-                return v10 + v50 + v100;
+                return Object.values(v).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0);
             }
             if (dim === 'none') {
                 return parseInt(this.newProduct.unitStock) || 0;
@@ -7481,12 +8525,13 @@ function hybridInventoryModule() {
                 }
                 this.updateNewProductLocation();
             }
+            // Auto regenerate SKU on category change
+            this.generateAutoSku();
         },
 
         calculateNewProductProfit() {
             const pvp = parseFloat(this.newProduct.pvp) || 0;
             const cost = parseFloat(this.newProduct.cost) || 0;
-            const weightedAverageCost = parseFloat(this.newProduct.weightedAverageCost) || cost;
             return Math.max(0, pvp - cost);
         },
 
@@ -7503,20 +8548,31 @@ function hybridInventoryModule() {
                 this.showToast('Por favor completa el codigo SKU y el nombre del producto.', 'warning');
                 return;
             }
+
+            // Deteccion de duplicados: bloquear si hay match critico no confirmado
+            if (!this.newProduct.forceCreateDespiteDuplicate && this.newProduct.duplicateRisk === 'duplicate_match' && this.newProduct.duplicateMatches && this.newProduct.duplicateMatches.length > 0) {
+                this.newProduct.duplicateAlertModalOpen = true;
+                this.showToast('Atencion: Se detecto un posible producto duplicado. Resuelve el conflicto para continuar.', 'warning');
+                return;
+            }
+
             const cleanSku = this.newProduct.sku.trim().toUpperCase();
             const exists = this.products.some(p => p.sku.toUpperCase() === cleanSku);
             if (exists) {
                 this.showToast('El SKU ' + cleanSku + ' ya existe en el catalogo. Usa un codigo unico.', 'warning');
                 return;
             }
+
             const totalStock = this.calculateNewProductTotalStock();
             const pvp = parseFloat(this.newProduct.pvp) || 0;
             const cost = parseFloat(this.newProduct.cost) || 0;
             const weightedAverageCost = parseFloat(this.newProduct.weightedAverageCost) || cost;
+
             const createdItem = {
                 sku: cleanSku,
                 name: this.newProduct.name.trim(),
                 category: this.newProduct.category,
+                subcategory: this.newProduct.subcategory || '',
                 type: this.newProduct.type,
                 variant_dimension: this.newProduct.variantDimension || 'size',
                 images: Array.isArray(this.newProduct.images) ? [...this.newProduct.images] : [],
@@ -7527,14 +8583,10 @@ function hybridInventoryModule() {
                 pvp: pvp,
                 cost: cost,
                 weightedAverageCost: weightedAverageCost,
-                sizes: (this.newProduct.variantDimension === 'size') ? {
-                    ch: parseInt(this.newProduct.sizes.ch) || 0,
-                    m: parseInt(this.newProduct.sizes.m) || 0,
-                    g: parseInt(this.newProduct.sizes.g) || 0,
-                    xl: parseInt(this.newProduct.sizes.xl) || 0,
-                    '2xl': parseInt(this.newProduct.sizes['2xl']) || 0,
-                    '3xl': parseInt(this.newProduct.sizes['3xl']) || 0
-                } : undefined,
+                description: this.newProduct.description || '',
+                bulletPoints: Array.isArray(this.newProduct.bulletPoints) ? [...this.newProduct.bulletPoints] : [],
+                seoTags: Array.isArray(this.newProduct.seoTags) ? [...this.newProduct.seoTags] : [],
+                sizes: (this.newProduct.variantDimension === 'size') ? { ...this.newProduct.sizes } : undefined,
                 shades: (this.newProduct.variantDimension === 'shade') ? { ...this.newProduct.shades } : undefined,
                 volumes: (this.newProduct.variantDimension === 'volume') ? { ...this.newProduct.volumes } : undefined,
                 adjustType: 'add',
@@ -7544,22 +8596,9 @@ function hybridInventoryModule() {
                 providerUrl: this.newProduct.providerUrl,
                 isScraping: false
             };
+
             this.products.unshift(createdItem);
             this.newProductDrawerOpen = false;
-            this.newProduct = {
-                sku: 'BX-ECO-012',
-                name: '',
-                category: 'Boxers',
-                type: 'propio',
-                location: 'Rack A-02 / Nivel 1',
-                pvp: 399.00,
-                cost: 135.00,
-                sizes: { ch: 15, m: 35, g: 30, xl: 10 },
-                supplierStock: 40,
-                provider: 'ModaIntima Textil MX',
-                providerUrl: '',
-                images: []
-            };
             this.showToast('Producto ' + createdItem.sku + ' agregado exitosamente al catalogo.', 'success');
         },
 
@@ -7672,44 +8711,134 @@ function hybridInventoryModule() {
             return Math.max(0, m).toFixed(1);
         },
 
-        saveDrawerChanges() {
-            if (this.selectedProduct) {
-                this.selectedProduct.sizes = { ...this.drawerSizes };
-                if (this.selectedProduct.variantDimension === 'shade') {
-                    this.selectedProduct.shades = { ...this.drawerShades };
-                }
-                this.selectedProduct.location = this.drawerLocation;
-                this.selectedProduct.pvp = this.drawerPvp;
-                this.selectedProduct.cost = this.drawerCost;
-                this.selectedProduct.weightedAverageCost = parseFloat(this.drawerCpp) || this.selectedProduct.weightedAverageCost || this.selectedProduct.cost;
-                this.selectedProduct.fabricType = this.drawerFabricType;
-                this.selectedProduct.colorName = this.drawerColorName;
-                this.selectedProduct.colorHex = this.drawerColorHex;
-                this.selectedProduct.colorType = this.drawerColorType;
-                this.selectedProduct.designType = this.drawerDesignType;
-                this.selectedProduct.websiteSection = this.drawerWebsiteSection;
-                this.selectedProduct.isPublished = this.drawerIsPublished;
-                this.selectedProduct.description = this.drawerDescription;
-                this.selectedProduct.brand = this.drawerBrand;
-                this.selectedProduct.discountPct = parseFloat(this.drawerDiscountPct) || 0;
-                this.selectedProduct.regularPrice = parseFloat(this.drawerRegularPrice) || this.selectedProduct.pvp;
-                if (this.drawerRequiresSanitaryControl || this.selectedProduct.requiresSanitaryControl) {
-                    this.selectedProduct.batchNumber = this.drawerBatchNumber;
-                    this.selectedProduct.expirationDate = this.drawerExpirationDate;
-                    this.selectedProduct.paoMonths = parseInt(this.drawerPaoMonths) || 12;
-                    this.selectedProduct.requiresSanitaryControl = true;
-                }
-                if (this.selectedProduct.type === 'propio') {
-                    this.selectedProduct.localStock = this.selectedProduct.variantDimension === 'shade'
-                        ? Object.values(this.drawerShades || {}).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0)
-                        : this.totalSizesCount();
-                    if (this.selectedProduct.localStock === 0) this.selectedProduct.status = 'Agotado';
-                    else if (this.selectedProduct.localStock < 25) this.selectedProduct.status = 'Bajo Stock';
-                    else this.selectedProduct.status = 'En Stock';
-                }
-                this.showToast(`Cambios de ${this.selectedProduct.sku} guardados correctamente.`, 'success');
+        drawerEffectivePvp() {
+            const base = parseFloat(this.drawerRegularPrice) || parseFloat(this.drawerPvp) || 0;
+            const disc = Math.min(100, Math.max(0, parseFloat(this.drawerDiscountPct) || 0));
+            const eff = base * (1 - (disc / 100));
+            return Math.round(eff * 100) / 100;
+        },
+
+        drawerUnitProfit() {
+            const eff = this.drawerEffectivePvp();
+            const cpp = parseFloat(this.drawerCpp) || parseFloat(this.drawerCost) || 0;
+            return Math.round((eff - cpp) * 100) / 100;
+        },
+
+        drawerRealMarginPct() {
+            const eff = this.drawerEffectivePvp();
+            const cpp = parseFloat(this.drawerCpp) || 0;
+            if (eff <= 0) return 0;
+            const m = ((eff - cpp) / eff) * 100;
+            return Math.max(0, m).toFixed(1);
+        },
+
+        drawerMarginalMarginPct() {
+            const eff = this.drawerEffectivePvp();
+            const cost = parseFloat(this.drawerCost) || 0;
+            if (eff <= 0) return 0;
+            const m = ((eff - cost) / eff) * 100;
+            return Math.max(0, m).toFixed(1);
+        },
+
+        livePhysicalStock() {
+            if (this.selectedProduct && this.selectedProduct.variantDimension === 'shade') {
+                return Object.values(this.drawerShades || {}).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0);
             }
+            return this.totalSizesCount();
+        },
+
+        liveAvailableStock() {
+            const phys = this.livePhysicalStock();
+            const comm = this.selectedProduct ? (parseInt(this.selectedProduct.committedStock) || 0) : 0;
+            const lock = this.selectedProduct ? (parseInt(this.selectedProduct.lockedStock) || 0) : 0;
+            return Math.max(0, phys - comm - lock);
+        },
+
+        async saveDrawerChanges() {
+            if (!this.selectedProduct) return;
+            const sku = this.selectedProduct.sku;
+
+            this.selectedProduct.sizes = { ...this.drawerSizes };
+            if (this.selectedProduct.variantDimension === 'shade') {
+                this.selectedProduct.shades = { ...this.drawerShades };
+            }
+            this.selectedProduct.location = this.drawerLocation;
+            this.selectedProduct.regularPrice = parseFloat(this.drawerRegularPrice) || parseFloat(this.drawerPvp) || 0;
+            this.selectedProduct.discountPct = parseFloat(this.drawerDiscountPct) || 0;
+            this.selectedProduct.pvp = this.drawerEffectivePvp();
+            this.selectedProduct.cost = parseFloat(this.drawerCost) || 0;
+            this.selectedProduct.weightedAverageCost = parseFloat(this.drawerCpp) || this.selectedProduct.weightedAverageCost || this.selectedProduct.cost;
+            this.selectedProduct.fabricType = this.drawerFabricType;
+            this.selectedProduct.colorName = this.drawerColorName;
+            this.selectedProduct.colorHex = this.drawerColorHex;
+            this.selectedProduct.colorType = this.drawerColorType;
+            this.selectedProduct.designType = this.drawerDesignType;
+            this.selectedProduct.websiteSection = this.drawerWebsiteSection;
+            this.selectedProduct.isPublished = this.drawerIsPublished;
+            this.selectedProduct.description = this.drawerDescription;
+            this.selectedProduct.brand = this.drawerBrand;
+            if (this.drawerRequiresSanitaryControl || this.selectedProduct.requiresSanitaryControl) {
+                this.selectedProduct.batchNumber = this.drawerBatchNumber;
+                this.selectedProduct.expirationDate = this.drawerExpirationDate;
+                this.selectedProduct.paoMonths = parseInt(this.drawerPaoMonths) || 12;
+                this.selectedProduct.requiresSanitaryControl = true;
+            }
+            if (this.selectedProduct.type === 'propio') {
+                this.selectedProduct.localStock = this.livePhysicalStock();
+                if (this.selectedProduct.localStock === 0) this.selectedProduct.status = 'Agotado';
+                else if (this.selectedProduct.localStock < 25) this.selectedProduct.status = 'Bajo Stock';
+                else this.selectedProduct.status = 'En Stock';
+            }
+            this.showToast(`Cambios de ${sku} guardados correctamente.`, 'success');
             this.drawerOpen = false;
+
+            try {
+                const payload = {
+                    name: this.selectedProduct.name,
+                    brand: this.drawerBrand,
+                    description: this.drawerDescription,
+                    is_published: !!this.drawerIsPublished,
+                    fabric_type: this.drawerFabricType,
+                    color_name: this.drawerColorName,
+                    color_hex: this.drawerColorHex,
+                    color_type: this.drawerColorType,
+                    design_type: this.drawerDesignType,
+                    website_section: this.drawerWebsiteSection,
+                    location: this.drawerLocation,
+                    regular_price: parseFloat(this.drawerRegularPrice) || parseFloat(this.drawerPvp) || 0,
+                    discount_pct: parseFloat(this.drawerDiscountPct) || 0,
+                    pvp: this.drawerEffectivePvp(),
+                    cost: parseFloat(this.drawerCost) || 0,
+                    cpp: parseFloat(this.drawerCpp) || 0,
+                    sizes: { ...this.drawerSizes },
+                    shades: { ...this.drawerShades },
+                    physical_stock: this.livePhysicalStock(),
+                    batch_number: this.drawerBatchNumber,
+                    expiration_date: this.drawerExpirationDate,
+                    pao_months: parseInt(this.drawerPaoMonths) || 12,
+                    requires_sanitary_control: !!this.drawerRequiresSanitaryControl
+                };
+
+                const res = await fetch(`/api/v1/inventory/products/${encodeURIComponent(sku)}/update-complete`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.financials) {
+                        this.selectedProduct.pvp = data.financials.effective_price;
+                        this.selectedProduct.weightedAverageCost = data.financials.cpp;
+                    }
+                }
+            } catch (err) {
+                console.warn('Persistencia remota en segundo plano no disponible (fallback local aplicado):', err);
+            }
         },
 
         formatCurrency(val) {
@@ -12487,837 +13616,17 @@ function hybridInventoryBody() {
     <!-- ================================================================= -->
     <!-- DRAWER LATERAL EXPANDIDO: TABLA COMPLETA TOP 10 PRODUCTOS         -->
     <!-- ================================================================= -->
-    <div 
-        x-show="topTenDrawerOpen" 
-        @keydown.escape.window="closeTopTenDrawer()"
-        class="fixed inset-0 z-50 overflow-hidden" 
-        style="display: none;"
-        aria-labelledby="top-ten-drawer-title" 
-        role="dialog" 
-        aria-modal="true"
-    >
-        <!-- Backdrop oscuro: Cierra al hacer clic fuera del panel -->
-        <div 
-            x-show="topTenDrawerOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="closeTopTenDrawer()"
-            class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity cursor-pointer"
-        ></div>
-
-        <!-- Contenedor flex con pointer-events-none para que el clic exterior traspase limpiamente -->
-        <div 
-            @click.self="closeTopTenDrawer()"
-            class="fixed inset-y-0 right-0 w-screen max-w-full flex pointer-events-none"
-        >
-            <!-- Panel del Drawer: con pointer-events-auto y @click.outside para cierre garantizado -->
-            <div 
-                x-show="topTenDrawerOpen"
-                @click.outside="if (!drawerOpen && !newProductDrawerOpen) closeTopTenDrawer()"
-                x-transition:enter="transform transition ease-out duration-300"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition ease-in duration-200"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                class="w-screen max-w-[96vw] lg:max-w-[calc(100vw-80px)] xl:max-w-[calc(100vw-100px)] bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between pointer-events-auto"
-            >
-                <!-- Header del Drawer Top 10 con Help ? -->
-                <div class="p-6 border-b border-slate-200 bg-slate-50/90">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="p-2.5 bg-amber-50 text-amber-600 rounded-xl border border-amber-200/80 inline-flex items-center justify-center shadow-2xs">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <h2 class="text-xl font-bold text-slate-900 leading-tight">Top 10 Productos con Mayor Rendimiento</h2>
-                                    <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-200">Best Sellers RevOps</span>
-                                    <!-- Help ? Icon del Drawer Header -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Matriz de Rendimiento Top 10</div>
-                                            <p class="text-[11px] text-slate-200 leading-snug">Monitorea los 10 productos que concentran el 64.2% del flujo de caja. Permite supervisar la curva de tallas más demandadas, rentabilidad neta y nivel de existencias físicas o externas para evitar quiebres.</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-slate-500 mt-1">Data grid completo: facturación consolidada, curva de tallas más demandadas y stock disponible</p>
-                            </div>
-                        </div>
-                        <button 
-                            @click="closeTopTenDrawer()" 
-                            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition cursor-pointer"
-                            aria-label="Cerrar panel"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-
-                    <!-- Métricas destacadas en cabecera del drawer con Tooltips ? -->
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-200/80">
-                        <!-- KPI 1: Facturación Top 10 -->
-                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Facturación Top 10</span>
-                                <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                    <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                    </span>
-                                    <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Facturación Concentrada Top 10</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Monto acumulado por los 10 productos estrella en los últimos 30 días. Representa el 64.2% del volumen total de ingresos del catálogo.</p>
-                                        <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-xl font-extrabold text-slate-900 mt-1 block">$1,104,800 <span class="text-xs text-slate-400 font-normal">MXN</span></span>
-                            <div class="text-[10px] text-emerald-600 font-medium mt-0.5">64.2% del volumen total de ventas</div>
-                        </div>
-
-                        <!-- KPI 2: Unidades Vendidas -->
-                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Unidades Vendidas</span>
-                                <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                    <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                    </span>
-                                    <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Prendas Despachadas Top 10</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Total de piezas vendidas entre los 10 modelos líderes, promediando 289 unidades por SKU con alta tasa de rotación en inventario.</p>
-                                        <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-xl font-extrabold text-indigo-600 mt-1 block">2,890 <span class="text-xs text-slate-400 font-normal">piezas</span></span>
-                            <div class="text-[10px] text-slate-500 mt-0.5">Promedio 289 uds por SKU</div>
-                        </div>
-
-                        <!-- KPI 3: Talla Central Más Vendida -->
-                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Talla Central Más Vendida</span>
-                                <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                    <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                    </span>
-                                    <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva Dominante de Tallas</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">La talla M (Mediana) concentra el 44.5% de los pedidos totales. Priorizar su aprovisionamiento evita quiebres en el segmento core de clientes.</p>
-                                        <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-xl font-extrabold text-indigo-900 mt-1 block">M &bull; Mediana</span>
-                            <div class="text-[10px] text-indigo-600 font-medium mt-0.5">Concentra el 44.5% de compras</div>
-                        </div>
-
-                        <!-- KPI 4: Margen Bruto Promedio -->
-                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-slate-500 font-semibold block text-[11px] uppercase tracking-wider">Margen Bruto Promedio</span>
-                                <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                    <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                    </span>
-                                    <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                        <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Rentabilidad Comercial Ponderada</div>
-                                        <p class="text-[10px] text-slate-200 leading-snug">Margen comercial ponderado combinando confección propia (65%-73%) y dropshipping (57%-63%). Se ubica en un rango óptimo y saludable (>50%).</p>
-                                        <span class="absolute bottom-full right-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-xl font-extrabold text-emerald-600 mt-1 block">66.0% <span class="text-xs text-slate-400 font-normal">RevOps</span></span>
-                            <div class="text-[10px] text-emerald-700 font-medium mt-0.5">Rango saludable (&gt;50%)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contenido con Scroll: TABLA COMPLETA CON TOOLTIPS ? EN ENCABEZADOS -->
-                <div class="p-6 overflow-y-auto flex-1 text-sm bg-slate-50/30">
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                            <thead>
-                                <tr class="bg-slate-50/90 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                                    <th class="py-3.5 px-3 w-12 text-center">#</th>
-                                    <th class="py-3.5 px-4 min-w-[200px]">Producto & SKU</th>
-                                    <th class="py-3.5 px-3 text-center">Categoría</th>
-                                    
-                                    <!-- ENCABEZADO CON HELP ? : TALLAS MÁS VENDIDAS -->
-                                    <th class="py-3.5 px-3 text-center">
-                                        <div class="inline-flex items-center justify-center gap-1">
-                                            <span>Tallas Más Vendidas</span>
-                                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva de Demanda por Talla</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Identifica las 2 tallas con mayor penetración (Top 1 y Top 2). En boxers y jocks dominan M y G; en tangas y bikinis dominan CH y M. Vital para no quebrar tallas centrales.</p>
-                                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </th>
-
-                                    <th class="py-3.5 px-3 text-center">Origen</th>
-                                    
-                                    <!-- ENCABEZADO CON HELP ? : UDS VENDIDAS -->
-                                    <th class="py-3.5 px-4 text-right">
-                                        <div class="inline-flex items-center justify-end gap-1">
-                                            <span>Uds Vendidas</span>
-                                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Volumen Despachado</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas vendidas en los últimos 30 días. La micro-barra indica la proporción respecto al producto líder (#1).</p>
-                                                    <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </th>
-
-                                    <!-- ENCABEZADO CON HELP ? : FACTURACIÓN (GMV) -->
-                                    <th class="py-3.5 px-4 text-right">
-                                        <div class="inline-flex items-center justify-end gap-1">
-                                            <span>Facturación (GMV)</span>
-                                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Gross Merchandise Value</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Total bruto generado por la venta de este SKU (Precio PVP x Unidades vendidas en 30 días).</p>
-                                                    <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </th>
-
-                                    <!-- ENCABEZADO CON HELP ? : MARGEN REVOPS -->
-                                    <th class="py-3.5 px-3 text-center">
-                                        <div class="inline-flex items-center justify-center gap-1">
-                                            <span>Margen RevOps</span>
-                                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-60 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Margen Bruto Unitario</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Rentabilidad sobre el precio final: (PVP - Costo) / PVP. Todos los productos del Top 10 superan el 50% de margen saludable.</p>
-                                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </th>
-
-                                    <!-- ENCABEZADO CON HELP ? : STOCK DISPONIBLE -->
-                                    <th class="py-3.5 px-4 text-right">
-                                        <div class="inline-flex items-center justify-end gap-1">
-                                            <span>Stock Disponible</span>
-                                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Nivel de Existencias</div>
-                                                    <p class="text-[10px] text-slate-200 leading-snug">Piezas físicas en almacén o confirmadas en catálogo del proveedor. Permite detectar quiebres inminentes en productos estrella.</p>
-                                                    <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </th>
-
-                                    <th class="py-3.5 px-3 text-center">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                                
-                                <!-- ITEM 1 (ORO) -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">1</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Boxer Trunks Modal Seamless</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BX-MOD-001</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">Boxers</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs" title="Talla Top 1: 45% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-indigo-600 font-normal">45%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 35% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">35%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">520 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-indigo-600 rounded-full" style="width: 100%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$218,400</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $420 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            65.5% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        284 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('BX-MOD-001')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 2 (PLATA) -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">2</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Boxer Algodón Pima Orgánico</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BX-COT-007</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">Boxers</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs" title="Talla Top 1: 42% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-indigo-600 font-normal">42%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 38% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">38%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">460 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-indigo-600 rounded-full" style="width: 88%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$179,400</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $390 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            69.2% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        480 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('BX-COT-007')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 3 (BRONCE) -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-800 border border-orange-300 font-extrabold text-xs inline-flex items-center justify-center shadow-xs">3</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Jockstrap Athletic Carbon Edition</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: JK-ATH-002</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">Jocks</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs" title="Talla Top 1: 50% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-blue-600 font-normal">50%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 30% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">30%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">395 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-blue-600 rounded-full" style="width: 76%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$150,100</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $380 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            69.7% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        198 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('JK-ATH-002')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 4 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">4</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Torzo Mesh Breathable Trunk</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TOR-DRP-003</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">Boxers</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs" title="Talla Top 1: 40% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-indigo-600 font-normal">40%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 35% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">35%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dropship (Torzo)
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">310 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-indigo-600 rounded-full" style="width: 60%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$151,900</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $490 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            57.1% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <span class="font-bold text-emerald-700">48 <span class="text-xs font-normal text-emerald-600">sincronizadas</span></span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TOR-DRP-003')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 5 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">5</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Tanga Microfibra Velvet Touch</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TG-SLK-004</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200/80">Tangas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200 shadow-2xs" title="Talla Top 1: 45% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-fuchsia-600 font-normal">45%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 40% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">40%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">285 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-fuchsia-600 rounded-full" style="width: 55%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$82,650</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $290 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            73.1% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        154 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TG-SLK-004')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 6 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">6</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Jockstrap Pro-Gym Wide Band</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: JK-PRO-010</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">Jocks</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs" title="Talla Top 1: 44% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-blue-600 font-normal">44%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 38% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">38%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">240 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-blue-600 rounded-full" style="width: 46%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$86,400</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $360 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            69.4% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        88 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('JK-PRO-010')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 7 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">7</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Tanga Extreme Minimalist Straps</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TG-EXT-008</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200/80">Tangas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200 shadow-2xs" title="Talla Top 1: 48% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-fuchsia-600 font-normal">48%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 38% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">38%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">215 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-fuchsia-600 rounded-full" style="width: 41%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$55,900</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $260 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            76.2% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        218 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TG-EXT-008')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 8 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">8</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Bikini Sport Performance Brief</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: BK-FIT-005</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">Bikinis</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs" title="Talla Top 1: 46% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-amber-600 font-normal">46%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 32% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-slate-500 font-normal">32%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Stock Propio
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">190 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-amber-600 rounded-full" style="width: 37%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$60,800</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $320 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            70.3% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900">
-                                        122 <span class="text-xs font-normal text-slate-500">piezas</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('BK-FIT-005')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 9 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">9</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Torzo Neon Glow Athletic Jock</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TOR-DRP-006</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">Jocks</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs" title="Talla Top 1: 48% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-blue-600 font-normal">48%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 34% de pedidos">
-                                                <span>G</span> <span class="text-[10px] text-slate-500 font-normal">34%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dropship (Torzo)
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">165 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-blue-600 rounded-full" style="width: 32%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$74,250</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $450 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            56.7% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            14 piezas
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TOR-DRP-006')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- ITEM 10 -->
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs inline-flex items-center justify-center">10</span>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 text-sm">Torzo Signature Satin Bikini</div>
-                                        <div class="text-[11px] font-mono text-indigo-600 font-medium">SKU: TOR-DRP-009</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">Bikinis</span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-extrabold text-xs bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs" title="Talla Top 1: 42% de pedidos">
-                                                <span>CH</span> <span class="text-[10px] text-amber-600 font-normal">42%</span>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-semibold text-xs bg-slate-100 text-slate-700 border border-slate-200" title="Talla Top 2: 40% de pedidos">
-                                                <span>M</span> <span class="text-[10px] text-slate-500 font-normal">40%</span>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dropship (Torzo)
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <span class="font-bold text-slate-900">110 uds</span>
-                                            <div class="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
-                                                <div class="h-full bg-amber-600 rounded-full" style="width: 21%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <div class="font-bold text-slate-900">$45,100</div>
-                                        <div class="text-[10px] text-slate-400">PVP: $410 MXN</div>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            57.3% <span class="text-[9px] font-normal text-emerald-600 hidden xl:inline">&bull; Saludable</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            Agotado
-                                        </span>
-                                    </td>
-                                    <td class="py-3.5 px-3 text-center">
-                                        <button @click="openDrawerForSku('TOR-DRP-009')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>Detalle</span>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Footer del Drawer -->
-                <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center gap-2 text-slate-500">
-                        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Estrategia RevOps: Las tallas centrales <strong>M</strong> y <strong>G</strong> dominan en boxers y jocks, mientras que <strong>CH</strong> lidera en tangas y bikinis. Concentrar compras según esta curva.</span>
-                    </div>
-                    <button 
-                        @click="closeTopTenDrawer()" 
-                        class="px-5 py-2 text-sm font-semibold bg-slate-800 hover:bg-slate-900 text-white rounded-lg shadow-sm transition cursor-pointer shrink-0"
-                    >
-                        Cerrar Panel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DRAWER LATERAL (Off-canvas animado con Alpine.js)                 -->
+    <!-- MODAL PANORÁMICO CENTRADO: DETALLE Y EDICIÓN DE SKU (TASK-INV-18) -->
     <!-- ================================================================= -->
     <div 
+        id="skuPanoramicModal"
         x-show="drawerOpen" 
-        class="fixed inset-0 z-[60] overflow-hidden" 
+        class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto" 
         style="z-index: 60; display: none;"
-        aria-labelledby="slide-over-title" 
+        aria-labelledby="sku-panoramic-title" 
         role="dialog" 
         aria-modal="true"
+        @keydown.escape.window="drawerOpen = false"
     >
         <!-- Backdrop oscuro con desenfoque suave -->
         <div 
@@ -13329,805 +13638,668 @@ function hybridInventoryBody() {
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             @click="drawerOpen = false"
-            class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         ></div>
 
-        <div class="fixed inset-y-0 right-0 w-screen max-w-full flex pointer-events-none">
-            <div 
-                x-show="drawerOpen"
-                x-transition:enter="transform transition ease-out duration-300"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition ease-in duration-200"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                class="w-screen max-w-4xl bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between"
-            >
-                <!-- Header del Drawer -->
-                <div class="p-6 border-b border-slate-200 bg-slate-50/70">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-xs font-mono font-bold rounded bg-indigo-100 text-indigo-700" x-text="selectedProduct?.sku"></span>
-                            <span class="text-xs px-2 py-0.5 rounded font-semibold uppercase tracking-wider"
-                                  :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'"
-                                  x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
-                            </span>
-                        </div>
-                        <button @click="drawerOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-
-                    <div class="flex items-center justify-between mt-3">
-                        <h2 class="text-xl font-bold text-slate-900" x-text="selectedProduct?.name"></h2>
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700" x-text="drawerBrand"></span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-0.5" x-text="selectedProduct?.category"></p>
+        <!-- Contenedor Panorámico Centrado max-w-7xl / 95vw -->
+        <div 
+            x-show="drawerOpen"
+            x-transition:enter="transform transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transform transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="relative w-full max-w-7xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-10"
+        >
+            <!-- Header del Modal Panorámico -->
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 text-sm font-mono font-bold rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200" x-text="selectedProduct?.sku"></span>
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider"
+                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
+                    </span>
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5"
+                          :class="drawerIsPublished ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700 border border-slate-300'">
+                        <span class="w-2 h-2 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                        <span x-text="drawerIsPublished ? 'Publicado en Vitrina' : 'Fuera de Catálogo'"></span>
+                    </span>
                 </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-sm font-bold text-slate-800" x-text="selectedProduct?.name"></div>
+                        <div class="text-xs text-slate-500" x-text="(drawerBrand || 'Sin Marca') + ' • ' + (selectedProduct?.category || 'General')"></div>
+                    </div>
+                    <button 
+                        @click="drawerOpen = false" 
+                        class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/70 transition cursor-pointer"
+                        title="Cerrar modal (Esc)"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
 
-                <!-- Contenido con Scroll del Drawer -->
-                <div class="p-6 overflow-y-auto flex-1 text-sm">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- ========================================================= -->
-                        <!-- COLUMNA IZQUIERDA: VITRINA WEB, ATRIBUTOS TEXTILES & CURA -->
-                        <!-- ========================================================= -->
-                        <div class="space-y-5">
-                            <!-- 1. Toggle de Publicación en Tienda Online -->
-                            <div class="p-4 rounded-xl border transition-colors shadow-2xs" :class="drawerIsPublished ? 'bg-emerald-50/80 border-emerald-300' : 'bg-slate-50 border-slate-200'">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="w-2.5 h-2.5 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
-                                            <span class="font-bold text-xs uppercase tracking-wider" :class="drawerIsPublished ? 'text-emerald-900' : 'text-slate-700'">Estado en Vitrina Web</span>
-                                        </div>
-                                        <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catálogo (oculta temporalmente del público).'"></p>
+            <!-- Contenido con Scroll de 3 Columnas -->
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- ========================================================= -->
+                    <!-- COLUMNA 1: IDENTIDAD, VITRINA WEB & ATRIBUTOS TEXTILES    -->
+                    <!-- ========================================================= -->
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- 1. Toggle de Publicación en Tienda Online -->
+                        <div class="p-4 rounded-xl border transition-colors shadow-2xs" :class="drawerIsPublished ? 'bg-emerald-50/80 border-emerald-300' : 'bg-slate-50 border-slate-200'">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full" :class="drawerIsPublished ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                                        <span class="font-bold text-xs uppercase tracking-wider" :class="drawerIsPublished ? 'text-emerald-900' : 'text-slate-700'">Estado en Vitrina Web</span>
                                     </div>
-                                    <button 
-                                        type="button" 
-                                        @click="drawerIsPublished = !drawerIsPublished" 
-                                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                        :class="drawerIsPublished ? 'bg-emerald-600' : 'bg-slate-300'"
-                                        title="Alternar publicación"
+                                    <p class="text-xs text-slate-500 mt-1" x-text="drawerIsPublished ? 'Prenda publicada y visible para clientes en la tienda online.' : 'Prenda fuera de catálogo (oculta temporalmente del público).'"></p>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    @click="drawerIsPublished = !drawerIsPublished" 
+                                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                    :class="drawerIsPublished ? 'bg-emerald-600' : 'bg-slate-300'"
+                                    title="Alternar publicación"
+                                >
+                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                          :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Catalogación & Proveedor -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="drawerBrand" 
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        placeholder="Ej: Torzo B2B, ModaIntima MX"
                                     >
-                                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                              :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
-                                    </button>
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
+                                    <select 
+                                        x-model="drawerWebsiteSection" 
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="basicos">Línea Básicos Esenciales</option>
+                                        <option value="disenador">Línea Diseñador & Autor</option>
+                                        <option value="temporada">Colección Temporada / Drops</option>
+                                        <option value="general">Catálogo General</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- 2. Marca o Proveedor & Sección del Sitio Web -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
-                                
-                                <div class="grid grid-cols-2 gap-3">
+                            <!-- Variante de Diseño: Con diseño vs Sin diseño -->
+                            <div>
+                                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de Diseño</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button 
+                                        type="button" 
+                                        @click="drawerDesignType = 'sin_diseno'"
+                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
+                                        :class="drawerDesignType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
+                                    >
+                                        Sin Diseño (Liso / Sólido)
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="drawerDesignType = 'con_diseno'"
+                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
+                                        :class="drawerDesignType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
+                                    >
+                                        Con Diseño (Estampado / Pattern)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Tipo de Tela & Fibras Textiles -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
+                                <button 
+                                    type="button" 
+                                    @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
+                                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                >
+                                    + Nueva Tela
+                                </button>
+                            </div>
+                            <select 
+                                x-model="drawerFabricType" 
+                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            >
+                                <template x-for="fab in apparelFabrics" :key="fab.id">
+                                    <option :value="fab.name" x-text="fab.name + ' (' + fab.description + ')'"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- 4. Color & Tornasol Iridiscente -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Color & Tornasol</label>
+                                <button 
+                                    type="button" 
+                                    @click="activeSettingsTab = 'colors'; moduleSettingsModalOpen = true;"
+                                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                >
+                                    + Nuevo Color/Tornasol
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
+                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
+                                    <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
+                                </div>
+                            </div>
+
+                            <!-- Selector Rápido de Paleta -->
+                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
+                                <template x-for="c in apparelColors" :key="c.id">
+                                    <button 
+                                        type="button" 
+                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
+                                        class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
+                                        :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
+                                        :title="c.name"
+                                    >
+                                        <span class="w-5 h-5 rounded-md border border-slate-300 shadow-3xs" :style="'background: ' + c.hex"></span>
+                                        <span class="text-[9px] font-semibold text-slate-700 truncate w-full text-center" x-text="c.name.split(' ')[0]"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- 5. Descripción Comercial del Producto -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-1.5 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Descripción de la Prenda</label>
+                                <span class="text-[10px] text-slate-400">Para vitrina web y curaduría</span>
+                            </div>
+                            <textarea 
+                                x-model="drawerDescription" 
+                                rows="3" 
+                                placeholder="Describe la composición, tacto, silueta y detalles de diseño de la prenda..." 
+                                class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================= -->
+                    <!-- COLUMNA 2: EXISTENCIAS, VARIANTES & UBICACIÓN DE BODEGA   -->
+                    <!-- ========================================================= -->
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- 4 KPIs Reactivos en Caliente (TASK-INV-18) -->
+                        <div class="bg-gradient-to-r from-slate-50 to-indigo-50/40 p-4 rounded-xl border border-slate-200/90 shadow-2xs">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                    <span>Disponibilidad Reactiva en Vivo</span>
+                                </span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">RevOps Live</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-center">
+                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-3xs">
+                                    <span class="text-[10px] text-slate-500 block uppercase font-semibold">Físico en Rack</span>
+                                    <span class="text-lg font-extrabold text-slate-900" x-text="livePhysicalStock()"></span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-amber-200/80 bg-amber-50/30 shadow-3xs">
+                                    <span class="text-[10px] text-amber-700 block uppercase font-semibold">Comprometido</span>
+                                    <span class="text-lg font-extrabold text-amber-600" x-text="selectedProduct ? (selectedProduct.committedStock || 0) : 0"></span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-purple-200/80 bg-purple-50/30 shadow-3xs">
+                                    <span class="text-[10px] text-purple-700 block uppercase font-semibold">Retenido en Locks</span>
+                                    <span class="text-lg font-extrabold text-purple-600" x-text="selectedProduct ? (selectedProduct.lockedStock || 0) : 0"></span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-emerald-300 bg-emerald-50/50 shadow-3xs">
+                                    <span class="text-[10px] text-emerald-700 block uppercase font-bold">Disponible Venta</span>
+                                    <span class="text-lg font-extrabold text-emerald-600" x-text="liveAvailableStock()"></span>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs">
+                                <span class="text-slate-500 text-[11px]">Trazabilidad de existencias:</span>
+                                <button 
+                                    type="button" 
+                                    @click="openKardexForSku(selectedProduct?.sku)" 
+                                    class="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer text-[11px]"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                    <span>Ver Kardex de este SKU &rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Matriz de Tallas o Tonos Cosméticos -->
+                        <template x-if="selectedProduct && selectedProduct.variantDimension === 'shade'">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono Cosmético</label>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-pink-100 text-pink-800 border border-pink-200">Swatches</span>
+                                    </div>
+                                    <span class="text-xs text-slate-500">Total: <strong class="text-pink-700 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <template x-for="shade in activeCosmeticShades" :key="shade.code">
+                                        <div class="bg-white p-2 rounded-lg border border-slate-200 text-center flex flex-col items-center shadow-2xs hover:border-pink-300 transition">
+                                            <div class="flex items-center gap-1.5 mb-1">
+                                                <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + shade.hex_color"></span>
+                                                <span class="text-xs font-bold text-slate-800" x-text="'Tono ' + shade.code"></span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-500 truncate w-full mb-1" x-text="shade.name"></span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                x-model.number="drawerShades[shade.code]" 
+                                                class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:bg-white focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                            >
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="!selectedProduct || selectedProduct.variantDimension !== 'shade'">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Curva de Tallas Activa</label>
+                                    <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
+                                </div>
+
+                                <!-- Fila 1: Tallas Centrales (CH a XL) -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.ch" 
+                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.m" 
+                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.g" 
+                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="drawerSizes.xl" 
+                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                        >
+                                    </div>
+                                </div>
+
+                                <!-- Fila 2: Tallas Extendidas (Plus Size) -->
+                                <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
+                                    <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                        <span>Tallas Extendidas (Plus Size)</span>
+                                        <span>Volumen reducido</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                            <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                x-model.number="drawerSizes['2xl']" 
+                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                            <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                x-model.number="drawerSizes['3xl']" 
+                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Slotting Físico en Almacén -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2">
+                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Ubicación Física en Almacén (Slotting)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Gaveta Asignada</label>
+                                    <select 
+                                        x-model="drawerLocation" 
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="">-- Seleccionar Gaveta --</option>
+                                        <template x-for="slot in warehouseSlots" :key="slot.code">
+                                            <option :value="slot.code" x-text="slot.code + ' (' + slot.zone + ')'"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-semibold text-slate-500 block mb-0.5">Código Manual / Libre</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="drawerLocation" 
+                                        placeholder="Ej: A-01-B"
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Control Sanitario & Trazabilidad (Un único bloque limpio) -->
+                        <template x-if="selectedProduct && (selectedProduct.requiresSanitaryControl || drawerRequiresSanitaryControl)">
+                            <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        </span>
+                                        <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
+                                    </div>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-purple-100 text-purple-800 border-purple-200">
+                                        Certificado Sanitario
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-2.5">
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
                                         <input 
                                             type="text" 
-                                            x-model="drawerBrand" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            placeholder="Ej: Torzo B2B, ModaIntima MX"
+                                            x-model="drawerBatchNumber" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         >
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
-                                        <select 
-                                            x-model="drawerWebsiteSection" 
-                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
+                                        <input 
+                                            type="date" 
+                                            x-model="drawerExpirationDate" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         >
-                                            <option value="basicos">Línea Básicos Esenciales</option>
-                                            <option value="disenador">Línea Diseñador & Autor</option>
-                                            <option value="temporada">Colección Temporada / Drops</option>
-                                            <option value="general">Catálogo General</option>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
+                                        <select 
+                                            x-model.number="drawerPaoMonths" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                            <option value="6">6 Meses</option>
+                                            <option value="12">12 Meses</option>
+                                            <option value="18">18 Meses</option>
+                                            <option value="24">24 Meses</option>
+                                            <option value="36">36 Meses</option>
                                         </select>
                                     </div>
                                 </div>
-
-                                <!-- Variante de Diseño: Con diseño vs Sin diseño -->
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Variante de Diseño</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button 
-                                            type="button" 
-                                            @click="drawerDesignType = 'sin_diseno'"
-                                            class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                            :class="drawerDesignType === 'sin_diseno' ? 'bg-white border-indigo-600 text-indigo-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                        >
-                                            Sin Diseño (Liso / Sólido)
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="drawerDesignType = 'con_diseno'"
-                                            class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                            :class="drawerDesignType === 'con_diseno' ? 'bg-white border-purple-600 text-purple-700 shadow-xs' : 'bg-slate-100 text-slate-600 border-slate-200'"
-                                        >
-                                            Con Diseño (Estampado / Pattern)
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
-
-                            <!-- 3. Tipo de Tela & Fibras Textiles -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2 shadow-2xs">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
-                                    <button 
-                                        type="button" 
-                                        @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
-                                        class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                    >
-                                        + Nueva Tela
-                                    </button>
-                                </div>
-                                <select 
-                                    x-model="drawerFabricType" 
-                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" x-text="fab.name + ' (' + fab.description + ')'"></option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- 4. Color & Tornasol Iridiscente -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Color & Tornasol</label>
-                                    <button 
-                                        type="button" 
-                                        @click="activeSettingsTab = 'colors'; moduleSettingsModalOpen = true;"
-                                        class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                    >
-                                        + Nuevo Color/Tornasol
-                                    </button>
-                                </div>
-                                
-                                <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                                    <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
-                                        <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Selector Rápido de Paleta -->
-                                <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
-                                    <template x-for="c in apparelColors" :key="c.id">
-                                        <button 
-                                            type="button" 
-                                            @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
-                                            class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
-                                            :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
-                                            :title="c.name"
-                                        >
-                                            <span class="w-5 h-5 rounded-md border border-slate-300 shadow-3xs" :style="'background: ' + c.hex"></span>
-                                            <span class="text-[9px] font-semibold text-slate-700 truncate w-full text-center" x-text="c.name.split(' ')[0]"></span>
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- 5. Descripción del Producto -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-1.5 shadow-2xs">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Descripción de la Prenda</label>
-                                    <span class="text-[10px] text-slate-400">Para vitrina web y curaduría</span>
-                                </div>
-                                <textarea 
-                                    x-model="drawerDescription" 
-                                    rows="4" 
-                                    placeholder="Describe la composición, tacto, silueta y detalles de diseño de la prenda..." 
-                                    class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y max-w-full"
-                                    style="resize: vertical; max-width: 100%;"
-                                ></textarea>
-                            </div>
-                        </div>
-                        <!-- ========================================================= -->
-                        <!-- COLUMNA DERECHA: EXISTENCIAS, SLOTTING, MARGEN & REORDEN   -->
-                        <!-- ========================================================= -->
-                        <div class="space-y-6">
-                            <!-- Tarjeta Resumen 3 Estados: Físico vs Comprometido vs Disponible -->
-                    <div class="bg-gradient-to-r from-slate-50 to-indigo-50/40 p-3.5 rounded-xl border border-slate-200/90 shadow-2xs">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                <span>Disponibilidad Real (RevOps)</span>
-                            </span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">En Venta Activa</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-3xs">
-                                <span class="text-[10px] text-slate-500 block uppercase font-medium">Físico en Rack</span>
-                                <span class="text-base font-extrabold text-slate-900" x-text="selectedProduct ? selectedProduct.localStock : 0"></span>
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-3xs">
-                                <span class="text-[10px] text-slate-500 block uppercase font-medium">Comprometido</span>
-                                <span class="text-base font-extrabold text-amber-600 flex items-center justify-center gap-0.5">
-                                    <svg class="w-3 h-3 inline-block text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                    <span x-text="selectedProduct ? (selectedProduct.committedStock || 0) : 0"></span>
-                                </span>
-                            </div>
-                            <div class="bg-white p-2 rounded-lg border border-emerald-200 bg-emerald-50/30 shadow-3xs">
-                                <span class="text-[10px] text-emerald-700 block uppercase font-bold">Disponible Venta</span>
-                                <span class="text-base font-extrabold text-emerald-600" x-text="selectedProduct ? getAvailableStock(selectedProduct) : 0"></span>
-                            </div>
-                        </div>
-                        <p class="text-[10px] text-slate-500 mt-2 text-center">
-                            Apartados en empaque de carritos directos o esperando arribo de proveedor en carritos mixtos.
-                        </p>
-                        <div class="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
-                            <span class="text-slate-500 text-[11px]">Trazabilidad de existencias:</span>
-                            <button 
-                                type="button" 
-                                @click="openKardexForSku(selectedProduct.sku)" 
-                                class="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer text-[11px]"
-                            >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                <span>Ver Kardex de este SKU &rarr;</span>
-                            </button>
-                        </div>
+                        </template>
                     </div>
-                    
-                    <!-- 1. Desglose de Stock por Talla o Tono Cosmético (TASK-INV-09) -->
-                    <template x-if="selectedProduct && selectedProduct.variantDimension === 'shade'">
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                            <div class="flex items-center justify-between mb-3">
+
+                    <!-- ========================================================= -->
+                    <!-- COLUMNA 3: MÉTRICAS REVOPS, CALCULADORA & PLAN REORDEN    -->
+                    <!-- ========================================================= -->
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- Calculadora Ultra-Reactiva de Rentabilidad (TASK-INV-18) -->
+                        <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-lg border border-slate-800 space-y-4">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
                                 <div class="flex items-center gap-2">
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Existencias por Tono Cosmético</label>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-pink-100 text-pink-800 border border-pink-200">Swatches & Subtonos</span>
+                                    <span class="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    </span>
+                                    <h4 class="font-bold text-sm text-white">Calculadora Reactiva RevOps</h4>
                                 </div>
-                                <span class="text-xs text-slate-500">Total: <strong class="text-pink-700 font-bold" x-text="totalProductStockCount()"></strong> piezas</span>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700/60">En Vivo</span>
                             </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                <template x-for="shade in activeCosmeticShades" :key="shade.code">
-                                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center flex flex-col items-center shadow-2xs hover:border-pink-300 transition">
-                                        <div class="flex items-center gap-1.5 mb-1">
-                                            <span class="cosmetic-swatch-20" :style="'background: ' + shade.hex_color"></span>
-                                            <span class="text-xs font-bold text-slate-800" x-text="'Tono ' + shade.code"></span>
-                                        </div>
-                                        <span class="text-[10px] text-slate-500 truncate w-full mb-1" x-text="shade.name"></span>
-                                        <span class="text-[9px] mb-1.5" :class="getUndertoneBadgeClass(shade.undertone)" x-text="getUndertoneLabel(shade.undertone)"></span>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Input PVP Regular / Base -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-300 block mb-1">PVP Regular</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
                                         <input 
                                             type="number" 
-                                            min="0" 
-                                            x-model.number="drawerShades[shade.code]" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-xs focus:bg-white focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                            step="0.5" 
+                                            x-model.number="drawerRegularPrice" 
+                                            class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                                         >
                                     </div>
+                                </div>
+
+                                <!-- Input Descuento (%) -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-rose-300 block mb-1">Descuento (%)</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            step="1" 
+                                            min="0" 
+                                            max="90" 
+                                            x-model.number="drawerDiscountPct" 
+                                            class="w-full bg-slate-800/90 border border-rose-500/40 rounded-lg py-1.5 px-2.5 text-xs font-bold text-rose-300 focus:outline-none focus:ring-1 focus:ring-rose-400"
+                                            placeholder="0%"
+                                        >
+                                        <span class="absolute right-2.5 top-2 text-xs text-rose-400 font-bold">%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Último Costo -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-slate-300 block mb-1">Último Costo</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.5" 
+                                            x-model.number="drawerCost" 
+                                            class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                                        >
+                                    </div>
+                                </div>
+
+                                <!-- CPP Contable -->
+                                <div>
+                                    <label class="text-[11px] font-semibold text-indigo-300 block mb-1">CPP Contable</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-xs text-indigo-400">$</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.1" 
+                                            x-model.number="drawerCpp" 
+                                            class="w-full bg-slate-800/90 border border-indigo-700/80 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-indigo-200 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PVP Efectivo Recalculado -->
+                            <div class="p-2.5 bg-slate-800/90 rounded-xl border border-slate-700 flex items-center justify-between">
+                                <span class="text-xs text-slate-300 font-medium">PVP Efectivo de Venta:</span>
+                                <span class="text-base font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerEffectivePvp())"></span>
+                            </div>
+
+                            <!-- Métricas Reactivas: Utilidad & Márgenes con Semáforo -->
+                            <div class="pt-2 border-t border-slate-800 grid grid-cols-2 gap-2 text-center">
+                                <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
+                                    <span class="text-[10px] text-slate-400 block">Utilidad Real s/ CPP:</span>
+                                    <span class="text-sm font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerUnitProfit())"></span>
+                                </div>
+                                <div class="bg-slate-800/70 p-2 rounded-lg border border-slate-700">
+                                    <span class="text-[10px] text-indigo-300 block font-semibold">Margen Real (CPP):</span>
+                                    <div class="flex items-center justify-center gap-1 mt-0.5">
+                                        <span class="text-sm font-extrabold font-mono" 
+                                              :class="drawerRealMarginPct() >= 40 ? 'text-emerald-400' : (drawerRealMarginPct() >= 25 ? 'text-amber-400' : 'text-rose-400')" 
+                                              x-text="drawerRealMarginPct() + '%'">
+                                        </span>
+                                        <span class="text-[8px] px-1 py-0.2 rounded font-bold uppercase"
+                                              :class="drawerRealMarginPct() >= 40 ? 'bg-emerald-500/20 text-emerald-300' : (drawerRealMarginPct() >= 25 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
+                                              x-text="drawerRealMarginPct() >= 40 ? 'Saludable' : (drawerRealMarginPct() >= 25 ? 'Aceptable' : 'Riesgo')">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Plan de Reabastecimiento & Futuras Compras -->
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1 bg-indigo-50 text-indigo-700 rounded-md border border-indigo-200 inline-flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                    </span>
+                                    <h4 class="font-bold text-xs text-slate-900 uppercase tracking-wider">Plan de Reabastecimiento</h4>
+                                </div>
+                                <template x-if="selectedProduct && isProductInPurchaseList(selectedProduct.sku)">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                        <span x-text="getProductPurchaseCount(selectedProduct.sku) + ' en cola'"></span>
+                                    </span>
                                 </template>
                             </div>
-                            <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-200/80">
-                                <span class="text-[10px] text-slate-400">Tonos configurables dinámicamente con código HEX y subtono.</span>
-                                <button type="button" @click="openCosmeticShadesModal()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Gestionar Tonos</button>
-                            </div>
-                        </div>
-                    </template>
 
-                    <template x-if="!selectedProduct || selectedProduct.variantDimension !== 'shade'">
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex items-center gap-1.5">
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Inventario por Talla</label>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Curva de Tallas</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Desglose de existencias por talla para evitar que quiebres en tallas centrales (M, G) bloqueen la conversión del modelo.</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600" x-text="totalSizesCount()"></strong> piezas</span>
-                            </div>
-
-                            <div class="grid grid-cols-4 gap-2.5">
-                                <!-- Talla CH -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">CH (S)</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.ch" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-
-                                <!-- Talla M -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">M</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.m" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-
-                                <!-- Talla G -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">G (L)</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.g" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-
-                                <!-- Talla XL -->
-                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-                                    <span class="text-xs font-bold text-slate-600 block mb-1">XL</span>
-                                    <input 
-                                        type="number" 
-                                        min="0" 
-                                        x-model.number="drawerSizes.xl" 
-                                        class="w-full text-center bg-white border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- 2. Ubicación en Bodega -->
-                    <div>
-                        <div class="flex items-center gap-1.5 mb-2">
-                            <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Ubicación Física en Almacén</label>
-                            <!-- Help Icon -->
-                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Dirección de Rack</div>
-                                    <p class="text-[10px] text-slate-200 leading-snug">Identificador exacto de pasillo, rack y gaveta para guiar al equipo de picking y empaque de pedidos.</p>
-                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <input 
-                            type="text" 
-                            x-model="drawerLocation" 
-                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                        >
-                    </div>
-
-                    <!-- Control Sanitario & Trazabilidad (TASK-INV-06) -->
-                    <template x-if="selectedProduct && selectedProduct.requiresSanitaryControl">
-                        <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    </span>
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border" :class="getSanitaryBadgeClass(selectedProduct)">
-                                    <span x-text="getSanitaryBadgeText(selectedProduct)"></span>
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-2.5">
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerBatchNumber" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
-                                    <input 
-                                        type="date" 
-                                        x-model="drawerExpirationDate" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
-                                    <select 
-                                        x-model.number="drawerPaoMonths" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="6">6 Meses</option>
-                                        <option value="12">12 Meses</option>
-                                        <option value="18">18 Meses</option>
-                                        <option value="24">24 Meses</option>
-                                        <option value="36">36 Meses</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Control Sanitario & Trazabilidad (TASK-INV-06) -->
-                    <template x-if="selectedProduct && selectedProduct.requiresSanitaryControl">
-                        <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/50 p-4 rounded-xl border border-purple-200/90 shadow-2xs space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="p-1 bg-purple-100 text-purple-700 rounded border border-purple-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    </span>
-                                    <label class="font-bold text-slate-900 text-xs uppercase tracking-wider">Control Sanitario & Trazabilidad</label>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border" :class="getSanitaryBadgeClass(selectedProduct)">
-                                    <span x-text="getSanitaryBadgeText(selectedProduct)"></span>
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-2.5">
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lote Activo</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerBatchNumber" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Fecha Caducidad</label>
-                                    <input 
-                                        type="date" 
-                                        x-model="drawerExpirationDate" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">PAO</label>
-                                    <select 
-                                        x-model.number="drawerPaoMonths" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <option value="6">6 Meses</option>
-                                        <option value="12">12 Meses</option>
-                                        <option value="18">18 Meses</option>
-                                        <option value="24">24 Meses</option>
-                                        <option value="36">36 Meses</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- 3. Calculadora Reactiva de Margen (PVP - Costo = Margen) -->
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-lg border border-slate-800">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                </span>
-                                <div class="flex items-center gap-1.5">
-                                    <h4 class="font-bold text-sm text-white">Calculadora Reactiva de Margen</h4>
-                                    <!-- Help Icon -->
-                                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-indigo-300 hover:text-white transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-950 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700" style="display: none;">
-                                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Calculadora RevOps de Rentabilidad</div>
-                                            <p class="text-[10px] text-slate-200 leading-snug">Calcula la ganancia bruta y el porcentaje de margen sobre PVP en tiempo real: Saludable (>50%), Aceptable (30-50%) o Riesgo (<30%).</p>
-                                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-950"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">RevOps Unit</span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <!-- Input PVP Regular -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-slate-300 block mb-1">PVP Regular (Lista)</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.5" 
-                                        x-model.number="drawerPvp" 
-                                        class="w-full bg-slate-800/80 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Input Descuento (%) -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-rose-300 block mb-1">Descuento Activo (%)</label>
-                                <div class="relative">
-                                    <input 
-                                        type="number" 
-                                        step="1" 
-                                        min="0" 
-                                        max="90" 
-                                        x-model.number="drawerDiscountPct" 
-                                        class="w-full bg-slate-800/80 border border-rose-500/40 rounded-lg py-1.5 px-2.5 text-sm font-bold text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400"
-                                        placeholder="0%"
-                                    >
-                                    <span class="absolute right-2.5 top-2 text-xs text-rose-400 font-bold">%</span>
-                                </div>
-                            </div>
-
-                            <!-- Input Último Costo -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-slate-300 block mb-1">Último Costo Compra</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.5" 
-                                        x-model.number="drawerCost" 
-                                        class="w-full bg-slate-800/80 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Input CPP Contable -->
-                            <div>
-                                <label class="text-[11px] font-semibold text-indigo-300 block mb-1">Costo Promedio (CPP)</label>
-                                <div class="relative">
-                                    <span class="absolute left-2.5 top-2 text-xs text-indigo-400">$</span>
-                                    <input 
-                                        type="number" 
-                                        step="0.1" 
-                                        x-model.number="drawerCpp" 
-                                        class="w-full bg-slate-800/80 border border-indigo-700/80 rounded-lg py-1.5 pl-6 pr-2 text-sm font-bold text-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Resultados en Tiempo Real con Comparativa Contable -->
-                        <div class="pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <span class="text-[11px] text-slate-400 block">Utilidad Real s/ CPP:</span>
-                                <div class="text-base font-extrabold text-emerald-400 font-mono" x-text="formatCurrency(drawerPvp - drawerCpp)"></div>
-                                <span class="text-[10px] text-slate-500 block font-mono">Marginal: <span x-text="formatCurrency(calculateProfit())"></span></span>
-                            </div>
-
-                            <div>
-                                <span class="text-[11px] text-indigo-300 block font-semibold">Margen Real (CPP):</span>
-                                <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-base font-extrabold font-mono" 
-                                          :class="calculateRealMarginPercent() >= 50 ? 'text-emerald-400' : (calculateRealMarginPercent() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
-                                          x-text="calculateRealMarginPercent() + '%'">
-                                    </span>
-                                    <span class="text-[9px] px-1 py-0.5 rounded font-bold uppercase tracking-wider"
-                                          :class="calculateRealMarginPercent() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateRealMarginPercent() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
-                                          x-text="calculateRealMarginPercent() >= 50 ? 'Saludable' : (calculateRealMarginPercent() >= 30 ? 'Aceptable' : 'Riesgo')">
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span class="text-[11px] text-slate-400 block">Margen Marginal (Costo):</span>
-                                <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-base font-bold text-slate-300 font-mono" x-text="calculateMarginPercent() + '%'"></span>
-                                    <span class="text-[10px] text-slate-400 font-mono" x-text="'Dif: ' + (getMarginDifference() > 0 ? '+' : '') + getMarginDifference() + '%'"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 4. PLAN DE REABASTECIMIENTO & FUTURAS COMPRAS CON PROVEEDOR -->
-                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/90 shadow-xs">
-                        <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-200">
-                            <div class="flex items-center gap-2">
-                                <span class="p-1.5 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200/80 inline-flex items-center justify-center shadow-2xs">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                    </svg>
-                                </span>
-                                <div>
-                                    <div class="flex items-center gap-1.5">
-                                        <h4 class="font-bold text-sm text-slate-900">Plan de Reabastecimiento con Proveedor</h4>
-                                        <!-- Help Icon -->
-                                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                                            </span>
-                                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Planificadas RevOps</div>
-                                                <p class="text-[10px] text-slate-200 leading-snug">Permite programar lotes de reabastecimiento antes de quebrar stock, acumulando volumen para alcanzar MOQ (pedido mínimo) o mejores tarifas mayoristas.</p>
-                                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="text-[11px] text-slate-500">Añadir a lista de compras para consolidar orden con fabricante</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Badge indicador si el SKU ya está en la lista -->
-                            <template x-if="selectedProduct && isProductInPurchaseList(selectedProduct.sku)">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-2xs">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                    <span x-text="getProductPurchaseCount(selectedProduct.sku) + ' uds en cola'"></span>
-                                </span>
-                            </template>
-                        </div>
-
-                        <div class="space-y-3.5">
                             <!-- Selector de Proveedor -->
                             <div>
-                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Proveedor Asignado / Fabricante</label>
+                                <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Proveedor / Fabricante</label>
                                 <select 
                                     x-model="purchaseSupplier" 
-                                    class="w-full bg-white border border-slate-200 rounded-lg py-2 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                 >
-                                    <option value="Torzo B2B">Torzo B2B &bull; Headless Scraper (CDMX)</option>
-                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX &bull; Fabricante Nacional SAP (Puebla)</option>
-                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL &bull; Algodón/Modal Orgánico (Barcelona)</option>
-                                    <option value="Lingerie Drop Global">Lingerie Drop Global &bull; Dropshipping Jocks/Bikinis (Miami)</option>
-                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel &bull; Sin Costuras (Medellín)</option>
-                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale &bull; Diseño Autor (Guadalajara)</option>
-                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics &bull; Distribuidor Multimarca (Monterrey)</option>
+                                    <option value="Torzo B2B">Torzo B2B • Headless Scraper (CDMX)</option>
+                                    <option value="ModaIntima Textil MX">ModaIntima Textil MX • Fabricante Nacional SAP (Puebla)</option>
+                                    <option value="Silk & Cotton Iberia SL">Silk & Cotton Iberia SL • Algodón/Modal Orgánico (Barcelona)</option>
+                                    <option value="Lingerie Drop Global">Lingerie Drop Global • Dropshipping Jocks/Bikinis (Miami)</option>
+                                    <option value="Seamless Tech Apparel">Seamless Tech Apparel • Sin Costuras (Medellín)</option>
+                                    <option value="Aura Underwear Wholesale">Aura Underwear Wholesale • Diseño Autor (Guadalajara)</option>
+                                    <option value="Intimates Co. Logistics">Intimates Co. Logistics • Distribuidor Multimarca (Monterrey)</option>
                                 </select>
                             </div>
 
-                            <!-- Matriz Reactiva de Tallas & Presets Rápidos -->
+                            <!-- Presets Rápidos (+30, +60, +120) -->
                             <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Matriz de Reposición por Talla</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Reposición por Talla</label>
                                     <div class="flex items-center gap-1">
-                                        <button type="button" @click="setPurchaseQty(30)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 8px;">+30</button>
-                                        <button type="button" @click="setPurchaseQty(60)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 8px;">+60</button>
-                                        <button type="button" @click="setPurchaseQty(120)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer font-extrabold" style="min-height:unset;padding:2px 8px;">+120 (MOQ)</button>
+                                        <button type="button" @click="setPurchaseQty(30)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 6px;">+30</button>
+                                        <button type="button" @click="setPurchaseQty(60)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 transition cursor-pointer" style="min-height:unset;padding:2px 6px;">+60</button>
+                                        <button type="button" @click="setPurchaseQty(120)" class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer font-extrabold" style="min-height:unset;padding:2px 6px;">+120 (MOQ)</button>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-slate-500 block mb-1">CH</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.ch" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-slate-200 rounded-lg py-1 px-1 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
+                                <div class="grid grid-cols-4 gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200 text-center">
+                                    <div>
+                                        <span class="text-[9px] font-bold text-slate-500 block">CH</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.ch" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-slate-200 rounded py-0.5 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-indigo-700 inline-flex items-center justify-center gap-0.5 mb-1">M <svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.m" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-indigo-200 rounded-lg py-1 px-1 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
+                                    <div>
+                                        <span class="text-[9px] font-bold text-indigo-700 block">M</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.m" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-indigo-200 rounded py-0.5 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-indigo-700 inline-flex items-center justify-center gap-0.5 mb-1">G <svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.g" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-indigo-200 rounded-lg py-1 px-1 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
+                                    <div>
+                                        <span class="text-[9px] font-bold text-indigo-700 block">G</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.g" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-indigo-200 rounded py-0.5 text-center text-xs font-extrabold text-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-[10px] font-bold text-slate-500 block mb-1">XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="purchaseSizes.xl" 
-                                            @input="updatePurchaseTotalFromSizes()"
-                                            class="w-full bg-white border border-slate-200 rounded-lg py-1 px-1 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Fila Plus Size para Reorden: 2XL y 3XL -->
-                                <div class="mt-2 p-2 bg-slate-50/70 rounded-lg border border-slate-200/80">
-                                    <div class="flex items-center justify-between mb-1 px-0.5">
-                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tallas Extendidas (Plus Size)</span>
-                                        <span class="text-[10px] text-slate-400">Poco volumen</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="bg-white p-1 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-[10px] font-bold text-slate-600 pl-1">2XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="purchaseSizes['2xl']" 
-                                                @input="updatePurchaseTotalFromSizes()"
-                                                class="w-16 bg-slate-50 border border-slate-200 rounded py-0.5 px-1 text-center text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
-                                        <div class="bg-white p-1 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-[10px] font-bold text-slate-600 pl-1">3XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="purchaseSizes['3xl']" 
-                                                @input="updatePurchaseTotalFromSizes()"
-                                                class="w-16 bg-slate-50 border border-slate-200 rounded py-0.5 px-1 text-center text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1.5 px-0.5">
-                                    <span>Total calculado: <strong class="text-indigo-600 font-bold" x-text="purchaseQty"></strong> piezas</span>
-                                    <span class="text-slate-400 text-[10px] inline-flex items-center gap-1"><svg class="w-2.5 h-2.5 text-amber-500 fill-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Tallas de mayor rotación</span>
-                                </div>
-                            </div>
-
-                            <!-- Prioridad e Inversión Estimada -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Prioridad de Reposición</label>
-                                    <select 
-                                        x-model="purchasePriority" 
-                                        class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
-                                        <option value="alta">Alta (Riesgo &lt; 7 días)</option>
-                                        <option value="media">Media (Curva habitual)</option>
-                                        <option value="baja">Baja (Lote programado)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Inversión Estimada</label>
-                                    <div class="bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs font-extrabold text-emerald-700 flex items-center justify-between">
-                                        <span x-text="formatCurrency(calculatePurchaseTotal())"></span>
-                                        <span class="text-[10px] font-normal text-slate-400">PVP Costo</span>
+                                    <div>
+                                        <span class="text-[9px] font-bold text-slate-500 block">XL</span>
+                                        <input type="number" min="0" x-model.number="purchaseSizes.xl" @input="updatePurchaseTotalFromSizes()" class="w-full bg-white border border-slate-200 rounded py-0.5 text-center text-xs font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Botón Acción: Añadir a Lista de Compras -->
+                            <!-- Inversión y Acción de Reorden -->
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-white border border-slate-200 rounded-lg p-2">
+                                    <span class="text-[10px] font-semibold text-slate-500 block">Total Piezas:</span>
+                                    <span class="font-extrabold text-slate-900" x-text="purchaseQty + ' uds'"></span>
+                                </div>
+                                <div class="bg-white border border-slate-200 rounded-lg p-2">
+                                    <span class="text-[10px] font-semibold text-slate-500 block">Inversión Estimada:</span>
+                                    <span class="font-extrabold text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></span>
+                                </div>
+                            </div>
+
                             <button 
                                 type="button" 
                                 @click="addToFuturePurchaseList()" 
-                                class="w-full mt-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer group"
+                                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition cursor-pointer"
                                 style="min-height:unset;"
                             >
-                                <svg class="w-4 h-4 text-indigo-200 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                 <span>Añadir a Lista de Futuras Compras</span>
                             </button>
 
-                            <!-- Mensaje de confirmación en línea inmediato dentro del drawer -->
                             <div 
                                 x-show="purchaseAddedSuccess" 
-                                x-transition:enter="transition ease-out duration-200 transform"
-                                x-transition:enter-start="opacity-0 -translate-y-1"
-                                x-transition:enter-end="opacity-100 translate-y-0"
-                                x-transition:leave="transition ease-in duration-150 transform"
-                                x-transition:leave-start="opacity-100 translate-y-0"
-                                x-transition:leave-end="opacity-0 -translate-y-1"
-                                class="mt-2.5 p-2.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-2xs"
+                                x-transition 
+                                class="p-2 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-1.5"
                                 style="display: none;"
                             >
                                 <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span class="flex-1 leading-tight">¡Añadido exitosamente a la lista de futuras compras!</span>
-                                <span class="text-[10px] bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded font-bold shrink-0">En Proveedores</span>
+                                <span class="flex-1 text-[11px]">Añadido a lista de compras</span>
                             </div>
                         </div>
                     </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
 
-
-                <!-- Footer del Drawer -->
-                <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
+            <!-- Footer del Modal Panorámico -->
+            <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                <div class="text-xs text-slate-500 hidden sm:flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <span>Los cambios se guardan y recalculan inmediatamente.</span>
+                </div>
+                <div class="flex items-center gap-3 ml-auto">
                     <button 
                         @click="drawerOpen = false" 
-                        class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
+                        class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-xl transition cursor-pointer"
                     >
                         Cancelar
                     </button>
                     <button 
                         type="button"
                         @click="handleSaveDrawerClick()" 
-                        class="px-5 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition cursor-pointer"
                         style="min-height: unset;"
                     >
-                        Guardar Cambios
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Guardar Cambios</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- ================================================================= -->
+<!-- ================================================================= -->
     <!-- DRAWER LATERAL: AGREGAR NUEVO PRODUCTO AL CATÁLOGO                -->
     <!-- ================================================================= -->
     <div 

@@ -204,6 +204,12 @@
   justify-content: center;
   padding: 6px 0;
 }
+.collapse-button {
+  transition: transform 0.2s ease;
+}
+.collapsed .collapse-button {
+  transform: rotate(180deg);
+}
 
 /* Topbar Action Icons (Notificaciones y Chat) */
 .topbar-icon-btn {

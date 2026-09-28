@@ -52,8 +52,8 @@
 | `TASK-INV-11` | CRUD Integral con Archivado y Restauración para Telas, Colores y Parámetros ROP | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-08`, Modal Ajustes, ROP, Tag v1.2 |
 | `TASK-INV-12` | Gestor Configurable de Vitrinas Web (Delegado a Hub 2 CMS) & Etiquetado en Catálogo | **Hub 2 (CMS) / Hub 4** | **Media** | **Delegada a Hub 2 (CMS)** | `TASK-INV-08`, `TASK-STR-02`, CMS Hub 2 |
 | `TASK-INV-13` | Gestor Integral de Proveedores (Híbridos Scrapeados vs Locales/Manuales) y Control de Estados | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Pestaña Proveedores, Modal CRUD, Tag v1.2 |
-| `TASK-INV-14` | Gestor Configurable de Tallas Textiles y Volúmenes de Perfumería en Matriz de Variantes | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | `TASK-INV-02`, Modal Curvas & Volúmenes |
-| `TASK-INV-15` | Drawer de Producto Full-Width con Auto-SKU, Asistente IA de Descripción y Detección de Duplicados | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | Drawer Producto, Copiloto IA, Duplicados |
+| `TASK-INV-14` | Gestor Configurable de Tallas Textiles y Volúmenes de Perfumería en Matriz de Variantes | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-02`, Modal Curvas & Volúmenes, Tag v1.6 |
+| `TASK-INV-15` | Drawer de Producto Full-Width con Auto-SKU, Asistente IA de Descripción y Detección de Duplicados | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta Producto, Auto-SKU, Copiloto IA, Duplicados, Tag v1.6 |
 | `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
 | `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
 | `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Navbar, Stripe Keys, Skydropx, Tag v1.5 |
@@ -97,7 +97,7 @@
 | `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5, Tag v1.1 |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
-| `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Pendiente (Fase 2)** | Ficha SKU, Curva Tallas, Margen Real, ROP |
+| `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Panorámico max-w-7xl, 4 KPIs Live, Margen Real, Tag v1.6 |
 | `TASK-DSH-09` | Master Kardex Global y Log de Auditoría Omnicanal para Superadministradores | **Hub 1 (Dashboard)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 1 Auditoría, `system_audit_logs`, Tag v1.5 |
 | `TASK-SYS-01` | Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | Sidebar Footer, Hub 8 Pantalla Completa, Tag v1.5 |
 | `TASK-COM-01` | Mensajería Interdepartamental Operativa con Detección Automática de Folios | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | `interdepartmental_messages`, Chat Drawer, Tag v1.5 |
@@ -373,7 +373,7 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Backend:** Tabla `inventory_vendors` (`id`, `name`, `type`, `contact_name`, `phone`, `email`, `lead_time_days`, `payment_terms`, `status`, `scraper_config`, `timestamps`) y endpoints RESTful `GET/POST /api/v1/inventory/vendors`, `PUT /api/v1/inventory/vendors/{id}`, `PATCH /api/v1/inventory/vendors/{id}/status`.
 
 ### `TASK-INV-14`: Gestor Configurable de Tallas Textiles y Volúmenes de Perfumería en Matriz de Variantes
-* **Prioridad:** **Alta** | **Estado:** **Pendiente (Fase 2: Backlog)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End - Tag v1.6)**
 * **Punto Ciego / Situación Reportada:**
   1. En la matriz de variantes (alta y edición de producto), la dimensión Cosmética cuenta con botón directo para gestionar el catálogo maestro de tonos (`TASK-INV-09`). Sin embargo, en la dimensión Textil no existe botón ni mecanismo para gestionar las tallas: la curva viene fija en código (`CH, M, G, XL, 2XL, 3XL`), imposibilitando registrar tallas especiales (`XS`, `4XL`, `5XL`), tallas numéricas de pantalón/cintura (`28, 30, 32, 34...`), copas de lencería (`32B, 34C...`) o prendas `Unitalla`.
   2. En la dimensión de Perfumería y Cosmética Líquida (volumen), tampoco existe botón ni modal para gestionar nuevos formatos o volúmenes (solo existen fijos `10ml, 50ml, 100ml`), impidiendo dar de alta presentaciones comerciales como `15ml`, `30ml`, `75ml`, `120ml` o `200ml`.
@@ -390,7 +390,7 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Backend:** Tablas `apparel_size_curves` / `apparel_sizes` y `fragrance_volumes`, endpoints RESTful de consulta y alta en `/api/v1/inventory/settings/sizes` y `/api/v1/inventory/settings/volumes`.
 
 ### `TASK-INV-15`: Drawer de Producto Full-Width con Auto-SKU, Asistente IA de Descripción y Detección Visual de Duplicados
-* **Prioridad:** **Alta** | **Estado:** **Pendiente (Fase 2: Backlog)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End - Tag v1.6)**
 * **Punto Ciego / Situación Reportada:**
   1. Al dar de alta un producto, el sistema exige capturar manualmente el SKU y bloquea el guardado arrojando un toast de error si falta. El SKU debe ser auto-generado de forma inteligente y reactiva según la categoría, marca y secuencia del catálogo.
   2. La redacción de la descripción de la prenda/producto se hace manualmente. Se requiere un copiloto generador asistido por IA que analice todos los atributos capturados (nombre, composición textil, color/tornasol, silueta, diseño, dimensiones) e inspeccione las imágenes adjuntas para redactar una ficha comercial optimizada para SEO y ventas.
@@ -457,7 +457,7 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
 * **Impacto en Backend:** Tablas `product_bundles` y `product_bundle_items`, endpoints RESTful `POST /api/v1/inventory/bundles`, `PUT /api/v1/inventory/bundles/{id}`, `DELETE /api/v1/inventory/bundles/{id}` y `PATCH /api/v1/inventory/bundles/{id}/status`.
 
 ### `TASK-INV-18`: Modal Panorámico de Detalle y Edición de SKU (`max-w-7xl`) & Reactividad Integral (Fase 2: Backlog)
-* **Prioridad:** **Alta** | **Estado:** **Pendiente (Fase 2: Backlog)**
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End - Tag v1.6)**
 * **Punto Ciego / Situación Reportada:**
   1. Al hacer clic en el botón de SKU (ej. `BX-MOD-001`) en el catálogo operativo, se abre un panel lateral (drawer) comprimido (`max-w-4xl`), generando barras de navegación y desplazamiento excesivas y obligando al usuario a operar en un espacio estrecho.
   2. Todo el panel carece de reactividad en tiempo real:

@@ -205,8 +205,8 @@
       });
     }
 
-    // 6. AJUSTES DEL SISTEMA (MODAL GENERICO)
-    var settingsModal = $('[data-settings-modal]');
+    // 6. AJUSTES DEL SISTEMA (PANTALLA COMPLETA - CERO MODALES)
+    var settingsFullscreen = $('[data-settings-fullscreen]') || $('#system-settings-fullscreen') || $('[data-settings-modal]');
     var settingsBtn = $('[data-action="open-system-settings"]');
     var settingsBody = $('[data-settings-body]');
     var settingsPanels = {
@@ -215,13 +215,13 @@
       'inventory-rules': '<p class="text-xs text-slate-600">Parametros globales de ROP, stock de seguridad y margen minimo. Disponible al conectar el Hub 4 (Inventario).</p>',
       rbac: '<p class="text-xs text-slate-600">Matriz de acceso por rol. Disponible al implementar TASK-RBAC-02.</p>'
     };
-    if (settingsBtn && settingsModal && settingsBody) {
+    if (settingsBtn && settingsFullscreen && settingsBody) {
       settingsBtn.addEventListener('click', function () {
-        settingsModal.style.display = 'flex';
+        settingsFullscreen.style.display = 'flex';
         settingsBody.innerHTML = settingsPanels.multiverse;
       });
-      $all('[data-action="close-settings-modal"]').forEach(function (btn) {
-        btn.addEventListener('click', function () { settingsModal.style.display = 'none'; });
+      $all('[data-action="close-settings-modal"], [data-action="close-settings-fullscreen"]').forEach(function (btn) {
+        btn.addEventListener('click', function () { settingsFullscreen.style.display = 'none'; });
       });
       $all('[data-settings-tab]').forEach(function (tab) {
         tab.addEventListener('click', function () {
@@ -233,7 +233,7 @@
       var saveBtn = $('[data-action="save-settings"]');
       if (saveBtn) {
         saveBtn.addEventListener('click', function () {
-          settingsModal.style.display = 'none';
+          settingsFullscreen.style.display = 'none';
           showToast('Ajustes del sistema guardados (demo)');
         });
       }

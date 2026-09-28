@@ -4,13 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name','slug','description','parent_id','meta'];
-    protected $casts = ['meta' => 'array'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'parent_id',
+        'is_active',
+        'meta',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'meta' => 'array',
+    ];
 
     public function parent()
     {
@@ -22,8 +34,23 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    public function activeChildren()
+    {
+        return $this->children()->where('is_active', true);
+    }
+
     public function products()
     {
         return $this->belongsToMany(Product::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeRoots($query)
+    {
+        return $query->whereNull('parent_id');
     }
 }
