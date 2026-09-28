@@ -136,13 +136,15 @@ flowchart TD
 
 ---
 
-### Slice 3: Roles RBAC Granulares para Aliados y Proveedores en Hub 7
-* **Objetivo:** Equipar al sistema de gobernanza con los roles formales `vendor` y `ally`, asociando cada cuenta de usuario a su entidad comercial especifica.
+### Slice 3: Roles RBAC Granulares para Aliados y Proveedores en Hub 7 (COMPLETADO)
+* **Objetivo:** Equipar al sistema de gobernanza con los roles formales `vendor` y `ally`, asociando cada cuenta de usuario a su entidad comercial especifica con aislamiento estricto multi-inquilino.
 * **Backend:**
-  - Migracion: agregar `supplier_id` y `ally_id` a la tabla `users` con claves foraneas protegidas (`onDelete('set null')`).
-  - Actualizacion de `RolePermissionService`: registro de permisos de `vendor` (acceso a extranet proveedor, visualizacion de OCs propias, despacho de remisiones) y `ally` (acceso a extranet aliado, taquilla QR, comisiones).
-  - Middleware `EnforceEntityIsolation`: valida que el usuario autenticado solo pueda consultar registros vinculados a su `supplier_id` o `ally_id`.
-  - Extension de `PortalAccessController::switchRole`: permite alternar en entornos sandbox a perfiles de prueba de proveedores (`Torzo Labs Vendor`) y aliados (`Circus Club Partner`).
+  - Migracion `2026_09_28_000000_add_supplier_id_and_ally_id_to_users_table.php`: agrega `supplier_id` y `ally_id` a la tabla `users` con claves foraneas protegidas (`nullOnDelete()`) e indices compuestos.
+  - Modelo `User`: casts, relaciones `supplier()` y `ally()`, helpers booleanos `isVendor()` e `isAlly()`, mapeo de seguridad en `canAccessHub()` restringiendo a proveedores a `vendor_extranet` y a aliados a `ally_extranet`, y restriccion automatica de acceso financiero.
+  - Middleware `EnsureEntityIsolation` (`entity.isolation`): valida que el usuario autenticado solo pueda consultar registros vinculados a su `supplier_id` o `ally_id`, inyectando atributos de entidad en el request y denegando el paso con HTTP 403 a usuarios huerfanos.
+  - Extension de `PortalAccessController::switchRole`: permite alternar en entornos de prueba a perfiles con rol `vendor` y `ally` con registro automatico de auditoria en `system_audit_logs`.
+  - Matriz de Gobernanza en `PortalGovernanceController`: roles `vendor` y `ally` agregados con sus respectivas descripciones y alcances.
+* **Pruebas:** `tests/Feature/Governance/EntityRbacIsolationTest.php` (11/11 tests pasando, 43 aserciones).
 * **Frontend:**
   - Conmutador visual de rol en Navbar / Governance con soporte para los nuevos roles.
   - Filtrado del Sidebar: al entrar con rol `vendor` o `ally`, la navegacion se restringe exclusivamente al Hub 7 con su pantalla correspondiente.
