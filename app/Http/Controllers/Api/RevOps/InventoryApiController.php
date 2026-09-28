@@ -56,13 +56,268 @@ class InventoryApiController extends Controller
             'amount' => (float) $ca->amount,
             'reason' => $ca->resolution_notes ?: 'Acuerdo compensatorio por discrepancia previa',
             'agreement_type' => $ca->agreement_type,
-            'status' => $ca->status === 'pending' ? 'Pendiente de Aplicar' : 'Aplicada',
+            'discrepancy_type' => $ca->discrepancy_type,
+            'missing_units' => $ca->missing_units_count,
+            'damaged_units' => $ca->damaged_units_count,
+            'unit_cost' => (float) $ca->unit_cost_applied,
+            'authorized_by' => $ca->authorized_by_vendor_contact,
+            'minutes' => $ca->discrepancy_minutes,
+            'status' => match ($ca->status) {
+                'pending' => 'Pendiente de Aplicar',
+                'applied' => 'Aplicada',
+                'void', 'cancelled' => 'Anulada',
+                default => ucfirst($ca->status),
+            },
+            'applied_to_po_id' => $ca->applied_to_po_id,
             'date' => $ca->created_at ? $ca->created_at->format('d/m/Y') : now()->format('d/m/Y'),
         ]);
 
         return response()->json([
             'success' => true,
             'agreements' => $agreements,
+        ]);
+    }
+
+    /**
+     * Formaliza el registro de una Minuta de Discrepancia Inbound / Nota de Credito (TASK-PUR-01).
+     */
+    public function storeCreditAgreement(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'supplier_id' => 'required|integer|exists:suppliers,id',
+            'purchase_order_id' => 'nullable|integer|exists:purchase_orders,id',
+            'reference_folio' => 'nullable|string|max:50',
+            'agreement_type' => 'nullable|string|max:40',
+            'discrepancy_type' => 'nullable|string|max:50',
+            'missing_units_count' => 'nullable|integer|min:0',
+            'damaged_units_count' => 'nullable|integer|min:0',
+            'unit_cost_applied' => 'nullable|numeric|min:0',
+            'amount' => 'nullable|numeric|min:0',
+            'authorized_by_vendor_contact' => 'nullable|string|max:150',
+            'discrepancy_minutes' => 'nullable|string|max:2000',
+            'resolution_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $supplier = Supplier::findOrFail($validated['supplier_id']);
+
+        $missing = (int) ($validated['missing_units_count'] ?? 0);
+        $damaged = (int) ($validated['damaged_units_count'] ?? 0);
+        $unitCost = (float) ($validated['unit_cost_applied'] ?? 0);
+
+        $amount = (float) ($validated['amount'] ?? 0);
+        if ($amount <= 0 && ($missing + $damaged) > 0 && $unitCost > 0) {
+            $amount = round(($missing + $damaged) * $unitCost, 2);
+        }
+
+        $rawFolio = $validated['reference_folio'] ?? null;
+        if (!$rawFolio) {
+            $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $supplier->name), 0, 4)) ?: 'PROV';
+            $count = SupplierCreditAgreement::where('supplier_id', $supplier->id)->count() + 1;
+            $rawFolio = sprintf('NC-%s-%s-%04d', $prefix, date('Y'), $count);
+        }
+
+        $po = null;
+        if (!empty($validated['purchase_order_id'])) {
+            $po = PurchaseOrder::find($validated['purchase_order_id']);
+        }
+
+        $minutesText = $validated['discrepancy_minutes'] ?? null;
+        if (!$minutesText) {
+            $minutesText = sprintf(
+                "Minuta de Discrepancia Inbound levantada el %s para el proveedor %s.\nMotivo: %s (Faltantes: %d uds, Danadas: %d uds a $%.2f MXN c/u).\nCompensacion acordada: $%.2f MXN a deducir en proxima OC.\nAutorizado por representante: %s.",
+                now()->format('d/m/Y H:i'),
+                $supplier->name,
+                $validated['discrepancy_type'] ?? 'Diferencia en rampa',
+                $missing,
+                $damaged,
+                $unitCost,
+                $amount,
+                $validated['authorized_by_vendor_contact'] ?? 'Representante de taller'
+            );
+        }
+
+        $agreement = SupplierCreditAgreement::create([
+            'supplier_id' => $supplier->id,
+            'purchase_order_id' => $po?->id,
+            'reference_folio' => $rawFolio,
+            'agreement_type' => $validated['agreement_type'] ?? 'shortage_discount',
+            'discrepancy_type' => $validated['discrepancy_type'] ?? 'missing_units',
+            'missing_units_count' => $missing,
+            'damaged_units_count' => $damaged,
+            'unit_cost_applied' => $unitCost,
+            'amount' => $amount,
+            'status' => 'pending',
+            'authorized_by_vendor_contact' => $validated['authorized_by_vendor_contact'] ?? null,
+            'resolution_notes' => $validated['resolution_notes'] ?? ('Minuta de discrepancia acordada: ' . $rawFolio),
+            'discrepancy_minutes' => $minutesText,
+        ]);
+
+        // Asiento en Purchase Kardex
+        PurchaseKardex::create([
+            'purchase_order_id' => $po?->id,
+            'supplier_id' => $supplier->id,
+            'movement_type' => 'DISCREPANCY_REGISTERED',
+            'description' => sprintf(
+                'Registro de Minuta de Discrepancia Inbound %s amparando $%.2f MXN (%s)',
+                $agreement->reference_folio,
+                $amount,
+                $agreement->resolution_notes
+            ),
+            'total_amount' => $amount,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Minuta de discrepancia y nota de credito registrada exitosamente.',
+            'agreement' => [
+                'id' => $agreement->id,
+                'supplier_id' => $agreement->supplier_id,
+                'supplier' => $supplier->name,
+                'ref' => $agreement->reference_folio,
+                'amount' => (float) $agreement->amount,
+                'status' => 'Pendiente de Aplicar',
+                'discrepancy_type' => $agreement->discrepancy_type,
+                'missing_units' => $agreement->missing_units_count,
+                'damaged_units' => $agreement->damaged_units_count,
+                'unit_cost' => (float) $agreement->unit_cost_applied,
+                'authorized_by' => $agreement->authorized_by_vendor_contact,
+                'minutes' => $agreement->discrepancy_minutes,
+                'date' => $agreement->created_at->format('d/m/Y'),
+            ],
+        ], 201);
+    }
+
+    /**
+     * Consulta el detalle formal de una Minuta de Discrepancia / Nota de Credito (TASK-PUR-01).
+     */
+    public function getCreditAgreementDetail(int $id): JsonResponse
+    {
+        $agreement = SupplierCreditAgreement::with(['supplier', 'purchaseOrder', 'appliedToPurchaseOrder'])->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'agreement' => $agreement,
+        ]);
+    }
+
+    /**
+     * Anula una Minuta de Discrepancia si se subsano de forma fisica (TASK-PUR-01).
+     */
+    public function voidCreditAgreement(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'void_reason' => 'nullable|string|max:500',
+        ]);
+
+        $agreement = SupplierCreditAgreement::with('supplier')->findOrFail($id);
+
+        if ($agreement->status === 'applied') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No es posible anular un acuerdo que ya fue aplicado en una orden de compra.',
+            ], 422);
+        }
+
+        $agreement->status = 'void';
+        $reason = $validated['void_reason'] ?? 'Acuerdo subsanado fisicamente por el proveedor';
+        $agreement->resolution_notes = ($agreement->resolution_notes ? $agreement->resolution_notes . " | " : '') . 'ANULADA: ' . $reason;
+        $agreement->save();
+
+        PurchaseKardex::create([
+            'purchase_order_id' => $agreement->purchase_order_id,
+            'supplier_id' => $agreement->supplier_id,
+            'movement_type' => 'CREDIT_VOIDED',
+            'description' => sprintf(
+                'Anulacion de Nota de Credito %s ($%.2f MXN): %s',
+                $agreement->reference_folio,
+                $agreement->amount,
+                $reason
+            ),
+            'total_amount' => (float) $agreement->amount,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Acuerdo compensatorio anulado correctamente.',
+            'agreement' => $agreement,
+        ]);
+    }
+
+    /**
+     * Consulta lista de Ordenes de Compra registradas en BD (TASK-INV-16).
+     */
+    public function getPurchaseOrders(Request $request): JsonResponse
+    {
+        $query = PurchaseOrder::query()
+            ->with(['supplier', 'items.product', 'items.variant', 'creditAgreement'])
+            ->latest();
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->integer('supplier_id'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        if ($request->filled('search')) {
+            $search = '%' . $request->string('search')->toString() . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('po_number', 'like', $search)
+                  ->orWhere('notes', 'like', $search)
+                  ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', $search));
+            });
+        }
+
+        $orders = $query->paginate($request->integer('per_page', 25));
+
+        return response()->json([
+            'success' => true,
+            'data' => $orders->items(),
+            'current_page' => $orders->currentPage(),
+            'last_page' => $orders->lastPage(),
+            'total' => $orders->total(),
+        ]);
+    }
+
+    /**
+     * Consulta detalle completo de una Orden de Compra (TASK-INV-16 / TASK-PUR-04).
+     */
+    public function getPurchaseOrderDetail(int $id): JsonResponse
+    {
+        $po = PurchaseOrder::with(['supplier', 'items.product', 'items.variant', 'creditAgreement', 'kardex'])->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'order' => $po,
+        ]);
+    }
+
+    /**
+     * Consulta bitacora inmutable de compras (Purchase Kardex) (TASK-PUR-04).
+     */
+    public function getPurchaseKardex(Request $request): JsonResponse
+    {
+        $query = PurchaseKardex::query()
+            ->with(['supplier', 'purchaseOrder'])
+            ->latest();
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->integer('supplier_id'));
+        }
+
+        if ($request->filled('movement_type')) {
+            $query->where('movement_type', $request->string('movement_type')->toString());
+        }
+
+        $kardex = $query->paginate($request->integer('per_page', 25));
+
+        return response()->json([
+            'success' => true,
+            'data' => $kardex->items(),
+            'current_page' => $kardex->currentPage(),
+            'last_page' => $kardex->lastPage(),
+            'total' => $kardex->total(),
         ]);
     }
 
@@ -78,6 +333,7 @@ class InventoryApiController extends Controller
             'notes' => 'nullable|string|max:1000',
             'delivery_commitment_date' => 'nullable|string|max:100',
             'payment_terms' => 'nullable|string|max:100',
+            'priority' => 'nullable|string|max:30',
             'has_credit_deduction' => 'nullable|boolean',
             'credit_agreement_id' => 'nullable|integer',
             'credit_note_ref' => 'nullable|string|max:50',
@@ -234,21 +490,48 @@ class InventoryApiController extends Controller
                 );
             }
 
+            $poPriority = strtolower($validated['priority'] ?? $validated['items'][0]['priority'] ?? 'media');
+            if (!in_array($poPriority, ['baja', 'media', 'alta', 'critica'])) {
+                $poPriority = 'media';
+            }
+
+            $poSnapshotData = $validated['po_snapshot'] ?? [
+                'po_number' => $poNumber,
+                'supplier_name' => $supplier->name,
+                'supplier_contact' => $supplier->contact_email,
+                'priority' => $poPriority,
+                'total_units' => $totalUnits,
+                'gross_subtotal' => $grossSubtotal,
+                'credit_deduction' => $deductionAmount,
+                'credit_agreement_ref' => $appliedAgreement?->reference_folio,
+                'taxable_subtotal' => $taxableSubtotal,
+                'tax' => $tax,
+                'total_amount' => $totalAmount,
+                'items' => $preparedItems,
+                'created_at' => now()->toIso8601String(),
+            ];
+
             $po = PurchaseOrder::create([
                 'po_number' => $poNumber,
                 'supplier_id' => $supplier->id,
+                'credit_agreement_id' => $appliedAgreement?->id,
                 'status' => 'confirmed',
+                'priority' => $poPriority,
                 'total_units' => $totalUnits,
+                'gross_subtotal' => $grossSubtotal,
+                'credit_deduction_amount' => $deductionAmount,
                 'subtotal' => $taxableSubtotal,
                 'tax' => $tax,
                 'total_amount' => $totalAmount,
                 'currency' => 'MXN',
                 'sent_at' => now(),
                 'notes' => $poNotes,
+                'po_snapshot' => $poSnapshotData,
             ]);
 
             if ($appliedAgreement) {
                 $appliedAgreement->purchase_order_id = $po->id;
+                $appliedAgreement->applied_to_po_id = $po->id;
                 $appliedAgreement->save();
             }
 
@@ -276,6 +559,21 @@ class InventoryApiController extends Controller
                 'description' => $kardexDesc,
                 'total_amount' => $totalAmount,
             ]);
+
+            if ($deductionAmount > 0) {
+                PurchaseKardex::create([
+                    'purchase_order_id' => $po->id,
+                    'supplier_id' => $supplier->id,
+                    'movement_type' => 'CREDIT_NOTE_APPLIED',
+                    'description' => sprintf(
+                        'Compensacion mercantil aplicada de $%.2f MXN amparada bajo nota de credito %s (%s)',
+                        $deductionAmount,
+                        $appliedAgreement?->reference_folio ?? 'NC',
+                        $appliedAgreement?->resolution_notes ?? 'Ajuste por discrepancia'
+                    ),
+                    'total_amount' => $deductionAmount,
+                ]);
+            }
 
             $po->load(['supplier', 'items.product', 'items.variant']);
 
@@ -319,6 +617,12 @@ class InventoryApiController extends Controller
 
         $po->status = 'in_transit';
         $po->sent_at = now();
+        if (!empty($validated['carrier'])) {
+            $po->carrier = $validated['carrier'];
+        }
+        if (!empty($validated['tracking_number'])) {
+            $po->tracking_number = $validated['tracking_number'];
+        }
 
         $dispatchNote = sprintf(
             'Despacho formal notificado a %s%s%s',

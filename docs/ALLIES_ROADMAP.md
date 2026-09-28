@@ -36,6 +36,8 @@ El **Hub 7: Convenios, Aliados & Atribución Bidireccional** implementa un motor
 | `TASK-ALY-04` | Cámara de Compensación con Liquidación SPEI, Especie y Patrocinio | Submódulo 4: Clearing House | **Completada (UI)** | **Alta** | Hub 5 Finanzas, Hub 4 Kardex |
 | `TASK-ALY-05` | Pantalla Extranet del Aliado (Partner Portal) con Validador de Taquilla | Portal Extranet (Partner) | **Completada (UI)** | **Alta** | Token Auth, QR SVG, Taquilla |
 | `TASK-INT-19` | Sincronización Automática de Liquidaciones a Cuentas por Pagar | Submódulo 4 / Hub 5 | **Completada (UI)** | **Alta** | `TASK-ALY-04`, `vendor_bills`, SPEI |
+| `TASK-HUB-VND` | Extranet de Proveedores y Fabricantes en Hub 7 con Aislamiento B2B | Extranet Hub 7 (Vendor) | **Completada (Fullstack)** | **Crítica** | RBAC `vendor`, `EnsureEntityIsolation`, OCs |
+| `TASK-INT-20` | Remisiones Fleteras B2B y Sincronización con Rampa Hub 4 y Tareas Hub 1 | Extranet Hub 7 / Rampa | **Completada (Fullstack)** | **Crítica** | `VendorShipment`, Rampa Hub 4, `OperationalTask` |
 
 ---
 

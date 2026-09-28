@@ -12,6 +12,13 @@ class SupplierCreditAgreement extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'unit_cost_applied' => 'decimal:2',
+        'missing_units_count' => 'integer',
+        'damaged_units_count' => 'integer',
+    ];
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
@@ -20,5 +27,10 @@ class SupplierCreditAgreement extends Model
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    public function appliedToPurchaseOrder(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'applied_to_po_id');
     }
 }

@@ -20,7 +20,7 @@ class PortalAccessController extends Controller
     public function switchRole(\Illuminate\Http\Request $request, \App\Services\Governance\AuditTrailService $auditService)
     {
         $validated = $request->validate([
-            'role' => ['required', 'string', 'in:superadmin,admin,finance,warehouse,purchases,logistics,sales,support,operator,all_roles,portal'],
+            'role' => ['required', 'string', 'in:superadmin,admin,finance,warehouse,purchases,logistics,sales,support,operator,all_roles,portal,vendor,ally'],
         ]);
 
         $previousRole = session('active_role') ?: (auth()->user()?->role ?? 'guest');

@@ -51,7 +51,13 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/inventario/{inventory}/movimientos', [InventoryMovementController::class, 'store'])->name('portal.inventory.movements.store');
 	Route::post('/admin/proveedores/{supplier}/sincronizar', [SupplierSyncController::class, 'store'])->name('portal.suppliers.sync');
 	Route::post('/admin/proveedores/{supplier}/colores', [SupplierColorMappingController::class, 'store'])->name('portal.suppliers.colors.store');
+});
+
+Route::middleware('auth')->group(function () {
 	Route::post('/admin/roles/switch', [PortalAccessController::class, 'switchRole'])->name('portal.roles.switch');
+});
+
+Route::middleware(['auth', 'role:portal'])->group(function () {
 
 	Route::middleware('financial.privacy')->group(function () {
 		Route::get('/admin/finanzas', [StorefrontController::class, 'portalFinance'])->name('portal.finance');
@@ -87,6 +93,14 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');
 	Route::post('/admin/convenios/aliados/{ally}/liquidar', [PortalAlliesController::class, 'executeSettlement'])->name('portal.allies.settlement.execute');
 	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv');
+});
+
+// Hub 7: Extranet de Proveedores & Fabricantes (TASK-HUB-VND)
+use App\Http\Controllers\PortalVendorController;
+
+Route::middleware(['auth', 'entity.isolation:vendor'])->group(function () {
+	Route::get('/admin/extranet/proveedores', [PortalVendorController::class, 'index'])->name('portal.vendor.extranet');
+	Route::get('/admin/extranet/proveedores/ordenes/{id}/imprimir', [PortalVendorController::class, 'printOrder'])->name('portal.vendor.orders.print');
 });
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');

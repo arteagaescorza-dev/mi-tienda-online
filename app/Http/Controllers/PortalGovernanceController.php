@@ -105,6 +105,24 @@ class PortalGovernanceController extends Controller
                 'env_switch' => false,
                 'badge_class' => 'bg-slate-100 text-slate-800 border-slate-300',
             ],
+            'vendor' => [
+                'name' => 'Proveedor / Fabricante B2B',
+                'description' => 'Extranet exclusiva en Hub 7: consulta de OCs, registro de remisiones y descarga de ordenes.',
+                'allowed_hubs' => ['Extranet Proveedor (Hub 7)'],
+                'financial_access' => false,
+                'audit_access' => false,
+                'env_switch' => false,
+                'badge_class' => 'bg-cyan-100 text-cyan-800 border-cyan-300',
+            ],
+            'ally' => [
+                'name' => 'Aliado Comercial / Creador',
+                'description' => 'Extranet exclusiva en Hub 7: metricas de campanas Dir A/B, cupones y liquidaciones.',
+                'allowed_hubs' => ['Extranet Aliado (Hub 7)'],
+                'financial_access' => false,
+                'audit_access' => false,
+                'env_switch' => false,
+                'badge_class' => 'bg-teal-100 text-teal-800 border-teal-300',
+            ],
         ];
 
         // 2. Datos de Auditoria Master

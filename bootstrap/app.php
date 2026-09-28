@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'financial.privacy' => \App\Http\Middleware\EnforceFinancialPrivacy::class,
+            'entity.isolation' => \App\Http\Middleware\EnsureEntityIsolation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

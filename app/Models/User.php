@@ -7,10 +7,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'supplier_id', 'ally_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,7 +28,25 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'supplier_id' => 'integer',
+            'ally_id' => 'integer',
         ];
+    }
+
+    /**
+     * Relacion con el Proveedor comercial B2B (TASK-HUB-VND).
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    /**
+     * Relacion con el Aliado comercial o Creador (TASK-ALY-01).
+     */
+    public function ally(): BelongsTo
+    {
+        return $this->belongsTo(Ally::class);
     }
 
     /**
@@ -36,6 +55,22 @@ class User extends Authenticatable
     public function getActiveRoleAttribute(): string
     {
         return session('active_role') ?: ($this->role ?? 'guest');
+    }
+
+    /**
+     * Determina si el usuario es un proveedor externo con entidad valida vinculada.
+     */
+    public function isVendor(): bool
+    {
+        return $this->active_role === 'vendor' && !empty($this->supplier_id);
+    }
+
+    /**
+     * Determina si el usuario es un aliado comercial con entidad valida vinculada.
+     */
+    public function isAlly(): bool
+    {
+        return $this->active_role === 'ally' && !empty($this->ally_id);
     }
 
     /**
@@ -57,7 +92,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Valida el acceso del usuario a un hub administrativo especifico.
+     * Valida el acceso del usuario a un hub administrativo o extranet especifica.
      */
     public function canAccessHub(string $hub): bool
     {
@@ -67,14 +102,26 @@ class User extends Authenticatable
             return true;
         }
 
+        // Proveedores B2B solo pueden acceder a su extranet
+        if ($role === 'vendor') {
+            return $hub === 'vendor_extranet';
+        }
+
+        // Aliados solo pueden acceder a su extranet
+        if ($role === 'ally') {
+            return $hub === 'ally_extranet';
+        }
+
         $hubAccessMap = [
-            'dashboard' => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'portal'],
-            'store'     => ['admin', 'superadmin', 'sales', 'marketing', 'portal'],
-            'crm'       => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
-            'inventory' => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'portal'],
-            'finance'   => ['admin', 'superadmin', 'finance', 'finanzas', 'portal'],
-            'logistics' => ['admin', 'superadmin', 'finance', 'warehouse', 'logistics', 'operator', 'portal'],
-            'allies'    => ['admin', 'superadmin', 'finance', 'sales', 'marketing', 'portal'],
+            'dashboard'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'portal'],
+            'store'           => ['admin', 'superadmin', 'sales', 'marketing', 'portal'],
+            'crm'             => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
+            'inventory'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'portal'],
+            'finance'         => ['admin', 'superadmin', 'finance', 'finanzas', 'portal'],
+            'logistics'       => ['admin', 'superadmin', 'finance', 'warehouse', 'logistics', 'operator', 'portal'],
+            'allies'          => ['admin', 'superadmin', 'finance', 'sales', 'marketing', 'portal'],
+            'vendor_extranet' => ['admin', 'superadmin', 'vendor', 'purchases', 'portal'],
+            'ally_extranet'   => ['admin', 'superadmin', 'ally', 'marketing', 'sales', 'portal'],
         ];
 
         return in_array($role, $hubAccessMap[$hub] ?? [], true);

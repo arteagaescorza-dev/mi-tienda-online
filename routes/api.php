@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\RevOps\LogisticsApiController;
 use App\Http\Controllers\Api\RevOps\AlliesApiController;
 use App\Http\Controllers\Api\RevOps\DashboardApiController;
 use App\Http\Controllers\Api\StorefrontApiController;
+use App\Http\Controllers\PortalVendorController;
 
 // =========================================================================
 // STOREFRONT D2C PUBLIC API ENDPOINTS
@@ -33,6 +34,12 @@ Route::prefix('v1')->group(function () {
     // 1. INVENTARIO & COMPRAS (HUB 4)
     Route::prefix('inventory')->group(function () {
         Route::get('/purchases/credit-agreements', [InventoryApiController::class, 'getCreditAgreements']);
+        Route::post('/purchases/credit-agreements', [InventoryApiController::class, 'storeCreditAgreement']);
+        Route::get('/purchases/credit-agreements/{id}', [InventoryApiController::class, 'getCreditAgreementDetail']);
+        Route::post('/purchases/credit-agreements/{id}/void', [InventoryApiController::class, 'voidCreditAgreement']);
+        Route::get('/purchases/orders', [InventoryApiController::class, 'getPurchaseOrders']);
+        Route::get('/purchases/orders/{id}', [InventoryApiController::class, 'getPurchaseOrderDetail']);
+        Route::get('/purchases/kardex', [InventoryApiController::class, 'getPurchaseKardex']);
         Route::post('/purchases/orders', [InventoryApiController::class, 'storePurchaseOrder']);
         Route::post('/purchases/orders/{id}/dispatch', [InventoryApiController::class, 'dispatchPurchaseOrder']);
         Route::post('/purchases/orders/{id}/receive', [InventoryApiController::class, 'receivePurchaseOrder']);
@@ -148,6 +155,16 @@ Route::prefix('v1')->group(function () {
         Route::post('/{id}/settle', [AlliesApiController::class, 'executeSettlement']);
         Route::post('/validate-voucher', [AlliesApiController::class, 'validateVoucher']);
         Route::get('/{id}/export-csv', [AlliesApiController::class, 'exportDoorListCsv']);
+    });
+
+    // 6.1. EXTRANET PROVEEDORES & FABRICANTES (HUB 7 - TASK-HUB-VND / TASK-INT-20)
+    Route::prefix('hub7/vendor')->group(function () {
+        Route::get('/orders', [PortalVendorController::class, 'getOrders']);
+        Route::get('/orders/{id}', [PortalVendorController::class, 'getOrderDetail']);
+        Route::post('/orders/{id}/confirm', [PortalVendorController::class, 'confirmOrder']);
+        Route::post('/orders/{id}/dispatch', [PortalVendorController::class, 'dispatchOrder']);
+        Route::get('/orders/{id}/shipment', [PortalVendorController::class, 'getShipment']);
+        Route::get('/credit-agreements', [PortalVendorController::class, 'getCreditAgreements']);
     });
 
     // 7. DASHBOARD GENERAL, TAREAS & COPILOTO (HUB 1)

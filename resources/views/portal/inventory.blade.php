@@ -2692,9 +2692,9 @@
                                             <span>Recibida en Almacén</span>
                                         </span>
                                     </template>
-                                    <template x-if="order.status === 'Pendiente Confirmación'">
+                                    <template x-if="order.status === 'Pendiente Confirmación' || order.status === 'Por Despachar'">
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span>⏳ Pendiente</span>
+                                            <span>Pendiente</span>
                                         </span>
                                     </template>
                                 </td>
