@@ -53,7 +53,7 @@
     <div class="store-subnav-bar mb-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <nav class="flex gap-2 -mb-px overflow-x-auto" aria-label="Submódulos de Tienda y CMS">
             <!-- TAB 1: EDITOR VISUAL -->
-            <button class="store-subnav-btn active" data-action="switch-store-tab" data-tab="visual" type="button">
+            <button class="store-subnav-btn active" data-action="switch-store-tab" data-tab="visual" onclick="window.switchStoreTab('visual')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                 <span>1. Editor Visual Multiverso</span>
                 <span class="store-subnav-count">4 Vitrinas</span>
@@ -61,7 +61,7 @@
             </button>
 
             <!-- TAB 2: BANNERS & MARQUESINAS -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="banners" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="banners" onclick="window.switchStoreTab('banners')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
                 <span>2. Banners &amp; Marquesinas</span>
                 <span class="store-subnav-count">{{ count($banners) }} Banners</span>
@@ -69,7 +69,7 @@
             </button>
 
             <!-- TAB 3: REGLAS DE FLETE -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="shipping" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="shipping" onclick="window.switchStoreTab('shipping')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                 <span>3. Reglas Comerciales &amp; Fletes</span>
                 <span class="store-subnav-count">Umbral ${{ number_format($shippingRule['freeShippingThreshold'], 0) }}</span>
@@ -77,7 +77,7 @@
             </button>
 
             <!-- TAB 4: CONTENIDO EDITORIAL & TALLAS -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="editorial" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="editorial" onclick="window.switchStoreTab('editorial')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 <span>4. Contenido Editorial &amp; Tallas</span>
                 <span class="store-subnav-count">Guía Torzo</span>
@@ -85,28 +85,28 @@
             </button>
 
             <!-- TAB 5: PÁGINAS CMS & NAVBAR -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" onclick="window.switchStoreTab('pages')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 <span>5. Páginas &amp; Navbar</span>
                 <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
             </button>
 
             <!-- TAB 6: REVISTA DIGITAL (BLOG) -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="magazine" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="magazine" onclick="window.switchStoreTab('magazine')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 <span>6. Revista Digital</span>
                 <span class="store-subnav-count">{{ $blogPosts->count() ?? 0 }} Artículos</span>
             </button>
 
             <!-- TAB 7: TRACKING & PIXELS -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="tracking" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="tracking" onclick="window.switchStoreTab('tracking')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 <span>7. Tracking &amp; Analítica</span>
                 <span class="store-subnav-count">{{ ($tracking && $tracking->is_active) ? 'Activo' : 'Pausado' }}</span>
             </button>
 
             <!-- TAB 8: FILTROS DE CATÁLOGO -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="filters" type="button">
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="filters" onclick="window.switchStoreTab('filters')" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                 <span>8. Filtros Catálogo</span>
                 <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
@@ -194,19 +194,19 @@
         <!-- SELECTOR DE VITRINA MULTIVERSO -->
         <div class="universe-selector-container mb-6 flex flex-wrap items-center gap-2">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Seleccionar Vitrina:</span>
-            <button class="universe-pill-btn active" data-action="switch-store-universe" data-universe="marte" type="button">
+            <button class="universe-pill-btn active" data-action="switch-store-universe" data-universe="marte" onclick="window.switchStoreUniverse('marte')" type="button">
                 <span class="universe-dot-indicator" style="background: #4f46e5;"></span>
                 <span>Marte (Masculino / Queer)</span>
             </button>
-            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="venus" type="button">
+            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="venus" onclick="window.switchStoreUniverse('venus')" type="button">
                 <span class="universe-dot-indicator" style="background: #db2777;"></span>
                 <span>Venus (Lencería / Beauty)</span>
             </button>
-            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="tiresias" type="button">
+            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="tiresias" onclick="window.switchStoreUniverse('tiresias')" type="button">
                 <span class="universe-dot-indicator" style="background: #8b5cf6;"></span>
                 <span>Tiresias (Moda Afirmativa)</span>
             </button>
-            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="terra" type="button">
+            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="terra" onclick="window.switchStoreUniverse('terra')" type="button">
                 <span class="universe-dot-indicator" style="background: #0284c7;"></span>
                 <span>Terra (Matriz / Unisex)</span>
             </button>
@@ -362,7 +362,7 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>Orden sincronizado</span>
                 </span>
-                <button class="button button-quiet py-2 px-3 text-xs font-bold bg-slate-900 text-white rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer hover:bg-slate-800 transition" data-action="open-create-section-modal" type="button">
+                <button class="button button-quiet py-2 px-3 text-xs font-bold bg-slate-900 text-white rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer hover:bg-slate-800 transition" data-action="open-create-section-modal" onclick="window.openCreateSectionModal()" type="button">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>Crear Nueva Sección</span>
                 </button>
@@ -383,7 +383,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100" id="sectionsSortableBody">
                     @forelse($sections as $sec)
-                        <tr class="hover:bg-slate-50/80 transition-colors select-none" data-section-id="{{ $sec->id }}">
+                        <tr class="hover:bg-slate-50/80 transition-colors select-none" data-section-id="{{ $sec->id }}" draggable="true">
                             <td class="py-3 px-3 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <div class="drag-handle p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded cursor-grab active:cursor-grabbing transition" title="Arrastra para reordenar">
@@ -398,8 +398,8 @@
                                     </div>
                                     <span class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 section-order-badge">#{{ $sec->sort_order }}</span>
                                     <div class="flex flex-col gap-0.5">
-                                        <button type="button" class="btn-move-section p-0.5 hover:bg-slate-200 rounded text-[9px] text-slate-500 cursor-pointer leading-none" data-action="move-section-up" data-section-id="{{ $sec->id }}" title="Mover arriba">&#9650;</button>
-                                        <button type="button" class="btn-move-section p-0.5 hover:bg-slate-200 rounded text-[9px] text-slate-500 cursor-pointer leading-none" data-action="move-section-down" data-section-id="{{ $sec->id }}" title="Mover abajo">&#9660;</button>
+                                        <button type="button" class="btn-move-section p-0.5 hover:bg-slate-200 rounded text-[9px] text-slate-500 cursor-pointer leading-none" data-action="move-section-up" onclick="window.moveSectionRow(this, -1)" data-section-id="{{ $sec->id }}" title="Mover arriba">&#9650;</button>
+                                        <button type="button" class="btn-move-section p-0.5 hover:bg-slate-200 rounded text-[9px] text-slate-500 cursor-pointer leading-none" data-action="move-section-down" onclick="window.moveSectionRow(this, 1)" data-section-id="{{ $sec->id }}" title="Mover abajo">&#9660;</button>
                                     </div>
                                 </div>
                             </td>
@@ -434,18 +434,18 @@
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section='@json($sec)' type="button" title="Editar información, vitrina y contenido">
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section="{{ htmlspecialchars(json_encode($sec), ENT_QUOTES, 'UTF-8') }}" onclick="window.openEditSectionModal(this.dataset.section)" type="button" title="Editar información, vitrina y contenido">
                                         Editar
                                     </button>
                                     @if($sec->status !== 'archived')
-                                        <button class="button button-light py-1 px-2 text-[11px] font-semibold text-amber-700 hover:bg-amber-50 rounded-lg shadow-2xs cursor-pointer" data-action="archive-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button" title="Archivar sección (no se muestra en tienda)">
+                                        <button class="button button-light py-1 px-2 text-[11px] font-semibold text-amber-700 hover:bg-amber-50 rounded-lg shadow-2xs cursor-pointer" data-action="archive-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" onclick="window.archiveStoreSection(this.dataset.sectionId, this.dataset.sectionName)" type="button" title="Archivar sección (no se muestra en tienda)">
                                             Archivar
                                         </button>
                                     @endif
-                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold rounded-lg shadow-2xs cursor-pointer hover:bg-slate-100" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button" title="Alternar entre activo y borrador">
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold rounded-lg shadow-2xs cursor-pointer hover:bg-slate-100" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" onclick="window.toggleSectionStatus(this.dataset.sectionId)" type="button" title="Alternar entre activo y borrador">
                                          {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
                                     </button>
-                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded-lg shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button" title="Eliminar sección definitivamente">
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded-lg shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" onclick="window.deleteSectionDirect(this.dataset.sectionId, this.dataset.sectionName)" type="button" title="Eliminar sección definitivamente">
                                         Eliminar
                                     </button>
                                 </div>
@@ -679,6 +679,7 @@
             </div>
         </div>
     </div>
+    </div>
     <!-- FIN SUBMÓDULO 3: REGLAS DE FLETE -->
 
     <!-- SUBMÓDULO 4: CONTENIDO EDITORIAL & TALLAS (TASK-INT-10) -->
@@ -769,6 +770,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <!-- FIN SUBMÓDULO 4 -->
 
@@ -1765,31 +1767,55 @@
 </div>
 
 {{-- SORTABLEJS PARA DRAG & DROP ERGONÓMICO EN VIVO --}}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{{ asset('js/vendor/sortable.min.js') }}"></script>
 
-{{-- SCRIPT REACTIVO OPERATIVO TIENDA & CMS MULTIVERSO (VANILLA JS LIGERO) --}}
+{{-- SCRIPT REACTIVO OPERATIVO TIENDA & CMS MULTIVERSO (VANILLA JS LIGERO Y SEGURO) --}}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+(function() {
+    'use strict';
+
     const storefrontsData = @json($storefronts);
     let activeUniverse = '{{ $activeUniverse ?? "marte" }}';
 
-    // 1. GESTOR DE PESTAÑAS (SUBNAV BAR)
-    const tabPanels = {
-        'visual': document.getElementById('storeVisualPanel'),
-        'banners': document.getElementById('storeBannersPanel'),
-        'shipping': document.getElementById('storeShippingPanel'),
-        'editorial': document.getElementById('storeEditorialPanel'),
-        'pages': document.getElementById('storePagesPanel'),
-        'magazine': document.getElementById('storeMagazinePanel'),
-        'tracking': document.getElementById('storeTrackingPanel'),
-        'filters': document.getElementById('storeFiltersPanel')
+    // ==========================================
+    // 1. GESTIÓN GLOBAL DE MODALES (FAIL-SAFE)
+    // ==========================================
+    window.openStoreModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.warn(`[Store CMS] Modal no encontrado: ${modalId}`);
+            return;
+        }
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.classList.add('overflow-hidden');
     };
 
-    const tabButtons = document.querySelectorAll('[data-action="switch-store-tab"]');
+    window.closeStoreModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.classList.remove('overflow-hidden');
+    };
 
-    function switchStoreTab(targetTab) {
-        Object.keys(tabPanels).forEach(tabKey => {
-            const panel = tabPanels[tabKey];
+    // ==========================================
+    // 2. GESTIÓN DE SUBNAV TABS (8 PESTAÑAS)
+    // ==========================================
+    const tabPanelIds = {
+        'visual': 'storeVisualPanel',
+        'banners': 'storeBannersPanel',
+        'shipping': 'storeShippingPanel',
+        'editorial': 'storeEditorialPanel',
+        'pages': 'storePagesPanel',
+        'magazine': 'storeMagazinePanel',
+        'tracking': 'storeTrackingPanel',
+        'filters': 'storeFiltersPanel'
+    };
+
+    window.switchStoreTab = function(targetTab) {
+        Object.keys(tabPanelIds).forEach(tabKey => {
+            const panel = document.getElementById(tabPanelIds[tabKey]);
             if (!panel) return;
             if (tabKey === targetTab) {
                 panel.classList.remove('hidden');
@@ -1800,6 +1826,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        const tabButtons = document.querySelectorAll('[data-action="switch-store-tab"]');
         tabButtons.forEach(btn => {
             if (btn.getAttribute('data-tab') === targetTab) {
                 btn.classList.add('active');
@@ -1808,57 +1835,22 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        const url = new URL(window.location);
-        url.searchParams.set('tab', targetTab);
-        window.history.replaceState({}, '', url);
-    }
+        try {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', targetTab);
+            window.history.replaceState({}, '', url);
+        } catch (e) {}
+    };
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            if (e.target.classList.contains('section-help-btn')) return;
-            const tab = this.getAttribute('data-tab');
-            if (tab) switchStoreTab(tab);
-        });
-    });
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialTab = urlParams.get('tab') || 'visual';
-    if (initialTab && tabPanels[initialTab]) {
-        switchStoreTab(initialTab);
-    }
-
-    // 2. CONMUTADOR DE VITRINAS MULTIVERSO & LIVE PREVIEW
-    const universeButtons = document.querySelectorAll('[data-action="switch-store-universe"]');
-    const vitrinaForm = document.getElementById('vitrinaConfigForm');
-    const vitrinaTitle = document.getElementById('vitrinaEditorTitle');
-    const vitrinaKicker = document.getElementById('vitrinaEditorKicker');
-
-    const nameInput = document.querySelector('[data-store-name-input]');
-    const accentInput = document.querySelector('[data-store-accent-color-input]');
-    const accentLabel = document.querySelector('[data-store-accent-label]');
-    const bgInput = document.querySelector('[data-store-bg-color-input]');
-    const bgLabel = document.querySelector('[data-store-bg-label]');
-    const heroTitleInput = document.querySelector('[data-store-hero-title-input]');
-    const heroSubInput = document.querySelector('[data-store-hero-sub-input]');
-    const heroCtaInput = document.querySelector('[data-store-hero-cta-input]');
-    const heroUrlInput = document.querySelector('[data-store-hero-url-input]');
-
-    // Preview DOM elements
-    const previewFrame = document.querySelector('[data-storefront-preview-frame]');
-    const previewHeroSection = document.querySelector('.preview-hero-section');
-    const previewHeroTitle = document.querySelector('.preview-hero-title');
-    const previewHeroSub = document.querySelector('.preview-hero-sub');
-    const previewHeroCta = document.querySelector('.preview-hero-cta');
-    const previewMarquee = document.querySelector('.preview-marquee-strip');
-    const previewTopBarName = document.querySelector('.preview-top-bar .font-bold');
-    const previewShelf = document.querySelector('.preview-grid-shelf');
-
-    function updateVitrinaUI(universe) {
+    // ==========================================
+    // 3. CONMUTADOR DE VITRINAS MULTIVERSO & LIVE PREVIEW
+    // ==========================================
+    window.switchStoreUniverse = function(universe) {
         activeUniverse = universe;
         const data = storefrontsData[universe];
         if (!data) return;
 
-        // Update pills
+        const universeButtons = document.querySelectorAll('[data-action="switch-store-universe"]');
         universeButtons.forEach(btn => {
             if (btn.getAttribute('data-universe') === universe) {
                 btn.classList.add('active');
@@ -1867,10 +1859,29 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Update form action and inputs
-        if (vitrinaForm) {
-            vitrinaForm.action = `/admin/tienda-cms/vitrinas/${universe}`;
-        }
+        const vitrinaForm = document.getElementById('vitrinaConfigForm');
+        const vitrinaTitle = document.getElementById('vitrinaEditorTitle');
+        const vitrinaKicker = document.getElementById('vitrinaEditorKicker');
+
+        const nameInput = document.querySelector('[data-store-name-input]');
+        const accentInput = document.querySelector('[data-store-accent-color-input]');
+        const accentLabel = document.querySelector('[data-store-accent-label]');
+        const bgInput = document.querySelector('[data-store-bg-color-input]');
+        const bgLabel = document.querySelector('[data-store-bg-label]');
+        const heroTitleInput = document.querySelector('[data-store-hero-title-input]');
+        const heroSubInput = document.querySelector('[data-store-hero-sub-input]');
+        const heroCtaInput = document.querySelector('[data-store-hero-cta-input]');
+        const heroUrlInput = document.querySelector('[data-store-hero-url-input]');
+
+        const previewHeroSection = document.querySelector('.preview-hero-section');
+        const previewHeroTitle = document.querySelector('.preview-hero-title');
+        const previewHeroSub = document.querySelector('.preview-hero-sub');
+        const previewHeroCta = document.querySelector('.preview-hero-cta');
+        const previewMarquee = document.querySelector('.preview-marquee-strip');
+        const previewTopBarName = document.querySelector('.preview-top-bar .font-bold');
+        const previewShelf = document.querySelector('.preview-grid-shelf');
+
+        if (vitrinaForm) vitrinaForm.action = `/admin/tienda-cms/vitrinas/${universe}`;
         if (vitrinaTitle) vitrinaTitle.textContent = `Personalizar Vitrina: ${data.name}`;
         if (vitrinaKicker) vitrinaKicker.textContent = data.kicker;
 
@@ -1884,7 +1895,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (heroCtaInput) heroCtaInput.value = data.heroCtaText;
         if (heroUrlInput) heroUrlInput.value = data.heroCtaUrl;
 
-        // Update Preview
         if (previewTopBarName) previewTopBarName.textContent = data.name;
         if (previewMarquee) previewMarquee.style.background = data.accentColor;
         if (previewHeroSection) previewHeroSection.style.background = data.backgroundColor;
@@ -1895,7 +1905,6 @@ document.addEventListener('DOMContentLoaded', function () {
             previewHeroCta.style.background = data.accentColor;
         }
 
-        // Update sample products
         if (previewShelf && data.sampleProducts) {
             previewShelf.innerHTML = data.sampleProducts.map(p => `
                 <div class="preview-product-card">
@@ -1904,245 +1913,51 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                     <div class="font-bold text-slate-900 truncate">${p.name}</div>
                     <div class="text-[10px] text-slate-500 mb-1">${p.tag}</div>
-                    <div class="font-bold font-mono" style="color: ${data.accentColor};">MXN $${p.price.toFixed(2)}</div>
+                    <div class="font-bold font-mono" style="color: ${data.accentColor};">MXN $${parseFloat(p.price).toFixed(2)}</div>
                 </div>
             `).join('');
         }
-    }
+    };
 
-    universeButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const u = this.getAttribute('data-universe');
-            if (u) updateVitrinaUI(u);
-        });
-    });
+    // ==========================================
+    // 4. BIFURCADOR EN MODAL CREAR SECCIÓN
+    // ==========================================
+    window.switchCreateSectionMode = function(mode) {
+        const btnModeCat = document.getElementById('createModeCatalogBtn');
+        const btnModeCont = document.getElementById('createModeContentBtn');
+        const wrapCatTax = document.getElementById('createCatalogTaxonomies');
+        const wrapCatType = document.getElementById('createTypeCatalogWrap');
+        const wrapContOpt = document.getElementById('createContentOptions');
+        const wrapContType = document.getElementById('createTypeContentWrap');
+        const selCatType = document.getElementById('createSectionTypeCatalog');
+        const selContType = document.getElementById('createSectionTypeContent');
 
-    // Real-time typing in vitrina inputs updates preview
-    if (nameInput) {
-        nameInput.addEventListener('input', function () {
-            if (previewTopBarName) previewTopBarName.textContent = this.value;
-        });
-    }
-    if (heroTitleInput) {
-        heroTitleInput.addEventListener('input', function () {
-            if (previewHeroTitle) previewHeroTitle.textContent = this.value;
-        });
-    }
-    if (heroSubInput) {
-        heroSubInput.addEventListener('input', function () {
-            if (previewHeroSub) previewHeroSub.textContent = this.value;
-        });
-    }
-    if (heroCtaInput) {
-        heroCtaInput.addEventListener('input', function () {
-            if (previewHeroCta) previewHeroCta.textContent = `${this.value} \u2192`;
-        });
-    }
-    if (accentInput) {
-        accentInput.addEventListener('input', function () {
-            if (accentLabel) accentLabel.textContent = this.value;
-            if (previewMarquee) previewMarquee.style.background = this.value;
-            if (previewHeroCta) previewHeroCta.style.background = this.value;
-        });
-    }
-    if (bgInput) {
-        bgInput.addEventListener('input', function () {
-            if (bgLabel) bgLabel.textContent = this.value;
-            if (previewHeroSection) previewHeroSection.style.background = this.value;
-        });
-    }
-
-    // Guardado Asíncrono de Vitrina con Feedback Visual Inmediato
-    if (vitrinaForm) {
-        vitrinaForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('saveVitrinaBtn');
-            const origHtml = submitBtn ? submitBtn.innerHTML : '';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `
-                    <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                    <span>Guardando cambios...</span>
-                `;
-            }
-
-            const formData = new FormData(vitrinaForm);
-
-            fetch(vitrinaForm.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `
-                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>¡Guardado Exitosamente!</span>
-                    `;
-                    setTimeout(() => {
-                        submitBtn.innerHTML = origHtml;
-                    }, 2500);
-                }
-                if (data.storefront) {
-                    storefrontsData[activeUniverse] = Object.assign(storefrontsData[activeUniverse] || {}, data.storefront);
-                    updateVitrinaUI(activeUniverse);
-                }
-            })
-            .catch(err => {
-                console.error('Error al guardar vitrina:', err);
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = origHtml;
-                }
-                vitrinaForm.submit();
-            });
-        });
-    }
-
-    // 3. PREVIEW DEVICE TOGGLE (DESKTOP vs MOBILE)
-    const deviceButtons = document.querySelectorAll('[data-action="set-preview-device"]');
-    deviceButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const device = this.getAttribute('data-device');
-            deviceButtons.forEach(b => {
-                b.classList.remove('bg-slate-900', 'text-white');
-                b.classList.add('text-slate-600');
-            });
-            this.classList.add('bg-slate-900', 'text-white');
-            this.classList.remove('text-slate-600');
-
-            if (previewFrame) {
-                previewFrame.classList.remove('desktop', 'mobile');
-                previewFrame.classList.add(device);
-            }
-        });
-    });
-
-    // 4. MARQUESINA & BANNERS TOGGLES
-    const announcementToggleBtn = document.querySelector('[data-action="toggle-announcement-bar"]');
-    const announcementForm = document.getElementById('toggleAnnouncementForm');
-    if (announcementToggleBtn && announcementForm) {
-        announcementToggleBtn.addEventListener('click', function () {
-            announcementForm.submit();
-        });
-    }
-
-    const bannerToggleBtns = document.querySelectorAll('[data-action="toggle-banner-status"]');
-    const bannerForm = document.getElementById('toggleBannerForm');
-    bannerToggleBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const bannerId = this.getAttribute('data-banner-id');
-            if (bannerId && bannerForm) {
-                bannerForm.action = `/admin/tienda-cms/banners/${bannerId}/toggle`;
-                bannerForm.submit();
-            }
-        });
-    });
-
-    // 5. SIMULADOR FINANCIERO DE ELASTICIDAD DE ENVÍO GRATIS (TASK-INT-18)
-    const slider = document.querySelector('[data-action="simulate-threshold-slider"]');
-    const thresholdVal = document.querySelector('[data-simulator-threshold-val]');
-    const ordersVal = document.querySelector('[data-simulator-orders-val]');
-    const ratioVal = document.querySelector('[data-simulator-ratio-val]');
-    const costVal = document.querySelector('[data-simulator-cost-val]');
-    const marginVal = document.querySelector('[data-simulator-margin-val]');
-    const diagBox = document.querySelector('[data-simulator-diag-box]');
-
-    if (slider) {
-        slider.addEventListener('input', function () {
-            const t = parseFloat(this.value);
-            if (thresholdVal) thresholdVal.textContent = `MXN $${t.toLocaleString()}`;
-
-            const formThreshold = document.querySelector('[data-shipping-threshold-input]');
-            if (formThreshold) formThreshold.value = t;
-
-            const projectedOrders = 120;
-            const ratio = Math.max(10, Math.min(85, Math.round(75 - ((t - 699) / 800) * 45)));
-            const ordersAbsorbed = Math.round(projectedOrders * (ratio / 100));
-            const absorbedCost = ordersAbsorbed * 145;
-            const projectedGmv = projectedOrders * 680;
-            const projectedMargin = Math.max(15, (52.0 - (absorbedCost / projectedGmv * 100))).toFixed(1);
-            const isHealthy = projectedMargin >= 30.0;
-
-            if (ratioVal) ratioVal.textContent = `${ratio}% de pedidos`;
-            if (costVal) costVal.textContent = `MXN $${absorbedCost.toLocaleString()}`;
-            if (marginVal) {
-                marginVal.textContent = `${projectedMargin}%`;
-                marginVal.className = `text-sm font-mono font-bold block mt-1 ${isHealthy ? 'text-emerald-600' : 'text-amber-600'}`;
-            }
-            if (diagBox) {
-                diagBox.className = `p-3.5 rounded-xl border text-xs ${isHealthy ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`;
-                const p = diagBox.querySelector('p');
-                if (p) {
-                    p.textContent = isHealthy
-                        ? 'El umbral actual protege el margen operativo por encima del umbral mínimo de viabilidad (30% EBITDA) absorbiendo costos de paquetería sin comprometer flujo de caja.'
-                        : 'Precaución: El umbral simulado compromete el margen neto debido a que una alta proporción de órdenes diluye la utilidad frente al flete courier de $145 MXN.';
-                }
-            }
-        });
-    }
-
-    // 6. GESTOR DE MODALES OPERATIVOS (APERTURA, EDICIÓN Y CIERRE SEGURO)
-    function openModal(id) {
-        const m = document.getElementById(id);
-        if (!m) return;
-        m.classList.remove('hidden');
-        m.style.display = 'flex';
-    }
-
-    function closeModal(id) {
-        const m = document.getElementById(id);
-        if (!m) return;
-        m.classList.add('hidden');
-        m.style.display = 'none';
-    }
-
-    // BIFURCADOR EN MODAL CREAR SECCIÓN
-    const btnModeCat = document.getElementById('createModeCatalogBtn');
-    const btnModeCont = document.getElementById('createModeContentBtn');
-    const wrapCatTax = document.getElementById('createCatalogTaxonomies');
-    const wrapCatType = document.getElementById('createTypeCatalogWrap');
-    const wrapContOpt = document.getElementById('createContentOptions');
-    const wrapContType = document.getElementById('createTypeContentWrap');
-    const selCatType = document.getElementById('createSectionTypeCatalog');
-    const selContType = document.getElementById('createSectionTypeContent');
-
-    if (btnModeCat && btnModeCont) {
-        btnModeCat.addEventListener('click', function () {
-            btnModeCat.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition';
-            btnModeCont.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition';
+        if (mode === 'catalog') {
+            if (btnModeCat) btnModeCat.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+            if (btnModeCont) btnModeCont.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
             if (wrapCatTax) { wrapCatTax.classList.remove('hidden'); wrapCatTax.style.display = 'block'; }
             if (wrapCatType) { wrapCatType.classList.remove('hidden'); wrapCatType.style.display = 'block'; }
             if (wrapContOpt) { wrapContOpt.classList.add('hidden'); wrapContOpt.style.display = 'none'; }
             if (wrapContType) { wrapContType.classList.add('hidden'); wrapContType.style.display = 'none'; }
             if (selCatType) selCatType.name = 'type';
             if (selContType) selContType.name = 'type_disabled';
-        });
-
-        btnModeCont.addEventListener('click', function () {
-            btnModeCont.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition';
-            btnModeCat.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition';
+        } else {
+            if (btnModeCont) btnModeCont.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+            if (btnModeCat) btnModeCat.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
             if (wrapCatTax) { wrapCatTax.classList.add('hidden'); wrapCatTax.style.display = 'none'; }
             if (wrapCatType) { wrapCatType.classList.add('hidden'); wrapCatType.style.display = 'none'; }
             if (wrapContOpt) { wrapContOpt.classList.remove('hidden'); wrapContOpt.style.display = 'block'; }
             if (wrapContType) { wrapContType.classList.remove('hidden'); wrapContType.style.display = 'block'; }
             if (selContType) selContType.name = 'type';
             if (selCatType) selCatType.name = 'type_disabled';
-        });
-    }
+        }
+    };
 
-    // MANEJADOR CONDICIONAL EN MODAL DE EDICIÓN
-    const editTypeSelect = document.getElementById('editTypeSelect');
-    const editCatTax = document.getElementById('editCatalogTaxonomies');
-    const editContOpt = document.getElementById('editContentOptions');
-
-    function toggleEditTypePanels(typeVal) {
+    window.toggleEditTypePanels = function(typeVal) {
         const contentTypes = ['hero_carousel', 'editorial_banner', 'brand_pillars', 'promo_modal', 'custom_html_css_js'];
+        const editCatTax = document.getElementById('editCatalogTaxonomies');
+        const editContOpt = document.getElementById('editContentOptions');
+
         if (contentTypes.includes(typeVal)) {
             if (editCatTax) { editCatTax.classList.add('hidden'); editCatTax.style.display = 'none'; }
             if (editContOpt) { editContOpt.classList.remove('hidden'); editContOpt.style.display = 'block'; }
@@ -2150,149 +1965,143 @@ document.addEventListener('DOMContentLoaded', function () {
             if (editCatTax) { editCatTax.classList.remove('hidden'); editCatTax.style.display = 'block'; }
             if (editContOpt) { editContOpt.classList.add('hidden'); editContOpt.style.display = 'none'; }
         }
-    }
+    };
 
-    if (editTypeSelect) {
-        editTypeSelect.addEventListener('change', function () {
-            toggleEditTypePanels(this.value);
-        });
-    }
+    window.openCreateSectionModal = function() {
+        window.openStoreModal('createSectionModal');
+    };
 
-    // DELEGACIÓN GLOBAL DE EVENTOS PARA MODALES
-    document.addEventListener('click', function (e) {
-        // Apertura de modal de crear sección
-        const openCreateBtn = e.target.closest('[data-action="open-create-section-modal"]');
-        if (openCreateBtn) {
-            openModal('createSectionModal');
-            return;
-        }
-
-        // Apertura de modal de editar sección
-        const openEditSecBtn = e.target.closest('[data-action="open-edit-section-modal"]');
-        if (openEditSecBtn) {
-            const raw = openEditSecBtn.getAttribute('data-section');
-            if (raw) {
-                try {
-                    const sec = JSON.parse(raw);
-                    const form = document.getElementById('editSectionForm');
-                    if (form) form.action = `/admin/tienda-cms/secciones/${sec.id}`;
-
-                    const universeSel = document.getElementById('editUniverseSelect');
-                    if (universeSel) universeSel.value = sec.universe || 'all';
-
-                    const statusSel = document.getElementById('editStatusSelect');
-                    if (statusSel) statusSel.value = sec.status || 'active';
-
-                    const typeSel = document.getElementById('editTypeSelect');
-                    if (typeSel) {
-                        typeSel.value = sec.type || 'curated_products';
-                        toggleEditTypePanels(typeSel.value);
-                    }
-
-                    const nameInp = document.getElementById('editNameInput');
-                    if (nameInp) nameInp.value = sec.name || '';
-
-                    const badgeInp = document.getElementById('editBadgeInput');
-                    if (badgeInp) badgeInp.value = sec.badge || '';
-
-                    const titleInp = document.getElementById('editTitleInput');
-                    if (titleInp) titleInp.value = sec.title || '';
-
-                    const subtitleInp = document.getElementById('editSubtitleInput');
-                    if (subtitleInp) subtitleInp.value = sec.subtitle || '';
-
-                    // Taxonomías
-                    const qr = sec.query_rules || {};
-                    const catSel = document.getElementById('editCategoryId');
-                    if (catSel) catSel.value = qr.category_id || '';
-
-                    const scatSel = document.getElementById('editSubcategoryId');
-                    if (scatSel) scatSel.value = qr.subcategory_id || '';
-
-                    const brandSel = document.getElementById('editBrand');
-                    if (brandSel) brandSel.value = qr.brand || '';
-
-                    const famSel = document.getElementById('editFamily');
-                    if (famSel) famSel.value = qr.family || '';
-
-                    const gtSel = document.getElementById('editGarmentType');
-                    if (gtSel) gtSel.value = qr.garment_type || '';
-
-                    const tagSel = document.getElementById('editTag');
-                    if (tagSel) tagSel.value = qr.tag || '';
-
-                    const discSel = document.getElementById('editDiscount');
-                    if (discSel) discSel.value = qr.discount || 'all';
-
-                    const limSel = document.getElementById('editLimit');
-                    if (limSel) limSel.value = qr.limit || 8;
-
-                    // Código custom
-                    const htmlArea = document.getElementById('editCustomHtml');
-                    if (htmlArea) htmlArea.value = sec.custom_html || '';
-
-                    const cssArea = document.getElementById('editCustomCss');
-                    if (cssArea) cssArea.value = sec.custom_css || '';
-
-                    const jsArea = document.getElementById('editCustomJs');
-                    if (jsArea) jsArea.value = sec.custom_js || '';
-
-                    openModal('editSectionModal');
-                } catch (err) {
-                    console.error('Error al precargar datos de la sección:', err);
-                }
-            }
-            return;
-        }
-
-        // Archivar sección directamente
-        const archiveBtn = e.target.closest('[data-action="archive-section"]');
-        if (archiveBtn) {
-            const secId = archiveBtn.getAttribute('data-section-id');
-            const secName = archiveBtn.getAttribute('data-section-name');
-            if (confirm(`¿Archivar la sección "${secName}"? Pasará a estado archivado y dejará de mostrarse en la tienda.`)) {
-                const archiveForm = document.getElementById('archiveSectionForm');
-                if (archiveForm && secId) {
-                    archiveForm.action = `/admin/tienda-cms/secciones/${secId}/archivar`;
-                    archiveForm.submit();
-                }
-            }
-            return;
-        }
-
-        // Apertura de otros modales oficiales
-        const openBtn = e.target.closest('[data-action^="open-"]');
-        if (openBtn) {
-            const modalTarget = openBtn.getAttribute('data-modal');
-            if (modalTarget) {
-                openModal(modalTarget);
+    window.openEditSectionModal = function(secData) {
+        let sec = secData;
+        if (typeof sec === 'string') {
+            try {
+                sec = JSON.parse(sec);
+            } catch (err) {
+                console.error('[Store CMS] Error al parsear JSON de sección:', err);
                 return;
             }
-            const action = openBtn.getAttribute('data-action');
-            if (action === 'open-edit-size-guide-modal') openModal('editSizeGuideModal');
-            else if (action === 'open-edit-care-modal') openModal('editCareModal');
-            else if (action === 'open-edit-profeco-modal') openModal('editProfecoModal');
+        }
+        if (!sec || !sec.id) return;
+
+        const form = document.getElementById('editSectionForm');
+        if (form) form.action = `/admin/tienda-cms/secciones/${sec.id}`;
+
+        const universeSel = document.getElementById('editUniverseSelect');
+        if (universeSel) universeSel.value = sec.universe || 'all';
+
+        const statusSel = document.getElementById('editStatusSelect');
+        if (statusSel) statusSel.value = sec.status || 'active';
+
+        const typeSel = document.getElementById('editTypeSelect');
+        if (typeSel) {
+            typeSel.value = sec.type || 'curated_products';
+            window.toggleEditTypePanels(typeSel.value);
         }
 
-        // Cierre de modales
-        const closeBtn = e.target.closest('[data-action="close-modal"]');
-        if (closeBtn) {
-            const modalId = closeBtn.getAttribute('data-modal');
-            if (modalId) closeModal(modalId);
+        const nameInp = document.getElementById('editNameInput');
+        if (nameInp) nameInp.value = sec.name || '';
+
+        const badgeInp = document.getElementById('editBadgeInput');
+        if (badgeInp) badgeInp.value = sec.badge || '';
+
+        const titleInp = document.getElementById('editTitleInput');
+        if (titleInp) titleInp.value = sec.title || '';
+
+        const subtitleInp = document.getElementById('editSubtitleInput');
+        if (subtitleInp) subtitleInp.value = sec.subtitle || '';
+
+        // Taxonomías
+        const qr = sec.query_rules || {};
+        const catSel = document.getElementById('editCategoryId');
+        if (catSel) catSel.value = qr.category_id || '';
+
+        const scatSel = document.getElementById('editSubcategoryId');
+        if (scatSel) scatSel.value = qr.subcategory_id || '';
+
+        const brandSel = document.getElementById('editBrand');
+        if (brandSel) brandSel.value = qr.brand || '';
+
+        const famSel = document.getElementById('editFamily');
+        if (famSel) famSel.value = qr.family || '';
+
+        const gtSel = document.getElementById('editGarmentType');
+        if (gtSel) gtSel.value = qr.garment_type || '';
+
+        const tagSel = document.getElementById('editTag');
+        if (tagSel) tagSel.value = qr.tag || '';
+
+        const discSel = document.getElementById('editDiscount');
+        if (discSel) discSel.value = qr.discount || 'all';
+
+        const limSel = document.getElementById('editLimit');
+        if (limSel) limSel.value = qr.limit || 8;
+
+        // Código custom
+        const htmlArea = document.getElementById('editCustomHtml');
+        if (htmlArea) htmlArea.value = sec.custom_html || '';
+
+        const cssArea = document.getElementById('editCustomCss');
+        if (cssArea) cssArea.value = sec.custom_css || '';
+
+        const jsArea = document.getElementById('editCustomJs');
+        if (jsArea) jsArea.value = sec.custom_js || '';
+
+        window.openStoreModal('editSectionModal');
+    };
+
+    window.archiveStoreSection = function(secId, secName) {
+        if (confirm(`¿Archivar la sección "${secName || 'seleccionada'}"? Pasará a estado archivado y dejará de mostrarse en la tienda.`)) {
+            const archiveForm = document.getElementById('archiveSectionForm');
+            if (archiveForm && secId) {
+                archiveForm.action = `/admin/tienda-cms/secciones/${secId}/archivar`;
+                archiveForm.submit();
+            }
         }
-    });
+    };
 
-    // Reordenamiento interactivo de secciones (Drag & Drop)
-    const sectionsBody = document.getElementById('sectionsSortableBody');
-    const syncBadge = document.getElementById('reorderSyncStatus');
+    window.toggleSectionStatus = function(secId) {
+        const form = document.getElementById('toggleSectionForm');
+        if (form && secId) {
+            form.action = `/admin/tienda-cms/secciones/${secId}/toggle`;
+            form.submit();
+        }
+    };
 
-    function syncSectionsOrder() {
+    window.deleteSectionDirect = function(secId, secName) {
+        if (confirm(`¿Estás seguro de eliminar la sección "${secName || 'seleccionada'}"?`)) {
+            const form = document.getElementById('deleteSectionForm');
+            if (form && secId) {
+                form.action = `/admin/tienda-cms/secciones/${secId}`;
+                form.submit();
+            }
+        }
+    };
+
+    window.moveSectionRow = function(btn, direction) {
+        const tr = btn.closest('tr');
+        if (!tr) return;
+        if (direction === -1 && tr.previousElementSibling) {
+            tr.parentNode.insertBefore(tr, tr.previousElementSibling);
+            window.syncSectionsOrder();
+        } else if (direction === 1 && tr.nextElementSibling) {
+            tr.parentNode.insertBefore(tr.nextElementSibling, tr);
+            window.syncSectionsOrder();
+        }
+    };
+
+    // ==========================================
+    // 5. SINCRONIZACIÓN DRAG & DROP DE SECCIONES
+    // ==========================================
+    window.syncSectionsOrder = function() {
+        const sectionsBody = document.getElementById('sectionsSortableBody');
+        const syncBadge = document.getElementById('reorderSyncStatus');
         if (!sectionsBody) return;
+
         const rows = sectionsBody.querySelectorAll('tr[data-section-id]');
         const order = [];
         rows.forEach((row, idx) => {
             const id = parseInt(row.getAttribute('data-section-id'));
-            order.push(id);
+            if (!isNaN(id)) order.push(id);
             const badge = row.querySelector('.section-order-badge');
             if (badge) badge.textContent = `#${idx + 1}`;
         });
@@ -2326,67 +2135,389 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 3000);
             }
         }).catch(err => {
-            console.error('Error al sincronizar orden de secciones:', err);
+            console.error('[Store CMS] Error al sincronizar orden:', err);
             if (syncBadge) {
                 syncBadge.className = 'text-[11px] font-semibold text-rose-700 flex items-center gap-1.5 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200';
                 syncBadge.innerHTML = `<span>Error al guardar orden</span>`;
             }
         });
-    }
+    };
 
-    // Inicializar SortableJS para Drag & Drop Real
-    if (typeof Sortable !== 'undefined' && sectionsBody) {
-        new Sortable(sectionsBody, {
-            handle: '.drag-handle',
-            animation: 200,
-            ghostClass: 'bg-indigo-50/80',
-            chosenClass: 'bg-indigo-100/60',
-            dragClass: 'shadow-2xl',
-            onEnd: function () {
-                syncSectionsOrder();
+    // ==========================================
+    // 6. INICIALIZADOR DE INTERACCIÓN Y EVENTOS
+    // ==========================================
+    function initStoreCMS() {
+        // Inicializar pestaña activa desde URL o default
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTab = urlParams.get('tab') || 'visual';
+        window.switchStoreTab(initialTab);
+
+        // Inicializar vitrina por defecto
+        window.switchStoreUniverse(activeUniverse);
+
+        // Bifurcador en Modal Crear
+        const btnModeCat = document.getElementById('createModeCatalogBtn');
+        const btnModeCont = document.getElementById('createModeContentBtn');
+        if (btnModeCat) {
+            btnModeCat.addEventListener('click', () => window.switchCreateSectionMode('catalog'));
+        }
+        if (btnModeCont) {
+            btnModeCont.addEventListener('click', () => window.switchCreateSectionMode('content'));
+        }
+
+        // Listener en select de tipo en Modal Editar
+        const editTypeSelect = document.getElementById('editTypeSelect');
+        if (editTypeSelect) {
+            editTypeSelect.addEventListener('change', function() {
+                window.toggleEditTypePanels(this.value);
+            });
+        }
+
+        // Inicializar SortableJS para Drag & Drop
+        const sectionsBody = document.getElementById('sectionsSortableBody');
+        if (sectionsBody) {
+            if (typeof Sortable !== 'undefined') {
+                new Sortable(sectionsBody, {
+                    handle: '.drag-handle',
+                    animation: 200,
+                    ghostClass: 'bg-indigo-50/80',
+                    chosenClass: 'bg-indigo-100/60',
+                    dragClass: 'shadow-2xl',
+                    onEnd: function () {
+                        window.syncSectionsOrder();
+                    }
+                });
             }
-        });
-    }
 
-    if (sectionsBody) {
-        sectionsBody.addEventListener('click', function (e) {
-            const moveUpBtn = e.target.closest('[data-action="move-section-up"]');
-            const moveDownBtn = e.target.closest('[data-action="move-section-down"]');
-            const toggleBtn = e.target.closest('[data-action="toggle-section-status"]');
-            const deleteBtn = e.target.closest('[data-action="delete-section"]');
-
-            if (moveUpBtn) {
-                const tr = moveUpBtn.closest('tr');
-                if (tr && tr.previousElementSibling) {
-                    tr.parentNode.insertBefore(tr, tr.previousElementSibling);
-                    syncSectionsOrder();
+            // Fallback nativo HTML5 Drag & Drop
+            let draggedRow = null;
+            sectionsBody.addEventListener('dragstart', function(e) {
+                draggedRow = e.target.closest('tr[data-section-id]');
+                if (draggedRow) {
+                    if (e.dataTransfer) {
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', draggedRow.getAttribute('data-section-id'));
+                    }
+                    draggedRow.classList.add('opacity-50');
                 }
-            } else if (moveDownBtn) {
-                const tr = moveDownBtn.closest('tr');
-                if (tr && tr.nextElementSibling) {
-                    tr.parentNode.insertBefore(tr.nextElementSibling, tr);
-                    syncSectionsOrder();
+            });
+            sectionsBody.addEventListener('dragend', function() {
+                if (draggedRow) {
+                    draggedRow.classList.remove('opacity-50');
+                    draggedRow = null;
                 }
-            } else if (toggleBtn) {
-                const secId = toggleBtn.getAttribute('data-section-id');
-                const form = document.getElementById('toggleSectionForm');
-                if (form && secId) {
-                    form.action = `/admin/tienda-cms/secciones/${secId}/toggle`;
-                    form.submit();
-                }
-            } else if (deleteBtn) {
-                const secId = deleteBtn.getAttribute('data-section-id');
-                const secName = deleteBtn.getAttribute('data-section-name');
-                if (confirm(`¿Estás seguro de eliminar la sección "${secName}"?`)) {
-                    const form = document.getElementById('deleteSectionForm');
-                    if (form && secId) {
-                        form.action = `/admin/tienda-cms/secciones/${secId}`;
-                        form.submit();
+            });
+            sectionsBody.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                const targetRow = e.target.closest('tr[data-section-id]');
+                if (targetRow && targetRow !== draggedRow && draggedRow) {
+                    const bounding = targetRow.getBoundingClientRect();
+                    const offset = e.clientY - bounding.top;
+                    if (offset > bounding.height / 2) {
+                        targetRow.parentNode.insertBefore(draggedRow, targetRow.nextSibling);
+                    } else {
+                        targetRow.parentNode.insertBefore(draggedRow, targetRow);
                     }
                 }
-            }
+            });
+            sectionsBody.addEventListener('drop', function(e) {
+                e.preventDefault();
+                window.syncSectionsOrder();
+            });
+        }
+
+        // Formulario de Vitrina: Inputs reactivos a tiempo real
+        const nameInput = document.querySelector('[data-store-name-input]');
+        const accentInput = document.querySelector('[data-store-accent-color-input]');
+        const accentLabel = document.querySelector('[data-store-accent-label]');
+        const bgInput = document.querySelector('[data-store-bg-color-input]');
+        const bgLabel = document.querySelector('[data-store-bg-label]');
+        const heroTitleInput = document.querySelector('[data-store-hero-title-input]');
+        const heroSubInput = document.querySelector('[data-store-hero-sub-input]');
+        const heroCtaInput = document.querySelector('[data-store-hero-cta-input]');
+        const previewTopBarName = document.querySelector('.preview-top-bar .font-bold');
+        const previewHeroTitle = document.querySelector('.preview-hero-title');
+        const previewHeroSub = document.querySelector('.preview-hero-sub');
+        const previewHeroCta = document.querySelector('.preview-hero-cta');
+        const previewMarquee = document.querySelector('.preview-marquee-strip');
+        const previewHeroSection = document.querySelector('.preview-hero-section');
+
+        if (nameInput) nameInput.addEventListener('input', function() { if (previewTopBarName) previewTopBarName.textContent = this.value; });
+        if (heroTitleInput) heroTitleInput.addEventListener('input', function() { if (previewHeroTitle) previewHeroTitle.textContent = this.value; });
+        if (heroSubInput) heroSubInput.addEventListener('input', function() { if (previewHeroSub) previewHeroSub.textContent = this.value; });
+        if (heroCtaInput) heroCtaInput.addEventListener('input', function() { if (previewHeroCta) previewHeroCta.textContent = `${this.value} \u2192`; });
+        if (accentInput) accentInput.addEventListener('input', function() {
+            if (accentLabel) accentLabel.textContent = this.value;
+            if (previewMarquee) previewMarquee.style.background = this.value;
+            if (previewHeroCta) previewHeroCta.style.background = this.value;
         });
+        if (bgInput) bgInput.addEventListener('input', function() {
+            if (bgLabel) bgLabel.textContent = this.value;
+            if (previewHeroSection) previewHeroSection.style.background = this.value;
+        });
+
+        // Guardado asíncrono de Vitrina
+        const vitrinaForm = document.getElementById('vitrinaConfigForm');
+        if (vitrinaForm) {
+            vitrinaForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('saveVitrinaBtn');
+                const origHtml = submitBtn ? submitBtn.innerHTML : '';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `
+                        <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        <span>Guardando cambios...</span>
+                    `;
+                }
+
+                const formData = new FormData(vitrinaForm);
+
+                fetch(vitrinaForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>¡Guardado Exitosamente!</span>
+                        `;
+                        setTimeout(() => {
+                            submitBtn.innerHTML = origHtml;
+                        }, 2500);
+                    }
+                    if (data.storefront) {
+                        storefrontsData[activeUniverse] = Object.assign(storefrontsData[activeUniverse] || {}, data.storefront);
+                        window.switchStoreUniverse(activeUniverse);
+                    }
+                })
+                .catch(err => {
+                    console.error('[Store CMS] Error al guardar vitrina:', err);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = origHtml;
+                    }
+                    vitrinaForm.submit();
+                });
+            });
+        }
+
+        // Preview Device Toggle (Desktop / Mobile)
+        const deviceButtons = document.querySelectorAll('[data-action="set-preview-device"]');
+        const previewFrame = document.querySelector('[data-storefront-preview-frame]');
+        deviceButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const device = this.getAttribute('data-device');
+                deviceButtons.forEach(b => {
+                    b.classList.remove('bg-slate-900', 'text-white');
+                    b.classList.add('text-slate-600');
+                });
+                this.classList.add('bg-slate-900', 'text-white');
+                this.classList.remove('text-slate-600');
+
+                if (previewFrame) {
+                    previewFrame.classList.remove('desktop', 'mobile');
+                    previewFrame.classList.add(device);
+                }
+            });
+        });
+
+        // Banners & Marquesina Toggles
+        const announcementToggleBtn = document.querySelector('[data-action="toggle-announcement-bar"]');
+        const announcementForm = document.getElementById('toggleAnnouncementForm');
+        if (announcementToggleBtn && announcementForm) {
+            announcementToggleBtn.addEventListener('click', function () {
+                announcementForm.submit();
+            });
+        }
+
+        const bannerToggleBtns = document.querySelectorAll('[data-action="toggle-banner-status"]');
+        const bannerForm = document.getElementById('toggleBannerForm');
+        bannerToggleBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const bannerId = this.getAttribute('data-banner-id');
+                if (bannerId && bannerForm) {
+                    bannerForm.action = `/admin/tienda-cms/banners/${bannerId}/toggle`;
+                    bannerForm.submit();
+                }
+            });
+        });
+
+        // Simulador de elasticidad de envío
+        const slider = document.querySelector('[data-action="simulate-threshold-slider"]');
+        const thresholdVal = document.querySelector('[data-simulator-threshold-val]');
+        const ratioVal = document.querySelector('[data-simulator-ratio-val]');
+        const costVal = document.querySelector('[data-simulator-cost-val]');
+        const marginVal = document.querySelector('[data-simulator-margin-val]');
+        const diagBox = document.querySelector('[data-simulator-diag-box]');
+
+        if (slider) {
+            slider.addEventListener('input', function () {
+                const t = parseFloat(this.value);
+                if (thresholdVal) thresholdVal.textContent = `MXN $${t.toLocaleString()}`;
+
+                const formThreshold = document.querySelector('[data-shipping-threshold-input]');
+                if (formThreshold) formThreshold.value = t;
+
+                const projectedOrders = 120;
+                const ratio = Math.max(10, Math.min(85, Math.round(75 - ((t - 699) / 800) * 45)));
+                const ordersAbsorbed = Math.round(projectedOrders * (ratio / 100));
+                const absorbedCost = ordersAbsorbed * 145;
+                const projectedGmv = projectedOrders * 680;
+                const projectedMargin = Math.max(15, (52.0 - (absorbedCost / projectedGmv * 100))).toFixed(1);
+                const isHealthy = projectedMargin >= 30.0;
+
+                if (ratioVal) ratioVal.textContent = `${ratio}% de pedidos`;
+                if (costVal) costVal.textContent = `MXN $${absorbedCost.toLocaleString()}`;
+                if (marginVal) {
+                    marginVal.textContent = `${projectedMargin}%`;
+                    marginVal.className = `text-sm font-mono font-bold block mt-1 ${isHealthy ? 'text-emerald-600' : 'text-amber-600'}`;
+                }
+                if (diagBox) {
+                    diagBox.className = `p-3.5 rounded-xl border text-xs ${isHealthy ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`;
+                    const p = diagBox.querySelector('p');
+                    if (p) {
+                        p.textContent = isHealthy
+                            ? 'El umbral actual protege el margen operativo por encima del umbral mínimo de viabilidad (30% EBITDA) absorbiendo costos de paquetería sin comprometer flujo de caja.'
+                            : 'Precaución: El umbral simulado compromete el margen neto debido a que una alta proporción de órdenes diluye la utilidad frente al flete courier de $145 MXN.';
+                    }
+                }
+            });
+        }
     }
-});
+
+    // ==========================================
+    // 7. DELEGACIÓN GLOBAL DE EVENTOS DE CLICK
+    // ==========================================
+    document.addEventListener('click', function(e) {
+        // Pestañas Subnav
+        const tabBtn = e.target.closest('[data-action="switch-store-tab"]');
+        if (tabBtn && !e.target.classList.contains('section-help-btn')) {
+            const targetTab = tabBtn.getAttribute('data-tab');
+            if (targetTab) window.switchStoreTab(targetTab);
+            return;
+        }
+
+        // Vitrina Universo Pills
+        const univBtn = e.target.closest('[data-action="switch-store-universe"]');
+        if (univBtn) {
+            const u = univBtn.getAttribute('data-universe');
+            if (u) window.switchStoreUniverse(u);
+            return;
+        }
+
+        // Botón Crear Sección
+        if (e.target.closest('[data-action="open-create-section-modal"]')) {
+            window.openCreateSectionModal();
+            return;
+        }
+
+        // Botón Editar Sección
+        const editBtn = e.target.closest('[data-action="open-edit-section-modal"]');
+        if (editBtn) {
+            const secData = editBtn.getAttribute('data-section');
+            if (secData) window.openEditSectionModal(secData);
+            return;
+        }
+
+        // Archivar Sección
+        const archiveBtn = e.target.closest('[data-action="archive-section"]');
+        if (archiveBtn) {
+            const secId = archiveBtn.getAttribute('data-section-id');
+            const secName = archiveBtn.getAttribute('data-section-name');
+            window.archiveStoreSection(secId, secName);
+            return;
+        }
+
+        // Activar / Pausar Sección
+        const toggleBtn = e.target.closest('[data-action="toggle-section-status"]');
+        if (toggleBtn) {
+            const secId = toggleBtn.getAttribute('data-section-id');
+            window.toggleSectionStatus(secId);
+            return;
+        }
+
+        // Eliminar Sección
+        const deleteBtn = e.target.closest('[data-action="delete-section"]');
+        if (deleteBtn) {
+            const secId = deleteBtn.getAttribute('data-section-id');
+            const secName = deleteBtn.getAttribute('data-section-name');
+            window.deleteSectionDirect(secId, secName);
+            return;
+        }
+
+        // Mover Sección Arriba / Abajo
+        const moveUpBtn = e.target.closest('[data-action="move-section-up"]');
+        if (moveUpBtn) {
+            window.moveSectionRow(moveUpBtn, -1);
+            return;
+        }
+        const moveDownBtn = e.target.closest('[data-action="move-section-down"]');
+        if (moveDownBtn) {
+            window.moveSectionRow(moveDownBtn, 1);
+            return;
+        }
+
+        // Apertura de modales generales
+        const openModalBtn = e.target.closest('[data-action="open-modal"]');
+        if (openModalBtn) {
+            const modalId = openModalBtn.getAttribute('data-modal');
+            if (modalId) window.openStoreModal(modalId);
+            return;
+        }
+
+        // Modales específicos editorial
+        if (e.target.closest('[data-action="open-edit-size-guide-modal"]')) {
+            window.openStoreModal('editSizeGuideModal');
+            return;
+        }
+        if (e.target.closest('[data-action="open-edit-care-modal"]')) {
+            window.openStoreModal('editCareModal');
+            return;
+        }
+        if (e.target.closest('[data-action="open-edit-profeco-modal"]')) {
+            window.openStoreModal('editProfecoModal');
+            return;
+        }
+
+        // Cierre de modales (botón X o Cancelar o clic fuera del modal)
+        const closeBtn = e.target.closest('[data-action="close-modal"]');
+        if (closeBtn) {
+            const modalId = closeBtn.getAttribute('data-modal');
+            if (modalId) window.closeStoreModal(modalId);
+            return;
+        }
+
+        // Clic en el backdrop oscuro del modal para cerrar
+        if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0') && e.target.id) {
+            window.closeStoreModal(e.target.id);
+        }
+    });
+
+    // Tecla Escape cierra modales abiertos
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const openModals = document.querySelectorAll('.fixed.inset-0:not(.hidden)');
+            openModals.forEach(m => window.closeStoreModal(m.id));
+        }
+    });
+
+    // ==========================================
+    // 8. AUTO-BOOTSTRAP INMEDIATO
+    // ==========================================
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStoreCMS);
+    } else {
+        initStoreCMS();
+    }
+})();
 </script>
 @endsection
