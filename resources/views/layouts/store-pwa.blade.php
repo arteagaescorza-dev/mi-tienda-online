@@ -146,7 +146,7 @@
           </div>
           <div class="brand-titles">
             <span class="brand-name" id="desktopBrandName">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
-            <span class="brand-sub" id="desktopBrandSub">{{ $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
+            <span class="brand-sub" id="desktopBrandSub">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
           </div>
         </a>
 
@@ -1233,6 +1233,7 @@
   <script>
     window.__INITIAL_STORE_PRODUCTS__ = @json($initialProducts ?? []);
     window.__ACTIVE_UNIVERSE__ = @json($activeUniverse ?? 'marte');
+    window.__UNIVERSE_META__ = @json($universeMeta ?? []);
     window.__STORE_CSRF_TOKEN__ = "{{ csrf_token() }}";
     window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
   </script>

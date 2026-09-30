@@ -137,9 +137,36 @@ class StorefrontController extends Controller
 
         $pwaProducts = $this->getPwaStoreProducts();
 
+        foreach ($sections as $section) {
+            if (in_array($section->type, ['curated_products', 'categories_grid', 'subcategories_slider', 'family_showcase', 'tags_cloud'])) {
+                $section->resolved_products = $this->getFilteredProductsForSection($section, $pwaProducts);
+            }
+        }
+
+        $allConfigs = CmsStorefrontConfig::all()->keyBy('universe');
+        $universeMeta = [];
+        foreach (['marte', 'venus', 'tiresias', 'terra'] as $u) {
+            $conf = $allConfigs->get($u);
+            $cached = Cache::get('cms_storefront_' . $u, []);
+            $universeMeta[$u] = [
+                'brandName' => $conf?->brand_name ?? $defaultStorefronts[$u]['brandName'],
+                'subTitle' => $conf?->kicker ?? $conf?->sub_title ?? $defaultStorefronts[$u]['subTitle'],
+                'heroTag' => $conf?->hero_tag ?? $defaultStorefronts[$u]['heroTag'],
+                'heroTitle' => $conf?->hero_title ?? $defaultStorefronts[$u]['heroTitle'],
+                'heroSubtitle' => $conf?->hero_subtitle ?? $defaultStorefronts[$u]['heroSubtitle'],
+                'pageTitle' => $conf?->page_title ?? $defaultStorefronts[$u]['pageTitle'],
+                'accentColor' => $conf?->accent_color ?? ($defaultStorefronts[$u]['accentColor'] ?? '#4f46e5'),
+                'backgroundColor' => $conf?->background_color ?? ($defaultStorefronts[$u]['backgroundColor'] ?? '#fafafa'),
+            ];
+            if (!empty($cached)) {
+                $universeMeta[$u] = array_merge($universeMeta[$u], array_filter($cached));
+            }
+        }
+
         return view('store.pwa.home', [
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
+            'universeMeta' => $universeMeta,
             'storefrontConfig' => $storefrontConfig,
             'shippingRule' => $shippingRule,
             'announcements' => $announcements,
@@ -152,6 +179,97 @@ class StorefrontController extends Controller
             'products' => $pwaProducts,
             'initialProducts' => $pwaProducts,
         ]);
+    }
+
+    public function getFilteredProductsForSection(CmsSection $section, array $allProducts): array
+    {
+        $rules = $section->query_rules ?? [];
+        if (is_string($rules)) {
+            $rules = json_decode($rules, true) ?: [];
+        }
+
+        $filtered = array_filter($allProducts, function ($p) use ($rules) {
+            // Garment type filter
+            if (!empty($rules['garment_type']) && $rules['garment_type'] !== 'all') {
+                $gtTarget = strtolower(trim($rules['garment_type']));
+                $pGt = strtolower(trim($p['garment_type'] ?? ''));
+                $pName = strtolower(trim($p['name'] ?? ''));
+                $pBrand = strtolower(trim($p['brand'] ?? ''));
+                if (!str_contains($pGt, $gtTarget) && !str_contains($pName, $gtTarget) && !str_contains($pBrand, $gtTarget)) {
+                    return false;
+                }
+            }
+
+            // Category filter
+            if (!empty($rules['category_id'])) {
+                $catId = (int)$rules['category_id'];
+                $pCatIds = $p['category_ids'] ?? [];
+                if (!empty($pCatIds) && !in_array($catId, $pCatIds)) {
+                    return false;
+                }
+            }
+
+            // Subcategory filter
+            if (!empty($rules['subcategory_id'])) {
+                $subId = (int)$rules['subcategory_id'];
+                $pCatIds = $p['category_ids'] ?? [];
+                if (!empty($pCatIds) && !in_array($subId, $pCatIds)) {
+                    return false;
+                }
+            }
+
+            // Brand filter
+            if (!empty($rules['brand']) && $rules['brand'] !== 'all') {
+                $brandTarget = strtolower(trim($rules['brand']));
+                $pBrand = strtolower(trim($p['brand'] ?? ''));
+                if (!str_contains($pBrand, $brandTarget)) {
+                    return false;
+                }
+            }
+
+            // Textile family filter
+            if (!empty($rules['family']) && $rules['family'] !== 'all') {
+                $familyTarget = strtolower(trim($rules['family']));
+                $pFabric = strtolower(trim($p['fabric_type'] ?? ''));
+                $pDesc = strtolower(trim($p['description'] ?? ''));
+                if (!str_contains($pFabric, $familyTarget) && !str_contains($pDesc, $familyTarget)) {
+                    return false;
+                }
+            }
+
+            // Style tag filter
+            if (!empty($rules['tag']) && $rules['tag'] !== 'all') {
+                $tagTarget = strtolower(trim($rules['tag']));
+                $pDesc = strtolower(trim($p['description'] ?? ''));
+                $pName = strtolower(trim($p['name'] ?? ''));
+                if (!str_contains($pDesc, $tagTarget) && !str_contains($pName, $tagTarget)) {
+                    return false;
+                }
+            }
+
+            // Discount filter
+            if (!empty($rules['discount'])) {
+                $discPct = (float)($p['discount_pct'] ?? 0);
+                if ($rules['discount'] === 'only_sale' && $discPct <= 0) {
+                    return false;
+                } elseif ($rules['discount'] === 'min_15' && $discPct < 15) {
+                    return false;
+                } elseif ($rules['discount'] === 'min_25' && $discPct < 25) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        if (empty($filtered)) {
+            $filtered = $allProducts;
+        }
+
+        $limit = isset($rules['limit']) ? (int)$rules['limit'] : 8;
+        if ($limit <= 0) $limit = 8;
+
+        return array_slice(array_values($filtered), 0, $limit);
     }
 
     public function products()
@@ -1549,6 +1667,11 @@ class StorefrontController extends Controller
                     'image' => $image,
                     'sizes' => $sizes,
                     'description' => $product->description ?: 'Prenda anatómica confeccionada con textiles transpirables.',
+                    'brand' => (string) ($product->brand ?? ''),
+                    'garment_type' => (string) data_get($product->meta, 'garment_type', ''),
+                    'fabric_type' => (string) data_get($product->meta, 'fabric_type', ''),
+                    'discount_pct' => (float) data_get($product->meta, 'discount_pct', 0),
+                    'category_ids' => $product->categories->pluck('id')->all(),
                     'variants' => $variants->map(fn ($v) => [
                         'id' => $v->id,
                         'sku' => $v->sku,

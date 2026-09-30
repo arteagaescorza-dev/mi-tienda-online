@@ -9,7 +9,7 @@
   'use strict';
 
   // Configuración de Identidad y Metadatos por Universo
-  const UNIVERSE_META = {
+  const UNIVERSE_META = Object.assign({
     marte: {
       brandName: 'MARTE',
       subTitle: 'UNIVERSO MASCULINO',
@@ -34,7 +34,7 @@
       heroTag: 'TERRA // CATÁLOGO GLOBAL CONSOLIDADO',
       pageTitle: 'TERRA — Ecosistema Multiverso Store'
     }
-  };
+  }, (typeof window !== 'undefined' && window.__UNIVERSE_META__) ? window.__UNIVERSE_META__ : {});
 
   // Catálogo Inicial Curado con Precios Oficiales Torzo de Menudeo (Conexión Base de Datos Laravel)
   let STORE_PRODUCTS = (typeof window !== 'undefined' && Array.isArray(window.__INITIAL_STORE_PRODUCTS__) && window.__INITIAL_STORE_PRODUCTS__.length > 0)
@@ -354,17 +354,19 @@
               ${prod.stockLabel}
             </span>
 
-            <!-- Imagen / Logo con apertura de PDP -->
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer;" data-action="open-product-modal" data-product-id="${prod.id}">
+            <!-- Imagen / Logo con enlace a PDP -->
+            <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer; text-decoration: none;" title="${prod.name}">
               <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">${prod.sku}</span>
-            </div>
+            </a>
           </div>
           
           <div class="product-body">
             <div>
               <div class="product-category-label">${prod.categoryName}</div>
-              <h3 class="product-title" data-action="open-product-modal" data-product-id="${prod.id}" style="cursor: pointer;">${prod.name}</h3>
+              <h3 class="product-title">
+                <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="cursor: pointer; color: inherit; text-decoration: none;">${prod.name}</a>
+              </h3>
               <div class="product-pricing-row">
                 <span class="product-price">MXN $${prod.price.toFixed(2)}</span>
                 <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
@@ -383,9 +385,9 @@
 
               <!-- Botonera: Ficha PDP + Agregar al Carrito -->
               <div style="display: flex; gap: 6px; margin-top: 8px;">
-                <button type="button" class="btn-hero-secondary" data-action="open-product-modal" data-product-id="${prod.id}" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm);" title="Ver ficha técnica">
+                <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica">
                   FICHA
-                </button>
+                </a>
                 <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="${prod.id}" style="flex: 1;">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   <span>AGREGAR</span>
@@ -401,6 +403,24 @@
   // Conmutador de Universos (Top bar & Drawer ZARA)
   function switchUniverse(universeKey) {
     storeState.activeUniverse = universeKey;
+    
+    // Navegar para renderizar en servidor las secciones CMS y catálogo específico del universo
+    if (typeof window !== 'undefined' && window.location) {
+      try {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('universo', universeKey);
+        if (window.location.pathname === '/' || window.location.pathname === '/productos') {
+          window.location.href = currentUrl.toString();
+          return;
+        } else {
+          window.location.href = '/?universo=' + encodeURIComponent(universeKey);
+          return;
+        }
+      } catch (err) {
+        window.location.href = '/?universo=' + encodeURIComponent(universeKey);
+        return;
+      }
+    }
     
     // Actualizar botones de top selector
     document.querySelectorAll('.universe-tab-btn').forEach(btn => {
@@ -1263,12 +1283,12 @@
 
       return `
         <div class="wishlist-item-card" data-product-id="${prod.id}">
-          <div class="wishlist-item-img" data-action="open-product-modal" data-product-id="${prod.id}" style="cursor: pointer;">
+          <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" class="wishlist-item-img" style="cursor: pointer; text-decoration: none;" title="${prod.name}">
             <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>
-          </div>
+          </a>
 
           <div style="flex-grow: 1;">
-            <div style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; line-height: 1.2; cursor: pointer;" data-action="open-product-modal" data-product-id="${prod.id}">${prod.name}</div>
+            <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; line-height: 1.2; cursor: pointer; color: inherit; text-decoration: none; display: block;">${prod.name}</a>
             <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${selectedSize}</strong> · <span style="color: #047857; font-weight: 600;">${prod.stockLabel}</span></div>
             <div style="font-family: var(--font-heading); font-size: 0.84rem; font-weight: 800; color: #050505; margin-top: 4px;">MXN $${prod.price.toFixed(2)}</div>
           </div>
@@ -4321,7 +4341,10 @@
     detectUrlAffiliationAndCoupons();
     updateCartBadges();
     updateWishlistBadges();
-    renderProductsGrid('homeProductsGrid');
+    const homeGrid = document.getElementById('homeProductsGrid');
+    if (homeGrid && homeGrid.children.length === 0) {
+      renderProductsGrid('homeProductsGrid');
+    }
     renderProductsGrid('catalogProductsGrid');
     renderCartSheetContent();
     if (typeof fetchCartFromBackend === 'function') {
