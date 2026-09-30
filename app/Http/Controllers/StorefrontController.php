@@ -92,6 +92,10 @@ class StorefrontController extends Controller
         $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
         $dbData = array_filter([
             'brandName' => $storefrontConfig->brand_name,
+            'kicker' => $storefrontConfig->kicker,
+            'logoUrl' => $storefrontConfig->logo_url,
+            'logoMobileUrl' => $storefrontConfig->logo_mobile_url,
+            'faviconUrl' => $storefrontConfig->favicon_url,
             'subTitle' => $storefrontConfig->sub_title,
             'heroTag' => $storefrontConfig->hero_tag,
             'heroTitle' => $storefrontConfig->hero_title,
@@ -100,13 +104,16 @@ class StorefrontController extends Controller
             'heroCtaUrl' => $storefrontConfig->hero_cta_url,
             'pageTitle' => $storefrontConfig->page_title,
             'primaryColor' => $storefrontConfig->primary_color,
+            'secondaryColor' => $storefrontConfig->secondary_color,
             'accentColor' => $storefrontConfig->accent_color,
             'backgroundColor' => $storefrontConfig->background_color,
             'surfaceColor' => $storefrontConfig->surface_color,
             'textColor' => $storefrontConfig->text_color,
+            'mutedTextColor' => $storefrontConfig->muted_text_color,
+            'borderColor' => $storefrontConfig->border_color,
             'customCss' => $storefrontConfig->custom_css,
             'customJs' => $storefrontConfig->custom_js,
-        ]);
+        ], fn($val) => !is_null($val) && $val !== '');
 
         $cachedStorefront = Cache::get('cms_storefront_' . $activeUniverse, []);
         $currentStorefront = array_merge($defaultStorefronts[$activeUniverse], $dbData, $cachedStorefront);
@@ -151,12 +158,22 @@ class StorefrontController extends Controller
             $universeMeta[$u] = [
                 'brandName' => $conf?->brand_name ?? $defaultStorefronts[$u]['brandName'],
                 'subTitle' => $conf?->kicker ?? $conf?->sub_title ?? $defaultStorefronts[$u]['subTitle'],
+                'kicker' => $conf?->kicker ?? $defaultStorefronts[$u]['subTitle'],
+                'logoUrl' => $conf?->logo_url,
+                'logoMobileUrl' => $conf?->logo_mobile_url,
+                'faviconUrl' => $conf?->favicon_url,
                 'heroTag' => $conf?->hero_tag ?? $defaultStorefronts[$u]['heroTag'],
                 'heroTitle' => $conf?->hero_title ?? $defaultStorefronts[$u]['heroTitle'],
                 'heroSubtitle' => $conf?->hero_subtitle ?? $defaultStorefronts[$u]['heroSubtitle'],
                 'pageTitle' => $conf?->page_title ?? $defaultStorefronts[$u]['pageTitle'],
+                'primaryColor' => $conf?->primary_color ?? '#09090b',
+                'secondaryColor' => $conf?->secondary_color ?? '#27272a',
                 'accentColor' => $conf?->accent_color ?? ($defaultStorefronts[$u]['accentColor'] ?? '#4f46e5'),
                 'backgroundColor' => $conf?->background_color ?? ($defaultStorefronts[$u]['backgroundColor'] ?? '#fafafa'),
+                'surfaceColor' => $conf?->surface_color ?? '#ffffff',
+                'textColor' => $conf?->text_color ?? '#09090b',
+                'mutedTextColor' => $conf?->muted_text_color ?? '#71717a',
+                'borderColor' => $conf?->border_color ?? '#e4e4e7',
             ];
             if (!empty($cached)) {
                 $universeMeta[$u] = array_merge($universeMeta[$u], array_filter($cached));
@@ -308,6 +325,10 @@ class StorefrontController extends Controller
         $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
         $dbData = array_filter([
             'brandName' => $storefrontConfig->brand_name,
+            'kicker' => $storefrontConfig->kicker,
+            'logoUrl' => $storefrontConfig->logo_url,
+            'logoMobileUrl' => $storefrontConfig->logo_mobile_url,
+            'faviconUrl' => $storefrontConfig->favicon_url,
             'subTitle' => $storefrontConfig->sub_title,
             'heroTag' => $storefrontConfig->hero_tag,
             'heroTitle' => $storefrontConfig->hero_title,
@@ -316,13 +337,16 @@ class StorefrontController extends Controller
             'heroCtaUrl' => $storefrontConfig->hero_cta_url,
             'pageTitle' => $storefrontConfig->page_title,
             'primaryColor' => $storefrontConfig->primary_color,
+            'secondaryColor' => $storefrontConfig->secondary_color,
             'accentColor' => $storefrontConfig->accent_color,
             'backgroundColor' => $storefrontConfig->background_color,
             'surfaceColor' => $storefrontConfig->surface_color,
             'textColor' => $storefrontConfig->text_color,
+            'mutedTextColor' => $storefrontConfig->muted_text_color,
+            'borderColor' => $storefrontConfig->border_color,
             'customCss' => $storefrontConfig->custom_css,
             'customJs' => $storefrontConfig->custom_js,
-        ]);
+        ], fn($val) => !is_null($val) && $val !== '');
 
         $defaultStorefronts = [
             'marte' => [

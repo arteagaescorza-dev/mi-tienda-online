@@ -12,6 +12,16 @@
   <meta name="description" content="Colección exclusiva de moda y prendas contemporáneas. Envíos express a todo México. Stock físico y bajo pedido.">
   @yield('seo')
 
+  @if(!empty($currentStorefront['faviconUrl']))
+    <link rel="icon" type="image/x-icon" href="{{ $currentStorefront['faviconUrl'] }}">
+    <link rel="shortcut icon" href="{{ $currentStorefront['faviconUrl'] }}">
+  @else
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+  @endif
+  @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
+    <link rel="apple-touch-icon" href="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}">
+  @endif
+
   @if(isset($tracking) && $tracking->is_active)
     @if(!empty($tracking->gtm_id))
       <!-- Google Tag Manager -->
@@ -65,22 +75,33 @@
   <!-- Variables CSS Semánticas de Marca y Colores de Hub 2 -->
   <style id="hub2DynamicTheme">
     :root {
-      @if(isset($currentStorefront['primaryColor']))
+      @if(!empty($currentStorefront['primaryColor']))
         --brand-primary: {{ $currentStorefront['primaryColor'] }};
       @endif
-      @if(isset($currentStorefront['accentColor']))
+      @if(!empty($currentStorefront['secondaryColor']))
+        --brand-secondary: {{ $currentStorefront['secondaryColor'] }};
+      @endif
+      @if(!empty($currentStorefront['accentColor']))
         --brand-accent: {{ $currentStorefront['accentColor'] }};
         --accent-indigo: {{ $currentStorefront['accentColor'] }};
       @endif
-      @if(isset($currentStorefront['backgroundColor']))
+      @if(!empty($currentStorefront['backgroundColor']))
         --brand-bg: {{ $currentStorefront['backgroundColor'] }};
         --bg-secondary: {{ $currentStorefront['backgroundColor'] }};
       @endif
-      @if(isset($currentStorefront['surfaceColor']))
+      @if(!empty($currentStorefront['surfaceColor']))
         --brand-surface: {{ $currentStorefront['surfaceColor'] }};
       @endif
-      @if(isset($currentStorefront['textColor']))
+      @if(!empty($currentStorefront['textColor']))
         --brand-text: {{ $currentStorefront['textColor'] }};
+      @endif
+      @if(!empty($currentStorefront['mutedTextColor']))
+        --brand-muted: {{ $currentStorefront['mutedTextColor'] }};
+        --text-muted: {{ $currentStorefront['mutedTextColor'] }};
+      @endif
+      @if(!empty($currentStorefront['borderColor']))
+        --brand-border: {{ $currentStorefront['borderColor'] }};
+        --border-color: {{ $currentStorefront['borderColor'] }};
       @endif
     }
     @if(!empty($currentStorefront['customCss']))
@@ -142,7 +163,11 @@
         <!-- Logo de Marca Adaptativo por Universo -->
         <a href="{{ route('store.home') }}" class="nav-brand-group">
           <div class="brand-logo-box">
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            @if(!empty($currentStorefront['logoUrl']))
+              <img src="{{ $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}" style="max-height: 26px; max-width: 120px; object-fit: contain;">
+            @else
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            @endif
           </div>
           <div class="brand-titles">
             <span class="brand-name" id="desktopBrandName">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
@@ -197,8 +222,12 @@
       </button>
 
       <a href="{{ route('store.home') }}" class="nav-brand-group">
-        <div class="brand-logo-box" style="width: 28px; height: 28px;">
-          <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="brand-logo-box" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+          @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
+            <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}" style="max-height: 24px; max-width: 28px; object-fit: contain;">
+          @else
+            <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          @endif
         </div>
         <span class="brand-name" id="mobileBrandName" style="font-size: 0.95rem;">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
       </a>

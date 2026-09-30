@@ -311,4 +311,52 @@ class Hub2AdminStoreControllerTest extends TestCase
             'accent_color' => '#db2777',
         ]);
     }
+
+    /**
+     * Test updating vitrina with full 8-token palette, logos, and favicon.
+     */
+    public function test_updating_vitrina_with_full_palette_and_branding_assets(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $logoFile = \Illuminate\Http\UploadedFile::fake()->image('brand-logo.png', 300, 100);
+        $logoMobileFile = \Illuminate\Http\UploadedFile::fake()->image('brand-mobile.png', 100, 100);
+        $faviconFile = \Illuminate\Http\UploadedFile::fake()->image('favicon.ico', 32, 32);
+
+        $payload = [
+            'brand_name' => 'Tiresias Vanguard',
+            'kicker' => 'Moda Afirmativa & Diseño Fluido',
+            'primary_color' => '#1e1b4b',
+            'secondary_color' => '#312e81',
+            'accent_color' => '#7c3aed',
+            'background_color' => '#f8fafc',
+            'surface_color' => '#ffffff',
+            'text_color' => '#0f172a',
+            'muted_text_color' => '#64748b',
+            'border_color' => '#cbd5e1',
+            'logo_file' => $logoFile,
+            'logo_mobile_file' => $logoMobileFile,
+            'favicon_file' => $faviconFile,
+        ];
+
+        $response = $this->actingAs($this->portalUser)
+            ->post(route('portal.store.vitrinas.update', ['universe' => 'tiresias']), $payload);
+
+        $response->assertSessionHas('success');
+
+        $config = CmsStorefrontConfig::where('universe', 'tiresias')->first();
+        $this->assertNotNull($config);
+        $this->assertEquals('Tiresias Vanguard', $config->brand_name);
+        $this->assertEquals('#1e1b4b', $config->primary_color);
+        $this->assertEquals('#312e81', $config->secondary_color);
+        $this->assertEquals('#7c3aed', $config->accent_color);
+        $this->assertEquals('#f8fafc', $config->background_color);
+        $this->assertEquals('#ffffff', $config->surface_color);
+        $this->assertEquals('#0f172a', $config->text_color);
+        $this->assertEquals('#64748b', $config->muted_text_color);
+        $this->assertEquals('#cbd5e1', $config->border_color);
+        $this->assertStringContainsString('uploads/branding/', $config->logo_url);
+        $this->assertStringContainsString('uploads/branding/', $config->logo_mobile_url);
+        $this->assertStringContainsString('uploads/branding/', $config->favicon_url);
+    }
 }

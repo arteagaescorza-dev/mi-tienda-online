@@ -48,81 +48,117 @@
     @endif
 
     {{-- ========================================================================= --}}
-    {{-- REGLA 10: BARRA DE PESTAÑAS DE SUBMÓDULO PRIMERO (SUBNAV BAR)             --}}
+    {{-- REGLA 10: BARRA DE PESTAÑAS DE SUBMÓDULO EN 2 FILAS (CERO SCROLL HORIZONTAL) --}}
     {{-- ========================================================================= --}}
-    <div class="store-subnav-bar mb-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <nav class="flex gap-2 -mb-px overflow-x-auto" aria-label="Submódulos de Tienda y CMS">
+    <div class="store-subnav-bar mb-6 border-b border-slate-200 pb-3 flex flex-col gap-3">
+        <div class="flex items-center justify-between gap-3">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Submódulos de Tienda y CMS (Hub 2)</span>
+            <div class="flex items-center gap-3 text-xs">
+                <span class="flex items-center gap-1.5 font-medium text-slate-600 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Motor Editorial: Sincronizado</span>
+                </span>
+                <a href="{{ route('store.home') }}" target="_blank" rel="noopener" class="text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors" style="text-decoration:none;">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span>Ver Storefront D2C</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2 FILAS DE PESTAÑAS (4 columnas x 2 filas en desktop) -->
+        <nav class="grid grid-cols-2 md:grid-cols-4 gap-2.5 w-full" aria-label="Submódulos de Tienda y CMS">
             <!-- TAB 1: EDITOR VISUAL -->
             <button class="store-subnav-btn active" data-action="switch-store-tab" data-tab="visual" onclick="window.switchStoreTab('visual')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                <span>1. Editor Visual Multiverso</span>
-                <span class="store-subnav-count">4 Vitrinas</span>
-                <button class="section-help-btn" type="button" aria-label="Ayuda Editor Visual" data-help-title="Editor Visual Multiverso" data-help-desc="Ajusta la paleta, copies y apariencia visual de cada vitrina manteniendo un inventario unificado.">?</button>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    <span class="truncate">1. Editor Visual</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">4 Vitrinas</span>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Editor Visual" data-help-title="Editor Visual Multiverso" data-help-desc="Ajusta la paleta de 8 colores, logos y apariencia visual de cada vitrina manteniendo un inventario unificado.">?</button>
+                </div>
             </button>
 
             <!-- TAB 2: BANNERS & MARQUESINAS -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="banners" onclick="window.switchStoreTab('banners')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-                <span>2. Banners &amp; Marquesinas</span>
-                <span class="store-subnav-count">{{ count($banners) }} Banners</span>
-                <button class="section-help-btn" type="button" aria-label="Ayuda Banners" data-help-title="Banners y Marquesinas" data-help-desc="Gestor de avisos rotativos superiores y carruseles hero con validación WebP (< 100 KB).">?</button>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+                    <span class="truncate">2. Banners &amp; Marquesinas</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">{{ count($banners) }} Banners</span>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Banners" data-help-title="Banners y Marquesinas" data-help-desc="Gestor de avisos rotativos superiores y carruseles hero con validación WebP (< 100 KB).">?</button>
+                </div>
             </button>
 
             <!-- TAB 3: REGLAS DE FLETE -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="shipping" onclick="window.switchStoreTab('shipping')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                <span>3. Reglas Comerciales &amp; Fletes</span>
-                <span class="store-subnav-count">Umbral ${{ number_format($shippingRule['freeShippingThreshold'], 0) }}</span>
-                <button class="section-help-btn" type="button" aria-label="Ayuda Reglas de Flete" data-help-title="Reglas Comerciales &amp; Fletes" data-help-desc="Configuración de envío gratis, entrega en Metro Chabacano y simulador financiero de elasticidad (TASK-INT-18).">?</button>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    <span class="truncate">3. Reglas &amp; Fletes</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">${{ number_format($shippingRule['freeShippingThreshold'], 0) }}</span>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Reglas de Flete" data-help-title="Reglas Comerciales &amp; Fletes" data-help-desc="Configuración de envío gratis, entrega en Metro Chabacano y simulador financiero de elasticidad (TASK-INT-18).">?</button>
+                </div>
             </button>
 
             <!-- TAB 4: CONTENIDO EDITORIAL & TALLAS -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="editorial" onclick="window.switchStoreTab('editorial')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                <span>4. Contenido Editorial &amp; Tallas</span>
-                <span class="store-subnav-count">Guía Torzo</span>
-                <button class="section-help-btn" type="button" aria-label="Ayuda Contenido Editorial" data-help-title="Contenido Editorial &amp; Tallas" data-help-desc="Guía anatómica de tallas textiles Torzo, protocolos de cuidado y aviso sanitario PROFECO (TASK-INT-10).">?</button>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span class="truncate">4. Editorial &amp; Tallas</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">Guía Torzo</span>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda Contenido Editorial" data-help-title="Contenido Editorial &amp; Tallas" data-help-desc="Guía anatómica de tallas textiles Torzo, protocolos de cuidado y aviso sanitario PROFECO (TASK-INT-10).">?</button>
+                </div>
             </button>
 
             <!-- TAB 5: PÁGINAS CMS & NAVBAR -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" onclick="window.switchStoreTab('pages')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>5. Páginas &amp; Navbar</span>
-                <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span class="truncate">5. Páginas &amp; Navbar</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
+                </div>
             </button>
 
             <!-- TAB 6: REVISTA DIGITAL (BLOG) -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="magazine" onclick="window.switchStoreTab('magazine')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <span>6. Revista Digital</span>
-                <span class="store-subnav-count">{{ $blogPosts->count() ?? 0 }} Artículos</span>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <span class="truncate">6. Revista Digital</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">{{ $blogPosts->count() ?? 0 }} Arts</span>
+                </div>
             </button>
 
             <!-- TAB 7: TRACKING & PIXELS -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="tracking" onclick="window.switchStoreTab('tracking')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                <span>7. Tracking &amp; Analítica</span>
-                <span class="store-subnav-count">{{ ($tracking && $tracking->is_active) ? 'Activo' : 'Pausado' }}</span>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span class="truncate">7. Tracking &amp; Pixels</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">{{ ($tracking && $tracking->is_active) ? 'Activo' : 'Pausado' }}</span>
+                </div>
             </button>
 
             <!-- TAB 8: FILTROS DE CATÁLOGO -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="filters" onclick="window.switchStoreTab('filters')" type="button">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                <span>8. Filtros Catálogo</span>
-                <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    <span class="truncate">8. Filtros Catálogo</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
+                </div>
             </button>
         </nav>
-
-        <div class="flex items-center gap-3 text-xs pb-2 sm:pb-0">
-            <span class="flex items-center gap-1.5 font-medium text-slate-600 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Motor Editorial: Sincronizado</span>
-            </span>
-            <a href="{{ route('store.home') }}" target="_blank" rel="noopener" class="text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors" style="text-decoration:none;">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                <span>Ver Storefront D2C</span>
-            </a>
-        </div>
     </div>
 
     {{-- ========================================================================= --}}
@@ -155,20 +191,25 @@
             <div class="mt-2 text-[11px] text-slate-400">Desacoplados de stock físico único (TASK-INT-10)</div>
         </div>
 
-        <!-- KPI 3: PALETA DE COLOR -->
+        <!-- KPI 3: PALETA DE COLOR (8 TOKENS) -->
         <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Color Primario &amp; Acento</span>
-                <button class="section-help-btn" type="button" aria-label="Ayuda Color" data-help-title="Paleta de Marca" data-help-desc="Tokens cromáticos compilados para la cabecera, botones y marquesinas de esta vitrina.">?</button>
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Paleta Multitoken</span>
+                <button class="section-help-btn" type="button" aria-label="Ayuda Color" data-help-title="Paleta Multitoken (8 Tokens)" data-help-desc="Tokens cromáticos compilados para cabecera, acentos, superficies, fondos, bordes y textos de esta vitrina.">?</button>
             </div>
             <div class="mt-3 flex items-baseline justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full border border-slate-300" style="background: {{ $storefronts['marte']['accentColor'] }};"></span>
-                    <span class="text-xl font-bold font-mono text-slate-900">{{ $storefronts['marte']['accentColor'] }}</span>
+                <div class="flex items-center gap-1.5" data-kpi-palette-swatches>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="primary" title="Primario" style="background: {{ $storefronts['marte']['primaryColor'] ?? '#0f172a' }};"></span>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="secondary" title="Secundario" style="background: {{ $storefronts['marte']['secondaryColor'] ?? '#334155' }};"></span>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="accent" title="Acento" style="background: {{ $storefronts['marte']['accentColor'] }};"></span>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="background" title="Fondo" style="background: {{ $storefronts['marte']['backgroundColor'] }};"></span>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="surface" title="Superficie" style="background: {{ $storefronts['marte']['surfaceColor'] ?? '#ffffff' }};"></span>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="text" title="Texto" style="background: {{ $storefronts['marte']['textColor'] ?? '#0f172a' }};"></span>
+                    <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" data-kpi-token="border" title="Borde" style="background: {{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }};"></span>
                 </div>
-                <span class="text-xs font-bold text-slate-600 font-mono">Indigo 600</span>
+                <span class="text-xs font-bold text-indigo-700 font-mono">8 Tokens</span>
             </div>
-            <div class="mt-2 text-[11px] text-slate-400">Fondo: {{ $storefronts['marte']['backgroundColor'] }}</div>
+            <div class="mt-2 text-[11px] text-slate-400">Tokens CSS sincronizados con Storefront</div>
         </div>
 
         <!-- KPI 4: PREVISUALIZADOR EN VIVO -->
@@ -224,55 +265,176 @@
                     <button class="section-help-btn" type="button" aria-label="Ayuda Editor de Vitrina" data-help-title="Editor de Vitrina" data-help-desc="Ajusta los copies, llamados a la acción y paleta de la vitrina seleccionada.">?</button>
                 </div>
 
-                <form id="vitrinaConfigForm" method="POST" action="{{ route('portal.store.vitrinas.update', ['universe' => 'marte']) }}" class="space-y-4 text-xs">
+                <form id="vitrinaConfigForm" method="POST" action="{{ route('portal.store.vitrinas.update', ['universe' => 'marte']) }}" enctype="multipart/form-data" class="space-y-4 text-xs">
                     @csrf
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nombre Comercial de la Vitrina</label>
-                        <input type="text" name="brand_name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 font-semibold" data-store-name-input value="{{ $storefronts['marte']['name'] }}">
+
+                    <!-- Callout: Desacoplamiento de Hero -->
+                    <div class="p-3 bg-amber-50/80 border border-amber-200/90 rounded-xl text-amber-900 flex items-start gap-2.5 shadow-2xs">
+                        <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="text-[11px] leading-relaxed">
+                            <span class="font-bold">Desacoplamiento Modular:</span> El Hero principal y los carruseles ya no se configuran como textos fijos aquí. Se gestionan dinámicamente con <strong>Drag & Drop</strong>, HTML/CSS personalizado y filtros en el constructor modular inferior.
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Color de Acento (Botones/Links)</label>
-                            <div class="flex items-center gap-2">
-                                <input type="color" name="accent_color" class="w-8 h-8 rounded border border-slate-200 cursor-pointer p-0" data-store-accent-color-input value="{{ $storefronts['marte']['accentColor'] }}">
-                                <span class="text-slate-600 font-mono text-[11px]" data-store-accent-label>{{ $storefronts['marte']['accentColor'] }}</span>
+                    <!-- 1. Identidad de Vitrina -->
+                    <div class="border-b border-slate-100 pb-3 space-y-3">
+                        <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <span>1. Identidad de Vitrina</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Nombre Comercial</label>
+                                <input type="text" name="brand_name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 font-semibold" data-store-name-input value="{{ $storefronts['marte']['name'] }}">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Kicker / Tagline</label>
+                                <input type="text" name="kicker" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500" data-store-kicker-input value="{{ $storefronts['marte']['kicker'] }}">
                             </div>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Color Fondo Lienzo</label>
-                            <div class="flex items-center gap-2">
-                                <input type="color" name="background_color" class="w-8 h-8 rounded border border-slate-200 cursor-pointer p-0" data-store-bg-color-input value="{{ $storefronts['marte']['backgroundColor'] }}">
-                                <span class="text-slate-600 font-mono text-[11px]" data-store-bg-label>{{ $storefronts['marte']['backgroundColor'] }}</span>
+                    </div>
+
+                    <!-- 2. Logos & Favicon del Sitio -->
+                    <div class="border-b border-slate-100 pb-3 space-y-3">
+                        <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>2. Logos & Favicon del Sitio</span>
+                        </div>
+
+                        <!-- Logo Principal (Desktop) -->
+                        <div class="bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/70">
+                            <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Logo Desktop (Header)</label>
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0" data-preview-thumb="logo">
+                                    @if(!empty($storefronts['marte']['logoUrl']))
+                                        <img src="{{ $storefronts['marte']['logoUrl'] }}" class="max-h-full max-w-full object-contain" alt="Logo">
+                                    @else
+                                        <span class="text-[9px] text-slate-400 font-mono">None</span>
+                                    @endif
+                                </div>
+                                <input type="text" name="logo_url" placeholder="https://... o ruta relativa" class="flex-1 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px]" data-store-logo-input value="{{ $storefronts['marte']['logoUrl'] ?? '' }}">
                             </div>
+                            <input type="file" name="logo_file" accept="image/*" class="w-full text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" data-store-logo-file>
+                        </div>
+
+                        <!-- Logo Móvil (PWA) -->
+                        <div class="bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/70">
+                            <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Logo Móvil (Header PWA)</label>
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0" data-preview-thumb="logo-mobile">
+                                    @if(!empty($storefronts['marte']['logoMobileUrl']))
+                                        <img src="{{ $storefronts['marte']['logoMobileUrl'] }}" class="max-h-full max-w-full object-contain" alt="Logo Móvil">
+                                    @else
+                                        <span class="text-[9px] text-slate-400 font-mono">None</span>
+                                    @endif
+                                </div>
+                                <input type="text" name="logo_mobile_url" placeholder="https://... o ruta relativa" class="flex-1 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px]" data-store-logo-mobile-input value="{{ $storefronts['marte']['logoMobileUrl'] ?? '' }}">
+                            </div>
+                            <input type="file" name="logo_mobile_file" accept="image/*" class="w-full text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" data-store-logo-mobile-file>
+                        </div>
+
+                        <!-- Favicon del Sitio -->
+                        <div class="bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/70">
+                            <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Favicon (.ico, .png, .svg)</label>
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <div class="w-7 h-7 rounded-md bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0" data-preview-thumb="favicon">
+                                    @if(!empty($storefronts['marte']['faviconUrl']))
+                                        <img src="{{ $storefronts['marte']['faviconUrl'] }}" class="w-4 h-4 object-contain" alt="Favicon">
+                                    @else
+                                        <span class="text-[8px] text-slate-400 font-mono">.ico</span>
+                                    @endif
+                                </div>
+                                <input type="text" name="favicon_url" placeholder="https://... o /favicon.ico" class="flex-1 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px]" data-store-favicon-input value="{{ $storefronts['marte']['faviconUrl'] ?? '' }}">
+                            </div>
+                            <input type="file" name="favicon_file" accept="image/x-icon,image/png,image/svg+xml" class="w-full text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" data-store-favicon-file>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Título Hero Principal (H1)</label>
-                        <input type="text" name="hero_title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 font-bold" data-store-hero-title-input value="{{ $storefronts['marte']['heroTitle'] }}">
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo Persuasivo</label>
-                        <textarea name="hero_subtitle" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 resize-y max-w-full leading-relaxed" style="resize: vertical; max-width: 100%;" data-store-hero-sub-input>{{ $storefronts['marte']['heroSubtitle'] }}</textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Texto del Botón CTA</label>
-                            <input type="text" name="hero_cta_text" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold" data-store-hero-cta-input value="{{ $storefronts['marte']['heroCtaText'] }}">
+                    <!-- 3. Paleta Cromática Integral (8 Tokens) -->
+                    <div class="space-y-3">
+                        <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4 4 4 0 014-4 4 4 0 014 4 4 4 0 01-4 4zm0 0l1.293-1.293a1 1 0 011.414 0L12 22m7-9a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            <span>3. Paleta Cromática Integral (8 Tokens)</span>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Enlace de Destino</label>
-                            <input type="text" name="hero_cta_url" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-500 bg-slate-50" data-store-hero-url-input value="{{ $storefronts['marte']['heroCtaUrl'] }}">
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <!-- Primario -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Primario (Brand)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="primary_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="primary" value="{{ $storefronts['marte']['primaryColor'] ?? '#0f172a' }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="primary" value="{{ $storefronts['marte']['primaryColor'] ?? '#0f172a' }}">
+                                </div>
+                            </div>
+
+                            <!-- Secundario -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Secundario (Badges)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="secondary_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="secondary" value="{{ $storefronts['marte']['secondaryColor'] ?? '#334155' }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="secondary" value="{{ $storefronts['marte']['secondaryColor'] ?? '#334155' }}">
+                                </div>
+                            </div>
+
+                            <!-- Acento -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Acento (CTA/Precios)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="accent_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="accent" value="{{ $storefronts['marte']['accentColor'] }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="accent" value="{{ $storefronts['marte']['accentColor'] }}">
+                                </div>
+                            </div>
+
+                            <!-- Fondo Lienzo -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Fondo Lienzo (Body)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="background_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="background" value="{{ $storefronts['marte']['backgroundColor'] }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="background" value="{{ $storefronts['marte']['backgroundColor'] }}">
+                                </div>
+                            </div>
+
+                            <!-- Superficie -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Superficie (Cards/Modales)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="surface_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="surface" value="{{ $storefronts['marte']['surfaceColor'] ?? '#ffffff' }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="surface" value="{{ $storefronts['marte']['surfaceColor'] ?? '#ffffff' }}">
+                                </div>
+                            </div>
+
+                            <!-- Texto Principal -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Texto Principal</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="text_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="text" value="{{ $storefronts['marte']['textColor'] ?? '#0f172a' }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="text" value="{{ $storefronts['marte']['textColor'] ?? '#0f172a' }}">
+                                </div>
+                            </div>
+
+                            <!-- Texto Secundario / Muted -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Texto Secundario (Muted)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="muted_text_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="muted_text" value="{{ $storefronts['marte']['mutedTextColor'] ?? '#64748b' }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="muted_text" value="{{ $storefronts['marte']['mutedTextColor'] ?? '#64748b' }}">
+                                </div>
+                            </div>
+
+                            <!-- Bordes / Separadores -->
+                            <div class="p-2 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Bordes & Separadores</label>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="color" name="border_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="border" value="{{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }}">
+                                    <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="border" value="{{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }}">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="pt-2">
-                        <button class="w-full button button-quiet py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg cursor-pointer flex items-center justify-center gap-2 transition" data-action="save-storefront-config" type="submit" id="saveVitrinaBtn">
+                        <button class="w-full button button-quiet py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg cursor-pointer flex items-center justify-center gap-2 transition shadow-sm" data-action="save-storefront-config" type="submit" id="saveVitrinaBtn">
                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Guardar Cambios de Vitrina</span>
+                            <span>Guardar Identidad y Paleta de Vitrina</span>
                         </button>
                     </div>
                 </form>
@@ -285,7 +447,7 @@
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-slate-700">Previsualizador en Vivo:</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider" style="background: {{ $storefronts['marte']['accentColor'] }};">{{ $storefronts['marte']['name'] }}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider" style="background: {{ $storefronts['marte']['accentColor'] }};" data-preview-universe-badge>{{ $storefronts['marte']['name'] }}</span>
                     </div>
                     <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-md p-1 shadow-2xs">
                         <button class="px-2 py-1 rounded text-xs font-semibold bg-slate-900 text-white cursor-pointer" data-preview-device-btn="desktop" data-action="set-preview-device" data-device="desktop" type="button">
@@ -298,50 +460,64 @@
                 </div>
 
                 <!-- Marco de la Tienda -->
-                <div class="storefront-preview-frame desktop" data-storefront-preview-frame>
+                <div class="storefront-preview-frame desktop" data-storefront-preview-frame style="background-color: {{ $storefronts['marte']['backgroundColor'] }}; border-color: {{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }};">
                     <!-- Topbar Simulado -->
-                    <div class="preview-top-bar">
+                    <div class="preview-top-bar" data-preview-topbar style="background: {{ $storefronts['marte']['primaryColor'] ?? '#09090b' }}; color: #ffffff; border-bottom: 1px solid {{ $storefronts['marte']['borderColor'] ?? '#334155' }};">
                         <div class="flex items-center gap-2">
-                            <span class="font-bold tracking-tight">{{ $storefronts['marte']['name'] }}</span>
-                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">Terra Ecosystem</span>
+                            <!-- Logo render o SVG / Marca -->
+                            <div class="preview-brand-logo flex items-center" data-preview-logo-container>
+                                @if(!empty($storefronts['marte']['logoUrl']))
+                                    <img src="{{ $storefronts['marte']['logoUrl'] }}" alt="Logo" class="h-5 max-w-[120px] object-contain" data-preview-logo-img>
+                                @else
+                                    <span class="font-black tracking-tight text-white text-sm" data-preview-brand-name>{{ $storefronts['marte']['name'] }}</span>
+                                @endif
+                            </div>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded font-mono" style="background: {{ $storefronts['marte']['secondaryColor'] ?? '#334155' }}; color: #ffffff;" data-preview-kicker-badge>{{ $storefronts['marte']['kicker'] }}</span>
                         </div>
-                        <div class="flex items-center gap-3 text-[10px] text-slate-300">
+                        <div class="flex items-center gap-3 text-[10px]" style="color: {{ $storefronts['marte']['mutedTextColor'] ?? '#94a3b8' }};">
                             <span>Catálogo</span>
-                            <span>Suscripciones</span>
-                            <span>Carrito (0)</span>
+                            <span>Revista</span>
+                            <span class="font-bold" style="color: #ffffff;">Carrito (0)</span>
                         </div>
                     </div>
 
                     <!-- Marquesina Dinámica Superior -->
-                    <div class="preview-marquee-strip" style="background: {{ $storefronts['marte']['accentColor'] }};">
-                        {{ $announcements[0]['text'] }}
+                    <div class="preview-marquee-strip" style="background: {{ $storefronts['marte']['accentColor'] }}; color: #ffffff;" data-preview-marquee>
+                        {{ $announcements[0]['text'] ?? 'Envíos asegurados y compras discretas' }}
                     </div>
 
-                    <!-- Hero Section Simulado -->
-                    <div class="preview-hero-section" style="background: {{ $storefronts['marte']['backgroundColor'] }};">
-                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2" style="background: #ffffff; color: {{ $storefronts['marte']['accentColor'] }}; border: 1px solid {{ $storefronts['marte']['accentColor'] }}30;">
-                            {{ $storefronts['marte']['kicker'] }}
+                    <!-- Showcase / Vitrina Activa Banner (Desacoplado de Hero) -->
+                    <div class="preview-showcase-section p-6 text-center transition-all" data-preview-showcase style="background: {{ $storefronts['marte']['surfaceColor'] ?? '#ffffff' }}; border-bottom: 1px solid {{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }};">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2" data-preview-badge style="background: {{ $storefronts['marte']['backgroundColor'] }}; color: {{ $storefronts['marte']['accentColor'] }}; border: 1px solid {{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }};">
+                            Vitrina Activa &bull; <span data-preview-kicker-text>{{ $storefronts['marte']['kicker'] }}</span>
                         </span>
-                        <h2 class="preview-hero-title text-slate-900">{{ $storefronts['marte']['heroTitle'] }}</h2>
-                        <p class="preview-hero-sub">{{ $storefronts['marte']['heroSubtitle'] }}</p>
-                        <a href="javascript:void(0)" class="preview-hero-cta" style="background: {{ $storefronts['marte']['accentColor'] }};">
-                            {{ $storefronts['marte']['heroCtaText'] }} &rarr;
-                        </a>
+                        <h2 class="preview-showcase-title text-lg font-black mb-1" data-preview-title style="color: {{ $storefronts['marte']['textColor'] ?? '#0f172a' }};">
+                            {{ $storefronts['marte']['name'] }}
+                        </h2>
+                        <p class="preview-showcase-sub text-xs max-w-md mx-auto mb-3" data-preview-sub style="color: {{ $storefronts['marte']['mutedTextColor'] ?? '#64748b' }};">
+                            Paleta cromática de 8 tokens y activos de marca sincronizados en tiempo real con la tienda en línea.
+                        </p>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-white shadow-xs" data-preview-cta style="background: {{ $storefronts['marte']['accentColor'] }};">
+                            <span>Explorar Catálogo</span>
+                            <span>&rarr;</span>
+                        </div>
                     </div>
 
                     <!-- Estante de Productos Muestra -->
-                    <div class="preview-grid-shelf">
+                    <div class="preview-grid-shelf" data-preview-grid-shelf style="background: {{ $storefronts['marte']['backgroundColor'] }};">
                         @foreach($storefronts['marte']['sampleProducts'] as $p)
-                            <div class="preview-product-card">
-                                <div class="preview-product-img">
-                                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <div class="preview-product-card" data-preview-product-card style="background: {{ $storefronts['marte']['surfaceColor'] ?? '#ffffff' }}; border: 1px solid {{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }};">
+                                <div class="preview-product-img" style="background: {{ $storefronts['marte']['backgroundColor'] }};">
+                                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" style="color: {{ $storefronts['marte']['mutedTextColor'] ?? '#64748b' }};"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 </div>
-                                <div class="font-bold text-slate-900 truncate">{{ $p['name'] }}</div>
-                                <div class="text-[10px] text-slate-500 mb-1">{{ $p['tag'] }}</div>
-                                <div class="font-bold font-mono" style="color: {{ $storefronts['marte']['accentColor'] }};">MXN ${{ $p['price'] }}.00</div>
+                                <div class="font-bold truncate text-[11px]" data-preview-product-title style="color: {{ $storefronts['marte']['textColor'] ?? '#0f172a' }};">{{ $p['name'] }}</div>
+                                <div class="text-[10px] mb-1" data-preview-product-tag style="color: {{ $storefronts['marte']['mutedTextColor'] ?? '#64748b' }};">{{ $p['tag'] }}</div>
+                                <div class="font-bold font-mono text-xs" data-preview-product-price style="color: {{ $storefronts['marte']['accentColor'] }};">MXN ${{ $p['price'] }}.00</div>
+                                <button type="button" class="mt-2 w-full py-1 rounded text-[10px] font-bold text-white" data-preview-product-btn style="background: {{ $storefronts['marte']['primaryColor'] ?? '#0f172a' }};">Añadir</button>
                             </div>
                         @endforeach
                     </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -1846,8 +2022,92 @@
     };
 
     // ==========================================
-    // 3. CONMUTADOR DE VITRINAS MULTIVERSO & LIVE PREVIEW
+    // 3. CONMUTADOR DE VITRINAS MULTIVERSO & LIVE PREVIEW (8 TOKENS + BRANDING)
     // ==========================================
+    window.applyStorefrontPreviewTokens = function(tokens, data) {
+        const previewUniverseBadge = document.querySelector('[data-preview-universe-badge]');
+        const previewFrame = document.querySelector('[data-storefront-preview-frame]');
+        const previewTopbar = document.querySelector('[data-preview-topbar]');
+        const logoContainer = document.querySelector('[data-preview-logo-container]');
+        const previewKickerBadge = document.querySelector('[data-preview-kicker-badge]');
+        const previewMarquee = document.querySelector('[data-preview-marquee]');
+        const previewShowcase = document.querySelector('[data-preview-showcase]');
+        const previewBadge = document.querySelector('[data-preview-badge]');
+        const previewKickerText = document.querySelector('[data-preview-kicker-text]');
+        const previewTitle = document.querySelector('[data-preview-title]');
+        const previewSub = document.querySelector('[data-preview-sub]');
+        const previewCta = document.querySelector('[data-preview-cta]');
+        const previewGridShelf = document.querySelector('[data-preview-grid-shelf]');
+
+        if (previewUniverseBadge) {
+            previewUniverseBadge.textContent = data.name;
+            previewUniverseBadge.style.background = tokens.accent;
+        }
+
+        if (previewFrame) {
+            previewFrame.style.backgroundColor = tokens.background;
+            previewFrame.style.borderColor = tokens.border;
+        }
+
+        if (previewTopbar) {
+            previewTopbar.style.background = tokens.primary;
+            previewTopbar.style.borderColor = tokens.border;
+        }
+
+        if (logoContainer) {
+            if (data.logoUrl) {
+                logoContainer.innerHTML = `<img src="${data.logoUrl}" alt="Logo" class="h-5 max-w-[120px] object-contain" data-preview-logo-img>`;
+            } else {
+                logoContainer.innerHTML = `<span class="font-black tracking-tight text-white text-sm" data-preview-brand-name>${data.name}</span>`;
+            }
+        }
+
+        if (previewKickerBadge) {
+            previewKickerBadge.textContent = data.kicker;
+            previewKickerBadge.style.background = tokens.secondary;
+        }
+
+        if (previewMarquee) {
+            previewMarquee.style.background = tokens.accent;
+        }
+
+        if (previewShowcase) {
+            previewShowcase.style.background = tokens.surface;
+            previewShowcase.style.borderColor = tokens.border;
+        }
+
+        if (previewBadge) {
+            previewBadge.style.background = tokens.background;
+            previewBadge.style.borderColor = tokens.border;
+            previewBadge.style.color = tokens.accent;
+        }
+
+        if (previewKickerText) previewKickerText.textContent = data.kicker;
+        if (previewTitle) {
+            previewTitle.textContent = data.name;
+            previewTitle.style.color = tokens.text;
+        }
+        if (previewSub) previewSub.style.color = tokens.muted_text;
+        if (previewCta) previewCta.style.background = tokens.accent;
+
+        if (previewGridShelf) {
+            previewGridShelf.style.background = tokens.background;
+            if (data.sampleProducts) {
+                previewGridShelf.innerHTML = data.sampleProducts.map(p => `
+                    <div class="preview-product-card" data-preview-product-card style="background: ${tokens.surface}; border: 1px solid ${tokens.border};">
+                        <div class="preview-product-img" style="background: ${tokens.background};">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" style="color: ${tokens.muted_text};"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <div class="font-bold truncate text-[11px]" data-preview-product-title style="color: ${tokens.text};">${p.name}</div>
+                        <div class="text-[10px] mb-1" data-preview-product-tag style="color: ${tokens.muted_text};">${p.tag}</div>
+                        <div class="font-bold font-mono text-xs" data-preview-product-price style="color: ${tokens.accent};">MXN $${parseFloat(p.price).toFixed(2)}</div>
+                        <button type="button" class="mt-2 w-full py-1 rounded text-[10px] font-bold text-white cursor-pointer" data-preview-product-btn style="background: ${tokens.primary};">Añadir</button>
+                    </div>
+                `).join('');
+            }
+        }
+    };
+
     window.switchStoreUniverse = function(universe) {
         activeUniverse = universe;
         const data = storefrontsData[universe];
@@ -1866,60 +2126,66 @@
         const vitrinaTitle = document.getElementById('vitrinaEditorTitle');
         const vitrinaKicker = document.getElementById('vitrinaEditorKicker');
 
-        const nameInput = document.querySelector('[data-store-name-input]');
-        const accentInput = document.querySelector('[data-store-accent-color-input]');
-        const accentLabel = document.querySelector('[data-store-accent-label]');
-        const bgInput = document.querySelector('[data-store-bg-color-input]');
-        const bgLabel = document.querySelector('[data-store-bg-label]');
-        const heroTitleInput = document.querySelector('[data-store-hero-title-input]');
-        const heroSubInput = document.querySelector('[data-store-hero-sub-input]');
-        const heroCtaInput = document.querySelector('[data-store-hero-cta-input]');
-        const heroUrlInput = document.querySelector('[data-store-hero-url-input]');
-
-        const previewHeroSection = document.querySelector('.preview-hero-section');
-        const previewHeroTitle = document.querySelector('.preview-hero-title');
-        const previewHeroSub = document.querySelector('.preview-hero-sub');
-        const previewHeroCta = document.querySelector('.preview-hero-cta');
-        const previewMarquee = document.querySelector('.preview-marquee-strip');
-        const previewTopBarName = document.querySelector('.preview-top-bar .font-bold');
-        const previewShelf = document.querySelector('.preview-grid-shelf');
-
         if (vitrinaForm) vitrinaForm.action = `/admin/tienda-cms/vitrinas/${universe}`;
         if (vitrinaTitle) vitrinaTitle.textContent = `Personalizar Vitrina: ${data.name}`;
         if (vitrinaKicker) vitrinaKicker.textContent = data.kicker;
 
-        if (nameInput) nameInput.value = data.name;
-        if (accentInput) accentInput.value = data.accentColor;
-        if (accentLabel) accentLabel.textContent = data.accentColor;
-        if (bgInput) bgInput.value = data.backgroundColor;
-        if (bgLabel) bgLabel.textContent = data.backgroundColor;
-        if (heroTitleInput) heroTitleInput.value = data.heroTitle;
-        if (heroSubInput) heroSubInput.value = data.heroSubtitle;
-        if (heroCtaInput) heroCtaInput.value = data.heroCtaText;
-        if (heroUrlInput) heroUrlInput.value = data.heroCtaUrl;
+        // 1. Identidad inputs
+        const nameInput = document.querySelector('[data-store-name-input]');
+        const kickerInput = document.querySelector('[data-store-kicker-input]');
+        if (nameInput) nameInput.value = data.name || '';
+        if (kickerInput) kickerInput.value = data.kicker || '';
 
-        if (previewTopBarName) previewTopBarName.textContent = data.name;
-        if (previewMarquee) previewMarquee.style.background = data.accentColor;
-        if (previewHeroSection) previewHeroSection.style.background = data.backgroundColor;
-        if (previewHeroTitle) previewHeroTitle.textContent = data.heroTitle;
-        if (previewHeroSub) previewHeroSub.textContent = data.heroSubtitle;
-        if (previewHeroCta) {
-            previewHeroCta.textContent = `${data.heroCtaText} \u2192`;
-            previewHeroCta.style.background = data.accentColor;
+        // 2. Logos & Favicon inputs & previews
+        const logoInput = document.querySelector('[data-store-logo-input]');
+        const logoMobileInput = document.querySelector('[data-store-logo-mobile-input]');
+        const faviconInput = document.querySelector('[data-store-favicon-input]');
+        const logoThumb = document.querySelector('[data-preview-thumb="logo"]');
+        const logoMobileThumb = document.querySelector('[data-preview-thumb="logo-mobile"]');
+        const faviconThumb = document.querySelector('[data-preview-thumb="favicon"]');
+
+        if (logoInput) logoInput.value = data.logoUrl || '';
+        if (logoMobileInput) logoMobileInput.value = data.logoMobileUrl || '';
+        if (faviconInput) faviconInput.value = data.faviconUrl || '';
+
+        if (logoThumb) {
+            logoThumb.innerHTML = data.logoUrl ? `<img src="${data.logoUrl}" class="max-h-full max-w-full object-contain" alt="Logo">` : `<span class="text-[9px] text-slate-400 font-mono">None</span>`;
+        }
+        if (logoMobileThumb) {
+            logoMobileThumb.innerHTML = data.logoMobileUrl ? `<img src="${data.logoMobileUrl}" class="max-h-full max-w-full object-contain" alt="Logo Móvil">` : `<span class="text-[9px] text-slate-400 font-mono">None</span>`;
+        }
+        if (faviconThumb) {
+            faviconThumb.innerHTML = data.faviconUrl ? `<img src="${data.faviconUrl}" class="w-4 h-4 object-contain" alt="Favicon">` : `<span class="text-[8px] text-slate-400 font-mono">.ico</span>`;
         }
 
-        if (previewShelf && data.sampleProducts) {
-            previewShelf.innerHTML = data.sampleProducts.map(p => `
-                <div class="preview-product-card">
-                    <div class="preview-product-img">
-                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    </div>
-                    <div class="font-bold text-slate-900 truncate">${p.name}</div>
-                    <div class="text-[10px] text-slate-500 mb-1">${p.tag}</div>
-                    <div class="font-bold font-mono" style="color: ${data.accentColor};">MXN $${parseFloat(p.price).toFixed(2)}</div>
-                </div>
-            `).join('');
-        }
+        // 3. Paleta Multitoken de 8 colores
+        const tokensMap = {
+            'primary': data.primaryColor || '#0f172a',
+            'secondary': data.secondaryColor || '#334155',
+            'accent': data.accentColor || '#4f46e5',
+            'background': data.backgroundColor || '#ffffff',
+            'surface': data.surfaceColor || '#ffffff',
+            'text': data.textColor || '#0f172a',
+            'muted_text': data.mutedTextColor || '#64748b',
+            'border': data.borderColor || '#e2e8f0'
+        };
+
+        Object.keys(tokensMap).forEach(token => {
+            const picker = document.querySelector(`[data-color-token="${token}"]`);
+            const label = document.querySelector(`[data-color-label="${token}"]`);
+            const val = tokensMap[token];
+            if (picker) picker.value = val;
+            if (label) label.value = val;
+        });
+
+        // 4. Actualizar Live Preview Frame
+        window.applyStorefrontPreviewTokens(tokensMap, data);
+
+        // 5. Actualizar KPI 3 Swatches
+        Object.keys(tokensMap).forEach(token => {
+            const swatch = document.querySelector(`[data-kpi-token="${token}"]`);
+            if (swatch) swatch.style.background = tokensMap[token];
+        });
     };
 
     // ==========================================
@@ -2251,34 +2517,115 @@
             });
         }
 
-        // Formulario de Vitrina: Inputs reactivos a tiempo real
+        // Formulario de Vitrina: Inputs reactivos a tiempo real (Identidad, Logos & 8 Tokens)
         const nameInput = document.querySelector('[data-store-name-input]');
-        const accentInput = document.querySelector('[data-store-accent-color-input]');
-        const accentLabel = document.querySelector('[data-store-accent-label]');
-        const bgInput = document.querySelector('[data-store-bg-color-input]');
-        const bgLabel = document.querySelector('[data-store-bg-label]');
-        const heroTitleInput = document.querySelector('[data-store-hero-title-input]');
-        const heroSubInput = document.querySelector('[data-store-hero-sub-input]');
-        const heroCtaInput = document.querySelector('[data-store-hero-cta-input]');
-        const previewTopBarName = document.querySelector('.preview-top-bar .font-bold');
-        const previewHeroTitle = document.querySelector('.preview-hero-title');
-        const previewHeroSub = document.querySelector('.preview-hero-sub');
-        const previewHeroCta = document.querySelector('.preview-hero-cta');
-        const previewMarquee = document.querySelector('.preview-marquee-strip');
-        const previewHeroSection = document.querySelector('.preview-hero-section');
+        const kickerInput = document.querySelector('[data-store-kicker-input]');
+        const logoInput = document.querySelector('[data-store-logo-input]');
+        const logoFileInput = document.querySelector('[data-store-logo-file]');
+        const logoMobileFileInput = document.querySelector('[data-store-logo-mobile-file]');
+        const faviconFileInput = document.querySelector('[data-store-favicon-file]');
 
-        if (nameInput) nameInput.addEventListener('input', function() { if (previewTopBarName) previewTopBarName.textContent = this.value; });
-        if (heroTitleInput) heroTitleInput.addEventListener('input', function() { if (previewHeroTitle) previewHeroTitle.textContent = this.value; });
-        if (heroSubInput) heroSubInput.addEventListener('input', function() { if (previewHeroSub) previewHeroSub.textContent = this.value; });
-        if (heroCtaInput) heroCtaInput.addEventListener('input', function() { if (previewHeroCta) previewHeroCta.textContent = `${this.value} \u2192`; });
-        if (accentInput) accentInput.addEventListener('input', function() {
-            if (accentLabel) accentLabel.textContent = this.value;
-            if (previewMarquee) previewMarquee.style.background = this.value;
-            if (previewHeroCta) previewHeroCta.style.background = this.value;
-        });
-        if (bgInput) bgInput.addEventListener('input', function() {
-            if (bgLabel) bgLabel.textContent = this.value;
-            if (previewHeroSection) previewHeroSection.style.background = this.value;
+        if (nameInput) {
+            nameInput.addEventListener('input', function() {
+                const currentData = storefrontsData[activeUniverse] || {};
+                currentData.name = this.value;
+                const pTitle = document.querySelector('[data-preview-title]');
+                const pBrand = document.querySelector('[data-preview-brand-name]');
+                const pBadge = document.querySelector('[data-preview-universe-badge]');
+                if (pTitle) pTitle.textContent = this.value;
+                if (pBrand) pBrand.textContent = this.value;
+                if (pBadge) pBadge.textContent = this.value;
+            });
+        }
+
+        if (kickerInput) {
+            kickerInput.addEventListener('input', function() {
+                const currentData = storefrontsData[activeUniverse] || {};
+                currentData.kicker = this.value;
+                const pKBadge = document.querySelector('[data-preview-kicker-badge]');
+                const pKText = document.querySelector('[data-preview-kicker-text]');
+                if (pKBadge) pKBadge.textContent = this.value;
+                if (pKText) pKText.textContent = this.value;
+            });
+        }
+
+        if (logoInput) {
+            logoInput.addEventListener('input', function() {
+                const currentData = storefrontsData[activeUniverse] || {};
+                currentData.logoUrl = this.value;
+                const logoThumb = document.querySelector('[data-preview-thumb="logo"]');
+                const logoContainer = document.querySelector('[data-preview-logo-container]');
+                if (logoThumb) {
+                    logoThumb.innerHTML = this.value ? `<img src="${this.value}" class="max-h-full max-w-full object-contain">` : `<span class="text-[9px] text-slate-400 font-mono">None</span>`;
+                }
+                if (logoContainer) {
+                    if (this.value) {
+                        logoContainer.innerHTML = `<img src="${this.value}" alt="Logo" class="h-5 max-w-[120px] object-contain" data-preview-logo-img>`;
+                    } else {
+                        logoContainer.innerHTML = `<span class="font-black tracking-tight text-white text-sm" data-preview-brand-name>${currentData.name || ''}</span>`;
+                    }
+                }
+            });
+        }
+
+        // Live preview para subida de archivos (Logos & Favicon)
+        function handleFilePreview(fileInput, thumbSelector, previewSelector) {
+            if (!fileInput) return;
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const objectUrl = URL.createObjectURL(file);
+                    const thumb = document.querySelector(thumbSelector);
+                    if (thumb) thumb.innerHTML = `<img src="${objectUrl}" class="max-h-full max-w-full object-contain">`;
+                    if (previewSelector) {
+                        const previewEl = document.querySelector(previewSelector);
+                        if (previewEl) previewEl.innerHTML = `<img src="${objectUrl}" class="h-5 max-w-[120px] object-contain">`;
+                    }
+                }
+            });
+        }
+        handleFilePreview(logoFileInput, '[data-preview-thumb="logo"]', '[data-preview-logo-container]');
+        handleFilePreview(logoMobileFileInput, '[data-preview-thumb="logo-mobile"]', null);
+        handleFilePreview(faviconFileInput, '[data-preview-thumb="favicon"]', null);
+
+        // Live preview reactivo para los 8 tokens cromáticos
+        const colorTokensList = ['primary', 'secondary', 'accent', 'background', 'surface', 'text', 'muted_text', 'border'];
+        colorTokensList.forEach(token => {
+            const picker = document.querySelector(`[data-color-token="${token}"]`);
+            const label = document.querySelector(`[data-color-label="${token}"]`);
+
+            function updateToken(val) {
+                if (picker) picker.value = val;
+                if (label) label.value = val;
+                const swatch = document.querySelector(`[data-kpi-token="${token}"]`);
+                if (swatch) swatch.style.background = val;
+
+                const currentData = storefrontsData[activeUniverse] || {};
+                const tokens = {
+                    'primary': document.querySelector('[data-color-token="primary"]')?.value || '#0f172a',
+                    'secondary': document.querySelector('[data-color-token="secondary"]')?.value || '#334155',
+                    'accent': document.querySelector('[data-color-token="accent"]')?.value || '#4f46e5',
+                    'background': document.querySelector('[data-color-token="background"]')?.value || '#ffffff',
+                    'surface': document.querySelector('[data-color-token="surface"]')?.value || '#ffffff',
+                    'text': document.querySelector('[data-color-token="text"]')?.value || '#0f172a',
+                    'muted_text': document.querySelector('[data-color-token="muted_text"]')?.value || '#64748b',
+                    'border': document.querySelector('[data-color-token="border"]')?.value || '#e2e8f0'
+                };
+                window.applyStorefrontPreviewTokens(tokens, currentData);
+            }
+
+            if (picker) {
+                picker.addEventListener('input', function() {
+                    updateToken(this.value);
+                });
+            }
+            if (label) {
+                label.addEventListener('input', function() {
+                    if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                        updateToken(this.value);
+                    }
+                });
+            }
         });
 
         // Guardado asíncrono de Vitrina

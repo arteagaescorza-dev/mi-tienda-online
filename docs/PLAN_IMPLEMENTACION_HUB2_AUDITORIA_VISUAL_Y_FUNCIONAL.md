@@ -136,3 +136,61 @@ Tras la revisión interactiva del usuario y el análisis de las evidencias gráf
   5. `StorefrontPwaHomeTest`: Integridad de vitrinas multiverso (`marte`, `venus`, `tiresias`, `terra`) y enlaces de navegación directa a `/productos/{slug}`.
   6. `StorefrontPwaPdpTest`: Navegación e interacción directa a la PDP full-screen sin modales ni drawers.
   7. `StorefrontPwaCartTest` y `StorefrontPwaCheckoutTest`: Flujo completo de conversión y compatibilidad con RevOps.
+
+---
+
+## 6. Fase 2: Perfeccionamiento de Identidad de Marca, Paleta Multitoken y Subnavegación (Hub 2)
+**Fecha:** 30 de Septiembre de 2026  
+**Objetivo:** Resolver los puntos críticos identificados en la personalización de vitrinas y la usabilidad de navegación en el panel de control.
+
+### 6.1. Diagnóstico y Requerimientos de Usuario
+1. **Subnavegación con Barra de Scroll Horizontal (Evidencia `media_1790790894274.png`):**
+   - La barra de pestañas forzaba `overflow-x: auto; white-space: nowrap;`, generando una barra de desplazamiento horizontal deficiente en desktop.
+   - **Solución:** Reorganización de la barra de pestañas en un diseño limpio de **dos filas** (Grid 4x2 responsivo), eliminando el scroll horizontal y permitiendo visualización directa de los 8 submódulos:
+     - Fila 1: 1. Editor Visual Multiverso | 2. Banners & Marquesinas | 3. Reglas Comerciales & Fletes | 4. Contenido Editorial & Tallas.
+     - Fila 2: 5. Páginas & Navbar | 6. Revista Digital | 7. Tracking & Analítica | 8. Filtros Catálogo.
+2. **Paleta Cromática Insuficiente (Solo 2 colores en formulario):**
+   - El formulario de vitrina solo presentaba Color de Acento y Color de Fondo, impidiendo controlar la jerarquía visual de la marca.
+   - **Solución:** Implementación de una paleta cromática completa de **8 tokens semánticos**:
+     - `primary_color`: Títulos H1, header desktop, botones oscuros/primarios.
+     - `secondary_color`: Botones secundarios, bordes activos, badges complementarios.
+     - `accent_color`: Botón CTA principal, enlaces activos, badges de oferta.
+     - `background_color`: Fondo del lienzo global (`body`, `--brand-bg`).
+     - `surface_color`: Fondo de tarjetas de producto y contenedores (`--brand-surface`).
+     - `text_color`: Tipografía principal legible (`--brand-text`).
+     - `muted_text_color`: Textos secundarios, SKU, IVA, descripciones (`--brand-muted`).
+     - `border_color`: Bordes de inputs, tarjetas y separadores (`--brand-border`).
+3. **Desacoplamiento de Campos Hero del Editor de Vitrina:**
+   - En Tab 1 se duplicaban campos estáticos de Hero (`hero_title`, `hero_subtitle`, `hero_cta_text`, `hero_cta_url`), entrando en conflicto con el motor dinámico de secciones Drag & Drop donde el Hero (`hero_carousel` o `editorial_banner`) se gestiona como componente modular reordenable.
+   - **Solución:** Eliminación de los campos Hero del formulario de Vitrina e incorporación de un aviso contextual que direcciona a la sección Drag & Drop inferior. El Previsualizador en Vivo se actualiza para reflejar la identidad de marca, header, paleta cromática, tarjetas y favicon/logos.
+4. **Configuración de Favicon y Logos del Sitio:**
+   - La vitrina carecía de campos para configurar la iconografía y activos gráficos de la marca.
+   - **Solución:** Incorporación de campos dedicados con previsualización inmediata:
+     - `logo_url`: Logo principal para la cabecera Desktop (SVG/PNG).
+     - `logo_mobile_url`: Logo/isotipo para la cabecera Móvil y PWA icon.
+     - `favicon_url`: Ícono de pestaña del navegador (.ico/.png/.svg).
+   - Sincronización automática con `<link rel="icon">`, `<header>` desktop y `<header>` móvil en [resources/views/layouts/store-pwa.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/layouts/store-pwa.blade.php).
+
+### 6.2. Implementación Técnica Realizada
+1. **Migración de Base de Datos:**
+   - Creada y ejecutada la migración `2026_09_30_120000_add_branding_and_palette_to_cms_storefront_configs.php` añadiendo `logo_url`, `logo_mobile_url`, `favicon_url`, `border_color` y `muted_text_color`.
+2. **Modelos y Persistencia:**
+   - Actualizado [app/Models/CmsStorefrontConfig.php](file:///c:/laragon/www/mi-tienda-online/app/Models/CmsStorefrontConfig.php) con defaults para los 4 universos y `$fillable` completo.
+3. **Controladores:**
+   - Actualizado [app/Http/Controllers/PortalStoreController.php](file:///c:/laragon/www/mi-tienda-online/app/Http/Controllers/PortalStoreController.php) con soporte para los 8 tokens cromáticos, logos, favicon y carga física de archivos a `public/uploads/branding/`.
+   - Actualizado [app/Http/Controllers/StorefrontController.php](file:///c:/laragon/www/mi-tienda-online/app/Http/Controllers/StorefrontController.php) inyectando la paleta y branding a `$currentStorefront` y `universeMeta`.
+4. **Vistas e Interfaz:**
+   - [resources/views/portal/store.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/portal/store.blade.php):
+     - Barra de navegación de submódulos en Grid 4x2 responsivo sin scroll horizontal.
+     - Formulario de Vitrina con 8 tokens cromáticos (pickers + hex inputs), activos gráficos (logos desktop/móvil y favicon con preview de thumbnail y carga de archivos) y aviso de desacoplamiento de Hero.
+     - Marco de previsualización en vivo sincronizado en tiempo real.
+     - Indicador KPI de Paleta Multitoken con muestra visual de los 8 swatches activos.
+   - [resources/views/layouts/store-pwa.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/layouts/store-pwa.blade.php):
+     - Inyección dinámica en `:root` de `--brand-primary`, `--brand-secondary`, `--brand-accent`, `--brand-bg`, `--brand-surface`, `--brand-text`, `--brand-muted` y `--brand-border`.
+     - Inyección de `<link rel="icon">` y `<link rel="apple-touch-icon">`.
+     - Renderizado de logos con fallback SVG.
+5. **Pruebas Automatizadas:**
+   - Implementado test `test_updating_vitrina_with_full_palette_and_branding_assets` en [tests/Feature/Hub2AdminStoreControllerTest.php](file:///c:/laragon/www/mi-tienda-online/tests/Feature/Hub2AdminStoreControllerTest.php) con `Storage::fake` y `UploadedFile::fake`.
+   - 100% de la suite `artisan test --filter="Hub2AdminStoreControllerTest|StorefrontDynamicSectionsTest"` aprobada (17 tests, 75 aserciones).
+
+

@@ -63,9 +63,17 @@ class PortalStoreController extends Controller
                 'id' => 'marte',
                 'name' => 'Marte Store',
                 'kicker' => 'Moda Masculina & Sensualidad Ergonómica',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#09090b',
+                'secondaryColor' => '#27272a',
                 'accentColor' => '#4f46e5',
                 'backgroundColor' => '#fafafa',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#09090b',
+                'mutedTextColor' => '#71717a',
+                'borderColor' => '#e4e4e7',
                 'heroTitle' => 'Diseño, Comodidad y Firmeza sin Censura',
                 'heroSubtitle' => 'Textiles premium de modal y bambú diseñados para la máxima libertad de movimiento y soporte atlético.',
                 'heroCtaText' => 'Ver Colección Masculina',
@@ -77,9 +85,17 @@ class PortalStoreController extends Controller
                 'id' => 'venus',
                 'name' => 'Venus Lingerie & Beauty',
                 'kicker' => 'Lencería de Autor, Bralettes y Cuidado Íntimo',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#1c1917',
+                'secondaryColor' => '#44403c',
                 'accentColor' => '#db2777',
                 'backgroundColor' => '#fff1f2',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#1c1917',
+                'mutedTextColor' => '#78716c',
+                'borderColor' => '#fecdd3',
                 'heroTitle' => 'Elegancia Sensorial y Suavidad para tu Piel',
                 'heroSubtitle' => 'Encajes finos, satín italiano y fórmulas limpias de cuidado personal pensadas para tu bienestar diario.',
                 'heroCtaText' => 'Explorar Colección Femenina',
@@ -91,9 +107,17 @@ class PortalStoreController extends Controller
                 'id' => 'tiresias',
                 'name' => 'Tiresias Moda Afirmativa',
                 'kicker' => 'Binders de Compresión Segura, Packing y Cuidado Afirmativo',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#0f172a',
+                'secondaryColor' => '#334155',
                 'accentColor' => '#8b5cf6',
                 'backgroundColor' => '#faf5ff',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#0f172a',
+                'mutedTextColor' => '#64748b',
+                'borderColor' => '#e9d5ff',
                 'heroTitle' => 'Libertad de Expresión y Ajuste Seguro para Todo Cuerpo',
                 'heroSubtitle' => 'Prendas afirmativas confeccionadas con ingeniería textil transpirable de compresión médica segura.',
                 'heroCtaText' => 'Ver Binders y Accesorios',
@@ -105,9 +129,17 @@ class PortalStoreController extends Controller
                 'id' => 'terra',
                 'name' => 'Terra Multiverse',
                 'kicker' => 'Ecosistema Global de Moda Íntima y Cuidado Personal',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#09090b',
+                'secondaryColor' => '#27272a',
                 'accentColor' => '#0284c7',
                 'backgroundColor' => '#f8fafc',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#09090b',
+                'mutedTextColor' => '#71717a',
+                'borderColor' => '#e4e4e7',
                 'heroTitle' => 'El Ecosistema Completo de Bienestar y Estilo',
                 'heroSubtitle' => 'Catálogo unificado, suscripciones mensuales recurrentes y fórmulas de autocuidado para todas las identidades.',
                 'heroCtaText' => 'Descubrir Todo el Catálogo',
@@ -127,18 +159,24 @@ class PortalStoreController extends Controller
                 $dbData = array_filter([
                     'name' => $c->brand_name,
                     'kicker' => $c->kicker,
+                    'logoUrl' => $c->logo_url,
+                    'logoMobileUrl' => $c->logo_mobile_url,
+                    'faviconUrl' => $c->favicon_url,
                     'primaryColor' => $c->primary_color,
+                    'secondaryColor' => $c->secondary_color,
                     'accentColor' => $c->accent_color,
                     'backgroundColor' => $c->background_color,
                     'surfaceColor' => $c->surface_color,
                     'textColor' => $c->text_color,
+                    'mutedTextColor' => $c->muted_text_color,
+                    'borderColor' => $c->border_color,
                     'heroTitle' => $c->hero_title,
                     'heroSubtitle' => $c->hero_subtitle,
                     'heroCtaText' => $c->hero_cta_text,
                     'heroCtaUrl' => $c->hero_cta_url,
                     'customCss' => $c->custom_css,
                     'customJs' => $c->custom_js,
-                ]);
+                ], fn($val) => !is_null($val) && $val !== '');
             }
             $merged = array_merge($defaultData, $dbData, $cached);
             $merged['activeSkus'] = $defaultData['activeSkus'];
@@ -375,8 +413,16 @@ class PortalStoreController extends Controller
             'brandName' => 'nullable|string|max:120',
             'brand_name' => 'nullable|string|max:120',
             'kicker' => 'nullable|string|max:200',
+            'logo_url' => 'nullable|string|max:255',
+            'logoUrl' => 'nullable|string|max:255',
+            'logo_mobile_url' => 'nullable|string|max:255',
+            'logoMobileUrl' => 'nullable|string|max:255',
+            'favicon_url' => 'nullable|string|max:255',
+            'faviconUrl' => 'nullable|string|max:255',
             'primaryColor' => 'nullable|string|max:20',
             'primary_color' => 'nullable|string|max:20',
+            'secondaryColor' => 'nullable|string|max:20',
+            'secondary_color' => 'nullable|string|max:20',
             'accentColor' => 'nullable|string|max:20',
             'accent_color' => 'nullable|string|max:20',
             'backgroundColor' => 'nullable|string|max:20',
@@ -385,6 +431,10 @@ class PortalStoreController extends Controller
             'surface_color' => 'nullable|string|max:20',
             'textColor' => 'nullable|string|max:20',
             'text_color' => 'nullable|string|max:20',
+            'mutedTextColor' => 'nullable|string|max:20',
+            'muted_text_color' => 'nullable|string|max:20',
+            'borderColor' => 'nullable|string|max:20',
+            'border_color' => 'nullable|string|max:20',
             'heroTitle' => 'nullable|string|max:200',
             'hero_title' => 'nullable|string|max:200',
             'heroSubtitle' => 'nullable|string|max:500',
@@ -408,8 +458,53 @@ class PortalStoreController extends Controller
         if ($request->filled('kicker')) {
             $config->kicker = $request->input('kicker');
         }
+
+        // Carga y Gestión de Activos Gráficos (Logos & Favicon)
+        if ($request->hasFile('logo_file')) {
+            $file = $request->file('logo_file');
+            $filename = 'logo_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/branding');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $config->logo_url = '/uploads/branding/' . $filename;
+        } elseif ($request->filled('logo_url') || $request->filled('logoUrl')) {
+            $config->logo_url = $request->input('logo_url') ?? $request->input('logoUrl');
+        }
+
+        if ($request->hasFile('logo_mobile_file')) {
+            $file = $request->file('logo_mobile_file');
+            $filename = 'logo_mob_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/branding');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $config->logo_mobile_url = '/uploads/branding/' . $filename;
+        } elseif ($request->filled('logo_mobile_url') || $request->filled('logoMobileUrl')) {
+            $config->logo_mobile_url = $request->input('logo_mobile_url') ?? $request->input('logoMobileUrl');
+        }
+
+        if ($request->hasFile('favicon_file')) {
+            $file = $request->file('favicon_file');
+            $filename = 'fav_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/branding');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $config->favicon_url = '/uploads/branding/' . $filename;
+        } elseif ($request->filled('favicon_url') || $request->filled('faviconUrl')) {
+            $config->favicon_url = $request->input('favicon_url') ?? $request->input('faviconUrl');
+        }
+
+        // Paleta Cromática Completa (8 Tokens)
         if ($request->filled('primary_color') || $request->filled('primaryColor')) {
             $config->primary_color = $request->input('primary_color') ?? $request->input('primaryColor');
+        }
+        if ($request->filled('secondary_color') || $request->filled('secondaryColor')) {
+            $config->secondary_color = $request->input('secondary_color') ?? $request->input('secondaryColor');
         }
         if ($request->filled('accent_color') || $request->filled('accentColor')) {
             $config->accent_color = $request->input('accent_color') ?? $request->input('accentColor');
@@ -423,6 +518,14 @@ class PortalStoreController extends Controller
         if ($request->filled('text_color') || $request->filled('textColor')) {
             $config->text_color = $request->input('text_color') ?? $request->input('textColor');
         }
+        if ($request->filled('muted_text_color') || $request->filled('mutedTextColor')) {
+            $config->muted_text_color = $request->input('muted_text_color') ?? $request->input('mutedTextColor');
+        }
+        if ($request->filled('border_color') || $request->filled('borderColor')) {
+            $config->border_color = $request->input('border_color') ?? $request->input('borderColor');
+        }
+
+        // Campos opcionales de Hero (conservados por retrocompatibilidad)
         if ($request->filled('hero_title') || $request->filled('heroTitle')) {
             $config->hero_title = $request->input('hero_title') ?? $request->input('heroTitle');
         }
@@ -448,11 +551,17 @@ class PortalStoreController extends Controller
             'name' => $config->brand_name,
             'brandName' => $config->brand_name,
             'kicker' => $config->kicker,
+            'logoUrl' => $config->logo_url,
+            'logoMobileUrl' => $config->logo_mobile_url,
+            'faviconUrl' => $config->favicon_url,
             'primaryColor' => $config->primary_color,
+            'secondaryColor' => $config->secondary_color,
             'accentColor' => $config->accent_color,
             'backgroundColor' => $config->background_color,
             'surfaceColor' => $config->surface_color,
             'textColor' => $config->text_color,
+            'mutedTextColor' => $config->muted_text_color,
+            'borderColor' => $config->border_color,
             'heroTitle' => $config->hero_title,
             'heroSubtitle' => $config->hero_subtitle,
             'heroCtaText' => $config->hero_cta_text,

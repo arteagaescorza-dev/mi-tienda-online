@@ -113,8 +113,13 @@
 | `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | DataLayer, Meta Graph API |
 | `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | PHPUnit, Core Web Vitals |
 | `TASK-H2-12` | Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (UI & SortableJS)** | SortableJS, Layout W-Full, Feedback Háptico |
-| `TASK-H2-13` | Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2 | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Pendiente (Prioridad Inmediata)** | Subnav JS, TabPanels, DOM State |
-| `TASK-H2-14` | Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real | **Tienda Pública (Storefront D2C)** | **Alta** | **Pendiente (Prioridad Inmediata)** | `store-pwa.js`, Tarjetas Catálogo, Rutas PDP |
+| `TASK-H2-13` | Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2 | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | Subnav JS, TabPanels, DOM State |
+| `TASK-H2-14` | Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.js`, Tarjetas Catálogo, Rutas PDP |
+| `TASK-H2-15` | Bifurcación Funcional de Creación de Secciones (Catálogo vs Contenido Custom/Modales) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | `#createSectionModal`, Blade, Backend Sanitization |
+| `TASK-H2-16` | Persistencia y Bidireccionalidad de Cambios de Vitrina (`Guardar Cambios de Vitrina`) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | AJAX, `CmsStorefrontConfig`, Caché Storefront |
+| `TASK-H2-17` | Suite de Edición, Reasignación de Vitrina, Archivado y Estado de Secciones | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | `#editSectionModal`, RESTful PUT/POST, Badges |
+| `TASK-H2-18` | Paleta Cromática Completa (8 Tokens), Logos/Favicon, Subnavegación 2 Filas y Desacoplamiento Hero | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | DDL Migration, PWA `:root`, Drag & Drop Hero |
+
 
 ---
 
@@ -1726,4 +1731,23 @@ graph TD
   - Formulario y botón de archivado atómico `[Archivar]` con confirmación previa y transición a estado `archived`.
   - Badges visuales de estado en la tabla: verde esmeralda para `active`, gris pizarra para `draft`, ámbar para `archived`.
   - Suite de pruebas automatizadas en `tests/Feature/Hub2AdminStoreControllerTest.php` con cobertura al 100%.
+
+---
+
+### `TASK-H2-18`: Paleta Cromática Completa (8 Tokens), Logos/Favicon, Subnavegación en 2 Filas y Desacoplamiento de Hero
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*) & Storefront PWA
+* **Diagnóstico & Requerimientos de Usuario:**
+  1. Subnavegación de 8 pestañas generaba scroll horizontal en desktop.
+  2. Paleta cromática limitada a solo 2 colores (acento y fondo), impidiendo control tipográfico y de jerarquía.
+  3. Campos Hero estáticos duplicados en el formulario de vitrina, cuando el Hero debe gestionarse desde el Drag & Drop modular inferior.
+  4. Carencia de campos para configurar y cargar logos (desktop y móvil) y favicon del sitio.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - **Subnavegación en 2 Filas:** Grid responsivo `grid-cols-2 md:grid-cols-4 gap-2.5` eliminando al 100% el scroll horizontal.
+  - **Paleta Cromática de 8 Tokens:** Implementación completa de `primary_color`, `secondary_color`, `accent_color`, `background_color`, `surface_color`, `text_color`, `muted_text_color`, `border_color` con pickers e inputs hexadecimales.
+  - **Logos & Favicon:** Campos para URL y carga de archivos (`logo_file`, `logo_mobile_file`, `favicon_file`) a `public/uploads/branding/`, inyectados dinámicamente en `<link rel="icon">`, `<link rel="apple-touch-icon">` y `<header>` de la tienda.
+  - **Desacoplamiento de Hero:** Retiro de inputs fijos de Hero de Tab 1 e inclusión de banner explicativo; el Hero se construye con Drag & Drop en la tabla modular.
+  - **Persistencia & Reactividad en Vivo:** `window.switchStoreUniverse` y listeners `input` sincronizan de inmediato el marco de previsualización a escala y las muestras KPI en tiempo real.
+  - **Pruebas Automatizadas:** 17 pruebas aprobadas con 75 aserciones en `Hub2AdminStoreControllerTest` y `StorefrontDynamicSectionsTest`.
+
 
