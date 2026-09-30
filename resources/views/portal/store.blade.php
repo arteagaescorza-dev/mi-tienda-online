@@ -1765,7 +1765,9 @@
         @csrf
     </form>
 </div>
+@endsection
 
+@push('scripts')
 {{-- SORTABLEJS PARA DRAG & DROP ERGONÓMICO EN VIVO --}}
 <script src="{{ asset('js/vendor/sortable.min.js') }}"></script>
 
@@ -2520,4 +2522,4 @@
     }
 })();
 </script>
-@endsection
+@endpush

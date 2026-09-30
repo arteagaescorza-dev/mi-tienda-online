@@ -10649,12 +10649,14 @@ const storeState = {
 };
 
 function switchStoreTab(tab) {
+  if (document.getElementById('storeAppRoot')) return;
   storeState.activeTab = tab;
   const main = document.querySelector('[data-main]');
   if (main) main.innerHTML = storeBody();
 }
 
 function switchStoreUniverse(universe) {
+  if (document.getElementById('storeAppRoot')) return;
   if (storeState.storefronts[universe]) {
     storeState.activeUniverse = universe;
     const main = document.querySelector('[data-main]');
@@ -10663,6 +10665,7 @@ function switchStoreUniverse(universe) {
 }
 
 function setPreviewDevice(device) {
+  if (document.getElementById('storeAppRoot')) return;
   storeState.previewDevice = device;
   const frame = document.querySelector('[data-storefront-preview-frame]');
   if (frame) {
@@ -10676,6 +10679,7 @@ function setPreviewDevice(device) {
 }
 
 function saveStorefrontConfig(universe) {
+  if (document.getElementById('storeAppRoot')) return;
   const nameInput = document.querySelector('[data-store-name-input]');
   const titleInput = document.querySelector('[data-store-hero-title-input]');
   const subInput = document.querySelector('[data-store-hero-sub-input]');
@@ -10696,6 +10700,7 @@ function saveStorefrontConfig(universe) {
 }
 
 function toggleAnnouncementBar() {
+  if (document.getElementById('storeAppRoot')) return;
   storeState.announcementActive = !storeState.announcementActive;
   showToast(storeState.announcementActive ? 'Marquesina superior activada' : 'Marquesina superior pausada');
   const main = document.querySelector('[data-main]');
@@ -10703,6 +10708,7 @@ function toggleAnnouncementBar() {
 }
 
 function toggleBannerStatus(bannerId) {
+  if (document.getElementById('storeAppRoot')) return;
   const banner = storeState.banners.find(b => b.id === Number(bannerId));
   if (banner) {
     banner.active = !banner.active;
@@ -10713,6 +10719,7 @@ function toggleBannerStatus(bannerId) {
 }
 
 function simulateShippingThreshold(threshold) {
+  if (document.getElementById('storeAppRoot')) return;
   threshold = parseFloat(threshold) || 999;
   storeState.simulator.currentThreshold = threshold;
   const estimatedAverageOrder = Math.max(650, threshold * 1.15);
@@ -10755,6 +10762,7 @@ function simulateShippingThreshold(threshold) {
 }
 
 function saveShippingRule() {
+  if (document.getElementById('storeAppRoot')) return;
   const thresholdInput = document.querySelector('[data-shipping-threshold-input]');
   const flatRateInput = document.querySelector('[data-shipping-flat-input]');
   const pickupInput = document.querySelector('[data-shipping-pickup-check]');
@@ -11499,7 +11507,7 @@ document.addEventListener('input', (e) => {
   }
 });
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !document.getElementById('storeAppRoot')) {
   window.storeState = storeState;
   window.storeBody = storeBody;
   window.switchStoreTab = switchStoreTab;

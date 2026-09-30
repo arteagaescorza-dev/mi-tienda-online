@@ -399,7 +399,7 @@
   <div class="toast" data-toast role="status"></div>
   <div id="global-toast-container" class="toast-container fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full" aria-live="polite"></div>
 
-  <script src="{{ asset('js/revops-panel/app.js') }}?v=20260928_v3"></script>
+  <script src="{{ asset('js/revops-panel/app.js') }}?v=20260930_v5"></script>
   @stack('scripts')
 </body>
 </html>
