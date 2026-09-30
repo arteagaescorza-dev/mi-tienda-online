@@ -104,15 +104,17 @@
                     <span class="product-stock-badge {{ $prod['stockType'] === 'ready' ? 'ready' : '' }}">
                       {{ $prod['stockLabel'] }}
                     </span>
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer;" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}">
+                    <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer; text-decoration: none;" title="{{ $prod['name'] }}">
                       <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">{{ $prod['sku'] }}</span>
-                    </div>
+                    </a>
                   </div>
                   <div class="product-body">
                     <div>
                       <div class="product-category-label">{{ $prod['categoryName'] }}</div>
-                      <h3 class="product-title" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}" style="cursor: pointer;">{{ $prod['name'] }}</h3>
+                      <h3 class="product-title">
+                        <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="cursor: pointer; color: inherit; text-decoration: none;">{{ $prod['name'] }}</a>
+                      </h3>
                       <div class="product-pricing-row">
                         <span class="product-price">{{ $prod['price_formatted'] }}</span>
                         <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
@@ -257,15 +259,17 @@
                 <span class="product-stock-badge {{ $prod['stockType'] === 'ready' ? 'ready' : '' }}">
                   {{ $prod['stockLabel'] }}
                 </span>
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer;" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}">
+                <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer; text-decoration: none;" title="{{ $prod['name'] }}">
                   <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">{{ $prod['sku'] }}</span>
-                </div>
+                </a>
               </div>
               <div class="product-body">
                 <div>
                   <div class="product-category-label">{{ $prod['categoryName'] }}</div>
-                  <h3 class="product-title" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}" style="cursor: pointer;">{{ $prod['name'] }}</h3>
+                  <h3 class="product-title">
+                    <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="cursor: pointer; color: inherit; text-decoration: none;">{{ $prod['name'] }}</a>
+                  </h3>
                   <div class="product-pricing-row">
                     <span class="product-price">{{ $prod['price_formatted'] }}</span>
                     <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
@@ -324,15 +328,17 @@
             <span class="product-stock-badge {{ $prod['stockType'] === 'ready' ? 'ready' : '' }}">
               {{ $prod['stockLabel'] }}
             </span>
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer;" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}">
+            <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #a1a1aa; width: 100%; height: 100%; cursor: pointer; text-decoration: none;" title="{{ $prod['name'] }}">
               <svg width="40" height="40" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span style="font-family: var(--font-heading); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #71717a;">{{ $prod['sku'] }}</span>
-            </div>
+            </a>
           </div>
           <div class="product-body">
             <div>
               <div class="product-category-label">{{ $prod['categoryName'] }}</div>
-              <h3 class="product-title" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}" style="cursor: pointer;">{{ $prod['name'] }}</h3>
+              <h3 class="product-title">
+                <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" style="cursor: pointer; color: inherit; text-decoration: none;">{{ $prod['name'] }}</a>
+              </h3>
               <div class="product-pricing-row">
                 <span class="product-price">{{ $prod['price_formatted'] }}</span>
                 <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
@@ -345,9 +351,9 @@
                 @endforeach
               </div>
               <div style="display: flex; gap: 6px; margin-top: 8px;">
-                <button type="button" class="btn-hero-secondary" data-action="open-product-modal" data-product-id="{{ $prod['id'] }}" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm);" title="Ver ficha técnica">
+                <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="padding: 8px 10px; font-size: 0.7rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica completa">
                   FICHA
-                </button>
+                </a>
                 <button type="button" class="btn-add-cart" data-action="add-to-cart" data-product-id="{{ $prod['id'] }}" style="flex: 1;">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   <span>AGREGAR</span>

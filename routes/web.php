@@ -92,6 +92,8 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/tienda-cms/marquesina/toggle', [PortalStoreController::class, 'toggleAnnouncement'])->name('portal.store.announcement.toggle');
 	Route::post('/admin/tienda-cms/vitrinas/{universe}', [PortalStoreController::class, 'updateStorefront'])->name('portal.store.vitrinas.update');
 	Route::post('/admin/tienda-cms/secciones', [PortalStoreController::class, 'storeSection'])->name('portal.store.sections.store');
+	Route::put('/admin/tienda-cms/secciones/{section}', [PortalStoreController::class, 'updateSection'])->name('portal.store.sections.update');
+	Route::post('/admin/tienda-cms/secciones/{section}/archivar', [PortalStoreController::class, 'archiveSection'])->name('portal.store.sections.archive');
 	Route::post('/admin/tienda-cms/secciones/reorder', [PortalStoreController::class, 'reorderSections'])->name('portal.store.sections.reorder');
 	Route::post('/admin/tienda-cms/secciones/{section}/toggle', [PortalStoreController::class, 'toggleSection'])->name('portal.store.sections.toggle');
 	Route::delete('/admin/tienda-cms/secciones/{section}', [PortalStoreController::class, 'destroySection'])->name('portal.store.sections.destroy');

@@ -40,6 +40,14 @@ El **Hub 2: Tienda & CMS Multiverso** es el centro de control editorial y de dis
 | `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | Catálogo PWA | **Completada** | **Media** | Hub 4 Categorías |
 | `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | Analytics & Tracking | **Completada** | **Alta** | Layout PWA, Checkout |
 | `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | Calidad & QA | **Completada** | **Alta** | PHPUnit, Lighthouse |
+| `TASK-H2-FIX-01` | Reingeniería del Creador de Secciones & Modales (Catálogo vs Contenido) | Submódulo 1: Editor Visual | **Completada** | **Alta (Inmediata)** | `CmsSection`, Taxonomías Hub 4 |
+| `TASK-H2-FIX-02` | Sincronización y Persistencia Real de Vitrinas (BD, Cache & `:root`) | Submódulo 1: Editor Visual | **Completada** | **Alta (Inmediata)** | `cms_storefront_configs` |
+| `TASK-H2-FIX-03` | Suite de Edición, Reasignación de Vitrina, Archivado y Estado de Secciones | Submódulo 1: Editor Visual | **Completada** | **Alta (Inmediata)** | `CmsSection`, PUT / Archive |
+| `TASK-H2-FIX-04` | Navegación Nativa a PDP Standalone (Eliminación de Modales/Drawers) | Storefront D2C PWA | **Completada** | **Alta (Inmediata)** | `store-pwa.js`, Rutas `/productos/{slug}` |
+| `TASK-H2-FIX-05` | Reactividad, Estilos y Visibilidad Garantizada de las 7 Pestañas de Hub 2 | Hub 2 (Submódulos 2 al 8) | **Completada** | **Alta (Inmediata)** | Subnav JS, TabPanels |
+
+> [!NOTE]
+> **Plan de Ejecución Activo de Auditoría:** Ver detalles en [`PLAN_IMPLEMENTACION_HUB2_AUDITORIA_VISUAL_Y_FUNCIONAL.md`](PLAN_IMPLEMENTACION_HUB2_AUDITORIA_VISUAL_Y_FUNCIONAL.md).
 
 ---
 

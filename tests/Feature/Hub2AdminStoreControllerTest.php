@@ -173,4 +173,142 @@ class Hub2AdminStoreControllerTest extends TestCase
         $this->assertEquals('Guía Anatómica Oficial 2026', $doc->title);
         $this->assertEquals('78 - 85 cm', $doc->payload[0]['waistCm']);
     }
+
+    /**
+     * Test updating a modular section (universe, status, title, rules).
+     */
+    public function test_updating_modular_section_and_universe(): void
+    {
+        $section = CmsSection::first();
+
+        $updatePayload = [
+            'name' => 'Sección Actualizada Marte a Venus',
+            'universe' => 'venus',
+            'status' => 'draft',
+            'title' => 'NUEVO TÍTULO EDITADO',
+            'subtitle' => 'Subtítulo actualizado para pruebas',
+            'badge' => 'OFERTA EXCLUSIVA',
+            'layout' => 'carousel',
+            'limit' => 12,
+            'query_rules' => ['brand' => 'CALVIN'],
+        ];
+
+        $response = $this->actingAs($this->portalUser)
+            ->put(route('portal.store.sections.update', ['section' => $section->id]), $updatePayload);
+
+        $response->assertSessionHas('success');
+
+        $fresh = $section->fresh();
+        $this->assertEquals('Sección Actualizada Marte a Venus', $fresh->name);
+        $this->assertEquals('venus', $fresh->universe);
+        $this->assertEquals('draft', $fresh->status);
+        $this->assertEquals('NUEVO TÍTULO EDITADO', $fresh->title);
+        $this->assertEquals('CALVIN', $fresh->query_rules['brand']);
+    }
+
+    /**
+     * Test archiving a section transitions its status to 'archived'.
+     */
+    public function test_archiving_a_modular_section(): void
+    {
+        $section = CmsSection::create([
+            'universe' => 'marte',
+            'name' => 'Sección Para Archivo',
+            'type' => 'curated_products',
+            'sort_order' => 50,
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->portalUser)
+            ->post(route('portal.store.sections.archive', ['section' => $section->id]));
+
+        $response->assertSessionHas('success');
+        $this->assertEquals('archived', $section->fresh()->status);
+    }
+
+    /**
+     * Test creating a promotional modal section with custom HTML, CSS and JS.
+     */
+    public function test_creating_promo_modal_section_with_custom_code(): void
+    {
+        $payload = [
+            'universe' => 'marte',
+            'name' => 'Modal Promocional Flash Sale',
+            'type' => 'promo_modal',
+            'title' => 'FLASH SALE 24H',
+            'custom_html' => '<div class="flash-popup"><h2>50% OFF</h2></div>',
+            'custom_css' => '.flash-popup { background: #000; color: #fff; }',
+            'custom_js' => 'console.log("Promo modal loaded");',
+        ];
+
+        $response = $this->actingAs($this->portalUser)
+            ->post(route('portal.store.sections.store'), $payload);
+
+        $response->assertSessionHas('success');
+
+        $modalSection = CmsSection::where('name', 'Modal Promocional Flash Sale')->first();
+        $this->assertNotNull($modalSection);
+        $this->assertEquals('promo_modal', $modalSection->type);
+        $this->assertEquals('<div class="flash-popup"><h2>50% OFF</h2></div>', $modalSection->custom_html);
+        $this->assertEquals('.flash-popup { background: #000; color: #fff; }', $modalSection->custom_css);
+        $this->assertEquals('console.log("Promo modal loaded");', $modalSection->custom_js);
+    }
+
+    /**
+     * Test product card sections strictly strip custom code textareas.
+     */
+    public function test_product_card_section_strips_custom_code(): void
+    {
+        $payload = [
+            'universe' => 'all',
+            'name' => 'Catálogo Curado Seguro',
+            'type' => 'curated_products',
+            'title' => 'PRODUCTOS SEGUROS',
+            'custom_html' => '<script>alert("hack");</script>',
+            'custom_css' => 'body { display: none; }',
+            'custom_js' => 'alert("danger");',
+        ];
+
+        $response = $this->actingAs($this->portalUser)
+            ->post(route('portal.store.sections.store'), $payload);
+
+        $response->assertSessionHas('success');
+
+        $section = CmsSection::where('name', 'Catálogo Curado Seguro')->first();
+        $this->assertNotNull($section);
+        $this->assertNull($section->custom_html);
+        $this->assertNull($section->custom_css);
+        $this->assertNull($section->custom_js);
+    }
+
+    /**
+     * Test updating vitrina returns JSON response when requested via AJAX.
+     */
+    public function test_updating_vitrina_via_ajax_returns_json(): void
+    {
+        $payload = [
+            'brand_name' => 'Venus Deluxe',
+            'accent_color' => '#db2777',
+            'background_color' => '#ffffff',
+            'hero_title' => 'ELEGANCIA CONTEMPORÁNEA',
+            'hero_subtitle' => 'Línea de seda y microfibra premium.',
+            'hero_cta_text' => 'DESCUBRIR',
+            'hero_cta_url' => '/venus/coleccion',
+        ];
+
+        $response = $this->actingAs($this->portalUser)
+            ->postJson(route('portal.store.vitrinas.update', ['universe' => 'venus']), $payload);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'universe' => 'venus',
+        ]);
+
+        $this->assertDatabaseHas('cms_storefront_configs', [
+            'universe' => 'venus',
+            'brand_name' => 'Venus Deluxe',
+            'accent_color' => '#db2777',
+        ]);
+    }
 }

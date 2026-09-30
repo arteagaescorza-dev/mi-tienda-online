@@ -7,6 +7,27 @@
 
 @section('content')
 <div id="storeAppRoot" class="w-full text-slate-800 font-sans antialiased" data-screen="store">
+    <style>
+        .tab-panel.hidden {
+            display: none !important;
+        }
+        .tab-panel:not(.hidden) {
+            display: block !important;
+        }
+        .store-subnav-btn.active {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        }
+        .store-subnav-btn.active svg {
+            color: #ffffff !important;
+        }
+        .store-subnav-btn.active .store-subnav-count {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+        }
+    </style>
     @if(session('success'))
         <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-2">
@@ -207,21 +228,21 @@
                     @csrf
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Nombre Comercial de la Vitrina</label>
-                        <input type="text" name="name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500" data-store-name-input value="{{ $storefronts['marte']['name'] }}">
+                        <input type="text" name="brand_name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 font-semibold" data-store-name-input value="{{ $storefronts['marte']['name'] }}">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Color de Acento (Botones/Links)</label>
                             <div class="flex items-center gap-2">
-                                <input type="color" name="accentColor" class="w-8 h-8 rounded border border-slate-200 cursor-pointer p-0" data-store-accent-color-input value="{{ $storefronts['marte']['accentColor'] }}">
+                                <input type="color" name="accent_color" class="w-8 h-8 rounded border border-slate-200 cursor-pointer p-0" data-store-accent-color-input value="{{ $storefronts['marte']['accentColor'] }}">
                                 <span class="text-slate-600 font-mono text-[11px]" data-store-accent-label>{{ $storefronts['marte']['accentColor'] }}</span>
                             </div>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Color Fondo Lienzo</label>
                             <div class="flex items-center gap-2">
-                                <input type="color" name="backgroundColor" class="w-8 h-8 rounded border border-slate-200 cursor-pointer p-0" data-store-bg-color-input value="{{ $storefronts['marte']['backgroundColor'] }}">
+                                <input type="color" name="background_color" class="w-8 h-8 rounded border border-slate-200 cursor-pointer p-0" data-store-bg-color-input value="{{ $storefronts['marte']['backgroundColor'] }}">
                                 <span class="text-slate-600 font-mono text-[11px]" data-store-bg-label>{{ $storefronts['marte']['backgroundColor'] }}</span>
                             </div>
                         </div>
@@ -229,28 +250,29 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Título Hero Principal (H1)</label>
-                        <input type="text" name="heroTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 font-bold" data-store-hero-title-input value="{{ $storefronts['marte']['heroTitle'] }}">
+                        <input type="text" name="hero_title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 font-bold" data-store-hero-title-input value="{{ $storefronts['marte']['heroTitle'] }}">
                     </div>
 
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo Persuasivo</label>
-                        <textarea name="heroSubtitle" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 resize-y max-w-full leading-relaxed" style="resize: vertical; max-width: 100%;" data-store-hero-sub-input>{{ $storefronts['marte']['heroSubtitle'] }}</textarea>
+                        <textarea name="hero_subtitle" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 resize-y max-w-full leading-relaxed" style="resize: vertical; max-width: 100%;" data-store-hero-sub-input>{{ $storefronts['marte']['heroSubtitle'] }}</textarea>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Texto del Botón CTA</label>
-                            <input type="text" name="heroCtaText" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold" data-store-hero-cta-input value="{{ $storefronts['marte']['heroCtaText'] }}">
+                            <input type="text" name="hero_cta_text" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold" data-store-hero-cta-input value="{{ $storefronts['marte']['heroCtaText'] }}">
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Enlace de Destino</label>
-                            <input type="text" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-500 bg-slate-50" data-store-hero-url-input value="{{ $storefronts['marte']['heroCtaUrl'] }}" readonly>
+                            <input type="text" name="hero_cta_url" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-500 bg-slate-50" data-store-hero-url-input value="{{ $storefronts['marte']['heroCtaUrl'] }}">
                         </div>
                     </div>
 
                     <div class="pt-2">
-                        <button class="w-full button button-quiet py-2 text-xs font-bold bg-slate-900 text-white rounded-lg cursor-pointer" data-action="save-storefront-config" type="submit">
-                            Guardar Cambios de Vitrina
+                        <button class="w-full button button-quiet py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg cursor-pointer flex items-center justify-center gap-2 transition" data-action="save-storefront-config" type="submit" id="saveVitrinaBtn">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Guardar Cambios de Vitrina</span>
                         </button>
                     </div>
                 </form>
@@ -404,16 +426,26 @@
                             <td class="py-3 px-3 text-center">
                                 @if($sec->status === 'active')
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Activa</span>
+                                @elseif($sec->status === 'archived')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Archivada</span>
                                 @else
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">Borrador</span>
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button class="button button-light py-1 px-2.5 text-[11px] font-semibold rounded-lg shadow-2xs cursor-pointer hover:bg-slate-100" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button">
+                                <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section='@json($sec)' type="button" title="Editar información, vitrina y contenido">
+                                        Editar
+                                    </button>
+                                    @if($sec->status !== 'archived')
+                                        <button class="button button-light py-1 px-2 text-[11px] font-semibold text-amber-700 hover:bg-amber-50 rounded-lg shadow-2xs cursor-pointer" data-action="archive-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button" title="Archivar sección (no se muestra en tienda)">
+                                            Archivar
+                                        </button>
+                                    @endif
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold rounded-lg shadow-2xs cursor-pointer hover:bg-slate-100" data-action="toggle-section-status" data-section-id="{{ $sec->id }}" type="button" title="Alternar entre activo y borrador">
                                          {{ $sec->status === 'active' ? 'Pausar' : 'Activar' }}
                                     </button>
-                                    <button class="button button-light py-1 px-2.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded-lg shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button">
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded-lg shadow-2xs cursor-pointer" data-action="delete-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" type="button" title="Eliminar sección definitivamente">
                                         Eliminar
                                     </button>
                                 </div>
@@ -432,7 +464,7 @@
     <!-- FIN SUBMÓDULO 1: EDITOR VISUAL -->
 
     <!-- SUBMÓDULO 2: BANNERS & MARQUESINAS -->
-    <div id="storeBannersPanel" class="tab-panel hidden">
+    <div id="storeBannersPanel" class="tab-panel hidden" style="display: none;">
 
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
@@ -527,7 +559,7 @@
     <!-- FIN SUBMÓDULO 2: BANNERS & MARQUESINAS -->
 
     <!-- SUBMÓDULO 3: REGLAS DE FLETE & SIMULADOR FINANCIERO (TASK-INT-18) -->
-    <div id="storeShippingPanel" class="tab-panel hidden">
+    <div id="storeShippingPanel" class="tab-panel hidden" style="display: none;">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
             <!-- CONFIGURADOR DE REGLAS DE DESPACHO -->
             <div class="lg:col-span-5 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
@@ -650,7 +682,7 @@
     <!-- FIN SUBMÓDULO 3: REGLAS DE FLETE -->
 
     <!-- SUBMÓDULO 4: CONTENIDO EDITORIAL & TALLAS (TASK-INT-10) -->
-    <div id="storeEditorialPanel" class="tab-panel hidden">
+    <div id="storeEditorialPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
@@ -743,7 +775,7 @@
     <!-- ========================================================================= -->
     <!-- SUBMÓDULO 5: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
     <!-- ========================================================================= -->
-    <div id="storePagesPanel" class="tab-panel hidden">
+    <div id="storePagesPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
@@ -822,7 +854,7 @@
     <!-- ========================================================================= -->
     <!-- SUBMÓDULO 6: CMS BLOG & REVISTA DIGITAL (TASK-H2-06)                      -->
     <!-- ========================================================================= -->
-    <div id="storeMagazinePanel" class="tab-panel hidden">
+    <div id="storeMagazinePanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
@@ -893,7 +925,7 @@
     <!-- ========================================================================= -->
     <!-- SUBMÓDULO 7: TRACKING & ANALÍTICA (TASK-H2-11)                            -->
     <!-- ========================================================================= -->
-    <div id="storeTrackingPanel" class="tab-panel hidden">
+    <div id="storeTrackingPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-3xl">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
@@ -962,7 +994,7 @@
     <!-- ========================================================================= -->
     <!-- SUBMÓDULO 8: FILTROS DE CATÁLOGO (TASK-H2-09)                             -->
     <!-- ========================================================================= -->
-    <div id="storeFiltersPanel" class="tab-panel hidden">
+    <div id="storeFiltersPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-4xl">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
@@ -1029,8 +1061,8 @@
     <!-- MODALES DE CONTROL OPERATIVO CMS                                          -->
     <!-- ========================================================================= -->
 
-    <!-- 1. MODAL CREAR SECCIÓN MODULAR -->
-    <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+    <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
+    <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -1040,46 +1072,69 @@
                 <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
             </div>
 
-            <form method="POST" action="{{ route('portal.store.sections.store') }}" class="space-y-4 text-xs">
+            <!-- Bifurcador de Modo: Catálogo vs Contenido -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl mb-4 text-xs font-bold">
+                <button type="button" id="createModeCatalogBtn" class="flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition">
+                    Prendas / Catálogo (Hub 4)
+                </button>
+                <button type="button" id="createModeContentBtn" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition">
+                    Hero / Carrusel / Modal / Custom
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.sections.store') }}" id="createSectionForm" class="space-y-4 text-xs">
                 @csrf
+                <input type="hidden" name="status" value="active">
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nombre Interno</label>
-                        <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Curaduría Verano Jocks">
+                        <label class="block font-semibold text-slate-700 mb-1">Nombre Interno (Gestión CMS)</label>
+                        <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Colección Verano Jocks">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Vitrina / Universo Destino</label>
+                        <label class="block font-semibold text-slate-700 mb-1">Vitrina Destino</label>
                         <select name="universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="all">Todas las vitrinas (Global)</option>
+                            <option value="all">Todas las vitrinas (Global / Multiverso)</option>
                             <option value="marte">Marte (Masculino)</option>
                             <option value="venus">Venus (Femenino)</option>
                             <option value="tiresias">Tiresias (Afirmativo)</option>
-                            <option value="terra">Terra (Unisex/Matriz)</option>
+                            <option value="terra">Terra (Unisex / Matriz)</option>
                         </select>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección</label>
-                    <select name="type" id="sectionTypeSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                <!-- SELECTOR DE TIPO CONDICIONADO AL MODO -->
+                <div id="createTypeCatalogWrap">
+                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Catálogo</label>
+                    <select name="type" id="createSectionTypeCatalog" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        <option value="curated_products">Tarjetas de Prendas Destacadas / Colección</option>
                         <option value="categories_grid">Cuadrícula de Categorías (Hub 4)</option>
-                        <option value="curated_products">Prendas Destacadas / Colección (Hub 4)</option>
                         <option value="family_showcase">Vitrina de Familias Textiles</option>
                         <option value="tags_cloud">Nube de Tags / Estilos</option>
+                        <option value="subcategories_slider">Slider de Subcategorías</option>
+                    </select>
+                </div>
+
+                <div id="createTypeContentWrap" class="hidden" style="display: none;">
+                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Contenido</label>
+                    <select name="type_content" id="createSectionTypeContent" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        <option value="hero_carousel">Hero Principal de Vitrina</option>
+                        <option value="hero_carousel">Carrusel de Banners Promocionales</option>
                         <option value="editorial_banner">Banner Editorial / Promoción</option>
-                        <option value="brand_pillars">Pilares de Marca (Garantías)</option>
-                        <option value="custom_html_css_js">Bloque Custom (HTML, CSS y JS libre)</option>
+                        <option value="brand_pillars">Pilares de Marca (Garantías & Courier)</option>
+                        <option value="promo_modal">Modal Promocional / Pop-up Flotante</option>
+                        <option value="custom_html_css_js">Botones CTA / Bloque Personalizado</option>
                     </select>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
-                        <input type="text" name="title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS PREMIUM">
+                        <input type="text" name="title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
-                        <input type="text" name="badge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO">
+                        <input type="text" name="badge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO">
                     </div>
                 </div>
 
@@ -1088,12 +1143,16 @@
                     <input type="text" name="subtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
                 </div>
 
-                <!-- SELECTOR TAXONOMÍAS DE HUB 4 -->
-                <div id="taxonomySectionOptions" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                    <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Filtro de Catálogo (Hub 4)</span>
+                <!-- TAXONOMÍAS HUB 4 (SOLO MODO CATÁLOGO) -->
+                <div id="createCatalogTaxonomies" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Reglas de Catálogo (Hub 4)</span>
+                        <span class="text-[10px] text-slate-500 font-medium">Filtrado dinámico</span>
+                    </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Filtrar por Categoría</label>
+                            <label class="block font-semibold text-slate-600 mb-1">Categoría Principal</label>
                             <select name="query_rules[category_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
                                 <option value="">Todas las categorías</option>
                                 @foreach($categories as $cat)
@@ -1102,7 +1161,19 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Filtrar por Marca</label>
+                            <label class="block font-semibold text-slate-600 mb-1">Subcategoría</label>
+                            <select name="query_rules[subcategory_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todas las subcategorías</option>
+                                @foreach($subcategories as $scat)
+                                    <option value="{{ $scat->id }}">{{ $scat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Marca</label>
                             <select name="query_rules[brand]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
                                 <option value="">Todas las marcas</option>
                                 @foreach($brands as $br)
@@ -1110,31 +1181,296 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Familia Textil</label>
+                            <select name="query_rules[family]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Cualquier fibra</option>
+                                @foreach($textileFamilies as $tf)
+                                    <option value="{{ $tf }}">{{ $tf }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Tipo de Prenda</label>
+                            <select name="query_rules[garment_type]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Cualquier tipo</option>
+                                @foreach($garmentTypes as $gt)
+                                    <option value="{{ $gt }}">{{ $gt }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Tag de Estilo</label>
+                            <select name="query_rules[tag]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Cualquier estilo</option>
+                                @foreach($styleTags as $st)
+                                    <option value="{{ $st }}">{{ $st }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Filtro de Descuento</label>
+                            <select name="query_rules[discount]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                @foreach($discountOptions as $dVal => $dLabel)
+                                    <option value="{{ $dVal }}">{{ $dLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Límite de Prendas</label>
+                            <select name="query_rules[limit]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="4">4 Prendas</option>
+                                <option value="8" selected>8 Prendas</option>
+                                <option value="12">12 Prendas</option>
+                                <option value="16">16 Prendas</option>
+                                <option value="24">24 Prendas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Disposición Visual</label>
+                        <select name="query_rules[layout]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                            <option value="grid_4">Cuadrícula 4 Columnas (Desktop) / 2 Columnas (Mobile)</option>
+                            <option value="grid_3">Cuadrícula 3 Columnas</option>
+                            <option value="grid_2">Cuadrícula 2 Columnas</option>
+                            <option value="carousel">Carrusel Deslizable Horizontal (Swipe)</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- EDITOR CUSTOM HTML/CSS/JS (CONDICIONAL) -->
-                <div id="customCodeSectionOptions" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3 hidden">
-                    <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
-                    <div>
-                        <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
-                        <textarea name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<div class='mi-banner'>...</div>"></textarea>
-                    </div>
+                <!-- CONFIGURACIÓN DE CONTENIDO & CÓDIGO CUSTOM (SOLO MODO CONTENIDO) -->
+                <div id="createContentOptions" class="space-y-3 hidden" style="display: none;">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
-                            <textarea name="custom_css" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder=".mi-banner { color: red; }"></textarea>
+                            <label class="block font-semibold text-slate-700 mb-1">Texto del Botón CTA (Opcional)</label>
+                            <input type="text" name="settings[cta_text]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Explorar Colección">
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
-                            <textarea name="custom_js" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="console.log('banner cargado');"></textarea>
+                            <label class="block font-semibold text-slate-700 mb-1">URL de Destino del Botón</label>
+                            <input type="text" name="settings[cta_url]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: /catalogo?universo=marte">
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
+                            <span class="text-[10px] text-slate-400 font-mono">Scoped HTML / CSS / JS</span>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
+                            <textarea name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<div class='custom-hero'>...</div>"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
+                                <textarea name="custom_css" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder=".custom-hero { padding: 24px; }"></textarea>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
+                                <textarea name="custom_js" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="console.log('Sección iniciada');"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                     <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createSectionModal">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer">Guardar y Añadir Sección</button>
+                    <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Guardar y Añadir Sección</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 1B. MODAL EDITAR SECCIÓN EXISTENTE -->
+    <div id="editSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <span>Editar Sección Modular</span>
+                </h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editSectionModal">&times;</button>
+            </div>
+
+            <form method="POST" id="editSectionForm" action="" class="space-y-4 text-xs">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Vitrina Destino</label>
+                        <select name="universe" id="editUniverseSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="all">Todas las vitrinas (Global)</option>
+                            <option value="marte">Marte (Masculino)</option>
+                            <option value="venus">Venus (Femenino)</option>
+                            <option value="tiresias">Tiresias (Afirmativo)</option>
+                            <option value="terra">Terra (Unisex / Matriz)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Estado de la Sección</label>
+                        <select name="status" id="editStatusSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="active">Activa (Visible en tienda)</option>
+                            <option value="draft">Borrador (Oculta)</option>
+                            <option value="archived">Archivada (Desactivada)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección</label>
+                        <select name="type" id="editTypeSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="curated_products">Prendas Destacadas / Colección</option>
+                            <option value="categories_grid">Cuadrícula de Categorías</option>
+                            <option value="family_showcase">Vitrina de Familias Textiles</option>
+                            <option value="tags_cloud">Nube de Tags / Estilos</option>
+                            <option value="subcategories_slider">Slider de Subcategorías</option>
+                            <option value="hero_carousel">Hero Principal de Vitrina</option>
+                            <option value="editorial_banner">Banner Editorial / Promoción</option>
+                            <option value="brand_pillars">Pilares de Marca (Garantías)</option>
+                            <option value="promo_modal">Modal Promocional / Pop-up</option>
+                            <option value="custom_html_css_js">Bloque Custom (HTML/CSS/JS)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nombre Interno</label>
+                        <input type="text" name="name" id="editNameInput" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Badge Superior</label>
+                        <input type="text" name="badge" id="editBadgeInput" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
+                        <input type="text" name="title" id="editTitleInput" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
+                        <input type="text" name="subtitle" id="editSubtitleInput" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                    </div>
+                </div>
+
+                <!-- TAXONOMÍAS HUB 4 PARA EDICIÓN -->
+                <div id="editCatalogTaxonomies" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                    <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Reglas de Catálogo (Hub 4)</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Categoría Principal</label>
+                            <select name="query_rules[category_id]" id="editCategoryId" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todas las categorías</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Subcategoría</label>
+                            <select name="query_rules[subcategory_id]" id="editSubcategoryId" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todas las subcategorías</option>
+                                @foreach($subcategories as $scat)
+                                    <option value="{{ $scat->id }}">{{ $scat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Marca</label>
+                            <select name="query_rules[brand]" id="editBrand" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todas las marcas</option>
+                                @foreach($brands as $br)
+                                    <option value="{{ $br }}">{{ $br }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Familia Textil</label>
+                            <select name="query_rules[family]" id="editFamily" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Cualquier fibra</option>
+                                @foreach($textileFamilies as $tf)
+                                    <option value="{{ $tf }}">{{ $tf }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Tipo de Prenda</label>
+                            <select name="query_rules[garment_type]" id="editGarmentType" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Cualquier tipo</option>
+                                @foreach($garmentTypes as $gt)
+                                    <option value="{{ $gt }}">{{ $gt }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Tag de Estilo</label>
+                            <select name="query_rules[tag]" id="editTag" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Cualquier estilo</option>
+                                @foreach($styleTags as $st)
+                                    <option value="{{ $st }}">{{ $st }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Filtro de Descuento</label>
+                            <select name="query_rules[discount]" id="editDiscount" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                @foreach($discountOptions as $dVal => $dLabel)
+                                    <option value="{{ $dVal }}">{{ $dLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Límite de Prendas</label>
+                            <select name="query_rules[limit]" id="editLimit" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="4">4 Prendas</option>
+                                <option value="8">8 Prendas</option>
+                                <option value="12">12 Prendas</option>
+                                <option value="16">16 Prendas</option>
+                                <option value="24">24 Prendas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CÓDIGO CUSTOM PARA EDICIÓN (SOLO SECCIONES DE CONTENIDO) -->
+                <div id="editContentOptions" class="space-y-3 hidden" style="display: none;">
+                    <div class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                        <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
+                            <textarea name="custom_html" id="editCustomHtml" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
+                                <textarea name="custom_css" id="editCustomCss" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
+                                <textarea name="custom_js" id="editCustomJs" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editSectionModal">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Guardar Cambios de Sección</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -1423,6 +1759,9 @@
         @csrf
         @method('DELETE')
     </form>
+    <form id="archiveSectionForm" method="POST" style="display:none;">
+        @csrf
+    </form>
 </div>
 
 {{-- SORTABLEJS PARA DRAG & DROP ERGONÓMICO EN VIVO --}}
@@ -1454,18 +1793,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!panel) return;
             if (tabKey === targetTab) {
                 panel.classList.remove('hidden');
+                panel.style.display = 'block';
             } else {
                 panel.classList.add('hidden');
+                panel.style.display = 'none';
             }
         });
 
         tabButtons.forEach(btn => {
             if (btn.getAttribute('data-tab') === targetTab) {
-                btn.classList.add('active', 'border-indigo-600', 'text-indigo-600');
-                btn.classList.remove('border-transparent', 'text-slate-500');
+                btn.classList.add('active');
             } else {
-                btn.classList.remove('active', 'border-indigo-600', 'text-indigo-600');
-                btn.classList.add('border-transparent', 'text-slate-500');
+                btn.classList.remove('active');
             }
         });
 
@@ -1613,6 +1952,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Guardado Asíncrono de Vitrina con Feedback Visual Inmediato
+    if (vitrinaForm) {
+        vitrinaForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('saveVitrinaBtn');
+            const origHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                    <span>Guardando cambios...</span>
+                `;
+            }
+
+            const formData = new FormData(vitrinaForm);
+
+            fetch(vitrinaForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>¡Guardado Exitosamente!</span>
+                    `;
+                    setTimeout(() => {
+                        submitBtn.innerHTML = origHtml;
+                    }, 2500);
+                }
+                if (data.storefront) {
+                    storefrontsData[activeUniverse] = Object.assign(storefrontsData[activeUniverse] || {}, data.storefront);
+                    updateVitrinaUI(activeUniverse);
+                }
+            })
+            .catch(err => {
+                console.error('Error al guardar vitrina:', err);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHtml;
+                }
+                vitrinaForm.submit();
+            });
+        });
+    }
+
     // 3. PREVIEW DEVICE TOGGLE (DESKTOP vs MOBILE)
     const deviceButtons = document.querySelectorAll('[data-action="set-preview-device"]');
     deviceButtons.forEach(btn => {
@@ -1696,60 +2087,202 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 6. GESTOR DE SECCIONES MODULARES (REORDENAMIENTO Y MODALES)
-    const modalButtons = document.querySelectorAll('[data-action^="open-"]');
-    modalButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const modalTarget = this.getAttribute('data-modal');
-            if (modalTarget) {
-                const m = document.getElementById(modalTarget);
-                if (m) m.classList.remove('hidden');
-                return;
-            }
-            const action = this.getAttribute('data-action');
-            if (action === 'open-create-section-modal') {
-                const m = document.getElementById('createSectionModal');
-                if (m) m.classList.remove('hidden');
-            } else if (action === 'open-edit-size-guide-modal') {
-                const m = document.getElementById('editSizeGuideModal');
-                if (m) m.classList.remove('hidden');
-            } else if (action === 'open-edit-care-modal') {
-                const m = document.getElementById('editCareModal');
-                if (m) m.classList.remove('hidden');
-            } else if (action === 'open-edit-profeco-modal') {
-                const m = document.getElementById('editProfecoModal');
-                if (m) m.classList.remove('hidden');
-            }
+    // 6. GESTOR DE MODALES OPERATIVOS (APERTURA, EDICIÓN Y CIERRE SEGURO)
+    function openModal(id) {
+        const m = document.getElementById(id);
+        if (!m) return;
+        m.classList.remove('hidden');
+        m.style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        if (!m) return;
+        m.classList.add('hidden');
+        m.style.display = 'none';
+    }
+
+    // BIFURCADOR EN MODAL CREAR SECCIÓN
+    const btnModeCat = document.getElementById('createModeCatalogBtn');
+    const btnModeCont = document.getElementById('createModeContentBtn');
+    const wrapCatTax = document.getElementById('createCatalogTaxonomies');
+    const wrapCatType = document.getElementById('createTypeCatalogWrap');
+    const wrapContOpt = document.getElementById('createContentOptions');
+    const wrapContType = document.getElementById('createTypeContentWrap');
+    const selCatType = document.getElementById('createSectionTypeCatalog');
+    const selContType = document.getElementById('createSectionTypeContent');
+
+    if (btnModeCat && btnModeCont) {
+        btnModeCat.addEventListener('click', function () {
+            btnModeCat.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition';
+            btnModeCont.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition';
+            if (wrapCatTax) { wrapCatTax.classList.remove('hidden'); wrapCatTax.style.display = 'block'; }
+            if (wrapCatType) { wrapCatType.classList.remove('hidden'); wrapCatType.style.display = 'block'; }
+            if (wrapContOpt) { wrapContOpt.classList.add('hidden'); wrapContOpt.style.display = 'none'; }
+            if (wrapContType) { wrapContType.classList.add('hidden'); wrapContType.style.display = 'none'; }
+            if (selCatType) selCatType.name = 'type';
+            if (selContType) selContType.name = 'type_disabled';
         });
-    });
 
-    const closeButtons = document.querySelectorAll('[data-action="close-modal"]');
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const modalId = this.getAttribute('data-modal');
-            const m = document.getElementById(modalId);
-            if (m) m.classList.add('hidden');
-        });
-    });
-
-    // Toggle de opciones condicionales en el modal de secciones
-    const sectionTypeSelect = document.getElementById('sectionTypeSelect');
-    const taxonomyOpts = document.getElementById('taxonomySectionOptions');
-    const customCodeOpts = document.getElementById('customCodeSectionOptions');
-
-    if (sectionTypeSelect) {
-        sectionTypeSelect.addEventListener('change', function () {
-            if (this.value === 'custom_html_css_js') {
-                if (taxonomyOpts) taxonomyOpts.classList.add('hidden');
-                if (customCodeOpts) customCodeOpts.classList.remove('hidden');
-            } else {
-                if (taxonomyOpts) taxonomyOpts.classList.remove('hidden');
-                if (customCodeOpts) customCodeOpts.classList.add('hidden');
-            }
+        btnModeCont.addEventListener('click', function () {
+            btnModeCont.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition';
+            btnModeCat.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition';
+            if (wrapCatTax) { wrapCatTax.classList.add('hidden'); wrapCatTax.style.display = 'none'; }
+            if (wrapCatType) { wrapCatType.classList.add('hidden'); wrapCatType.style.display = 'none'; }
+            if (wrapContOpt) { wrapContOpt.classList.remove('hidden'); wrapContOpt.style.display = 'block'; }
+            if (wrapContType) { wrapContType.classList.remove('hidden'); wrapContType.style.display = 'block'; }
+            if (selContType) selContType.name = 'type';
+            if (selCatType) selCatType.name = 'type_disabled';
         });
     }
 
-    // Reordenamiento interactivo de secciones
+    // MANEJADOR CONDICIONAL EN MODAL DE EDICIÓN
+    const editTypeSelect = document.getElementById('editTypeSelect');
+    const editCatTax = document.getElementById('editCatalogTaxonomies');
+    const editContOpt = document.getElementById('editContentOptions');
+
+    function toggleEditTypePanels(typeVal) {
+        const contentTypes = ['hero_carousel', 'editorial_banner', 'brand_pillars', 'promo_modal', 'custom_html_css_js'];
+        if (contentTypes.includes(typeVal)) {
+            if (editCatTax) { editCatTax.classList.add('hidden'); editCatTax.style.display = 'none'; }
+            if (editContOpt) { editContOpt.classList.remove('hidden'); editContOpt.style.display = 'block'; }
+        } else {
+            if (editCatTax) { editCatTax.classList.remove('hidden'); editCatTax.style.display = 'block'; }
+            if (editContOpt) { editContOpt.classList.add('hidden'); editContOpt.style.display = 'none'; }
+        }
+    }
+
+    if (editTypeSelect) {
+        editTypeSelect.addEventListener('change', function () {
+            toggleEditTypePanels(this.value);
+        });
+    }
+
+    // DELEGACIÓN GLOBAL DE EVENTOS PARA MODALES
+    document.addEventListener('click', function (e) {
+        // Apertura de modal de crear sección
+        const openCreateBtn = e.target.closest('[data-action="open-create-section-modal"]');
+        if (openCreateBtn) {
+            openModal('createSectionModal');
+            return;
+        }
+
+        // Apertura de modal de editar sección
+        const openEditSecBtn = e.target.closest('[data-action="open-edit-section-modal"]');
+        if (openEditSecBtn) {
+            const raw = openEditSecBtn.getAttribute('data-section');
+            if (raw) {
+                try {
+                    const sec = JSON.parse(raw);
+                    const form = document.getElementById('editSectionForm');
+                    if (form) form.action = `/admin/tienda-cms/secciones/${sec.id}`;
+
+                    const universeSel = document.getElementById('editUniverseSelect');
+                    if (universeSel) universeSel.value = sec.universe || 'all';
+
+                    const statusSel = document.getElementById('editStatusSelect');
+                    if (statusSel) statusSel.value = sec.status || 'active';
+
+                    const typeSel = document.getElementById('editTypeSelect');
+                    if (typeSel) {
+                        typeSel.value = sec.type || 'curated_products';
+                        toggleEditTypePanels(typeSel.value);
+                    }
+
+                    const nameInp = document.getElementById('editNameInput');
+                    if (nameInp) nameInp.value = sec.name || '';
+
+                    const badgeInp = document.getElementById('editBadgeInput');
+                    if (badgeInp) badgeInp.value = sec.badge || '';
+
+                    const titleInp = document.getElementById('editTitleInput');
+                    if (titleInp) titleInp.value = sec.title || '';
+
+                    const subtitleInp = document.getElementById('editSubtitleInput');
+                    if (subtitleInp) subtitleInp.value = sec.subtitle || '';
+
+                    // Taxonomías
+                    const qr = sec.query_rules || {};
+                    const catSel = document.getElementById('editCategoryId');
+                    if (catSel) catSel.value = qr.category_id || '';
+
+                    const scatSel = document.getElementById('editSubcategoryId');
+                    if (scatSel) scatSel.value = qr.subcategory_id || '';
+
+                    const brandSel = document.getElementById('editBrand');
+                    if (brandSel) brandSel.value = qr.brand || '';
+
+                    const famSel = document.getElementById('editFamily');
+                    if (famSel) famSel.value = qr.family || '';
+
+                    const gtSel = document.getElementById('editGarmentType');
+                    if (gtSel) gtSel.value = qr.garment_type || '';
+
+                    const tagSel = document.getElementById('editTag');
+                    if (tagSel) tagSel.value = qr.tag || '';
+
+                    const discSel = document.getElementById('editDiscount');
+                    if (discSel) discSel.value = qr.discount || 'all';
+
+                    const limSel = document.getElementById('editLimit');
+                    if (limSel) limSel.value = qr.limit || 8;
+
+                    // Código custom
+                    const htmlArea = document.getElementById('editCustomHtml');
+                    if (htmlArea) htmlArea.value = sec.custom_html || '';
+
+                    const cssArea = document.getElementById('editCustomCss');
+                    if (cssArea) cssArea.value = sec.custom_css || '';
+
+                    const jsArea = document.getElementById('editCustomJs');
+                    if (jsArea) jsArea.value = sec.custom_js || '';
+
+                    openModal('editSectionModal');
+                } catch (err) {
+                    console.error('Error al precargar datos de la sección:', err);
+                }
+            }
+            return;
+        }
+
+        // Archivar sección directamente
+        const archiveBtn = e.target.closest('[data-action="archive-section"]');
+        if (archiveBtn) {
+            const secId = archiveBtn.getAttribute('data-section-id');
+            const secName = archiveBtn.getAttribute('data-section-name');
+            if (confirm(`¿Archivar la sección "${secName}"? Pasará a estado archivado y dejará de mostrarse en la tienda.`)) {
+                const archiveForm = document.getElementById('archiveSectionForm');
+                if (archiveForm && secId) {
+                    archiveForm.action = `/admin/tienda-cms/secciones/${secId}/archivar`;
+                    archiveForm.submit();
+                }
+            }
+            return;
+        }
+
+        // Apertura de otros modales oficiales
+        const openBtn = e.target.closest('[data-action^="open-"]');
+        if (openBtn) {
+            const modalTarget = openBtn.getAttribute('data-modal');
+            if (modalTarget) {
+                openModal(modalTarget);
+                return;
+            }
+            const action = openBtn.getAttribute('data-action');
+            if (action === 'open-edit-size-guide-modal') openModal('editSizeGuideModal');
+            else if (action === 'open-edit-care-modal') openModal('editCareModal');
+            else if (action === 'open-edit-profeco-modal') openModal('editProfecoModal');
+        }
+
+        // Cierre de modales
+        const closeBtn = e.target.closest('[data-action="close-modal"]');
+        if (closeBtn) {
+            const modalId = closeBtn.getAttribute('data-modal');
+            if (modalId) closeModal(modalId);
+        }
+    });
+
+    // Reordenamiento interactivo de secciones (Drag & Drop)
     const sectionsBody = document.getElementById('sectionsSortableBody');
     const syncBadge = document.getElementById('reorderSyncStatus');
 

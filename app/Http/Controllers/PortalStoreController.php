@@ -221,8 +221,18 @@ class PortalStoreController extends Controller
 
         // 8. Secciones dinámicas y taxonomías de catálogo de Hub 4
         $sections = CmsSection::orderBy('sort_order')->get();
-        $categories = Category::select('id', 'name', 'slug')->get();
+        $categories = Category::whereNull('parent_id')->select('id', 'name', 'slug')->get();
+        $subcategories = Category::whereNotNull('parent_id')->select('id', 'name', 'slug', 'parent_id')->get();
         $brands = Product::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand');
+        $textileFamilies = ['Modal Velvet', 'Algodón Pima', 'Bambú Orgánico', 'Microfibra Dry-Fit', 'Malla Transpirable', 'Satín & Seda'];
+        $garmentTypes = ['Boxer Trunk', 'Jockstrap', 'Brief', 'Bikini / Tanga', 'Harness / Arnés', 'Tank Top / Playera', 'Bodysuit'];
+        $styleTags = ['Sensual', 'Deportivo / Gym', 'Afirmativo / Compresión', 'Minimalista', 'Edición Limitada', 'Básico Diario'];
+        $discountOptions = [
+            'all' => 'Cualquier prenda',
+            'only_sale' => 'Solo con descuento / Liquidación',
+            'min_15' => 'Descuento mín. 15%',
+            'min_25' => 'Descuento mín. 25%',
+        ];
 
         // 9. Páginas CMS, Blog Revista Digital, Tracking y Filtros
         $pages = CmsPage::orderBy('navbar_order')->get();
@@ -238,7 +248,12 @@ class PortalStoreController extends Controller
             'banners' => $banners,
             'sections' => $sections,
             'categories' => $categories,
+            'subcategories' => $subcategories,
             'brands' => $brands,
+            'textileFamilies' => $textileFamilies,
+            'garmentTypes' => $garmentTypes,
+            'styleTags' => $styleTags,
+            'discountOptions' => $discountOptions,
             'shippingRule' => $shippingRule,
             'simulator' => $simulator,
             'sizeGuide' => $sizeGuide,
@@ -358,38 +373,81 @@ class PortalStoreController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:120',
             'brandName' => 'nullable|string|max:120',
+            'brand_name' => 'nullable|string|max:120',
+            'kicker' => 'nullable|string|max:200',
             'primaryColor' => 'nullable|string|max:20',
+            'primary_color' => 'nullable|string|max:20',
             'accentColor' => 'nullable|string|max:20',
+            'accent_color' => 'nullable|string|max:20',
             'backgroundColor' => 'nullable|string|max:20',
+            'background_color' => 'nullable|string|max:20',
             'surfaceColor' => 'nullable|string|max:20',
+            'surface_color' => 'nullable|string|max:20',
             'textColor' => 'nullable|string|max:20',
+            'text_color' => 'nullable|string|max:20',
             'heroTitle' => 'nullable|string|max:200',
+            'hero_title' => 'nullable|string|max:200',
             'heroSubtitle' => 'nullable|string|max:500',
+            'hero_subtitle' => 'nullable|string|max:500',
             'heroCtaText' => 'nullable|string|max:80',
+            'hero_cta_text' => 'nullable|string|max:80',
             'heroCtaUrl' => 'nullable|string|max:255',
+            'hero_cta_url' => 'nullable|string|max:255',
             'customCss' => 'nullable|string',
+            'custom_css' => 'nullable|string',
             'customJs' => 'nullable|string',
+            'custom_js' => 'nullable|string',
         ]);
 
         $config = CmsStorefrontConfig::forUniverse($universe);
-        if (!empty($validated['name']) || !empty($validated['brandName'])) {
-            $config->brand_name = $validated['brandName'] ?? $validated['name'];
+
+        $brandName = $request->input('brand_name') ?? $request->input('brandName') ?? $request->input('name');
+        if ($brandName) {
+            $config->brand_name = $brandName;
         }
-        if (!empty($validated['primaryColor'])) $config->primary_color = $validated['primaryColor'];
-        if (!empty($validated['accentColor'])) $config->accent_color = $validated['accentColor'];
-        if (!empty($validated['backgroundColor'])) $config->background_color = $validated['backgroundColor'];
-        if (!empty($validated['surfaceColor'])) $config->surface_color = $validated['surfaceColor'];
-        if (!empty($validated['textColor'])) $config->text_color = $validated['textColor'];
-        if (!empty($validated['heroTitle'])) $config->hero_title = $validated['heroTitle'];
-        if (!empty($validated['heroSubtitle'])) $config->hero_subtitle = $validated['heroSubtitle'];
-        if (!empty($validated['heroCtaText'])) $config->hero_cta_text = $validated['heroCtaText'];
-        if (!empty($validated['heroCtaUrl'])) $config->hero_cta_url = $validated['heroCtaUrl'];
-        if (isset($validated['customCss'])) $config->custom_css = $validated['customCss'];
-        if (isset($validated['customJs'])) $config->custom_js = $validated['customJs'];
+        if ($request->filled('kicker')) {
+            $config->kicker = $request->input('kicker');
+        }
+        if ($request->filled('primary_color') || $request->filled('primaryColor')) {
+            $config->primary_color = $request->input('primary_color') ?? $request->input('primaryColor');
+        }
+        if ($request->filled('accent_color') || $request->filled('accentColor')) {
+            $config->accent_color = $request->input('accent_color') ?? $request->input('accentColor');
+        }
+        if ($request->filled('background_color') || $request->filled('backgroundColor')) {
+            $config->background_color = $request->input('background_color') ?? $request->input('backgroundColor');
+        }
+        if ($request->filled('surface_color') || $request->filled('surfaceColor')) {
+            $config->surface_color = $request->input('surface_color') ?? $request->input('surfaceColor');
+        }
+        if ($request->filled('text_color') || $request->filled('textColor')) {
+            $config->text_color = $request->input('text_color') ?? $request->input('textColor');
+        }
+        if ($request->filled('hero_title') || $request->filled('heroTitle')) {
+            $config->hero_title = $request->input('hero_title') ?? $request->input('heroTitle');
+        }
+        if ($request->filled('hero_subtitle') || $request->filled('heroSubtitle')) {
+            $config->hero_subtitle = $request->input('hero_subtitle') ?? $request->input('heroSubtitle');
+        }
+        if ($request->filled('hero_cta_text') || $request->filled('heroCtaText')) {
+            $config->hero_cta_text = $request->input('hero_cta_text') ?? $request->input('heroCtaText');
+        }
+        if ($request->filled('hero_cta_url') || $request->filled('heroCtaUrl')) {
+            $config->hero_cta_url = $request->input('hero_cta_url') ?? $request->input('heroCtaUrl');
+        }
+        if ($request->has('custom_css') || $request->has('customCss')) {
+            $config->custom_css = $request->input('custom_css') ?? $request->input('customCss');
+        }
+        if ($request->has('custom_js') || $request->has('customJs')) {
+            $config->custom_js = $request->input('custom_js') ?? $request->input('customJs');
+        }
+
         $config->save();
 
         $cached = [
             'name' => $config->brand_name,
+            'brandName' => $config->brand_name,
+            'kicker' => $config->kicker,
             'primaryColor' => $config->primary_color,
             'accentColor' => $config->accent_color,
             'backgroundColor' => $config->background_color,
@@ -399,11 +457,13 @@ class PortalStoreController extends Controller
             'heroSubtitle' => $config->hero_subtitle,
             'heroCtaText' => $config->hero_cta_text,
             'heroCtaUrl' => $config->hero_cta_url,
+            'customCss' => $config->custom_css,
+            'customJs' => $config->custom_js,
         ];
         Cache::forever('cms_storefront_' . $universe, $cached);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'storefront' => $cached]);
+            return response()->json(['success' => true, 'universe' => $universe, 'storefront' => $cached, 'message' => "Configuración de vitrina {$universe} guardada exitosamente."]);
         }
 
         return back()->with('success', "Configuración visual de vitrina {$universe} actualizada exitosamente.");
@@ -417,7 +477,52 @@ class PortalStoreController extends Controller
         $validated = $request->validate([
             'universe' => 'required|string|in:all,marte,venus,tiresias,terra',
             'name' => 'required|string|max:120',
-            'type' => 'required|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner',
+            'type' => 'required|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner,promo_modal',
+            'title' => 'nullable|string|max:200',
+            'subtitle' => 'nullable|string|max:500',
+            'badge' => 'nullable|string|max:80',
+            'query_rules' => 'nullable|array',
+            'custom_html' => 'nullable|string',
+            'custom_css' => 'nullable|string',
+            'custom_js' => 'nullable|string',
+            'settings' => 'nullable|array',
+            'status' => 'nullable|string|in:active,draft,archived',
+        ]);
+
+        $maxOrder = CmsSection::max('sort_order') ?? 0;
+        $validated['sort_order'] = $maxOrder + 1;
+        $validated['status'] = $validated['status'] ?? 'active';
+
+        // Regla de Negocio: Las secciones de tarjetas de catálogo NO permiten código custom.
+        // Solo las secciones de contenido/hero/carrusel/modal/botones pueden tener HTML/CSS/JS.
+        $productCardTypes = ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'subcategories_slider'];
+        if (in_array($validated['type'], $productCardTypes)) {
+            $validated['custom_html'] = null;
+            $validated['custom_css'] = null;
+            $validated['custom_js'] = null;
+        }
+
+        $section = CmsSection::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'section' => $section, 'message' => "Sección '{$section->name}' creada exitosamente."]);
+        }
+
+        return back()->with('success', "Sección '{$section->name}' creada exitosamente.");
+    }
+
+    /**
+     * Update an existing modular section.
+     */
+    public function updateSection(Request $request, $id)
+    {
+        $section = CmsSection::findOrFail($id);
+
+        $validated = $request->validate([
+            'universe' => 'required|string|in:all,marte,venus,tiresias,terra',
+            'name' => 'required|string|max:120',
+            'type' => 'nullable|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner,promo_modal',
+            'status' => 'required|string|in:active,draft,archived',
             'title' => 'nullable|string|max:200',
             'subtitle' => 'nullable|string|max:500',
             'badge' => 'nullable|string|max:80',
@@ -428,17 +533,40 @@ class PortalStoreController extends Controller
             'settings' => 'nullable|array',
         ]);
 
-        $maxOrder = CmsSection::max('sort_order') ?? 0;
-        $validated['sort_order'] = $maxOrder + 1;
-        $validated['status'] = 'active';
-
-        $section = CmsSection::create($validated);
-
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'section' => $section]);
+        if (empty($validated['type'])) {
+            $validated['type'] = $section->type;
         }
 
-        return back()->with('success', "Sección '{$section->name}' creada exitosamente.");
+        $productCardTypes = ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'subcategories_slider'];
+        if (in_array($validated['type'], $productCardTypes)) {
+            $validated['custom_html'] = null;
+            $validated['custom_css'] = null;
+            $validated['custom_js'] = null;
+        }
+
+        $section->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'section' => $section, 'message' => "Sección '{$section->name}' actualizada correctamente."]);
+        }
+
+        return back()->with('success', "Sección '{$section->name}' actualizada correctamente.");
+    }
+
+    /**
+     * Archive an existing modular section (status = 'archived').
+     */
+    public function archiveSection(Request $request, $id)
+    {
+        $section = CmsSection::findOrFail($id);
+        $section->status = 'archived';
+        $section->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'archived', 'message' => "Sección '{$section->name}' archivada correctamente."]);
+        }
+
+        return back()->with('success', "Sección '{$section->name}' archivada correctamente.");
     }
 
     /**

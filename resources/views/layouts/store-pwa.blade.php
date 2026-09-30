@@ -70,9 +70,11 @@
       @endif
       @if(isset($currentStorefront['accentColor']))
         --brand-accent: {{ $currentStorefront['accentColor'] }};
+        --accent-indigo: {{ $currentStorefront['accentColor'] }};
       @endif
       @if(isset($currentStorefront['backgroundColor']))
         --brand-bg: {{ $currentStorefront['backgroundColor'] }};
+        --bg-secondary: {{ $currentStorefront['backgroundColor'] }};
       @endif
       @if(isset($currentStorefront['surfaceColor']))
         --brand-surface: {{ $currentStorefront['surfaceColor'] }};

@@ -1654,26 +1654,76 @@ graph TD
 ---
 
 ### `TASK-H2-13`: Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2
-* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Pendiente**
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
 * **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulos 2 al 8
 * **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 2):**
-  1. **Pantallas en Blanco al Conmutar:** Al hacer clic en cualquiera de las siguientes 7 pestañas (*2. Banners & Marquesinas*, *3. Reglas Comerciales & Fletes*, *4. Contenido Editorial & Tallas*, *5. Páginas & Navbar*, *6. Revista Digital*, *7. Tracking & Analítica*, *8. Filtros Catálogo*), el área de trabajo se muestra totalmente vacía debajo de las tarjetas de KPIs.
-  2. **Falla en la Alternancia de Estados:** La lógica de conmutación de paneles (`tabPanels`) y las clases de visualización (`hidden` vs `active`) presentan desacople con los estilos CSS del panel o colisionan con escuchas de eventos residuales en el cliente.
-* **Solución de UI/UX & Arquitectura Requerida:**
-  - Auditar la alternancia del DOM asegurando que cada uno de los contenedores (`storeBannersPanel`, `storeShippingPanel`, `storeEditorialPanel`, `storePagesPanel`, `storeMagazinePanel`, `storeTrackingPanel`, `storeFiltersPanel`) mantenga `display: block` cuando está activo y `display: none` cuando está inactivo, sin depender de clases conflictivas de frameworks externos.
-  - Sincronizar el estado del selector en la URL (`?tab=banners`, `?tab=shipping`, etc.) para permitir recargas y persistencia de navegación directa sin pérdida de estado.
-  - Verificar que los componentes internos de cada pestaña (formularios, tablas de banners, simulador de elasticidad, tablas de páginas y revista, inputs de tracking y switches de filtros) se rendericen completos con tipografía y espaciado formal RevOps.
+  1. **Pantallas en Blanco al Conmutar:** Al hacer clic en cualquiera de las siguientes 7 pestañas (*2. Banners & Marquesinas*, *3. Reglas Comerciales & Fletes*, *4. Contenido Editorial & Tallas*, *5. Páginas & Navbar*, *6. Revista Digital*, *7. Tracking & Analítica*, *8. Filtros Catálogo*), el área de trabajo se mostraba vacía.
+  2. **Falla en la Alternancia de Estados:** Conflicto de clases CSS con Tailwind CDN y estilo en línea.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Inyección de reglas CSS explícitas `.tab-panel.hidden { display: none !important; }` y `.tab-panel:not(.hidden) { display: block !important; }`.
+  - Conmutador JavaScript `switchTab()` en `resources/views/portal/store.blade.php` con manipulación directa de estilo `style.display = 'block' / 'none'`.
+  - Estilos activos para botones de subnav `.store-subnav-btn.active` con background formal índigo y texto blanco.
+  - Sincronización bidireccional con parámetro URL `?tab=` y hash history.
 
 ---
 
 ### `TASK-H2-14`: Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real
-* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Pendiente**
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
 * **Módulo / Hub Destino:** Tienda Pública D2C PWA (`storefront`)
 * **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 3):**
-  1. **Persistencia de Ficha Modal en Desktop:** Al hacer clic sobre cualquier tarjeta de prenda en el catálogo o vitrina pública (ej. *Tanga Licra Azul Rey*), el sistema continúa abriendo una ventana modal superpuesta con backdrop oscuro y botón de cierre (`✕`).
-  2. **Persistencia de Drawer en Móvil:** En viewports móviles, la interacción levanta un bottom sheet deslizable en lugar de transferir la navegación.
-  3. **Desconexión con la Ruta Canónica:** No se ejecuta la redirección nativa hacia la vista a pantalla completa dedicada `/productos/{slug}` ([product-detail.blade.php](file:///c:/laragon/www/mi-tienda-online/resources/views/store/pwa/product-detail.blade.php)), impidiendo el aprovechamiento de la ergonomía full-screen, SEO de producto y URL compartible.
-* **Solución de UI/UX & Arquitectura Requerida:**
-  - En los scripts del storefront (`store-pwa.js` y plantillas Blade de tarjetas de producto en el home/catálogo), sustituir el disparador `openProductModal(id)` por enlaces `<a href="/productos/${slug}">` directos con navegación estándar.
-  - Eliminar o desacoplar el contenedor modal `#productModal` y drawer `#productDrawer` para visitas directas a productos, asegurando que el flujo de compra inicie siempre desde la PDP a pantalla completa con selector de tallas y sticky bottom bar.
+  1. **Persistencia de Ficha Modal en Desktop:** Al hacer clic sobre cualquier tarjeta de prenda en el catálogo o vitrina pública (ej. *Tanga Licra Azul Rey*), el sistema continuaba abriendo una ventana modal superpuesta.
+  2. **Persistencia de Drawer en Móvil:** En viewports móviles, la interacción levantaba un bottom sheet deslizable.
+  3. **Desconexión con la Ruta Canónica:** No se ejecutaba la redirección nativa hacia la vista a pantalla completa dedicada `/productos/{slug}`.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - En `resources/views/store/pwa/home.blade.php`, todas las tarjetas de prendas (secciones curadas, fallback catalog feed) fueron reescritas con enlaces nativos directos `<a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}">`.
+  - En `public/js/storefront/store-pwa.js`, la función `openProductModal(productId)` redirige directamente vía `window.location.href = '/productos/' + slug`.
+  - Eliminación de todo código muerto de renderizado de modal/drawer en el cliente, dejando navegación estándar e indexable para SEO.
+
+---
+
+### `TASK-H2-15`: Bifurcación Funcional de Creación de Secciones (Modo A: Catálogo de Prendas vs Modo B: Contenido/Hero/Carrusel/Modal/Custom) y Creación de Modales
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado:**
+  1. El botón `+ Crear Nueva Sección` no abría el modal en la interfaz.
+  2. El sistema no permitía crear modales promocionales ni filtrado taxonómico avanzado por familias textiles, prendas, marcas o descuentos.
+  3. Faltaba la regla de negocio estricta: Secciones de tarjetas de productos son 100% catálogo (sin código custom), mientras que banners, carruseles, modales y botones permiten HTML/CSS/JS.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Creación de `#createSectionModal` con selector conmutable de modo:
+    * **Modo A (Catálogo de Prendas):** Controles guiados para universo, categorías, subcategorías, marcas de Hub 4, familias textiles, tipos de prenda, etiquetas de estilo, filtros de descuento, límite de productos (4 a 24) y layout (grid / carrusel). **Estrictamente sin áreas de código custom**.
+    * **Modo B (Contenido / Hero / Carrusel / Modal Promocional / Botones Custom):** Soporta `hero_carousel`, `brand_pillars`, `editorial_banner`, `promo_modal`, `custom_html_css_js`. Incluye editores de código HTML, CSS y JS con sanitización en backend (`storeSection` y `updateSection`).
+  - Validación en backend (`PortalStoreController@storeSection`) que limpia y anula `custom_html`, `custom_css` y `custom_js` en tipos de catálogo de productos.
+
+---
+
+### `TASK-H2-16`: Persistencia y Bidireccionalidad de Cambios de Vitrina (`Guardar Cambios de Vitrina`) con Caché y Storefront Real
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado:**
+  1. El botón `Guardar Cambios de Vitrina` no guardaba los cambios en base de datos ni los reflejaba en la tienda pública.
+  2. Discrepancias de nombres de campos (`brand_name` vs `name`, `accent_color` vs `accentColor`).
+  3. Falta de sincronización con la caché del storefront `cms_storefront_{$universe}`.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Estandarización de inputs en `#vitrinaConfigForm` en `resources/views/portal/store.blade.php`.
+  - Normalización de parámetros en `PortalStoreController@updateStorefront` con soporte para snake_case y camelCase, escritura en `CmsStorefrontConfig::forUniverse()` y renovación atómica de `Cache::forever('cms_storefront_' . $universe, $cached)`.
+  - Respuesta AJAX JSON con botón con indicador de carga (*Guardando...*), animación de checkmark y feedback visual.
+  - Actualización inmediata en el objeto JavaScript de previsualización en vivo (`STOREFRONTS[currentUniverse]`).
+  - Mapeo directo en `resources/views/layouts/store-pwa.blade.php` en `#hub2DynamicTheme` para propagar `--brand-accent`, `--accent-indigo`, `--brand-bg` y `--bg-secondary` a todos los botones y fondos de la tienda real.
+
+---
+
+### `TASK-H2-17`: Suite de Edición, Reasignación de Vitrina, Archivado y Estado de Secciones
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado:**
+  1. Las secciones existentes no se podían editar (ni vitrina de destino, ni estado, ni parámetros).
+  2. No existía la capacidad de archivar secciones.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Adición de rutas RESTful en `routes/web.php`:
+    * `PUT /admin/tienda-cms/secciones/{section}` (`portal.store.sections.update`).
+    * `POST /admin/tienda-cms/secciones/{section}/archivar` (`portal.store.sections.archive`).
+  - Modal `#editSectionModal` con pre-población dinámica (`window.openEditSectionModal(id)`).
+  - Formulario y botón de archivado atómico `[Archivar]` con confirmación previa y transición a estado `archived`.
+  - Badges visuales de estado en la tabla: verde esmeralda para `active`, gris pizarra para `draft`, ámbar para `archived`.
+  - Suite de pruebas automatizadas en `tests/Feature/Hub2AdminStoreControllerTest.php` con cobertura al 100%.
 
