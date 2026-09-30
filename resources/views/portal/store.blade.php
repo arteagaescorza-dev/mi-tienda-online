@@ -434,7 +434,7 @@
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section="{{ htmlspecialchars(json_encode($sec), ENT_QUOTES, 'UTF-8') }}" onclick="window.openEditSectionModal(this.dataset.section)" type="button" title="Editar información, vitrina y contenido">
+                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section-id="{{ $sec->id }}" onclick="window.openEditSectionModal({{ $sec->id }})" type="button" title="Editar información, vitrina y contenido">
                                         Editar
                                     </button>
                                     @if($sec->status !== 'archived')
@@ -1777,6 +1777,7 @@
     'use strict';
 
     const storefrontsData = @json($storefronts);
+    const sectionsData = @json($sections->keyBy('id'));
     let activeUniverse = '{{ $activeUniverse ?? "marte" }}';
 
     // ==========================================
@@ -1973,17 +1974,31 @@
         window.openStoreModal('createSectionModal');
     };
 
-    window.openEditSectionModal = function(secData) {
-        let sec = secData;
-        if (typeof sec === 'string') {
+    window.openEditSectionModal = function(secIdOrData) {
+        let sec = null;
+        if (typeof secIdOrData === 'number' || (typeof secIdOrData === 'string' && /^\d+$/.test(secIdOrData.trim()))) {
+            const id = parseInt(secIdOrData);
+            sec = sectionsData[id];
+        } else if (typeof secIdOrData === 'object' && secIdOrData !== null) {
+            sec = secIdOrData;
+        } else if (typeof secIdOrData === 'string') {
             try {
-                sec = JSON.parse(sec);
+                sec = JSON.parse(secIdOrData);
             } catch (err) {
-                console.error('[Store CMS] Error al parsear JSON de sección:', err);
-                return;
+                const id = parseInt(secIdOrData);
+                if (!isNaN(id) && sectionsData[id]) {
+                    sec = sectionsData[id];
+                } else {
+                    console.error('[Store CMS] Error al parsear JSON de sección:', err);
+                    return;
+                }
             }
         }
-        if (!sec || !sec.id) return;
+
+        if (!sec || !sec.id) {
+            console.error('[Store CMS] No se pudo encontrar la sección para editar:', secIdOrData);
+            return;
+        }
 
         const form = document.getElementById('editSectionForm');
         if (form) form.action = `/admin/tienda-cms/secciones/${sec.id}`;
@@ -2013,7 +2028,14 @@
         if (subtitleInp) subtitleInp.value = sec.subtitle || '';
 
         // Taxonomías
-        const qr = sec.query_rules || {};
+        let qr = sec.query_rules || {};
+        if (typeof qr === 'string') {
+            try {
+                qr = JSON.parse(qr);
+            } catch (e) {
+                qr = {};
+            }
+        }
         const catSel = document.getElementById('editCategoryId');
         if (catSel) catSel.value = qr.category_id || '';
 
@@ -2425,8 +2447,9 @@
         // Botón Editar Sección
         const editBtn = e.target.closest('[data-action="open-edit-section-modal"]');
         if (editBtn) {
+            const secId = editBtn.getAttribute('data-section-id');
             const secData = editBtn.getAttribute('data-section');
-            if (secData) window.openEditSectionModal(secData);
+            window.openEditSectionModal(secId || secData);
             return;
         }
 
