@@ -14,17 +14,97 @@
         .tab-panel:not(.hidden) {
             display: block !important;
         }
+        .store-subnav-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            grid-template-rows: repeat(2, auto) !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+        @media (max-width: 900px) {
+            .store-subnav-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-rows: repeat(4, auto) !important;
+            }
+        }
+        .store-subnav-btn {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 10px 14px !important;
+            border-radius: 10px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            text-align: left !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        .store-subnav-btn:hover {
+            color: #0f172a !important;
+            background: #f8fafc !important;
+            border-color: #94a3b8 !important;
+        }
         .store-subnav-btn.active {
             background-color: #0f172a !important;
             color: #ffffff !important;
+            border-color: #0f172a !important;
             font-weight: 700 !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15) !important;
+        }
+        .store-subnav-btn svg {
+            color: #64748b !important;
+            flex-shrink: 0 !important;
         }
         .store-subnav-btn.active svg {
             color: #ffffff !important;
         }
+        .store-subnav-btn .store-subnav-count {
+            background-color: #f1f5f9 !important;
+            color: #475569 !important;
+            padding: 2px 7px !important;
+            border-radius: 6px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            white-space: nowrap !important;
+            border: 1px solid #e2e8f0 !important;
+        }
         .store-subnav-btn.active .store-subnav-count {
             background-color: #334155 !important;
+            color: #ffffff !important;
+            border-color: #475569 !important;
+        }
+        .store-subnav-btn .section-help-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 18px !important;
+            height: 18px !important;
+            border-radius: 9999px !important;
+            background: #e2e8f0 !important;
+            color: #475569 !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            border: none !important;
+            cursor: pointer !important;
+            margin-left: 4px !important;
+            line-height: 1 !important;
+        }
+        .store-subnav-btn.active .section-help-btn {
+            background: rgba(255, 255, 255, 0.25) !important;
+            color: #ffffff !important;
+        }
+        .store-subnav-btn .section-help-btn:hover {
+            background: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        .store-subnav-btn.active .section-help-btn:hover {
+            background: rgba(255, 255, 255, 0.4) !important;
             color: #ffffff !important;
         }
     </style>
@@ -66,7 +146,7 @@
         </div>
 
         <!-- 2 FILAS DE PESTAÑAS (4 columnas x 2 filas en desktop) -->
-        <nav class="grid grid-cols-2 md:grid-cols-4 gap-2.5 w-full" aria-label="Submódulos de Tienda y CMS">
+        <nav class="store-subnav-grid w-full" aria-label="Submódulos de Tienda y CMS">
             <!-- TAB 1: EDITOR VISUAL -->
             <button class="store-subnav-btn active" data-action="switch-store-tab" data-tab="visual" onclick="window.switchStoreTab('visual')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
@@ -75,7 +155,7 @@
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">4 Vitrinas</span>
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Editor Visual" data-help-title="Editor Visual Multiverso" data-help-desc="Ajusta la paleta de 8 colores, logos y apariencia visual de cada vitrina manteniendo un inventario unificado.">?</button>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Editor Visual" data-help-title="Editor Visual Multiverso" data-help-desc="Ajusta la paleta de 8 colores, logos y apariencia visual de cada vitrina manteniendo un inventario unificado.">?</span>
                 </div>
             </button>
 
@@ -87,7 +167,7 @@
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ count($banners) }} Banners</span>
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Banners" data-help-title="Banners y Marquesinas" data-help-desc="Gestor de avisos rotativos superiores y carruseles hero con validación WebP (< 100 KB).">?</button>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Banners" data-help-title="Banners y Marquesinas" data-help-desc="Gestor de avisos rotativos superiores y carruseles hero con validación WebP (< 100 KB).">?</span>
                 </div>
             </button>
 
@@ -99,7 +179,7 @@
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">${{ number_format($shippingRule['freeShippingThreshold'], 0) }}</span>
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Reglas de Flete" data-help-title="Reglas Comerciales &amp; Fletes" data-help-desc="Configuración de envío gratis, entrega en Metro Chabacano y simulador financiero de elasticidad (TASK-INT-18).">?</button>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Reglas de Flete" data-help-title="Reglas Comerciales &amp; Fletes" data-help-desc="Configuración de envío gratis, entrega en Metro Chabacano y simulador financiero de elasticidad (TASK-INT-18).">?</span>
                 </div>
             </button>
 
@@ -111,7 +191,7 @@
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">Guía Torzo</span>
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Contenido Editorial" data-help-title="Contenido Editorial &amp; Tallas" data-help-desc="Guía anatómica de tallas textiles Torzo, protocolos de cuidado y aviso sanitario PROFECO (TASK-INT-10).">?</button>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido Editorial" data-help-title="Contenido Editorial &amp; Tallas" data-help-desc="Guía anatómica de tallas textiles Torzo, protocolos de cuidado y aviso sanitario PROFECO (TASK-INT-10).">?</span>
                 </div>
             </button>
 
@@ -582,6 +662,12 @@
                             <td class="py-3 px-4">
                                 <strong class="text-slate-900 block font-semibold text-xs">{{ $sec->name }}</strong>
                                 <span class="text-slate-500 text-[11px] block mt-0.5 truncate max-w-md">{{ $sec->title ?? 'Sin título visible' }}</span>
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    <code class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono text-slate-700">#section-{{ $sec->id }}</code>
+                                    <button type="button" onclick="window.copyStoreRoute('#section-{{ $sec->id }}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer underline flex items-center gap-0.5" title="Copiar ruta ancla para vincular en botones del Hero">
+                                        <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Copiar Ruta
+                                    </button>
+                                </div>
                             </td>
                             <td class="py-3 px-3">
                                 <span class="px-2 py-1 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -985,7 +1071,12 @@
                             <tr class="hover:bg-slate-50/60 transition">
                                 <td class="py-3 px-3">
                                     <strong class="font-bold text-slate-900 block">{{ $pg->title }}</strong>
-                                    <span class="text-[11px] font-mono text-slate-400">/pagina/{{ $pg->slug }}</span>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <span class="text-[11px] font-mono text-slate-500">/pagina/{{ $pg->slug }}</span>
+                                        <button type="button" onclick="window.copyStoreRoute('/pagina/{{ $pg->slug }}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer underline flex items-center gap-0.5" title="Copiar ruta institucional para vincular en botones del Hero">
+                                            <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Copiar Ruta
+                                        </button>
+                                    </div>
                                 </td>
                                 <td class="py-3 px-3 text-center">
                                     @if($pg->show_in_navbar)
@@ -1260,7 +1351,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('portal.store.sections.store') }}" id="createSectionForm" class="space-y-4 text-xs">
+            <form method="POST" action="{{ route('portal.store.sections.store') }}" id="createSectionForm" enctype="multipart/form-data" class="space-y-4 text-xs">
                 @csrf
                 <input type="hidden" name="status" value="active">
 
@@ -1421,19 +1512,193 @@
                 </div>
 
                 <!-- CONFIGURACIÓN DE CONTENIDO & CÓDIGO CUSTOM (SOLO MODO CONTENIDO) -->
-                <div id="createContentOptions" class="space-y-3 hidden" style="display: none;">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Texto del Botón CTA (Opcional)</label>
-                            <input type="text" name="settings[cta_text]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Explorar Colección">
+                <!-- CONFIGURACIÓN DE CONTENIDO & MOTOR DE HERO (SOLO MODO CONTENIDO) -->
+                <div id="createContentOptions" class="space-y-4 hidden" style="display: none;">
+                    
+                    <!-- BLOQUE MOTOR DE HERO DINÁMICO (CUANDO ES HERO_CAROUSEL) -->
+                    <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Motor de Hero Dinámico &amp; Vitrina
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-medium">Bifurcación Visual / Código &amp; Sangrado</span>
                         </div>
+
+                        <!-- 1. BIFURCADOR DE MODO: ESTRUCTURADO VS CÓDIGO CUSTOM -->
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">URL de Destino del Botón</label>
-                            <input type="text" name="settings[cta_url]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: /catalogo?universo=marte">
+                            <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado del Hero</label>
+                            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
+                                <label id="createHeroModeStructuredLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition bg-white text-indigo-700 shadow-xs text-center">
+                                    <input type="radio" name="settings[hero_mode]" value="structured" checked class="hidden" onchange="window.toggleHeroModeCreate(this.value)">
+                                    <span>🎨 Visual Estructurado</span>
+                                </label>
+                                <label id="createHeroModeCustomLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition text-slate-600 hover:text-slate-900 text-center">
+                                    <input type="radio" name="settings[hero_mode]" value="custom" class="hidden" onchange="window.toggleHeroModeCreate(this.value)">
+                                    <span>💻 Código Custom</span>
+                                </label>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-1">Conmuta de forma mutuamente excluyente qué contenido se renderiza en la tienda para evitar duplicados.</p>
+                        </div>
+
+                        <!-- 2. ANCHO DE PANTALLA: FULL WIDTH VS BOXED -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Ancho en Pantalla (Sangrado Edge-to-Edge)</label>
+                            <input type="hidden" name="settings[full_width]" value="0">
+                            <label class="flex items-center gap-2.5 cursor-pointer p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                                <input type="checkbox" name="settings[full_width]" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                <div>
+                                    <span class="font-bold text-slate-800 block text-xs">Abarcar 100% del Ancho de Pantalla (Full-Width)</span>
+                                    <span class="text-[11px] text-slate-500">Expande el hero de borde a borde rompiendo los límites del contenedor principal de la tienda.</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- 3. IMAGEN DE FONDO (AMBOS MODOS) -->
+                        <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
+                            <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo (Background Image)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
+                                    <input type="file" name="background_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'createHeroBgPreview')">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL Externa</label>
+                                    <input type="text" name="settings[background_image]" id="createHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'createHeroBgPreview')">
+                                </div>
+                            </div>
+                            <div id="createHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
+                                <img src="" alt="Vista previa fondo" class="w-16 h-10 object-cover rounded shadow-xs bg-slate-200">
+                                <span class="text-[11px] text-slate-600 truncate flex-1 font-mono"></span>
+                                <button type="button" onclick="window.clearHeroBgPreview('createSectionModal', 'createHeroBgPreview', 'createHeroBgUrl')" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">Eliminar</button>
+                            </div>
+                        </div>
+
+                        <!-- 4. CAPA DE DEGRADADOS OVERLAY (AMBOS MODOS) -->
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <input type="hidden" name="settings[enable_gradient]" value="0">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="settings[enable_gradient]" id="createEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createGradientControls').style.display = this.checked ? 'block' : 'none'">
+                                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado / Overlay sobre el Fondo</span>
+                            </label>
+
+                            <div id="createGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
+                                            <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
+                                            <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección</label>
+                                        <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
+                                            <option value="to bottom">Vertical ↓</option>
+                                            <option value="to right">Horizontal →</option>
+                                            <option value="135deg">Diagonal ↘</option>
+                                            <option value="to top">Invertido ↑</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Opacidad: <span id="createGradOpacityVal">80%</span></label>
+                                        <input type="range" name="settings[gradient_opacity]" id="createGradOpacity" min="10" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+                                    </div>
+                                </div>
+
+                                <div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
+                            </div>
+                        </div>
+
+                        <!-- 5. ACCIONES Y BOTONES DEL HERO (SOLO MODO ESTRUCTURADO) -->
+                        <div id="createHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
+
+                            <!-- Botón Primario -->
+                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                <span class="block font-bold text-indigo-700 text-[11px]">Botón Primario (Destacado)</span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                        <input type="text" name="settings[cta_primary_text]" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: EXPLORAR CATÁLOGO" value="EXPLORAR CATÁLOGO">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="text" name="settings[cta_primary_url]" id="createCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
+                                            <select onchange="if(this.value){ document.getElementById('createCtaPrimaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                <option value="">+ Insertar Ruta</option>
+                                                <optgroup label="Secciones Modulares">
+                                                    @foreach($sections as $s)
+                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Páginas Institucionales">
+                                                    @foreach($pages as $p)
+                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Vitrinas Multiverso">
+                                                    <option value="/marte">/marte (Masculino)</option>
+                                                    <option value="/venus">/venus (Femenino)</option>
+                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                    <option value="/terra">/terra (Unisex)</option>
+                                                    <option value="/catalogo">/catalogo (General)</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón Secundario -->
+                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                <span class="block font-bold text-slate-700 text-[11px]">Botón Secundario (Opcional)</span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                        <input type="text" name="settings[cta_secondary_text]" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: GUÍA DE TALLAS TORZO" value="GUÍA DE TALLAS TORZO">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="text" name="settings[cta_secondary_url]" id="createCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas o #section-3">
+                                            <select onchange="if(this.value){ document.getElementById('createCtaSecondaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                <option value="">+ Insertar Ruta</option>
+                                                <optgroup label="Secciones Modulares">
+                                                    @foreach($sections as $s)
+                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Páginas Institucionales">
+                                                    @foreach($pages as $p)
+                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Vitrinas Multiverso">
+                                                    <option value="/marte">/marte (Masculino)</option>
+                                                    <option value="/venus">/venus (Femenino)</option>
+                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                    <option value="/terra">/terra (Unisex)</option>
+                                                    <option value="/catalogo">/catalogo (General)</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                    <!-- EDITOR DE CÓDIGO CUSTOM (SCOPED) -->
+                    <div id="createCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
                             <span class="text-[10px] text-slate-400 font-mono">Scoped HTML / CSS / JS</span>
@@ -1477,7 +1742,7 @@
                 <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editSectionModal">&times;</button>
             </div>
 
-            <form method="POST" id="editSectionForm" action="" class="space-y-4 text-xs">
+            <form method="POST" id="editSectionForm" action="" enctype="multipart/form-data" class="space-y-4 text-xs">
                 @csrf
                 @method('PUT')
 
@@ -1622,9 +1887,193 @@
                     </div>
                 </div>
 
-                <!-- CÓDIGO CUSTOM PARA EDICIÓN (SOLO SECCIONES DE CONTENIDO) -->
-                <div id="editContentOptions" class="space-y-3 hidden" style="display: none;">
-                    <div class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                <!-- CÓDIGO CUSTOM Y MOTOR DE HERO PARA EDICIÓN -->
+                <div id="editContentOptions" class="space-y-4 hidden" style="display: none;">
+                    
+                    <!-- BLOQUE MOTOR DE HERO DINÁMICO (EDICIÓN) -->
+                    <div id="editHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Motor de Hero Dinámico &amp; Vitrina
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-medium">Bifurcación Visual / Código &amp; Sangrado</span>
+                        </div>
+
+                        <!-- 1. BIFURCADOR DE MODO: ESTRUCTURADO VS CÓDIGO CUSTOM -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado del Hero</label>
+                            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
+                                <label id="editHeroModeStructuredLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition bg-white text-indigo-700 shadow-xs text-center">
+                                    <input type="radio" name="settings[hero_mode]" id="editHeroModeStructured" value="structured" checked class="hidden" onchange="window.toggleHeroModeEdit(this.value)">
+                                    <span>🎨 Visual Estructurado</span>
+                                </label>
+                                <label id="editHeroModeCustomLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition text-slate-600 hover:text-slate-900 text-center">
+                                    <input type="radio" name="settings[hero_mode]" id="editHeroModeCustom" value="custom" class="hidden" onchange="window.toggleHeroModeEdit(this.value)">
+                                    <span>💻 Código Custom</span>
+                                </label>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-1">Conmuta de forma mutuamente excluyente qué contenido se renderiza en la tienda para evitar duplicados.</p>
+                        </div>
+
+                        <!-- 2. ANCHO DE PANTALLA: FULL WIDTH VS BOXED -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Ancho en Pantalla (Sangrado Edge-to-Edge)</label>
+                            <input type="hidden" name="settings[full_width]" value="0">
+                            <label class="flex items-center gap-2.5 cursor-pointer p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                                <input type="checkbox" name="settings[full_width]" id="editFullWidth" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                <div>
+                                    <span class="font-bold text-slate-800 block text-xs">Abarcar 100% del Ancho de Pantalla (Full-Width)</span>
+                                    <span class="text-[11px] text-slate-500">Expande el hero de borde a borde rompiendo los límites del contenedor principal de la tienda.</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- 3. IMAGEN DE FONDO (AMBOS MODOS) -->
+                        <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
+                            <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo (Background Image)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
+                                    <input type="file" name="background_image_file" id="editHeroBgFile" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'editHeroBgPreview')">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL Externa</label>
+                                    <input type="text" name="settings[background_image]" id="editHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'editHeroBgPreview')">
+                                </div>
+                            </div>
+                            <div id="editHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
+                                <img src="" alt="Vista previa fondo" class="w-16 h-10 object-cover rounded shadow-xs bg-slate-200">
+                                <span class="text-[11px] text-slate-600 truncate flex-1 font-mono"></span>
+                                <button type="button" onclick="window.clearHeroBgPreview('editSectionModal', 'editHeroBgPreview', 'editHeroBgUrl')" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">Eliminar</button>
+                            </div>
+                        </div>
+
+                        <!-- 4. CAPA DE DEGRADADOS OVERLAY (AMBOS MODOS) -->
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <input type="hidden" name="settings[enable_gradient]" value="0">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="settings[enable_gradient]" id="editEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editGradientControls').style.display = this.checked ? 'block' : 'none'">
+                                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado / Overlay sobre el Fondo</span>
+                            </label>
+
+                            <div id="editGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="editGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editGradColorStart').value = this.value; window.updateHeroGradientPreview('edit')">
+                                            <input type="text" name="settings[gradient_color_start]" id="editGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('edit')">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="editGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editGradColorEnd').value = this.value; window.updateHeroGradientPreview('edit')">
+                                            <input type="text" name="settings[gradient_color_end]" id="editGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('edit')">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección</label>
+                                        <select name="settings[gradient_direction]" id="editGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('edit')">
+                                            <option value="to bottom">Vertical ↓</option>
+                                            <option value="to right">Horizontal →</option>
+                                            <option value="135deg">Diagonal ↘</option>
+                                            <option value="to top">Invertido ↑</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Opacidad: <span id="editGradOpacityVal">80%</span></label>
+                                        <input type="range" name="settings[gradient_opacity]" id="editGradOpacity" min="10" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('editGradOpacityVal').textContent = this.value + '%'; window.updateHeroGradientPreview('edit')">
+                                    </div>
+                                </div>
+
+                                <div id="editGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
+                            </div>
+                        </div>
+
+                        <!-- 5. ACCIONES Y BOTONES DEL HERO (SOLO MODO ESTRUCTURADO) -->
+                        <div id="editHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
+
+                            <!-- Botón Primario -->
+                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                <span class="block font-bold text-indigo-700 text-[11px]">Botón Primario (Destacado)</span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                        <input type="text" name="settings[cta_primary_text]" id="editCtaPrimaryText" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: EXPLORAR CATÁLOGO">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="text" name="settings[cta_primary_url]" id="editCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
+                                            <select onchange="if(this.value){ document.getElementById('editCtaPrimaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                <option value="">+ Insertar Ruta</option>
+                                                <optgroup label="Secciones Modulares">
+                                                    @foreach($sections as $s)
+                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Páginas Institucionales">
+                                                    @foreach($pages as $p)
+                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Vitrinas Multiverso">
+                                                    <option value="/marte">/marte (Masculino)</option>
+                                                    <option value="/venus">/venus (Femenino)</option>
+                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                    <option value="/terra">/terra (Unisex)</option>
+                                                    <option value="/catalogo">/catalogo (General)</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón Secundario -->
+                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                <span class="block font-bold text-slate-700 text-[11px]">Botón Secundario (Opcional)</span>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                        <input type="text" name="settings[cta_secondary_text]" id="editCtaSecondaryText" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: GUÍA DE TALLAS TORZO">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="text" name="settings[cta_secondary_url]" id="editCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas o #section-3">
+                                            <select onchange="if(this.value){ document.getElementById('editCtaSecondaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                <option value="">+ Insertar Ruta</option>
+                                                <optgroup label="Secciones Modulares">
+                                                    @foreach($sections as $s)
+                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Páginas Institucionales">
+                                                    @foreach($pages as $p)
+                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <optgroup label="Vitrinas Multiverso">
+                                                    <option value="/marte">/marte (Masculino)</option>
+                                                    <option value="/venus">/venus (Femenino)</option>
+                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                    <option value="/terra">/terra (Unisex)</option>
+                                                    <option value="/catalogo">/catalogo (General)</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EDITOR DE CÓDIGO CUSTOM (SCOPED) -->
+                    <div id="editCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
                         <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
                         <div>
                             <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
@@ -2189,6 +2638,131 @@
     };
 
     // ==========================================
+    // 3B. HERO & RUTAS HELPERS (TASK-H2-HERO-ENGINE)
+    // ==========================================
+    window.copyStoreRoute = function(text) {
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl font-sans text-xs flex items-center gap-2 border border-slate-700 animate-bounce';
+            toast.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Ruta copiada al portapapeles: <strong>${text}</strong></span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.4s ease';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 2200);
+        }).catch(err => {
+            prompt('Copia la ruta:', text);
+        });
+    };
+
+    window.toggleHeroModeCreate = function(mode) {
+        const lblStruct = document.getElementById('createHeroModeStructuredLbl');
+        const lblCustom = document.getElementById('createHeroModeCustomLbl');
+        const buttonsWrap = document.getElementById('createHeroButtonsWrap');
+        const customCodeWrap = document.getElementById('createCustomCodeWrap');
+
+        if (mode === 'custom') {
+            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+            if (buttonsWrap) { buttonsWrap.classList.add('hidden'); buttonsWrap.style.display = 'none'; }
+            if (customCodeWrap) { customCodeWrap.classList.remove('hidden'); customCodeWrap.style.display = 'block'; }
+        } else {
+            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+            if (buttonsWrap) { buttonsWrap.classList.remove('hidden'); buttonsWrap.style.display = 'block'; }
+            if (customCodeWrap) { customCodeWrap.classList.add('hidden'); customCodeWrap.style.display = 'none'; }
+        }
+    };
+
+    window.toggleHeroModeEdit = function(mode) {
+        const lblStruct = document.getElementById('editHeroModeStructuredLbl');
+        const lblCustom = document.getElementById('editHeroModeCustomLbl');
+        const buttonsWrap = document.getElementById('editHeroButtonsWrap');
+        const customCodeWrap = document.getElementById('editCustomCodeWrap');
+        const radioStruct = document.getElementById('editHeroModeStructured');
+        const radioCustom = document.getElementById('editHeroModeCustom');
+
+        if (mode === 'custom') {
+            if (radioCustom) radioCustom.checked = true;
+            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+            if (buttonsWrap) { buttonsWrap.classList.add('hidden'); buttonsWrap.style.display = 'none'; }
+            if (customCodeWrap) { customCodeWrap.classList.remove('hidden'); customCodeWrap.style.display = 'block'; }
+        } else {
+            if (radioStruct) radioStruct.checked = true;
+            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+            if (buttonsWrap) { buttonsWrap.classList.remove('hidden'); buttonsWrap.style.display = 'block'; }
+            if (customCodeWrap) { customCodeWrap.classList.add('hidden'); customCodeWrap.style.display = 'none'; }
+        }
+    };
+
+    window.previewHeroBgImage = function(fileInput, previewContainerId) {
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+        const file = fileInput.files[0];
+        const container = document.getElementById(previewContainerId);
+        if (!container) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = container.querySelector('img');
+            const span = container.querySelector('span');
+            if (img) img.src = e.target.result;
+            if (span) span.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            container.classList.remove('hidden');
+            container.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.previewHeroBgUrl = function(url, previewContainerId) {
+        const container = document.getElementById(previewContainerId);
+        if (!container) return;
+        if (!url || !url.trim()) {
+            container.classList.add('hidden');
+            container.style.display = 'none';
+            return;
+        }
+        const img = container.querySelector('img');
+        const span = container.querySelector('span');
+        if (img) img.src = url;
+        if (span) span.textContent = url;
+        container.classList.remove('hidden');
+        container.style.display = 'flex';
+    };
+
+    window.clearHeroBgPreview = function(modalId, previewContainerId, urlInputId) {
+        const container = document.getElementById(previewContainerId);
+        if (container) {
+            container.classList.add('hidden');
+            container.style.display = 'none';
+            const img = container.querySelector('img');
+            if (img) img.src = '';
+        }
+        if (urlInputId) {
+            const urlInput = document.getElementById(urlInputId);
+            if (urlInput) urlInput.value = '';
+        }
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            const fileInput = modal.querySelector('input[type="file"][name="background_image_file"]');
+            if (fileInput) fileInput.value = '';
+        }
+    };
+
+    window.updateHeroGradientPreview = function(prefix) {
+        const start = document.getElementById(prefix + 'GradColorStart')?.value || '#0f172a';
+        const end = document.getElementById(prefix + 'GradColorEnd')?.value || '#1e1b4b';
+        const dir = document.getElementById(prefix + 'GradDir')?.value || 'to bottom';
+        const bar = document.getElementById(prefix + 'GradPreviewBar');
+        if (bar) {
+            bar.style.background = `linear-gradient(${dir}, ${start}, ${end})`;
+        }
+    };
+
+    // ==========================================
     // 4. BIFURCADOR EN MODAL CREAR SECCIÓN
     // ==========================================
     window.switchCreateSectionMode = function(mode) {
@@ -2200,6 +2774,7 @@
         const wrapContType = document.getElementById('createTypeContentWrap');
         const selCatType = document.getElementById('createSectionTypeCatalog');
         const selContType = document.getElementById('createSectionTypeContent');
+        const createHeroWrap = document.getElementById('createHeroEngineWrap');
 
         if (mode === 'catalog') {
             if (btnModeCat) btnModeCat.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
@@ -2219,6 +2794,15 @@
             if (wrapContType) { wrapContType.classList.remove('hidden'); wrapContType.style.display = 'block'; }
             if (selContType) selContType.name = 'type';
             if (selCatType) selCatType.name = 'type_disabled';
+            if (createHeroWrap && selContType) {
+                if (selContType.value === 'hero_carousel') {
+                    createHeroWrap.classList.remove('hidden');
+                    createHeroWrap.style.display = 'block';
+                } else {
+                    createHeroWrap.classList.add('hidden');
+                    createHeroWrap.style.display = 'none';
+                }
+            }
         }
     };
 
@@ -2226,13 +2810,24 @@
         const contentTypes = ['hero_carousel', 'editorial_banner', 'brand_pillars', 'promo_modal', 'custom_html_css_js'];
         const editCatTax = document.getElementById('editCatalogTaxonomies');
         const editContOpt = document.getElementById('editContentOptions');
+        const editHeroWrap = document.getElementById('editHeroEngineWrap');
 
         if (contentTypes.includes(typeVal)) {
             if (editCatTax) { editCatTax.classList.add('hidden'); editCatTax.style.display = 'none'; }
             if (editContOpt) { editContOpt.classList.remove('hidden'); editContOpt.style.display = 'block'; }
+            if (editHeroWrap) {
+                if (typeVal === 'hero_carousel') {
+                    editHeroWrap.classList.remove('hidden');
+                    editHeroWrap.style.display = 'block';
+                } else {
+                    editHeroWrap.classList.add('hidden');
+                    editHeroWrap.style.display = 'none';
+                }
+            }
         } else {
             if (editCatTax) { editCatTax.classList.remove('hidden'); editCatTax.style.display = 'block'; }
             if (editContOpt) { editContOpt.classList.add('hidden'); editContOpt.style.display = 'none'; }
+            if (editHeroWrap) { editHeroWrap.classList.add('hidden'); editHeroWrap.style.display = 'none'; }
         }
     };
 
@@ -2335,6 +2930,67 @@
 
         const jsArea = document.getElementById('editCustomJs');
         if (jsArea) jsArea.value = sec.custom_js || '';
+
+        // Settings del Hero & Vitrina
+        let st = sec.settings || {};
+        if (typeof st === 'string') {
+            try { st = JSON.parse(st); } catch(e) { st = {}; }
+        }
+
+        const heroMode = st.hero_mode || (!sec.title && sec.custom_html ? 'custom' : 'structured');
+        window.toggleHeroModeEdit(heroMode);
+
+        const editFullWidth = document.getElementById('editFullWidth');
+        if (editFullWidth) editFullWidth.checked = (st.full_width === 1 || st.full_width === '1' || st.full_width === true);
+
+        const editHeroBgUrl = document.getElementById('editHeroBgUrl');
+        if (editHeroBgUrl) {
+            editHeroBgUrl.value = st.background_image || '';
+            if (st.background_image) {
+                window.previewHeroBgUrl(st.background_image, 'editHeroBgPreview');
+            } else {
+                window.clearHeroBgPreview('editSectionModal', 'editHeroBgPreview', 'editHeroBgUrl');
+            }
+        }
+
+        const editEnableGrad = document.getElementById('editEnableGradient');
+        const editGradControls = document.getElementById('editGradientControls');
+        const hasGrad = (st.enable_gradient === 1 || st.enable_gradient === '1' || st.enable_gradient === true);
+        if (editEnableGrad) editEnableGrad.checked = hasGrad;
+        if (editGradControls) editGradControls.style.display = hasGrad ? 'block' : 'none';
+
+        const editGradStart = document.getElementById('editGradColorStart');
+        const editGradStartPicker = document.getElementById('editGradColorStartPicker');
+        if (editGradStart) editGradStart.value = st.gradient_color_start || '#0f172a';
+        if (editGradStartPicker) editGradStartPicker.value = st.gradient_color_start || '#0f172a';
+
+        const editGradEnd = document.getElementById('editGradColorEnd');
+        const editGradEndPicker = document.getElementById('editGradColorEndPicker');
+        if (editGradEnd) editGradEnd.value = st.gradient_color_end || '#1e1b4b';
+        if (editGradEndPicker) editGradEndPicker.value = st.gradient_color_end || '#1e1b4b';
+
+        const editGradDir = document.getElementById('editGradDir');
+        if (editGradDir) editGradDir.value = st.gradient_direction || 'to bottom';
+
+        const editGradOpacity = document.getElementById('editGradOpacity');
+        const editGradOpacityVal = document.getElementById('editGradOpacityVal');
+        const opVal = st.gradient_opacity || 80;
+        if (editGradOpacity) editGradOpacity.value = opVal;
+        if (editGradOpacityVal) editGradOpacityVal.textContent = opVal + '%';
+        window.updateHeroGradientPreview('edit');
+
+        // Botones CTA
+        const ctaPriText = document.getElementById('editCtaPrimaryText');
+        if (ctaPriText) ctaPriText.value = st.cta_primary_text || st.cta_text || qr.cta_text || '';
+
+        const ctaPriUrl = document.getElementById('editCtaPrimaryUrl');
+        if (ctaPriUrl) ctaPriUrl.value = st.cta_primary_url || st.cta_url || qr.cta_url || '';
+
+        const ctaSecText = document.getElementById('editCtaSecondaryText');
+        if (ctaSecText) ctaSecText.value = st.cta_secondary_text || 'GUÍA DE TALLAS TORZO';
+
+        const ctaSecUrl = document.getElementById('editCtaSecondaryUrl');
+        if (ctaSecUrl) ctaSecUrl.value = st.cta_secondary_url || '';
 
         window.openStoreModal('editSectionModal');
     };
@@ -2460,6 +3116,23 @@
         if (editTypeSelect) {
             editTypeSelect.addEventListener('change', function() {
                 window.toggleEditTypePanels(this.value);
+            });
+        }
+
+        // Listener en select de tipo contenido en Modal Crear
+        const createTypeContent = document.getElementById('createSectionTypeContent');
+        if (createTypeContent) {
+            createTypeContent.addEventListener('change', function() {
+                const createHeroWrap = document.getElementById('createHeroEngineWrap');
+                if (createHeroWrap) {
+                    if (this.value === 'hero_carousel') {
+                        createHeroWrap.classList.remove('hidden');
+                        createHeroWrap.style.display = 'block';
+                    } else {
+                        createHeroWrap.classList.add('hidden');
+                        createHeroWrap.style.display = 'none';
+                    }
+                }
             });
         }
 

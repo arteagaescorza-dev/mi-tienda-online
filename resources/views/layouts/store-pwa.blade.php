@@ -62,7 +62,6 @@
 
   <!-- Manifest PWA Oficial -->
   <link rel="manifest" href="{{ asset('manifest.json') }}">
-  <link rel="icon" type="image/png" href="{{ asset('user-avatar.png') }}">
 
   <!-- Google Fonts: Plus Jakarta Sans & Outfit (Minimalist Luxury) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,33 +76,202 @@
     :root {
       @if(!empty($currentStorefront['primaryColor']))
         --brand-primary: {{ $currentStorefront['primaryColor'] }};
+        --accent-primary: {{ $currentStorefront['primaryColor'] }};
       @endif
       @if(!empty($currentStorefront['secondaryColor']))
         --brand-secondary: {{ $currentStorefront['secondaryColor'] }};
+        --accent-emerald: {{ $currentStorefront['secondaryColor'] }};
+        --accent-emerald-border: {{ $currentStorefront['secondaryColor'] }};
       @endif
       @if(!empty($currentStorefront['accentColor']))
         --brand-accent: {{ $currentStorefront['accentColor'] }};
         --accent-indigo: {{ $currentStorefront['accentColor'] }};
+        --accent-cta: {{ $currentStorefront['accentColor'] }};
       @endif
       @if(!empty($currentStorefront['backgroundColor']))
         --brand-bg: {{ $currentStorefront['backgroundColor'] }};
+        --bg-primary: {{ $currentStorefront['backgroundColor'] }};
         --bg-secondary: {{ $currentStorefront['backgroundColor'] }};
       @endif
       @if(!empty($currentStorefront['surfaceColor']))
         --brand-surface: {{ $currentStorefront['surfaceColor'] }};
+        --bg-surface: {{ $currentStorefront['surfaceColor'] }};
       @endif
       @if(!empty($currentStorefront['textColor']))
         --brand-text: {{ $currentStorefront['textColor'] }};
+        --text-primary: {{ $currentStorefront['textColor'] }};
+        --accent-black: {{ $currentStorefront['textColor'] }};
       @endif
       @if(!empty($currentStorefront['mutedTextColor']))
         --brand-muted: {{ $currentStorefront['mutedTextColor'] }};
+        --text-secondary: {{ $currentStorefront['mutedTextColor'] }};
         --text-muted: {{ $currentStorefront['mutedTextColor'] }};
       @endif
       @if(!empty($currentStorefront['borderColor']))
         --brand-border: {{ $currentStorefront['borderColor'] }};
         --border-color: {{ $currentStorefront['borderColor'] }};
+        --border-subtle: {{ $currentStorefront['borderColor'] }};
+        --border-medium: {{ $currentStorefront['borderColor'] }};
       @endif
     }
+
+    /* Mapeo Concreto y Forzado de los 8 Tokens al Storefront */
+    @if(!empty($currentStorefront['backgroundColor']))
+      body.store-body {
+        background-color: var(--brand-bg) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['surfaceColor']))
+      .product-card,
+      .sticky-header-wrapper,
+      .navbar-desktop,
+      .navbar-mobile,
+      .bottom-sheet-content,
+      .modal-card,
+      .dock-tab {
+        background-color: var(--brand-surface) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['textColor']))
+      body.store-body,
+      .product-title,
+      .nav-link-item,
+      .brand-name,
+      .dock-tab-label,
+      .store-heading,
+      .filter-group-title,
+      .universe-pill,
+      h1, h2, h3, h4 {
+        color: var(--brand-text) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['mutedTextColor']))
+      .product-category-label,
+      .brand-sub,
+      .marquee-sep,
+      .text-muted,
+      .product-desc,
+      .product-sku-code {
+        color: var(--brand-muted) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['borderColor']))
+      .product-card,
+      .sticky-header-wrapper,
+      .size-pill-btn,
+      .btn-pill-action,
+      .navbar-desktop,
+      .universe-pill,
+      .minimal-marquee-bar,
+      .brand-border {
+        border-color: var(--brand-border) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['secondaryColor']))
+      .product-stock-badge,
+      .product-stock-badge.ready {
+        color: var(--brand-secondary) !important;
+        border-color: var(--brand-secondary) !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['accentColor']))
+      .product-price,
+      .price-highlight,
+      .accent-price {
+        color: var(--brand-accent) !important;
+      }
+      .btn-add-cart,
+      .btn-primary,
+      .btn-checkout,
+      .hero-cta-btn,
+      .size-pill-btn.selected,
+      .universe-tab-btn.active {
+        background-color: var(--brand-accent) !important;
+        border-color: var(--brand-accent) !important;
+        color: #ffffff !important;
+      }
+      .btn-add-cart:hover,
+      .hero-cta-btn:hover {
+        filter: brightness(0.9);
+      }
+      .nav-link-item.active::after {
+        background-color: var(--brand-accent) !important;
+      }
+      .nav-link-item:hover,
+      .nav-link-item.active {
+        color: var(--brand-accent) !important;
+      }
+    @endif
+
+    /* Corrección Ergonómica de Logo y Encabezado */
+    .brand-logo-box {
+      width: auto !important;
+      height: auto !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .brand-logo-box img {
+      max-height: 38px !important;
+      width: auto !important;
+      max-width: 170px !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+    .nav-brand-group {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      text-decoration: none !important;
+    }
+    .brand-titles {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+    }
+
+    /* Hero Full Width & Edge-to-Edge Bleed (TASK-H2-HERO-FULLWIDTH) */
+    html, body.store-body {
+      overflow-x: hidden !important;
+    }
+    .hero-editorial-section.hero-full-width {
+      width: 100vw !important;
+      position: relative !important;
+      left: 50% !important;
+      right: 50% !important;
+      margin-left: -50vw !important;
+      margin-right: -50vw !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    .hero-editorial-section.hero-full-width .hero-banner-card {
+      border-radius: 0 !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+      padding-left: max(20px, calc((100vw - 1280px) / 2 + 24px)) !important;
+      padding-right: max(20px, calc((100vw - 1280px) / 2 + 24px)) !important;
+    }
+    .hero-editorial-section.hero-full-width .hero-custom-container {
+      width: 100% !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+    }
+
     @if(!empty($currentStorefront['customCss']))
       {!! $currentStorefront['customCss'] !!}
     @endif
@@ -164,13 +332,15 @@
         <a href="{{ route('store.home') }}" class="nav-brand-group">
           <div class="brand-logo-box">
             @if(!empty($currentStorefront['logoUrl']))
-              <img src="{{ $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}" style="max-height: 26px; max-width: 120px; object-fit: contain;">
+              <img src="{{ $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
             @else
-              <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             @endif
           </div>
           <div class="brand-titles">
-            <span class="brand-name" id="desktopBrandName">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
+            @if(empty($currentStorefront['logoUrl']))
+              <span class="brand-name" id="desktopBrandName">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
+            @endif
             <span class="brand-sub" id="desktopBrandSub">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
           </div>
         </a>
@@ -222,14 +392,19 @@
       </button>
 
       <a href="{{ route('store.home') }}" class="nav-brand-group">
-        <div class="brand-logo-box" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+        <div class="brand-logo-box">
           @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
-            <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}" style="max-height: 24px; max-width: 28px; object-fit: contain;">
+            <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
           @else
-            <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           @endif
         </div>
-        <span class="brand-name" id="mobileBrandName" style="font-size: 0.95rem;">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
+        <div class="brand-titles">
+          @if(empty($currentStorefront['logoMobileUrl']) && empty($currentStorefront['logoUrl']))
+            <span class="brand-name" id="mobileBrandName" style="font-size: 0.95rem;">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
+          @endif
+          <span class="brand-sub" id="mobileBrandSub" style="font-size: 0.6rem;">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
+        </div>
       </a>
 
       <div style="display: flex; align-items: center; gap: 4px;">

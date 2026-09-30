@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Manual Técnico y Operativo de Workflows de la Aplicación - Mi Tienda</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 12mm 10mm;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    font-size: 8.8pt;
+    line-height: 1.42;
+  }
+  .page-break { page-break-before: always; break-before: page; }
+  .avoid-break { page-break-inside: avoid; break-inside: avoid; }
+  
+  /* Portada */
+  .cover-container {
+    height: 94vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 35px 28px;
+    background: linear-gradient(145deg, #090d16 0%, #1e1b4b 60%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+  }
+  .cover-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    background: rgba(99, 102, 241, 0.25);
+    border: 1px solid #818cf8;
+    color: #c7d2fe;
+    border-radius: 20px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .cover-title {
+    font-size: 23pt;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 18px 0 10px 0;
+    letter-spacing: -0.02em;
+  }
+  .cover-subtitle {
+    font-size: 11pt;
+    color: #94a3b8;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 620px;
+  }
+  .cover-meta {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: #cbd5e1;
+  }
+
+  /* Titulos */
+  h1.chapter-title {
+    font-size: 14.5pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hub-tag {
+    font-size: 7.5pt;
+    font-family: monospace;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+    border: 1px solid #bfdbfe;
+  }
+  h2.section-heading {
+    font-size: 10.5pt;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 12px 0 6px 0;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  h3.subsection-heading {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #334155;
+    margin: 8px 0 4px 0;
+  }
+  p { margin-bottom: 7px; color: #334155; text-align: justify; }
+
+  /* Callouts & Tarjetas */
+  .callout-box {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 8.5pt;
+  }
+  .callout-box strong { color: #0f172a; }
+  .callout-success {
+    background: #f0fdf4;
+    border-left-color: #16a34a;
+  }
+  .callout-warning {
+    background: #fffbeb;
+    border-left-color: #d97706;
+  }
+
+  /* Tablas de Flujo */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px 0;
+    font-size: 8pt;
+  }
+  table.data-table th, table.data-table td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.data-table th {
+    background: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 7.5pt;
+    letter-spacing: 0.5px;
+  }
+  table.data-table tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  /* Diagramas en Cajas */
+  .diagram-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .diagram-caption {
+    font-size: 7.8pt;
+    color: #64748b;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* Pasos del Flujo E2E */
+  .step-list {
+    margin: 8px 0 12px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .step-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .step-number {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #1e293b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8pt;
+    font-weight: 800;
+  }
+  .step-content {
+    flex-grow: 1;
+  }
+  .step-content strong {
+    color: #0f172a;
+    display: block;
+    margin-bottom: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover-container">
+  <div>
+    <span class="cover-badge">Arquitectura y Flujos de Datos Transversales</span>
+    <h1 class="cover-title">MANUAL TÉCNICO Y OPERATIVO DE WORKFLOWS DE LA APLICACIÓN</h1>
+    <p class="cover-subtitle">
+      Especificación formal de interconexión sistémica entre módulos: Storefront D2C Multiverso, Hubs Operativos (1 al 7), Bus de Eventos, Cascada de Margen Neto y Ciclos de Vida Transaccionales de Principio a Fin.
+    </p>
+  </div>
+  
+  <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+    <div style="font-size: 9pt; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">POSTULADO DE DISEÑO CROSS-HUB:</div>
+    <div style="font-size: 8.5pt; color: #94a3b8; line-height: 1.45;">
+      "Cada módulo en la plataforma opera como un micro-servicio lógico fuertemente sincronizado. Ningún dato existe de manera aislada: una recepción en Rampa incrementa existencias en vitrinas, una orden en Checkout bloquea existencias y prepara picking, y un manifiesto logístico recalcula en cascada el margen neto real de la empresa."
+    </div>
+  </div>
+
+  <div class="cover-meta">
+    <div><strong>Sistema:</strong> Mi Tienda Unified Commerce 2.6.0</div>
+    <div><strong>Ámbito:</strong> Workflows e Interconexión de Módulos (Sin Roles)</div>
+    <div><strong>Fecha de Formalización:</strong> Septiembre 2026</div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 1: ARQUITECTURA NUCLEAR -->
+<h1 class="chapter-title">
+  <span>1. ARQUITECTURA NUCLEAR Y BUS DE EVENTOS</span>
+  <span class="hub-tag">Event-Driven Core</span>
+</h1>
+
+<p>
+  La arquitectura de <strong>Mi Tienda</strong> está diseñada bajo un patrón dirigido por eventos (Event-Driven Architecture) con transacciones ACID en base de datos relacional para datos críticos (Kardex, Saldos y Ledger de Órdenes) y una cola de trabajos asíncronos para operaciones desacopladas (Telemetría de Marketing, Notificaciones WhatsApp y Timbrado SAT CFDI 4.0).
+</p>
+
+<div class="callout-box">
+  <strong>Principio de Consistencia de Estado:</strong> Toda mutación de estado significativa en la plataforma emite un evento canónico del dominio (Domain Event). Los módulos suscriptores reaccionan de forma atómica o asíncrona, eliminando la duplicidad de captura de información y garantizando trazabilidad absoluta.
+</div>
+
+<h2 class="section-heading">Mapa de Conexión de Módulos</h2>
+<p>
+  El ecosistema se distribuye en ocho grandes componentes interconectados:
+</p>
+
+<div class="diagram-container avoid-break">
+  <svg viewBox="0 0 760 210" width="100%" height="200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fondos de Hubs -->
+    <rect x="10" y="10" width="220" height="80" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="120" y="32" font-family="sans-serif" font-size="10" font-weight="bold" fill="#1d4ed8" text-anchor="middle">STOREFRONT D2C (PWA)</text>
+    <text x="120" y="50" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">4 Vitrinas Multiverso • Carrito Híbrido</text>
+    <text x="120" y="65" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Checkout Express • Portal RMA</text>
+
+    <rect x="270" y="10" width="220" height="80" rx="8" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+    <text x="380" y="32" font-family="sans-serif" font-size="10" font-weight="bold" fill="#6d28d9" text-anchor="middle">HUB 2: TIENDA & CMS</text>
+    <text x="380" y="50" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Paleta 8 Tokens :root • Drag-and-Drop</text>
+    <text x="380" y="65" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Reglas de Flete & Guías Torzo</text>
+
+    <rect x="530" y="10" width="220" height="80" rx="8" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="640" y="32" font-family="sans-serif" font-size="10" font-weight="bold" fill="#15803d" text-anchor="middle">HUB 4: INVENTARIO & KARDEX</text>
+    <text x="640" y="50" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Catálogo Central • Slotting • BOM</text>
+    <text x="640" y="65" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Rampa Inbound • Alertas ROP</text>
+
+    <!-- Hubs Fila Inferior -->
+    <rect x="10" y="115" width="220" height="80" rx="8" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="120" y="137" font-family="sans-serif" font-size="10" font-weight="bold" fill="#b45309" text-anchor="middle">HUB 5: FINANZAS & REVOPS</text>
+    <text x="120" y="155" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Cascada Margen Neto • Pasarelas</text>
+    <text x="120" y="170" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Motor SAT CFDI 4.0 • MRR</text>
+
+    <rect x="270" y="115" width="220" height="80" rx="8" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="380" y="137" font-family="sans-serif" font-size="10" font-weight="bold" fill="#b91c1c" text-anchor="middle">HUB 6: LOGÍSTICA & DESPACHO</text>
+    <text x="380" y="155" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Mesa de Empaque Óptico • Pesaje</text>
+    <text x="380" y="170" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">APIs Carrier DHL/FedEx • Mesa RMA</text>
+
+    <rect x="530" y="115" width="220" height="80" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+    <text x="640" y="137" font-family="sans-serif" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">HUBS SATÉLITE (1, 3 Y 7)</text>
+    <text x="640" y="155" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Hub 1: Dashboard Ejecutivo & Copiloto</text>
+    <text x="640" y="170" font-family="sans-serif" font-size="8" fill="#475569" text-anchor="middle">Hub 3: Ads & WhatsApp • Hub 7: B2B</text>
+
+    <!-- Flechas de Conexión -->
+    <path d="M 230 45 L 270 45" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+    <path d="M 490 45 L 530 45" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3,3"/>
+    <path d="M 120 90 L 120 115" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 380 90 L 380 115" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 640 90 L 640 115" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 230 150 L 270 150" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 490 150 L 530 150" stroke="#94a3b8" stroke-width="2"/>
+  </svg>
+  <div class="diagram-caption">Figura 1.1: Topología de Sincronización Funcional entre Módulos y Hubs.</div>
+</div>
+
+<h2 class="section-heading">Catálogo Nuclear de Eventos de la Plataforma</h2>
+<table class="data-table avoid-break">
+  <thead>
+    <tr>
+      <th style="width: 22%;">Evento Canónico</th>
+      <th style="width: 15%;">Módulo Emisor</th>
+      <th style="width: 28%;">Carga Útil (Payload)</th>
+      <th style="width: 35%;">Efectos Sincronizados Cross-Hub</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>OrderPlaced</code></td>
+      <td>Storefront D2C</td>
+      <td>ID Orden, SKUs, Cantidades, Dirección, Método Pago</td>
+      <td><strong>Hub 4:</strong> Bloqueo de stock (TTL 15 min).<br><strong>Hub 5:</strong> Pre-autorización en pasarela.<br><strong>Hub 1:</strong> Registro de orden tentativa en dashboard.</td>
+    </tr>
+    <tr>
+      <td><code>PaymentCaptured</code></td>
+      <td>Hub 5 (Finanzas)</td>
+      <td>ID Orden, Importe Cobrado, ID Transacción, Comisión</td>
+      <td><strong>Hub 4:</strong> Asienta Salida definitiva en Kardex.<br><strong>Hub 6:</strong> Encola pedido en Mesa de Empaque.<br><strong>Hub 3:</strong> Envía WhatsApp de confirmación con ticket.</td>
+    </tr>
+    <tr>
+      <td><code>PackageManifested</code></td>
+      <td>Hub 6 (Logística)</td>
+      <td>ID Orden, Guía Courier, Peso, Costo Real de Guía</td>
+      <td><strong>Hub 5:</strong> Imputa costo real de flete a la orden.<br><strong>Storefront:</strong> Actualiza tracking para el cliente.<br><strong>Hub 3:</strong> Despacha WhatsApp con código de seguimiento.</td>
+    </tr>
+    <tr>
+      <td><code>InboundRestocked</code></td>
+      <td>Hub 4 (Inventario)</td>
+      <td>SKUs, Cantidad Recibida, Costo Unitario, Lote</td>
+      <td><strong>Hub 2:</strong> Incrementa stock visible en vitrinas.<br><strong>Hub 5:</strong> Genera pasivo en Cuentas por Pagar.<br><strong>Hub 1:</strong> Desactiva alerta de quiebre de stock si aplica.</td>
+    </tr>
+    <tr>
+      <td><code>StorefrontThemed</code></td>
+      <td>Hub 2 (CMS)</td>
+      <td>Vitrina, 8 Tokens Cromáticos, Logos, Banners</td>
+      <td><strong>Storefront:</strong> Inyección reactiva en `:root` CSS sin re-compilar.<br><strong>Cache:</strong> Invalidación selectiva de etiquetas CDN.</td>
+    </tr>
+    <tr>
+      <td><code>RmaResolved</code></td>
+      <td>Hub 6 (RMA)</td>
+      <td>ID RMA, Dictamen (Reingreso/Merma), SKU</td>
+      <td><strong>Hub 4:</strong> Genera Entrada por Devolución al Kardex.<br><strong>Hub 5:</strong> Emite Nota de Crédito CFDI 4.0 o saldo a favor.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 2: STOREFRONT D2C Y HUB 2 CMS -->
+<h1 class="chapter-title">
+  <span>2. EXPERIENCIA D2C & MOTOR EDITORIAL (HUB 2)</span>
+  <span class="hub-tag">Hub 2 ↔ Storefront</span>
+</h1>
+
+<p>
+  El <strong>Storefront D2C PWA</strong> y el <strong>Hub 2 (Tienda & CMS Multiverso)</strong> componen la capa de comercialización y mercadotecnia digital. Su relación técnica es de desacoplamiento total entre lógica de inventarios y presentación visual.
+</p>
+
+<h2 class="section-heading">2.1 Inyección Cromática Dinámica (Paleta de 8 Tokens `:root`)</h2>
+<p>
+  Para evitar recompilaciones pesadas de hojas de estilo cada vez que un diseñador o administrador modifica un color en el panel de administración, el sistema utiliza un esquema de tokens CSS inyectados directamente en el documento HTML (`store-pwa.blade.php`).
+</p>
+
+<div class="callout-box avoid-break">
+  <strong>Los 8 Tokens Canónicos de Identidad Visual:</strong>
+  <ul style="margin: 6px 0 0 16px; font-size: 8.2pt; line-height: 1.5;">
+    <li><code>--store-primary</code>: Botones principales de acción, badges destacados y contrastes de navegación.</li>
+    <li><code>--store-secondary</code>: Elementos secundarios de llamada a la acción y estados hover.</li>
+    <li><code>--store-accent</code>: Etiquetas de descuento, promociones relámpago e indicadores de urgencia.</li>
+    <li><code>--store-header-bg</code>: Fondo de la barra superior fija (topbar) y cabecera de la vitrina.</li>
+    <li><code>--store-header-text</code>: Tipografía de títulos y enlaces ubicados en la barra superior.</li>
+    <li><code>--store-bg</code>: Fondo global de la aplicación (lienzo de navegación).</li>
+    <li><code>--store-surface</code>: Superficie de tarjetas de producto, modales, drawers y contenedores de checkout.</li>
+    <li><code>--store-border</code>: Líneas divisorias de catálogo, bordes de inputs y separadores de sección.</li>
+  </ul>
+</div>
+
+<h2 class="section-heading">2.2 Motor de Reglas Comerciales de Fletes y Elasticidad</h2>
+<p>
+  La determinación del cobro o bonificación del flete de envío opera mediante un enlace directo entre Hub 2 (donde se configuran los umbrales) y el Checkout del Storefront:
+</p>
+<ul class="step-list avoid-break">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Lectura de Umbral de Envío Gratis:</strong>
+      El subtotal del carrito se compara contra el umbral configurado (`$shippingRule['freeShippingThreshold']`, ej. $999 MXN). Si el subtotal es igual o superior, la cotización de flete estándar cambia a $0.00 MXN.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Barra de Progreso Reactiva:</strong>
+      El carrito renderiza un indicador dinámico: <em>"Agrega $X más para obtener Envío Gratis"</em>, incentivando el incremento del ticket promedio ponderado.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Sincronización con el Simulador de Elasticidad Financiera:</strong>
+      Cada orden bonificada registra internamente el costo absorbido, enviando el dato a Hub 5 para alertar si el margen neto cae por debajo del 18% acordado en las directrices de RevOps.
+    </div>
+  </li>
+</ul>
+
+<h2 class="section-heading">2.3 Motor Modular de Hero &amp; Bifurcación Visual/Código</h2>
+<p>
+  El motor de Hero implementa controles avanzados de diseño y arquitectura de software para máxima flexibilidad y estabilidad visual:
+</p>
+<ul class="step-list">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Sangrado Edge-to-Edge (Full-Width 100vw):</strong>
+      Permite al hero abarcar el 100% del ancho del viewport rompiendo los límites del contenedor estándar (1320px) mediante técnicas CSS de viewport breakout (<code>width: 100vw; margin-left: -50vw; left: 50%; right: 50%;</code>) con padding interior ergonómico que preserva la alineación visual con el grid de productos.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Bifurcación Mutuamente Excluyente (Eliminación de Duplicados):</strong>
+      Conmuta estrictamente entre el <em>Modo Visual Estructurado</em> (campos de badge, título H1, subtítulo y botones de acción) y el <em>Modo Código Scoped</em> (HTML, CSS y JS aislados). El motor de renderizado Blade evalúa <code>settings['hero_mode']</code> y garantiza que nunca se dupliquen ambos elementos simultáneamente en la tienda.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Capas de Fondo Fotográfico &amp; Degradados Overlay:</strong>
+      Soporta subida de archivos de imagen locales (guardados en <code>public/uploads/sections/</code>) o URLs remotas con previsualización en vivo. Permite superponer una capa de degradado combinada (color inicial, color final, dirección vertical/horizontal/diagonal y control de opacidad de 0 a 100%) para asegurar la legibilidad del texto sobre cualquier fotografía.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Botones CTA &amp; Asistente Dinámico de Rutas:</strong>
+      Configuración de botones Primario y Secundario con selector asistido integrado ("+ Insertar Ruta") que ofrece selección directa de Secciones Modulares (<code>#section-{id}</code>), Páginas Institucionales (<code>/pagina/{slug}</code>) y Vitrinas Multiverso (<code>/marte</code>, <code>/venus</code>, <code>/tiresias</code>, <code>/terra</code>, <code>/catalogo</code>).
+    </div>
+  </li>
+</ul>
+
+<h2 class="section-heading">2.4 Estructura de Secciones Drag-and-Drop &amp; Rutas Ancla</h2>
+<p>
+  El gestor de secciones de Hub 2 permite ordenar bloques mediante eventos drag-and-drop. Cada vitrina mantiene un arreglo ordenado en base de datos (`cms_storefront_sections`), renderizando en el Storefront componentes Blade desacoplados donde cada bloque dispone de un ancla DOM única <code>id="section-{id}"</code> para navegación fluida:
+</p>
+<table class="data-table avoid-break">
+  <thead>
+    <tr>
+      <th style="width: 25%;">Tipo de Sección</th>
+      <th style="width: 35%;">Función en Storefront</th>
+      <th style="width: 40%;">Dependencia Cruzada con Otros Hubs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>HERO_CAROUSEL</code></td>
+      <td>Hero principal con modo estructurado o custom, sangrado full-width, degradados y botones CTA enlazados.</td>
+      <td><strong>Hub 3:</strong> Enlace a campañas UTM, catálogos segmentados y páginas estáticas.</td>
+    </tr>
+    <tr>
+      <td><code>BRAND_PILLARS</code></td>
+      <td>Garantías de marca (Envíos express, empaque discreto, SPEI sin comisiones).</td>
+      <td><strong>Hub 2:</strong> Calculado dinámicamente con los umbrales de flete de la vitrina.</td>
+    </tr>
+    <tr>
+      <td><code>PRODUCT_GRID / CURATED</code></td>
+      <td>Tarjetas de prendas destacadas filtradas por taxonomías textiles y categorías.</td>
+      <td><strong>Hub 4:</strong> Solo muestra productos con stock disponible en Kardex &gt; 0.</td>
+    </tr>
+    <tr>
+      <td><code>EDITORIAL_TORZO</code></td>
+      <td>Guía anatómica de tallas textiles y protocolos sanitarios de cuidado.</td>
+      <td><strong>PROFECO:</strong> Cumplimiento normativo obligatorio de etiquetado en prendas íntimas.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 3: INVENTARIO, KARDEX & INBOUND (HUB 4) -->
+<h1 class="chapter-title">
+  <span>3. INVENTARIO, CATÁLOGO & INBOUND (HUB 4)</span>
+  <span class="hub-tag">Hub 4 Core</span>
+</h1>
+
+<p>
+  El <strong>Hub 4 (Inventario, Catálogo & Almacén)</strong> funge como la fuente única de verdad para las existencias físicas de la empresa. Su funcionamiento garantiza que ninguna vitrina venda un artículo que no esté físicamente resguardado en almacén o en tránsito con recepción garantizada.
+</p>
+
+<h2 class="section-heading">3.1 El Kardex Transaccional Multialmacén</h2>
+<p>
+  Cada SKU en el sistema posee un historial cronológico e inmutable de movimientos. A diferencia de esquemas de inventario simplificados donde solo existe un contador numérico, el Kardex calcula el costo promedio ponderado y registra quién y qué proceso originó el cambio:
+</p>
+
+<div class="diagram-container avoid-break">
+  <svg viewBox="0 0 740 140" width="100%" height="130" xmlns="http://www.w3.org/2000/svg">
+    <!-- Nodos Kardex -->
+    <rect x="20" y="40" width="130" height="60" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+    <text x="85" y="65" font-family="sans-serif" font-size="9" font-weight="bold" fill="#15803d" text-anchor="middle">RAMPA INBOUND</text>
+    <text x="85" y="80" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">+ Entradas por Compra</text>
+
+    <rect x="180" y="40" width="130" height="60" rx="6" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+    <text x="245" y="65" font-family="sans-serif" font-size="9" font-weight="bold" fill="#0f172a" text-anchor="middle">SLOTTING BODEGA</text>
+    <text x="245" y="80" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Pasillo-Rack-Nivel</text>
+
+    <rect x="340" y="25" width="150" height="90" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="415" y="55" font-family="sans-serif" font-size="10" font-weight="bold" fill="#1d4ed8" text-anchor="middle">KARDEX CENTRAL</text>
+    <text x="415" y="73" font-family="sans-serif" font-size="8" fill="#1e293b" text-anchor="middle">Costo Promedio Ponderado</text>
+    <text x="415" y="88" font-family="sans-serif" font-size="7.5" fill="#64748b" text-anchor="middle">Existencia Física Real</text>
+
+    <rect x="520" y="40" width="100" height="60" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="570" y="65" font-family="sans-serif" font-size="9" font-weight="bold" fill="#991b1b" text-anchor="middle">MESA EMPAQUE</text>
+    <text x="570" y="80" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">- Salidas x Pedido</text>
+
+    <rect x="640" y="40" width="90" height="60" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+    <text x="685" y="65" font-family="sans-serif" font-size="9" font-weight="bold" fill="#92400e" text-anchor="middle">MESA RMA</text>
+    <text x="685" y="80" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">+ Reingreso</text>
+
+    <!-- Conectores -->
+    <path d="M 150 70 L 180 70" stroke="#64748b" stroke-width="1.5"/>
+    <path d="M 310 70 L 340 70" stroke="#2563eb" stroke-width="2"/>
+    <path d="M 490 70 L 520 70" stroke="#dc2626" stroke-width="2"/>
+    <path d="M 620 70 L 640 70" stroke="#d97706" stroke-width="1.5"/>
+  </svg>
+  <div class="diagram-caption">Figura 3.1: Circuito Transaccional de Afectación al Kardex Central.</div>
+</div>
+
+<h2 class="section-heading">3.2 Estructura BOM (Bill of Materials) para Kits y Prendas Compuestas</h2>
+<p>
+  En el modelo comercial de Mi Tienda, un producto comercializable puede ser un SKU simple (ej. Prenda Torzo Classic Talla M) o un Set Compuesto (ej. Kit Duo Torzo + Cuidado Íntimo + Empaque de Regalo).
+</p>
+<div class="callout-box avoid-break">
+  <strong>Regla de Explosión de Insumos BOM:</strong>
+  Al confirmarse la venta o ensamble de un SKU Compuesto, el motor BOM realiza la deducción atómica de cada uno de los componentes secundarios en sus ubicaciones físicas de almacén. Esto evita incongruencias de inventario donde el set aparece disponible pero los insumos individuales ya no existen en bodega.
+</div>
+
+<h2 class="section-heading">3.3 Rampa Inbound y Alertas de Punto de Reorden (ROP)</h2>
+<p>
+  La recepción de mercancía en rampa ejecuta una verificación ciega. El personal de bodega escanea los bultos sin conocer anticipadamente el número exacto reportado por el proveedor; el sistema detecta desviaciones y previene el ingreso de piezas defectuosas o no solicitadas.
+</p>
+<p>
+  Asimismo, cada SKU tiene asignado un <strong>ROP (Reorder Point)</strong> calculado en base al lead time del proveedor y la velocidad de venta histórica. Al cruzarse el umbral mínimo:
+</p>
+<ul style="margin: 4px 0 0 16px; font-size: 8.5pt;">
+  <li>Se emite una alerta prioritaria en el <strong>Hub 1 (Dashboard Operativo)</strong>.</li>
+  <li>Se genera un borrador de Orden de Compra en el <strong>Hub 7 (Convenios B2B)</strong>.</li>
+  <li>Si el stock llega a cero, el <strong>Hub 2 (CMS)</strong> oculta automáticamente el botón de compra en el Storefront D2C, reemplazándolo por un formulario de lista de espera.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 4: FINANZAS, REVOPS & LOGÍSTICA OUTBOUND -->
+<h1 class="chapter-title">
+  <span>4. FINANZAS (HUB 5) & LOGÍSTICA OUTBOUND (HUB 6)</span>
+  <span class="hub-tag">Hub 5 ↔ Hub 6</span>
+</h1>
+
+<p>
+  La interacción entre <strong>Hub 5 (Finanzas & RevOps)</strong> y <strong>Hub 6 (Logística & Despacho)</strong> representa la columna vertebral de la rentabilidad del negocio. La plataforma no asume márgenes teóricos; cada pedido calcula su costo real centavo a centavo.
+</p>
+
+<h2 class="section-heading">4.1 La Cascada de Margen Neto Real (Desglose por Orden)</h2>
+<p>
+  El análisis financiero tradicional en e-commerce suele considerar únicamente el precio de venta menos el costo del producto. Mi Tienda implementa una cascada contable completa en tiempo real:
+</p>
+
+<table class="data-table avoid-break">
+  <thead>
+    <tr>
+      <th style="width: 15%;">Etapa</th>
+      <th style="width: 30%;">Rubro Contable</th>
+      <th style="width: 25%;">Fuente del Dato</th>
+      <th style="width: 30%;">Impacto Sistémico</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>(+) Entrada</strong></td>
+      <td>GMV Transaccional</td>
+      <td>Storefront Checkout</td>
+      <td>Importe bruto cobrado a la tarjeta del cliente.</td>
+    </tr>
+    <tr>
+      <td><strong>(-) Fricción 1</strong></td>
+      <td>Comisión Pasarela de Pagos</td>
+      <td>API Stripe / Mercado Pago</td>
+      <td>Deducción del 3.5% + $4.00 MXN retenido por procesador.</td>
+    </tr>
+    <tr>
+      <td><strong>(-) Fricción 2</strong></td>
+      <td>COGS (Costo Mercancía Vendida)</td>
+      <td>Hub 4 (Kardex Promedio)</td>
+      <td>Costo exacto del lote al momento de la salida de almacén.</td>
+    </tr>
+    <tr>
+      <td><strong>(-) Fricción 3</strong></td>
+      <td>Flete Real Courier</td>
+      <td>Hub 6 (API DHL/FedEx)</td>
+      <td>Costo facturado por el transportista según peso y zona.</td>
+    </tr>
+    <tr>
+      <td><strong>(-) Fricción 4</strong></td>
+      <td>Material de Empaque & BOM</td>
+      <td>Hub 4 (Insumos de empaque)</td>
+      <td>Costo de caja corrugada, papel seda y precinto de seguridad.</td>
+    </tr>
+    <tr>
+      <td><strong>(=) Salida</strong></td>
+      <td><strong>Margen Neto Operativo</strong></td>
+      <td><strong>Hub 5 (RevOps Ledger)</strong></td>
+      <td><strong>Alimenta el estado de resultados consolidado en Hub 1.</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="section-heading">4.2 Mesa de Empaque Inteligente y Balanzas Volumétricas</h2>
+<p>
+  El módulo de Mesa de Empaque de Hub 6 erradica el error humano en los envíos mediante tres compuertas de seguridad:
+</p>
+<ul class="step-list avoid-break">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Verificación Óptica 100% (Barcode Scan):</strong>
+      El operario debe escanear el código EAN de cada prenda antes de colocarla en la caja. Si un SKU no coincide con la orden, el sistema bloquea la pantalla con una alerta sonora y visual.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Pesaje Electrónico Integrado:</strong>
+      La caja empacada se posa sobre la balanza digital conectada a la estación. El peso real se compara contra el peso teórico de la suma de los SKUs + empaque. Si la desviación supera el 5%, se exige re-inspección.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Consumo de APIs Carrier y Generación de Guía:</strong>
+      Con las dimensiones exactas y el código postal de destino, el motor logístico consulta en milisegundos las tarifas de DHL, FedEx, Estafeta y 99Minutos, emitiendo la etiqueta ZPL/PDF más rentable.
+    </div>
+  </li>
+</ul>
+
+<h2 class="section-heading">4.3 Motor de Timbrado Fiscal SAT CFDI 4.0</h2>
+<p>
+  Hub 5 incluye el servicio nativo de facturación electrónica mexicana bajo normativa CFDI 4.0:
+</p>
+<ul style="margin: 4px 0 0 16px; font-size: 8.5pt;">
+  <li><strong>Facturación por Solicitud del Cliente:</strong> Si el consumidor captura su RFC, Razón Social, Régimen Fiscal y Código Postal en el checkout, el sistema timbra en tiempo real y adjunta el XML y PDF a su recibo de correo.</li>
+  <li><strong>Factura Global Diaria:</strong> Al concluir la jornada operativa, las órdenes no facturadas individualmente se consolidan en un único CFDI 4.0 global a público general con RFC genérico (`XAXX010101000`), cuadrando al centavo los ingresos bancarios contra las ventas registradas.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 5: FLUJOS OPERATIVOS E2E (END-TO-END) -->
+<h1 class="chapter-title">
+  <span>5. FLUJOS OPERATIVOS DE PRINCIPIO A FIN (END-TO-END)</span>
+  <span class="hub-tag">E2E Lifecycle</span>
+</h1>
+
+<p>
+  A continuación se detallan los 5 flujos operativos integrales que abarcan múltiples módulos simultáneamente, indicando los disparadores, las transiciones de estado y las validaciones de negocio.
+</p>
+
+<h2 class="section-heading">5.1 FLUJO E2E 1: Ciclo Completo Order-to-Cash & Fulfillment</h2>
+<p>
+  Representa la ruta crítica desde que un consumidor entra al Storefront hasta que el paquete es entregado en su domicilio y se asienta el resultado financiero:
+</p>
+
+<div class="diagram-container avoid-break">
+  <svg viewBox="0 0 740 180" width="100%" height="170" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cajas del Flujo -->
+    <rect x="10" y="20" width="100" height="50" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="60" y="42" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#1d4ed8" text-anchor="middle">PASO 1</text>
+    <text x="60" y="56" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Storefront Checkout</text>
+
+    <rect x="135" y="20" width="100" height="50" rx="6" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="185" y="42" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#15803d" text-anchor="middle">PASO 2</text>
+    <text x="185" y="56" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Hub 5: Cobro Pasarela</text>
+
+    <rect x="260" y="20" width="100" height="50" rx="6" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+    <text x="310" y="42" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#6d28d9" text-anchor="middle">PASO 3</text>
+    <text x="310" y="56" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Hub 4: Salida Kardex</text>
+
+    <rect x="385" y="20" width="100" height="50" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="435" y="42" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#b91c1c" text-anchor="middle">PASO 4</text>
+    <text x="435" y="56" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Hub 6: Empaque Óptico</text>
+
+    <rect x="510" y="20" width="100" height="50" rx="6" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="560" y="42" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#b45309" text-anchor="middle">PASO 5</text>
+    <text x="560" y="56" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Hub 6: Guía Courier</text>
+
+    <rect x="635" y="20" width="95" height="50" rx="6" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+    <text x="682" y="42" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#334155" text-anchor="middle">PASO 6</text>
+    <text x="682" y="56" font-family="sans-serif" font-size="7.5" fill="#475569" text-anchor="middle">Hub 3: CRM WhatsApp</text>
+
+    <!-- Flechas Superiores -->
+    <path d="M 110 45 L 135 45" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 235 45 L 260 45" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 360 45 L 385 45" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 485 45 L 510 45" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 610 45 L 635 45" stroke="#94a3b8" stroke-width="2"/>
+
+    <!-- Retorno Financiero y Ejecutivo Inferior -->
+    <rect x="180" y="105" width="380" height="55" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+    <text x="370" y="126" font-family="sans-serif" font-size="9.5" font-weight="bold" fill="#38bdf8" text-anchor="middle">CIERRE FINANCIERO & DASHBOARD (HUBS 5 Y 1)</text>
+    <text x="370" y="145" font-family="sans-serif" font-size="8" fill="#e2e8f0" text-anchor="middle">Cálculo de Margen Neto Real • Timbrado CFDI 4.0 • Actualización GMV y OTIF</text>
+
+    <path d="M 560 70 L 560 105" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,3"/>
+    <path d="M 185 70 L 185 105" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,3"/>
+  </svg>
+  <div class="diagram-caption">Figura 5.1: Flujo End-to-End de Procesamiento de Pedido (Order-to-Cash).</div>
+</div>
+
+<h2 class="section-heading">5.2 FLUJO E2E 2: Aprovisionamiento Inbound, Ensamble BOM y Publicación</h2>
+<p>
+  Garantiza que la adquisición y manufactura de prendas y sets se traduzca de forma limpia en existencias comerciales:
+</p>
+<ul class="step-list avoid-break">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Hub 7 (Convenios):</strong> Se emite la Orden de Compra formal al proveedor textil con cantidades, costos pactados y fecha compromiso de rampa.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Hub 4 (Rampa Inbound):</strong> El camión de carga arriba a almacén. El personal escanea los paquetes con la interfaz de recepción ciega. Se verifica lote y condiciones físicas.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Hub 4 (Kardex & Slotting):</strong> El sistema asienta la entrada en Kardex recalculando el costo promedio ponderado y asigna el lote a los racks de almacenamiento.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Hub 4 (Motor BOM):</strong> Para productos tipo Set/Kit, se activa la orden de producción interna, consumiendo insumos simples y generando existencia vendible del set.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">5</div>
+    <div class="step-content">
+      <strong>Hub 2 & Storefront:</strong> Al confirmarse la entrada física en Kardex, el inventario visible en el Storefront D2C se refresca en tiempo real sin recargar caché.
+    </div>
+  </li>
+</ul>
+
+<h2 class="section-heading">5.3 FLUJO E2E 3: Logística Inversa, Peritaje RMA y Reingreso</h2>
+<p>
+  Regula las solicitudes de devolución, garantía o cambio físico de productos:
+</p>
+<ul class="step-list avoid-break">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Storefront RMA:</strong> El cliente inicia trámite adjuntando número de pedido, motivo y fotografías de la prenda en su empaque original.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Hub 6 (Mesa RMA):</strong> Un analista valida la evidencia y genera la guía prepago inversa de paquetería hacia la bodega central.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Inspección Física:</strong> Al llegar el paquete a almacén, se somete a revisión textil y sanitaria. Si el producto está íntegro, se emite dictamen de <em>Reingreso</em>.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Hub 4 & Hub 5:</strong> El Kardex asienta la entrada por devolución. Finanzas emite la Nota de Crédito CFDI 4.0 o reembolsa al método de pago original.
+    </div>
+  </li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 6: GOBERNANZA TÉCNICA Y AUDITORÍA -->
+<h1 class="chapter-title">
+  <span>6. GOBERNANZA TÉCNICA & POLÍTICA DE CALIDAD</span>
+  <span class="hub-tag">QA & Standards</span>
+</h1>
+
+<p>
+  Para mantener la estabilidad e integridad de los workflows de la plataforma, todo desarrollo futuro debe apegarse a las directrices de arquitectura formalizadas en este documento.
+</p>
+
+<h2 class="section-heading">6.1 Principios de Integridad de la Base de Datos</h2>
+<div class="callout-box avoid-break">
+  <strong>Reglas No Negociables del Núcleo Transaccional:</strong>
+  <ul style="margin: 6px 0 0 16px; font-size: 8.2pt; line-height: 1.5;">
+    <li><strong>Prohibición de Eliminación Física (Hard Deletes):</strong> Las órdenes, movimientos de Kardex, pólizas contables y registros de auditoría nunca se eliminan físicamente; se utilizan estados de anulación o borrado lógico (`softDeletes`) con bitácora del motivo.</li>
+    <li><strong>Transacciones Atómicas DB:</strong> Toda operación que afecte simultáneamente a dos o más hubs (ej. cobrar orden + descontar stock) debe estar envuelta en un bloque `DB::transaction(...)` con bloqueo pesimista de filas (`lockForUpdate`).</li>
+    <li><strong>Idempotencia en Pasarelas y Webhooks:</strong> Todos los endpoints que reciben webhooks de Stripe, Mercado Pago o Couriers deben validar el identificador único del evento para impedir procesamientos duplicados ante reintentos de red.</li>
+  </ul>
+</div>
+
+<h2 class="section-heading">6.2 Protocolo de Actualización Documental</h2>
+<p>
+  En cumplimiento con las normas de gobernanza del proyecto Mi Tienda:
+</p>
+<table class="data-table avoid-break">
+  <thead>
+    <tr>
+      <th style="width: 25%;">Tipo de Cambio</th>
+      <th style="width: 35%;">Archivo Fuente de Especificación</th>
+      <th style="width: 40%;">Acción Requerida Obligatoria</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Nuevo Módulo o Hub</td>
+      <td><code>docs/APPLICATION_WORKFLOW_SPEC.md</code></td>
+      <td>Actualizar mapa de arquitectura y matriz de eventos cruzados.</td>
+    </tr>
+    <tr>
+      <td>Ajuste a Cascada Financiera</td>
+      <td><code>docs/APPLICATION_WORKFLOW_SPEC.md</code></td>
+      <td>Documentar nuevos rubros de fricción o impuestos SAT.</td>
+    </tr>
+    <tr>
+      <td>Modificación a Reglas de Flete</td>
+      <td><code>docs/APPLICATION_WORKFLOW_SPEC.md</code></td>
+      <td>Actualizar thresholds de envío gratis y parámetros de absorción.</td>
+    </tr>
+    <tr>
+      <td><strong>Cualquier Cambio a Workflows</strong></td>
+      <td><strong><code>docs/APPLICATION_WORKFLOW_MANUAL.html</code></strong></td>
+      <td><strong>Compilar versión actualizada en PDF mediante motor headless.</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout-box callout-success avoid-break" style="margin-top: 14px;">
+  <strong>Certificación de Conformidad del Sistema:</strong>
+  Este documento y su correspondiente manual imprimible constituyen la versión oficial 2.6.0 de los flujos de trabajo de la plataforma Mi Tienda. Su observancia es mandatoria para todos los equipos de desarrollo, infraestructura y operaciones comerciales.
+</div>
+
+</body>
+</html>

@@ -596,7 +596,22 @@ class PortalStoreController extends Controller
             'custom_js' => 'nullable|string',
             'settings' => 'nullable|array',
             'status' => 'nullable|string|in:active,draft,archived',
+            'background_image_file' => 'nullable|image|max:5120',
         ]);
+
+        $settings = $request->input('settings', []);
+
+        // Manejo de imagen de fondo subida
+        if ($request->hasFile('background_image_file')) {
+            $file = $request->file('background_image_file');
+            $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sections'), $filename);
+            $settings['background_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->filled('background_image_url')) {
+            $settings['background_image'] = $request->input('background_image_url');
+        }
+
+        $validated['settings'] = $settings;
 
         $maxOrder = CmsSection::max('sort_order') ?? 0;
         $validated['sort_order'] = $maxOrder + 1;
@@ -640,11 +655,28 @@ class PortalStoreController extends Controller
             'custom_css' => 'nullable|string',
             'custom_js' => 'nullable|string',
             'settings' => 'nullable|array',
+            'background_image_file' => 'nullable|image|max:5120',
         ]);
 
         if (empty($validated['type'])) {
             $validated['type'] = $section->type;
         }
+
+        $currentSettings = $section->settings ?? [];
+        $newSettings = $request->input('settings', []);
+        $mergedSettings = array_merge($currentSettings, $newSettings);
+
+        // Manejo de imagen de fondo subida
+        if ($request->hasFile('background_image_file')) {
+            $file = $request->file('background_image_file');
+            $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sections'), $filename);
+            $mergedSettings['background_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->filled('background_image_url')) {
+            $mergedSettings['background_image'] = $request->input('background_image_url');
+        }
+
+        $validated['settings'] = $mergedSettings;
 
         $productCardTypes = ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'subcategories_slider'];
         if (in_array($validated['type'], $productCardTypes)) {

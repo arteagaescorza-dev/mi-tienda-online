@@ -110,4 +110,78 @@ class StorefrontDynamicSectionsTest extends TestCase
         $response->assertStatus(200);
         $response->assertDontSee('CONTENIDO NO PUBLICADO', false);
     }
+
+    /**
+     * Test hero section in structured mode renders full width, background, gradient, dynamic CTA buttons, and excludes custom HTML.
+     */
+    public function test_hero_structured_mode_renders_fullwidth_buttons_and_gradient(): void
+    {
+        $sec = CmsSection::create([
+            'universe' => 'all',
+            'name' => 'Hero Verano Full Width',
+            'type' => 'hero_carousel',
+            'title' => 'HERO TITULO ESTRUCTURADO',
+            'badge' => 'NUEVA COLECCION',
+            'subtitle' => 'Prendas unicas con envio express',
+            'custom_html' => '<div id="heroDuplicadoBug">ESTE CODIGO NO DEBE SALIR EN MODO ESTRUCTURADO</div>',
+            'settings' => [
+                'hero_mode' => 'structured',
+                'full_width' => true,
+                'background_image' => '/uploads/sections/hero_verano.webp',
+                'enable_gradient' => true,
+                'gradient_color_start' => '#0f172a',
+                'gradient_color_end' => '#1e1b4b',
+                'gradient_direction' => 'to bottom',
+                'gradient_opacity' => 85,
+                'cta_primary_text' => 'VER JOCKS EXCLUSIVOS',
+                'cta_primary_url' => '#section-42',
+                'cta_secondary_text' => 'GUIA DETALLADA',
+                'cta_secondary_url' => '/pagina/guia-tallas',
+            ],
+            'sort_order' => 1,
+            'status' => 'active',
+        ]);
+
+        $response = $this->get('/?universo=marte');
+
+        $response->assertStatus(200);
+        $response->assertSee('hero-full-width', false);
+        $response->assertSee('id="section-' . $sec->id . '"', false);
+        $response->assertSee('HERO TITULO ESTRUCTURADO', false);
+        $response->assertSee('VER JOCKS EXCLUSIVOS', false);
+        $response->assertSee('#section-42', false);
+        $response->assertSee('GUIA DETALLADA', false);
+        $response->assertSee('/pagina/guia-tallas', false);
+        $response->assertSee('/uploads/sections/hero_verano.webp', false);
+        $response->assertSee('linear-gradient(to bottom, #0f172a, #1e1b4b)', false);
+        // MUTUAL EXCLUSIVITY: Structured mode must NOT render custom HTML!
+        $response->assertDontSee('ESTE CODIGO NO DEBE SALIR EN MODO ESTRUCTURADO', false);
+    }
+
+    /**
+     * Test hero section in custom mode renders isolated custom code without duplicating structured card.
+     */
+    public function test_hero_custom_mode_renders_isolated_custom_code_without_duplication(): void
+    {
+        $sec = CmsSection::create([
+            'universe' => 'all',
+            'name' => 'Hero Custom Exclusivo',
+            'type' => 'hero_carousel',
+            'title' => 'TITULO QUE NO DEBE APARECER EN MODO CUSTOM',
+            'custom_html' => '<div id="miHeroCustomPuro">SOLO CODIGO CUSTOM RENDERIZADO</div>',
+            'settings' => [
+                'hero_mode' => 'custom',
+                'full_width' => true,
+            ],
+            'sort_order' => 1,
+            'status' => 'active',
+        ]);
+
+        $response = $this->get('/?universo=marte');
+
+        $response->assertStatus(200);
+        $response->assertSee('SOLO CODIGO CUSTOM RENDERIZADO', false);
+        // MUTUAL EXCLUSIVITY: Custom mode must NOT render the structured hero card title!
+        $response->assertDontSee('TITULO QUE NO DEBE APARECER EN MODO CUSTOM', false);
+    }
 }

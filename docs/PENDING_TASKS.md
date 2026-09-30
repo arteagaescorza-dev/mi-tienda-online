@@ -119,7 +119,8 @@
 | `TASK-H2-16` | Persistencia y Bidireccionalidad de Cambios de Vitrina (`Guardar Cambios de Vitrina`) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | AJAX, `CmsStorefrontConfig`, Caché Storefront |
 | `TASK-H2-17` | Suite de Edición, Reasignación de Vitrina, Archivado y Estado de Secciones | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | `#editSectionModal`, RESTful PUT/POST, Badges |
 | `TASK-H2-18` | Paleta Cromática Completa (8 Tokens), Logos/Favicon, Subnavegación 2 Filas y Desacoplamiento Hero | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | DDL Migration, PWA `:root`, Drag & Drop Hero |
-
+| `TASK-H2-19` | Especificación Técnica y Manual de Workflows de la Aplicación (Interconexión Cross-Hub & PDF Imprimible) | **Transversal (Gobernanza / Core)** | **Alta (Regla de Proyecto)** | **Completada (Fullstack End-to-End)** | `APPLICATION_WORKFLOW_SPEC.md`, `APPLICATION_WORKFLOW_MANUAL.pdf` |
+| `TASK-H2-20` | Motor Modular de Hero: Full-Width 100vw, Conmutación Excluyente (Cero Duplicados), Fondos, Degradados Overlay y Generador de Rutas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Viewport Breakout, Blade Bifurcation, Route Helper, PHPUnit |
 
 ---
 
@@ -1749,5 +1750,29 @@ graph TD
   - **Desacoplamiento de Hero:** Retiro de inputs fijos de Hero de Tab 1 e inclusión de banner explicativo; el Hero se construye con Drag & Drop en la tabla modular.
   - **Persistencia & Reactividad en Vivo:** `window.switchStoreUniverse` y listeners `input` sincronizan de inmediato el marco de previsualización a escala y las muestras KPI en tiempo real.
   - **Pruebas Automatizadas:** 17 pruebas aprobadas con 75 aserciones en `Hub2AdminStoreControllerTest` y `StorefrontDynamicSectionsTest`.
+
+---
+
+### `TASK-H2-20`: Motor Modular de Hero: Full-Width 100vw, Conmutación Excluyente (Cero Duplicados), Fondos, Degradados Overlay y Generador de Rutas
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*) & Submódulo 5 (*Páginas & Navbar*) & Storefront PWA
+* **Diagnóstico & Requerimientos del Usuario:**
+  1. *Gestión del Ancho de Pantalla:* El Hero comenzaba ~20% a la derecha o constreñido dentro del `.container` estándar. Debe tener la opción de abarcar el 100% de la pantalla (Full-Width / Edge-to-Edge bleed) o mantenerse en contenedor boxed estándar.
+  2. *Eliminación de Hero Duplicado:* Al editar el Hero se renderizaba de forma duplicada tanto lo propuesto por el formulario (tarjeta estructurada) como lo propuesto por el código custom. Debe ser conmutable y opcional (`hero_mode`: Estructurado vs Código Scoped).
+  3. *Carga de Imagen de Fondo:* Ambos modos deben permitir subir una imagen de fondo o ingresar URL externa con previsualización en vivo.
+  4. *Capas de Degradados Superpuestos:* Ambos modos deben permitir conmutar diferentes colores para formar degradados sobre/después de la imagen de fondo (color inicial, color final, dirección, opacidad).
+  5. *Botones del Hero y Generador de Rutas:* La opción predefinida debe permitir crear y personalizar los botones del Hero (Primario y Secundario) y asignar la ruta a la que llevan. En la pestaña de Secciones Modulares cada bloque debe generar y mostrar su ruta ancla (`#section-{id}`) con botón de copia en 1 clic; en Páginas & Navbar cada página debe generar su ruta pública (`/pagina/{slug}`) con botón de copia en 1 clic; y en el modal de configuración del Hero debe proveerse un selector desplegable asistido para autocompletar estas rutas en los botones.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - **Sangrado Edge-to-Edge (`.hero-full-width`):** Viewport breakout con `width: 100vw !important; margin-left: -50vw !important; left: 50% !important; right: 50% !important;` y padding ergonómico que preserva la alineación tipográfica con la cuadrícula de productos en cualquier resolución.
+  - **Bifurcación Mutuamente Excluyente de Renderizado:** El motor Blade evalúa `$sec->settings['hero_mode']`. Si es `custom`, renderiza únicamente el bloque aislado Scoped HTML/CSS/JS. Si es `structured`, renderiza la tarjeta `.hero-banner-card` con títulos, subtítulos, badges y botones. Erradicación total de elementos duplicados.
+  - **Subida de Imágenes & Background:** Soporte de carga de archivos `background_image_file` procesados hacia `public/uploads/sections/` y campo `background_image` con visor reactivo thumbnail `FileReader` y botón de eliminación.
+  - **Capa de Degradados Overlay:** Controles reactivos de degradado (`enable_gradient`, `gradient_color_start`, `gradient_color_end`, `gradient_direction`, `gradient_opacity` slider 10-100%) y barra de muestra en vivo, renderizados como `linear-gradient(...)` combinado con `url(...)`.
+  - **Generador de Rutas & Anclas Modulares:**
+    - Identificadores DOM únicos `id="section-{{ $sec->id }}"` inyectados en cada sección modular del Storefront.
+    - Badges `#section-{{ $sec->id }}` con botón interactivo de 1 clic "Copiar Ruta" en la tabla de secciones CMS.
+    - Badges `/pagina/{{ $pg->slug }}` con botón interactivo de 1 clic "Copiar Ruta" en la tabla de páginas institucionales.
+    - Selector integrado `+ Insertar Ruta` en los campos de URL de los botones CTA para autocompletar anclas de secciones, páginas o vitrinas multiverso.
+  - **Pruebas Automatizadas:** 19 pruebas de integración y renderizado aprobadas con 89 aserciones (`StorefrontDynamicSectionsTest` y `Hub2AdminStoreControllerTest`). Test suite completa de 353 pruebas aprobada con 2,212 aserciones sin ninguna regresión.
+  - **Documentación & Versión PDF:** `APPLICATION_WORKFLOW_SPEC.md` y `APPLICATION_WORKFLOW_MANUAL.html` actualizados, y `APPLICATION_WORKFLOW_MANUAL.pdf` compilado y generado exitosamente.
 
 

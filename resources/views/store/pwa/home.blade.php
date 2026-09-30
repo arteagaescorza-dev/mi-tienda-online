@@ -7,51 +7,94 @@
     @if(isset($sections) && $sections->isNotEmpty())
       @foreach($sections as $sec)
         @if($sec->type === 'hero_carousel')
+          @php
+            $settings = is_array($sec->settings) ? $sec->settings : (json_decode($sec->settings ?? '{}', true) ?: []);
+            $heroMode = $settings['hero_mode'] ?? (!empty($sec->custom_html) && empty($sec->title) ? 'custom' : 'structured');
+            $isFullWidth = !empty($settings['full_width']);
+            $bgImage = $settings['background_image'] ?? null;
+            $enableGradient = !empty($settings['enable_gradient']);
+            $gradStart = $settings['gradient_color_start'] ?? '#0f172a';
+            $gradEnd = $settings['gradient_color_end'] ?? '#1e1b4b';
+            $gradDir = $settings['gradient_direction'] ?? 'to bottom';
+            $gradOpacity = isset($settings['gradient_opacity']) ? ((int)$settings['gradient_opacity'] / 100) : 0.85;
+
+            $bgLayers = [];
+            if ($enableGradient) {
+                $bgLayers[] = "linear-gradient({$gradDir}, {$gradStart}, {$gradEnd})";
+            }
+            if (!empty($bgImage)) {
+                $bgLayers[] = "url('{$bgImage}') center/cover no-repeat";
+            }
+            $heroBgStyle = !empty($bgLayers) ? 'background: ' . implode(', ', $bgLayers) . ' !important;' : '';
+
+            $ctaPrimaryText = $settings['cta_primary_text'] ?? $settings['cta_text'] ?? $sec->query_rules['cta_text'] ?? 'EXPLORAR CATÁLOGO';
+            $ctaPrimaryUrl = $settings['cta_primary_url'] ?? $settings['cta_url'] ?? $sec->query_rules['cta_url'] ?? null;
+            $ctaSecondaryText = $settings['cta_secondary_text'] ?? 'GUÍA DE TALLAS TORZO';
+            $ctaSecondaryUrl = $settings['cta_secondary_url'] ?? null;
+          @endphp
+
           <!-- Hero Carousel / Editorial Banner -->
-          <section class="hero-editorial-section" data-section-id="{{ $sec->id }}">
-            <div class="hero-banner-card">
-              <div class="hero-tag-pill">
-                <span class="hero-pulse-dot"></span>
-                <span id="heroBrandTag">{{ $sec->badge ?? $currentStorefront['heroTag'] ?? 'MARTE // COLECCIÓN OFICIAL TORZO' }}</span>
-              </div>
-              <h1 class="hero-title">{{ $sec->title ?? $currentStorefront['heroTitle'] ?? 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA' }}</h1>
-              <p class="hero-desc">
-                {{ $sec->subtitle ?? $currentStorefront['heroSubtitle'] ?? 'Diseño textil anatómico con modal pima, costuras planas y microfibras de alta transpirabilidad. Envíos express a todo México.' }}
-              </p>
-              <div class="hero-actions-row">
-                @php
-                  $ctaText = $sec->settings['cta_text'] ?? $sec->query_rules['cta_text'] ?? 'EXPLORAR CATÁLOGO';
-                  $ctaUrl = $sec->settings['cta_url'] ?? $sec->query_rules['cta_url'] ?? null;
-                @endphp
-                @if(!empty($ctaUrl))
-                  <a href="{{ $ctaUrl }}" class="btn-hero-primary" style="text-decoration: none;">
-                    <span>{{ $ctaText }}</span>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </a>
-                @else
-                  <button type="button" class="btn-hero-primary" data-action="switch-dock-tab" data-dock-tab="catalog">
-                    <span>{{ $ctaText }}</span>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
+          <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-full-width' : '' }}" data-section-id="{{ $sec->id }}">
+            @if($heroMode === 'custom')
+              {{-- MODO CÓDIGO PERSONALIZADO (AISLADO, NO DUPLICA EL HERO) --}}
+              <div class="hero-custom-container" style="{{ $heroBgStyle }}">
+                @if(!empty($sec->custom_css))
+                  <style>{!! $sec->custom_css !!}</style>
                 @endif
-                <button type="button" class="btn-hero-secondary" data-action="open-size-guide">
-                  <span>GUÍA DE TALLAS TORZO</span>
-                </button>
+                @if(!empty($sec->custom_html))
+                  {!! $sec->custom_html !!}
+                @endif
+                @if(!empty($sec->custom_js))
+                  <script>{!! $sec->custom_js !!}</script>
+                @endif
               </div>
-            </div>
-            @if(!empty($sec->custom_css))
-              <style>{!! $sec->custom_css !!}</style>
-            @endif
-            @if(!empty($sec->custom_html))
-              {!! $sec->custom_html !!}
-            @endif
-            @if(!empty($sec->custom_js))
-              <script>{!! $sec->custom_js !!}</script>
+            @else
+              {{-- MODO VISUAL ESTRUCTURADO (FORMULARIO DINÁMICO) --}}
+              <div class="hero-banner-card" style="{{ $heroBgStyle }}">
+                @if(!empty($sec->badge) || !empty($currentStorefront['heroTag']))
+                  <div class="hero-tag-pill">
+                    <span class="hero-pulse-dot"></span>
+                    <span id="heroBrandTag">{{ $sec->badge ?? $currentStorefront['heroTag'] ?? 'MARTE // COLECCIÓN OFICIAL TORZO' }}</span>
+                  </div>
+                @endif
+
+                <h1 class="hero-title">{{ $sec->title ?? $currentStorefront['heroTitle'] ?? 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA' }}</h1>
+
+                @if(!empty($sec->subtitle) || !empty($currentStorefront['heroSubtitle']))
+                  <p class="hero-desc">
+                    {{ $sec->subtitle ?? $currentStorefront['heroSubtitle'] ?? 'Diseño textil anatómico con modal pima, costuras planas y microfibras de alta transpirabilidad. Envíos express a todo México.' }}
+                  </p>
+                @endif
+
+                <div class="hero-actions-row">
+                  @if(!empty($ctaPrimaryUrl))
+                    <a href="{{ $ctaPrimaryUrl }}" class="btn-hero-primary" style="text-decoration: none;">
+                      <span>{{ $ctaPrimaryText }}</span>
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  @else
+                    <button type="button" class="btn-hero-primary" data-action="switch-dock-tab" data-dock-tab="catalog">
+                      <span>{{ $ctaPrimaryText }}</span>
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                  @endif
+
+                  @if(!empty($ctaSecondaryUrl))
+                    <a href="{{ $ctaSecondaryUrl }}" class="btn-hero-secondary" style="text-decoration: none;">
+                      <span>{{ $ctaSecondaryText }}</span>
+                    </a>
+                  @else
+                    <button type="button" class="btn-hero-secondary" data-action="open-size-guide">
+                      <span>{{ $ctaSecondaryText }}</span>
+                    </button>
+                  @endif
+                </div>
+              </div>
             @endif
           </section>
         @elseif($sec->type === 'brand_pillars')
           <!-- Pilares de Marca & Beneficios (Courier Exclusivo) -->
-          <section class="brand-pillars-bar" data-section-id="{{ $sec->id }}">
+          <section id="section-{{ $sec->id }}" class="brand-pillars-bar" data-section-id="{{ $sec->id }}">
             <div class="pillar-item-card">
               <div class="pillar-icon-box">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -93,7 +136,7 @@
           </section>
         @elseif($sec->type === 'editorial_banner')
           <!-- Banner Promocional de Campañas Dir A (Convenios & Aliados Hub 7 TASK-STR-04) -->
-          <section class="lead-magnet-banner-card" id="leadMagnetHomeCard_{{ $sec->id }}" data-section-id="{{ $sec->id }}">
+          <section id="section-{{ $sec->id }}" class="lead-magnet-banner-card" data-section-id="{{ $sec->id }}" data-card-id="leadMagnetHomeCard_{{ $sec->id }}">
             <div class="lead-magnet-content">
               <div class="lead-magnet-tag-row">
                 <span class="lead-magnet-tag">{{ $sec->badge ?? 'CONVENIOS MULTIVERSO // HUB 7' }}</span>
@@ -134,7 +177,7 @@
           @php
             $sectionProducts = $sec->resolved_products ?? $products;
           @endphp
-          <section style="margin-bottom: 32px;" data-section-id="{{ $sec->id }}" data-section-type="{{ $sec->type }}">
+          <section id="section-{{ $sec->id }}" style="margin-bottom: 32px;" data-section-id="{{ $sec->id }}" data-section-type="{{ $sec->type }}">
             <div class="catalog-section-header">
               <div>
                 <h2 class="section-headline">{{ $sec->title ?? 'PRENDAS DESTACADAS' }}</h2>
@@ -217,7 +260,7 @@
           @php
             $sliderProducts = $sec->resolved_products ?? $products;
           @endphp
-          <section style="margin-bottom: 32px;" data-section-id="{{ $sec->id }}" data-section-type="subcategories_slider">
+          <section id="section-{{ $sec->id }}" style="margin-bottom: 32px;" data-section-id="{{ $sec->id }}" data-section-type="subcategories_slider">
             <div class="catalog-section-header">
               <div>
                 <h2 class="section-headline">{{ $sec->title ?? 'EXPLORAR COLECCIÓN' }}</h2>
@@ -319,7 +362,7 @@
           </script>
         @elseif($sec->type === 'custom_html_css_js')
           <!-- Bloque Custom Operativo (HTML/CSS/JS Scoped) -->
-          <section class="custom-cms-section" data-section-id="{{ $sec->id }}" style="margin-bottom: 32px;">
+          <section id="section-{{ $sec->id }}" class="custom-cms-section" data-section-id="{{ $sec->id }}" style="margin-bottom: 32px;">
             @if(!empty($sec->custom_css))
               <style>{!! $sec->custom_css !!}</style>
             @endif
