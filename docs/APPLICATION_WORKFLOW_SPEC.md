@@ -258,6 +258,9 @@ sequenceDiagram
      - *Sección 3:* Guía Oficial de Tallas & Protocolos de Cuidado (`accordionSecEditorial`).
    - El panel de *CMS Blog & Revista Digital* (`#storeMagazinePanel`) opera como pestaña independiente (Tab 3) con su propio gestor de artículos, lecturas y publicación editorial.
    - El Gestor de Secciones Modulares del Home (`#sectionsTable`) queda confinado con exclusividad dentro de `Editor Visual` (Tab 1), garantizando que no se visualice en ninguna otra pestaña.
+8. **Aislamiento Estructural de Paneles y Desbloqueo de Modales Operativos (TASK-H2-23):**
+   - Para prevenir bloqueos de renderizado en cascada donde estilos de paneles inactivos (`.tab-panel.hidden { display: none !important; }`) anulen la visualización de modales superpuestos (`fixed inset-0 z-50`), la estructura HTML garantiza que los 6 paneles principales y los 7 modales operativos CMS (`#createSectionModal`, `#editSectionModal`, `#editSizeGuideModal`, `#editCareModal`, `#editProfecoModal`, `#createPageModal`, `#createBlogModal`) residan como elementos hermanos directos e independientes bajo `#storeAppRoot`.
+   - La función global `window.openStoreModal(modalId)` ejecuta `modal.style.removeProperty('display')` previo a `modal.style.display = 'flex'`, limpiando cualquier estilo residual en línea, mientras que `window.openCreateSectionModal()` resetea de forma determinista el modo activo a Catálogo (`window.switchCreateSectionMode('catalog')`).
 
 ---
 

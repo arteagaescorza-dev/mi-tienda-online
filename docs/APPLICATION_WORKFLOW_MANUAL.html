@@ -537,6 +537,13 @@
       El Gestor de Secciones Modulares (<code>#sectionsTable</code>) reside exclusivamente dentro de <code>#storeVisualPanel</code>, garantizando que permanezca oculto al navegar por las demás pestañas del CMS.
     </div>
   </li>
+  <li class="step-item">
+    <div class="step-number">6</div>
+    <div class="step-content">
+      <strong>Aislamiento Estructural de Paneles & Modales Globales (TASK-H2-23):</strong>
+      Garantiza que los 6 paneles principales y los 7 modales operativos CMS residan como elementos hermanos directos bajo <code>#storeAppRoot</code> (nivel jerárquico <code>depth = 2</code>). Esto erradica bloqueos donde paneles inactivos con <code>display: none !important</code> ocultaban modales superpuestos, permitiendo que el botón <em>"Crear Nueva Sección"</em> abra inmediatamente con dimensiones plenas y conmutación automática al modo catálogo.
+    </div>
+  </li>
 </ul>
 
 <div class="page-break"></div>

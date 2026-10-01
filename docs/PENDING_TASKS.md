@@ -121,6 +121,9 @@
 | `TASK-H2-18` | Paleta Cromática Completa (8 Tokens), Logos/Favicon, Subnavegación 2 Filas y Desacoplamiento Hero | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | DDL Migration, PWA `:root`, Drag & Drop Hero |
 | `TASK-H2-19` | Especificación Técnica y Manual de Workflows de la Aplicación (Interconexión Cross-Hub & PDF Imprimible) | **Transversal (Gobernanza / Core)** | **Alta (Regla de Proyecto)** | **Completada (Fullstack End-to-End)** | `APPLICATION_WORKFLOW_SPEC.md`, `APPLICATION_WORKFLOW_MANUAL.pdf` |
 | `TASK-H2-20` | Motor Modular de Hero: Full-Width 100vw, Conmutación Excluyente (Cero Duplicados), Fondos, Degradados Overlay y Generador de Rutas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Viewport Breakout, Blade Bifurcation, Route Helper, PHPUnit |
+| `TASK-H2-21` | Corrección Crítica de Renderizado Móvil (< 769px) en Storefront PWA y Control de Caché | **Tienda Pública (Storefront D2C)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Breakpoints PWA, Cache Busting, Hero Contrast |
+| `TASK-H2-22` | Conmutador Global de Vitrinas, Reestructuración a 6 Pestañas y Acordeón de Contenidos & Reglas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Universe Selector Bar, Subnav 6 Tabs, Accordion |
+| `TASK-H2-23` | Aislamiento Estructural de Paneles y Desbloqueo Definitivo del Modal Crear Nueva Sección | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Balance de Divs Blade, CDP Headless Verification, Modales Globales |
 
 ---
 
@@ -1821,5 +1824,40 @@ graph TD
   - **Pruebas Automatizadas:** 27 pruebas pasando al 100% con 134 aserciones en `Hub2AdminStoreControllerTest`, incluyendo `test_admin_store_cms_unified_accordion_and_global_universe_selector`.
   - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado en HTML y compilado a PDF.
 
+---
 
-
+### `TASK-H2-23`: Aislamiento Estructural de Paneles y Desbloqueo Definitivo del Modal Crear Nueva Sección en Editor Visual
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Vista de Control `resources/views/portal/store.blade.php`
+* **Diagnóstico & Causa Raíz Detectada:**
+  1. *Falla Reportada:* El botón `Crear Nueva Sección` (`data-action="open-create-section-modal"`) en el Gestor de Secciones Modulares del Home (Tab 1, Editor Visual) "se rompió otra vez" y no abría el modal interactivo `#createSectionModal`.
+  2. *Diagnóstico Profundo con Chrome DevTools Protocol (CDP Headless):* Se ejecutó una auditoría en vivo del árbol DOM usando Chrome Headless. Al disparar el evento click sobre el botón, el modal `#createSectionModal` recibía las clases correctas y `style.display = 'flex'`, pero sus dimensiones computadas arrojaban:
+     - `offsetHeight: 0`
+     - `offsetWidth: 0`
+     - `boundingClientRect: { top: 0, left: 0, width: 0, height: 0 }`
+  3. *Inspección de Ancestros:* La inspección de la cadena de padres (`modalParentChain`) reveló que `#createSectionModal` tenía como ancestros:
+     $$\text{createSectionModal} \subset \text{accordionSecShippingBody} \subset \text{accordionSecBanners} \subset \text{storeContentRulesPanel}$$
+     Debido a que `storeContentRulesPanel` (Pestaña 2) permanece con `display: none !important` cuando el usuario se encuentra en el Tab 1 (Editor Visual), ningún elemento hijo dentro de él puede renderizarse en pantalla, sin importar que tenga `fixed inset-0 z-50`.
+  4. *Causa Raíz de HTML Blade:* 
+     - Omisión de etiqueta de cierre `</div>` en `accordionSecBanners` (Línea 895).
+     - Omisión de dos etiquetas de cierre `</div>` en `accordionSecShippingBody` y `accordionSecShipping` (Línea 1035).
+     - Omisión de etiqueta de cierre `</div>` en `storeContentRulesPanel` (Línea 1144).
+     Esto causó que las pestañas 3 (`storeMagazinePanel`), 4 (`storePagesPanel`), 5 (`storeTrackingPanel`), 6 (`storeFiltersPanel`) y TODOS los modales quedaran atrapados dentro de la pestaña 2.
+* **Solución Técnica & Arquitectura Implementada:**
+  - **Saneamiento y Balance Estricto de Divs:**
+    - Cierre hermético de `accordionSecBanners` (`depth = 3` $\rightarrow$ `depth = 2`).
+    - Cierre hermético de `accordionSecShippingBody` y `accordionSecShipping` (`depth = 4` $\rightarrow$ `depth = 2`).
+    - Cierre hermético de `accordionSecEditorialBody`, `accordionSecEditorial` y `storeContentRulesPanel` (`depth = 2` $\rightarrow$ `depth = 1`).
+    - Verificación matemática por árbol sintáctico (`verify_div_tree.cjs`): Los 6 tab panels (`storeVisualPanel`, `storeContentRulesPanel`, `storeMagazinePanel`, `storePagesPanel`, `storeTrackingPanel`, `storeFiltersPanel`) y todos los modales de control operativo (`createSectionModal`, `editSectionModal`, etc.) son ahora hijos directos independientes de `#storeAppRoot` (`depth = 2`).
+  - **Limpieza de Propiedades Inline en Modales:**
+    - Se actualizó `window.openStoreModal(modalId)` para ejecutar `modal.style.removeProperty('display')` previo a `modal.style.display = 'flex'`, garantizando que cualquier override de Tailwind sea limpiado sin conflictos.
+    - Se optimizó `window.openCreateSectionModal()` para invocar de forma predeterminada `window.switchCreateSectionMode('catalog')`, asegurando que el modal abra siempre en su estado más limpio e intuitivo.
+  - **Verificación Automatizada End-to-End con Chrome Headless:**
+    - Tras la corrección, el click en `[data-action="open-create-section-modal"]` arrojó en Chrome Headless:
+      - `computedDisplay: "flex"`
+      - `computedVisibility: "visible"`
+      - `offsetHeight: 429`
+      - `offsetWidth: 764`
+      - `modalParentChain[0]: div#storeAppRoot`
+    - Cierre comprobado mediante `[data-action="close-modal"]`: `computedDisplay: "none"`, `offsetHeight: 0`.
+  - **Pruebas de Regresión:** 27 pruebas pasando al 100% (134 aserciones) en `Hub2AdminStoreControllerTest`.

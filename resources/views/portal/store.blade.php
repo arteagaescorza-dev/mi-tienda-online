@@ -893,7 +893,8 @@
                 </div>
             </div>
         </div>
-        <!-- FIN SECCIÓN 1 ACORDEÓN -->
+    </div>
+    <!-- FIN SECCIÓN 1 ACORDEÓN -->
 
         <!-- SECCIÓN 2 ACORDEÓN: REGLAS DE FLETE & SIMULADOR FINANCIERO -->
         <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecShipping">
@@ -1031,10 +1032,10 @@
                 </div>
             </div>
         </div>
-        </div>
-        </div>
-        </div>
-        <!-- FIN SECCIÓN 2 ACORDEÓN -->
+    </div>
+</div>
+</div>
+<!-- FIN SECCIÓN 2 ACORDEÓN -->
 
         <!-- SECCIÓN 3 ACORDEÓN: CONTENIDO EDITORIAL & TALLAS -->
         <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecEditorial">
@@ -1142,7 +1143,8 @@
         </div>
         <!-- FIN SECCIÓN 3 ACORDEÓN -->
     </div>
-    <!-- FIN SUBMÓDULO 2: CONTENIDO & REGLAS -->
+</div>
+<!-- FIN SUBMÓDULO 2: CONTENIDO & REGLAS -->
 
     <!-- ========================================================================= -->
     <!-- SUBMÓDULO 3: CMS BLOG & REVISTA DIGITAL (TASK-H2-06)                      -->
@@ -2523,6 +2525,7 @@
             return;
         }
         modal.classList.remove('hidden');
+        modal.style.removeProperty('display');
         modal.style.display = 'flex';
         document.body.classList.add('overflow-hidden');
     };
@@ -3048,6 +3051,9 @@
     };
 
     window.openCreateSectionModal = function() {
+        if (typeof window.switchCreateSectionMode === 'function') {
+            window.switchCreateSectionMode('catalog');
+        }
         window.openStoreModal('createSectionModal');
     };
 
