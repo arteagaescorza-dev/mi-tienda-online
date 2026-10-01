@@ -166,17 +166,18 @@
   // Estado Central de la Tienda
   const storeState = {
     activeUniverse: 'marte', // 'terra', 'marte', 'venus', 'tiresias'
-    activeTab: 'home',       // 'home', 'catalog'
+    activeTab: 'home',       // 'home', 'explore', 'catalog'
     activeCategory: 'all',
     activeSize: 'all',
     cart: [],
+    savedForLater: [],       // Array de prendas guardadas para después
     wishlist: [],            // Array de IDs de productos en lista de deseos
     selectedSizes: {},       // Mapeo productId -> talla elegida
     activeModalProductId: null,
     selectedModalSize: null
   };
 
-  // Cargar Carrito y Wishlist desde localStorage
+  // Cargar Carrito, Wishlist y Guardados para después desde localStorage
   try {
     const savedCart = localStorage.getItem('multiverse_store_cart');
     if (savedCart) {
@@ -186,8 +187,13 @@
     if (savedWishlist) {
       storeState.wishlist = JSON.parse(savedWishlist);
     }
+    const savedLater = localStorage.getItem('multiverse_store_saved_for_later');
+    if (savedLater) {
+      storeState.savedForLater = JSON.parse(savedLater);
+    }
   } catch (err) {
     storeState.cart = [];
+    storeState.savedForLater = [];
     storeState.wishlist = [];
   }
 
@@ -197,6 +203,14 @@
       localStorage.setItem('multiverse_store_cart', JSON.stringify(storeState.cart));
     } catch (e) {}
     updateCartBadges();
+    renderCartSheetContent();
+  }
+
+  // Guardar Prendas para Después
+  function saveSavedForLater() {
+    try {
+      localStorage.setItem('multiverse_store_saved_for_later', JSON.stringify(storeState.savedForLater || []));
+    } catch (e) {}
     renderCartSheetContent();
   }
 
@@ -288,6 +302,9 @@
     
     const desktopBadge = document.getElementById('desktopCartCount');
     if (desktopBadge) desktopBadge.textContent = totalCount;
+
+    const desktopNavBadge = document.getElementById('desktopNavCartCount');
+    if (desktopNavBadge) desktopNavBadge.textContent = totalCount;
 
     const dockBadge = document.getElementById('dockCartBadge');
     if (dockBadge) dockBadge.textContent = totalCount;
@@ -449,7 +466,7 @@
     renderProductsGrid('catalogProductsGrid');
   }
 
-  // Alternar Tabs del Bottom Dock (Inicio, Catálogo, Carrito, Cuenta)
+  // Alternar Tabs del Bottom Dock y Navbar (Inicio, Explorar, Catálogo, Carrito, Cuenta)
   function switchDockTab(tabId) {
     if (tabId === 'cart') {
       openDrawer('cartSheet');
@@ -462,21 +479,30 @@
 
     storeState.activeTab = tabId;
 
-    // Actualizar estilo visual del dock
-    document.querySelectorAll('.dock-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.dockTab === tabId);
+    // Actualizar estilo visual del dock móvil y links desktop
+    document.querySelectorAll('.dock-tab-btn, .nav-link-item').forEach(btn => {
+      const match = btn.dataset.dockTab === tabId;
+      btn.classList.toggle('active', match);
     });
 
     // Cambiar vistas de contenido
     const homeView = document.getElementById('viewHome');
+    const exploreView = document.getElementById('viewExplore');
     const catalogView = document.getElementById('viewCatalog');
 
     if (tabId === 'home') {
       if (homeView) homeView.style.display = 'block';
+      if (exploreView) exploreView.style.display = 'none';
+      if (catalogView) catalogView.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tabId === 'explore') {
+      if (homeView) homeView.style.display = 'none';
+      if (exploreView) exploreView.style.display = 'block';
       if (catalogView) catalogView.style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabId === 'catalog') {
       if (homeView) homeView.style.display = 'none';
+      if (exploreView) exploreView.style.display = 'none';
       if (catalogView) catalogView.style.display = 'block';
       renderProductsGrid('catalogProductsGrid');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -706,6 +732,39 @@
         body: JSON.stringify({ cart_id: getCartSessionId() })
       }).catch(() => {});
     }
+  }
+
+  function saveCartItemForLater(index) {
+    if (!storeState.cart[index]) return;
+    const item = storeState.cart[index];
+    storeState.cart.splice(index, 1);
+    if (!Array.isArray(storeState.savedForLater)) {
+      storeState.savedForLater = [];
+    }
+    storeState.savedForLater.push(item);
+    saveSavedForLater();
+    saveCart();
+
+    if (storeState.cart.length === 0) {
+      notifyStockLockReleased();
+    }
+    showToastNotification(`"${item.name}" guardado para después`);
+  }
+
+  function moveSavedItemToCart(index) {
+    if (!storeState.savedForLater || !storeState.savedForLater[index]) return;
+    const item = storeState.savedForLater.splice(index, 1)[0];
+    saveSavedForLater();
+    addItemToCart(item.id, item.size, item.quantity || 1);
+    showToastNotification(`"${item.name}" movido al carrito`);
+  }
+
+  function removeSavedItem(index) {
+    if (!storeState.savedForLater || !storeState.savedForLater[index]) return;
+    const item = storeState.savedForLater.splice(index, 1)[0];
+    saveSavedForLater();
+    renderCartSheetContent();
+    showToastNotification(`"${item.name}" eliminado de guardados`);
   }
 
   function clearCart() {
@@ -942,15 +1001,54 @@
     const remainingForFree = Math.max(0, freeShippingThreshold - subtotal);
     const shippingProgress = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
+    // Bloque de prendas guardadas para después
+    const hasSaved = Array.isArray(storeState.savedForLater) && storeState.savedForLater.length > 0;
+    let savedSectionHtml = '';
+    if (hasSaved) {
+      savedSectionHtml = `
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border-subtle);">
+          <div style="font-family: var(--font-heading); font-size: 0.74rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              <span>Guardados para después</span>
+            </div>
+            <span style="background: #f4f4f5; color: var(--text-muted); padding: 1px 7px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">${storeState.savedForLater.length}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${storeState.savedForLater.map((sItem, sIdx) => `
+              <div style="display: flex; gap: 12px; padding: 10px; background: #fafafa; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); align-items: center;">
+                <div style="width: 44px; height: 44px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                  ${sItem.image && sItem.image !== '/user-avatar.png' ? `<img src="${sItem.image}" alt="${sItem.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
+                </div>
+                <div style="flex-grow: 1; min-width: 0;">
+                  <div style="font-family: var(--font-heading); font-size: 0.76rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sItem.name}</div>
+                  <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${sItem.size}</strong> &bull; MXN $${(sItem.price).toFixed(2)}</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                  <button type="button" class="btn-sheet-apply" data-action="move-saved-to-cart" data-index="${sIdx}" style="padding: 5px 8px; font-size: 0.68rem; border-radius: var(--radius-sm); cursor: pointer;" title="Mover al carrito">
+                    Mover al carrito
+                  </button>
+                  <button type="button" class="btn-remove-item" data-action="remove-saved-item" data-index="${sIdx}" title="Eliminar de guardados">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     if (storeState.cart.length === 0) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+        <div style="text-align: center; padding: 40px 20px 24px; color: var(--text-muted);">
           <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: #f4f4f5; display: flex; align-items: center; justify-content: center;">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
           </div>
           <strong style="font-family: var(--font-heading); color: var(--text-primary); display: block; font-size: 1rem;">Tu carrito está vacío</strong>
           <p style="font-size: 0.8rem; margin-top: 4px;">Explora el catálogo y agrega tus prendas favoritas.</p>
         </div>
+        ${savedSectionHtml}
       `;
       if (footerAction) footerAction.style.display = 'none';
       renderCouponBoxes();
@@ -1046,12 +1144,18 @@
           <div style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 800; color: #050505; margin-top: 4px;">MXN $${(item.price * item.quantity).toFixed(2)}</div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <button type="button" class="btn-qty-control" data-action="decrease-qty" data-index="${idx}">-</button>
-          <span style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 800; min-width: 18px; text-align: center;">${item.quantity}</span>
-          <button type="button" class="btn-qty-control" data-action="increase-qty" data-index="${idx}">+</button>
-          <button type="button" class="btn-remove-item" data-action="remove-item" data-index="${idx}" title="Eliminar">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button type="button" class="btn-qty-control" data-action="decrease-qty" data-index="${idx}">-</button>
+            <span style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 800; min-width: 18px; text-align: center;">${item.quantity}</span>
+            <button type="button" class="btn-qty-control" data-action="increase-qty" data-index="${idx}">+</button>
+            <button type="button" class="btn-remove-item" data-action="remove-item" data-index="${idx}" title="Eliminar">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+          <button type="button" data-action="save-for-later" data-index="${idx}" title="Guardar para después" style="background: none; border: none; padding: 2px 0; font-size: 0.65rem; color: var(--text-muted); cursor: pointer; text-decoration: underline; display: flex; align-items: center; gap: 3px;">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+            <span>Guardar para después</span>
           </button>
         </div>
       </div>
@@ -1108,7 +1212,7 @@
       }
     }
 
-    container.innerHTML = urgencyBanner + shippingNotice + mixedNoticeHtml + itemsHtml;
+    container.innerHTML = urgencyBanner + shippingNotice + mixedNoticeHtml + itemsHtml + savedSectionHtml;
     renderCouponBoxes();
   }
 
@@ -3928,6 +4032,51 @@
     if (rmBtn) {
       e.preventDefault();
       removeCartItem(parseInt(rmBtn.dataset.index, 10));
+      return;
+    }
+
+    const saveLaterBtn = e.target.closest('[data-action="save-for-later"]');
+    if (saveLaterBtn) {
+      e.preventDefault();
+      saveCartItemForLater(parseInt(saveLaterBtn.dataset.index, 10));
+      return;
+    }
+
+    const moveSavedBtn = e.target.closest('[data-action="move-saved-to-cart"]');
+    if (moveSavedBtn) {
+      e.preventDefault();
+      moveSavedItemToCart(parseInt(moveSavedBtn.dataset.index, 10));
+      return;
+    }
+
+    const rmSavedBtn = e.target.closest('[data-action="remove-saved-item"]');
+    if (rmSavedBtn) {
+      e.preventDefault();
+      removeSavedItem(parseInt(rmSavedBtn.dataset.index, 10));
+      return;
+    }
+
+    const exploreFilterBtn = e.target.closest('[data-action="explore-filter-catalog"]');
+    if (exploreFilterBtn) {
+      e.preventDefault();
+      const universe = exploreFilterBtn.dataset.universe;
+      const category = exploreFilterBtn.dataset.category;
+      if (universe && universe !== 'all' && universe !== storeState.activeUniverse) {
+        let targetUrl = '/productos?universo=' + encodeURIComponent(universe);
+        if (category && category !== 'all') {
+          targetUrl += '&categoria=' + encodeURIComponent(category);
+        }
+        window.location.href = targetUrl;
+        return;
+      }
+      if (category && category !== 'all') {
+        storeState.activeCategory = category;
+        document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
+          p.classList.toggle('active', p.dataset.category === storeState.activeCategory);
+        });
+      }
+      switchDockTab('catalog');
+      renderProductsGrid('catalogProductsGrid');
       return;
     }
 

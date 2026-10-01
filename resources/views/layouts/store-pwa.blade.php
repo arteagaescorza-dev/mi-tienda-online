@@ -460,17 +460,16 @@
           </div>
         </a>
 
-        <!-- Enlaces Centrales -->
+        <!-- Enlaces Centrales Oficiales (Regla: Inicio, Explorar, Catálogo, Carrito, Cuenta) -->
         <nav class="nav-links-desktop">
           <a href="#" class="nav-link-item active" data-action="switch-dock-tab" data-dock-tab="home">INICIO</a>
+          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="explore">EXPLORAR</a>
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">CATÁLOGO</a>
-          <a href="#" class="nav-link-item" data-action="open-filter-drawer" style="color: #dc2626;">OFERTAS</a>
-          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">NOVEDADES</a>
-          @if(!empty($navbarPages))
-            @foreach($navbarPages as $np)
-              <a href="{{ url('/pagina/' . $np->slug) }}" class="nav-link-item">{{ strtoupper($np->title) }}</a>
-            @endforeach
-          @endif
+          <a href="#" class="nav-link-item" data-action="open-cart">
+            <span>CARRITO</span>
+            <span id="desktopNavCartCount" class="cart-count-badge" style="display:inline-flex;">0</span>
+          </a>
+          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="account">CUENTA</a>
         </nav>
 
         <!-- Acciones Desktop -->
@@ -629,13 +628,18 @@
   </footer>
 
   <!-- ============================================================================
-       BOTTOM NAVIGATION DOCK (EXACTAMENTE 4 BOTONES - MÓVIL ONLY)
-       1. Inicio | 2. Catálogo | 3. Carrito | 4. Cuenta
+       BOTTOM NAVIGATION DOCK (EXACTAMENTE 5 BOTONES - MÓVIL ONLY)
+       1. Inicio | 2. Explorar | 3. Catálogo | 4. Carrito | 5. Cuenta
        ============================================================================ -->
   <nav class="bottom-app-dock" aria-label="Navegación principal de la aplicación">
     <button type="button" class="dock-tab-btn active" data-action="switch-dock-tab" data-dock-tab="home">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       <span class="dock-tab-label">Inicio</span>
+    </button>
+
+    <button type="button" class="dock-tab-btn" data-action="switch-dock-tab" data-dock-tab="explore">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+      <span class="dock-tab-label">Explorar</span>
     </button>
 
     <button type="button" class="dock-tab-btn" data-action="switch-dock-tab" data-dock-tab="catalog">

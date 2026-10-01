@@ -163,20 +163,13 @@ class Hub2CmsPagesAndBlogTest extends TestCase
             'published_at' => now()->subDay(),
         ]);
 
-        // 1. Revista Index
+        // 1. Revista Index redirige limpiamente a Home (Home Modular es la Revista Oficial)
         $indexResp = $this->get('/revista');
-        $indexResp->assertOk();
-        $indexResp->assertSee('REVISTA DIGITAL');
-        $indexResp->assertSee('Secretos del Modal Pima Peruano');
-        $indexResp->assertSee('Materiales Nobles');
+        $indexResp->assertRedirect(route('store.home'));
 
-        // 2. Article Detail
+        // 2. Article Detail redirige limpiamente a Home
         $detailResp = $this->get('/revista/' . $post->slug);
-        $detailResp->assertOk();
-        $detailResp->assertSee('Secretos del Modal Pima Peruano en Ropa Interior');
-        $detailResp->assertSee('Equipo Editorial');
-        $detailResp->assertSee('4 min de lectura');
-        $detailResp->assertSee('application/ld+json', false);
+        $detailResp->assertRedirect(route('store.home'));
     }
 
     public function test_admin_can_update_tracking_settings(): void

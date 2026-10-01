@@ -140,6 +140,7 @@ class StorefrontController extends Controller
         $navbarPages = CmsPage::inNavbar()->get();
         $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
+        $explorePages = CmsPage::active()->orderBy('navbar_order')->get();
         $trackingSettings = CmsTrackingSetting::current();
         $officialDocs = CmsOfficialDocument::where('is_active', true)->get()->keyBy('code');
 
@@ -192,12 +193,23 @@ class StorefrontController extends Controller
             'navbarPages' => $navbarPages,
             'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
+            'explorePages' => $explorePages,
+            'initialTab' => $request->query('tab', 'home'),
             'tracking' => $trackingSettings,
             'trackingSettings' => $trackingSettings,
             'officialDocs' => $officialDocs,
             'products' => $pwaProducts,
             'initialProducts' => $pwaProducts,
         ]);
+    }
+
+    /**
+     * Página /explorar: renderiza el catálogo de colecciones y páginas de exploración.
+     */
+    public function explore(Request $request)
+    {
+        $request->merge(['tab' => 'explore']);
+        return $this->home($request);
     }
 
     public function getFilteredProductsForSection(CmsSection $section, array $allProducts): array
@@ -477,108 +489,19 @@ class StorefrontController extends Controller
     }
 
     /**
-     * Catálogo / Feed de artículos de Revista Digital (Blog CMS).
+     * Catálogo / Feed de artículos de Revista Digital (Redirige a Inicio - Revista Digital Oficial).
      */
     public function magazineIndex(Request $request)
     {
-        $activeUniverse = strtolower((string) $request->query('universo', 'marte'));
-        if (! in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
-            $activeUniverse = 'marte';
-        }
-
-        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
-        $currentStorefront = [
-            'brandName' => $storefrontConfig->brand_name ?? 'TORZO',
-            'pageTitle' => 'Revista Digital // Multiverso Textil & Bienestar',
-            'primaryColor' => $storefrontConfig->primary_color,
-            'accentColor' => $storefrontConfig->accent_color,
-            'backgroundColor' => $storefrontConfig->background_color,
-            'surfaceColor' => $storefrontConfig->surface_color,
-            'textColor' => $storefrontConfig->text_color,
-        ];
-
-        $posts = CmsBlogPost::published()->get();
-        $categories = $posts->pluck('category_name')->filter()->unique()->values();
-        $navbarPages = CmsPage::inNavbar()->get();
-        $mobilePages = CmsPage::inMobileNavbar()->get();
-        $footerPages = CmsPage::inFooter()->get();
-        $tracking = CmsTrackingSetting::current();
-        $announcements = Cache::get('cms_announcements', [
-            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
-            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
-            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
-        ]);
-
-        return view('store.pwa.magazine', [
-            'posts' => $posts,
-            'categories' => $categories,
-            'activeUniverse' => $activeUniverse,
-            'currentStorefront' => $currentStorefront,
-            'navbarPages' => $navbarPages,
-            'mobilePages' => $mobilePages,
-            'footerPages' => $footerPages,
-            'announcements' => $announcements,
-            'tracking' => $tracking,
-        ]);
+        return redirect()->route('store.home');
     }
 
     /**
-     * Ficha de lectura completa de artículo de Revista Digital.
+     * Ficha de lectura de Revista Digital (Redirige a Inicio - Revista Digital Oficial).
      */
     public function magazinePost(string $slug)
     {
-        $activeUniverse = strtolower((string) request()->query('universo', 'marte'));
-        if (! in_array($activeUniverse, ['marte', 'venus', 'tiresias', 'terra'])) {
-            $activeUniverse = 'marte';
-        }
-
-        $post = CmsBlogPost::published()->where('slug', $slug)->firstOrFail();
-
-        $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
-        $currentStorefront = [
-            'brandName' => $storefrontConfig->brand_name ?? 'TORZO',
-            'pageTitle' => $post->title . ' — Revista Digital',
-            'primaryColor' => $storefrontConfig->primary_color,
-            'accentColor' => $storefrontConfig->accent_color,
-            'backgroundColor' => $storefrontConfig->background_color,
-            'surfaceColor' => $storefrontConfig->surface_color,
-            'textColor' => $storefrontConfig->text_color,
-        ];
-
-        $relatedPosts = CmsBlogPost::published()
-            ->where('id', '!=', $post->id)
-            ->where('category_name', $post->category_name)
-            ->take(3)
-            ->get();
-        if ($relatedPosts->isEmpty()) {
-            $relatedPosts = CmsBlogPost::published()->where('id', '!=', $post->id)->take(3)->get();
-        }
-
-        $navbarPages = CmsPage::inNavbar()->get();
-        $mobilePages = CmsPage::inMobileNavbar()->get();
-        $footerPages = CmsPage::inFooter()->get();
-        $tracking = CmsTrackingSetting::current();
-        $announcements = Cache::get('cms_announcements', [
-            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
-            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
-            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
-        ]);
-
-        return view('store.pwa.magazine-post', [
-            'post' => $post,
-            'relatedPosts' => $relatedPosts,
-            'activeUniverse' => $activeUniverse,
-            'currentStorefront' => $currentStorefront,
-            'navbarPages' => $navbarPages,
-            'mobilePages' => $mobilePages,
-            'footerPages' => $footerPages,
-            'announcements' => $announcements,
-            'tracking' => $tracking,
-        ]);
+        return redirect()->route('store.home');
     }
 
     /**

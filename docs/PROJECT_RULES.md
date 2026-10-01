@@ -203,7 +203,43 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   - `WebSite` con `SearchAction` dinámico apuntando al buscador de la tienda.
   - `Product` enriquecido en fichas de producto (PDP) con precios, monedas, disponibilidad `InStock`/`PreOrder` y SKU.
   - `WebPage` estructurado en páginas institucionales CMS.
-* **Sitemap XML Dinámico (`/sitemap.xml`):** Generación automática en tiempo real de mapa del sitio bajo el estándar `http://www.sitemaps.org/schemas/sitemap/0.9`, incluyendo Home, catálogo de universos, revista digital, artículos editoriales publicados, páginas institucionales activas y productos visibles con sus frecuencias de cambio (`changefreq`) y ponderaciones de prioridad (`priority`).
+* **Sitemap XML Dinámico (`/sitemap.xml`):** Generación automática en tiempo real de mapa del sitio bajo el estándar `http://www.sitemaps.org/schemas/sitemap/0.9`, incluyendo Home, catálogo de universos, páginas de explorar activas y productos visibles con sus frecuencias de cambio (`changefreq`) y ponderaciones de prioridad (`priority`).
+
+### Regla 6.15: Navbar Canónico Permanente de 5 Botones (Desktop y Móvil)
+* **Quinteta Canónica Obligatoria:** El navbar, tanto en versión de escritorio (`navbar-desktop`) como en el dock de navegación inferior móvil (`bottom-app-dock`), contiene estrictamente los siguientes 5 botones canónicos:
+  1. **Inicio**
+  2. **Explorar**
+  3. **Catálogo**
+  4. **Carrito** (con badge reactivo de contador de prendas)
+  5. **Cuenta** (portal del comprador y mis pedidos)
+* Queda terminantemente prohibido alterar, suprimir o reordenar estos 5 botones en cualquiera de las vitrinas o contextos del storefront.
+
+### Regla 6.16: Inicio como Revista Digital Oficial (Erradicación de Blog Paralelo)
+* **Revista Digital Unificada en Home:** La vitrina de inicio (`viewHome`), conducida por las secciones modulares administradas en Hub 2 (Editor Visual), constituye la **Revista Digital Oficial** de la marca.
+* **Erradicación de Submódulos Residuales:** Queda erradicado cualquier submódulo o pestaña separada de Blog/Revista en el panel administrativo (Hub 2) y cualquier ruta residual. Todo el contenido editorial, lanzamientos de temporada y lookbooks se articulan como secciones modulares dentro del Home.
+
+### Regla 6.17: Vista Explorar y Gestión en Hub 2 como "Páginas de Explorar" con Filtros de Catálogo
+* **Página de Explorar (`/explorar`):** Renderiza una cuadrícula de tarjetas interactivas ("botones con imágenes") para el descubrimiento temático de universos, colecciones y curadurías de estilo.
+* **Gestión Centralizada en Hub 2:** Se administra desde Hub 2, pestaña *Páginas de Explorar & Navbar*, en la sección formalmente renombrada a **"Páginas de Explorar"** (antes "Páginas institucionales").
+* **Configuración de Filtros de Catálogo:** Cada tarjeta permite vincular:
+  1. Imagen destacada (URL externa o subida directa de archivo a `public/uploads/pages/`).
+  2. Título y descripción SEO.
+  3. Filtros directos de catálogo (`filter_universe`, `filter_category`, `filter_tags`), permitiendo que el usuario salte con un clic al catálogo prefiltrado o lea el contenido editorial completo.
+
+### Regla 6.18: Inmutabilidad Canónica del Catálogo
+* El catálogo de productos y su infraestructura de vitrinas multiverso permanecen inmutables en su estructura base: navegación fluida por categorías, familias textiles, tallas y stock en tiempo real. Esta arquitectura se formaliza como canónica e inmutable en el proyecto.
+
+### Regla 6.19: Carrito con Persistencia y Funcionalidad de "Guardar para Después"
+* **Persistencia Aislada:** El carrito incorpora la funcionalidad de guardar prendas para después sin afectar el proceso de compra activo.
+* **Operativa Reactiva:**
+  - El botón "Guardar para después" (`data-action="save-for-later"`) traslada el ítem desde el carrito a un almacenamiento secundario persistido en `localStorage` (`multiverse_store_saved_for_later`).
+  - Las prendas guardadas no computan en el subtotal, no intervienen en el cálculo de envío gratis ni consumen apartado de inventario en checkout.
+  - El usuario puede restaurar cualquier ítem al carrito activo ("Mover al carrito") o eliminarlo definitivamente en cualquier momento.
+
+### Regla 6.20: Iconografía Estricta en SVG Vectorial y Prohibición Absoluta de Emojis
+* **Exclusividad SVG:** Todo el código del proyecto (Storefront, PWA, Hubs administrativos, modales, drawers y componentes de UI) emplea **exclusivamente íconos vectoriales SVG**.
+* **Prohibición de Emojis en Código Base:** Queda terminantemente prohibido el uso de emojis tipográficos en archivos `.blade.php`, `.js`, `.css` o esquemas de base de datos.
+* **Única Excepción:** Textos ingresados directamente por el usuario administrador o comprador final en campos de entrada libre (HTML custom, descripciones personalizadas).
 
 ---
 
@@ -306,6 +342,12 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Checkout & Stock** | Apartado Temporal Exclusivo en Checkout | Timer 5m en checkout; carrito nunca se vacía por timeout; badge "Ya no hay existencias" |
 | **Pasarelas de Pago**| Cero SPEI / Tarjetas & OXXO Pay | Tarjetas crédito/débito y OXXO Pay 48h; cero CLABE ni validación manual |
 | **Storefront Navbar**| Navbar Sticky Permanente & Cinta Banner | `position: sticky; top: 0; z-index: 999;` en scroll; editor de marquesina en Hub 2 |
+| **Navbar Canónico** | 5 Botones Oficiales (Desktop/Móvil) | Inicio, Explorar, Catálogo, Carrito y Cuenta permanentes |
+| **Revista Digital** | Home Modular = Revista Oficial | Cero blogs separados; Home dinámico orquestado desde Hub 2 Tab 1 |
+| **Explorar & Filtros** | Botones con Imágenes y Filtros Directos | Ruta `/explorar`, gestión en Hub 2 Tab 3 ("Páginas de Explorar"), filtros de universo/categoría |
+| **Catálogo** | Inmutabilidad Canónica | Multiverso con stock y facetas inmutable en estructura base |
+| **Carrito Avanzado** | Guardar para Después | Persistencia en `localStorage`, cero impacto en checkout ni subtotal |
+| **Iconografía** | Exclusividad SVG & Cero Emojis | Vectoriales SVG en 100% de vistas/scripts; prohibición absoluta de emojis en código |
 | **Páginas Institucionales**| Gestión Dual Desktop & Móvil + CRUD | Checkboxes independientes `desktop`/`móvil`; modal `#editPageModal` (`depth = 2`); activar/pausar, archivar, eliminar |
 | **SEO Storefront** | Optimización Integral & Sitemap XML | OpenGraph, Twitter Cards, JSON-LD (`Organization`, `WebSite`, `Product`), `/sitemap.xml` dinámico |
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |

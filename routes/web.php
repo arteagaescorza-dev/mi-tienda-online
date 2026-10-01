@@ -10,6 +10,7 @@ use App\Http\Controllers\SupplierColorMappingController;
 use App\Http\Controllers\StorefrontController;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('store.home');
+Route::get('/explorar', [StorefrontController::class, 'explore'])->name('store.explore');
 Route::get('/productos', [StorefrontController::class, 'products'])->name('store.products');
 Route::get('/productos/{slug}', [StorefrontController::class, 'product'])->name('store.product');
 Route::get('/revista', [StorefrontController::class, 'magazineIndex'])->name('store.magazine');

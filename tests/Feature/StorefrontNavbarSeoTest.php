@@ -84,7 +84,12 @@ class StorefrontNavbarSeoTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('DESKTOP ONLY POLICY');
+        $response->assertSee('INICIO');
+        $response->assertSee('EXPLORAR');
+        $response->assertSee('CATÁLOGO');
+        $response->assertSee('CARRITO');
+        $response->assertSee('CUENTA');
+        $response->assertSee('Desktop Only Policy');
         $response->assertSee('MOBILE ONLY GUIDE');
         $response->assertSee('/pagina/desktop-policy');
         $response->assertSee('/pagina/mobile-guide');

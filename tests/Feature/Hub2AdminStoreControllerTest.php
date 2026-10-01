@@ -379,13 +379,13 @@ class Hub2AdminStoreControllerTest extends TestCase
         $response->assertSee('data-universe="terra"', false);
         $response->assertSee('id="activeUniverseContextBadge"', false);
 
-        // 2. 6 Pestañas Principales en Subnav Grid
+        // 2. 5 Pestañas Principales en Subnav Grid (Home Modular es la Revista Oficial)
         $response->assertSee('data-tab="visual"', false);
         $response->assertSee('data-tab="content_rules"', false);
-        $response->assertSee('data-tab="magazine"', false);
         $response->assertSee('data-tab="pages"', false);
         $response->assertSee('data-tab="tracking"', false);
         $response->assertSee('data-tab="filters"', false);
+        $response->assertDontSee('data-tab="magazine"', false);
 
         // 3. Panel de Contenido & Reglas Unificado con 3 Secciones de Acordeón
         $response->assertSee('id="storeContentRulesPanel"', false);
@@ -393,11 +393,9 @@ class Hub2AdminStoreControllerTest extends TestCase
         $response->assertSee('id="accordionSecShipping"', false);
         $response->assertSee('id="accordionSecEditorial"', false);
 
-        // 4. Panel Independiente de Revista Digital
-        $response->assertSee('id="storeMagazinePanel"', false);
-
-        // 5. Panel de Páginas & Navbar
+        // 4. Panel de Páginas de Explorar & Navbar
         $response->assertSee('id="storePagesPanel"', false);
+        $response->assertDontSee('id="storeMagazinePanel"', false);
 
         // 6. Secciones Modulares presentes dentro del Editor Visual
         $response->assertSee('id="storeVisualPanel"', false);

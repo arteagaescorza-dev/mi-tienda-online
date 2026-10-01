@@ -1,8 +1,8 @@
 @extends('layouts.store-pwa')
 
 @section('content')
-  <!-- VISTA 1: INICIO (HOME FEED) -->
-  <div id="viewHome">
+  <!-- VISTA 1: INICIO (HOME FEED // NUESTRA REVISTA DIGITAL OFICIAL) -->
+  <div id="viewHome" style="{{ ($initialTab ?? 'home') === 'home' ? 'display: block;' : 'display: none;' }}">
     
     @if(isset($sections) && $sections->isNotEmpty())
       @foreach($sections as $sec)
@@ -519,8 +519,62 @@
 
   </div>
 
+  <!-- VISTA: EXPLORAR (BOTONES CON IMÁGENES & FILTROS DE CATÁLOGO CONFIGURABLES) -->
+  <div id="viewExplore" style="{{ ($initialTab ?? '') === 'explore' ? 'display: block;' : 'display: none;' }} padding-top: 16px;">
+    <div class="catalog-section-header">
+      <div>
+        <h2 class="section-headline">EXPLORAR UNIVERSOS &amp; COLECCIONES</h2>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Páginas temáticas, curadurías de estilo y guías de selección</span>
+      </div>
+    </div>
+
+    <div class="explore-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; margin-bottom: 40px;">
+      @forelse($explorePages ?? [] as $ep)
+        <div class="explore-card-item" style="border-radius: var(--radius-md, 12px); overflow: hidden; border: 1px solid var(--border-subtle, #e4e4e7); background: var(--brand-surface, #ffffff); box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05)); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;">
+          <div style="height: 180px; width: 100%; position: relative; background: #18181b; overflow: hidden;">
+            @if(!empty($ep->image_url))
+              <img src="{{ $ep->image_url }}" alt="{{ $ep->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+            @else
+              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1e1b4b, #0f172a); color: #ffffff;">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+              </div>
+            @endif
+            @if(!empty($ep->filter_universe) || !empty($ep->filter_category))
+              <span style="position: absolute; top: 10px; left: 10px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); color: #ffffff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.2);">
+                {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($ep->filter_category) ? ' // ' . strtoupper($ep->filter_category) : '' }}
+              </span>
+            @endif
+          </div>
+          <div style="padding: 16px; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+            <div>
+              <h3 style="font-family: var(--font-heading); font-size: 1rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary, #09090b);">{{ $ep->title }}</h3>
+              @if(!empty($ep->seo_description))
+                <p style="font-size: 0.75rem; color: var(--text-secondary, #71717a); margin: 0 0 14px; line-height: 1.4;">{{ \Illuminate\Support\Str::limit($ep->seo_description, 90) }}</p>
+              @endif
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+              @if(!empty($ep->filter_universe) || !empty($ep->filter_category))
+                <button type="button" class="btn-sheet-apply" data-action="explore-filter-catalog" data-universe="{{ $ep->filter_universe }}" data-category="{{ $ep->filter_category }}" style="flex: 1; padding: 8px 12px; font-size: 0.75rem; border-radius: var(--radius-sm, 8px); cursor: pointer; text-align: center;">
+                  Ver Catálogo Filtrado
+                </button>
+              @endif
+              <a href="{{ url('/pagina/' . $ep->slug) }}" class="btn-sheet-clear" style="padding: 8px 12px; font-size: 0.75rem; border-radius: var(--radius-sm, 8px); text-decoration: none; text-align: center; color: var(--text-primary); border: 1px solid var(--border-subtle); display: inline-flex; align-items: center; justify-content: center;">
+                Leer Contenido
+              </a>
+            </div>
+          </div>
+        </div>
+      @empty
+        <div style="grid-column: 1 / -1; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle);">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">No hay páginas de exploración configuradas aún. Créalas desde el Hub 2 en la sección "Páginas de Explorar".</p>
+        </div>
+      @endforelse
+    </div>
+  </div>
+
   <!-- VISTA 2: CATÁLOGO COMPLETO -->
-  <div id="viewCatalog" style="display: none; padding-top: 16px;">
+  <div id="viewCatalog" style="{{ ($initialTab ?? '') === 'catalog' ? 'display: block;' : 'display: none;' }} padding-top: 16px;">
     <div class="catalog-section-header">
       <div>
         <h2 class="section-headline">CATÁLOGO COMPLETO</h2>

@@ -805,6 +805,10 @@ class PortalStoreController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:cms_pages,slug',
             'icon' => 'nullable|string|max:50',
+            'image_url' => 'nullable|string|max:500',
+            'filter_universe' => 'nullable|string|max:40',
+            'filter_category' => 'nullable|string|max:80',
+            'filter_tags' => 'nullable|string|max:255',
             'content_html' => 'required|string',
             'show_in_navbar' => 'nullable|boolean',
             'show_in_mobile' => 'nullable|boolean',
@@ -814,7 +818,15 @@ class PortalStoreController extends Controller
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string',
             'status' => 'nullable|in:active,paused,draft,archived',
+            'image_file' => 'nullable|image|max:5120',
         ]);
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = 'page_explore_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pages'), $filename);
+            $validated['image_url'] = '/uploads/pages/' . $filename;
+        }
 
         $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
         $validated['show_in_mobile'] = $request->boolean('show_in_mobile', true);
@@ -827,7 +839,7 @@ class PortalStoreController extends Controller
             return response()->json(['success' => true, 'page' => $page]);
         }
 
-        return back()->with('success', "Página CMS '{$page->title}' creada exitosamente.");
+        return back()->with('success', "Página de Explorar '{$page->title}' creada exitosamente.");
     }
 
     /**
@@ -843,6 +855,10 @@ class PortalStoreController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:cms_pages,slug,' . $page->id,
             'icon' => 'nullable|string|max:50',
+            'image_url' => 'nullable|string|max:500',
+            'filter_universe' => 'nullable|string|max:40',
+            'filter_category' => 'nullable|string|max:80',
+            'filter_tags' => 'nullable|string|max:255',
             'content_html' => 'required|string',
             'show_in_navbar' => 'nullable|boolean',
             'show_in_mobile' => 'nullable|boolean',
@@ -852,7 +868,15 @@ class PortalStoreController extends Controller
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string',
             'status' => 'nullable|in:active,paused,draft,archived',
+            'image_file' => 'nullable|image|max:5120',
         ]);
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = 'page_explore_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pages'), $filename);
+            $validated['image_url'] = '/uploads/pages/' . $filename;
+        }
 
         $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
         $validated['show_in_mobile'] = $request->boolean('show_in_mobile');
