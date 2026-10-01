@@ -497,7 +497,7 @@
   </li>
 </ul>
 
-<h2 class="section-heading">2.5 Arquitectura de 5 Pestañas, Conmutador Global de Vitrinas y Acordeón Unificado (TASK-H2-22)</h2>
+<h2 class="section-heading">2.5 Arquitectura de 6 Pestañas, Conmutador Global de Vitrinas y Acordeón Unificado (TASK-H2-22)</h2>
 <p>
   Para optimizar la ergonomía operativa del administrador y permitir la gestión fluida del multiverso sin recargas de página, Hub 2 adopta una arquitectura de panel consolidada y reactiva:
 </p>
@@ -512,19 +512,26 @@
   <li class="step-item">
     <div class="step-number">2</div>
     <div class="step-content">
-      <strong>Consolidación en 5 Pestañas Principales:</strong>
-      Elimina la sobrecarga de navegación horizontal reorganizando las herramientas en: <code>1. Editor Visual</code> (Branding, tokens y Secciones Drag & Drop), <code>2. Contenido & Reglas</code> (Acordeón de políticas y publicaciones), <code>3. Páginas & Navbar</code> (CMS de páginas institucionales), <code>4. Tracking & Pixels</code> (GTM, GA4, Meta CAPI) y <code>5. Filtros Catálogo</code> (Facetas y orden jerárquico).
+      <strong>Consolidación en 6 Pestañas Principales (2 filas de 3 columnas):</strong>
+      Elimina la sobrecarga de navegación horizontal reorganizando las herramientas en: <code>1. Editor Visual</code> (Branding, tokens y Secciones Drag & Drop), <code>2. Contenido & Reglas</code> (Acordeón de políticas y tallas), <code>3. Blog & Revista</code> (CMS editorial de notas técnicas), <code>4. Páginas & Navbar</code> (CMS de páginas institucionales), <code>5. Tracking & Pixels</code> (GTM, GA4, Meta CAPI) y <code>6. Filtros Catálogo</code> (Facetas y orden jerárquico).
     </div>
   </li>
   <li class="step-item">
     <div class="step-number">3</div>
     <div class="step-content">
-      <strong>Acordeón Interactivo de 4 Secciones:</strong>
-      Dentro de <em>Contenido & Reglas</em>, se agrupan en una única vista colapsable las secciones: <em>1. Banners Promocionales & Marquesinas</em>, <em>2. Reglas de Flete & Simulador Financiero</em>, <em>3. Guía Oficial de Tallas & Cuidado</em> y <em>4. CMS Blog & Revista Digital</em>, provisto de controles globales de <em>"Expandir Todo"</em> y <em>"Contraer Todo"</em>.
+      <strong>Acordeón Hermético de 3 Secciones:</strong>
+      Dentro de <em>Contenido & Reglas</em>, se agrupan en una única vista colapsable las secciones: <em>1. Banners Promocionales & Marquesinas</em>, <em>2. Reglas de Flete & Simulador Financiero</em> y <em>3. Guía Oficial de Tallas & Cuidado</em>, con cierre estricto de contenedores que evita anidamientos erróneos y provisto de controles globales de <em>"Expandir Todo"</em> y <em>"Contraer Todo"</em>.
     </div>
   </li>
   <li class="step-item">
     <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Revista Digital como Pestaña Dedicada (Tab 3):</strong>
+      El submódulo de publicaciones editoriales (<code>#storeMagazinePanel</code>) opera con su propio espacio de trabajo para redacción de artículos, asignación de autores, cálculo de tiempo de lectura y optimización SEO orgánico.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">5</div>
     <div class="step-content">
       <strong>Confinamiento Estricto de Secciones Modulares en Tab 1:</strong>
       El Gestor de Secciones Modulares (<code>#sectionsTable</code>) reside exclusivamente dentro de <code>#storeVisualPanel</code>, garantizando que permanezca oculto al navegar por las demás pestañas del CMS.

@@ -1795,31 +1795,30 @@ graph TD
 
 ---
 
-### `TASK-H2-22`: Conmutador Global de Vitrinas Persistente, Reestructuración a 5 Pestañas y Acordeón Unificado de Contenidos & Reglas
+### `TASK-H2-22`: Conmutador Global de Vitrinas Persistente, Reestructuración a 6 Pestañas, Acordeón de Contenidos & Reglas y Desacoplamiento de Revista Digital
 * **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
 * **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Vista de Control `resources/views/portal/store.blade.php` & Controller `Hub2AdminStoreController`
 * **Diagnóstico & Requerimientos del Usuario:**
   1. *Conmutador Global de Vitrinas:* Los botones de seleccionar vitrina (`Marte`, `Venus`, `Tiresias`, `Terra`) deben conmutar a las características de cada sitio o universo, y este conmutador debe estar presente y visible en cada una de las pestañas del módulo.
-  2. *Pestaña Unificada con Acordeón:* En una sola pestaña (`Contenido & Reglas`) debe caber lo que anteriormente se encontraba disperso en: *Banners & Marquesinas*, *Reglas & Fletes*, *Editorial & Tallas* y *Revista Digital*. Cada una de estas secciones debe ser un bloque interactivo que se expande y se contrae de forma individual o masiva.
-  3. *Confinamiento de Secciones Modulares:* La sección "Secciones modulares del home" no debe estar presente en todas las pestañas; debe ubicarse estricta y únicamente dentro de *Editor Visual* (Tab 1).
+  2. *Corrección de Anidamiento en Acordeón:* "Guía oficial de tallas se muestra dentro de reglas de flete". Se identificó omisión de etiquetas de cierre `</div>` en la columna derecha del simulador financiero de fletes (`lg:col-span-7`, `simulator-card`, `grid`), provocando que la cabecera y el contenido de `accordionSecEditorial` quedaran atrapados e incrustados visualmente dentro de la tarjeta blanca del simulador de flete.
+  3. *Revista Digital como Pestaña Independiente:* "CMS Blog y Revista Digital sí es una pestaña del módulo". No debe formar parte del acordeón colapsable de la pestaña 2, sino disponer de su propio panel dedicado (`#storeMagazinePanel`) accesible desde la barra superior.
+  4. *Confinamiento de Secciones Modulares:* La sección "Secciones modulares del home" no debe estar presente en todas las pestañas; debe ubicarse estricta y únicamente dentro de *Editor Visual* (Tab 1).
 * **Solución Técnica & Arquitectura Implementada:**
-  - **Barra Global de Vitrinas (`.universe-selector-bar`):** Extraída del panel visual y reubicada en la zona transversal superior, garantizando persistencia en todas las pestañas. Incorpora badge reactivo `#activeUniverseContextBadge` con color dinámico según la identidad del universo activo.
-  - **Reorganización Subnav a 5 Pestañas Principales:**
-    1. `1. Editor Visual` (`data-tab="visual"`): Personalización cromática, logos, favicon, live preview frame desktop/móvil y Gestor de Secciones Modulares Drag & Drop.
-    2. `2. Contenido & Reglas` (`data-tab="content_rules"`): Acordeón unificado con 4 submódulos interactivos.
-    3. `3. Páginas & Navbar` (`data-tab="pages"`): CMS de páginas institucionales con enlaces en cabecera/footer y generador de rutas.
-    4. `4. Tracking & Pixels` (`data-tab="tracking"`): GTM, GA4, Meta Pixel y Meta Conversions API (CAPI).
-    5. `5. Filtros Catálogo` (`data-tab="filters"`): Editor de facetas, taxonomías y jerarquías del catálogo público.
-  - **Acordeón Interactivo de 4 Secciones (`.store-accordion-section`):**
-    - Sección 1: *Banners Promocionales & Marquesinas Superiores* (`accordionSecBanners`).
-    - Sección 2: *Reglas de Flete, Despacho & Simulador Financiero* (`accordionSecShipping`).
-    - Sección 3: *Guía Oficial de Tallas & Protocolos de Cuidado* (`accordionSecEditorial`).
-    - Sección 4: *CMS Blog & Revista Digital* (`accordionSecMagazine`).
+  - **Barra Global de Vitrinas (`.universe-selector-bar`):** Ubicada en la zona transversal superior con persistencia en todas las pestañas. Incorpora badge reactivo `#activeUniverseContextBadge` con color dinámico según la vitrina activa.
+  - **Reorganización Subnav a 6 Pestañas Principales (2 filas de 3 columnas sin scroll):**
+    1. `1. Editor Visual` (`data-tab="visual"`): Personalización cromática de 8 tokens, logos, favicon, live preview frame desktop/móvil y Gestor de Secciones Modulares Drag & Drop.
+    2. `2. Contenido & Reglas` (`data-tab="content_rules"`): Acordeón unificado con 3 submódulos interactivos (Banners, Fletes, Guía de Tallas).
+    3. `3. Blog & Revista` (`data-tab="magazine"`): CMS editorial con tabla de notas técnicas, categorías, lectura y acciones de borrado/publicación.
+    4. `4. Páginas & Navbar` (`data-tab="pages"`): CMS de páginas institucionales con enlaces en cabecera/footer y generador de rutas.
+    5. `5. Tracking & Pixels` (`data-tab="tracking"`): GTM, GA4, Meta Pixel y Meta Conversions API (CAPI).
+    6. `6. Filtros Catálogo` (`data-tab="filters"`): Editor de facetas, taxonomías y jerarquías del catálogo público.
+  - **Corrección Estructural y Cierre Estricto de Divs en Acordeón:**
+    - Cierre hermético de `diag-box`, `simulator-card`, `lg:col-span-7`, `grid lg:grid-cols-12`, `accordionSecShippingBody` y `accordionSecShipping`.
+    - La Sección 3 (`accordionSecEditorial`) se renderiza como tarjeta de acordeón independiente al mismo nivel jerárquico que la Sección 1 y 2.
     - Controles globales de encabezado: `Expandir Todo` y `Contraer Todo` (`window.toggleAllStoreAccordions`).
-    - Rotación CSS fluida de chevrons (`transform rotate-180`), transiciones suaves y aislamiento de estilos.
-  - **Enrutamiento Retrocompatible (`subSectionMap`):** Al navegar hacia `?tab=banners`, `?tab=shipping`, `?tab=editorial` o `?tab=magazine`, el script conmuta de inmediato a `content_rules`, expande el acordeón respectivo y realiza auto-scroll al bloque correspondiente.
-  - **Confinamiento de Secciones Modulares en Tab 1:** Corregida la estructura de cierre de divs para asegurar que el bloque `#sectionsTable` resida exclusivamente dentro de `#storeVisualPanel`.
-  - **Pruebas Automatizadas:** 27 pruebas pasando al 100% con 133 aserciones en `Hub2AdminStoreControllerTest`, incluyendo la nueva prueba de validación estructural `test_admin_store_cms_unified_accordion_and_global_universe_selector`.
+  - **Enrutamiento Retrocompatible (`subSectionMap`):** Al navegar hacia `?tab=banners`, `?tab=shipping` o `?tab=editorial`, el script conmuta de inmediato a `content_rules`, expande el acordeón respectivo y realiza auto-scroll al bloque correspondiente.
+  - **Confinamiento de Secciones Modulares en Tab 1:** Estructura de cierre verificada; `#sectionsTable` reside exclusivamente dentro de `#storeVisualPanel`.
+  - **Pruebas Automatizadas:** 27 pruebas pasando al 100% con 134 aserciones en `Hub2AdminStoreControllerTest`, incluyendo `test_admin_store_cms_unified_accordion_and_global_universe_selector`.
   - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado en HTML y compilado a PDF.
 
 

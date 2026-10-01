@@ -361,7 +361,7 @@ class Hub2AdminStoreControllerTest extends TestCase
     }
 
     /**
-     * Test admin store CMS renders 5 unified tabs, global universe selector and accordion structure.
+     * Test admin store CMS renders 6 unified tabs, global universe selector and accordion structure.
      */
     public function test_admin_store_cms_unified_accordion_and_global_universe_selector(): void
     {
@@ -379,24 +379,27 @@ class Hub2AdminStoreControllerTest extends TestCase
         $response->assertSee('data-universe="terra"', false);
         $response->assertSee('id="activeUniverseContextBadge"', false);
 
-        // 2. 5 Pestañas Principales en Subnav Grid
+        // 2. 6 Pestañas Principales en Subnav Grid
         $response->assertSee('data-tab="visual"', false);
         $response->assertSee('data-tab="content_rules"', false);
+        $response->assertSee('data-tab="magazine"', false);
         $response->assertSee('data-tab="pages"', false);
         $response->assertSee('data-tab="tracking"', false);
         $response->assertSee('data-tab="filters"', false);
 
-        // 3. Panel de Contenido & Reglas Unificado con 4 Secciones de Acordeón
+        // 3. Panel de Contenido & Reglas Unificado con 3 Secciones de Acordeón
         $response->assertSee('id="storeContentRulesPanel"', false);
         $response->assertSee('id="accordionSecBanners"', false);
         $response->assertSee('id="accordionSecShipping"', false);
         $response->assertSee('id="accordionSecEditorial"', false);
-        $response->assertSee('id="accordionSecMagazine"', false);
 
-        // 4. Panel de Páginas & Navbar
+        // 4. Panel Independiente de Revista Digital
+        $response->assertSee('id="storeMagazinePanel"', false);
+
+        // 5. Panel de Páginas & Navbar
         $response->assertSee('id="storePagesPanel"', false);
 
-        // 5. Secciones Modulares presentes dentro del Editor Visual
+        // 6. Secciones Modulares presentes dentro del Editor Visual
         $response->assertSee('id="storeVisualPanel"', false);
         $response->assertSee('id="sectionsTable"', false);
     }

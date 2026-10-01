@@ -16,16 +16,16 @@
         }
         .store-subnav-grid {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important;
+            grid-template-columns: repeat(3, 1fr) !important;
             gap: 10px !important;
             width: 100% !important;
         }
-        @media (max-width: 1100px) {
+        @media (max-width: 900px) {
             .store-subnav-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
+                grid-template-columns: repeat(2, 1fr) !important;
             }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 580px) {
             .store-subnav-grid {
                 grid-template-columns: 1fr !important;
             }
@@ -208,45 +208,56 @@
                 </div>
             </button>
 
-            <!-- TAB 2: CONTENIDO, REGLAS & EDITORIAL (ACORDEÓN UNIFICADO) -->
+            <!-- TAB 2: CONTENIDO & REGLAS (ACORDEÓN UNIFICADO) -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="content_rules" onclick="window.switchStoreTab('content_rules')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M4 6h16M4 12h16M4 18h10"/><polyline points="14 18 17 21 21 17"/></svg>
                     <span class="truncate">2. Contenido &amp; Reglas</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                    <span class="store-subnav-count">4 Módulos</span>
-                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido y Reglas" data-help-title="Contenido, Reglas &amp; Editorial" data-help-desc="Panel unificado con 4 módulos expandibles: Banners, Reglas de Flete, Guía de Tallas Torzo y Revista Digital.">?</span>
+                    <span class="store-subnav-count">3 Módulos</span>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido y Reglas" data-help-title="Contenido, Reglas &amp; Editorial" data-help-desc="Panel unificado con 3 módulos expandibles: Banners &amp; Marquesinas, Reglas de Flete y Guía Oficial de Tallas.">?</span>
                 </div>
             </button>
 
-            <!-- TAB 3: PÁGINAS CMS & NAVBAR -->
+            <!-- TAB 3: CMS BLOG & REVISTA DIGITAL -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="magazine" onclick="window.switchStoreTab('magazine')" type="button">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <span class="truncate">3. Blog &amp; Revista</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count">{{ count($blogPosts) }} Artículos</span>
+                </div>
+            </button>
+
+            <!-- TAB 4: PÁGINAS CMS & NAVBAR -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" onclick="window.switchStoreTab('pages')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    <span class="truncate">3. Páginas &amp; Navbar</span>
+                    <span class="truncate">4. Páginas &amp; Navbar</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
                 </div>
             </button>
 
-            <!-- TAB 4: TRACKING & PIXELS -->
+            <!-- TAB 5: TRACKING & PIXELS -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="tracking" onclick="window.switchStoreTab('tracking')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    <span class="truncate">4. Tracking &amp; Pixels</span>
+                    <span class="truncate">5. Tracking &amp; Pixels</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ ($tracking && $tracking->is_active) ? 'Activo' : 'Pausado' }}</span>
                 </div>
             </button>
 
-            <!-- TAB 5: FILTROS DE CATÁLOGO -->
+            <!-- TAB 6: FILTROS DE CATÁLOGO -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="filters" onclick="window.switchStoreTab('filters')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    <span class="truncate">5. Filtros Catálogo</span>
+                    <span class="truncate">6. Filtros Catálogo</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
@@ -1017,7 +1028,11 @@
                             </p>
                         </div>
                     </div>
+                </div>
             </div>
+        </div>
+        </div>
+        </div>
         </div>
         <!-- FIN SECCIÓN 2 ACORDEÓN -->
 
@@ -1122,98 +1137,86 @@
                         <strong>Transparencia con el Cliente:</strong> Esta leyenda se muestra de manera visible en el checkout, confirmación de pedido y en el exterior del paquete rotulado por Almacén.
                     </div>
                 </div>
-        </div>
-        </div>
-        <!-- FIN SECCIÓN 3 ACORDEÓN -->
-
-        <!-- SECCIÓN 4 ACORDEÓN: REVISTA DIGITAL & ARTÍCULOS BLOG -->
-        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecMagazine">
-            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecMagazine')">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-sm font-bold text-slate-900">4. CMS Blog &amp; Revista Digital (TASK-H2-06)</div>
-                        <div class="text-[11px] text-slate-500">Notas técnicas, guías de ajuste y artículos editoriales con SEO optimizado.</div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">{{ count($blogPosts) }} Artículos</span>
-                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-            </button>
-            <div class="store-accordion-body p-6 border-t border-slate-100 hidden" id="accordionSecMagazineBody" style="display: none;">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                            <span>Revista Digital // Artículos y Publicaciones Editoriales</span>
-                        </h3>
-                        <p class="text-xs text-slate-500">Publica notas técnicas, guías de ajuste y artículos de bienestar que impulsan el SEO orgánico del ecosistema.</p>
-                    </div>
-                    <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createBlogModal" type="button">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        <span>Nuevo Artículo</span>
-                    </button>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
-                                <th class="py-2.5 px-3">Artículo &amp; Slug</th>
-                                <th class="py-2.5 px-3">Categoría</th>
-                                <th class="py-2.5 px-3">Autor</th>
-                                <th class="py-2.5 px-3 text-center">Lectura</th>
-                                <th class="py-2.5 px-3 text-center">Estado</th>
-                                <th class="py-2.5 px-3 text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($blogPosts as $bp)
-                                <tr class="hover:bg-slate-50/60 transition">
-                                    <td class="py-3 px-3">
-                                        <strong class="font-bold text-slate-900 block">{{ $bp->title }}</strong>
-                                        <span class="text-[11px] font-mono text-slate-400">/revista/{{ $bp->slug }}</span>
-                                    </td>
-                                    <td class="py-3 px-3">
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ $bp->category_name }}</span>
-                                    </td>
-                                    <td class="py-3 px-3 text-slate-600">{{ $bp->author_name ?? 'Editorial' }}</td>
-                                    <td class="py-3 px-3 text-center text-slate-500">{{ $bp->reading_time_minutes ?? 3 }} min</td>
-                                    <td class="py-3 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $bp->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
-                                            {{ strtoupper($bp->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-3 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ url('/revista/' . $bp->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
-                                            <form method="POST" action="{{ route('portal.store.blog.destroy', $bp->id) }}" onsubmit="return confirm('¿Eliminar este artículo del blog?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay artículos publicados en la revista digital aún.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+            </div>
             </div>
         </div>
-        <!-- FIN SECCIÓN 4 ACORDEÓN -->
+        <!-- FIN SECCIÓN 3 ACORDEÓN -->
     </div>
-    <!-- FIN SUBMÓDULO 2: CONTENIDO, REGLAS & PUBLICACIONES -->
+    <!-- FIN SUBMÓDULO 2: CONTENIDO & REGLAS -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 3: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
+    <!-- SUBMÓDULO 3: CMS BLOG & REVISTA DIGITAL (TASK-H2-06)                      -->
+    <!-- ========================================================================= -->
+    <div id="storeMagazinePanel" class="tab-panel hidden" style="display: none;">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <span>Revista Digital // Artículos y Publicaciones Editoriales</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Publica notas técnicas, guías de ajuste y artículos de bienestar que impulsan el SEO orgánico del ecosistema.</p>
+                </div>
+                <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createBlogModal" type="button">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Nuevo Artículo</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+                            <th class="py-2.5 px-3">Artículo &amp; Slug</th>
+                            <th class="py-2.5 px-3">Categoría</th>
+                            <th class="py-2.5 px-3">Autor</th>
+                            <th class="py-2.5 px-3 text-center">Lectura</th>
+                            <th class="py-2.5 px-3 text-center">Estado</th>
+                            <th class="py-2.5 px-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($blogPosts as $bp)
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-3">
+                                    <strong class="font-bold text-slate-900 block">{{ $bp->title }}</strong>
+                                    <span class="text-[11px] font-mono text-slate-400">/revista/{{ $bp->slug }}</span>
+                                </td>
+                                <td class="py-3 px-3">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ $bp->category_name }}</span>
+                                </td>
+                                <td class="py-3 px-3 text-slate-600">{{ $bp->author_name ?? 'Editorial' }}</td>
+                                <td class="py-3 px-3 text-center text-slate-500">{{ $bp->reading_time_minutes ?? 3 }} min</td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $bp->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                                        {{ strtoupper($bp->status) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ url('/revista/' . $bp->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
+                                        <form method="POST" action="{{ route('portal.store.blog.destroy', $bp->id) }}" onsubmit="return confirm('¿Eliminar este artículo del blog?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay artículos publicados en la revista digital aún.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- FIN SUBMÓDULO 3: CMS BLOG & REVISTA DIGITAL -->
+
+    <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 4: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
     <!-- ========================================================================= -->
     <div id="storePagesPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
@@ -1294,10 +1297,10 @@
             </div>
         </div>
     </div>
-    <!-- FIN SUBMÓDULO 3: GESTOR DE PÁGINAS CMS & NAVBAR -->
+    <!-- FIN SUBMÓDULO 4: GESTOR DE PÁGINAS CMS & NAVBAR -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 4: TRACKING & ANALÍTICA (TASK-H2-11)                            -->
+    <!-- SUBMÓDULO 5: TRACKING & ANALÍTICA (TASK-H2-11)                            -->
     <!-- ========================================================================= -->
     <div id="storeTrackingPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-3xl">
@@ -1363,10 +1366,10 @@
             </form>
         </div>
     </div>
-    <!-- FIN SUBMÓDULO 4: TRACKING & ANALÍTICA -->
+    <!-- FIN SUBMÓDULO 5: TRACKING & ANALÍTICA -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 5: FILTROS DE CATÁLOGO (TASK-H2-09)                             -->
+    <!-- SUBMÓDULO 6: FILTROS DE CATÁLOGO (TASK-H2-09)                             -->
     <!-- ========================================================================= -->
     <div id="storeFiltersPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-4xl">
@@ -2533,11 +2536,12 @@
     };
 
     // ==========================================
-    // 2. GESTIÓN DE SUBNAV TABS (5 PESTAÑAS PRINCIPALES)
+    // 2. GESTIÓN DE SUBNAV TABS (6 PESTAÑAS PRINCIPALES)
     // ==========================================
     const tabPanelIds = {
         'visual': 'storeVisualPanel',
         'content_rules': 'storeContentRulesPanel',
+        'magazine': 'storeMagazinePanel',
         'pages': 'storePagesPanel',
         'tracking': 'storeTrackingPanel',
         'filters': 'storeFiltersPanel'
@@ -2547,8 +2551,7 @@
     const subSectionMap = {
         'banners': { tab: 'content_rules', accordionId: 'accordionSecBanners' },
         'shipping': { tab: 'content_rules', accordionId: 'accordionSecShipping' },
-        'editorial': { tab: 'content_rules', accordionId: 'accordionSecEditorial' },
-        'magazine': { tab: 'content_rules', accordionId: 'accordionSecMagazine' }
+        'editorial': { tab: 'content_rules', accordionId: 'accordionSecEditorial' }
     };
 
     // Funciones operativas de Acordeón
@@ -2572,7 +2575,7 @@
     };
 
     window.toggleAllStoreAccordions = function(expand) {
-        const sections = ['accordionSecBanners', 'accordionSecShipping', 'accordionSecEditorial', 'accordionSecMagazine'];
+        const sections = ['accordionSecBanners', 'accordionSecShipping', 'accordionSecEditorial'];
         sections.forEach(secId => {
             const section = document.getElementById(secId);
             const body = document.getElementById(secId + 'Body');
