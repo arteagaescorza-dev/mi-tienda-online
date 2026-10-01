@@ -471,15 +471,29 @@
           </a>
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="account">CUENTA</a>
         </nav>
+
+        <!-- Botones de Acción Desktop: Búsqueda y Wishlist (Reglas 1 y 5) -->
+        <div class="nav-actions-desktop">
+          <button type="button" class="btn-pill-action" data-action="toggle-search" title="Buscar prendas" aria-label="Buscar prendas">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>BUSCAR</span>
+          </button>
+          <button type="button" class="btn-pill-action" data-action="open-wishlist" title="Mis deseos" aria-label="Ver deseos">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span>DESEOS</span>
+            <span id="desktopWishlistCount" class="cart-count-badge" style="display:none;">0</span>
+          </button>
+        </div>
       </div>
     </header>
 
     <!-- 2. Header Móvil App (Compacto & Táctil) -->
     <header class="navbar-mobile">
-      <button type="button" class="mobile-icon-btn" data-action="open-filter-drawer" aria-label="Abrir filtros">
+      <button type="button" class="mobile-icon-btn" id="mobileFilterToggleBtn" data-action="open-filter-drawer" aria-label="Abrir filtros" style="display: none;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
       </button>
 
+      <!-- Logo de Marca (Sin Slogan ni Subtítulo según Regla 2) -->
       <a href="{{ route('store.home') }}" class="nav-brand-group">
         <div class="brand-logo-box">
           @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
@@ -488,42 +502,31 @@
             <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           @endif
         </div>
-        <div class="brand-titles">
-          @if(empty($currentStorefront['logoMobileUrl']) && empty($currentStorefront['logoUrl']))
-            <span class="brand-name" id="mobileBrandName" style="font-size: 0.95rem;">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
-          @endif
-          <span class="brand-sub" id="mobileBrandSub" style="font-size: 0.6rem;">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
-        </div>
       </a>
 
+      <!-- Iconos de Acción Móvil: Búsqueda y Wishlist (Sin Carrito según Regla 2) -->
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button type="button" class="mobile-icon-btn" data-action="open-wishlist" aria-label="Ver deseos">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <button type="button" class="mobile-icon-btn" data-action="toggle-search" aria-label="Buscar prendas">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
-        <button type="button" class="mobile-icon-btn" data-action="open-cart" aria-label="Ver carrito">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <button type="button" class="mobile-icon-btn" data-action="open-wishlist" aria-label="Ver deseos" style="position: relative;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span id="mobileWishlistCount" class="cart-count-badge" style="position: absolute; top: 6px; right: 4px; font-size: 0.6rem; min-width: 14px; padding: 1px 4px; display: none;">0</span>
         </button>
       </div>
     </header>
 
-    <!-- Barra Móvil de Páginas Institucionales Sincronizadas -->
-    @if(!empty($mobilePages) && $mobilePages->isNotEmpty())
-      <div class="mobile-institutional-bar">
-        <div class="container mobile-institutional-scroll">
-          @foreach($mobilePages as $mp)
-            <a href="{{ url('/pagina/' . $mp->slug) }}" class="mobile-inst-link">{{ strtoupper($mp->title) }}</a>
-          @endforeach
-        </div>
-      </div>
-    @endif
-
-    <!-- 3. Selector de Universos Multiverso (Barra Superior Táctil) -->
-    <div class="universe-selector-bar">
-      <div class="container universe-scroll-container">
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'marte' ? 'active' : '' }}" data-action="switch-universe" data-universe="marte">MARTE // MASCULINO</button>
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'venus' ? 'active' : '' }}" data-action="switch-universe" data-universe="venus">VENUS // LENCERÍA & BEAUTY</button>
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'tiresias' ? 'active' : '' }}" data-action="switch-universe" data-universe="tiresias">TIRESIAS // AFIRMATIVO</button>
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'terra' ? 'active' : '' }}" data-action="switch-universe" data-universe="terra">TERRA // GLOBAL</button>
+    <!-- Barra Desplegable de Búsqueda Conmutable (Regla 5) -->
+    <div id="storeSearchBar" class="store-search-bar" style="display: none; padding: 10px 16px; background: var(--bg-primary, #ffffff); border-bottom: 1px solid var(--border-subtle, #e4e4e7); transition: all 0.2s ease;">
+      <div class="container" style="display: flex; align-items: center; gap: 8px;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: var(--text-muted, #71717a);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="storeLiveSearchInput" placeholder="Buscar prendas, estilos, categorías..." style="flex: 1; border: none; outline: none; background: transparent; font-family: var(--font-heading, sans-serif); font-size: 0.85rem; padding: 8px 4px; color: var(--text-primary, #09090b);" autocomplete="off">
+        <button type="button" id="clearSearchBtn" data-action="clear-search" style="background: none; border: none; cursor: pointer; color: var(--text-muted, #71717a); padding: 4px; display: none;" aria-label="Limpiar búsqueda">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <button type="button" data-action="toggle-search" style="background: none; border: none; cursor: pointer; color: var(--text-primary, #09090b); padding: 4px; font-size: 0.75rem; font-weight: 700; font-family: var(--font-heading, sans-serif);" aria-label="Cerrar búsqueda">
+          CERRAR
+        </button>
       </div>
     </div>
   </div>

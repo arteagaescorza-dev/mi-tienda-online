@@ -169,6 +169,7 @@
     activeTab: 'home',       // 'home', 'explore', 'catalog'
     activeCategory: 'all',
     activeSize: 'all',
+    searchQuery: '',         // Búsqueda en tiempo real (Regla 5)
     cart: [],
     savedForLater: [],       // Array de prendas guardadas para después
     wishlist: [],            // Array de IDs de productos en lista de deseos
@@ -214,12 +215,16 @@
     renderCartSheetContent();
   }
 
-  // Guardar Wishlist
+  // Guardar Wishlist (Sincroniza badges y carrito donde reside la wishlist)
   function saveWishlist() {
     try {
       localStorage.setItem('multiverse_store_wishlist', JSON.stringify(storeState.wishlist));
     } catch (e) {}
     updateWishlistBadges();
+    renderCartSheetContent();
+    if (typeof renderWishlistDrawerContent === 'function') {
+      renderWishlistDrawerContent();
+    }
   }
 
   // ============================================================================
@@ -310,16 +315,36 @@
     if (dockBadge) dockBadge.textContent = totalCount;
   }
 
-  // Actualizar Contadores de Wishlist
+  // Actualizar Contadores de Wishlist (Desktop y Móvil)
   function updateWishlistBadges() {
     const count = storeState.wishlist.length;
     const desktopWishlist = document.getElementById('desktopWishlistCount');
-    if (desktopWishlist) desktopWishlist.textContent = count;
+    if (desktopWishlist) {
+      desktopWishlist.textContent = count;
+      desktopWishlist.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+    const mobileWishlist = document.getElementById('mobileWishlistCount');
+    if (mobileWishlist) {
+      mobileWishlist.textContent = count;
+      mobileWishlist.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
   }
 
-  // Filtrar Productos según Universo y Categoría
+  // Filtrar Productos según Universo, Categoría y Búsqueda (Regla 5)
   function getFilteredProducts() {
     return STORE_PRODUCTS.filter(prod => {
+      // Filtro de Búsqueda Conmutable
+      if (storeState.searchQuery && storeState.searchQuery.trim().length > 0) {
+        const q = storeState.searchQuery.trim().toLowerCase();
+        const mName = prod.name && prod.name.toLowerCase().includes(q);
+        const mCat = prod.categoryName && prod.categoryName.toLowerCase().includes(q);
+        const mDesc = prod.description && prod.description.toLowerCase().includes(q);
+        const mSku = prod.sku && prod.sku.toLowerCase().includes(q);
+        if (!mName && !mCat && !mDesc && !mSku) {
+          return false;
+        }
+      }
+
       // Filtro de Universo
       if (storeState.activeUniverse !== 'terra') {
         if (!prod.universes.includes(storeState.activeUniverse)) {
@@ -329,6 +354,12 @@
       // Filtro de Categoría
       if (storeState.activeCategory !== 'all') {
         if (prod.category !== storeState.activeCategory) {
+          return false;
+        }
+      }
+      // Filtro de Talla
+      if (storeState.activeSize && storeState.activeSize !== 'all') {
+        if (!prod.sizes || !prod.sizes.includes(storeState.activeSize)) {
           return false;
         }
       }
@@ -478,6 +509,12 @@
     }
 
     storeState.activeTab = tabId;
+
+    // Regla 2: El botón de filtros en móvil solo se muestra cuando se está visualizando el catálogo
+    const mobileFilterBtn = document.getElementById('mobileFilterToggleBtn');
+    if (mobileFilterBtn) {
+      mobileFilterBtn.style.display = (tabId === 'catalog') ? 'inline-flex' : 'none';
+    }
 
     // Actualizar estilo visual del dock móvil y links desktop
     document.querySelectorAll('.dock-tab-btn, .nav-link-item').forEach(btn => {
@@ -1039,6 +1076,49 @@
       `;
     }
 
+    // Bloque de Wishlist / Mis Deseos (Regla 1: dentro de carrito reside la lista de la wishlist)
+    const hasWishlist = Array.isArray(storeState.wishlist) && storeState.wishlist.length > 0;
+    let wishlistSectionHtml = '';
+    if (hasWishlist) {
+      wishlistSectionHtml = `
+        <div id="cartWishlistSection" style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border-subtle);">
+          <div style="font-family: var(--font-heading); font-size: 0.74rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <span>Mi Lista de Deseos</span>
+            </div>
+            <span style="background: #f4f4f5; color: var(--text-muted); padding: 1px 7px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700;">${storeState.wishlist.length}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${storeState.wishlist.map(productId => {
+              const wProd = STORE_PRODUCTS.find(p => p.id === productId);
+              if (!wProd) return '';
+              const wSize = storeState.selectedSizes[productId] || 'M';
+              return `
+                <div style="display: flex; gap: 12px; padding: 10px; background: #fafafa; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); align-items: center;">
+                  <div style="width: 44px; height: 44px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                    ${wProd.image && wProd.image !== '/user-avatar.png' ? `<img src="${wProd.image}" alt="${wProd.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
+                  </div>
+                  <div style="flex-grow: 1; min-width: 0;">
+                    <a href="/productos/${encodeURIComponent(wProd.slug || wProd.id)}" style="font-family: var(--font-heading); font-size: 0.76rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; color: inherit; text-decoration: none;">${wProd.name}</a>
+                    <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">Talla: <strong style="color: var(--text-primary);">${wSize}</strong> &bull; MXN $${(wProd.price).toFixed(2)}</div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                    <button type="button" class="btn-sheet-apply" data-action="move-wishlist-to-cart" data-product-id="${wProd.id}" style="padding: 5px 8px; font-size: 0.68rem; border-radius: var(--radius-sm); cursor: pointer;" title="Mover al carrito">
+                      Al carrito
+                    </button>
+                    <button type="button" class="btn-remove-item" data-action="toggle-wishlist" data-product-id="${wProd.id}" title="Quitar de deseos">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     if (storeState.cart.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 20px 24px; color: var(--text-muted);">
@@ -1049,6 +1129,7 @@
           <p style="font-size: 0.8rem; margin-top: 4px;">Explora el catálogo y agrega tus prendas favoritas.</p>
         </div>
         ${savedSectionHtml}
+        ${wishlistSectionHtml}
       `;
       if (footerAction) footerAction.style.display = 'none';
       renderCouponBoxes();
@@ -1212,7 +1293,7 @@
       }
     }
 
-    container.innerHTML = urgencyBanner + shippingNotice + mixedNoticeHtml + itemsHtml + savedSectionHtml;
+    container.innerHTML = urgencyBanner + shippingNotice + mixedNoticeHtml + itemsHtml + savedSectionHtml + wishlistSectionHtml;
     renderCouponBoxes();
   }
 
@@ -1352,14 +1433,20 @@
 
     addToCart(productId, size);
 
+    const wIdx = storeState.wishlist.indexOf(productId);
+    if (wIdx > -1) {
+      storeState.wishlist.splice(wIdx, 1);
+      saveWishlist();
+    }
+
     dispatchWishlistTelemetry('move_to_cart', {
       product_id: productId,
       universe: storeState.activeUniverse,
       selected_size: size
     });
 
-    closeDrawer('wishlistSheet');
-    openDrawer('cartSheet');
+    renderCartSheetContent();
+    showToastNotification(`"${product.name}" movido al carrito`);
   }
 
   function renderWishlistDrawerContent() {
@@ -1415,6 +1502,49 @@
       </div>
       ${itemsHtml}
     `;
+  }
+
+  // ============================================================================
+  // FUNCIÓN DE BÚSQUEDA CONMUTABLE EN TIEMPO REAL (REGLA 5)
+  // ============================================================================
+  function toggleSearchBar(forceOpen = null) {
+    const searchBar = document.getElementById('storeSearchBar');
+    const searchInput = document.getElementById('storeLiveSearchInput');
+    if (!searchBar) return;
+
+    const isClosed = (searchBar.style.display === 'none' || !searchBar.style.display);
+    const shouldOpen = (forceOpen !== null) ? forceOpen : isClosed;
+
+    if (shouldOpen) {
+      searchBar.style.display = 'block';
+      if (searchInput) {
+        setTimeout(() => searchInput.focus(), 60);
+      }
+    } else {
+      searchBar.style.display = 'none';
+      if (storeState.searchQuery) {
+        storeState.searchQuery = '';
+        if (searchInput) searchInput.value = '';
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) clearBtn.style.display = 'none';
+        renderProductsGrid('catalogProductsGrid');
+        renderProductsGrid('homeProductsGrid');
+      }
+    }
+  }
+
+  function handleLiveSearch(query) {
+    storeState.searchQuery = query;
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (clearBtn) {
+      clearBtn.style.display = (query && query.length > 0) ? 'inline-flex' : 'none';
+    }
+
+    if (storeState.activeTab !== 'catalog') {
+      switchDockTab('catalog');
+    } else {
+      renderProductsGrid('catalogProductsGrid');
+    }
   }
 
   // ============================================================================
@@ -3808,12 +3938,37 @@
       return;
     }
 
-    // 7. Abrir Drawer de Deseos
+    // 7. Abrir Wishlist (reside dentro del Carrito - Regla 1)
     const openWishlistBtn = e.target.closest('[data-action="open-wishlist"]');
     if (openWishlistBtn) {
       e.preventDefault();
-      renderWishlistDrawerContent();
-      openDrawer('wishlistSheet');
+      openDrawer('cartSheet');
+      setTimeout(() => {
+        const wSec = document.getElementById('cartWishlistSection');
+        if (wSec) {
+          wSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      return;
+    }
+
+    // 7.1 Conmutador de Búsqueda (Regla 5)
+    const toggleSearchBtn = e.target.closest('[data-action="toggle-search"]');
+    if (toggleSearchBtn) {
+      e.preventDefault();
+      toggleSearchBar();
+      return;
+    }
+
+    const clearSearchBtn = e.target.closest('[data-action="clear-search"]');
+    if (clearSearchBtn) {
+      e.preventDefault();
+      const input = document.getElementById('storeLiveSearchInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      handleLiveSearch('');
       return;
     }
 
@@ -4383,8 +4538,12 @@
     }
   });
 
-  // Formateo Reactivo en Inputs de Checkout
+  // Formateo Reactivo en Inputs de Checkout y Búsqueda en Vivo (Regla 5)
   document.addEventListener('input', function(e) {
+    if (e.target.id === 'storeLiveSearchInput') {
+      handleLiveSearch(e.target.value);
+      return;
+    }
     if (e.target.id === 'checkoutCardNumber') {
       let v = e.target.value.replace(/\D/g, '').slice(0, 16);
       e.target.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
@@ -4423,15 +4582,23 @@
     }
   });
 
-  // Cierre con tecla Escape y Enter en Cupones
+  // Cierre con tecla Escape y Enter en Cupones y Búsqueda
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
+      const searchBar = document.getElementById('storeSearchBar');
+      if (searchBar && searchBar.style.display !== 'none') {
+        toggleSearchBar(false);
+      }
       closeProductModal();
       closeCheckoutModal();
       closeAllDrawers();
       closeLeadMagnetModal();
     }
     if (e.key === 'Enter') {
+      if (e.target && e.target.id === 'storeLiveSearchInput') {
+        e.preventDefault();
+        handleLiveSearch(e.target.value);
+      }
       if (e.target && e.target.id === 'cartCouponInput') {
         e.preventDefault();
         applyDiscountCoupon(e.target.value);
@@ -4483,6 +4650,13 @@
     detectUrlAffiliationAndCoupons();
     updateCartBadges();
     updateWishlistBadges();
+
+    // Control inicial del botón de filtros en móvil (Regla 2: sólo visible si catálogo)
+    const mobileFilterBtn = document.getElementById('mobileFilterToggleBtn');
+    if (mobileFilterBtn) {
+      mobileFilterBtn.style.display = (storeState.activeTab === 'catalog') ? 'inline-flex' : 'none';
+    }
+
     const homeGrid = document.getElementById('homeProductsGrid');
     if (homeGrid && homeGrid.children.length === 0) {
       renderProductsGrid('homeProductsGrid');
@@ -4519,6 +4693,8 @@
     window.submitLeadMagnet = submitLeadMagnet;
     window.switchUniverse = switchUniverse;
     window.switchDockTab = switchDockTab;
+    window.toggleSearchBar = toggleSearchBar;
+    window.handleLiveSearch = handleLiveSearch;
     window.openDrawer = openDrawer;
     window.closeAllDrawers = closeAllDrawers;
     window.addToCart = addToCart;

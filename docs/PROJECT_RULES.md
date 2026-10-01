@@ -241,6 +241,27 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 * **Prohibición de Emojis en Código Base:** Queda terminantemente prohibido el uso de emojis tipográficos en archivos `.blade.php`, `.js`, `.css` o esquemas de base de datos.
 * **Única Excepción:** Textos ingresados directamente por el usuario administrador o comprador final en campos de entrada libre (HTML custom, descripciones personalizadas).
 
+### Regla 6.21: Wishlist Integrada en Drawer de Carrito y Botón de Deseos en Navbar Desktop
+* **Ubicación Canónica de la Wishlist:** La lista de deseos ("Mis Deseos") reside integrada en el Drawer de Carrito (`#cartSheet`), accesible tanto cuando el carrito contiene productos como cuando está vacío. Cada ítem de la wishlist permite visualizar imagen, nombre, talla seleccionada y precio, ofreciendo acciones directas para "Al carrito" (añadiendo la prenda y descontándola de la wishlist) o "Eliminar".
+* **Acceso Directo en Navbar Desktop:** En la versión de escritorio, junto a la quinteta canónica de navegación, reside el botón de Wishlist (`data-action="open-wishlist"` con ícono de corazón SVG y badge reactivo `#desktopWishlistCount`), el cual despliega el drawer de compras posicionando el visor directamente en la sección de deseos.
+
+### Regla 6.22: Header Móvil Superior Limpio (Filtros Condicionales, Logo Minimalista, Cero Carrito Redundante)
+* **Botón de Filtros Condicionado al Catálogo:** El botón de filtros (`#mobileFilterToggleBtn`) se muestra en la barra superior móvil **únicamente cuando se está visualizando la vista de catálogo** (`tabId === 'catalog'`). En las vistas Inicio, Explorar o Cuenta permanece oculto.
+* **Logo Minimalista Sin Slogan:** El header móvil muestra exclusivamente el isotipo/logo oficial de la marca (`brand-logo-box`), suprimiendo subtítulos, kickers o slogans para maximizar el área táctil y la limpieza visual.
+* **Wishlist con Badge:** Muestra el ícono de corazón SVG con contador reactivo `#mobileWishlistCount`.
+* **Cero Carrito en Header Móvil:** Queda estrictamente prohibido colocar el botón de carrito en la barra superior móvil, ya que el carrito reside de manera canónica y ergonómica en el dock de navegación inferior (`bottom-app-dock`).
+
+### Regla 6.23: Erradicación de la Barra Móvil de Páginas Institucionales
+* La barra de scroll horizontal `.mobile-institutional-bar` que listaba guías de tallas, cuidados de prendas y páginas institucionales en el header queda totalmente erradicada del layout superior móvil. Toda la navegación institucional y editorial se canaliza a través de la sección **Explorar** del dock de navegación.
+
+### Regla 6.24: Erradicación de la Barra Superior de Universos en Móvil
+* La barra táctil horizontal `.universe-selector-bar` (con los botones MARTE, VENUS, TIRESIAS, TERRA) queda completamente eliminada del layout del storefront. La selección, navegación y filtrado por universos se gestiona dentro de las tarjetas temáticas de la vista **Explorar** y dentro del drawer lateral de filtros.
+
+### Regla 6.25: Función de Búsqueda Conmutable Universal (Desktop y Móvil)
+* **Botón de Búsqueda Conmutable:** Tanto en versión Desktop (`.nav-actions-desktop`) como en Móvil (`.navbar-mobile`) se ubica un botón de búsqueda con ícono de lupa SVG (`data-action="toggle-search"`).
+* **Barra Desplegable Reactiva (`#storeSearchBar`):** Al conmutar el botón, se despliega una barra de búsqueda con campo de entrada en vivo (`#storeLiveSearchInput`), placeholder contextual, botón de limpieza rápida y botón de cerrar.
+* **Filtrado en Tiempo Real:** Al escribir cualquier término, el storefront filtra dinámicamente los productos por nombre, categoría, descripción y SKU. Si el usuario no se encuentra en la pestaña de catálogo, el sistema conmuta automáticamente a la vista de Catálogo (`switchDockTab('catalog')`) para presentar los resultados instantáneamente.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -350,6 +371,10 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Iconografía** | Exclusividad SVG & Cero Emojis | Vectoriales SVG en 100% de vistas/scripts; prohibición absoluta de emojis en código |
 | **Páginas Institucionales**| Gestión Dual Desktop & Móvil + CRUD | Checkboxes independientes `desktop`/`móvil`; modal `#editPageModal` (`depth = 2`); activar/pausar, archivar, eliminar |
 | **SEO Storefront** | Optimización Integral & Sitemap XML | OpenGraph, Twitter Cards, JSON-LD (`Organization`, `WebSite`, `Product`), `/sitemap.xml` dinámico |
+| **Wishlist & Carrito** | Wishlist en Drawer & Desktop Navbar | Sección Mis Deseos en `#cartSheet`; botón corazón en navbar desktop con badge `#desktopWishlistCount` |
+| **Header Móvil** | Header Limpio Sin Slogan & Sin Carrito Redundante | Solo logo de marca; botón de filtros condicionado a tab catálogo; corazón de wishlist; cero carrito |
+| **Páginas & Universos Móvil** | Barras Redundantes Erradicadas | Eliminadas `.mobile-institutional-bar` y `.universe-selector-bar`; navegación en Explorar y Drawer |
+| **Búsqueda Conmutable** | Búsqueda Reactiva Universal | Botón lupa en desktop y móvil; barra desplegable `#storeSearchBar` con filtrado en tiempo real |
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |

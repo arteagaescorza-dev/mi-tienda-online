@@ -25,22 +25,27 @@ class StorefrontPwaHomeTest extends TestCase
         $response->assertSee('css/store-pwa.css');
         $response->assertSee('js/storefront/store-pwa.js');
 
-        // Multiverse Selector Bar
-        $response->assertSee('MARTE // MASCULINO', false);
-        $response->assertSee('VENUS // LENCERÍA & BEAUTY', false);
-        $response->assertSee('TIRESIAS // AFIRMATIVO', false);
-        $response->assertSee('TERRA // GLOBAL', false);
+        // Header sin barra superior de universos (Regla 4: gestionada en Explorar y Drawer)
+        $response->assertDontSee('universe-selector-bar', false);
+        $response->assertSee('zara-multiverse-filter-bar', false);
+        $response->assertSee('data-universe="marte"', false);
 
         // Minimalist Marquee & Brand Pillars
         $response->assertSee('ENVÍOS EXPRESS A TODO MÉXICO', false);
         $response->assertSee('TRANSFERENCIAS SPEI BBVA', false);
         $response->assertSee('EMPAQUE 100% DISCRETO', false);
 
-        // 4-Button Bottom Dock
+        // 5-Button Bottom Dock & Desktop Nav (Regla 4.13)
         $response->assertSee('data-dock-tab="home"', false);
+        $response->assertSee('data-dock-tab="explore"', false);
         $response->assertSee('data-dock-tab="catalog"', false);
         $response->assertSee('data-dock-tab="cart"', false);
         $response->assertSee('data-dock-tab="account"', false);
+
+        // Botón de Búsqueda y Wishlist (Reglas 1 y 5)
+        $response->assertSee('data-action="toggle-search"', false);
+        $response->assertSee('data-action="open-wishlist"', false);
+        $response->assertSee('id="mobileFilterToggleBtn"', false);
     }
 
     public function test_home_displays_real_products_from_database_with_stock_and_variants(): void

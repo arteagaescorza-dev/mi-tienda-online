@@ -87,8 +87,8 @@ class StorefrontDynamicSectionsTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('NUESTRA HISTORIA', false);
-        $response->assertSee('/nuestra-historia', false);
+        $response->assertSee('Nuestra Historia', false);
+        $response->assertSee('/pagina/nuestra-historia', false);
     }
 
     /**

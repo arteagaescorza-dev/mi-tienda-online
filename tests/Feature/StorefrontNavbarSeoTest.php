@@ -90,7 +90,7 @@ class StorefrontNavbarSeoTest extends TestCase
         $response->assertSee('CARRITO');
         $response->assertSee('CUENTA');
         $response->assertSee('Desktop Only Policy');
-        $response->assertSee('MOBILE ONLY GUIDE');
+        $response->assertSee('Mobile Only Guide');
         $response->assertSee('/pagina/desktop-policy');
         $response->assertSee('/pagina/mobile-guide');
     }
