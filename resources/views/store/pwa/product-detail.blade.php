@@ -103,6 +103,30 @@
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(0, 0, 0, 0.06);
+    cursor: zoom-in;
+    user-select: none;
+  }
+  .pdp-image-zoom-trigger {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(9, 9, 11, 0.75);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+    z-index: 5;
+  }
+  .pdp-image-zoom-trigger:hover {
+    background: rgba(9, 9, 11, 0.95);
+    transform: scale(1.06);
   }
   .pdp-main-img {
     width: 100%;
@@ -362,28 +386,168 @@
     background: #27272a;
   }
 
-  .pdp-btn-whatsapp {
+  /* ==========================================================================
+     PDP IMAGE GALLERY MODAL & SWIPE (PROJECT_RULES PDP RULE 2)
+     ========================================================================== */
+  .pdp-gallery-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    touch-action: pan-y;
+  }
+  .pdp-gallery-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 9, 11, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .pdp-gallery-content {
+    position: relative;
     width: 100%;
-    height: 46px;
-    border: 1.5px solid #22c55e;
-    background: #f0fdf4;
-    color: #166534;
-    border-radius: 8px;
-    font-size: 0.82rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .pdp-gallery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    z-index: 10;
+  }
+  .pdp-gallery-counter {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.85rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
+    color: #f4f4f5;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .pdp-gallery-close-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pdp-gallery-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+  }
+  .pdp-gallery-viewport {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .pdp-gallery-viewport:active {
+    cursor: grabbing;
+  }
+  .pdp-gallery-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+  }
+  .pdp-gallery-slide {
+    min-width: 100%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .pdp-gallery-img {
+    max-width: 92vw;
+    max-height: 75vh;
+    object-fit: contain;
+    border-radius: 12px;
+    pointer-events: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+  .pdp-gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+  .pdp-gallery-nav:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-50%) scale(1.08);
+  }
+  .pdp-gallery-prev {
+    left: 20px;
+  }
+  .pdp-gallery-next {
+    right: 20px;
+  }
+  @media (max-width: 640px) {
+    .pdp-gallery-nav {
+      display: none;
+    }
+  }
+  .pdp-gallery-dots {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 16px 20px 24px;
+    z-index: 10;
   }
-  .pdp-btn-whatsapp:hover {
-    background: #22c55e;
-    color: #ffffff;
+  .pdp-gallery-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .pdp-gallery-dot.active {
+    width: 24px;
+    background: #ffffff;
   }
 
   /* Pillars Grid */
@@ -540,7 +704,7 @@
 
     <!-- COLUMNA 1: GALERÍA DE IMÁGENES -->
     <div class="pdp-media-wrapper">
-      <div class="pdp-main-image-card">
+      <div class="pdp-main-image-card" onclick="openPdpGalleryModal(currentPdpImageIndex)" role="button" tabindex="0" title="Click para ampliar imagen" aria-label="Ampliar galería de imágenes">
         <span id="pdpStockBadge" class="pdp-image-stock-badge {{ $product['stockType'] }}">
           {{ $product['stockLabel'] }}
         </span>
@@ -555,12 +719,16 @@
             <small style="font-size: 0.72rem; color: #a1a1aa;">{{ $product['sku'] }}</small>
           </div>
         @endif
+
+        <button type="button" class="pdp-image-zoom-trigger" onclick="event.stopPropagation(); openPdpGalleryModal(currentPdpImageIndex);" aria-label="Ampliar imagen de producto">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </button>
       </div>
 
       @if(count($product['images']) > 1)
         <div class="pdp-thumbs-strip">
           @foreach($product['images'] as $thumb)
-            <button type="button" class="pdp-thumb-btn {{ $loop->first ? 'active' : '' }}" onclick="switchPdpImage('{{ asset($thumb) }}', this)">
+            <button type="button" class="pdp-thumb-btn {{ $loop->first ? 'active' : '' }}" onclick="switchPdpImage('{{ asset($thumb) }}', this, {{ $loop->index }})" aria-label="Ver miniatura {{ $loop->iteration }}">
               <img src="{{ asset($thumb) }}" alt="Miniatura {{ $loop->iteration }}">
             </button>
           @endforeach
@@ -647,11 +815,7 @@
         </button>
       </div>
 
-      <!-- Compra Directa vía WhatsApp Concierge -->
-      <a id="pdpWhatsappLink" href="https://wa.me/5215500000000?text={{ urlencode('Hola, me interesa adquirir la prenda ' . $product['name'] . ' (SKU: ' . $product['sku'] . ')') }}" target="_blank" rel="noopener" class="pdp-btn-whatsapp">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.115-.526-1.748-.724-2.853-2.518-2.94-2.635-.088-.117-.706-.94-.706-1.792s.446-1.272.605-1.447c.159-.175.347-.219.462-.219.116 0 .232.002.332.007.106.005.249-.04.39.299.144.35.491 1.198.534 1.286.043.087.072.19.014.305-.058.117-.087.19-.174.29-.087.102-.183.228-.261.306-.087.087-.178.182-.077.355.101.174.45 1.742 1.487 2.663.784.697 1.446.913 1.65.1.203.204.323.174.439.043.116-.13.492-.571.622-.767.13-.195.26-.163.434-.099.174.065 1.1.519 1.289.613.188.095.313.141.359.22.046.079.046.459-.098.864z"/></svg>
-        <span>CONSULTAR POR WHATSAPP</span>
-      </a>
+
 
       <!-- Pilares de Confianza Courier & Sanitario -->
       <div class="pdp-pillars-grid">
@@ -784,6 +948,48 @@
     <span>AGREGAR</span>
   </button>
 </div>
+
+<!-- MODAL INTERACTIVO DE GALERÍA DE IMÁGENES CON SWIPE (REGLA PDP 2) -->
+<div id="pdpGalleryModal" class="pdp-gallery-modal" aria-hidden="true" role="dialog" aria-modal="true" style="display: none;">
+  <div class="pdp-gallery-backdrop" onclick="closePdpGalleryModal()"></div>
+  <div class="pdp-gallery-content">
+    <div class="pdp-gallery-header">
+      <span class="pdp-gallery-counter" id="pdpGalleryCounter">1 / {{ max(1, count($product['images'] ?? [])) }}</span>
+      <button type="button" class="pdp-gallery-close-btn" onclick="closePdpGalleryModal()" aria-label="Cerrar modal de imágenes">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="pdp-gallery-viewport" id="pdpGalleryViewport">
+      <div class="pdp-gallery-track" id="pdpGalleryTrack">
+        @forelse($product['images'] as $idx => $imgUrl)
+          <div class="pdp-gallery-slide" data-index="{{ $idx }}">
+            <img src="{{ asset($imgUrl) }}" alt="{{ $product['name'] }} - Vista {{ $idx + 1 }}" loading="lazy" class="pdp-gallery-img" onerror="this.onerror=null; this.src='{{ asset('user-avatar.png') }}';">
+          </div>
+        @empty
+          <div class="pdp-gallery-slide" data-index="0">
+            <img src="{{ asset($product['image']) }}" alt="{{ $product['name'] }}" class="pdp-gallery-img" onerror="this.onerror=null; this.src='{{ asset('user-avatar.png') }}';">
+          </div>
+        @endforelse
+      </div>
+    </div>
+
+    @if(count($product['images'] ?? []) > 1)
+      <button type="button" class="pdp-gallery-nav pdp-gallery-prev" onclick="navigatePdpGallery(-1)" aria-label="Imagen anterior">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button type="button" class="pdp-gallery-nav pdp-gallery-next" onclick="navigatePdpGallery(1)" aria-label="Imagen siguiente">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <div class="pdp-gallery-dots" id="pdpGalleryDots">
+        @foreach($product['images'] as $idx => $imgUrl)
+          <button type="button" class="pdp-gallery-dot {{ $loop->first ? 'active' : '' }}" onclick="goToPdpGallerySlide({{ $idx }})" aria-label="Ir a imagen {{ $idx + 1 }}"></button>
+        @endforeach
+      </div>
+    @endif
+  </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -855,14 +1061,195 @@
     }
   }
 
-  function switchPdpImage(src, btn) {
+  let currentPdpImageIndex = 0;
+  const pdpGalleryTotal = {{ max(1, count($product['images'] ?? [])) }};
+
+  function switchPdpImage(src, btn, index = 0) {
     const mainImg = document.getElementById('pdpMainImg');
     if (mainImg) {
       mainImg.src = src;
     }
     document.querySelectorAll('.pdp-thumb-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) {
+      btn.classList.add('active');
+    }
+    currentPdpImageIndex = index;
   }
+
+  function openPdpGalleryModal(index = 0) {
+    currentPdpImageIndex = (index >= 0 && index < pdpGalleryTotal) ? index : 0;
+    const modal = document.getElementById('pdpGalleryModal');
+    if (!modal) return;
+    
+    updatePdpGalleryTrack(false);
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePdpGalleryModal() {
+    const modal = document.getElementById('pdpGalleryModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function goToPdpGallerySlide(index, animate = true) {
+    if (pdpGalleryTotal <= 0) return;
+    if (index < 0) {
+      currentPdpImageIndex = 0;
+    } else if (index >= pdpGalleryTotal) {
+      currentPdpImageIndex = pdpGalleryTotal - 1;
+    } else {
+      currentPdpImageIndex = index;
+    }
+    updatePdpGalleryTrack(animate);
+  }
+
+  function navigatePdpGallery(step) {
+    if (pdpGalleryTotal <= 1) return;
+    let next = currentPdpImageIndex + step;
+    if (next < 0) next = pdpGalleryTotal - 1;
+    else if (next >= pdpGalleryTotal) next = 0;
+    goToPdpGallerySlide(next, true);
+  }
+
+  function updatePdpGalleryTrack(animate = true) {
+    const track = document.getElementById('pdpGalleryTrack');
+    const counter = document.getElementById('pdpGalleryCounter');
+    const dots = document.querySelectorAll('.pdp-gallery-dot');
+
+    if (track) {
+      track.style.transition = animate ? 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
+      track.style.transform = `translateX(-${currentPdpImageIndex * 100}%)`;
+    }
+
+    if (counter) {
+      counter.textContent = `${currentPdpImageIndex + 1} / ${pdpGalleryTotal}`;
+    }
+
+    dots.forEach((dot, idx) => {
+      dot.classList.toggle('active', idx === currentPdpImageIndex);
+    });
+  }
+
+  // Soporte de Swipe Táctil y Arrastre en Galería Modal (PROJECT_RULES PDP Regla 2)
+  (function initPdpGallerySwipe() {
+    const viewport = document.getElementById('pdpGalleryViewport');
+    const track = document.getElementById('pdpGalleryTrack');
+    if (!viewport || !track) return;
+
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let isTouching = false;
+    let isHorizontalSwipe = false;
+    let startTime = 0;
+
+    // EVENTOS TOUCH
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      isTouching = true;
+      isHorizontalSwipe = false;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      currentX = startX;
+      startTime = Date.now();
+      track.style.transition = 'none';
+    }, { passive: true });
+
+    viewport.addEventListener('touchmove', (e) => {
+      if (!isTouching || e.touches.length !== 1) return;
+      currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = currentX - startX;
+      const diffY = currentY - startY;
+
+      if (!isHorizontalSwipe) {
+        if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+          isHorizontalSwipe = true;
+        }
+      }
+
+      if (isHorizontalSwipe) {
+        if (e.cancelable) e.preventDefault();
+        const viewportWidth = viewport.clientWidth || 360;
+        const dragPercent = (diffX / viewportWidth) * 100;
+        const baseTranslate = -(currentPdpImageIndex * 100);
+        track.style.transform = `translateX(${baseTranslate + dragPercent}%)`;
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('touchend', (e) => {
+      if (!isTouching) return;
+      isTouching = false;
+      const diffX = (e.changedTouches ? e.changedTouches[0].clientX : currentX) - startX;
+      const elapsed = Date.now() - startTime;
+      const threshold = 45;
+      const isQuickFlick = elapsed < 300 && Math.abs(diffX) > 20;
+
+      if (isHorizontalSwipe && (Math.abs(diffX) > threshold || isQuickFlick)) {
+        if (diffX < 0) {
+          navigatePdpGallery(1); // Deslizar izquierda -> Siguiente
+        } else {
+          navigatePdpGallery(-1); // Deslizar derecha -> Anterior
+        }
+      } else {
+        updatePdpGalleryTrack(true);
+      }
+      isHorizontalSwipe = false;
+    }, { passive: true });
+
+    // ARRASTRE CON RATÓN (MOUSE DRAG)
+    let isMouseDown = false;
+    viewport.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      startX = e.clientX;
+      currentX = startX;
+      startTime = Date.now();
+      track.style.transition = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      currentX = e.clientX;
+      const diffX = currentX - startX;
+      const viewportWidth = viewport.clientWidth || 360;
+      const dragPercent = (diffX / viewportWidth) * 100;
+      const baseTranslate = -(currentPdpImageIndex * 100);
+      track.style.transform = `translateX(${baseTranslate + dragPercent}%)`;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isMouseDown) return;
+      isMouseDown = false;
+      const diffX = currentX - startX;
+      const elapsed = Date.now() - startTime;
+      if (Math.abs(diffX) > 40 || (elapsed < 300 && Math.abs(diffX) > 20)) {
+        if (diffX < 0) {
+          navigatePdpGallery(1);
+        } else {
+          navigatePdpGallery(-1);
+        }
+      } else {
+        updatePdpGalleryTrack(true);
+      }
+    });
+
+    // ATAJOS DE TECLADO
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('pdpGalleryModal');
+      if (!modal || modal.style.display === 'none') return;
+      if (e.key === 'ArrowLeft') {
+        navigatePdpGallery(-1);
+      } else if (e.key === 'ArrowRight') {
+        navigatePdpGallery(1);
+      } else if (e.key === 'Escape') {
+        closePdpGalleryModal();
+      }
+    });
+  })();
 
   function toggleAccordion(id) {
     const card = document.getElementById(id);

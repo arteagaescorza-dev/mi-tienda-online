@@ -130,6 +130,13 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   ```
 * **Justificación de UX/Layout:** La expansión horizontal rompe las columnas de formularios en cuadrículas, desborda los contenedores de modales estrechos y genera barras de scroll horizontal parásitas tanto en desktop como en dispositivos móviles. Solo se autoriza la elongación vertical para revisar textos extensos.
 
+### Regla 6.7: Ficha Independiente de Producto (PDP) — Supresión de WhatsApp y Galería Modal con Swipe
+* **Regla 6.7.1 (Supresión Estricta de WhatsApp en PDP):** Las páginas independientes de cada producto (`/productos/{slug}`) no deben mostrar bajo ninguna circunstancia botón, enlace o gatillo de WhatsApp (`.pdp-btn-whatsapp`, `#pdpWhatsappLink`, etc.). El embudo comercial de la PDP debe conducir directamente al flujo transaccional nativo de carrito (`addToCart`) y checkout D2C sin derivar la venta fuera de la plataforma.
+* **Regla 6.7.2 (Apertura de Modales de Imagen y Swipe Táctil):** Las páginas independientes de producto deben permitir abrir un modal interactivo / visor lightbox a pantalla completa al hacer clic sobre las imágenes del producto (tanto en la tarjeta principal como en las miniaturas).
+  - **Soporte de Gestos Swipe:** El visor modal debe admitir deslizamiento táctil horizontal fluido (`touchstart`, `touchmove`, `touchend` con prevención de scroll parásito en el eje Y), permitiendo al usuario cambiar de imagen con un simple gesto en dispositivos móviles.
+  - **Interacción Multidispositivo:** Adicionalmente, el modal debe proveer controles por clics (flechas prev/next y barra de indicadores/dots), arrastre con ratón en escritorio (`mousedown`/`mousemove`), atajos de teclado (`ArrowLeft`, `ArrowRight`, `Escape`) y contador de progreso (`1 / N`).
+  - **Aislamiento Estructural:** En estricto cumplimiento de la Regla 5.1, el modal `#pdpGalleryModal` debe ser hijo directo del contenedor de la vista (`depth = 2`), garantizando visibilidad `z-index: 99999` libre de anidamientos en paneles ocultos.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -225,6 +232,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Workflows** | Flujos de la Aplicación sin Roles | Especificación centrada en interconexión de módulos y datos |
 | **Estructura DOM** | Aislamiento de Paneles y Modales | Nodos hermanos bajo `#storeAppRoot` (`depth = 2`); paridad de `<div>` |
 | **UI / PWA** | Full-width Breakout, Cache Busting & Resize Solo Vertical | `100vw` sin overflow; `?v=filemtime`; `textarea { resize: vertical !important; }` |
+| **PDP Storefront** | Cero WhatsApp & Galería Swipe | Sin botón wa.me en `/productos/{slug}`; modal lightbox interactivo con swipe táctil |
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |

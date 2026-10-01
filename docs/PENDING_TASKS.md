@@ -95,6 +95,7 @@
 | `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01`, Tag v1.1 |
 | `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR), Tag v1.1 |
 | `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5, Tag v1.1 |
+| `TASK-STR-07` | Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `resources/views/store/pwa/product-detail.blade.php`, `PROJECT_RULES.md` |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Panorámico max-w-7xl, 4 KPIs Live, Margen Real, Tag v1.6 |
@@ -1560,6 +1561,25 @@ graph TD
   - **Modelos Eloquent:** `PwaPushSubscription`, `PwaPushNotificationLog`.
   - **Servicio de Dominio:** `WebPushNotificationService` compatible con el estándar VAPID (RFC 8292) mediante `minishlink/web-push` y colas de base de datos cPanel (`queue:work --stop-when-empty`).
   - **Endpoints RESTful:** `POST /api/v1/store/push-subscribe`, `DELETE /api/v1/store/push-unsubscribe/{id}`, `POST /api/v1/store/push-test`.
+
+### `TASK-STR-07`: Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Normativa de Gobierno:** `PROJECT_RULES.md` (Reglas 6.7.1 y 6.7.2).
+* **Punto Ciego / Solicitud del Usuario Resuelta:**
+  1. **Fuga de Conversión por WhatsApp:** La ficha independiente de producto mostraba un botón directo a WhatsApp Concierge (`.pdp-btn-whatsapp`, `#pdpWhatsappLink`) que desviaba a los clientes fuera del carrito y checkout transaccional del PWA.
+  2. **Imágenes Estáticas:** Las prendas íntimas y de alta moda requieren inspección minuciosa de textiles, costuras y detalles. No se contaba con un visor de imágenes ampliado a pantalla completa ni soporte táctil para alternar fotos en dispositivos móviles.
+* **Solución Implementada:**
+  - **1. Supresión Absoluta de WhatsApp en PDP:** Eliminación del enlace `#pdpWhatsappLink`, de las clases `.pdp-btn-whatsapp` y de la reactividad JavaScript asociada en `product-detail.blade.php`. Toda la conversión queda canalizada exclusivamente a través de `submitPdpToCart()`.
+  - **2. Modal Interactivo `#pdpGalleryModal`:** Visor a pantalla completa con backdrop desenfocado (`backdrop-filter: blur(16px)`), cabecera con contador (`1 / N`), botón de cierre y dot indicators inferiores. Cumple con la regla anti-anidamiento (Regla 5.1).
+  - **3. Gestor de Gestos Swipe Táctiles:** Soporte táctil nativo (`touchstart`, `touchmove`, `touchend`) con prevención de scroll vertical parásito, arrastre con ratón en escritorio (`mousedown`/`mousemove`), flechas de navegación y atajos de teclado (`ArrowLeft`, `ArrowRight`, `Escape`).
+  - **4. Matriz de Pruebas Automatizadas:** 9 pruebas en `StorefrontPwaPdpTest` validando la ausencia del botón de WhatsApp y la correcta inicialización del modal de galería y el controlador de swipe.
+* **Archivos Modificados:**
+  - `resources/views/store/pwa/product-detail.blade.php`
+  - `tests/Feature/StorefrontPwaPdpTest.php`
+  - `docs/PROJECT_RULES.md`
+  - `docs/PROJECT_RULES.html`
+  - `docs/PROJECT_RULES.pdf`
+  - `docs/PENDING_TASKS.md`
 
 ### `TASK-PUR-01`: Proceso de Notificación de Discrepancia Inbound, Minuta de Negociación y Formalización IA (PDF/Email)
 * **Prioridad:** **Alta** | **Estado:** **Pendiente (Diseño Normativo Aprobado)**

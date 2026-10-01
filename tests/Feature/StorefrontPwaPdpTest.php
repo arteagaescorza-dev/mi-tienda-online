@@ -220,4 +220,61 @@ class StorefrontPwaPdpTest extends TestCase
 
         $this->assertCount(0, $matches[0], 'El HTML de la PDP no debe contener emojis bajo la política estricta.');
     }
+
+    public function test_pdp_does_not_render_whatsapp_button_under_project_rule(): void
+    {
+        $product = Product::create([
+            'sku' => 'PDP-NO-WA-01',
+            'title' => 'Brief Modal Sin WhatsApp',
+            'slug' => 'brief-modal-sin-whatsapp',
+            'price' => 299.00,
+            'visible' => true,
+        ]);
+
+        $response = $this->get('/productos/' . $product->slug);
+
+        $response->assertOk();
+        $response->assertViewIs('store.pwa.product-detail');
+        // Regla 1: Las páginas independientes de cada producto NO muestran botón de WhatsApp
+        $response->assertDontSee('pdp-btn-whatsapp', false);
+        $response->assertDontSee('CONSULTAR POR WHATSAPP', false);
+        $response->assertDontSee('id="pdpWhatsappLink"', false);
+    }
+
+    public function test_pdp_renders_image_modal_and_supports_swipe_gallery(): void
+    {
+        $product = Product::create([
+            'sku' => 'PDP-GALLERY-01',
+            'title' => 'Thong Sensorial con Galeria Swipe',
+            'slug' => 'thong-sensorial-con-galeria-swipe',
+            'price' => 250.00,
+            'visible' => true,
+            'meta' => [
+                'image' => '/uploads/thong-front.webp',
+                'images' => [
+                    '/uploads/thong-front.webp',
+                    '/uploads/thong-side.webp',
+                    '/uploads/thong-back.webp',
+                ],
+            ],
+        ]);
+
+        $response = $this->get('/productos/' . $product->slug);
+
+        $response->assertOk();
+        $response->assertViewIs('store.pwa.product-detail');
+        // Regla 2: Apertura de modal de imágenes y swipe interactivo
+        $response->assertSee('id="pdpGalleryModal"', false);
+        $response->assertSee('pdp-gallery-modal', false);
+        $response->assertSee('pdp-gallery-viewport', false);
+        $response->assertSee('id="pdpGalleryTrack"', false);
+        $response->assertSee('pdp-image-zoom-trigger', false);
+        $response->assertSee('openPdpGalleryModal', false);
+        $response->assertSee('closePdpGalleryModal', false);
+        $response->assertSee('navigatePdpGallery', false);
+        $response->assertSee('initPdpGallerySwipe', false);
+        $response->assertSee('/uploads/thong-front.webp', false);
+        $response->assertSee('/uploads/thong-side.webp', false);
+        $response->assertSee('/uploads/thong-back.webp', false);
+    }
 }
