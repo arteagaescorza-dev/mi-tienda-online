@@ -1793,5 +1793,34 @@ graph TD
   - **Verificación Automatizada:** Suite de pruebas pasando al 100% (19 pruebas, 89 aserciones en `Hub2AdminStoreControllerTest` y `StorefrontDynamicSectionsTest`).
   - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado y compilado en PDF.
 
+---
+
+### `TASK-H2-22`: Conmutador Global de Vitrinas Persistente, Reestructuración a 5 Pestañas y Acordeón Unificado de Contenidos & Reglas
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Vista de Control `resources/views/portal/store.blade.php` & Controller `Hub2AdminStoreController`
+* **Diagnóstico & Requerimientos del Usuario:**
+  1. *Conmutador Global de Vitrinas:* Los botones de seleccionar vitrina (`Marte`, `Venus`, `Tiresias`, `Terra`) deben conmutar a las características de cada sitio o universo, y este conmutador debe estar presente y visible en cada una de las pestañas del módulo.
+  2. *Pestaña Unificada con Acordeón:* En una sola pestaña (`Contenido & Reglas`) debe caber lo que anteriormente se encontraba disperso en: *Banners & Marquesinas*, *Reglas & Fletes*, *Editorial & Tallas* y *Revista Digital*. Cada una de estas secciones debe ser un bloque interactivo que se expande y se contrae de forma individual o masiva.
+  3. *Confinamiento de Secciones Modulares:* La sección "Secciones modulares del home" no debe estar presente en todas las pestañas; debe ubicarse estricta y únicamente dentro de *Editor Visual* (Tab 1).
+* **Solución Técnica & Arquitectura Implementada:**
+  - **Barra Global de Vitrinas (`.universe-selector-bar`):** Extraída del panel visual y reubicada en la zona transversal superior, garantizando persistencia en todas las pestañas. Incorpora badge reactivo `#activeUniverseContextBadge` con color dinámico según la identidad del universo activo.
+  - **Reorganización Subnav a 5 Pestañas Principales:**
+    1. `1. Editor Visual` (`data-tab="visual"`): Personalización cromática, logos, favicon, live preview frame desktop/móvil y Gestor de Secciones Modulares Drag & Drop.
+    2. `2. Contenido & Reglas` (`data-tab="content_rules"`): Acordeón unificado con 4 submódulos interactivos.
+    3. `3. Páginas & Navbar` (`data-tab="pages"`): CMS de páginas institucionales con enlaces en cabecera/footer y generador de rutas.
+    4. `4. Tracking & Pixels` (`data-tab="tracking"`): GTM, GA4, Meta Pixel y Meta Conversions API (CAPI).
+    5. `5. Filtros Catálogo` (`data-tab="filters"`): Editor de facetas, taxonomías y jerarquías del catálogo público.
+  - **Acordeón Interactivo de 4 Secciones (`.store-accordion-section`):**
+    - Sección 1: *Banners Promocionales & Marquesinas Superiores* (`accordionSecBanners`).
+    - Sección 2: *Reglas de Flete, Despacho & Simulador Financiero* (`accordionSecShipping`).
+    - Sección 3: *Guía Oficial de Tallas & Protocolos de Cuidado* (`accordionSecEditorial`).
+    - Sección 4: *CMS Blog & Revista Digital* (`accordionSecMagazine`).
+    - Controles globales de encabezado: `Expandir Todo` y `Contraer Todo` (`window.toggleAllStoreAccordions`).
+    - Rotación CSS fluida de chevrons (`transform rotate-180`), transiciones suaves y aislamiento de estilos.
+  - **Enrutamiento Retrocompatible (`subSectionMap`):** Al navegar hacia `?tab=banners`, `?tab=shipping`, `?tab=editorial` o `?tab=magazine`, el script conmuta de inmediato a `content_rules`, expande el acordeón respectivo y realiza auto-scroll al bloque correspondiente.
+  - **Confinamiento de Secciones Modulares en Tab 1:** Corregida la estructura de cierre de divs para asegurar que el bloque `#sectionsTable` resida exclusivamente dentro de `#storeVisualPanel`.
+  - **Pruebas Automatizadas:** 27 pruebas pasando al 100% con 133 aserciones en `Hub2AdminStoreControllerTest`, incluyendo la nueva prueba de validación estructural `test_admin_store_cms_unified_accordion_and_global_universe_selector`.
+  - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado en HTML y compilado a PDF.
+
 
 

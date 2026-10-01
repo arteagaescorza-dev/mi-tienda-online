@@ -497,6 +497,41 @@
   </li>
 </ul>
 
+<h2 class="section-heading">2.5 Arquitectura de 5 Pestañas, Conmutador Global de Vitrinas y Acordeón Unificado (TASK-H2-22)</h2>
+<p>
+  Para optimizar la ergonomía operativa del administrador y permitir la gestión fluida del multiverso sin recargas de página, Hub 2 adopta una arquitectura de panel consolidada y reactiva:
+</p>
+<ul class="step-list avoid-break">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Conmutador Global de Vitrinas Persistente (<code>.universe-selector-bar</code>):</strong>
+      Extraído de los paneles individuales y situado en el encabezado transversal superior. Permite conmutar al instante entre <em>Marte</em>, <em>Venus</em>, <em>Tiresias</em> y <em>Terra</em> desde cualquier pestaña del módulo, sincronizando en caliente el badge contextual <code>#activeUniverseContextBadge</code>, los KPIs de SKUs y marca, la paleta multitoken y el live preview frame.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Consolidación en 5 Pestañas Principales:</strong>
+      Elimina la sobrecarga de navegación horizontal reorganizando las herramientas en: <code>1. Editor Visual</code> (Branding, tokens y Secciones Drag & Drop), <code>2. Contenido & Reglas</code> (Acordeón de políticas y publicaciones), <code>3. Páginas & Navbar</code> (CMS de páginas institucionales), <code>4. Tracking & Pixels</code> (GTM, GA4, Meta CAPI) y <code>5. Filtros Catálogo</code> (Facetas y orden jerárquico).
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Acordeón Interactivo de 4 Secciones:</strong>
+      Dentro de <em>Contenido & Reglas</em>, se agrupan en una única vista colapsable las secciones: <em>1. Banners Promocionales & Marquesinas</em>, <em>2. Reglas de Flete & Simulador Financiero</em>, <em>3. Guía Oficial de Tallas & Cuidado</em> y <em>4. CMS Blog & Revista Digital</em>, provisto de controles globales de <em>"Expandir Todo"</em> y <em>"Contraer Todo"</em>.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Confinamiento Estricto de Secciones Modulares en Tab 1:</strong>
+      El Gestor de Secciones Modulares (<code>#sectionsTable</code>) reside exclusivamente dentro de <code>#storeVisualPanel</code>, garantizando que permanezca oculto al navegar por las demás pestañas del CMS.
+    </div>
+  </li>
+</ul>
+
 <div class="page-break"></div>
 
 <!-- CAPÍTULO 3: INVENTARIO, KARDEX & INBOUND (HUB 4) -->

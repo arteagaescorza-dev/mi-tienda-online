@@ -249,6 +249,15 @@ sequenceDiagram
 4. **Bifurcación y Renderizado del Hero Modular:** El motor de Hero implementa bifurcación mutuamente excluyente entre el modo visual estructurado y el editor de código scoped, erradicando duplicidades en la vitrina. Soporta sangrado de borde a borde a pantalla completa (`100vw` edge-to-edge breakout), capas de degradado superpuestas con ajuste de ángulo, colores y opacidad, e imágenes de fondo con subida directa y previsualización.
 5. **Enrutamiento Asistido y Anclas Modulares:** Todas las secciones modulares exponen un ancla DOM única (`#section-{id}`). En el panel administrativo de Hub 2, cada sección y página institucional expone su ruta con badges de copia en un solo clic, complementado por un selector desplegable asistido que permite insertar rutas de secciones, páginas o vitrinas en los botones CTA sin errores.
 6. **Resiliencia en Renderizado Móvil y Cache Busting Dinámico:** La hoja de estilos `store-pwa.css` aplica arquitectura de consultas de medios estrictamente balanceadas con validación de paridad de llaves para evitar que reglas móviles (< 769px) queden absorbidas por bloques desktop. Para erradicar persistencia de estilos obsoletos en navegadores móviles, el layout inyecta un parámetro de versionamiento dinámico (`?v={filemtime}`), garantizando que las actualizaciones de diseño se reflejen de inmediato en todos los clientes PWA y dispositivos móviles sin requerir purga manual de caché en el dispositivo del cliente.
+7. **Conmutación Universal Multitransversal y Acordeón Unificado (TASK-H2-22):**
+   - El selector de vitrinas multiverso (`.universe-selector-bar`) se ubica en el encabezado transversal del módulo, garantizando persistencia y conmutación reactiva instantánea en cualquiera de las pestañas activas, sincronizando KPIs de SKUs, marcas, muestras de 8 tokens, frames de previsualización y filtrado visual de tablas.
+   - El submódulo administrativo se organiza en 5 pestañas principales: `1. Editor Visual`, `2. Contenido & Reglas`, `3. Páginas & Navbar`, `4. Tracking & Pixels` y `5. Filtros Catálogo`.
+   - En la pestaña `Contenido & Reglas`, un acordeón unificado (`.store-accordion-section`) aloja cuatro bloques colapsables con controles globales de expansión/contracción masiva:
+     - *Sección 1:* Banners Promocionales & Marquesinas Superiores (`accordionSecBanners`).
+     - *Sección 2:* Reglas de Flete, Despacho & Simulador Financiero (`accordionSecShipping`).
+     - *Sección 3:* Guía Oficial de Tallas & Protocolos de Cuidado (`accordionSecEditorial`).
+     - *Sección 4:* CMS Blog & Revista Digital (`accordionSecMagazine`).
+   - El Gestor de Secciones Modulares del Home (`#sectionsTable`) queda confinado con exclusividad dentro de `Editor Visual` (Tab 1), garantizando que no se visualice en ninguna otra pestaña.
 
 ---
 

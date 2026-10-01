@@ -16,16 +16,65 @@
         }
         .store-subnav-grid {
             display: grid !important;
-            grid-template-columns: repeat(4, 1fr) !important;
-            grid-template-rows: repeat(2, auto) !important;
+            grid-template-columns: repeat(5, 1fr) !important;
             gap: 10px !important;
             width: 100% !important;
         }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .store-subnav-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                grid-template-rows: repeat(4, auto) !important;
+                grid-template-columns: repeat(3, 1fr) !important;
             }
+        }
+        @media (max-width: 640px) {
+            .store-subnav-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        .universe-pill-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 7px 14px !important;
+            border-radius: 9999px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            color: #334155 !important;
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        }
+        .universe-pill-btn:hover {
+            background: #f8fafc !important;
+            border-color: #94a3b8 !important;
+            color: #0f172a !important;
+        }
+        .universe-pill-btn.active {
+            background: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2) !important;
+        }
+        .universe-dot-indicator {
+            width: 8px !important;
+            height: 8px !important;
+            border-radius: 9999px !important;
+            flex-shrink: 0 !important;
+        }
+        .store-accordion-section {
+            border-radius: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .store-accordion-section:hover {
+            border-color: #cbd5e1;
+        }
+        .store-accordion-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .store-accordion-chevron {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .store-subnav-btn {
             display: flex !important;
@@ -145,7 +194,7 @@
             </div>
         </div>
 
-        <!-- 2 FILAS DE PESTAÑAS (4 columnas x 2 filas en desktop) -->
+        <!-- PESTAÑAS DE SUBMÓDULO UNIFICADAS -->
         <nav class="store-subnav-grid w-full" aria-label="Submódulos de Tienda y CMS">
             <!-- TAB 1: EDITOR VISUAL -->
             <button class="store-subnav-btn active" data-action="switch-store-tab" data-tab="visual" onclick="window.switchStoreTab('visual')" type="button">
@@ -159,80 +208,45 @@
                 </div>
             </button>
 
-            <!-- TAB 2: BANNERS & MARQUESINAS -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="banners" onclick="window.switchStoreTab('banners')" type="button">
+            <!-- TAB 2: CONTENIDO, REGLAS & EDITORIAL (ACORDEÓN UNIFICADO) -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="content_rules" onclick="window.switchStoreTab('content_rules')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-                    <span class="truncate">2. Banners &amp; Marquesinas</span>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M4 6h16M4 12h16M4 18h10"/><polyline points="14 18 17 21 21 17"/></svg>
+                    <span class="truncate">2. Contenido &amp; Reglas</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                    <span class="store-subnav-count">{{ count($banners) }} Banners</span>
-                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Banners" data-help-title="Banners y Marquesinas" data-help-desc="Gestor de avisos rotativos superiores y carruseles hero con validación WebP (< 100 KB).">?</span>
+                    <span class="store-subnav-count">4 Módulos</span>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido y Reglas" data-help-title="Contenido, Reglas &amp; Editorial" data-help-desc="Panel unificado con 4 módulos expandibles: Banners, Reglas de Flete, Guía de Tallas Torzo y Revista Digital.">?</span>
                 </div>
             </button>
 
-            <!-- TAB 3: REGLAS DE FLETE -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="shipping" onclick="window.switchStoreTab('shipping')" type="button">
-                <div class="flex items-center gap-2 overflow-hidden">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                    <span class="truncate">3. Reglas &amp; Fletes</span>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                    <span class="store-subnav-count">${{ number_format($shippingRule['freeShippingThreshold'], 0) }}</span>
-                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Reglas de Flete" data-help-title="Reglas Comerciales &amp; Fletes" data-help-desc="Configuración de envío gratis, entrega en Metro Chabacano y simulador financiero de elasticidad (TASK-INT-18).">?</span>
-                </div>
-            </button>
-
-            <!-- TAB 4: CONTENIDO EDITORIAL & TALLAS -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="editorial" onclick="window.switchStoreTab('editorial')" type="button">
-                <div class="flex items-center gap-2 overflow-hidden">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    <span class="truncate">4. Editorial &amp; Tallas</span>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                    <span class="store-subnav-count">Guía Torzo</span>
-                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido Editorial" data-help-title="Contenido Editorial &amp; Tallas" data-help-desc="Guía anatómica de tallas textiles Torzo, protocolos de cuidado y aviso sanitario PROFECO (TASK-INT-10).">?</span>
-                </div>
-            </button>
-
-            <!-- TAB 5: PÁGINAS CMS & NAVBAR -->
+            <!-- TAB 3: PÁGINAS CMS & NAVBAR -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" onclick="window.switchStoreTab('pages')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    <span class="truncate">5. Páginas &amp; Navbar</span>
+                    <span class="truncate">3. Páginas &amp; Navbar</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
                 </div>
             </button>
 
-            <!-- TAB 6: REVISTA DIGITAL (BLOG) -->
-            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="magazine" onclick="window.switchStoreTab('magazine')" type="button">
-                <div class="flex items-center gap-2 overflow-hidden">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    <span class="truncate">6. Revista Digital</span>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                    <span class="store-subnav-count">{{ $blogPosts->count() ?? 0 }} Arts</span>
-                </div>
-            </button>
-
-            <!-- TAB 7: TRACKING & PIXELS -->
+            <!-- TAB 4: TRACKING & PIXELS -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="tracking" onclick="window.switchStoreTab('tracking')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    <span class="truncate">7. Tracking &amp; Pixels</span>
+                    <span class="truncate">4. Tracking &amp; Pixels</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ ($tracking && $tracking->is_active) ? 'Activo' : 'Pausado' }}</span>
                 </div>
             </button>
 
-            <!-- TAB 8: FILTROS DE CATÁLOGO -->
+            <!-- TAB 5: FILTROS DE CATÁLOGO -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="filters" onclick="window.switchStoreTab('filters')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    <span class="truncate">8. Filtros Catálogo</span>
+                    <span class="truncate">5. Filtros Catálogo</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
@@ -265,8 +279,8 @@
                 <button class="section-help-btn" type="button" aria-label="Ayuda SKUs" data-help-title="SKUs Visibles" data-help-desc="Cantidad de modelos de prendas y cuidado personal filtrados para esta vitrina.">?</button>
             </div>
             <div class="mt-3 flex items-baseline justify-between">
-                <span class="text-2xl font-black font-mono tracking-tight text-indigo-600">{{ $storefronts['marte']['activeSkus'] }} Modelos</span>
-                <span class="text-xs font-bold text-indigo-700 font-mono">Marte Store</span>
+                <span class="text-2xl font-black font-mono tracking-tight text-indigo-600" data-kpi-skus-count>{{ $storefronts['marte']['activeSkus'] }} Modelos</span>
+                <span class="text-xs font-bold text-indigo-700 font-mono" data-kpi-skus-brand>Marte Store</span>
             </div>
             <div class="mt-2 text-[11px] text-slate-400">Desacoplados de stock físico único (TASK-INT-10)</div>
         </div>
@@ -300,21 +314,21 @@
             </div>
             <div class="mt-3 flex items-baseline justify-between">
                 <span class="text-2xl font-black font-mono tracking-tight text-emerald-600">Desktop</span>
-                <span class="text-xs font-bold text-emerald-700 font-mono">375px &bull; 100%</span>
+                <span class="text-xs font-bold text-emerald-700 font-mono" data-kpi-preview-universe>Marte Store</span>
             </div>
             <div class="mt-2 text-[11px] text-slate-400">Escala adaptativa en tiempo real</div>
         </div>
     </div>
 
     {{-- ========================================================================= --}}
-    {{-- REGLA 10: SECCIÓN 3: PANELES Y ESPACIO DE TRABAJO OPERATIVO (NIVEL 3)     --}}
+    {{-- CONMUTADOR DE VITRINA MULTIVERSO GLOBAL (PRESENTE EN TODAS LAS PESTAÑAS)   --}}
     {{-- ========================================================================= --}}
-    
-    <!-- SUBMÓDULO 1: EDITOR VISUAL MULTIVERSO -->
-    <div id="storeVisualPanel" class="tab-panel">
-        <!-- SELECTOR DE VITRINA MULTIVERSO -->
-        <div class="universe-selector-container mb-6 flex flex-wrap items-center gap-2">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Seleccionar Vitrina:</span>
+    <div class="universe-selector-bar bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mr-1">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <span>Seleccionar Vitrina:</span>
+            </span>
             <button class="universe-pill-btn active" data-action="switch-store-universe" data-universe="marte" onclick="window.switchStoreUniverse('marte')" type="button">
                 <span class="universe-dot-indicator" style="background: #4f46e5;"></span>
                 <span>Marte (Masculino / Queer)</span>
@@ -332,6 +346,21 @@
                 <span>Terra (Matriz / Unisex)</span>
             </button>
         </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium">Universo Activo:</span>
+            <span id="activeUniverseContextBadge" class="px-3 py-1 rounded-full font-bold text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span id="activeUniverseContextText">Marte Store &bull; {{ $storefronts['marte']['activeSkus'] }} Modelos</span>
+            </span>
+        </div>
+    </div>
+
+    {{-- ========================================================================= --}}
+    {{-- REGLA 10: SECCIÓN 3: PANELES Y ESPACIO DE TRABAJO OPERATIVO (NIVEL 3)     --}}
+    {{-- ========================================================================= --}}
+    
+    <!-- SUBMÓDULO 1: EDITOR VISUAL MULTIVERSO -->
+    <div id="storeVisualPanel" class="tab-panel">
 
         <!-- PANEL PRINCIPAL A 2 COLUMNAS: FORMULARIO vs PREVIEW EN VIVO -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
@@ -601,7 +630,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- GESTOR DE SECCIONES MODULARES DEL HOME (DRAG & DROP) -->
     <div class="w-full bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 mt-6">
@@ -725,10 +753,47 @@
     </div>
     <!-- FIN SUBMÓDULO 1: EDITOR VISUAL -->
 
-    <!-- SUBMÓDULO 2: BANNERS & MARQUESINAS -->
-    <div id="storeBannersPanel" class="tab-panel hidden" style="display: none;">
+    <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 2: CONTENIDO, REGLAS & PUBLICACIONES (ACORDEÓN UNIFICADO)        -->
+    <!-- ========================================================================= -->
+    <div id="storeContentRulesPanel" class="tab-panel hidden" style="display: none;">
+        <!-- Header de Control de Secciones Acordeón -->
+        <div class="flex items-center justify-between bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm mb-4">
+            <div>
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                    <span>Gestión de Contenidos, Políticas y Publicaciones</span>
+                </h3>
+                <p class="text-xs text-slate-500">Expande o contrae cada sección para configurar banners, fletes, guías de tallas y la revista digital.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" class="button button-light py-1 px-3 text-xs font-semibold rounded-lg cursor-pointer" onclick="window.toggleAllStoreAccordions(true)">
+                    Expandir Todo
+                </button>
+                <button type="button" class="button button-light py-1 px-3 text-xs font-semibold rounded-lg cursor-pointer" onclick="window.toggleAllStoreAccordions(false)">
+                    Contraer Todo
+                </button>
+            </div>
+        </div>
 
-        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+        <!-- SECCIÓN 1 ACORDEÓN: BANNERS & MARQUESINAS -->
+        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecBanners">
+            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecBanners')">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-900">1. Banners Promocionales &amp; Marquesinas Superiores</div>
+                        <div class="text-[11px] text-slate-500">Avisos destacados en cabecera y carruseles hero segmentados por vitrina.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono">{{ count($banners) }} Banners</span>
+                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </button>
+            <div class="store-accordion-body p-6 border-t border-slate-100" id="accordionSecBannersBody">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -817,12 +882,27 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- FIN SUBMÓDULO 2: BANNERS & MARQUESINAS -->
+        <!-- FIN SECCIÓN 1 ACORDEÓN -->
 
-    <!-- SUBMÓDULO 3: REGLAS DE FLETE & SIMULADOR FINANCIERO (TASK-INT-18) -->
-    <div id="storeShippingPanel" class="tab-panel hidden" style="display: none;">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <!-- SECCIÓN 2 ACORDEÓN: REGLAS DE FLETE & SIMULADOR FINANCIERO -->
+        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecShipping">
+            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecShipping')">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-900">2. Reglas de Flete, Despacho &amp; Simulador Financiero (TASK-INT-18)</div>
+                        <div class="text-[11px] text-slate-500">Umbrales de envío gratis, tarifas fijas, punto físico y simulador de elasticidad.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono">Umbral ${{ number_format($shippingRule['freeShippingThreshold']) }}</span>
+                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </button>
+            <div class="store-accordion-body p-6 border-t border-slate-100 hidden" id="accordionSecShippingBody" style="display: none;">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- CONFIGURADOR DE REGLAS DE DESPACHO -->
             <div class="lg:col-span-5 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
@@ -937,16 +1017,28 @@
                             </p>
                         </div>
                     </div>
-                </div>
             </div>
         </div>
-    </div>
-    </div>
-    <!-- FIN SUBMÓDULO 3: REGLAS DE FLETE -->
+        <!-- FIN SECCIÓN 2 ACORDEÓN -->
 
-    <!-- SUBMÓDULO 4: CONTENIDO EDITORIAL & TALLAS (TASK-INT-10) -->
-    <div id="storeEditorialPanel" class="tab-panel hidden" style="display: none;">
-        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+        <!-- SECCIÓN 3 ACORDEÓN: CONTENIDO EDITORIAL & TALLAS -->
+        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecEditorial">
+            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecEditorial')">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-900">3. Guía Oficial de Tallas &amp; Protocolos de Cuidado (TASK-INT-10)</div>
+                        <div class="text-[11px] text-slate-500">Matriz de medidas anatómicas en PDP, lavado de fibras y leyendas sanitarias PROFECO.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-mono">{{ count($sizeGuide) }} Tallas</span>
+                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </button>
+            <div class="store-accordion-body p-6 border-t border-slate-100 hidden" id="accordionSecEditorialBody" style="display: none;">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -1030,14 +1122,98 @@
                         <strong>Transparencia con el Cliente:</strong> Esta leyenda se muestra de manera visible en el checkout, confirmación de pedido y en el exterior del paquete rotulado por Almacén.
                     </div>
                 </div>
+        </div>
+        </div>
+        <!-- FIN SECCIÓN 3 ACORDEÓN -->
+
+        <!-- SECCIÓN 4 ACORDEÓN: REVISTA DIGITAL & ARTÍCULOS BLOG -->
+        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecMagazine">
+            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecMagazine')">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-900">4. CMS Blog &amp; Revista Digital (TASK-H2-06)</div>
+                        <div class="text-[11px] text-slate-500">Notas técnicas, guías de ajuste y artículos editoriales con SEO optimizado.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono">{{ count($blogPosts) }} Artículos</span>
+                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </button>
+            <div class="store-accordion-body p-6 border-t border-slate-100 hidden" id="accordionSecMagazineBody" style="display: none;">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            <span>Revista Digital // Artículos y Publicaciones Editoriales</span>
+                        </h3>
+                        <p class="text-xs text-slate-500">Publica notas técnicas, guías de ajuste y artículos de bienestar que impulsan el SEO orgánico del ecosistema.</p>
+                    </div>
+                    <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createBlogModal" type="button">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Nuevo Artículo</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+                                <th class="py-2.5 px-3">Artículo &amp; Slug</th>
+                                <th class="py-2.5 px-3">Categoría</th>
+                                <th class="py-2.5 px-3">Autor</th>
+                                <th class="py-2.5 px-3 text-center">Lectura</th>
+                                <th class="py-2.5 px-3 text-center">Estado</th>
+                                <th class="py-2.5 px-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse($blogPosts as $bp)
+                                <tr class="hover:bg-slate-50/60 transition">
+                                    <td class="py-3 px-3">
+                                        <strong class="font-bold text-slate-900 block">{{ $bp->title }}</strong>
+                                        <span class="text-[11px] font-mono text-slate-400">/revista/{{ $bp->slug }}</span>
+                                    </td>
+                                    <td class="py-3 px-3">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ $bp->category_name }}</span>
+                                    </td>
+                                    <td class="py-3 px-3 text-slate-600">{{ $bp->author_name ?? 'Editorial' }}</td>
+                                    <td class="py-3 px-3 text-center text-slate-500">{{ $bp->reading_time_minutes ?? 3 }} min</td>
+                                    <td class="py-3 px-3 text-center">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $bp->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                                            {{ strtoupper($bp->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-3 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ url('/revista/' . $bp->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
+                                            <form method="POST" action="{{ route('portal.store.blog.destroy', $bp->id) }}" onsubmit="return confirm('¿Eliminar este artículo del blog?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay artículos publicados en la revista digital aún.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        <!-- FIN SECCIÓN 4 ACORDEÓN -->
     </div>
-    </div>
-    <!-- FIN SUBMÓDULO 4 -->
+    <!-- FIN SUBMÓDULO 2: CONTENIDO, REGLAS & PUBLICACIONES -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 5: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
+    <!-- SUBMÓDULO 3: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
     <!-- ========================================================================= -->
     <div id="storePagesPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
@@ -1118,81 +1294,10 @@
             </div>
         </div>
     </div>
-    <!-- FIN SUBMÓDULO 5 -->
+    <!-- FIN SUBMÓDULO 3: GESTOR DE PÁGINAS CMS & NAVBAR -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 6: CMS BLOG & REVISTA DIGITAL (TASK-H2-06)                      -->
-    <!-- ========================================================================= -->
-    <div id="storeMagazinePanel" class="tab-panel hidden" style="display: none;">
-        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                        <span>Revista Digital // Artículos y Publicaciones Editoriales</span>
-                    </h3>
-                    <p class="text-xs text-slate-500">Publica notas técnicas, guías de ajuste y artículos de bienestar que impulsan el SEO orgánico del ecosistema.</p>
-                </div>
-                <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createBlogModal" type="button">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span>Nuevo Artículo</span>
-                </button>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
-                            <th class="py-2.5 px-3">Artículo &amp; Slug</th>
-                            <th class="py-2.5 px-3">Categoría</th>
-                            <th class="py-2.5 px-3">Autor</th>
-                            <th class="py-2.5 px-3 text-center">Lectura</th>
-                            <th class="py-2.5 px-3 text-center">Estado</th>
-                            <th class="py-2.5 px-3 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($blogPosts as $bp)
-                            <tr class="hover:bg-slate-50/60 transition">
-                                <td class="py-3 px-3">
-                                    <strong class="font-bold text-slate-900 block">{{ $bp->title }}</strong>
-                                    <span class="text-[11px] font-mono text-slate-400">/revista/{{ $bp->slug }}</span>
-                                </td>
-                                <td class="py-3 px-3">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ $bp->category_name }}</span>
-                                </td>
-                                <td class="py-3 px-3 text-slate-600">{{ $bp->author_name ?? 'Editorial' }}</td>
-                                <td class="py-3 px-3 text-center text-slate-500">{{ $bp->reading_time_minutes ?? 3 }} min</td>
-                                <td class="py-3 px-3 text-center">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $bp->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
-                                        {{ strtoupper($bp->status) }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ url('/revista/' . $bp->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
-                                        <form method="POST" action="{{ route('portal.store.blog.destroy', $bp->id) }}" onsubmit="return confirm('¿Eliminar este artículo del blog?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay artículos publicados en la revista digital aún.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <!-- FIN SUBMÓDULO 6 -->
-
-    <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 7: TRACKING & ANALÍTICA (TASK-H2-11)                            -->
+    <!-- SUBMÓDULO 4: TRACKING & ANALÍTICA (TASK-H2-11)                            -->
     <!-- ========================================================================= -->
     <div id="storeTrackingPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-3xl">
@@ -1258,10 +1363,10 @@
             </form>
         </div>
     </div>
-    <!-- FIN SUBMÓDULO 7 -->
+    <!-- FIN SUBMÓDULO 4: TRACKING & ANALÍTICA -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 8: FILTROS DE CATÁLOGO (TASK-H2-09)                             -->
+    <!-- SUBMÓDULO 5: FILTROS DE CATÁLOGO (TASK-H2-09)                             -->
     <!-- ========================================================================= -->
     <div id="storeFiltersPanel" class="tab-panel hidden" style="display: none;">
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6 max-w-4xl">
@@ -2428,24 +2533,76 @@
     };
 
     // ==========================================
-    // 2. GESTIÓN DE SUBNAV TABS (8 PESTAÑAS)
+    // 2. GESTIÓN DE SUBNAV TABS (5 PESTAÑAS PRINCIPALES)
     // ==========================================
     const tabPanelIds = {
         'visual': 'storeVisualPanel',
-        'banners': 'storeBannersPanel',
-        'shipping': 'storeShippingPanel',
-        'editorial': 'storeEditorialPanel',
+        'content_rules': 'storeContentRulesPanel',
         'pages': 'storePagesPanel',
-        'magazine': 'storeMagazinePanel',
         'tracking': 'storeTrackingPanel',
         'filters': 'storeFiltersPanel'
     };
 
+    // Mapeo retrocompatible para enlaces a subsecciones dentro del acordeón unificado
+    const subSectionMap = {
+        'banners': { tab: 'content_rules', accordionId: 'accordionSecBanners' },
+        'shipping': { tab: 'content_rules', accordionId: 'accordionSecShipping' },
+        'editorial': { tab: 'content_rules', accordionId: 'accordionSecEditorial' },
+        'magazine': { tab: 'content_rules', accordionId: 'accordionSecMagazine' }
+    };
+
+    // Funciones operativas de Acordeón
+    window.toggleStoreAccordion = function(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        const body = document.getElementById(sectionId + 'Body');
+        const chevron = section.querySelector('.store-accordion-chevron');
+        if (!body) return;
+
+        const isHidden = body.classList.contains('hidden') || body.style.display === 'none';
+        if (isHidden) {
+            body.classList.remove('hidden');
+            body.style.display = 'block';
+            if (chevron) chevron.classList.add('rotate-180');
+        } else {
+            body.classList.add('hidden');
+            body.style.display = 'none';
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+    };
+
+    window.toggleAllStoreAccordions = function(expand) {
+        const sections = ['accordionSecBanners', 'accordionSecShipping', 'accordionSecEditorial', 'accordionSecMagazine'];
+        sections.forEach(secId => {
+            const section = document.getElementById(secId);
+            const body = document.getElementById(secId + 'Body');
+            const chevron = section ? section.querySelector('.store-accordion-chevron') : null;
+            if (!body) return;
+            if (expand) {
+                body.classList.remove('hidden');
+                body.style.display = 'block';
+                if (chevron) chevron.classList.add('rotate-180');
+            } else {
+                body.classList.add('hidden');
+                body.style.display = 'none';
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        });
+    };
+
     window.switchStoreTab = function(targetTab) {
+        let activeTabKey = targetTab;
+        let accordionToOpen = null;
+
+        if (subSectionMap[targetTab]) {
+            activeTabKey = subSectionMap[targetTab].tab;
+            accordionToOpen = subSectionMap[targetTab].accordionId;
+        }
+
         Object.keys(tabPanelIds).forEach(tabKey => {
             const panel = document.getElementById(tabPanelIds[tabKey]);
             if (!panel) return;
-            if (tabKey === targetTab) {
+            if (tabKey === activeTabKey) {
                 panel.classList.remove('hidden');
                 panel.style.display = 'block';
             } else {
@@ -2456,12 +2613,25 @@
 
         const tabButtons = document.querySelectorAll('[data-action="switch-store-tab"]');
         tabButtons.forEach(btn => {
-            if (btn.getAttribute('data-tab') === targetTab) {
+            const btnTab = btn.getAttribute('data-tab');
+            if (btnTab === activeTabKey || (subSectionMap[btnTab] && subSectionMap[btnTab].tab === activeTabKey)) {
                 btn.classList.add('active');
             } else {
                 btn.classList.remove('active');
             }
         });
+
+        if (accordionToOpen) {
+            const body = document.getElementById(accordionToOpen + 'Body');
+            const sec = document.getElementById(accordionToOpen);
+            const chevron = sec ? sec.querySelector('.store-accordion-chevron') : null;
+            if (body) {
+                body.classList.remove('hidden');
+                body.style.display = 'block';
+                if (chevron) chevron.classList.add('rotate-180');
+                sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
 
         try {
             const url = new URL(window.location);
@@ -2562,6 +2732,7 @@
         const data = storefrontsData[universe];
         if (!data) return;
 
+        // 1. Selector de Vitrinas Global: Activar botón correspondiente
         const universeButtons = document.querySelectorAll('[data-action="switch-store-universe"]');
         universeButtons.forEach(btn => {
             if (btn.getAttribute('data-universe') === universe) {
@@ -2571,6 +2742,29 @@
             }
         });
 
+        // 2. Actualizar Badge de Contexto Global en barra de universos
+        const contextBadge = document.getElementById('activeUniverseContextBadge');
+        if (contextBadge) {
+            contextBadge.textContent = `Vitrina Activa: ${data.name} (${universe.toUpperCase()})`;
+            contextBadge.style.borderColor = data.accentColor || '#4f46e5';
+            contextBadge.style.color = data.accentColor || '#4f46e5';
+        }
+
+        // 3. Actualizar KPIs reactivos en Header
+        const kpiSkusCount = document.querySelector('[data-kpi-skus-count]');
+        const kpiSkusBrand = document.querySelector('[data-kpi-skus-brand]');
+        const kpiPreviewUniverse = document.querySelector('[data-kpi-preview-universe]');
+        if (kpiSkusCount && data.activeSkus !== undefined) {
+            kpiSkusCount.textContent = `${data.activeSkus} SKUs`;
+        }
+        if (kpiSkusBrand) {
+            kpiSkusBrand.textContent = data.name;
+        }
+        if (kpiPreviewUniverse) {
+            kpiPreviewUniverse.textContent = data.name;
+        }
+
+        // 4. Formulario de configuración de vitrina (Editor Visual)
         const vitrinaForm = document.getElementById('vitrinaConfigForm');
         const vitrinaTitle = document.getElementById('vitrinaEditorTitle');
         const vitrinaKicker = document.getElementById('vitrinaEditorKicker');
@@ -2579,13 +2773,13 @@
         if (vitrinaTitle) vitrinaTitle.textContent = `Personalizar Vitrina: ${data.name}`;
         if (vitrinaKicker) vitrinaKicker.textContent = data.kicker;
 
-        // 1. Identidad inputs
+        // 4.1 Identidad inputs
         const nameInput = document.querySelector('[data-store-name-input]');
         const kickerInput = document.querySelector('[data-store-kicker-input]');
         if (nameInput) nameInput.value = data.name || '';
         if (kickerInput) kickerInput.value = data.kicker || '';
 
-        // 2. Logos & Favicon inputs & previews
+        // 4.2 Logos & Favicon inputs & previews
         const logoInput = document.querySelector('[data-store-logo-input]');
         const logoMobileInput = document.querySelector('[data-store-logo-mobile-input]');
         const faviconInput = document.querySelector('[data-store-favicon-input]');
@@ -2607,7 +2801,7 @@
             faviconThumb.innerHTML = data.faviconUrl ? `<img src="${data.faviconUrl}" class="w-4 h-4 object-contain" alt="Favicon">` : `<span class="text-[8px] text-slate-400 font-mono">.ico</span>`;
         }
 
-        // 3. Paleta Multitoken de 8 colores
+        // 4.3 Paleta Multitoken de 8 colores
         const tokensMap = {
             'primary': data.primaryColor || '#0f172a',
             'secondary': data.secondaryColor || '#334155',
@@ -2627,14 +2821,33 @@
             if (label) label.value = val;
         });
 
-        // 4. Actualizar Live Preview Frame
+        // 5. Actualizar Live Preview Frame
         window.applyStorefrontPreviewTokens(tokensMap, data);
 
-        // 5. Actualizar KPI 3 Swatches
+        // 6. Actualizar KPI 3 Swatches
         Object.keys(tokensMap).forEach(token => {
             const swatch = document.querySelector(`[data-kpi-token="${token}"]`);
             if (swatch) swatch.style.background = tokensMap[token];
         });
+
+        // 7. Filtrar o destacar filas de Banners y Secciones asociadas a esta vitrina
+        document.querySelectorAll('tr[data-banner-universe]').forEach(row => {
+            const bUniverse = row.getAttribute('data-banner-universe');
+            if (!bUniverse || bUniverse === 'all' || bUniverse === universe) {
+                row.style.opacity = '1';
+                row.classList.remove('bg-slate-100/30');
+            } else {
+                row.style.opacity = '0.45';
+                row.classList.add('bg-slate-100/30');
+            }
+        });
+
+        // 8. Reflejar universo en URL (sin recargar)
+        try {
+            const url = new URL(window.location);
+            url.searchParams.set('universe', universe);
+            window.history.replaceState({}, '', url);
+        } catch (e) {}
     };
 
     // ==========================================
@@ -3096,10 +3309,9 @@
         // Inicializar pestaña activa desde URL o default
         const urlParams = new URLSearchParams(window.location.search);
         const initialTab = urlParams.get('tab') || 'visual';
+        const initialUniverse = urlParams.get('universe') || activeUniverse;
         window.switchStoreTab(initialTab);
-
-        // Inicializar vitrina por defecto
-        window.switchStoreUniverse(activeUniverse);
+        window.switchStoreUniverse(initialUniverse);
 
         // Bifurcador en Modal Crear
         const btnModeCat = document.getElementById('createModeCatalogBtn');
