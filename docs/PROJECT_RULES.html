@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reglas Oficiales del Proyecto - Mi Tienda Online</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 12mm 10mm;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    font-size: 8.8pt;
+    line-height: 1.45;
+  }
+  .page-break { page-break-before: always; break-before: page; }
+  .avoid-break { page-break-inside: avoid; break-inside: avoid; }
+  
+  /* Portada */
+  .cover-container {
+    height: 94vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 38px 32px;
+    background: linear-gradient(145deg, #090d16 0%, #1e1b4b 55%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+  }
+  .cover-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    background: rgba(99, 102, 241, 0.25);
+    border: 1px solid #818cf8;
+    color: #c7d2fe;
+    border-radius: 20px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .cover-title {
+    font-size: 24pt;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 18px 0 10px 0;
+    letter-spacing: -0.02em;
+  }
+  .cover-subtitle {
+    font-size: 11pt;
+    color: #94a3b8;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 620px;
+  }
+  .cover-meta {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.65);
+    padding: 14px 18px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .meta-item strong { display: block; font-size: 7.5pt; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px; }
+  .meta-item span { font-size: 9pt; font-weight: 600; color: #f8fafc; }
+  
+  .cover-pillars {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .pillar-card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    padding: 12px 14px;
+    border-radius: 6px;
+  }
+  .pillar-card h4 { font-size: 9.5pt; color: #a5b4fc; font-weight: 700; margin-bottom: 4px; }
+  .pillar-card p { font-size: 8pt; color: #cbd5e1; line-height: 1.35; }
+  
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 14px;
+    font-size: 8pt;
+    color: #64748b;
+  }
+  .cover-footer strong { color: #94a3b8; }
+
+  /* Encabezados y Secciones */
+  .chapter-title {
+    font-size: 14pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 4px;
+    margin: 18px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: -0.01em;
+  }
+  .rule-badge {
+    font-size: 7.5pt;
+    font-weight: 800;
+    padding: 3px 8px;
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 4px;
+    border: 1px solid #c7d2fe;
+    text-transform: uppercase;
+  }
+  
+  .section-heading {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin: 12px 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-heading::before {
+    content: "■";
+    color: #4f46e5;
+    font-size: 8pt;
+  }
+  
+  p { margin-bottom: 7px; color: #334155; }
+  
+  /* Callouts & Alertas */
+  .callout-box {
+    background: #f8fafc;
+    border-left: 3.5px solid #4f46e5;
+    padding: 9px 12px;
+    margin: 9px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 8.5pt;
+  }
+  .callout-box.danger {
+    background: #fff1f2;
+    border-left-color: #e11d48;
+    color: #9f1239;
+  }
+  .callout-box.success {
+    background: #f0fdf4;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+  .callout-box.warning {
+    background: #fffbeb;
+    border-left-color: #d97706;
+    color: #78350f;
+  }
+  .callout-box strong { font-weight: 700; }
+
+  /* Tablas de Reglas */
+  table.rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 8pt;
+  }
+  table.rules-table th {
+    background: #0f172a;
+    color: #ffffff;
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 7.2pt;
+    letter-spacing: 0.5px;
+  }
+  table.rules-table td {
+    padding: 5.5px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  table.rules-table tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+  table.rules-table td.rule-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 700;
+    color: #4338ca;
+    white-space: nowrap;
+  }
+
+  /* Listas de Pasos y Reglas */
+  .rule-list {
+    list-style: none;
+    margin: 8px 0;
+  }
+  .rule-item {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+  }
+  .rule-number {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 8pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .rule-body {
+    flex: 1;
+  }
+  .rule-body strong {
+    color: #0f172a;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 8pt;
+  }
+
+  .formula-banner {
+    background: #0f172a;
+    color: #38bdf8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin: 7px 0;
+    font-size: 8pt;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #1e293b;
+  }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover-container">
+  <div>
+    <span class="cover-badge">Estatuto de Ingeniería & Gobernanza</span>
+    <h1 class="cover-title">CÓDIGO OFICIAL DE REGLAS DEL PROYECTO</h1>
+    <p class="cover-subtitle">
+      Compendio normativo de arquitectura fullstack, directrices de base de datos, aislamiento DOM, sincronización multiverso y estándares de calidad para el ecosistema Mi Tienda Online.
+    </p>
+
+    <div class="cover-pillars">
+      <div class="pillar-card">
+        <h4>1. Vertical Slice Senior (End-to-End)</h4>
+        <p>Cero datos mockeados o interfaces cosméticas. Toda funcionalidad persiste en MySQL, modelos Eloquent, FormRequests y pruebas PHPUnit.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>2. Single Inventory Pool Desacoplado</h4>
+        <p>Un almacén central (Hub 4 Kardex) abastece cuatro vitrinas independientes (Marte, Venus, Tiresias, Terra) con reglas taxonómicas.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>3. Aislamiento Estructural de Paneles y Modales</h4>
+        <p>Los 6 paneles y 7 modales operativos CMS residen como nodos hermanos bajo <code>#storeAppRoot</code> (depth=2), erradicando bloqueos por CSS.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>4. Workflows de Aplicación sin Roles</h4>
+        <p>La documentación modela cómo se interconectan los datos entre módulos, sin mezclarse con perfiles o descripciones de puestos laborales.</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <strong>Proyecto:</strong>
+        <span>Mi Tienda Online (PWA RevOps)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Alcance:</strong>
+        <span>Hubs 1 al 7 + Storefront D2C</span>
+      </div>
+      <div class="meta-item">
+        <strong>Vigencia:</strong>
+        <span>Normativa Obligatoria 2026</span>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div><strong>Estatus:</strong> Activo / Mandatorio</div>
+      <div><strong>Compilación:</strong> Tríptico Documental (MD + HTML + PDF)</div>
+      <div><strong>Versión:</strong> Canon v2.4</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 1 -->
+<h2 class="chapter-title">
+  <span>1. PRINCIPIOS FUNDAMENTALES DE INGENIERÍA</span>
+  <span class="rule-badge">Norma 1.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 1.1: Metodología Fullstack Senior (Vertical Slice)</strong>
+      Queda estrictamente prohibido el desarrollo de interfaces cosméticas o "mockeadas" sin persistencia real. Toda tarea debe entregarse con persistencia en MySQL, modelos Eloquent con relaciones, validación en FormRequests, controladores RESTful/Blade, vistas interactivas PWA y batería de pruebas PHPUnit automatizadas.
+      <div class="formula-banner">
+        MySQL (DDL) ➔ Eloquent ➔ Servicios ACID (Kardex) ➔ Endpoints REST ➔ UI PWA ➔ PHPUnit Tests
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 1.2: Integridad del Código Existente y Comentarios</strong>
+      Preservar rigurosamente los comentarios, docstrings e implementaciones previas. Ninguna refactorización debe romper submódulos adyacentes ni alterar contratos existentes sin previa validación en pruebas de regresión.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 1.3: Sincronización Mandatoria con BACKEND_INTEGRATION_SPEC.md</strong>
+      Ninguna tarea se considera "Completada" si sus tablas, columnas, esquemas JSON y FormRequests no están 100% formalizados de antemano en el contrato de backend maestro.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 2 -->
+<h2 class="chapter-title">
+  <span>2. ARQUITECTURA MULTIVERSO & POOL CENTRAL DE INVENTARIO</span>
+  <span class="rule-badge">Norma 2.0</span>
+</h2>
+
+<p>
+  La plataforma opera un modelo desacoplado de vitrinas de venta que beben de una única bodega física:
+</p>
+
+<table class="rules-table avoid-break">
+  <thead>
+    <tr>
+      <th style="width: 18%;">Vitrina</th>
+      <th style="width: 25%;">Identidad Comercial</th>
+      <th style="width: 32%;">Regla de Filtrado Taxonómico</th>
+      <th style="width: 25%;">Acceso a Stock</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Marte</strong></td>
+      <td>Moda Masculina & Atlética</td>
+      <td><code>brand IN ('JOCKSTRAPS','BRIEF/BOXERS','TANGA')</code></td>
+      <td>Kardex Central Hub 4</td>
+    </tr>
+    <tr>
+      <td><strong>Venus</strong></td>
+      <td>Lencería & Cuidado Íntimo</td>
+      <td><code>brand IN ('BIKINI','SWIMWEAR','TANGA')</code></td>
+      <td>Kardex Central Hub 4</td>
+    </tr>
+    <tr>
+      <td><strong>Tiresias</strong></td>
+      <td>Afirmativo & Binders</td>
+      <td><code>brand IN ('TANK TOPS','T-SHIRTS','BRIEF/BOXERS')</code></td>
+      <td>Kardex Central Hub 4</td>
+    </tr>
+    <tr>
+      <td><strong>Terra</strong></td>
+      <td>Unisex & Suscripciones</td>
+      <td><code>brand IN ('COMBOS','Adrenaline Forte')</code></td>
+      <td>Kardex Central Hub 4</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout-box warning avoid-break">
+  <strong>Regla Inamovible:</strong> Queda prohibido clonar productos o SKUs en la base de datos para mostrarlos en distintas vitrinas. Una prenda en inventario es única en bodega; su presencia en cada vitrina responde a reglas dinámicas de catálogo y visibilidad.
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 3 -->
+<h2 class="chapter-title">
+  <span>3. REGLAS DE ESTRUCTURA DOM, BLADE & AISLAMIENTO DE MODALES</span>
+  <span class="rule-badge">Norma 3.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 3.1: Aislamiento Estructural de Paneles y Modales (Regla Anti-Anidamiento)</strong>
+      Todos los paneles de pestañas (<code>.tab-panel</code>) y todos los modales interactivos (<code>#createSectionModal</code>, <code>#editSectionModal</code>, <code>#editSizeGuideModal</code>, etc.) deben ser <strong>hermanos directos e independientes</strong> en el nivel <code>depth = 2</code> bajo <code>#storeAppRoot</code>.
+      <div class="callout-box danger">
+        <strong>Peligro Crítico:</strong> Nunca anidar un modal dentro de un panel con clase <code>tab-panel hidden</code>. La regla <code>.tab-panel.hidden { display: none !important; }</code> anula cualquier <code>fixed inset-0 z-50</code>, tornando el modal invisible e inerte al clic del usuario.
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 3.2: Balance Matemático y Cierre Estricto de Etiquetas Blade</strong>
+      Toda vista Blade debe mantener paridad absoluta entre aperturas y cierres de <code>&lt;div&gt;</code>. Cada sección de acordeón debe cerrar explícitamente su body y su contenedor principal antes de iniciar la sección siguiente.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 3.3: Limpieza y Control de Estilos en Apertura de Modales</strong>
+      Toda apertura de modal debe remover la propiedad inline (<code>modal.style.removeProperty('display')</code>) antes de asignar <code>display: flex</code>, e invocar el modo por defecto (Catálogo) para evitar estados corruptos.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 4 -->
+<h2 class="chapter-title">
+  <span>4. REGLAS DE INTERFAZ, CSS & STOREFRONT PWA</span>
+  <span class="rule-badge">Norma 4.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 4.1: Sangrado de Pantalla Completa (Full-Width Breakout)</strong>
+      Los Hero banners pueden expandirse al 100% del viewport (<code>width: 100vw; margin-left: -50vw; left: 50%;</code>) sin desbordes horizontales, aplicando <code>overflow-x: hidden</code> en el layout raíz.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 4.2: Cache Busting Dinámico Obligatorio</strong>
+      Todo activo crítico de estilos o scripts debe inyectar versionamiento dinámico basado en la fecha de modificación: <code>?v={{ filemtime(...) }}</code>. Esto garantiza que las correcciones móviles y de PWA se reflejen de inmediato sin exigir vaciado de caché al cliente.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 4.3: Ergonomía de Navegación (Cero Scroll Horizontal)</strong>
+      Las subnavegaciones se ordenan en cuadrículas estructuradas (ej. 2 filas de 3 columnas). El conmutador de vitrinas (<code>.universe-selector-bar</code>) debe permanecer visible y persistente en todas las pestañas.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 5 -->
+<h2 class="chapter-title">
+  <span>5. MERCHANDISING, CMS & SECCIONES MODULARES (HUB 2)</span>
+  <span class="rule-badge">Norma 5.0</span>
+</h2>
+
+<table class="rules-table avoid-break">
+  <thead>
+    <tr>
+      <th style="width: 25%;">Tipo de Sección</th>
+      <th style="width: 40%;">Características Permitidas</th>
+      <th style="width: 35%;">Restricciones Estrictas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Catálogo de Prendas</strong> (Tarjetas, Categorías, Familias, Tags)</td>
+      <td>Filtros dinámicos Hub 4, marcas, límite de prendas, layouts en cuadrícula o carrusel.</td>
+      <td><strong>Prohibido código custom:</strong> Cero HTML, CSS o JS libre para proteger integridad del catálogo.</td>
+    </tr>
+    <tr>
+      <td><strong>Contenido & Hero</strong> (Hero, Banners, Pilares, Modales, CTA)</td>
+      <td>Bifurcación excluyente (visual vs código), degradados overlay, imagen de fondo, código scoped.</td>
+      <td><strong>Sanitización en backend obligatoria:</strong> Todo input HTML/JS se purifica antes de persistir.</td>
+    </tr>
+    <tr>
+      <td><strong>Gestor Drag & Drop</strong> (Secciones del Home)</td>
+      <td>Reordenamiento en vivo, activación/pausa, archivado atómico, asignación de vitrina.</td>
+      <td><strong>Confinado a Tab 1:</strong> Exclusivo del <em>Editor Visual</em>; no aparece en las demás pestañas.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- CAPÍTULO 6 -->
+<h2 class="chapter-title">
+  <span>6. SEGURIDAD, CALIDAD & DOCUMENTACIÓN VIVA</span>
+  <span class="rule-badge">Norma 6.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 6.1: Cero Tests Rotos (100% Passing Test Suite)</strong>
+      Ningún commit se consolida si la suite de pruebas PHPUnit presenta un solo error o fallo. Todas las aserciones deben reportar estado verde.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 6.2: Validación en Navegador Real con Chrome DevTools Protocol (CDP Headless)</strong>
+      Incidentes visuales o reactivos se diagnostican inspeccionando dimensiones reales (<code>offsetHeight</code>, <code>offsetWidth</code>) y la cadena de ancestros (<code>modalParentChain</code>) en Chrome Headless.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 6.3: La Regla del Tríptico Documental</strong>
+      Toda directriz arquitectónica o manual de flujos debe sincronizarse en tres formatos simultáneos:
+      <code>Markdown (*.md)</code> ➔ <code>HTML Editorial (*.html)</code> ➔ <code>PDF Imprimible (*.pdf vía Chrome)</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 6.4: Registro Continuo en PENDING_TASKS.md & Commits Semánticos</strong>
+      Toda oportunidad o bug se registra formalmente con ID <code>TASK-XXX-NN</code>. Los commits de Git declaran de manera atómica el ID de tarea y la naturaleza de la solución (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>).
+    </div>
+  </div>
+</div>
+
+<div class="callout-box success avoid-break" style="margin-top: 15px;">
+  <strong>Vigencia y Mandato:</strong> Este código de reglas es de observancia obligatoria para cualquier agente, desarrollador o mantenedor del repositorio <em>Mi Tienda Online</em>. Cualquier desviación técnica debe ser corregida de inmediato para preservar la estabilidad, escalabilidad y excelencia operativa de la plataforma.
+</div>
+
+</body>
+</html>
