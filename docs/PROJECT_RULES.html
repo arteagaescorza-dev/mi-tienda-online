@@ -514,6 +514,38 @@
       Queda formalmente eliminado el método de pago por transferencia SPEI en la tienda, marquesinas, cintillos de beneficios y checkout. El flujo transaccional D2C opera exclusivamente con: 1) Tarjetas de Débito y Crédito (Visa, Mastercard, AMEX) con tokenización bancaria, y 2) OXXO Pay con referencia digital de 14 dígitos y ventana de apartado de 48 horas.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">9</div>
+    <div class="rule-content">
+      <strong>Regla 4.9: Navbar Sticky Visible Todo el Tiempo (Desktop & Móvil)</strong>
+      El encabezado del storefront (<code>.sticky-header-wrapper</code>) permanece permanentemente visible en scroll (<code>position: sticky !important; top: 0 !important; z-index: 999 !important; backdrop-filter: blur(16px);</code>) tanto en pantallas de escritorio como en móviles, prohibiendo cualquier comportamiento auto-hide o retráctil.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">10</div>
+    <div class="rule-content">
+      <strong>Regla 4.10: Edición de Navbar y Cinta Banner Superior desde Hub 2</strong>
+      La cinta banner informativa (marquesina continua) y la configuración del navbar se administran exclusivamente desde Hub 2, Pestaña Páginas y Navbar (<code>storePagesPanel</code>), erradicando textos estáticos duplicados o referencias a WhatsApp.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">11</div>
+    <div class="rule-content">
+      <strong>Regla 4.11: Gestión Dual Desktop y Móvil de Páginas Institucionales</strong>
+      La sección de páginas sincronizadas permite configurar de forma independiente la visualización en Desktop (<code>show_in_navbar</code>), Móvil (<code>show_in_mobile</code>) y Footer (<code>show_in_footer</code>), así como el ciclo completo: Crear, Editar (modal <code>depth = 2</code>), Activar/Pausar, Archivar y Eliminar.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">12</div>
+    <div class="rule-content">
+      <strong>Regla 4.12: Optimización SEO Integral & Sitemap XML Dinámico</strong>
+      Todo el storefront cuenta con optimización SEO de primer nivel: meta canonical, OpenGraph, Twitter Cards, microdatos Schema.org (JSON-LD para <code>Organization</code>, <code>WebSite</code>, <code>Product</code> y <code>WebPage</code>), y mapa del sitio dinámico en <code>/sitemap.xml</code> con frecuencias de cambio y prioridades.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>

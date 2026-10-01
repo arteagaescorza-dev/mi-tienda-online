@@ -5,7 +5,25 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="{{ $page->seo_title ?: $page->title }} | {{ $currentStorefront['brandName'] ?? 'TORZO' }}">
   <meta property="og:description" content="{{ $page->seo_description ?: Str::limit(strip_tags($page->content_html), 160) }}">
+  <meta property="og:url" content="{{ url('/pagina/' . $page->slug) }}">
+
+  <!-- Schema.org JSON-LD WebPage -->
+  <script type="application/ld+json">
+  {!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebPage',
+    'name' => $page->seo_title ?: $page->title,
+    'description' => $page->seo_description ?: Str::limit(strip_tags($page->content_html), 160),
+    'url' => url('/pagina/' . $page->slug),
+    'isPartOf' => [
+      '@type' => 'WebSite',
+      'name' => $currentStorefront['brandName'] ?? 'TORZO',
+      'url' => url('/'),
+    ],
+  ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+  </script>
 @endsection
+
 
 @push('styles')
 <style>

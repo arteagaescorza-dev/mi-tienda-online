@@ -162,7 +162,48 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 * **Pasarelas Digitales Homologadas:** El storefront opera de forma estricta y transparente con dos modalidades de pago seguro:
   1. **Tarjetas de Débito y Crédito (Visa, Mastercard, American Express):** Procesadas en tiempo real mediante pasarela bancaria tokenizada con autorización instantánea y confirmación automática de pedido.
   2. **OXXO Pay:** Generación de referencia digital numérica de 14 dígitos en tiempo real con ventana de apartado físico de stock por 48 horas para liquidación en sucursales de conveniencia a nivel nacional.
-* Se eliminan todas las referencias a CLABE interbancaria BBVA o validación manual de comprobantes en el storefront para erradicar fricción operativa y riesgos de conciliación.
+### Regla 6.11: Navbar Sticky Visible Todo el Tiempo (Desktop & Móvil)
+* **Adherencia Permanente en Scroll:** El storefront PWA cuenta con un encabezado/navbar (`.sticky-header-wrapper`) visible en todo momento tanto en pantallas de escritorio como en dispositivos móviles, anclado rígidamente al inicio del viewport:
+  ```css
+  .sticky-header-wrapper {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+  }
+  ```
+* **Prohibición de Ocultamiento en Scroll:** Queda prohibido el uso de patrones tipo *auto-hide* o *headroom.js* que oculten el navbar al deslizar hacia abajo, asegurando que el acceso al carrito, catálogo, selector de universos y páginas institucionales sea instantáneo y continuo.
+
+### Regla 6.12: Edición de Navbar y Cinta Banner Superior desde Hub 2 (Pestaña Páginas & Navbar)
+* **Gestión Centralizada en Tab 4:** El navbar se edita desde **Hub 2 (Tienda & CMS), Pestaña Páginas & Navbar (`storePagesPanel`)**, desde el cual también se edita la **Cinta Banner superior** (marquesina informativa animada que corre por encima del navbar).
+* **Parámetros de la Cinta Banner:** Permite conmutar el estado general (activar/pausar marquesina), editar el texto de los anuncios, asignar enlaces internos/externos opcionales y alternar la visibilidad individual de cada aviso.
+* **Prohibición de Textos Estáticos Duplicados o Enlaces a WhatsApp:** La cinta banner debe alimentarse exclusivamente del repositorio dinámico de anuncios (`cms_announcements`), erradicando bloques estáticos hardcodeados y referencias a WhatsApp.
+
+### Regla 6.13: Gestión Dual Desktop y Móvil de Páginas Institucionales Sincronizadas
+* **Control Independiente de Visibilidad:** En la sección "Páginas Institucionales Sincronizadas en el Navbar", el administrador puede configurar y conmutar de manera independiente la presencia de cada página institucional en:
+  1. **Versión Desktop:** Barra central de navegación del header (`show_in_navbar`).
+  2. **Versión Móvil:** Barra táctil horizontal rápida bajo el header y bloque dedicado dentro del drawer de filtros (`show_in_mobile`).
+  3. **Footer Corporativo:** Enlaces en la base del sitio (`show_in_footer`).
+* **Ciclo de Vida y CRUD Integral:** Esta sección permite:
+  - **Crear nuevas páginas:** Título, slug automático, contenido enriquecido, órdenes de visualización y metadatos SEO.
+  - **Editar páginas existentes:** Mediante modal reactivo independiente (`#editPageModal`, ubicado en `depth = 2` bajo `#storeAppRoot` en estricto apego a la Regla 5.1).
+  - **Activar y Pausar:** Conmutar al instante la disponibilidad pública de la página mediante endpoint dedicado (`toggle-status`).
+  - **Archivar:** Pasar la página a estado histórico protegido sin eliminar el contenido (`archive`).
+  - **Eliminar:** Purgar de forma permanente registros obsoletos mediante confirmación de seguridad.
+
+### Regla 6.14: Optimización SEO Integral de Todo el Storefront
+* **Metadatos Sociales y de Indexación:** Todo el storefront cuenta con optimización exhaustiva para motores de búsqueda y redes sociales:
+  - Declaración `<meta name="robots" content="index, follow">` y canonical dinámico (`<link rel="canonical" href="...">`).
+  - **OpenGraph Oficial Completo:** `og:site_name`, `og:type="website"`, `og:locale="es_MX"`, `og:title`, `og:description`, `og:url` y `og:image`.
+  - **Twitter Cards Oficiales:** `twitter:card="summary_large_image"`, `twitter:title`, `twitter:description` y `twitter:image`.
+* **Datos Estructurados Schema.org (JSON-LD):** Inyección de grafos JSON-LD estándar para:
+  - `Organization` (nombre de marca, url, logo oficial).
+  - `WebSite` con `SearchAction` dinámico apuntando al buscador de la tienda.
+  - `Product` enriquecido en fichas de producto (PDP) con precios, monedas, disponibilidad `InStock`/`PreOrder` y SKU.
+  - `WebPage` estructurado en páginas institucionales CMS.
+* **Sitemap XML Dinámico (`/sitemap.xml`):** Generación automática en tiempo real de mapa del sitio bajo el estándar `http://www.sitemaps.org/schemas/sitemap/0.9`, incluyendo Home, catálogo de universos, revista digital, artículos editoriales publicados, páginas institucionales activas y productos visibles con sus frecuencias de cambio (`changefreq`) y ponderaciones de prioridad (`priority`).
 
 ---
 
@@ -264,8 +305,12 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Filtros Storefront**| Drawer Lateral Izquierdo | Off-canvas desde `left: 0`, backdrop modal, cero acordeones invasivos |
 | **Checkout & Stock** | Apartado Temporal Exclusivo en Checkout | Timer 5m en checkout; carrito nunca se vacía por timeout; badge "Ya no hay existencias" |
 | **Pasarelas de Pago**| Cero SPEI / Tarjetas & OXXO Pay | Tarjetas crédito/débito y OXXO Pay 48h; cero CLABE ni validación manual |
+| **Storefront Navbar**| Navbar Sticky Permanente & Cinta Banner | `position: sticky; top: 0; z-index: 999;` en scroll; editor de marquesina en Hub 2 |
+| **Páginas Institucionales**| Gestión Dual Desktop & Móvil + CRUD | Checkboxes independientes `desktop`/`móvil`; modal `#editPageModal` (`depth = 2`); activar/pausar, archivar, eliminar |
+| **SEO Storefront** | Optimización Integral & Sitemap XML | OpenGraph, Twitter Cards, JSON-LD (`Organization`, `WebSite`, `Product`), `/sitemap.xml` dinámico |
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
+

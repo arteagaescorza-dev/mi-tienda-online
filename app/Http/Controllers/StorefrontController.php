@@ -138,6 +138,7 @@ class StorefrontController extends Controller
             ->get();
 
         $navbarPages = CmsPage::inNavbar()->get();
+        $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $trackingSettings = CmsTrackingSetting::current();
         $officialDocs = CmsOfficialDocument::where('is_active', true)->get()->keyBy('code');
@@ -189,6 +190,7 @@ class StorefrontController extends Controller
             'announcements' => $announcements,
             'sections' => $sections,
             'navbarPages' => $navbarPages,
+            'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
             'tracking' => $trackingSettings,
             'trackingSettings' => $trackingSettings,
@@ -388,6 +390,7 @@ class StorefrontController extends Controller
         $currentStorefront['pageTitle'] = $dbProduct->title . ' — ' . ($currentStorefront['brandName'] ?? 'TORZO');
 
         $navbarPages = CmsPage::inNavbar()->get();
+        $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $tracking = CmsTrackingSetting::current();
         $sizeGuideDoc = CmsOfficialDocument::forDocument('torzo_size_guide');
@@ -460,6 +463,7 @@ class StorefrontController extends Controller
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
             'navbarPages' => $navbarPages,
+            'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
             'tracking' => $tracking,
             'sizeGuideDoc' => $sizeGuideDoc,
@@ -496,8 +500,16 @@ class StorefrontController extends Controller
         $posts = CmsBlogPost::published()->get();
         $categories = $posts->pluck('category_name')->filter()->unique()->values();
         $navbarPages = CmsPage::inNavbar()->get();
+        $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $tracking = CmsTrackingSetting::current();
+        $announcements = Cache::get('cms_announcements', [
+            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+        ]);
 
         return view('store.pwa.magazine', [
             'posts' => $posts,
@@ -505,7 +517,9 @@ class StorefrontController extends Controller
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
             'navbarPages' => $navbarPages,
+            'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
+            'announcements' => $announcements,
             'tracking' => $tracking,
         ]);
     }
@@ -543,8 +557,16 @@ class StorefrontController extends Controller
         }
 
         $navbarPages = CmsPage::inNavbar()->get();
+        $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $tracking = CmsTrackingSetting::current();
+        $announcements = Cache::get('cms_announcements', [
+            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+        ]);
 
         return view('store.pwa.magazine-post', [
             'post' => $post,
@@ -552,7 +574,9 @@ class StorefrontController extends Controller
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
             'navbarPages' => $navbarPages,
+            'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
+            'announcements' => $announcements,
             'tracking' => $tracking,
         ]);
     }
@@ -581,18 +605,108 @@ class StorefrontController extends Controller
         ];
 
         $navbarPages = CmsPage::inNavbar()->get();
+        $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $tracking = CmsTrackingSetting::current();
+        $announcements = Cache::get('cms_announcements', [
+            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+        ]);
 
         return view('store.pwa.page', [
             'page' => $page,
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
             'navbarPages' => $navbarPages,
+            'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
+            'announcements' => $announcements,
             'tracking' => $tracking,
         ]);
     }
+
+    /**
+     * Mapa del sitio XML dinámico con optimización SEO integral.
+     */
+    public function sitemap(Request $request)
+    {
+        $urls = [];
+
+        // 1. Home e Universos
+        $urls[] = [
+            'loc' => url('/'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'daily',
+            'priority' => '1.0',
+        ];
+        foreach (['marte', 'venus', 'tiresias', 'terra'] as $u) {
+            $urls[] = [
+                'loc' => url('/?universo=' . $u),
+                'lastmod' => now()->toAtomString(),
+                'changefreq' => 'daily',
+                'priority' => '0.9',
+            ];
+        }
+
+        // 2. Revista digital
+        $urls[] = [
+            'loc' => url('/revista'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'daily',
+            'priority' => '0.8',
+        ];
+
+        // 3. Artículos de revista publicados
+        $posts = CmsBlogPost::published()->get();
+        foreach ($posts as $post) {
+            $urls[] = [
+                'loc' => url('/revista/' . $post->slug),
+                'lastmod' => ($post->updated_at ?? $post->created_at ?? now())->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
+        }
+
+        // 4. Páginas institucionales CMS activas
+        $pages = CmsPage::active()->get();
+        foreach ($pages as $page) {
+            $urls[] = [
+                'loc' => url('/pagina/' . $page->slug),
+                'lastmod' => ($page->updated_at ?? $page->created_at ?? now())->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.7',
+            ];
+        }
+
+        // 5. Catálogo de productos visibles
+        $products = Product::where('visible', true)->get();
+        foreach ($products as $prod) {
+            $urls[] = [
+                'loc' => url('/producto/' . $prod->slug),
+                'lastmod' => ($prod->updated_at ?? $prod->created_at ?? now())->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.8',
+            ];
+        }
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($urls as $item) {
+            $xml .= "  <url>\n";
+            $xml .= "    <loc>" . htmlspecialchars($item['loc'], ENT_XML1, 'UTF-8') . "</loc>\n";
+            $xml .= "    <lastmod>" . $item['lastmod'] . "</lastmod>\n";
+            $xml .= "    <changefreq>" . $item['changefreq'] . "</changefreq>\n";
+            $xml .= "    <priority>" . $item['priority'] . "</priority>\n";
+            $xml .= "  </url>\n";
+        }
+        $xml .= '</urlset>';
+
+        return response($xml, 200)->header('Content-Type', 'application/xml; charset=utf-8');
+    }
+
 
     public function categories()
     {

@@ -27,6 +27,7 @@ Route::get('/checkout/exito', [StorefrontController::class, 'checkoutSuccess'])-
 Route::get('/search', [StorefrontController::class, 'search'])->name('store.search');
 Route::get('/privacidad', [StorefrontController::class, 'privacy'])->name('store.privacy');
 Route::get('/cookies', [StorefrontController::class, 'cookies'])->name('store.cookies');
+Route::get('/sitemap.xml', [StorefrontController::class, 'sitemap'])->name('store.sitemap');
 Route::middleware('auth')->group(function () {
 	Route::get('/mi-perfil', [StorefrontController::class, 'profile'])->name('store.profile');
 	Route::get('/mis-pedidos', [StorefrontController::class, 'orders'])->name('store.orders');
@@ -100,7 +101,10 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::post('/admin/tienda-cms/documentos/{code}', [PortalStoreController::class, 'updateDocument'])->name('portal.store.documents.update');
 	Route::post('/admin/tienda-cms/paginas', [PortalStoreController::class, 'storePage'])->name('portal.store.pages.store');
 	Route::put('/admin/tienda-cms/paginas/{page}', [PortalStoreController::class, 'updatePage'])->name('portal.store.pages.update');
+	Route::post('/admin/tienda-cms/paginas/{page}/toggle-status', [PortalStoreController::class, 'togglePageStatus'])->name('portal.store.pages.toggle-status');
+	Route::post('/admin/tienda-cms/paginas/{page}/archivar', [PortalStoreController::class, 'archivePage'])->name('portal.store.pages.archive');
 	Route::delete('/admin/tienda-cms/paginas/{page}', [PortalStoreController::class, 'destroyPage'])->name('portal.store.pages.destroy');
+	Route::post('/admin/tienda-cms/anuncios/actualizar', [PortalStoreController::class, 'updateAnnouncements'])->name('portal.store.announcements.update');
 	Route::post('/admin/tienda-cms/blog', [PortalStoreController::class, 'storeBlogPost'])->name('portal.store.blog.store');
 	Route::put('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'updateBlogPost'])->name('portal.store.blog.update');
 	Route::delete('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'destroyBlogPost'])->name('portal.store.blog.destroy');

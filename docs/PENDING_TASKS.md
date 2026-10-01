@@ -97,6 +97,7 @@
 | `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5, Tag v1.1 |
 | `TASK-STR-07` | Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `resources/views/store/pwa/product-detail.blade.php`, `PROJECT_RULES.md` |
 | `TASK-STR-08` | Gobernanza Storefront: Filtros Drawer Izquierdo, Reserva en Checkout, Supresión SPEI y Norma UTF-8 | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.css`, `store-pwa.js`, `store-pwa.blade.php`, `PROJECT_RULES.md` |
+| `TASK-STR-09` | Navbar Sticky Permanente, Editor de Marquesina & Páginas Desktop/Móvil con SEO Integral | **Tienda Pública / Hub 2 (CMS)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.blade.php`, `PortalStoreController`, `StorefrontController`, `PROJECT_RULES.md` |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Panorámico max-w-7xl, 4 KPIs Live, Margen Real, Tag v1.6 |
@@ -1611,6 +1612,53 @@ graph TD
   - `resources/views/layouts/store-pwa.blade.php`
   - `resources/views/store/pwa/product-detail.blade.php`
   - `tests/Feature/PortalAuthorizationTest.php`
+  - `docs/PROJECT_RULES.md`
+  - `docs/PROJECT_RULES.html`
+  - `docs/PROJECT_RULES.pdf`
+  - `docs/PENDING_TASKS.md`
+
+### `TASK-STR-09`: Navbar Sticky Permanente, Editor de Marquesina & Páginas Desktop/Móvil con SEO Integral
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Normativa de Gobierno:** `PROJECT_RULES.md` (Reglas 6.11, 6.12, 6.13, 6.14).
+* **Puntos Ciegos / Nuevas Reglas Solicitadas:**
+  1. **Navbar Sticky Permanente:** El storefront debe disponer de un navbar visible todo el tiempo (`position: sticky; top: 0; z-index: 999;`), sin perderse en el scroll, tanto en Desktop como en Móvil.
+  2. **Edición Centralizada desde Hub 2:** El navbar y la cinta banner superior (marquesina de anuncios arriba del navbar) deben poder editarse directamente desde Hub 2 (Pestaña Páginas & Navbar), suprimiendo textos hardcodeados o referencias a WhatsApp.
+  3. **Gestión Dual de Páginas Institucionales (Desktop & Móvil):** La sección de páginas institucionales sincronizadas en el navbar debe permitir configurar y conmutar de forma independiente la versión Desktop y la versión Móvil, además de proveer el ciclo CRUD completo: Crear nuevas páginas, editarlas, activarlas y pausarlas, archivarlas y eliminarlas.
+  4. **Optimización SEO Integral:** Todo el storefront debe contar con optimización SEO rigurosa: OpenGraph completo, Twitter Cards, datos estructurados JSON-LD Schema.org (`Organization`, `WebSite`, `Product`, `WebPage`), canonical dinámico y mapa del sitio XML dinámico (`/sitemap.xml`).
+* **Solución Implementada:**
+  - **1. Navbar Sticky Visible en Todo Momento:**
+    * En `resources/views/layouts/store-pwa.blade.php`: Configurado `.sticky-header-wrapper` con `position: sticky !important; top: 0 !important; z-index: 999 !important; background: rgba(255, 255, 255, 0.96) !important; backdrop-filter: blur(16px) !important;`.
+    * En `public/css/store-pwa.css`: Actualizado `.sticky-header-wrapper` a `z-index: 999;`.
+  - **2. Editor de Marquesina & Navbar en Hub 2 (Tab 4):**
+    * En `resources/views/portal/store.blade.php` (`storePagesPanel`): Añadido bloque superior de configuración de la marquesina con interruptor on/off (`announcement_active`), editor dinámico de frases y links, y botón de guardado hacia `portal.store.announcements.update`.
+    * En `PortalStoreController.php`: Método `updateAnnouncements` guarda en caché `cms_announcements` y `cms_announcement_active`.
+    * En `store-pwa.blade.php`: Marquesina dinámica que consume `$announcements` sin textos estáticos repetidos ni WhatsApp.
+  - **3. Gestión Dual Desktop/Móvil de Páginas Institucionales con CRUD:**
+    * Migración `2026_10_01_201411_add_show_in_mobile_to_cms_pages_table.php` agregando columna booleana `show_in_mobile`.
+    * Modelo `CmsPage`: Atributo `show_in_mobile` en `$fillable` y `$casts`, y scopes `scopeInNavbar`, `scopeInMobileNavbar`, `scopeInFooter`.
+    * En `PortalStoreController.php`: Métodos `storePage`, `updatePage`, `togglePageStatus`, `archivePage`, `destroyPage`.
+    * En `routes/web.php`: Rutas RESTful para actualización, toggle, archivar y eliminar páginas.
+    * En `store.blade.php`: Tabla con columnas explícitas Desktop (`show_in_navbar`), Móvil (`show_in_mobile`), Footer (`show_in_footer`), Estado (`ACTIVO`, `PAUSADO`, `ARCHIVADO`) y botones de Ver, Editar, Activar/Pausar, Archivar y Eliminar.
+    * Modal `#createPageModal`: Actualizado con selector tri-canal (Desktop, Móvil, Footer).
+    * Modal `#editPageModal`: Implementado como hijo directo bajo `#storeAppRoot` (`depth = 2`, Regla 5.1 anti-anidamiento) con función JS `window.openEditPageModal(page)`.
+    * En Storefront: `$navbarPages` renderizado en navbar desktop; `$mobilePages` renderizado en barra rápida horizontal móvil y en el drawer de filtros lateral.
+  - **4. Optimización SEO Integral:**
+    * En `store-pwa.blade.php`: Tags `<meta name="robots">`, `<link rel="canonical">`, OpenGraph (`og:site_name`, `og:type`, `og:locale="es_MX"`, `og:title`, `og:description`, `og:url`, `og:image`), Twitter Cards (`summary_large_image`), y bloque JSON-LD estructurado Schema.org (`Organization`, `WebSite` con `SearchAction`).
+    * En `resources/views/store/pwa/page.blade.php`: Schema.org JSON-LD estructurado tipo `WebPage`.
+    * En `app/Http/Controllers/StorefrontController.php`: Método `sitemap()` que genera `/sitemap.xml` dinámico con URLs de Home, universos, revista digital, artículos de blog, páginas CMS y productos con `lastmod`, `changefreq` y `priority`.
+    * En `routes/web.php`: Ruta pública `GET /sitemap.xml`.
+* **Pruebas Automatizadas:**
+  - `tests/Feature/StorefrontNavbarSeoTest.php`: 5 pruebas completas con 40 aserciones validando visibilidad del navbar, sitemap XML, visibilidad desktop vs móvil de páginas institucionales, actualización de anuncios y CRUD con toggle/archivo de páginas.
+* **Archivos Modificados:**
+  - `database/migrations/2026_10_01_201411_add_show_in_mobile_to_cms_pages_table.php`
+  - `app/Models/CmsPage.php`
+  - `app/Http/Controllers/PortalStoreController.php`
+  - `app/Http/Controllers/StorefrontController.php`
+  - `routes/web.php`
+  - `resources/views/layouts/store-pwa.blade.php`
+  - `resources/views/portal/store.blade.php`
+  - `resources/views/store/pwa/page.blade.php`
+  - `tests/Feature/StorefrontNavbarSeoTest.php`
   - `docs/PROJECT_RULES.md`
   - `docs/PROJECT_RULES.html`
   - `docs/PROJECT_RULES.pdf`

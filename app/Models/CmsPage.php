@@ -17,6 +17,7 @@ class CmsPage extends Model
         'icon',
         'content_html',
         'show_in_navbar',
+        'show_in_mobile',
         'navbar_order',
         'show_in_footer',
         'footer_order',
@@ -28,6 +29,7 @@ class CmsPage extends Model
 
     protected $casts = [
         'show_in_navbar' => 'boolean',
+        'show_in_mobile' => 'boolean',
         'show_in_footer' => 'boolean',
         'navbar_order' => 'integer',
         'footer_order' => 'integer',
@@ -42,6 +44,13 @@ class CmsPage extends Model
     {
         return $query->active()
             ->where('show_in_navbar', true)
+            ->orderBy('navbar_order');
+    }
+
+    public function scopeInMobileNavbar($query)
+    {
+        return $query->active()
+            ->where('show_in_mobile', true)
             ->orderBy('navbar_order');
     }
 

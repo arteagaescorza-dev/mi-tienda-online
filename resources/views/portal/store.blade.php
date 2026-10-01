@@ -1218,17 +1218,89 @@
     <!-- FIN SUBMÓDULO 3: CMS BLOG & REVISTA DIGITAL -->
 
     <!-- ========================================================================= -->
-    <!-- SUBMÓDULO 4: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-H2-03)                  -->
+    <!-- SUBMÓDULO 4: GESTOR DE PÁGINAS CMS & NAVBAR (TASK-STR-09)                  -->
     <!-- ========================================================================= -->
     <div id="storePagesPanel" class="tab-panel hidden" style="display: none;">
+        <!-- 1. CINTA BANNER SUPERIOR (MARQUESINA) & CONTROL DEL NAVBAR -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                        <span>Cinta Banner Superior (Marquesina) &amp; Navbar</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Configura la marquesina animada que corre por encima del navbar y revisa la adherencia sticky permanente del menú.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Sticky position: sticky; top: 0; z-index: 999 activo">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Navbar Sticky Visible</span>
+                    </span>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('portal.store.announcements.update') }}" class="space-y-4">
+                @csrf
+                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-700">Estado de la Cinta Superior:</span>
+                        <label class="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                            <input type="checkbox" name="announcement_active" value="1" {{ ($announcementActive ?? true) ? 'checked' : '' }} class="rounded text-indigo-600">
+                            <span class="font-semibold">Activar Marquesina en Storefront</span>
+                        </label>
+                    </div>
+                    <span class="text-[11px] text-slate-500 font-mono">Scroll infinito continuo (2x loop)</span>
+                </div>
+
+                <div class="space-y-2.5" id="announcementsListContainer">
+                    <label class="block font-semibold text-slate-700 text-xs">Mensajes de Anuncios Activos</label>
+                    @php
+                        $announcementsItems = $announcements ?? [];
+                        if (empty($announcementsItems)) {
+                            $announcementsItems = [
+                                ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'link' => '', 'active' => true],
+                                ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'link' => '', 'active' => true],
+                                ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'link' => '', 'active' => true],
+                                ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'link' => '', 'active' => true],
+                            ];
+                        }
+                    @endphp
+
+                    @foreach($announcementsItems as $idx => $an)
+                        <div class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-lg text-xs">
+                            <span class="w-5 text-slate-400 font-bold font-mono text-[11px] text-center">#{{ $idx + 1 }}</span>
+                            <div class="flex-1">
+                                <input type="text" name="announcements[{{ $idx }}][text]" value="{{ $an['text'] ?? '' }}" placeholder="Texto del aviso (Ej: ENVÍO GRATIS EN COMPRAS +$999)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded text-xs bg-white" required>
+                            </div>
+                            <div class="w-1/3">
+                                <input type="text" name="announcements[{{ $idx }}][link]" value="{{ $an['link'] ?? '' }}" placeholder="URL enlace (Opcional, ej: /ofertas)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded text-xs bg-white">
+                            </div>
+                            <label class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 px-2 cursor-pointer">
+                                <input type="checkbox" name="announcements[{{ $idx }}][active]" value="1" {{ ($an['active'] ?? true) ? 'checked' : '' }} class="rounded text-indigo-600">
+                                <span>Activo</span>
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-[11px] text-slate-400">Los cambios se reflejan inmediatamente en la cinta superior del storefront en Desktop y Móvil.</span>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs cursor-pointer shadow-xs transition">
+                        Guardar Cinta Banner
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 2. PÁGINAS INSTITUCIONALES (DESKTOP & MÓVIL) -->
         <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span>Páginas Institucionales Sincronizadas en el Navbar</span>
+                        <span>Páginas Institucionales Sincronizadas en el Navbar (Desktop &amp; Móvil)</span>
                     </h3>
-                    <p class="text-xs text-slate-500">Crea páginas con contenido enriquecido, slugs limpios y sincronización automática en la cabecera y pie de la tienda.</p>
+                    <p class="text-xs text-slate-500">Edita la visibilidad en Desktop y Móvil, crea nuevas páginas, edítalas, actívalas, paúsales, archívalas o elimínalas.</p>
                 </div>
                 <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createPageModal" type="button">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -1241,8 +1313,9 @@
                     <thead>
                         <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
                             <th class="py-2.5 px-3">Título &amp; Slug</th>
-                            <th class="py-2.5 px-3 text-center">En Navbar</th>
-                            <th class="py-2.5 px-3 text-center">En Footer</th>
+                            <th class="py-2.5 px-3 text-center">Desktop</th>
+                            <th class="py-2.5 px-3 text-center">Móvil</th>
+                            <th class="py-2.5 px-3 text-center">Footer</th>
                             <th class="py-2.5 px-3 text-center">Estado</th>
                             <th class="py-2.5 px-3 text-right">Acciones</th>
                         </tr>
@@ -1261,37 +1334,73 @@
                                 </td>
                                 <td class="py-3 px-3 text-center">
                                     @if($pg->show_in_navbar)
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Sí (Pos #{{ $pg->navbar_order ?? 0 }})</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Visible (#{{ $pg->navbar_order ?? 0 }})</span>
                                     @else
-                                        <span class="text-slate-400 text-[11px]">No</span>
+                                        <span class="text-slate-400 text-[11px]">Oculto</span>
+                                    @endif
+                                </td>
+                                <td class="py-3 px-3 text-center">
+                                    @if($pg->show_in_mobile)
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Visible</span>
+                                    @else
+                                        <span class="text-slate-400 text-[11px]">Oculto</span>
                                     @endif
                                 </td>
                                 <td class="py-3 px-3 text-center">
                                     @if($pg->show_in_footer)
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Sí (Pos #{{ $pg->footer_order ?? 0 }})</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Visible (#{{ $pg->footer_order ?? 0 }})</span>
                                     @else
-                                        <span class="text-slate-400 text-[11px]">No</span>
+                                        <span class="text-slate-400 text-[11px]">Oculto</span>
                                     @endif
                                 </td>
                                 <td class="py-3 px-3 text-center">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $pg->status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                        {{ strtoupper($pg->status) }}
-                                    </span>
+                                    @if($pg->status === 'active')
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVO</span>
+                                    @elseif($pg->status === 'archived')
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">ARCHIVADO</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">{{ strtoupper($pg->status) }}</span>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ url('/pagina/' . $pg->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold">Ver</a>
-                                        <form method="POST" action="{{ route('portal.store.pages.destroy', $pg->id) }}" onsubmit="return confirm('¿Eliminar esta página CMS definitivamente?')">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <a href="{{ url('/pagina/' . $pg->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold border border-slate-200 rounded">Ver</a>
+                                        
+                                        <!-- Botón Editar (Modal depth=2) -->
+                                        <button type="button" class="px-2 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded text-[11px] font-semibold cursor-pointer border border-amber-200" onclick='window.openEditPageModal(@json($pg))'>
+                                            Editar
+                                        </button>
+
+                                        <!-- Botón Pausar / Activar -->
+                                        <form method="POST" action="{{ route('portal.store.pages.toggle-status', $pg->id) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-1 text-[11px] font-semibold rounded border cursor-pointer {{ $pg->status === 'active' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' }}">
+                                                {{ $pg->status === 'active' ? 'Pausar' : 'Activar' }}
+                                            </button>
+                                        </form>
+
+                                        <!-- Botón Archivar -->
+                                        @if($pg->status !== 'archived')
+                                            <form method="POST" action="{{ route('portal.store.pages.archive', $pg->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="px-2 py-1 text-[11px] font-semibold rounded bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 cursor-pointer" onclick="return confirm('¿Archivar esta página CMS?')">
+                                                    Archivar
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <!-- Botón Eliminar -->
+                                        <form method="POST" action="{{ route('portal.store.pages.destroy', $pg->id) }}" onsubmit="return confirm('¿Eliminar esta página CMS definitivamente?')" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer">Eliminar</button>
+                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer border border-rose-200 rounded bg-rose-50 hover:bg-rose-100">Eliminar</button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-6 text-center text-slate-400 text-xs">No hay páginas institucionales registradas aún.</td>
+                                <td colspan="6" class="py-6 text-center text-slate-400 text-xs">No hay páginas institucionales registradas aún.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -2356,16 +2465,23 @@
                     <textarea name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="<p>Todos nuestros envíos viajan en empaque neutro y sellado...</p>"></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
                     <div class="space-y-2">
                         <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
                             <input type="checkbox" name="show_in_navbar" value="1" class="rounded text-indigo-600">
-                            <span>Sincronizar en Navbar Superior</span>
+                            <span>Visible en Desktop</span>
                         </label>
                         <div>
-                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden en Navbar</label>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden Navbar</label>
                             <input type="number" name="navbar_order" value="0" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs">
                         </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="show_in_mobile" value="1" checked class="rounded text-indigo-600">
+                            <span>Visible en Móvil</span>
+                        </label>
+                        <p class="text-[11px] text-slate-400">Aparece en barra rápida y drawer móvil.</p>
                     </div>
                     <div class="space-y-2">
                         <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
@@ -2373,7 +2489,7 @@
                             <span>Mostrar en Footer</span>
                         </label>
                         <div>
-                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden en Footer</label>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden Footer</label>
                             <input type="number" name="footer_order" value="0" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs">
                         </div>
                     </div>
@@ -2401,6 +2517,94 @@
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                     <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createPageModal">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer">Guardar Página</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5.1 MODAL EDITAR PÁGINA CMS (TASK-STR-09) DIRECT SIBLING DEPTH=2 -->
+    <div id="editPageModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <span>Editar Página Institucional</span>
+                </h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editPageModal">&times;</button>
+            </div>
+
+            <form id="editPageForm" method="POST" action="" class="space-y-4 text-xs">
+                @csrf
+                @method('PUT')
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Título de la Página</label>
+                        <input type="text" id="edit_page_title" name="title" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Política de Envíos Seguros">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Slug URL</label>
+                        <input type="text" id="edit_page_slug" name="slug" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="envios-seguros">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Contenido de la Página (HTML o Texto)</label>
+                    <textarea id="edit_page_content" name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="edit_page_show_in_navbar" name="show_in_navbar" value="1" class="rounded text-indigo-600">
+                            <span>Visible en Desktop</span>
+                        </label>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden Navbar</label>
+                            <input type="number" id="edit_page_navbar_order" name="navbar_order" value="0" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="edit_page_show_in_mobile" name="show_in_mobile" value="1" class="rounded text-indigo-600">
+                            <span>Visible en Móvil</span>
+                        </label>
+                        <p class="text-[11px] text-slate-400">Barra rápida y drawer móvil.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="edit_page_show_in_footer" name="show_in_footer" value="1" class="rounded text-indigo-600">
+                            <span>Mostrar en Footer</span>
+                        </label>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">Orden Footer</label>
+                            <input type="number" id="edit_page_footer_order" name="footer_order" value="0" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Meta Título (SEO)</label>
+                        <input type="text" id="edit_page_meta_title" name="meta_title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Título para buscadores">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Estado de Publicación</label>
+                        <select id="edit_page_status" name="status" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="active">Activo (Visible al público)</option>
+                            <option value="paused">Pausado (Oculto)</option>
+                            <option value="archived">Archivado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Meta Descripción (SEO)</label>
+                    <textarea id="edit_page_meta_description" name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve resumen optimizado para Google (máx 160 caracteres)"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editPageModal">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer">Actualizar Página</button>
                 </div>
             </form>
         </div>
@@ -2874,6 +3078,39 @@
         }).catch(err => {
             prompt('Copia la ruta:', text);
         });
+    };
+
+    window.openEditPageModal = function(page) {
+        if (!page) return;
+        const form = document.getElementById('editPageForm');
+        if (form) {
+            form.action = `/admin/tienda-cms/paginas/${page.id}`;
+        }
+        const titleEl = document.getElementById('edit_page_title');
+        const slugEl = document.getElementById('edit_page_slug');
+        const contentEl = document.getElementById('edit_page_content');
+        const inNavbarEl = document.getElementById('edit_page_show_in_navbar');
+        const inMobileEl = document.getElementById('edit_page_show_in_mobile');
+        const inFooterEl = document.getElementById('edit_page_show_in_footer');
+        const navOrderEl = document.getElementById('edit_page_navbar_order');
+        const footerOrderEl = document.getElementById('edit_page_footer_order');
+        const metaTitleEl = document.getElementById('edit_page_meta_title');
+        const metaDescEl = document.getElementById('edit_page_meta_description');
+        const statusEl = document.getElementById('edit_page_status');
+
+        if (titleEl) titleEl.value = page.title || '';
+        if (slugEl) slugEl.value = page.slug || '';
+        if (contentEl) contentEl.value = page.content_html || '';
+        if (inNavbarEl) inNavbarEl.checked = Boolean(page.show_in_navbar);
+        if (inMobileEl) inMobileEl.checked = Boolean(page.show_in_mobile);
+        if (inFooterEl) inFooterEl.checked = Boolean(page.show_in_footer);
+        if (navOrderEl) navOrderEl.value = page.navbar_order ?? 0;
+        if (footerOrderEl) footerOrderEl.value = page.footer_order ?? 0;
+        if (metaTitleEl) metaTitleEl.value = page.seo_title || page.meta_title || '';
+        if (metaDescEl) metaDescEl.value = page.seo_description || page.meta_description || '';
+        if (statusEl) statusEl.value = page.status || 'active';
+
+        window.openStoreModal('editPageModal');
     };
 
     window.toggleHeroModeCreate = function(mode) {

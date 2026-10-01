@@ -794,23 +794,32 @@ class PortalStoreController extends Controller
      */
     public function storePage(Request $request)
     {
+        if ($request->filled('content') && ! $request->filled('content_html')) {
+            $request->merge(['content_html' => $request->input('content')]);
+        }
+        if (! $request->filled('slug') && $request->filled('title')) {
+            $request->merge(['slug' => \Illuminate\Support\Str::slug($request->input('title'))]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:cms_pages,slug',
             'icon' => 'nullable|string|max:50',
             'content_html' => 'required|string',
             'show_in_navbar' => 'nullable|boolean',
+            'show_in_mobile' => 'nullable|boolean',
             'navbar_order' => 'nullable|integer',
             'show_in_footer' => 'nullable|boolean',
             'footer_order' => 'nullable|integer',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string',
-            'status' => 'nullable|in:active,draft',
+            'status' => 'nullable|in:active,paused,draft,archived',
         ]);
 
         $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
+        $validated['show_in_mobile'] = $request->boolean('show_in_mobile', true);
         $validated['show_in_footer'] = $request->boolean('show_in_footer');
-        $validated['status'] = $validated['status'] ?? 'active';
+        $validated['status'] = in_array($validated['status'] ?? 'active', ['active', 'paused', 'draft', 'archived']) ? $validated['status'] : 'active';
 
         $page = CmsPage::create($validated);
 
@@ -826,22 +835,31 @@ class PortalStoreController extends Controller
      */
     public function updatePage(Request $request, CmsPage $page)
     {
+        if ($request->filled('content') && ! $request->filled('content_html')) {
+            $request->merge(['content_html' => $request->input('content')]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:cms_pages,slug,' . $page->id,
             'icon' => 'nullable|string|max:50',
             'content_html' => 'required|string',
             'show_in_navbar' => 'nullable|boolean',
+            'show_in_mobile' => 'nullable|boolean',
             'navbar_order' => 'nullable|integer',
             'show_in_footer' => 'nullable|boolean',
             'footer_order' => 'nullable|integer',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string',
-            'status' => 'nullable|in:active,draft',
+            'status' => 'nullable|in:active,paused,draft,archived',
         ]);
 
         $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
+        $validated['show_in_mobile'] = $request->boolean('show_in_mobile');
         $validated['show_in_footer'] = $request->boolean('show_in_footer');
+        if (!empty($validated['status'])) {
+            $validated['status'] = in_array($validated['status'], ['active', 'paused', 'draft', 'archived']) ? $validated['status'] : 'active';
+        }
         $page->update($validated);
 
         if ($request->wantsJson()) {
@@ -849,6 +867,35 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', "Página CMS '{$page->title}' actualizada exitosamente.");
+    }
+
+    /**
+     * Alternar estado activo / pausado de una página CMS.
+     */
+    public function togglePageStatus(CmsPage $page)
+    {
+        $newStatus = $page->status === 'active' ? 'paused' : 'active';
+        $page->update(['status' => $newStatus]);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'status' => $newStatus]);
+        }
+
+        return back()->with('success', "Estado de página '{$page->title}' cambiado a " . strtoupper($newStatus) . '.');
+    }
+
+    /**
+     * Archivar una página CMS.
+     */
+    public function archivePage(CmsPage $page)
+    {
+        $page->update(['status' => 'archived']);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'archived']);
+        }
+
+        return back()->with('success', "Página CMS '{$page->title}' archivada exitosamente.");
     }
 
     /**
@@ -863,6 +910,49 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', 'Página CMS eliminada.');
+    }
+
+    /**
+     * Actualizar los anuncios de la cinta banner (Marquesina).
+     */
+    public function updateAnnouncements(Request $request)
+    {
+        $rawAnnouncements = $request->input('announcements', []);
+        $announcementsList = [];
+
+        if (is_array($rawAnnouncements)) {
+            foreach ($rawAnnouncements as $index => $item) {
+                $text = trim(is_array($item) ? ($item['text'] ?? '') : (string) $item);
+                if ($text !== '') {
+                    $announcementsList[] = [
+                        'id' => $index + 1,
+                        'text' => $text,
+                        'link' => is_array($item) ? ($item['link'] ?? '#') : '#',
+                        'badge' => is_array($item) ? ($item['badge'] ?? 'INFO') : 'INFO',
+                        'active' => is_array($item) ? filter_var($item['active'] ?? true, FILTER_VALIDATE_BOOLEAN) : true,
+                    ];
+                }
+            }
+        }
+
+        if (empty($announcementsList)) {
+            $announcementsList = [
+                ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'link' => '#', 'badge' => 'LOGÍSTICA', 'active' => true],
+                ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'link' => '#', 'badge' => 'FINANZAS', 'active' => true],
+                ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'link' => '#', 'badge' => 'INVENTARIO', 'active' => true],
+                ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'link' => '#', 'badge' => 'PROMO', 'active' => true],
+                ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'link' => '#', 'badge' => 'SOPORTE', 'active' => true],
+            ];
+        }
+
+        Cache::forever('cms_announcements', $announcementsList);
+        Cache::forever('cms_announcement_active', $request->boolean('announcement_active', true));
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'announcements' => $announcementsList]);
+        }
+
+        return back()->with('success', 'Cinta banner de anuncios del navbar actualizada exitosamente.');
     }
 
     /**

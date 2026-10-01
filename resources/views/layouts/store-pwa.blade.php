@@ -9,7 +9,58 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>{{ $currentStorefront['pageTitle'] ?? 'MARTE — Universo Masculino & Multiverso Store' }}</title>
-  <meta name="description" content="Colección exclusiva de moda y prendas contemporáneas. Envíos express a todo México. Stock físico y bajo pedido.">
+  <meta name="description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- OpenGraph / Redes Sociales Oficiales -->
+  <meta property="og:site_name" content="{{ $currentStorefront['brandName'] ?? 'Multiverso Store' }}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="{{ $currentStorefront['pageTitle'] ?? 'Multiverso Store' }}">
+  <meta property="og:description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
+  <meta property="og:url" content="{{ url()->current() }}">
+  @if(!empty($currentStorefront['logoUrl']))
+    <meta property="og:image" content="{{ $currentStorefront['logoUrl'] }}">
+  @endif
+
+  <!-- Twitter Cards Oficiales -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ $currentStorefront['pageTitle'] ?? 'Multiverso Store' }}">
+  <meta name="twitter:description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
+  @if(!empty($currentStorefront['logoUrl']))
+    <meta name="twitter:image" content="{{ $currentStorefront['logoUrl'] }}">
+  @endif
+
+  <!-- JSON-LD Schema.org Structured Data (Organization & WebSite) -->
+  <script type="application/ld+json">
+  {!! json_encode([
+    '@context' => 'https://schema.org',
+    '@graph' => array_values(array_filter([
+      [
+        '@type' => 'Organization',
+        '@id' => url('/') . '#organization',
+        'name' => $currentStorefront['brandName'] ?? 'Multiverso Store',
+        'url' => url('/'),
+        'logo' => !empty($currentStorefront['logoUrl']) ? $currentStorefront['logoUrl'] : null,
+        'sameAs' => [],
+      ],
+      [
+        '@type' => 'WebSite',
+        '@id' => url('/') . '#website',
+        'url' => url('/'),
+        'name' => $currentStorefront['brandName'] ?? 'Multiverso Store',
+        'inLanguage' => 'es-MX',
+        'potentialAction' => [
+          '@type' => 'SearchAction',
+          'target' => url('/search') . '?q={search_term_string}',
+          'query-input' => 'required name=search_term_string',
+        ],
+      ],
+    ])),
+  ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+  </script>
+
   @yield('seo')
 
   @if(!empty($currentStorefront['faviconUrl']))
@@ -281,6 +332,59 @@
       color: #ffffff !important;
     }
 
+    /* Navbar Sticky Visible Todo el Tiempo (Regla 1) */
+    .sticky-header-wrapper {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 999 !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+
+    /* Barra Móvil de Páginas Institucionales Sincronizadas */
+    .mobile-institutional-bar {
+      display: none;
+      background: var(--brand-surface, #ffffff);
+      border-bottom: 1px solid var(--border-subtle, #e4e4e7);
+      padding: 6px 0;
+    }
+    @media (max-width: 768px) {
+      .mobile-institutional-bar {
+        display: block;
+      }
+    }
+    .mobile-institutional-scroll {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 0 16px;
+    }
+    .mobile-institutional-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .mobile-inst-link {
+      font-family: var(--font-heading, sans-serif);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #71717a);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .mobile-inst-link:hover, .mobile-inst-link:active {
+      color: var(--brand-accent, #4f46e5);
+      background: rgba(0, 0, 0, 0.08);
+    }
+
     @if(!empty($currentStorefront['customCss']))
       {!! $currentStorefront['customCss'] !!}
     @endif
@@ -311,28 +415,30 @@
       </div>
     </div>
 
-    <!-- Marquesina Superior de Avisos Minimalista (Courier Exclusivo, Cero Metro) -->
-    <div class="minimal-marquee-bar" aria-label="Avisos importantes de envío y pago">
-      <div class="marquee-track">
-        @if(!empty($announcements))
-          @foreach($announcements as $announcement)
-            @if(is_array($announcement) && ($announcement['active'] ?? true))
-              <span>{{ strtoupper($announcement['text'] ?? '') }}</span>
+    <!-- Marquesina Superior de Avisos Dinámica (Hub 2) -->
+    @php
+      $activeAnnouncements = collect($announcements ?? [])
+        ->filter(fn($item) => is_array($item) && ($item['active'] ?? true) && !empty($item['text']))
+        ->values();
+    @endphp
+    @if($activeAnnouncements->isNotEmpty())
+      <div class="minimal-marquee-bar" aria-label="Avisos importantes de la tienda">
+        <div class="marquee-track">
+          @for($i = 0; $i < 2; $i++)
+            @foreach($activeAnnouncements as $announcement)
+              @if(!empty($announcement['url']))
+                <a href="{{ $announcement['url'] }}" style="color: inherit; text-decoration: none;">
+                  <span>{{ strtoupper($announcement['text']) }}</span>
+                </a>
+              @else
+                <span>{{ strtoupper($announcement['text']) }}</span>
+              @endif
               <span class="marquee-sep">/</span>
-            @endif
-          @endforeach
-        @endif
-        <span>ENVÍOS EXPRESS A TODO MÉXICO</span>
-        <span class="marquee-sep">/</span>
-        <span>PAGOS 100% SEGUROS CON TARJETA & OXXO</span>
-        <span class="marquee-sep">/</span>
-        <span>STOCK FÍSICO CON ENTREGA INMEDIATA</span>
-        <span class="marquee-sep">/</span>
-        <span>ENVÍO GRATIS EN COMPRAS MAYORES A ${{ number_format((float)($shippingRule['freeShippingThreshold'] ?? 999), 0) }}</span>
-        <span class="marquee-sep">/</span>
-        <span>ATENCIÓN PERSONALIZADA POR WHATSAPP</span>
+            @endforeach
+          @endfor
+        </div>
       </div>
-    </div>
+    @endif
 
     <!-- 1. Header de Escritorio (Estilo DEV/pop) -->
     <header class="navbar-desktop">
@@ -362,7 +468,7 @@
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">NOVEDADES</a>
           @if(!empty($navbarPages))
             @foreach($navbarPages as $np)
-              <a href="{{ url('/' . $np->slug) }}" class="nav-link-item">{{ strtoupper($np->title) }}</a>
+              <a href="{{ url('/pagina/' . $np->slug) }}" class="nav-link-item">{{ strtoupper($np->title) }}</a>
             @endforeach
           @endif
         </nav>
@@ -426,6 +532,17 @@
       </div>
     </header>
 
+    <!-- Barra Móvil de Páginas Institucionales Sincronizadas -->
+    @if(!empty($mobilePages) && $mobilePages->isNotEmpty())
+      <div class="mobile-institutional-bar">
+        <div class="container mobile-institutional-scroll">
+          @foreach($mobilePages as $mp)
+            <a href="{{ url('/pagina/' . $mp->slug) }}" class="mobile-inst-link">{{ strtoupper($mp->title) }}</a>
+          @endforeach
+        </div>
+      </div>
+    @endif
+
     <!-- 3. Selector de Universos Multiverso (Barra Superior Táctil) -->
     <div class="universe-selector-bar">
       <div class="container universe-scroll-container">
@@ -481,7 +598,7 @@
           <ul class="footer-link-list">
             @if(!empty($footerPages) && $footerPages->isNotEmpty())
               @foreach($footerPages as $fp)
-                <li><a href="{{ url('/' . $fp->slug) }}" style="color: inherit; text-decoration: none;">{{ $fp->title }}</a></li>
+                <li><a href="{{ url('/pagina/' . $fp->slug) }}" style="color: inherit; text-decoration: none;">{{ $fp->title }}</a></li>
               @endforeach
             @else
               <li><a href="/privacidad" style="color: inherit; text-decoration: none;">Aviso de Privacidad</a></li>
@@ -606,6 +723,20 @@
           </div>
         </div>
       </div>
+
+      @if(!empty($mobilePages) && $mobilePages->isNotEmpty())
+        <div class="filter-group-block">
+          <div class="filter-group-title">Páginas Institucionales</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            @foreach($mobilePages as $mp)
+              <a href="{{ url('/pagina/' . $mp->slug) }}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--border-subtle, #e4e4e7); color: var(--text-primary, #09090b); text-decoration: none; font-size: 0.8rem; font-weight: 600;">
+                <span>{{ $mp->title }}</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </a>
+            @endforeach
+          </div>
+        </div>
+      @endif
     </div>
 
     <div class="sheet-footer-actions">
