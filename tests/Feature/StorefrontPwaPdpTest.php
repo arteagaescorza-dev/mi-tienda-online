@@ -277,4 +277,32 @@ class StorefrontPwaPdpTest extends TestCase
         $response->assertSee('/uploads/thong-side.webp', false);
         $response->assertSee('/uploads/thong-back.webp', false);
     }
+
+    public function test_pdp_sanitizes_and_renders_clean_utf8_without_mojibake(): void
+    {
+        // Producto con texto potencialmente doblemente codificado (Mojibake común)
+        $product = Product::create([
+            'sku' => 'PDP-UTF8-TEST',
+            'title' => 'Tanga ErgonÃ³mica DiseÃ±ada',
+            'slug' => 'tanga-ergonomica-disenada',
+            'description' => 'Prenda ergonÃ³mica de alta calidad confeccionada con Modal Seamless. DiseÃ±ada para soporte anatÃ³mico Ã³ptimo, transpirabilidad duradera y tacto ultrasuave para uso cotidiano.',
+            'price' => 299.00,
+            'visible' => true,
+        ]);
+
+        $response = $this->get('/productos/' . $product->slug);
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/html; charset=utf-8');
+        $response->assertSee('<meta charset="UTF-8">', false);
+
+        // Debe renderizarse en UTF-8 limpio
+        $response->assertSee('Prenda ergonómica de alta calidad confeccionada con Modal Seamless. Diseñada para soporte anatómico óptimo', false);
+
+        // Queda estrictamente prohibido Mojibake en el contenido
+        $response->assertDontSee('ergonÃ³mica', false);
+        $response->assertDontSee('DiseÃ±ada', false);
+        $response->assertDontSee('anatÃ³mico', false);
+        $response->assertDontSee('Ã³ptimo', false);
+    }
 }

@@ -1,4 +1,4 @@
-// MÃ³dulo de Inventario HÃ­brido y CatÃ¡logo para Plataforma RevOps (Ropa Interior B2C)
+// Módulo de Inventario Híbrido y Catálogo para Plataforma RevOps (Ropa Interior B2C)
 // Desarrollado con Tailwind CSS + Alpine.js
 
 function hybridInventoryModule() {
@@ -76,7 +76,7 @@ function hybridInventoryModule() {
         deepLinkBannerText: '',
         highlightedSku: null,
 
-        // TASK-INT-06: TelemetrÃ­a de Carritos SimultÃ¡neos y Reserva Temporal de Stock (TTL 5m)
+        // TASK-INT-06: Telemetría de Carritos Simultáneos y Reserva Temporal de Stock (TTL 5m)
         stockLocks: [
             {
                 id: 'lock_demo_001',
@@ -105,25 +105,25 @@ function hybridInventoryModule() {
         ],
         stockLocksModalOpen: false,
 
-        // TASK-INV-08 / TASK-INV-11: CatÃ¡logo de Telas y Fibras Textiles
+        // TASK-INV-08 / TASK-INV-11: Catálogo de Telas y Fibras Textiles
         apparelFabrics: [
-            { id: 'algodon_pima', name: 'AlgodÃ³n Pima', description: 'Fibra natural extra suave de hilo largo de alta durabilidad', is_active: true },
-            { id: 'algodon_peinado', name: 'AlgodÃ³n Peinado', description: '100% algodÃ³n transpirable sin impurezas para uso diario', is_active: true },
-            { id: 'modal', name: 'Modal Seamless', description: 'Fibra celulÃ³sica ultra-sedosa con secado rÃ¡pido y mÃ¡xima elasticidad', is_active: true },
-            { id: 'elastano', name: 'Elastano / Spandex Fit', description: 'Alta compresiÃ³n anatÃ³mica y memoria elÃ¡stica activa', is_active: true },
-            { id: 'malla_mesh', name: 'Malla / Mesh Transpirable', description: 'Tejido tÃ©cnico micro-perforado para ventilaciÃ³n y control tÃ©rmico', is_active: true },
+            { id: 'algodon_pima', name: 'Algodón Pima', description: 'Fibra natural extra suave de hilo largo de alta durabilidad', is_active: true },
+            { id: 'algodon_peinado', name: 'Algodón Peinado', description: '100% algodón transpirable sin impurezas para uso diario', is_active: true },
+            { id: 'modal', name: 'Modal Seamless', description: 'Fibra celulósica ultra-sedosa con secado rápido y máxima elasticidad', is_active: true },
+            { id: 'elastano', name: 'Elastano / Spandex Fit', description: 'Alta compresión anatómica y memoria elástica activa', is_active: true },
+            { id: 'malla_mesh', name: 'Malla / Mesh Transpirable', description: 'Tejido técnico micro-perforado para ventilación y control térmico', is_active: true },
             { id: 'microfibra_velvet', name: 'Microfibra Velvet Touch', description: 'Tacto aterciopelado ultraligero que evita rozaduras', is_active: true },
-            { id: 'bambu_eco', name: 'BambÃº Eco Air', description: 'Fibra ecolÃ³gica antibacteriana natural y termorreguladora', is_active: true },
-            { id: 'seda_satin', name: 'Seda / SatÃ­n Premium', description: 'Acabado brillante de lujo para lencerÃ­a de autor', is_active: true }
+            { id: 'bambu_eco', name: 'Bambú Eco Air', description: 'Fibra ecológica antibacteriana natural y termorreguladora', is_active: true },
+            { id: 'seda_satin', name: 'Seda / Satín Premium', description: 'Acabado brillante de lujo para lencería de autor', is_active: true }
         ],
 
-        // TASK-INV-08 / TASK-INV-11: Paleta de Colores SÃ³lidos y Tornasoles Iridiscentes
+        // TASK-INV-08 / TASK-INV-11: Paleta de Colores Sólidos y Tornasoles Iridiscentes
         apparelColors: [
             { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', type: 'solid', is_active: true },
-            { id: 'blanco', name: 'Blanco Ã“palo', hex: '#f8fafc', type: 'solid', is_active: true },
+            { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid', is_active: true },
             { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', type: 'solid', is_active: true },
             { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid', is_active: true },
-            { id: 'rojo_borgona', name: 'Rojo BorgoÃ±a', hex: '#881337', type: 'solid', is_active: true },
+            { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', type: 'solid', is_active: true },
             { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', type: 'solid', is_active: true },
             { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', type: 'solid', is_active: true },
             { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', type: 'solid', is_active: true },
@@ -133,7 +133,7 @@ function hybridInventoryModule() {
             { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', is_active: true }
         ],
 
-        // TASK-INV-08: Staging de CuradurÃ­a Previa de Scraping (ValidaciÃ³n humana antes de publicar)
+        // TASK-INV-08: Staging de Curaduría Previa de Scraping (Validación humana antes de publicar)
         scrapedPendingItems: [
             {
                 id: 'SCRP-PEND-001',
@@ -141,7 +141,7 @@ function hybridInventoryModule() {
                 name: 'Torzo Holographic Prism Jockstrap',
                 brand: 'Torzo B2B',
                 suggestedCategory: 'Jocks',
-                scrapedDescription: 'Prenda suspensorio atlÃ©tico con elÃ¡stico reflectante y tejido de malla tÃ©cnica transpirable con destellos tornasol. Ideal para performance y diseÃ±o contemporÃ¡neo.',
+                scrapedDescription: 'Prenda suspensorio atlético con elástico reflectante y tejido de malla técnica transpirable con destellos tornasol. Ideal para performance y diseño contemporáneo.',
                 originUrl: 'https://torzo.example.com/item/holo-prism-jock',
                 cost: 145.00,
                 suggestedPvp: 390.00,
@@ -160,14 +160,14 @@ function hybridInventoryModule() {
                 name: 'Torzo Bamboo Comfort Trunks Seamless',
                 brand: 'Torzo B2B',
                 suggestedCategory: 'Boxers',
-                scrapedDescription: 'Boxer corto liso elaborado en viscosa de bambÃº ecolÃ³gico, costuras planas anti-rozaduras y pretina elÃ¡stica afelpada para mÃ¡xima comodidad.',
+                scrapedDescription: 'Boxer corto liso elaborado en viscosa de bambú ecológico, costuras planas anti-rozaduras y pretina elástica afelpada para máxima comodidad.',
                 originUrl: 'https://torzo.example.com/item/bamboo-trunks',
                 cost: 120.00,
                 suggestedPvp: 340.00,
                 detectedColorName: 'Verde Militar Oliva',
                 detectedColorHex: '#365314',
                 colorType: 'solid',
-                suggestedFabric: 'BambÃº Eco Air',
+                suggestedFabric: 'Bambú Eco Air',
                 suggestedDesign: 'sin_diseno',
                 suggestedSection: 'basicos',
                 supplierStock: 90,
@@ -175,7 +175,7 @@ function hybridInventoryModule() {
             }
         ],
 
-        // TASK-INV-08 / TASK-INV-11 / TASK-INV-17: Modal de Ajustes y ConfiguraciÃ³n del MÃ³dulo
+        // TASK-INV-08 / TASK-INV-11 / TASK-INV-17: Modal de Ajustes y Configuración del Módulo
         moduleSettingsModalOpen: false,
         activeSettingsTab: 'fabrics', // 'fabrics' | 'colors' | 'shades' | 'slotting' | 'rop' | 'scraping' | 'sections' | 'bundles'
         bundleEditor: {
@@ -213,7 +213,7 @@ function hybridInventoryModule() {
         slotEditState: { isEditing: false, editingCode: null, form: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true } },
         ropSettings: { leadTimeLocal: 3, leadTimeDropship: 5, safetyStockDays: 7, defaultDailySales: 2 },
 
-        // TASK-INV-14: GestiÃ³n Configurable de Curvas de Tallas, VolÃºmenes y CategorÃ­as
+        // TASK-INV-14: Gestión Configurable de Curvas de Tallas, Volúmenes y Categorías
         sizeCurves: [],
         selectedCurveId: null,
         newCurveForm: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true },
@@ -445,7 +445,7 @@ function hybridInventoryModule() {
             notes: ''
         },
 
-        // TASK-INV-08: Modal de CuradurÃ­a de Scraping
+        // TASK-INV-08: Modal de Curaduría de Scraping
         scrapingCurationModalOpen: false,
         curatingItem: null,
 
@@ -462,7 +462,7 @@ function hybridInventoryModule() {
         drawerDiscountPct: 0,
         drawerRegularPrice: 0,
 
-        // Regla 6: PaginaciÃ³n en tablas mediante "Cargar mÃ¡s"
+        // Regla 6: Paginación en tablas mediante "Cargar más"
         visibleCount: 8,
         pageSize: 8,
         isLoadingMore: false,
@@ -471,7 +471,7 @@ function hybridInventoryModule() {
         kardexIsLoadingMore: false,
         _lastFilterQuery: '',
 
-        // Regla 7: Filtros especÃ­ficos por columna
+        // Regla 7: Filtros específicos por columna
         colFilters: {
             sku: '',
             product: '',
@@ -503,17 +503,17 @@ function hybridInventoryModule() {
         confirmPurchaseModalOpen: false,
         purchaseAddedSuccess: false,
         hasAddedPurchaseThisSession: false,
-        // TASK-INV-01 / TASK-INV-11: CatÃ¡logo y Estado de Slotting FÃ­sico en Bodega
+        // TASK-INV-01 / TASK-INV-11: Catálogo y Estado de Slotting Físico en Bodega
         warehouseSlots: [
             { code: 'A-01-A', aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 01 Gaveta Superior', capacity: 100, status: 'active', is_active: true },
             { code: 'A-01-B', aisle: 'A', rack: '01', bin: 'B', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 01 Gaveta Media', capacity: 120, status: 'active', is_active: true },
             { code: 'A-02-A', aisle: 'A', rack: '02', bin: 'A', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 02 Gaveta Superior', capacity: 100, status: 'active', is_active: true },
             { code: 'A-02-B', aisle: 'A', rack: '02', bin: 'B', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 02 Gaveta Media', capacity: 150, status: 'active', is_active: true },
             { code: 'A-03-A', aisle: 'A', rack: '03', bin: 'A', zone: 'Ropa Interior', name: 'Pasillo A (Ropa Interior) - Rack 03 Gaveta Superior', capacity: 100, status: 'active', is_active: true },
-            { code: 'B-01-A', aisle: 'B', rack: '01', bin: 'A', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 01 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
-            { code: 'B-02-B', aisle: 'B', rack: '02', bin: 'B', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 02 Gaveta Media', capacity: 90, status: 'active', is_active: true },
-            { code: 'B-03-A', aisle: 'B', rack: '03', bin: 'A', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 03 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
-            { code: 'B-04-C', aisle: 'B', rack: '04', bin: 'C', zone: 'AtlÃ©tico & Jocks', name: 'Pasillo B (AtlÃ©tico & Jocks) - Rack 04 Gaveta Inferior', capacity: 110, status: 'active', is_active: true },
+            { code: 'B-01-A', aisle: 'B', rack: '01', bin: 'A', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 01 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
+            { code: 'B-02-B', aisle: 'B', rack: '02', bin: 'B', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 02 Gaveta Media', capacity: 90, status: 'active', is_active: true },
+            { code: 'B-03-A', aisle: 'B', rack: '03', bin: 'A', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 03 Gaveta Superior', capacity: 80, status: 'active', is_active: true },
+            { code: 'B-04-C', aisle: 'B', rack: '04', bin: 'C', zone: 'Atlético & Jocks', name: 'Pasillo B (Atlético & Jocks) - Rack 04 Gaveta Inferior', capacity: 110, status: 'active', is_active: true },
             { code: 'C-01-A', aisle: 'C', rack: '01', bin: 'A', zone: 'Skincare & Cuidado', name: 'Pasillo C (Skincare & Cuidado) - Rack 01 Gaveta Climatizada', capacity: 60, status: 'active', is_active: true },
             { code: 'C-02-B', aisle: 'C', rack: '02', bin: 'B', zone: 'Skincare & Cuidado', name: 'Pasillo C (Skincare & Cuidado) - Rack 02 Gaveta Media', capacity: 75, status: 'active', is_active: true },
             { code: 'C-03-A', aisle: 'C', rack: '03', bin: 'A', zone: 'Skincare & Cuidado', name: 'Pasillo C (Skincare & Cuidado) - Rack 03 Gaveta Superior', capacity: 50, status: 'active', is_active: true }
@@ -552,7 +552,7 @@ function hybridInventoryModule() {
             result: null
         },
 
-        // Estado AuditorÃ­a CÃ­clica a Ciegas (TASK-INV-07: 3 SKUs Diarios)
+        // Estado Auditoría Cíclica a Ciegas (TASK-INV-07: 3 SKUs Diarios)
         cycleCountHistory: [],
         cycleCountModal: {
             isOpen: false,
@@ -565,16 +565,16 @@ function hybridInventoryModule() {
             discrepancyReasons: {}, // { [sku]: 'Merma operativa' }
             reconciliationReport: null
         },
-        // TASK-INV-09: Gestor Configurable de Tonos de CosmÃ©tica con Swatches y Subtonos
+        // TASK-INV-09: Gestor Configurable de Tonos de Cosmética con Swatches y Subtonos
         cosmeticShades: [
             { id: 1, code: '01', name: 'Porcelana', hex_color: '#F7D8BE', undertone: 'cool', sort_order: 1, is_active: true },
             { id: 2, code: '02', name: 'Neutro Claro', hex_color: '#EEC29A', undertone: 'neutral', sort_order: 2, is_active: true },
-            { id: 3, code: '03', name: 'Beige CÃ¡lido', hex_color: '#D9A577', undertone: 'warm', sort_order: 3, is_active: true },
+            { id: 3, code: '03', name: 'Beige Cálido', hex_color: '#D9A577', undertone: 'warm', sort_order: 3, is_active: true },
             { id: 4, code: '04', name: 'Canela Dorado', hex_color: '#BD8052', undertone: 'warm', sort_order: 4, is_active: true },
-            { id: 5, code: '05', name: 'Miel CÃ¡lido', hex_color: '#9A5B32', undertone: 'warm', sort_order: 5, is_active: true },
-            { id: 6, code: '06', name: 'Ã‰bano Profundo', hex_color: '#6D3C1A', undertone: 'cool', sort_order: 6, is_active: true },
+            { id: 5, code: '05', name: 'Miel Cálido', hex_color: '#9A5B32', undertone: 'warm', sort_order: 5, is_active: true },
+            { id: 6, code: '06', name: 'Ébano Profundo', hex_color: '#6D3C1A', undertone: 'cool', sort_order: 6, is_active: true },
             { id: 7, code: '07', name: 'Caramelo Neutro', hex_color: '#C68B59', undertone: 'neutral', sort_order: 7, is_active: true },
-            { id: 8, code: '08', name: 'CafÃ© Intenso', hex_color: '#542D13', undertone: 'warm', sort_order: 8, is_active: true }
+            { id: 8, code: '08', name: 'Café Intenso', hex_color: '#542D13', undertone: 'warm', sort_order: 8, is_active: true }
         ],
         cosmeticShadesModal: {
             isOpen: false,
@@ -760,7 +760,7 @@ function hybridInventoryModule() {
         "committedStock": 15,
         "committedSizes": { "ch": 2, "m": 6, "g": 5, "xl": 2 },
         "supplierStock": null,
-        "location": "Rack B-03 / CajÃ³n 1",
+        "location": "Rack B-03 / Cajón 1",
         "status": "En Stock",
         "pvp": 380,
         "cost": 115,
@@ -784,7 +784,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 48,
-        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
+        "location": "Almacén Proveedor (Torzo B2B)",
         "status": "Sincronizado",
         "providerUrl": "https://torzo.example.com/item/mesh-trunk",
         "isScraping": false,
@@ -858,7 +858,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 14,
-        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
+        "location": "Almacén Proveedor (Torzo B2B)",
         "status": "Bajo Stock",
         "providerUrl": "https://torzo.example.com/item/neon-jock",
         "isScraping": false,
@@ -877,7 +877,7 @@ function hybridInventoryModule() {
     {
         "sku": "BX-COT-007",
         "weightedAverageCost": 114.00,
-        "name": "Boxer AlgodÃ³n Pima OrgÃ¡nico",
+        "name": "Boxer Algodón Pima Orgánico",
         "category": "Boxers",
         "type": "propio",
         "localStock": 480,
@@ -932,7 +932,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 0,
-        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
+        "location": "Almacén Proveedor (Torzo B2B)",
         "status": "Agotado",
         "providerUrl": "https://torzo.example.com/item/satin-bikini",
         "isScraping": false,
@@ -975,7 +975,7 @@ function hybridInventoryModule() {
     {
         "sku": "BX-BAM-011",
         "weightedAverageCost": 132.00,
-        "name": "Boxer Brief BambÃº Eco Air Flow",
+        "name": "Boxer Brief Bambú Eco Air Flow",
         "category": "Boxers",
         "type": "propio",
         "localStock": 315,
@@ -1030,7 +1030,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 62,
-        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
+        "location": "Almacén Proveedor (Torzo B2B)",
         "status": "Sincronizado",
         "providerUrl": "https://torzo.example.com/item/air-mesh-brief",
         "isScraping": false,
@@ -1056,7 +1056,7 @@ function hybridInventoryModule() {
         "committedStock": 7,
         "committedSizes": { "ch": 1, "m": 3, "g": 2, "xl": 1 },
         "supplierStock": null,
-        "location": "Rack B-04 / CajÃ³n 2",
+        "location": "Rack B-04 / Cajón 2",
         "status": "En Stock",
         "pvp": 520,
         "cost": 160,
@@ -1073,7 +1073,7 @@ function hybridInventoryModule() {
     {
         "sku": "TG-LACE-015",
         "weightedAverageCost": 71.00,
-        "name": "Tanga Encaje ElÃ¡stico Black Lace",
+        "name": "Tanga Encaje Elástico Black Lace",
         "category": "Tangas",
         "type": "propio",
         "localStock": 140,
@@ -1128,7 +1128,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 35,
-        "location": "AlmacÃ©n Proveedor (ModaIntima Textil MX)",
+        "location": "Almacén Proveedor (ModaIntima Textil MX)",
         "status": "Sincronizado",
         "providerUrl": "https://modaintima.example.com/b2b/thermal-boxer",
         "isScraping": false,
@@ -1202,7 +1202,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 28,
-        "location": "AlmacÃ©n Proveedor (Torzo B2B)",
+        "location": "Almacén Proveedor (Torzo B2B)",
         "status": "Sincronizado",
         "providerUrl": "https://torzo.example.com/item/cyber-stripe",
         "isScraping": false,
@@ -1228,7 +1228,7 @@ function hybridInventoryModule() {
         "committedStock": 8,
         "committedSizes": { "ch": 1, "m": 3, "g": 3, "xl": 1 },
         "supplierStock": null,
-        "location": "Rack B-03 / CajÃ³n 3",
+        "location": "Rack B-03 / Cajón 3",
         "status": "En Stock",
         "pvp": 490,
         "cost": 145,
@@ -1245,7 +1245,7 @@ function hybridInventoryModule() {
     {
         "sku": "TG-COT-022",
         "weightedAverageCost": 52.00,
-        "name": "Tanga Confort Diario AlgodÃ³n Stretch",
+        "name": "Tanga Confort Diario Algodón Stretch",
         "category": "Tangas",
         "type": "propio",
         "localStock": 260,
@@ -1276,7 +1276,7 @@ function hybridInventoryModule() {
         "committedStock": 0,
         "committedSizes": { "ch": 0, "m": 0, "g": 0, "xl": 0 },
         "supplierStock": 19,
-        "location": "AlmacÃ©n Proveedor (Silk & Cotton Iberia SL)",
+        "location": "Almacén Proveedor (Silk & Cotton Iberia SL)",
         "status": "Bajo Stock",
         "providerUrl": "https://silkcotton.example.com/items/royal-silk-brief",
         "isScraping": false,
@@ -1295,7 +1295,7 @@ function hybridInventoryModule() {
     {
         "sku": "BX-GEO-024",
         "weightedAverageCost": 119.00,
-        "name": "Boxer GeomÃ©trico EdiciÃ³n Pride",
+        "name": "Boxer Geométrico Edición Pride",
         "category": "Boxers",
         "type": "propio",
         "localStock": 145,
@@ -1407,7 +1407,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BAS-001",
         "weightedAverageCost": 152.5,
         "name": "Base Fluida Mate Alta Cobertura Terra Venus",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 65,
@@ -1442,7 +1442,7 @@ function hybridInventoryModule() {
         "sku": "CSM-COR-002",
         "weightedAverageCost": 98,
         "name": "Corrector Liquido Iluminador HD Anti-Ojeras",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 83,
@@ -1477,7 +1477,7 @@ function hybridInventoryModule() {
         "sku": "CSM-PLV-003",
         "weightedAverageCost": 120,
         "name": "Polvo Compacto Mineral Matificante Ultrafino",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 101,
@@ -1512,7 +1512,7 @@ function hybridInventoryModule() {
         "sku": "CSM-PRM-004",
         "weightedAverageCost": 135,
         "name": "Primer Siliconado Control Poros y Brillo",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 110,
@@ -1547,7 +1547,7 @@ function hybridInventoryModule() {
         "sku": "CSM-TNT-005",
         "weightedAverageCost": 80.5,
         "name": "Tinte Labial y Mejillas Acabado Aterciopelado",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 116,
@@ -1582,7 +1582,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BLS-006",
         "weightedAverageCost": 57,
         "name": "Balsamo Labial Reparador con Color SPF 20",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 119,
@@ -1617,7 +1617,7 @@ function hybridInventoryModule() {
         "sku": "CSM-GEL-007",
         "weightedAverageCost": 72,
         "name": "Gel Fijador de Cejas Transparente Esculpidor",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 104,
@@ -1652,7 +1652,7 @@ function hybridInventoryModule() {
         "sku": "CSM-SRM-008",
         "weightedAverageCost": 172,
         "name": "Serum Iluminador Facial con Vitamina C 10%",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 87,
@@ -1687,7 +1687,7 @@ function hybridInventoryModule() {
         "sku": "CSM-DLN-009",
         "weightedAverageCost": 86.5,
         "name": "Delineador Liquido Carbon Black Waterproof",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 93,
@@ -1722,7 +1722,7 @@ function hybridInventoryModule() {
         "sku": "CSM-ILM-010",
         "weightedAverageCost": 110,
         "name": "Iluminador Liquido Perla Nacarada Multiuso",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 102,
@@ -1757,7 +1757,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BBC-011",
         "weightedAverageCost": 129,
         "name": "BB Cream Perfeccionadora Hidratante SPF 30",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 105,
@@ -1792,7 +1792,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BRZ-012",
         "weightedAverageCost": 104,
         "name": "Bronzer en Barra Moldeador Tono Canela",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 123,
@@ -1827,7 +1827,7 @@ function hybridInventoryModule() {
         "sku": "CSM-SOM-013",
         "weightedAverageCost": 199,
         "name": "Paleta de Sombras Neutros Calidos Terra",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 96,
@@ -1862,7 +1862,7 @@ function hybridInventoryModule() {
         "sku": "CSM-FJD-014",
         "weightedAverageCost": 114.5,
         "name": "Spray Fijador de Maquillaje Acabado Mate",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 114,
@@ -1897,7 +1897,7 @@ function hybridInventoryModule() {
         "sku": "CSM-ACT-015",
         "weightedAverageCost": 138,
         "name": "Aceite Limpiador Desmaquillante de Camelia",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 97,
@@ -1932,7 +1932,7 @@ function hybridInventoryModule() {
         "sku": "CSM-TON-016",
         "weightedAverageCost": 112,
         "name": "Tonico Exfoliante Diario Acido Glicolico 5%",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 91,
@@ -1967,7 +1967,7 @@ function hybridInventoryModule() {
         "sku": "CSM-OJOS-017",
         "weightedAverageCost": 142,
         "name": "Crema Contorno de Ojos Descongestiva Cafeina",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 97,
@@ -2002,7 +2002,7 @@ function hybridInventoryModule() {
         "sku": "CSM-PUR-018",
         "weightedAverageCost": 91,
         "name": "Mascarilla Facial Purificante de Arcilla Rosa",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 115,
@@ -2037,7 +2037,7 @@ function hybridInventoryModule() {
         "sku": "CSM-EXF-019",
         "weightedAverageCost": 52,
         "name": "Exfoliante Labial Suave Azucar Moreno y Miel",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 100,
@@ -2072,7 +2072,7 @@ function hybridInventoryModule() {
         "sku": "CSM-BRM-020",
         "weightedAverageCost": 88,
         "name": "Bruma Hidratante Facial Agua de Rosas 120ml",
-        "category": "CosmÃ©tica",
+        "category": "Cosmética",
         "type": "propio",
         "variantDimension": "shade",
         "localStock": 118,
@@ -2107,7 +2107,7 @@ function hybridInventoryModule() {
         "sku": "PRF-MAR-001",
         "weightedAverageCost": 278,
         "name": "Eau de Parfum Marte Noir Cuero y Sandalo",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 65,
@@ -2138,7 +2138,7 @@ function hybridInventoryModule() {
         "sku": "PRF-VEN-002",
         "weightedAverageCost": 265,
         "name": "Eau de Parfum Venus Secret Jazmin y Vainilla",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 78,
@@ -2169,7 +2169,7 @@ function hybridInventoryModule() {
         "sku": "PRF-TIR-003",
         "weightedAverageCost": 295,
         "name": "Eau de Parfum Tiresias Ambar Gris y Cedro",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 91,
@@ -2200,7 +2200,7 @@ function hybridInventoryModule() {
         "sku": "PRF-CIT-004",
         "weightedAverageCost": 188,
         "name": "Agua de Colonia Bergamota de Calabria 100ml",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 104,
@@ -2231,7 +2231,7 @@ function hybridInventoryModule() {
         "sku": "PRF-OUD-005",
         "weightedAverageCost": 398,
         "name": "Extracto de Perfume Oud Real y Cardamomo",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 105,
@@ -2262,7 +2262,7 @@ function hybridInventoryModule() {
         "sku": "PRF-BOS-006",
         "weightedAverageCost": 238,
         "name": "Eau de Parfum Bosque Humedo Musgo y Vetiver",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 98,
@@ -2293,7 +2293,7 @@ function hybridInventoryModule() {
         "sku": "PRF-TRA-007",
         "weightedAverageCost": 139,
         "name": "Decant Travel Pocket Atomizer Set x3 10ml",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 75,
@@ -2324,7 +2324,7 @@ function hybridInventoryModule() {
         "sku": "PRF-MIS-008",
         "weightedAverageCost": 105,
         "name": "Body Mist Refrescante Bambu y Te Blanco",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 88,
@@ -2355,7 +2355,7 @@ function hybridInventoryModule() {
         "sku": "PRF-IRI-009",
         "weightedAverageCost": 345,
         "name": "Perfume Esencia Pura Iris Florentino",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 89,
@@ -2386,7 +2386,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ROL-010",
         "weightedAverageCost": 115,
         "name": "Perfume en Aceite Roll-On Ambar Dorado 15ml",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 102,
@@ -2417,7 +2417,7 @@ function hybridInventoryModule() {
         "sku": "PRF-NER-011",
         "weightedAverageCost": 196,
         "name": "Agua Fresca Neroli Mediterraneo y Azahar",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 95,
@@ -2448,7 +2448,7 @@ function hybridInventoryModule() {
         "sku": "PRF-OCN-012",
         "weightedAverageCost": 228,
         "name": "Eau de Parfum Sal Marina y Algas Atlanticas",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 108,
@@ -2479,7 +2479,7 @@ function hybridInventoryModule() {
         "sku": "PRF-TAB-013",
         "weightedAverageCost": 256,
         "name": "Colonia Amaderada Hoja de Tabaco y Haba Tonka",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 73,
@@ -2510,7 +2510,7 @@ function hybridInventoryModule() {
         "sku": "PRF-SOL-014",
         "weightedAverageCost": 118,
         "name": "Perfume Solido Cuero y Cacao Balsamico 20g",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 86,
@@ -2541,7 +2541,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ORQ-015",
         "weightedAverageCost": 110,
         "name": "Bruma Sensual Orquidea Negra y Pachuli",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 99,
@@ -2572,7 +2572,7 @@ function hybridInventoryModule() {
         "sku": "PRF-CIP-016",
         "weightedAverageCost": 215,
         "name": "Eau de Parfum Cipres de Toscana y Pino Silvestre",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 92,
@@ -2603,7 +2603,7 @@ function hybridInventoryModule() {
         "sku": "PRF-HIG-017",
         "weightedAverageCost": 206,
         "name": "Fragancia Fresca Higo Verde y Corteza de Cedro",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 93,
@@ -2634,7 +2634,7 @@ function hybridInventoryModule() {
         "sku": "PRF-VET-018",
         "weightedAverageCost": 305,
         "name": "Extracto Puro Vetiver de Haiti Ahumado",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 106,
@@ -2665,7 +2665,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ROM-019",
         "weightedAverageCost": 162,
         "name": "Colonia Botanica Romero Silvestre y Toronja",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 83,
@@ -2696,7 +2696,7 @@ function hybridInventoryModule() {
         "sku": "PRF-ECL-020",
         "weightedAverageCost": 362,
         "name": "Perfume Edicion Limitada Eclipse Resina Dorada",
-        "category": "PerfumerÃ­a",
+        "category": "Perfumería",
         "type": "propio",
         "variantDimension": "volume",
         "localStock": 96,
@@ -3228,10 +3228,10 @@ function hybridInventoryModule() {
         
 
         // =========================================================================
-        // MÃ‰TODOS DE PRIORIDAD 2: INBOUND, WHATSAPP & KARDEX
+        // MÉTODOS DE PRIORIDAD 2: INBOUND, WHATSAPP & KARDEX
         // =========================================================================
 
-        // [P2.1] RecepciÃ³n Inbound
+        // [P2.1] Recepción Inbound
         openReceiveOrderModal(order) {
             this.receivingOrder = order;
             this.receivingSizes = {
@@ -3242,7 +3242,7 @@ function hybridInventoryModule() {
                 '2xl': (order.sizes && order.sizes['2xl']) || 0,
                 '3xl': (order.sizes && order.sizes['3xl']) || 0
             };
-            this.receivingNotes = 'Cotejo fÃ­sico conforme. Empaque sellado de origen.';
+            this.receivingNotes = 'Cotejo físico conforme. Empaque sellado de origen.';
 
             // Deteccion de Control Sanitario (TASK-INV-06)
             const prod = this.products.find(p => p.sku === order.sku);
@@ -3288,14 +3288,14 @@ function hybridInventoryModule() {
             const totalReceived = this.calculateReceivingTotal();
 
             if (totalReceived <= 0) {
-                this.showToast('Debes ingresar al menos 1 unidad recibida en el cotejo fÃ­sico.', 'warning');
+                this.showToast('Debes ingresar al menos 1 unidad recibida en el cotejo físico.', 'warning');
                 return;
             }
 
             // 1. Actualizar estado de la orden
-            order.status = 'Recibida en AlmacÃ©n';
+            order.status = 'Recibida en Almacén';
 
-            // 2. Incrementar stock del producto en catÃ¡logo y recalcular CPP Contable
+            // 2. Incrementar stock del producto en catálogo y recalcular CPP Contable
             const product = this.products.find(p => p.sku === order.sku);
             let stockBefore = 0;
             let stockAfter = 0;
@@ -3320,7 +3320,7 @@ function hybridInventoryModule() {
                     product.sizes[sz] = (product.sizes[sz] || 0) + (parseInt(this.receivingSizes[sz]) || 0);
                 });
 
-                // Si era dropship y ahora tiene stock fÃ­sico, se vuelve mixto o propio
+                // Si era dropship y ahora tiene stock físico, se vuelve mixto o propio
                 if (product.type === 'dropship' && product.localStock > 0) {
                     product.type = 'mixto';
                 }
@@ -3339,7 +3339,7 @@ function hybridInventoryModule() {
                 const req = this.customerOnDemandRequests.find(r => r.sku === order.sku && r.cartLabel.includes(order.linkedCartId));
                 if (req) {
                     req.verificationStatus = 'confirmado';
-                    req.statusNote = 'MercancÃ­a en AlmacÃ©n - Listo para Empaque Total';
+                    req.statusNote = 'Mercancía en Almacén - Listo para Empaque Total';
                 }
                 this.mixedCartLiberated = {
                     show: true,
@@ -3360,11 +3360,11 @@ function hybridInventoryModule() {
                 stockBefore: stockBefore,
                 stockAfter: stockAfter,
                 reference: 'Orden #' + order.id + ' (' + (order.carrier.split(' ')[0] || 'Inbound') + ')',
-                user: 'AlmacÃ©n Central (RecepciÃ³n Inbound)',
-                note: (order.linkedCartId ? ('RecepciÃ³n de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'RecepciÃ³n conforme de mercancÃ­a en trÃ¡nsito. ') + 'ValuaciÃ³n CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
+                user: 'Almacén Central (Recepción Inbound)',
+                note: (order.linkedCartId ? ('Recepción de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'Recepción conforme de mercancía en tránsito. ') + 'Valuación CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
             });
 
-            // Sincronizar recepciÃ³n Inbound con backend si la orden tiene persistencia DB
+            // Sincronizar recepción Inbound con backend si la orden tiene persistencia DB
             if (order.dbId) {
                 fetch('/api/v1/inventory/purchases/orders/' + order.dbId + '/receive', {
                     method: 'POST',
@@ -3384,7 +3384,7 @@ function hybridInventoryModule() {
             }
 
             this.receiveOrderModalOpen = false;
-            this.showToast('Â¡' + totalReceived + ' piezas de ' + order.sku + ' ingresadas a almacÃ©n exitosamente!', 'success');
+            this.showToast('¡' + totalReceived + ' piezas de ' + order.sku + ' ingresadas a almacén exitosamente!', 'success');
         },
 
         // [P2.2] Generador WhatsApp
@@ -3406,9 +3406,9 @@ function hybridInventoryModule() {
             const lines = [];
             lines.push('*ORDEN DE COMPRA MAYORISTA*');
             lines.push('*Proveedor:* ' + (supplier === 'all' ? 'Consolidado Multimarca' : supplier));
-            lines.push('*Fecha de EmisiÃ³n:* ' + new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }));
+            lines.push('*Fecha de Emisión:* ' + new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }));
             lines.push('*Comprador:* Mi Tienda Online (RevOps Compras)');
-            lines.push('*Destino:* AlmacÃ©n Central CDMX');
+            lines.push('*Destino:* Almacén Central CDMX');
             lines.push('-------------------------------------------');
 
             const filteredOrders = incPlanned ? this.futurePurchaseOrders.filter(o => supplier === 'all' || o.supplier === supplier) : [];
@@ -3423,16 +3423,16 @@ function hybridInventoryModule() {
                     totalUnits += o.qty;
                     totalCost += o.totalCost;
                     lines.push('\n*' + (idx + 1) + '. ' + o.productName + '*');
-                    lines.push('   â€¢ SKU: [' + o.sku + ']');
-                    lines.push('   â€¢ Cantidad Total: *' + o.qty + ' piezas*');
+                    lines.push('   • SKU: [' + o.sku + ']');
+                    lines.push('   • Cantidad Total: *' + o.qty + ' piezas*');
                     if (o.sizes) {
                         const szStr = Object.entries(o.sizes)
                             .filter(([_, v]) => v > 0)
                             .map(([k, v]) => k.toUpperCase() + ': ' + v)
                             .join(' | ');
-                        lines.push('   â€¢ Curva de Tallas: [ ' + szStr + ' ]');
+                        lines.push('   • Curva de Tallas: [ ' + szStr + ' ]');
                     }
-                    lines.push('   â€¢ Costo Unitario: ' + this.formatCurrency(o.costUnit) + ' | Subtotal: *' + this.formatCurrency(o.totalCost) + '*');
+                    lines.push('   • Costo Unitario: ' + this.formatCurrency(o.costUnit) + ' | Subtotal: *' + this.formatCurrency(o.totalCost) + '*');
                 });
                 lines.push('');
             }
@@ -3444,9 +3444,9 @@ function hybridInventoryModule() {
                     totalUnits += r.qty;
                     totalCost += r.totalCost;
                     lines.push('\n*' + (idx + 1) + '. ' + r.productName + '* (Talla: *' + r.size + '*)');
-                    lines.push('   â€¢ SKU: [' + r.sku + '] | Cantidad: *' + r.qty + ' ud(s)*');
-                    lines.push('   â€¢ Referencia: ' + r.cartLabel + ' (' + r.customerName + ')');
-                    lines.push('   â€¢ Subtotal: *' + this.formatCurrency(r.totalCost) + '*');
+                    lines.push('   • SKU: [' + r.sku + '] | Cantidad: *' + r.qty + ' ud(s)*');
+                    lines.push('   • Referencia: ' + r.cartLabel + ' (' + r.customerName + ')');
+                    lines.push('   • Subtotal: *' + this.formatCurrency(r.totalCost) + '*');
                 });
                 lines.push('');
             }
@@ -3454,9 +3454,9 @@ function hybridInventoryModule() {
             lines.push('===========================================');
             lines.push('*RESUMEN TOTAL DE COMPRA:*');
             lines.push('*Total de Piezas:* ' + totalUnits + ' unidades');
-            lines.push('*InversiÃ³n Total Estimada:* ' + this.formatCurrency(totalCost));
+            lines.push('*Inversión Total Estimada:* ' + this.formatCurrency(totalCost));
             lines.push('===========================================');
-            lines.push('*Instrucciones:* Favor de confirmar existencias por talla y enviar cuenta bancaria para liquidaciÃ³n.');
+            lines.push('*Instrucciones:* Favor de confirmar existencias por talla y enviar cuenta bancaria para liquidación.');
 
             return lines.join('\n');
         },
@@ -3466,7 +3466,7 @@ function hybridInventoryModule() {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     this.exportCopiedToast = true;
-                    this.showToast('Â¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
+                    this.showToast('¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
                     setTimeout(() => { this.exportCopiedToast = false; }, 3000);
                 }).catch(() => {
                     this.fallbackCopyText(text);
@@ -3484,11 +3484,11 @@ function hybridInventoryModule() {
             document.execCommand('copy');
             document.body.removeChild(el);
             this.exportCopiedToast = true;
-            this.showToast('Â¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
+            this.showToast('¡Texto copiado al portapapeles! Listo para pegar en WhatsApp.', 'success');
             setTimeout(() => { this.exportCopiedToast = false; }, 3000);
         },
 
-        // Toggle colapso de tarjetas de KPIs (Regla 2 de DiseÃ±o UI)
+        // Toggle colapso de tarjetas de KPIs (Regla 2 de Diseño UI)
         toggleKpis() {
             this.kpisCollapsed = !this.kpisCollapsed;
         },
@@ -3534,7 +3534,7 @@ function hybridInventoryModule() {
         recordOrderDispatch(payload) {
             if (!payload || !payload.items || !Array.isArray(payload.items)) return;
             const orderId = payload.orderId || '#ORD-DESP';
-            const operator = payload.operator || 'Operador LogÃ­stico';
+            const operator = payload.operator || 'Operador Logístico';
             const courier = payload.courier || 'DHL Express';
 
             if (typeof window !== 'undefined') {
@@ -3544,7 +3544,7 @@ function hybridInventoryModule() {
                 }
             }
 
-            // Aliases entre SKUs de tareas Dashboard y catÃ¡logo maestro de inventario
+            // Aliases entre SKUs de tareas Dashboard y catálogo maestro de inventario
             const skuAliases = {
                 'BOX-BAM-001-M': 'BX-MOD-001',
                 'TOR-DRP-002-M': 'JK-ATH-002',
@@ -3588,7 +3588,7 @@ function hybridInventoryModule() {
                         stockAfter: product.localStock,
                         reference: orderId,
                         user: operator,
-                        note: `Despacho de pedido ${orderId} vÃ­a ${courier}.${prefNote} Stock comprometido liberado y fÃ­sico deducido.`
+                        note: `Despacho de pedido ${orderId} vía ${courier}.${prefNote} Stock comprometido liberado y físico deducido.`
                     });
                 } else {
                     this.recordInventoryMovement({
@@ -3601,7 +3601,7 @@ function hybridInventoryModule() {
                         stockAfter: 0,
                         reference: orderId,
                         user: operator,
-                        note: `Despacho de pedido ${orderId} vÃ­a ${courier}.${prefNote} Salida registrada sin decremento local.`
+                        note: `Despacho de pedido ${orderId} vía ${courier}.${prefNote} Salida registrada sin decremento local.`
                     });
                 }
             });
@@ -3611,7 +3611,7 @@ function hybridInventoryModule() {
             }
         },
 
-        // TASK-INT-03: LiberaciÃ³n Masiva de Lotes de SuscripciÃ³n (Batch Fulfillment en Fecha de Corte)
+        // TASK-INT-03: Liberación Masiva de Lotes de Suscripción (Batch Fulfillment en Fecha de Corte)
         recordSubscriptionBatchFulfillment(payload) {
             if (!payload || !payload.batchCode || !payload.componentsDeduction || !Array.isArray(payload.componentsDeduction)) return;
             const batchCode = payload.batchCode;
@@ -3740,10 +3740,10 @@ function hybridInventoryModule() {
         },
 
         // =========================================================================
-        // MÃ‰TODOS DE PRIORIDAD 3: EDICIÃ“N INLINE & ACCIONES EN LOTE
+        // MÉTODOS DE PRIORIDAD 3: EDICIÓN INLINE & ACCIONES EN LOTE
         // =========================================================================
 
-        // [P3.1] EdiciÃ³n RÃ¡pida en LÃ­nea
+        // [P3.1] Edición Rápida en Línea
         startInlineEdit(sku, field, initialValue) {
             this.editingCell = { sku: sku, field: field };
             this.tempEditValue = initialValue;
@@ -3810,7 +3810,7 @@ function hybridInventoryModule() {
 
         exportSelectedToCsv() {
             if (this.selectedSkus.length === 0) {
-                this.showToast('No has seleccionado ningÃºn producto para exportar.', 'warning');
+                this.showToast('No has seleccionado ningún producto para exportar.', 'warning');
                 return;
             }
             const selectedProds = this.products.filter(p => this.selectedSkus.includes(p.sku));
@@ -3845,12 +3845,12 @@ function hybridInventoryModule() {
         },
 
         // =========================================================================
-        // MÃ‰TODOS DE EXPORTACIÃ“N A MICROSOFT EXCEL (.xlsx / .xls)
+        // MÉTODOS DE EXPORTACIÓN A MICROSOFT EXCEL (.xlsx / .xls)
         // =========================================================================
 
         exportSelectedToExcel() {
             if (this.selectedSkus.length === 0) {
-                this.showToast('No has seleccionado ningÃºn producto para exportar.', 'warning');
+                this.showToast('No has seleccionado ningún producto para exportar.', 'warning');
                 return;
             }
             const selectedProds = this.products.filter(p => this.selectedSkus.includes(p.sku));
@@ -3860,9 +3860,9 @@ function hybridInventoryModule() {
             const excelRows = selectedProds.map(p => ({
                 'SKU': p.sku,
                 'Producto': p.name || '',
-                'CategorÃ­a': p.category || '',
+                'Categoría': p.category || '',
                 'Tipo': p.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo',
-                'Stock FÃ­sico': p.localStock || 0,
+                'Stock Físico': p.localStock || 0,
                 'Stock Comprometido': p.committedStock || 0,
                 'Stock Disponible': this.getAvailableStock(p),
                 'Talla CH': (p.sizes && p.sizes.ch) || 0,
@@ -3875,10 +3875,10 @@ function hybridInventoryModule() {
                 'PVP (MXN)': p.pvp || 0,
                 'Margen (%)': this.calculateMarginPercent(p.pvp, p.cost) + '%',
                 'Proveedor': p.provider || p.supplier || 'Torzo B2B',
-                'UbicaciÃ³n': p.location || 'Rack Principal'
+                'Ubicación': p.location || 'Rack Principal'
             }));
 
-            // Si SheetJS (XLSX) estÃ¡ disponible (CDN en index.html)
+            // Si SheetJS (XLSX) está disponible (CDN en index.html)
             if (typeof window !== 'undefined' && window.XLSX) {
                 const ws = window.XLSX.utils.json_to_sheet(excelRows);
                 ws['!cols'] = [
@@ -3888,11 +3888,11 @@ function hybridInventoryModule() {
                     { wch: 18 }, { wch: 12 }, { wch: 12 }, { wch: 22 }, { wch: 18 }
                 ];
                 const wb = window.XLSX.utils.book_new();
-                window.XLSX.utils.book_append_sheet(wb, ws, 'CatÃ¡logo Operativo');
+                window.XLSX.utils.book_append_sheet(wb, ws, 'Catálogo Operativo');
                 window.XLSX.writeFile(wb, fileName + '.xlsx');
             } else {
-                // Fallback XML Spreadsheet para Excel sin requerir librerÃ­a externa
-                this.downloadExcelHtml(excelRows, 'CatÃ¡logo Operativo', fileName + '.xls');
+                // Fallback XML Spreadsheet para Excel sin requerir librería externa
+                this.downloadExcelHtml(excelRows, 'Catálogo Operativo', fileName + '.xls');
             }
 
             this.showToast(selectedProds.length + ' productos exportados a Excel exitosamente.', 'success');
@@ -3904,7 +3904,7 @@ function hybridInventoryModule() {
             const requests = this.customerOnDemandRequests.filter(r => supplierFilter === 'all' || r.supplier === supplierFilter);
 
             if (orders.length === 0 && requests.length === 0) {
-                this.showToast('No hay Ã³rdenes ni solicitudes para exportar.', 'warning');
+                this.showToast('No hay órdenes ni solicitudes para exportar.', 'warning');
                 return;
             }
 
@@ -3932,7 +3932,7 @@ function hybridInventoryModule() {
             const requestsData = requests.map(r => ({
                 'ID Solicitud': r.id,
                 'Cliente': r.customer,
-                'TelÃ©fono': r.phone || '',
+                'Teléfono': r.phone || '',
                 'SKU': r.sku,
                 'Prenda': r.item,
                 'Talla Requerida': r.size,
@@ -3958,11 +3958,11 @@ function hybridInventoryModule() {
                 this.downloadExcelHtml(combinedData, 'Ordenes de Compra', fileName + '.xls');
             }
 
-            this.showToast('Ã“rdenes consolidadas exportadas a Excel exitosamente.', 'success');
+            this.showToast('Órdenes consolidadas exportadas a Excel exitosamente.', 'success');
         },
 
         // =========================================================================
-        // MÃ‰TODOS DE PRIORIDAD 4: ROP / DOH, SCRAPING ALERTS & PARETO ABC
+        // MÉTODOS DE PRIORIDAD 4: ROP / DOH, SCRAPING ALERTS & PARETO ABC
         // =========================================================================
 
         // [P4.1] Motor Predictivo ROP / DOH
@@ -4010,7 +4010,7 @@ function hybridInventoryModule() {
             const xxl = Math.max(0, Math.round(needed * 0.03));
             const xxxl = Math.max(0, needed - (ch + m + g + xl + xxl));
             const cost = product.cost || 120;
-            // Regla de criticidad ROP para asignaciÃ³n de prioridad inicial (editable posteriormente)
+            // Regla de criticidad ROP para asignación de prioridad inicial (editable posteriormente)
             const currentStock = product.stock !== undefined ? product.stock : (product.unitStock || 0);
             const ropThreshold = product.rop || 20;
             let dynamicPriority = 'media';
@@ -4032,7 +4032,7 @@ function hybridInventoryModule() {
                 costUnit: cost,
                 totalCost: needed * cost,
                 priority: dynamicPriority,
-                status: 'Planificada (ROP AutomÃ¡tico)',
+                status: 'Planificada (ROP Automático)',
                 date: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
             };
             this.futurePurchaseOrders.unshift(newOrder);
@@ -4042,16 +4042,16 @@ function hybridInventoryModule() {
         openCreatePOForProduct(product) {
             this.generateROPOrder(product);
             this.activeTab = 'purchases';
-            this.showToast('Redirigiendo a Ã“rdenes de Compra para ' + product.sku, 'info');
+            this.showToast('Redirigiendo a Órdenes de Compra para ' + product.sku, 'info');
         },
 
-        // [P4.2] MÃ©todos del Centro de Scraping Torzo Bot
+        // [P4.2] Métodos del Centro de Scraping Torzo Bot
         triggerScraperQuickCheck() {
             this.isScrapingNow = true;
-            this.showToast('Torzo Bot: Consultando stock y variaciones en catÃ¡logo remoto...', 'info');
+            this.showToast('Torzo Bot: Consultando stock y variaciones en catálogo remoto...', 'info');
             setTimeout(() => {
                 this.isScrapingNow = false;
-                this.lastScrapeTime = 'ReciÃ©n sincronizado';
+                this.lastScrapeTime = 'Recién sincronizado';
                 this.showToast('Scraping completado: 7 mayoristas auditados, 3 alertas vigentes.', 'success');
             }, 1200);
         },
@@ -4089,15 +4089,15 @@ function hybridInventoryModule() {
             alert.resolved = true;
         },
 
-        // [P4.3] MÃ©todos de Filtro Temporal y AnÃ¡lisis ABC (Pareto)
+        // [P4.3] Métodos de Filtro Temporal y Análisis ABC (Pareto)
         setDashboardTimeRange(range) {
             this.dashboardTimeRange = range;
             const labels = {
                 'today': 'Hoy',
-                '7d': 'Ãšltimos 7 DÃ­as',
-                '30d': 'Ãšltimos 30 DÃ­as',
-                'year': 'Este AÃ±o (2026)',
-                'all': 'HistÃ³rico Completo'
+                '7d': 'Últimos 7 Días',
+                '30d': 'Últimos 30 Días',
+                'year': 'Este Año (2026)',
+                'all': 'Histórico Completo'
             };
             this.showToast('Dashboard filtrado para: ' + (labels[range] || range), 'info');
         },
@@ -4122,7 +4122,7 @@ function hybridInventoryModule() {
         filterByAbcFromDashboard(abc) {
             this.abcFilter = abc;
             this.activeTab = 'inventory';
-            this.showToast('Filtrando catÃ¡logo por Clase ABC: ' + abc, 'info');
+            this.showToast('Filtrando catálogo por Clase ABC: ' + abc, 'info');
         },
 
         downloadExcelHtml(rows, sheetName, filename) {
@@ -4197,7 +4197,7 @@ function hybridInventoryModule() {
                 }
             });
             this.bulkCategoryModalOpen = false;
-            this.showToast(count + ' productos reasignados a la categorÃ­a ' + targetCat + '.', 'success');
+            this.showToast(count + ' productos reasignados a la categoría ' + targetCat + '.', 'success');
         },
 
         addSelectedToPurchases() {
@@ -4226,7 +4226,7 @@ function hybridInventoryModule() {
                 }
             });
             this.selectedSkus = [];
-            this.showToast(addedCount + ' lotes aÃ±adidos a la Lista de Compras Planificadas.', 'success');
+            this.showToast(addedCount + ' lotes añadidos a la Lista de Compras Planificadas.', 'success');
         },
 
         init() {
@@ -4305,7 +4305,7 @@ function hybridInventoryModule() {
                     window.addEventListener('open-stock-locks-modal', () => {
                         this.openStockLocksModal();
                     });
-                    // Soporte de impresiÃ³n formal de Orden de Compra (PO PDF)
+                    // Soporte de impresión formal de Orden de Compra (PO PDF)
                     window.addEventListener('beforeprint', () => {
                         const targetInstance = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
                         if (targetInstance && targetInstance.poGeneratorModalOpen) {
@@ -4315,7 +4315,7 @@ function hybridInventoryModule() {
                     window.addEventListener('afterprint', () => {
                         document.body.classList.remove('printing-po-doc');
                     });
-                    // TASK-INT-06: Listeners para telemetrÃ­a de carritos simultÃ¡neos y reservas con TTL
+                    // TASK-INT-06: Listeners para telemetría de carritos simultáneos y reservas con TTL
                     window.addEventListener('stock-lock-acquired', (e) => {
                         if (e && e.detail) {
                             this.handleStockLockAcquired(e.detail);
@@ -4360,7 +4360,7 @@ function hybridInventoryModule() {
                         }
                     });
                 }
-                // TASK-INT-02: Consumir cola de despachos pendientes e histÃ³ricos si existen
+                // TASK-INT-02: Consumir cola de despachos pendientes e históricos si existen
                 if (window.__pendingOrderDispatches && Array.isArray(window.__pendingOrderDispatches)) {
                     while (window.__pendingOrderDispatches.length > 0) {
                         const pendingPayload = window.__pendingOrderDispatches.shift();
@@ -4397,15 +4397,15 @@ function hybridInventoryModule() {
         },
 
         initApparelDefaults() {
-            const fabricList = ['Modal Seamless', 'AlgodÃ³n Peinado', 'Malla / Mesh Transpirable', 'Elastano / Spandex Fit', 'Microfibra Velvet Touch', 'BambÃº Eco Air'];
+            const fabricList = ['Modal Seamless', 'Algodón Peinado', 'Malla / Mesh Transpirable', 'Elastano / Spandex Fit', 'Microfibra Velvet Touch', 'Bambú Eco Air'];
             const colorList = [
                 { name: 'Negro Profundo', hex: '#0f172a', type: 'solid' },
-                { name: 'Blanco Ã“palo', hex: '#f8fafc', type: 'solid' },
+                { name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid' },
                 { name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid' },
                 { name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent' },
                 { name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent' },
                 { name: 'Gris Oxford', hex: '#475569', type: 'solid' },
-                { name: 'Rojo BorgoÃ±a', hex: '#881337', type: 'solid' }
+                { name: 'Rojo Borgoña', hex: '#881337', type: 'solid' }
             ];
             const sectionList = ['basicos', 'disenador', 'temporada', 'general'];
 
@@ -4419,12 +4419,12 @@ function hybridInventoryModule() {
                 }
                 if (p.designType === undefined) p.designType = (idx % 3 === 1) ? 'con_diseno' : 'sin_diseno';
                 if (p.websiteSection === undefined) p.websiteSection = sectionList[idx % sectionList.length];
-                if (p.isPublished === undefined) p.isPublished = idx !== 2; // SKU 3 fuera de catÃ¡logo para demostrar
+                if (p.isPublished === undefined) p.isPublished = idx !== 2; // SKU 3 fuera de catálogo para demostrar
                 if (p.brand === undefined) p.brand = p.type === 'dropship' ? 'Torzo B2B' : (idx % 2 === 0 ? 'ModaIntima Textil MX' : 'Marte RevOps Intimates');
                 if (p.discountPct === undefined) p.discountPct = (idx === 0 || idx === 3) ? 15 : 0;
                 if (p.regularPrice === undefined) p.regularPrice = p.pvp;
                 if (!p.description) {
-                    p.description = `Prenda ergonÃ³mica de alta calidad confeccionada con ${p.fabricType}. DiseÃ±ada para soporte anatÃ³mico Ã³ptimo, transpirabilidad duradera y tacto ultrasuave para uso cotidiano.`;
+                    p.description = `Prenda ergonómica de alta calidad confeccionada con ${p.fabricType}. Diseñada para soporte anatómico óptimo, transpirabilidad duradera y tacto ultrasuave para uso cotidiano.`;
                 }
             });
         },
@@ -4466,7 +4466,7 @@ function hybridInventoryModule() {
             });
         },
 
-        // TASK-INT-01: MÃ©todos de GestiÃ³n de Saltos Profundos (Deep Links) Inter-Hub
+        // TASK-INT-01: Métodos de Gestión de Saltos Profundos (Deep Links) Inter-Hub
         handleDeepLink(options = {}) {
             if (!options) return;
             if (options.tab) {
@@ -4483,7 +4483,7 @@ function hybridInventoryModule() {
             if (options.searchFilter !== undefined && options.searchFilter !== null && options.searchFilter !== '') {
                 this.searchFilter = options.searchFilter;
                 this.deepLinkActive = true;
-                this.deepLinkBannerText = options.bannerMessage || `Filtro activo por bÃºsqueda: "${options.searchFilter}"`;
+                this.deepLinkBannerText = options.bannerMessage || `Filtro activo por búsqueda: "${options.searchFilter}"`;
             }
             if (options.supplierFilter && options.supplierFilter !== 'all') {
                 this.supplierFilter = options.supplierFilter;
@@ -4522,7 +4522,7 @@ function hybridInventoryModule() {
             }
             this.visibleCount = this.pageSize || 8;
             if (typeof showToast === 'function') {
-                showToast('CatÃ¡logo completo restablecido sin filtros');
+                showToast('Catálogo completo restablecido sin filtros');
             }
         },
 
@@ -4616,7 +4616,7 @@ function hybridInventoryModule() {
                     matchesSanitary = !!item.requiresSanitaryControl && this.getDaysUntilExpiration(item.expirationDate) <= 30;
                 }
 
-                // Filtros especÃ­ficos por columna (Regla 7)
+                // Filtros específicos por columna (Regla 7)
                 let matchesCol = true;
                 if (this.colFilters) {
                     if (this.colFilters.sku && this.colFilters.sku.trim() !== '') {
@@ -4731,7 +4731,7 @@ function hybridInventoryModule() {
             }
         },
 
-        // TASK-INV-09: MÃ©todos de GestiÃ³n y Renderizado de Tonos de CosmÃ©tica
+        // TASK-INV-09: Métodos de Gestión y Renderizado de Tonos de Cosmética
         get activeCosmeticShades() {
             return (this.cosmeticShades || []).filter(s => s.is_active);
         },
@@ -4762,8 +4762,8 @@ function hybridInventoryModule() {
         },
 
         getUndertoneLabel(undertone) {
-            if (undertone === 'warm') return 'CÃ¡lido';
-            if (undertone === 'cool') return 'FrÃ­o';
+            if (undertone === 'warm') return 'Cálido';
+            if (undertone === 'cool') return 'Frío';
             return 'Neutro';
         },
 
@@ -4801,7 +4801,7 @@ function hybridInventoryModule() {
         saveCosmeticShade() {
             const form = this.cosmeticShadesModal.form;
             if (!form.code || !form.code.trim() || !form.name || !form.name.trim() || !form.hex_color) {
-                this.showToast('Por favor completa el cÃ³digo, nombre comercial y color hexadecimal.', 'warning');
+                this.showToast('Por favor completa el código, nombre comercial y color hexadecimal.', 'warning');
                 return;
             }
             const cleanCode = form.code.trim();
@@ -4821,7 +4821,7 @@ function hybridInventoryModule() {
             } else {
                 const exists = this.cosmeticShades.some(s => s.code.toLowerCase() === cleanCode.toLowerCase());
                 if (exists) {
-                    this.showToast(`El cÃ³digo de tono ${cleanCode} ya existe. Usa un cÃ³digo Ãºnico.`, 'warning');
+                    this.showToast(`El código de tono ${cleanCode} ya existe. Usa un código único.`, 'warning');
                     return;
                 }
                 const newId = Math.max(0, ...this.cosmeticShades.map(s => s.id)) + 1;
@@ -4835,7 +4835,7 @@ function hybridInventoryModule() {
                     is_active: form.is_active
                 };
                 this.cosmeticShades.push(newShade);
-                this.showToast(`Nuevo tono cosmÃ©tico ${cleanCode} (${form.name}) registrado exitosamente.`, 'success');
+                this.showToast(`Nuevo tono cosmético ${cleanCode} (${form.name}) registrado exitosamente.`, 'success');
             }
             if (typeof window !== 'undefined') {
                 window.cosmeticShadesMaster = this.cosmeticShades;
@@ -4855,7 +4855,7 @@ function hybridInventoryModule() {
             const shade = this.cosmeticShades.find(s => s.id === shadeId);
             if (!shade) return;
             if (this.cosmeticShades.length <= 1) {
-                this.showToast('Debe existir al menos un tono en el catÃ¡logo maestro.', 'warning');
+                this.showToast('Debe existir al menos un tono en el catálogo maestro.', 'warning');
                 return;
             }
             this.cosmeticShades = this.cosmeticShades.filter(s => s.id !== shadeId);
@@ -4930,7 +4930,7 @@ function hybridInventoryModule() {
 
         rescrapeProduct(item) {
             item.isScraping = true;
-            this.showToast(`Sincronizando con catÃ¡logo de Torzo para ${item.sku}...`, 'info');
+            this.showToast(`Sincronizando con catálogo de Torzo para ${item.sku}...`, 'info');
             setTimeout(() => {
                 item.isScraping = false;
                 const newStock = Math.floor(Math.random() * 40) + 10;
@@ -4942,7 +4942,7 @@ function hybridInventoryModule() {
         },
 
         
-        // --- GESTIÃ“N DE FUTURAS COMPRAS CON PROVEEDOR ---
+        // --- GESTIÓN DE FUTURAS COMPRAS CON PROVEEDOR ---
         purchaseSupplier: 'Torzo B2B',
         purchaseQty: 50,
         purchasePriority: 'alta',
@@ -5022,7 +5022,7 @@ function hybridInventoryModule() {
                 supplier: 'Silk & Cotton Iberia SL',
                 ref: 'NC-SILK-2026-01',
                 amount: 540.00,
-                reason: 'PenalizaciÃ³n acordada por demora de 4 dÃ­as hÃ¡biles en recolecciÃ³n de transporte',
+                reason: 'Penalización acordada por demora de 4 días hábiles en recolección de transporte',
                 date: '02 Sept, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -5030,7 +5030,7 @@ function hybridInventoryModule() {
                 supplier: 'Torzo B2B',
                 ref: 'NC-TORZO-2026-012',
                 amount: 850.00,
-                reason: 'Faltante en muelle rampa Inbound 02 verificado contra remisiÃ³n #TRZ-889',
+                reason: 'Faltante en muelle rampa Inbound 02 verificado contra remisión #TRZ-889',
                 date: '14 Sept, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -5038,7 +5038,7 @@ function hybridInventoryModule() {
                 supplier: 'Torzo B2B',
                 ref: 'NC-TORZO-2026-007',
                 amount: 1420.00,
-                reason: 'BonificaciÃ³n por volumen trimestral y compensaciÃ³n por merma de tintura en lote anterior',
+                reason: 'Bonificación por volumen trimestral y compensación por merma de tintura en lote anterior',
                 date: '28 Ago, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -5046,7 +5046,7 @@ function hybridInventoryModule() {
                 supplier: 'ModaIntima Textil MX',
                 ref: 'NC-MODA-2026-001',
                 amount: 600.00,
-                reason: 'BonificaciÃ³n comercial acordada por retraso de transporte fletero',
+                reason: 'Bonificación comercial acordada por retraso de transporte fletero',
                 date: '10 Sept, 2026',
                 status: 'Pendiente de Aplicar'
             },
@@ -5066,7 +5066,7 @@ function hybridInventoryModule() {
                 id: 'KDX-PUR-2026-001',
                 timestamp: '05 Sept, 2026 12:45',
                 type: 'PO_EMITIDA',
-                typeLabel: 'EmisiÃ³n de PO',
+                typeLabel: 'Emisión de PO',
                 badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
                 poNumber: 'PO-2026-0041',
                 supplier: 'Torzo B2B',
@@ -5075,7 +5075,7 @@ function hybridInventoryModule() {
                 deltaQty: '+48 uds',
                 totalAmount: 10080.00,
                 user: 'Elena Compras',
-                notes: 'GeneraciÃ³n formal de PO enviada a taller con entrega programada en Rampa Central CDMX.'
+                notes: 'Generación formal de PO enviada a taller con entrega programada en Rampa Central CDMX.'
             },
             {
                 id: 'KDX-PUR-2026-002',
@@ -5111,7 +5111,7 @@ function hybridInventoryModule() {
                 id: 'KDX-PUR-2026-004',
                 timestamp: '04 Sept, 2026 14:00',
                 type: 'RECEPCION_RAMPA',
-                typeLabel: 'RecepciÃ³n en Rampa',
+                typeLabel: 'Recepción en Rampa',
                 badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
                 poNumber: 'PO-2026-0038',
                 supplier: 'Torzo B2B',
@@ -5119,17 +5119,17 @@ function hybridInventoryModule() {
                 productName: 'Jockstrap Athletic Carbon Edition',
                 deltaQty: '+28 uds ingresadas',
                 totalAmount: 3245.00,
-                user: 'Carlos AlmacÃ©n',
-                notes: 'Ingreso fÃ­sico a rack A-02 conforme conteo ciego validado.'
+                user: 'Carlos Almacén',
+                notes: 'Ingreso físico a rack A-02 conforme conteo ciego validado.'
             }
         ],
 
-        // [P2.1] ColecciÃ³n reactiva de Ã“rdenes de Compra Activas (En TrÃ¡nsito y AlmacÃ©n)
+        // [P2.1] Colección reactiva de Órdenes de Compra Activas (En Tránsito y Almacén)
         activePurchaseOrders: [
             {
                 id: 'OC-2026-085',
                 supplier: 'Torzo B2B',
-                carrier: 'FedEx Express (GuÃ­a #FX-882910-MX)',
+                carrier: 'FedEx Express (Guía #FX-882910-MX)',
                 eta: 'Hoy / En Reparto',
                 sku: 'JK-ATH-002',
                 productName: 'Jockstrap Athletic Carbon Edition',
@@ -5145,7 +5145,7 @@ function hybridInventoryModule() {
             {
                 id: 'OC-2026-088',
                 supplier: 'Torzo B2B',
-                carrier: 'DHL Express (GuÃ­a #DHL-994012-MX)',
+                carrier: 'DHL Express (Guía #DHL-994012-MX)',
                 eta: 'Arribo en Sucursal',
                 sku: 'TOR-DRP-003',
                 productName: 'Torzo Mesh Breathable Trunk',
@@ -5156,13 +5156,13 @@ function hybridInventoryModule() {
                 date: '04 Sept, 2026',
                 status: 'En Camino',
                 linkedCartId: '#ORD-4491',
-                linkedCustomer: 'SofÃ­a AlbarrÃ¡n'
+                linkedCustomer: 'Sofía Albarrán'
             },
             {
                 id: 'OC-2026-089',
                 supplier: 'Torzo B2B',
-                carrier: 'Estafeta Terrestre (GuÃ­a #EST-440192-MX)',
-                eta: '3 - 5 dÃ­as hÃ¡biles',
+                carrier: 'Estafeta Terrestre (Guía #EST-440192-MX)',
+                eta: '3 - 5 días hábiles',
                 sku: 'TOR-DRP-006',
                 productName: 'Boxer Mesh Breathable UltraVent',
                 qty: 45,
@@ -5170,32 +5170,32 @@ function hybridInventoryModule() {
                 unitCost: 115.00,
                 totalCost: 5175.00,
                 date: '05 Sept, 2026',
-                status: 'Pendiente ConfirmaciÃ³n',
+                status: 'Pendiente Confirmación',
                 linkedCartId: null,
                 linkedCustomer: null
             }
         ],
 
-        // [P2.1] Estado para Modal de RecepciÃ³n Inbound
+        // [P2.1] Estado para Modal de Recepción Inbound
         receiveOrderModalOpen: false,
         receivingOrder: null,
         receivingSizes: { ch: 0, m: 0, g: 0, xl: 0, '2xl': 0, '3xl': 0 },
-        receivingNotes: 'Cotejo fÃ­sico conforme. Empaque sellado de origen.',
+        receivingNotes: 'Cotejo físico conforme. Empaque sellado de origen.',
         mixedCartLiberated: { show: false, orderId: '', customer: '', item: '', date: '' },
 
-        // [P2.2] Estado para Generador de Ã“rdenes WhatsApp
+        // [P2.2] Estado para Generador de Órdenes WhatsApp
         orderExportModalOpen: false,
         exportSupplierFilter: 'Torzo B2B',
         exportIncludeOnDemand: true,
         exportIncludePlanned: true,
         exportCopiedToast: false,
 
-        // [P2.3] Estado para Kardex & AuditorÃ­a Multicanal
+        // [P2.3] Estado para Kardex & Auditoría Multicanal
         kardexDrawerOpen: false,
         kardexSearch: '',
         kardexFilterType: 'all',
 
-        // [P3.1] Estado para EdiciÃ³n RÃ¡pida en LÃ­nea (Inline Quick Edit)
+        // [P3.1] Estado para Edición Rápida en Línea (Inline Quick Edit)
         editingCell: { sku: null, field: null },
         tempEditValue: null,
         savedCellFeedback: { sku: null, field: null },
@@ -5244,7 +5244,7 @@ function hybridInventoryModule() {
         drawerPaoMonths: 12,
         drawerRequiresSanitaryControl: false,
 
-        // Centro de AuditorÃ­a Operativa & Discrepancias B2B (Propuesta 1)
+        // Centro de Auditoría Operativa & Discrepancias B2B (Propuesta 1)
         isScrapingNow: false,
         scrapingAlerts: [
             {
@@ -5346,20 +5346,20 @@ function hybridInventoryModule() {
                 stockAfter: 284,
                 reference: 'Pedido Mixto #ORD-4491',
                 user: 'Checkout Web',
-                note: 'Prenda fÃ­sica apartada en rack esperando mercancÃ­a de Torzo'
+                note: 'Prenda física apartada en rack esperando mercancía de Torzo'
             },
             {
                 id: 'MOV-2026-099',
                 timestamp: '05 Sept 2026, 17:40',
                 type: 'ENTRADA_COMPRA',
                 sku: 'BX-COT-007',
-                productName: 'Trunk AlgodÃ³n OrgÃ¡nico Pack x3',
+                productName: 'Trunk Algodón Orgánico Pack x3',
                 sizes: { ch: 5, m: 15, g: 15, xl: 5 },
                 delta: 40,
                 stockBefore: 95,
                 stockAfter: 135,
                 reference: 'Orden Compra #OC-2026-079 (DHL)',
-                user: 'Carlos M. (AlmacÃ©n Central)',
+                user: 'Carlos M. (Almacén Central)',
                 note: 'Ingreso por reabastecimiento programado de temporada'
             },
             {
@@ -5374,14 +5374,14 @@ function hybridInventoryModule() {
                 stockAfter: 42,
                 reference: 'TKT-MER-014',
                 user: 'Control de Calidad',
-                note: 'Descostura en elÃ¡stico reportada en inspecciÃ³n previa a empaque'
+                note: 'Descostura en elástico reportada en inspección previa a empaque'
             },
             {
                 id: 'MOV-2026-097',
                 timestamp: '05 Sept 2026, 11:25',
                 type: 'VENTA_DIRECTA',
                 sku: 'TG-SLK-004',
-                productName: 'Tanga ClÃ¡sica Hilos de Seda',
+                productName: 'Tanga Clásica Hilos de Seda',
                 sizes: { ch: 1, m: 2 },
                 delta: -3,
                 stockBefore: 61,
@@ -5401,8 +5401,8 @@ function hybridInventoryModule() {
                 stockBefore: 110,
                 stockAfter: 112,
                 reference: 'AUD-INV-SEMANAL',
-                user: 'Supervisor de AlmacÃ©n',
-                note: 'Ajuste positivo por conteo fÃ­sico en gaveta B-04'
+                user: 'Supervisor de Almacén',
+                note: 'Ajuste positivo por conteo físico en gaveta B-04'
             },
             {
                 id: 'MOV-2026-095',
@@ -5414,8 +5414,8 @@ function hybridInventoryModule() {
                 delta: -3,
                 stockBefore: 38,
                 stockAfter: 35,
-                reference: 'GuÃ­a DHL #981273-MX',
-                user: 'LogÃ­stica Outbound',
+                reference: 'Guía DHL #981273-MX',
+                user: 'Logística Outbound',
                 note: 'Despacho expedido hacia Guadalajara'
             },
             {
@@ -5429,8 +5429,8 @@ function hybridInventoryModule() {
                 stockBefore: 50,
                 stockAfter: 75,
                 reference: 'Orden Compra #OC-2026-074',
-                user: 'Carlos M. (AlmacÃ©n Central)',
-                note: 'RecepciÃ³n conforme de pedido a Balam Textil'
+                user: 'Carlos M. (Almacén Central)',
+                note: 'Recepción conforme de pedido a Balam Textil'
             }
         ],
 
@@ -5445,7 +5445,7 @@ function hybridInventoryModule() {
                 cartType: 'solicitud_pedido',
                 cartLabel: 'Carrito Solicitud Directa',
                 sku: 'BX-DEP-009',
-                productName: 'BÃ³xer Deportivo Seamless Dry',
+                productName: 'Bóxer Deportivo Seamless Dry',
                 size: 'G',
                 qty: 2,
                 supplier: 'Torzo B2B',
@@ -5458,10 +5458,10 @@ function hybridInventoryModule() {
             },
             {
                 id: 'REQ-2026-082',
-                customerName: 'SofÃ­a AlbarrÃ¡n',
+                customerName: 'Sofía Albarrán',
                 customerPhone: '+52 33 9876 5432',
                 cartType: 'mixto_linea_proveedor',
-                cartLabel: 'Carrito Mixto #ORD-4491 (LÃ­nea On-Demand)',
+                cartLabel: 'Carrito Mixto #ORD-4491 (Línea On-Demand)',
                 sku: 'TOR-DRP-003',
                 productName: 'Torzo Mesh Breathable Trunk',
                 size: 'M',
@@ -5519,7 +5519,7 @@ function hybridInventoryModule() {
         },
 
         // ====================================================================
-        // TASK-INT-06: GESTOR DE CARRITOS SIMULTÃNEOS Y RESERVA TEMPORAL (TTL)
+        // TASK-INT-06: GESTOR DE CARRITOS SIMULTÁNEOS Y RESERVA TEMPORAL (TTL)
         // ====================================================================
         get activeStockLocks() {
             const now = Date.now();
@@ -5638,7 +5638,7 @@ function hybridInventoryModule() {
                 .reduce((sum, lock) => sum + (lock.quantity || 0), 0);
         },
 
-        // Motor de Stock de 3 Estados (FÃ³rmula Tripartita: FÃ­sico - Comprometido - Bloqueado en Carrito = Disponible)
+        // Motor de Stock de 3 Estados (Fórmula Tripartita: Físico - Comprometido - Bloqueado en Carrito = Disponible)
         getAvailableStock(product) {
             if (!product) return 0;
             const physical = product.localStock || 0;
@@ -5702,10 +5702,10 @@ function hybridInventoryModule() {
             this.hasAddedPurchaseThisSession = true;
             this.purchaseAddedSuccess = true;
             setTimeout(() => { this.purchaseAddedSuccess = false; }, 4000);
-            this.showToast(qty + ' uds (' + this.selectedProduct.sku + ') aÃ±adidas con desglose por tallas a compras.', 'success');
+            this.showToast(qty + ' uds (' + this.selectedProduct.sku + ') añadidas con desglose por tallas a compras.', 'success');
         },
 
-        // [TASK-INV-16] MÃ©todos reactivos de la bandeja de Compras, PO y Kardex
+        // [TASK-INV-16] Métodos reactivos de la bandeja de Compras, PO y Kardex
         updatePlannedOrderQty(orderId, newQty) {
             const order = this.futurePurchaseOrders.find(o => o.id === orderId);
             if (!order) return;
@@ -5743,7 +5743,7 @@ function hybridInventoryModule() {
                 user: 'Elena Compras',
                 notes: 'Cantidad modificada en compras planificadas. Subtotal recalculado a $' + order.totalCost.toFixed(2) + ' MXN.'
             });
-            this.showToast('Lote ' + order.id + ' actualizado a ' + qty + ' uds. InversiÃ³n recalculada.', 'info');
+            this.showToast('Lote ' + order.id + ' actualizado a ' + qty + ' uds. Inversión recalculada.', 'info');
         },
 
         updatePlannedOrderSize(orderId, sizeKey, val) {
@@ -5801,7 +5801,7 @@ function hybridInventoryModule() {
                 user: 'Elena Compras',
                 notes: 'Costo unitario pactado con fabricante actualizado a $' + cost.toFixed(2) + ' MXN. Subtotal recalculado a $' + order.totalCost.toFixed(2) + ' MXN.'
             });
-            this.showToast('Costo de ' + order.id + ' actualizado a $' + cost.toFixed(2) + ' MXN. InversiÃ³n recalculada.', 'info');
+            this.showToast('Costo de ' + order.id + ' actualizado a $' + cost.toFixed(2) + ' MXN. Inversión recalculada.', 'info');
         },
 
         updatePlannedOrderPriority(orderId, newPriority) {
@@ -5827,11 +5827,11 @@ function hybridInventoryModule() {
             const poNumber = po ? po.poNumber : 'PO-OFICIAL';
             const el = document.getElementById('printablePurchaseOrderDoc');
 
-            // 1. AÃ±adir clase de respaldo en el body principal
+            // 1. Añadir clase de respaldo en el body principal
             document.body.classList.add('printing-po-doc');
 
-            // 2. MÃ©todo Principal: ImpresiÃ³n vÃ­a iFrame Aislado
-            // Desacopla 100% el documento de la jerarquÃ­a de modales, flexbox, overflow y transforms GPU de Chromium
+            // 2. Método Principal: Impresión vía iFrame Aislado
+            // Desacopla 100% el documento de la jerarquía de modales, flexbox, overflow y transforms GPU de Chromium
             if (typeof document !== 'undefined' && el) {
                 try {
                     let printFrame = document.getElementById('poPrintFrame');
@@ -5912,7 +5912,7 @@ function hybridInventoryModule() {
                             printFrame.contentWindow.focus();
                             printFrame.contentWindow.print();
                         } catch (err) {
-                            console.warn('Fallo impresiÃ³n iframe, recurriendo a window.print()', err);
+                            console.warn('Fallo impresión iframe, recurriendo a window.print()', err);
                             if (typeof window !== 'undefined' && window.print) {
                                 window.print();
                             }
@@ -6031,9 +6031,9 @@ function hybridInventoryModule() {
                     map[sup] = {
                         supplier: sup,
                         providerData: prov || null,
-                        leadTime: prov ? (prov.leadTimeDays + ' dÃ­as') : '4.2 dÃ­as',
-                        contact: prov ? (prov.contactName + ' (' + prov.phone + ')') : 'VÃ­a Portal B2B',
-                        paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'CrÃ©dito 60 dÃ­as' : (prov.paymentTerms === 'credito_30' ? 'CrÃ©dito 30 dÃ­as' : 'CrÃ©dito 15 dÃ­as')) : 'CrÃ©dito 30 dÃ­as',
+                        leadTime: prov ? (prov.leadTimeDays + ' días') : '4.2 días',
+                        contact: prov ? (prov.contactName + ' (' + prov.phone + ')') : 'Vía Portal B2B',
+                        paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'Crédito 60 días' : (prov.paymentTerms === 'credito_30' ? 'Crédito 30 días' : 'Crédito 15 días')) : 'Crédito 30 días',
                         moqTarget: moqTarget,
                         totalQty: 0,
                         totalCost: 0,
@@ -6105,9 +6105,9 @@ function hybridInventoryModule() {
             }
             this.recalculatePoTotals();
             if (po.hasCreditDeduction) {
-                this.showToast('CompensaciÃ³n por nota de crÃ©dito activada.', 'info');
+                this.showToast('Compensación por nota de crédito activada.', 'info');
             } else {
-                this.showToast('CompensaciÃ³n desactivada.', 'info');
+                this.showToast('Compensación desactivada.', 'info');
             }
         },
 
@@ -6129,11 +6129,11 @@ function hybridInventoryModule() {
             if (!po) return;
 
             if (!selectedRef || selectedRef === '') {
-                // DeseleccionÃ³ compensaciÃ³n
+                // Deseleccionó compensación
                 po.hasCreditDeduction = false;
                 po.deductionAmount = 0;
                 this.recalculatePoTotals();
-                this.showToast('CompensaciÃ³n por acuerdo desactivada.', 'info');
+                this.showToast('Compensación por acuerdo desactivada.', 'info');
                 return;
             }
 
@@ -6232,7 +6232,7 @@ function hybridInventoryModule() {
             }
 
             if (items.length === 0) {
-                this.showToast('No hay artÃ­culos planificados para este proveedor.', 'warning');
+                this.showToast('No hay artículos planificados para este proveedor.', 'warning');
                 return;
             }
 
@@ -6243,7 +6243,7 @@ function hybridInventoryModule() {
             const total = Math.round((subtotal + iva) * 100) / 100;
             const poNumber = 'PO-2026-' + String(Math.floor(1000 + Math.random() * 9000));
 
-            // DetecciÃ³n automÃ¡tica de acuerdo de nota de crÃ©dito pendiente para el proveedor
+            // Detección automática de acuerdo de nota de crédito pendiente para el proveedor
             const pendingList = (target.pendingCreditAgreements || this.pendingCreditAgreements || []);
             const autoAgreement = pendingList.find(a => (targetSupplier === 'Consolidado Multimarca' || a.supplier === targetSupplier) && a.status === 'Pendiente de Aplicar');
 
@@ -6255,9 +6255,9 @@ function hybridInventoryModule() {
                 contactName: prov ? prov.contactName : 'Ejecutivo de Cuenta B2B',
                 contactPhone: prov ? prov.phone : '+52 55 5555 0100',
                 contactEmail: prov ? prov.email : 'pedidos@proveedor.com',
-                paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'CrÃ©dito 60 dÃ­as' : (prov.paymentTerms === 'credito_30' ? 'CrÃ©dito 30 dÃ­as' : 'CrÃ©dito Comercial 15 dÃ­as')) : 'CrÃ©dito Comercial 30 dÃ­as',
-                deliveryDock: 'Rampa Central AlmacÃ©n CDMX - BahÃ­a Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
-                deliveryCommitmentDate: '5 dÃ­as hÃ¡biles posteriores a recepciÃ³n de orden',
+                paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'Crédito 60 días' : (prov.paymentTerms === 'credito_30' ? 'Crédito 30 días' : 'Crédito Comercial 15 días')) : 'Crédito Comercial 30 días',
+                deliveryDock: 'Rampa Central Almacén CDMX - Bahía Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
+                deliveryCommitmentDate: '5 días hábiles posteriores a recepción de orden',
                 items: items.map(it => ({
                     id: it.id,
                     sku: it.sku,
@@ -6279,8 +6279,8 @@ function hybridInventoryModule() {
                 subtotal: subtotal,
                 iva: iva,
                 total: total,
-                buyerAgent: 'Elena Compras (CoordinaciÃ³n de Abastecimiento RevOps)',
-                notes: 'Favor de confirmar recepciÃ³n, remitir factura comercial y nÃºmero de guÃ­a fletera a compras@mitienda.com.',
+                buyerAgent: 'Elena Compras (Coordinación de Abastecimiento RevOps)',
+                notes: 'Favor de confirmar recepción, remitir factura comercial y número de guía fletera a compras@mitienda.com.',
                 isIssued: false
             };
 
@@ -6301,14 +6301,14 @@ function hybridInventoryModule() {
             const po = target.currentPoData || this.currentPoData;
             if (!po) return;
 
-            const supplierName = po.supplier || 'Taller ConfecciÃ³n';
+            const supplierName = po.supplier || 'Taller Confección';
             const contactEmail = po.contactEmail || 'pedidos@proveedor.com';
             const subject = `[ORDEN DE COMPRA] ${po.poNumber} - Mi Tienda Online / ${supplierName}`;
             let deductionText = '';
             if (po.hasCreditDeduction && po.deductionAmount > 0) {
-                deductionText = `\n\n* COMPENSACIÃ“N POR NOTA DE CRÃ‰DITO / DISCREPANCIA:\nSe aplicÃ³ deducciÃ³n de $${po.deductionAmount.toFixed(2)} MXN amparada bajo el acuerdo ${po.creditNoteRef} (${po.creditNoteReason}).\nImporte Bruto Partidas: $${(po.grossSubtotal || po.subtotal).toFixed(2)} MXN | Subtotal Neto Liquidable: $${po.subtotal.toFixed(2)} MXN + IVA.\n`;
+                deductionText = `\n\n* COMPENSACIÓN POR NOTA DE CRÉDITO / DISCREPANCIA:\nSe aplicó deducción de $${po.deductionAmount.toFixed(2)} MXN amparada bajo el acuerdo ${po.creditNoteRef} (${po.creditNoteReason}).\nImporte Bruto Partidas: $${(po.grossSubtotal || po.subtotal).toFixed(2)} MXN | Subtotal Neto Liquidable: $${po.subtotal.toFixed(2)} MXN + IVA.\n`;
             }
-            const body = `Estimado equipo de ${supplierName},\n\nAdjunto a este correo encontrarÃ¡n la Orden de Compra formal con folio ${po.poNumber} por un total de ${po.totalPieces} piezas ($${(po.total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN).${deductionText}\nFavor de acusar recibo de este documento, confirmar la fecha estimada de entrega en nuestro muelle de recepciÃ³n e indicar el nÃºmero de guÃ­a de la fletera asignada una vez despachado el embarque.\n\nCondiciones de Pago: ${po.paymentTerms || 'CrÃ©dito Comercial 30 dÃ­as'}\nMuelle de RecepciÃ³n: Rampa Central AlmacÃ©n CDMX - BahÃ­a Inbound 02 (Av. Insurgentes Sur #1898, CDMX)\n\nQuedamos a su disposiciÃ³n para cualquier aclaraciÃ³n tÃ©cnica o logÃ­stica.\n\nAtentamente,\n${po.buyerAgent || 'Elena Compras'}\nCoordinaciÃ³n de Abastecimiento RevOps\nMi Tienda Online S.A. de C.V.`;
+            const body = `Estimado equipo de ${supplierName},\n\nAdjunto a este correo encontrarán la Orden de Compra formal con folio ${po.poNumber} por un total de ${po.totalPieces} piezas ($${(po.total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN).${deductionText}\nFavor de acusar recibo de este documento, confirmar la fecha estimada de entrega en nuestro muelle de recepción e indicar el número de guía de la fletera asignada una vez despachado el embarque.\n\nCondiciones de Pago: ${po.paymentTerms || 'Crédito Comercial 30 días'}\nMuelle de Recepción: Rampa Central Almacén CDMX - Bahía Inbound 02 (Av. Insurgentes Sur #1898, CDMX)\n\nQuedamos a su disposición para cualquier aclaración técnica o logística.\n\nAtentamente,\n${po.buyerAgent || 'Elena Compras'}\nCoordinación de Abastecimiento RevOps\nMi Tienda Online S.A. de C.V.`;
 
             const dispatchData = {
                 poNumber: po.poNumber,
@@ -6342,7 +6342,7 @@ function hybridInventoryModule() {
 
             const recipient = emailData ? emailData.to : po.contactEmail;
 
-            // 1. Snapshot inmutable completo de la PO emitida para guardado y reimpresiÃ³n
+            // 1. Snapshot inmutable completo de la PO emitida para guardado y reimpresión
             const poSnapshot = {
                 ...po,
                 isIssued: true,
@@ -6355,10 +6355,10 @@ function hybridInventoryModule() {
                 id: po.poNumber.replace('PO-', 'OC-'),
                 poNumber: po.poNumber,
                 supplier: po.supplier,
-                carrier: 'Transportista B2B (AsignaciÃ³n en curso)',
+                carrier: 'Transportista B2B (Asignación en curso)',
                 eta: po.deliveryCommitmentDate,
                 sku: po.items && po.items.length > 0 ? po.items.map(i => i.sku).join(', ') : 'VARIOS',
-                productName: po.items && po.items.length === 1 ? po.items[0].productName : ((po.items && po.items[0] ? po.items[0].productName : 'Lote ConfecciÃ³n') + ' (+' + (po.items.length - 1) + ' adicionales)'),
+                productName: po.items && po.items.length === 1 ? po.items[0].productName : ((po.items && po.items[0] ? po.items[0].productName : 'Lote Confección') + ' (+' + (po.items.length - 1) + ' adicionales)'),
                 qty: po.totalPieces,
                 sizes: po.items && po.items[0] && po.items[0].sizes ? { ...po.items[0].sizes } : { ch: 0, m: 0, g: 0, xl: 0 },
                 unitCost: po.items && po.items[0] ? po.items[0].costUnit : 0,
@@ -6435,7 +6435,7 @@ function hybridInventoryModule() {
                 console.warn('Nota: Persistencia de PO completada en modo offline/cache:', err);
             });
 
-            // 3. Si se aplicÃ³ una nota de crÃ©dito, marcar el acuerdo como aplicado
+            // 3. Si se aplicó una nota de crédito, marcar el acuerdo como aplicado
             if (po.hasCreditDeduction && po.creditNoteRef) {
                 const agreements = (target.pendingCreditAgreements || this.pendingCreditAgreements || []);
                 const appliedAgr = agreements.find(a => a.ref === po.creditNoteRef);
@@ -6444,39 +6444,39 @@ function hybridInventoryModule() {
                 }
             }
 
-            // 4. Descontar los Ã­tems planificados convertidos
+            // 4. Descontar los ítems planificados convertidos
             const itemIds = (po.items || []).map(i => i.id);
             if (target.futurePurchaseOrders) {
                 target.futurePurchaseOrders = target.futurePurchaseOrders.filter(o => !itemIds.includes(o.id));
             }
             this.futurePurchaseOrders = this.futurePurchaseOrders.filter(o => !itemIds.includes(o.id));
 
-            // 5. Registrar en Kardex de AuditorÃ­a de Compras
+            // 5. Registrar en Kardex de Auditoría de Compras
             target.logPurchaseKardex({
                 type: 'PO_EMITIDA',
-                typeLabel: 'EmisiÃ³n & EnvÃ­o PO',
+                typeLabel: 'Emisión & Envío PO',
                 badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
                 poNumber: po.poNumber,
                 supplier: po.supplier,
                 sku: po.items && po.items[0] ? po.items[0].sku : 'LOTE-VARIOS',
                 productName: 'Orden Oficial ' + po.poNumber + ' (' + po.items.length + ' partidas, ' + po.totalPieces + ' uds)',
-                deltaQty: '+' + po.totalPieces + ' uds (TrÃ¡nsito)',
+                deltaQty: '+' + po.totalPieces + ' uds (Tránsito)',
                 totalAmount: po.total,
                 user: 'Elena Compras',
-                notes: 'PO emitida formalmente y enviada a ' + recipient + ' con snapshot inmutable guardado.' + (po.deductionAmount > 0 ? (' DeducciÃ³n de $' + po.deductionAmount.toFixed(2) + ' MXN amparada bajo acuerdo ' + po.creditNoteRef + '.') : '')
+                notes: 'PO emitida formalmente y enviada a ' + recipient + ' con snapshot inmutable guardado.' + (po.deductionAmount > 0 ? (' Deducción de $' + po.deductionAmount.toFixed(2) + ' MXN amparada bajo acuerdo ' + po.creditNoteRef + '.') : '')
             });
 
-            // 5. SincronizaciÃ³n con Finanzas (TASK-INT-23)
+            // 5. Sincronización con Finanzas (TASK-INT-23)
             if (typeof window.syncPoWithFinanceState === 'function') {
                 window.syncPoWithFinanceState(po);
             }
 
-            // 5.2 SincronizaciÃ³n y NotificaciÃ³n Reactiva al Extranet del Proveedor (TASK-HUB-VND / TASK-PUR-04)
+            // 5.2 Sincronización y Notificación Reactiva al Extranet del Proveedor (TASK-HUB-VND / TASK-PUR-04)
             if (typeof window !== 'undefined' && typeof window.notifyVendorExtranetNewPo === 'function') {
                 window.notifyVendorExtranetNewPo(po);
             }
 
-            // 6. Cerrar modales y enfocar vista de Ã“rdenes Emitidas
+            // 6. Cerrar modales y enfocar vista de Órdenes Emitidas
             target.emailDispatchModalOpen = false;
             this.emailDispatchModalOpen = false;
             target.poGeneratorModalOpen = false;
@@ -6496,7 +6496,7 @@ function hybridInventoryModule() {
             const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
             if (!order) return;
 
-            // Si la orden ya cuenta con su snapshot original emitido, lo recuperamos Ã­ntegro
+            // Si la orden ya cuenta con su snapshot original emitido, lo recuperamos íntegro
             if (order.poSnapshot) {
                 const snapshot = {
                     ...order.poSnapshot,
@@ -6524,9 +6524,9 @@ function hybridInventoryModule() {
                 contactName: prov ? prov.contactName : 'Gerencia Comercial B2B',
                 contactPhone: prov ? prov.phone : '+52 55 5555 0100',
                 contactEmail: prov ? prov.email : 'pedidos@' + order.supplier.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com',
-                paymentTerms: 'CrÃ©dito Comercial 30 dÃ­as contra entrega',
-                deliveryDock: 'Rampa Central AlmacÃ©n CDMX - BahÃ­a Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
-                deliveryCommitmentDate: order.eta || '3 a 5 dÃ­as hÃ¡biles',
+                paymentTerms: 'Crédito Comercial 30 días contra entrega',
+                deliveryDock: 'Rampa Central Almacén CDMX - Bahía Inbound 02 (Av. Insurgentes Sur #1898, CDMX)',
+                deliveryCommitmentDate: order.eta || '3 a 5 días hábiles',
                 items: [{
                     id: order.id + '-item',
                     sku: order.sku || 'SKU-INB',
@@ -6540,7 +6540,7 @@ function hybridInventoryModule() {
                 subtotal: sub,
                 iva: iva,
                 total: total,
-                buyerAgent: 'Elena Compras (CoordinaciÃ³n de Abastecimiento RevOps)',
+                buyerAgent: 'Elena Compras (Coordinación de Abastecimiento RevOps)',
                 notes: 'Expediente oficial de orden emitida. Flete asignado: ' + (order.carrier || 'Flete Terrestre') + '.',
                 isIssued: true
             };
@@ -6558,7 +6558,7 @@ function hybridInventoryModule() {
             if (found) {
                 this.viewPoPdfFromActiveOrder(found);
             } else {
-                this.showToast('No se encontrÃ³ el expediente de la orden ' + poNumber, 'warning');
+                this.showToast('No se encontró el expediente de la orden ' + poNumber, 'warning');
             }
         },
 
@@ -6575,9 +6575,9 @@ function hybridInventoryModule() {
         copyTrackingNumber(text) {
             if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text);
-                this.showToast('NÃºmero de guÃ­a ' + text + ' copiado al portapapeles.', 'success');
+                this.showToast('Número de guía ' + text + ' copiado al portapapeles.', 'success');
             } else {
-                this.showToast('GuÃ­a: ' + text, 'info');
+                this.showToast('Guía: ' + text, 'info');
             }
         },
 
@@ -6641,7 +6641,7 @@ function hybridInventoryModule() {
 
         openOnDemandRejectModal(req) {
             this.selectedOnDemandReq = req;
-            this.onDemandRejectReason = 'Agotado en taller de confecciÃ³n sin fecha de resurtido';
+            this.onDemandRejectReason = 'Agotado en taller de confección sin fecha de resurtido';
             this.onDemandRejectModalOpen = true;
         },
 
@@ -6661,11 +6661,11 @@ function hybridInventoryModule() {
                 deltaQty: '0 uds',
                 totalAmount: 0,
                 user: 'Elena Compras',
-                notes: 'MercancÃ­a agotada en fabricante. NotificaciÃ³n enviada a AtenciÃ³n a Clientes (Hub 3): "' + this.onDemandRejectReason + '".'
+                notes: 'Mercancía agotada en fabricante. Notificación enviada a Atención a Clientes (Hub 3): "' + this.onDemandRejectReason + '".'
             });
 
             this.onDemandRejectModalOpen = false;
-            this.showToast('Solicitud ' + req.id + ' marcada como Agotada. Ticket de sustituciÃ³n despachado a Hub 3.', 'warning');
+            this.showToast('Solicitud ' + req.id + ' marcada como Agotada. Ticket de sustitución despachado a Hub 3.', 'warning');
         },
 
         verifyRequestWithSupplier(req) {
@@ -6675,14 +6675,14 @@ function hybridInventoryModule() {
 
         sendPaymentLinkToCustomer(req) {
             req.paymentSent = true;
-            this.showToast('Enlace de pago y confirmaciÃ³n enviado a ' + req.customerName + ' (' + req.customerPhone + ') vÃ­a WhatsApp.', 'success');
+            this.showToast('Enlace de pago y confirmación enviado a ' + req.customerName + ' (' + req.customerPhone + ') vía WhatsApp.', 'success');
         },
 
         convertRequestToPurchaseOrder(req) {
             this.resolveOnDemandToPlanned(req);
         },
 
-        // Kardex de AuditorÃ­a de Compras (TASK-INV-16)
+        // Kardex de Auditoría de Compras (TASK-INV-16)
         logPurchaseKardex(event) {
             const newEntry = {
                 id: 'KDX-PUR-2026-' + String(this.purchaseKardexLog.length + 1).padStart(3, '0'),
@@ -6733,13 +6733,13 @@ function hybridInventoryModule() {
                 prod.isPublished = !prod.isPublished;
                 const msg = prod.isPublished 
                     ? `SKU ${sku} publicado en vitrina web activa.`
-                    : `SKU ${sku} retirado del catÃ¡logo pÃºblico (fuera de catÃ¡logo).`;
+                    : `SKU ${sku} retirado del catálogo público (fuera de catálogo).`;
                 this.showToast(msg, prod.isPublished ? 'success' : 'info');
             }
         },
 
         // =========================================================================
-        // TASK-INV-11: GESTIÃ“N INTEGRAL DE TELAS, COLORES, SLOTTING Y REGLAS ROP
+        // TASK-INV-11: GESTIÓN INTEGRAL DE TELAS, COLORES, SLOTTING Y REGLAS ROP
         // =========================================================================
 
         // --- TELAS & FIBRAS ---
@@ -6755,7 +6755,7 @@ function hybridInventoryModule() {
                 description: this.newFabricForm.description.trim() || 'Fibra textil para indumentaria',
                 is_active: true
             });
-            this.showToast(`Tela "${this.newFabricForm.name.trim()}" registrada con Ã©xito.`, 'success');
+            this.showToast(`Tela "${this.newFabricForm.name.trim()}" registrada con éxito.`, 'success');
             this.newFabricForm = { name: '', description: '' };
         },
 
@@ -6777,7 +6777,7 @@ function hybridInventoryModule() {
 
         saveFabric() {
             if (!this.fabricEditState.form.name || !this.fabricEditState.form.name.trim()) {
-                this.showToast('El nombre de la tela no puede estar vacÃ­o.', 'warning');
+                this.showToast('El nombre de la tela no puede estar vacío.', 'warning');
                 return;
             }
             const idx = this.apparelFabrics.findIndex(f => f.id === this.fabricEditState.editingId);
@@ -6785,7 +6785,7 @@ function hybridInventoryModule() {
                 this.apparelFabrics[idx].name = this.fabricEditState.form.name.trim();
                 this.apparelFabrics[idx].description = this.fabricEditState.form.description.trim();
                 this.apparelFabrics[idx].is_active = this.fabricEditState.form.is_active;
-                this.showToast(`Tela "${this.apparelFabrics[idx].name}" actualizada con Ã©xito.`, 'success');
+                this.showToast(`Tela "${this.apparelFabrics[idx].name}" actualizada con éxito.`, 'success');
             }
             this.cancelEditFabric();
         },
@@ -6801,7 +6801,7 @@ function hybridInventoryModule() {
             if (!fab) return;
             const inUseCount = (this.products || []).filter(p => (p.fabric === fab.name || p.drawerFabricType === fab.name)).length;
             if (inUseCount > 0) {
-                this.showToast(`No es posible eliminar "${fab.name}" porque estÃ¡ en uso en ${inUseCount} productos. Se recomienda archivarla.`, 'warning');
+                this.showToast(`No es posible eliminar "${fab.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarla.`, 'warning');
                 return;
             }
             this.apparelFabrics = this.apparelFabrics.filter(f => f.id !== fabId);
@@ -6861,7 +6861,7 @@ function hybridInventoryModule() {
 
         saveColor() {
             if (!this.colorEditState.form.name || !this.colorEditState.form.name.trim()) {
-                this.showToast('El nombre del color no puede estar vacÃ­o.', 'warning');
+                this.showToast('El nombre del color no puede estar vacío.', 'warning');
                 return;
             }
             const idx = this.apparelColors.findIndex(c => c.id === this.colorEditState.editingId);
@@ -6874,7 +6874,7 @@ function hybridInventoryModule() {
                 this.apparelColors[idx].hex = hexVal;
                 this.apparelColors[idx].type = this.colorEditState.form.type;
                 this.apparelColors[idx].is_active = this.colorEditState.form.is_active;
-                this.showToast(`Color "${this.apparelColors[idx].name}" actualizado con Ã©xito.`, 'success');
+                this.showToast(`Color "${this.apparelColors[idx].name}" actualizado con éxito.`, 'success');
             }
             this.cancelEditColor();
         },
@@ -6890,14 +6890,14 @@ function hybridInventoryModule() {
             if (!col) return;
             const inUseCount = (this.products || []).filter(p => (p.colorName === col.name || p.drawerColorName === col.name)).length;
             if (inUseCount > 0) {
-                this.showToast(`No es posible eliminar "${col.name}" porque estÃ¡ en uso en ${inUseCount} productos. Se recomienda archivarlo.`, 'warning');
+                this.showToast(`No es posible eliminar "${col.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarlo.`, 'warning');
                 return;
             }
             this.apparelColors = this.apparelColors.filter(c => c.id !== colId);
             this.showToast(`Color "${col.name}" eliminado de la paleta.`, 'success');
         },
 
-        // --- SLOTTING FÃSICO (UBICACIONES DE ALMACÃ‰N) ---
+        // --- SLOTTING FÍSICO (UBICACIONES DE ALMACÉN) ---
         getSlotProductCount(slotCode) {
             return (this.products || []).filter(p => (p.location === slotCode || p.location_code === slotCode)).length;
         },
@@ -6915,7 +6915,7 @@ function hybridInventoryModule() {
             const code = `${aisle}-${rack}-${bin}`;
 
             if (this.warehouseSlots.some(s => s.code === code)) {
-                this.showToast(`La ubicaciÃ³n ${code} ya existe en bodega.`, 'warning');
+                this.showToast(`La ubicación ${code} ya existe en bodega.`, 'warning');
                 return;
             }
 
@@ -6934,7 +6934,7 @@ function hybridInventoryModule() {
                 is_active: true
             });
 
-            this.showToast(`UbicaciÃ³n fÃ­sica ${code} registrada con Ã©xito.`, 'success');
+            this.showToast(`Ubicación física ${code} registrada con éxito.`, 'success');
             this.newSlotForm = { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true };
         },
 
@@ -6968,7 +6968,7 @@ function hybridInventoryModule() {
                 s.capacity = parseInt(this.slotEditState.form.capacity) || 100;
                 s.status = this.slotEditState.form.status;
                 s.is_active = this.slotEditState.form.is_active;
-                this.showToast(`UbicaciÃ³n ${s.code} actualizada con Ã©xito.`, 'success');
+                this.showToast(`Ubicación ${s.code} actualizada con éxito.`, 'success');
             }
             this.cancelEditSlot();
         },
@@ -6977,17 +6977,17 @@ function hybridInventoryModule() {
             slot.is_active = !slot.is_active;
             slot.status = slot.is_active ? 'active' : 'archived';
             const statusLabel = slot.is_active ? 'reactivada' : 'archivada';
-            this.showToast(`UbicaciÃ³n ${slot.code} ${statusLabel} correctamente.`, 'info');
+            this.showToast(`Ubicación ${slot.code} ${statusLabel} correctamente.`, 'info');
         },
 
         deleteSlot(slotCode) {
             const prodCount = this.getSlotProductCount(slotCode);
             if (prodCount > 0) {
-                this.showToast(`No es posible eliminar ${slotCode} porque aloja ${prodCount} producto(s). Reasigna los productos primero o archiva la ubicaciÃ³n.`, 'warning');
+                this.showToast(`No es posible eliminar ${slotCode} porque aloja ${prodCount} producto(s). Reasigna los productos primero o archiva la ubicación.`, 'warning');
                 return;
             }
             this.warehouseSlots = this.warehouseSlots.filter(s => s.code !== slotCode);
-            this.showToast(`UbicaciÃ³n ${slotCode} eliminada del inventario fÃ­sico.`, 'success');
+            this.showToast(`Ubicación ${slotCode} eliminada del inventario físico.`, 'success');
         },
 
         // --- PUNTOS DE REORDEN (ROP) ---
@@ -7011,7 +7011,7 @@ function hybridInventoryModule() {
                 if (p.isUnderRop) underCount++;
             });
 
-            this.showToast(`ParÃ¡metros ROP guardados. ${this.products.length} productos recalculados en tiempo real (${underCount} en riesgo de quiebre).`, 'success');
+            this.showToast(`Parámetros ROP guardados. ${this.products.length} productos recalculados en tiempo real (${underCount} en riesgo de quiebre).`, 'success');
         },
 
         // =========================================================================
@@ -7952,7 +7952,7 @@ function hybridInventoryModule() {
                 committedStock: 0,
                 committedSizes: { ch: 0, m: 0, g: 0, xl: 0 },
                 supplierStock: item.supplierStock || 50,
-                location: 'AlmacÃ©n Proveedor (Torzo B2B)',
+                location: 'Almacén Proveedor (Torzo B2B)',
                 status: 'Sincronizado',
                 providerUrl: item.originUrl || 'https://torzo.example.com',
                 isScraping: false,
@@ -7971,7 +7971,7 @@ function hybridInventoryModule() {
             this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== item.id);
             this.scrapingCurationModalOpen = false;
             this.curatingItem = null;
-            this.showToast(`Prenda ${finalSku} curada, validada y publicada en el catÃ¡logo.`, 'success');
+            this.showToast(`Prenda ${finalSku} curada, validada y publicada en el catálogo.`, 'success');
         },
 
         discardScrapedItem(id) {
@@ -8039,7 +8039,7 @@ function hybridInventoryModule() {
             };
             this.drawerOpen = true;
 
-            // Enriquecer reactivamente con el backend si estÃ¡ disponible
+            // Enriquecer reactivamente con el backend si está disponible
             if (product.sku) {
                 fetch(`/api/v1/inventory/products/${encodeURIComponent(product.sku)}/detail`, {
                     headers: { 'Accept': 'application/json' }
@@ -8902,7 +8902,7 @@ function hybridInventoryModule() {
         openQuickAdjust(sku) {
             this.activeTab = 'inventory';
             this.searchFilter = sku;
-            this.showToast('Filtrando catÃ¡logo por SKU: ' + sku + ' para ajuste rÃ¡pido.', 'info');
+            this.showToast('Filtrando catálogo por SKU: ' + sku + ' para ajuste rápido.', 'info');
         },
 
         calculateProfit() {
@@ -8911,7 +8911,7 @@ function hybridInventoryModule() {
 
         
         // =========================================================================
-        // TASK-INV-04: MÃ‰TODOS DE VALUACIÃ“N CONTABLE (CPP VS ÃšLTIMO COSTO)
+        // TASK-INV-04: MÉTODOS DE VALUACIÓN CONTABLE (CPP VS ÚLTIMO COSTO)
         // =========================================================================
         calculateCPP(currentStock, currentCPP, receivedQty, newCost) {
             const s = Math.max(0, parseInt(currentStock) || 0);
@@ -9127,10 +9127,10 @@ function hybridInventoryModule() {
 
         triggerGlobalRefresh() {
             this.isRefreshing = true;
-            this.showToast('Actualizando mÃ©tricas de inventario y conexiones...', 'info');
+            this.showToast('Actualizando métricas de inventario y conexiones...', 'info');
             setTimeout(() => {
                 this.isRefreshing = false;
-                this.showToast('Inventario y mÃ©tricas sincronizados con Ã©xito.', 'success');
+                this.showToast('Inventario y métricas sincronizados con éxito.', 'success');
             }, 900);
         },
 
@@ -9142,7 +9142,7 @@ function hybridInventoryModule() {
             }, 1600);
         },
 
-        // TASK-INV-01: MÃ©todos de Slotting y UbicaciÃ³n FÃ­sica
+        // TASK-INV-01: Métodos de Slotting y Ubicación Física
         getSlotBadgeClass(location) {
             if (!location || location === 'N/A' || location.includes('Dropship')) {
                 return 'bg-slate-100 text-slate-600 border-slate-200';
@@ -9235,10 +9235,10 @@ function hybridInventoryModule() {
         // METODOS DE AUDITORIA CICLICA A CIEGAS (TASK-INV-07: 3 SKUS DIARIOS)
         // =========================================================================
         openCycleCountModal() {
-            // Seleccionar 3 SKUs fÃ­sicos de bodega (exclusivamente stock propio con existencias en rack):
-            // 1) 1 SKU Clase A de alta rotaciÃ³n en bodega
-            // 2) 1 SKU de prendas textiles bÃ¡sicas
-            // 3) 1 SKU de categorÃ­a sensible (cosmÃ©tica/cuidado personal)
+            // Seleccionar 3 SKUs físicos de bodega (exclusivamente stock propio con existencias en rack):
+            // 1) 1 SKU Clase A de alta rotación en bodega
+            // 2) 1 SKU de prendas textiles básicas
+            // 3) 1 SKU de categoría sensible (cosmética/cuidado personal)
             const propios = this.products.filter(p => p.type === 'propio' && (p.localStock || 0) > 0);
             const skuClaseA = propios.find(p => this.getAbcClass(p) === 'A') || propios[0] || this.products[0];
             const skuTextile = propios.find(p => p.sku !== skuClaseA.sku && !p.requiresSanitaryControl) || propios[1] || this.products[1];
@@ -9409,8 +9409,8 @@ function hybridInventoryModule() {
                             delta: row.diff,
                             stockBefore: stockBefore,
                             stockAfter: stockAfter,
-                            reference: 'AuditorÃ­a Diaria (Ciega)',
-                            user: 'Auditor de AlmacÃ©n (Conteo CÃ­clico)',
+                            reference: 'Auditoría Diaria (Ciega)',
+                            user: 'Auditor de Almacén (Conteo Cíclico)',
                             note: 'Motivo: ' + reason + ' | Discrepancia: ' + (row.diff > 0 ? '+' : '') + row.diff + ' uds'
                         });
 
@@ -9442,7 +9442,7 @@ function hybridInventoryModule() {
                             totalCounted: data.total_units_counted || 0,
                             totalVariance: data.total_variance_units || 0,
                             iraScore: data.ira_accuracy_score || 100,
-                            auditedBy: 'Operador AlmacÃ©n',
+                            auditedBy: 'Operador Almacén',
                             status: data.status || 'reconciled',
                             details: data.details || []
                         });
@@ -9456,9 +9456,9 @@ function hybridInventoryModule() {
             this.cycleCountModal.isOpen = false;
 
             if (adjustedCount > 0) {
-                this.showToast('AuditorÃ­a completada: ' + adjustedCount + ' SKU(s) reconciliados en Kardex');
+                this.showToast('Auditoría completada: ' + adjustedCount + ' SKU(s) reconciliados en Kardex');
             } else {
-                this.showToast('AuditorÃ­a completada al 100% de exactitud: Sin discrepancias');
+                this.showToast('Auditoría completada al 100% de exactitud: Sin discrepancias');
             }
         },
 
@@ -9773,7 +9773,7 @@ function hybridInventoryModule() {
             const index = this.productBundles.findIndex(b => b.id === bundleId);
             if (index === -1) return;
             const name = this.productBundles[index].name;
-            if (confirm(`Â¿Estas seguro de eliminar la receta BOM "${name}"? Esta accion no se puede deshacer.`)) {
+            if (confirm(`¿Estas seguro de eliminar la receta BOM "${name}"? Esta accion no se puede deshacer.`)) {
                 this.productBundles.splice(index, 1);
                 this.showToast(`Receta BOM eliminada: ${name}`, 'info');
             }

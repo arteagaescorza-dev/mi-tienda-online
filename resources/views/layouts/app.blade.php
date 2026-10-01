@@ -21,7 +21,7 @@
             <div class="storefront-announcement" role="status" aria-label="Avisos de la tienda">
                 <div class="storefront-announcement-track">
                     <span>Envios seguros a todo Mexico</span><b aria-hidden="true">/</b>
-                    <span>Transferencias SPEI sin comision</span><b aria-hidden="true">/</b>
+                    <span>Pagos seguros con Tarjeta y OXXO</span><b aria-hidden="true">/</b>
                     <span>Stock fisico con entrega inmediata</span><b aria-hidden="true">/</b>
                     <span>250+ prendas exclusivas</span><b aria-hidden="true">/</b>
                     <span>Pedidos directos por WhatsApp</span><b aria-hidden="true">/</b>

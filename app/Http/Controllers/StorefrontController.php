@@ -126,10 +126,10 @@ class StorefrontController extends Controller
 
         $announcements = Cache::get('cms_announcements', [
             ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI SIN COMISIÓN', 'active' => true],
+            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
             ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
             ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'ATENCIÓN PERSONALIZADA POR WHATSAPP', 'active' => true],
+            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
         ]);
 
         $sections = CmsSection::active()
@@ -402,10 +402,10 @@ class StorefrontController extends Controller
 
         $announcements = Cache::get('cms_announcements', [
             ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI SIN COMISIÓN', 'active' => true],
+            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
             ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
             ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'ATENCIÓN PERSONALIZADA POR WHATSAPP', 'active' => true],
+            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
         ]);
 
         // Cálculo de stock y preparación de variantes

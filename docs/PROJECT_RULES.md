@@ -20,20 +20,21 @@ $$\text{Migración MySQL} \longrightarrow \text{Modelos Eloquent} \longrightarro
 * Se debe preservar de forma rigurosa la totalidad de comentarios, docstrings y anotaciones existentes en los archivos modificados, a menos que el usuario o un requerimiento técnico explícito ordene su reemplazo.
 * No se deben alterar métodos o controladores preexistentes de otros submódulos sin verificar que la suite completa de pruebas unitarias y funcionales continúe ejecutándose sin errores.
 
-### Regla 1.3: Declaración Universal y Obligatoria de Codificación UTF-8
+### Regla 1.3: Sincronización Mandatoria con `BACKEND_INTEGRATION_SPEC.md`
+Ninguna tarea de la plataforma se considera "Completada" sin que su arquitectura de persistencia, migración de base de datos, modelo Eloquent, endpoints RESTful con esquemas JSON de petición/respuesta y reglas de validación en FormRequests queden **100% formalizados y blindados en [`BACKEND_INTEGRATION_SPEC.md`](file:///c:/laragon/www/mi-tienda-online/docs/BACKEND_INTEGRATION_SPEC.md)**. Toda tarea pendiente debe mantener sincronizado de antemano su contrato de backend.
+
+### Regla 1.4: Declaración Universal y Obligatoria de Codificación UTF-8
 * **Estándar Inmutable UTF-8:** Todo el proyecto (código fuente, base de datos, comunicaciones HTTP y documentación técnica) se declara y opera bajo codificación **UTF-8 universal** (con cotejamiento MySQL `utf8mb4_unicode_ci` / conjunto de caracteres `utf8mb4`). Queda estrictamente prohibido el empleo de codificaciones legadas o regionales (ISO-8859-1, Windows-1252, Latin1).
 * **Cabeceras HTTP y Vistas Blade:** Todas las plantillas Blade y documentos HTML deben declarar explícitamente `<meta charset="utf-8">`. Las respuestas del servidor deben emitir cabeceras `Content-Type: text/html; charset=UTF-8` o `application/json; charset=UTF-8`.
 * **Capa de Persistencia y Conexión PDO:** Los archivos de configuración (`config/database.php`) y migraciones deben forzar `'charset' => 'utf8mb4'` y `'collation' => 'utf8mb4_unicode_ci'` para admitir caracteres acentuados en español, diacríticos y símbolos técnicos sin corrupción de datos.
 * **Archivos Fuente:** Todo archivo `.php`, `.js`, `.css`, `.json`, `.md` y `.html` debe guardarse obligatoriamente en codificación UTF-8 sin marca de orden de bytes (BOM).
+* **Sanitización Automática de Modelos:** Los modelos Eloquent (como `App\Models\Product`) implementan accesores y mutadores de saneamiento activo (`Product::sanitizeUtf8($value)`) para corregir en caliente cualquier entrada o registro histórico que presente doble codificación UTF-8 / Mojibake (`Ã³`, `Ã±`, `Ã¡`, etc.).
 
 ---
 
 ## 2. Reglas de Persistencia, Modelado y Contratos de Backend
 
-### Regla 2.1: Sincronización Mandatoria con `BACKEND_INTEGRATION_SPEC.md`
-Ninguna tarea de la plataforma se considera "Completada" sin que su arquitectura de persistencia, migración de base de datos, modelo Eloquent, endpoints RESTful con esquemas JSON de petición/respuesta y reglas de validación en FormRequests queden **100% formalizados y blindados en [`BACKEND_INTEGRATION_SPEC.md`](file:///c:/laragon/www/mi-tienda-online/docs/BACKEND_INTEGRATION_SPEC.md)**. Toda tarea pendiente debe mantener sincronizado de antemano su contrato de backend.
-
-### Regla 2.2: Transaccionalidad y Atomicidad en Kardex y Finanzas (ACID)
+### Regla 2.1: Transaccionalidad y Atomicidad en Kardex y Finanzas (ACID)
 * Todo movimiento de mercancía (entradas de proveedor, ensambles de recetas BOM, apartados por checkout, despachos en mesa de expedición o retornos RMA) debe ejecutarse bajo transacciones de base de datos (`DB::transaction`).
 * El Kardex transaccional de Hub 4 es la **fuente única e incontrovertible de verdad** para los inventarios. Ninguna pantalla o controlador puede alterar existencias mediante asignaciones directas sin asentar el registro histórico correspondiente en el Kardex.
 * Se debe garantizar el cálculo riguroso del Costo Promedio Ponderado (CPP) por lote o variación.
