@@ -117,6 +117,19 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 ### Regla 6.5: Sobriedad Visual en Paneles Administrativos (Cero Emojis Informales)
 * En interfaces operativas de backend y paneles ejecutivos, queda restringido el uso de emojis informales en cabeceras de módulos, tablas de datos y botones de acción. Se debe emplear exclusivamente iconografía vectorial SVG (Feather Icons, Heroicons o Lucide) y tipografía técnica/monoespaciada para claves, SKUs y métricas.
 
+### Regla 6.6: Restricción Estricta de Redimensionamiento en Cajas de Texto (Solo Vertical, Jamás Horizontal)
+* **Ninguna caja de texto (`<textarea>`, input multilínea o editor de código) puede expandirse de forma horizontal en ninguna pantalla o formulario del sistema.**
+* Queda terminantemente prohibido el uso o comportamiento por omisión de `resize: both` o `resize: horizontal`.
+* Todas las áreas de texto en el panel administrativo (`revops-panel.css`) y la tienda pública (`store-pwa.css`) deben aplicar obligatoriamente:
+  ```css
+  textarea {
+    resize: vertical !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  ```
+* **Justificación de UX/Layout:** La expansión horizontal rompe las columnas de formularios en cuadrículas, desborda los contenedores de modales estrechos y genera barras de scroll horizontal parásitas tanto en desktop como en dispositivos móviles. Solo se autoriza la elongación vertical para revisar textos extensos.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -211,7 +224,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Arquitectura** | Single Inventory Pool Multiverso | Stock centralizado en Hub 4; vitrinas desacopladas |
 | **Workflows** | Flujos de la Aplicación sin Roles | Especificación centrada en interconexión de módulos y datos |
 | **Estructura DOM** | Aislamiento de Paneles y Modales | Nodos hermanos bajo `#storeAppRoot` (`depth = 2`); paridad de `<div>` |
-| **UI / PWA** | Full-width Breakout & Cache Busting | `100vw` breakout sin overflow horizontal; `?v=filemtime` en CSS |
+| **UI / PWA** | Full-width Breakout, Cache Busting & Resize Solo Vertical | `100vw` sin overflow; `?v=filemtime`; `textarea { resize: vertical !important; }` |
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |

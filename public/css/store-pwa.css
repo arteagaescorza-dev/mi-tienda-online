@@ -55,6 +55,19 @@
   padding: 0;
 }
 
+/* REGLA DEL PROYECTO: NINGUNA CAJA DE TEXTO PUEDE EXPANDIRSE DE FORMA HORIZONTAL (SOLO VERTICAL) */
+textarea,
+input[type="text"],
+input[type="search"] {
+  resize: vertical !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+textarea {
+  resize: vertical !important;
+}
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;

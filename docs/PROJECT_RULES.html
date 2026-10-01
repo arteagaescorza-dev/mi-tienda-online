@@ -466,6 +466,14 @@
       Las subnavegaciones se ordenan en cuadrículas estructuradas (ej. 2 filas de 3 columnas). El conmutador de vitrinas (<code>.universe-selector-bar</code>) debe permanecer visible y persistente en todas las pestañas.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 4.4: Restricción Estricta de Cajas de Texto (Solo Expansión Vertical)</strong>
+      Ninguna caja de texto (<code>&lt;textarea&gt;</code>, input multilínea o editor de código) puede expandirse de forma horizontal en ninguna pantalla o formulario del sistema. Queda terminantemente prohibido el uso de <code>resize: both</code> o <code>resize: horizontal</code>. Toda área de texto aplica obligatoriamente <code>resize: vertical !important; max-width: 100% !important; box-sizing: border-box !important;</code> para salvaguardar las cuadrículas y prevenir scroll horizontal parásito.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
