@@ -1775,4 +1775,23 @@ graph TD
   - **Pruebas Automatizadas:** 19 pruebas de integración y renderizado aprobadas con 89 aserciones (`StorefrontDynamicSectionsTest` y `Hub2AdminStoreControllerTest`). Test suite completa de 353 pruebas aprobada con 2,212 aserciones sin ninguna regresión.
   - **Documentación & Versión PDF:** `APPLICATION_WORKFLOW_SPEC.md` y `APPLICATION_WORKFLOW_MANUAL.html` actualizados, y `APPLICATION_WORKFLOW_MANUAL.pdf` compilado y generado exitosamente.
 
+---
+
+### `TASK-H2-21`: Corrección Crítica de Renderizado Móvil (< 769px) en Storefront PWA y Control de Caché
+* **Prioridad:** **Crítica (Hotfix Inmediato)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) & Storefront PWA (`public/css/store-pwa.css`, `resources/views/layouts/store-pwa.blade.php`)
+* **Diagnóstico & Requerimientos del Usuario:**
+  1. *Rotura de Interfaz en Móvil:* Al visualizar la tienda en dispositivos móviles (< 769px), los botones aparecían sin estilos (`[Filtros]`, selector de tallas con bordes negros nativos HTML, enlaces morados sin formato, tarjetas sin sombreado y tipografías desalineadas).
+  2. *Causa Raíz:* En `public/css/store-pwa.css` (línea 353), la media query `@media (min-width: 769px) { .hero-editorial-section { padding: 36px 0 28px; }` carecía de su llave de cierre `}`. Esto causó que las ~3,500 líneas subsecuentes de la hoja de estilos quedaran atrapadas dentro de la regla desktop, siendo ignoradas completamente por los navegadores móviles.
+  3. *Invalidez de Caché Móvil:* Los navegadores móviles persistían la hoja de estilos rota en caché.
+  4. *Contraste de Texto en Hero:* En ciertas configuraciones de vitrinas con texto negro, la regla global `h1, h2 { color: var(--brand-text) !important; }` reducía la legibilidad sobre fondos oscuros o con imágenes de fondo del Hero.
+* **Solución Técnica & Arquitectura Implementada:**
+  - **Cierre y Balance de Media Queries:** Se añadió la llave de cierre faltante en `public/css/store-pwa.css`. Se auditó la paridad sintáctica global con PowerShell, verificando exactamente 495 llaves de apertura `{` y 495 llaves de cierre `}`.
+  - **Invalidez de Caché Dinámica (Cache Busting):** Se incorporó parámetro de versionamiento dinámico en `resources/views/layouts/store-pwa.blade.php`: `store-pwa.css?v={{ filemtime(...) }}`, forzando la descarga inmediata del CSS corregido en navegadores móviles y clientes PWA sin intervención del usuario.
+  - **Protección de Contraste en Hero Banner:** Se reforzaron reglas de especificidad para `.hero-banner-card .hero-title { color: #ffffff !important; }`, `.hero-banner-card .hero-desc` y `.hero-banner-card .hero-tag-pill`, garantizando máxima legibilidad sobre cualquier imagen o degradado.
+  - **Purga de Caché de Vistas & Framework:** Ejecución de `php artisan view:clear` y `php artisan cache:clear`.
+  - **Verificación Automatizada:** Suite de pruebas pasando al 100% (19 pruebas, 89 aserciones en `Hub2AdminStoreControllerTest` y `StorefrontDynamicSectionsTest`).
+  - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado y compilado en PDF.
+
+
 

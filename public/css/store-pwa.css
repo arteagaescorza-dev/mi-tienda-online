@@ -353,6 +353,8 @@ body.store-body {
   .hero-editorial-section {
     padding: 36px 0 28px;
   }
+}
+
 .hero-editorial-section.hero-full-width {
   width: 100vw !important;
   position: relative !important;

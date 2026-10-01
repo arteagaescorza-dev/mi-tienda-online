@@ -69,7 +69,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Estilos Mobile-First & Desktop Adaptive Namespaced -->
-  <link rel="stylesheet" href="{{ asset('css/store-pwa.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/store-pwa.css') }}?v={{ file_exists(public_path('css/store-pwa.css')) ? filemtime(public_path('css/store-pwa.css')) : time() }}">
 
   <!-- Variables CSS Semánticas de Marca y Colores de Hub 2 -->
   <style id="hub2DynamicTheme">
@@ -270,6 +270,15 @@
       width: 100% !important;
       max-width: 100vw !important;
       box-sizing: border-box !important;
+    }
+    .hero-banner-card .hero-title {
+      color: #ffffff !important;
+    }
+    .hero-banner-card .hero-desc {
+      color: #a1a1aa !important;
+    }
+    .hero-banner-card .hero-tag-pill {
+      color: #ffffff !important;
     }
 
     @if(!empty($currentStorefront['customCss']))

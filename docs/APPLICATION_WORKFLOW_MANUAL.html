@@ -472,6 +472,31 @@
   </tbody>
 </table>
 
+<h2 class="section-heading">2.4 Resiliencia en Renderizado Móvil y Cache Busting Dinámico</h2>
+<p>
+  Para asegurar que la experiencia táctil en pantallas móviles (&lt; 769px) mantenga fidelidad visual idéntica a desktop, el motor del Storefront PWA aplica dos salvaguardas arquitectónicas:
+</p>
+<ul class="step-list avoid-break">
+  <li class="step-item">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Balance Sintáctico de Medios en CSS:</strong> Se valida la paridad estricta de llaves en <code>store-pwa.css</code> para evitar que reglas móviles queden subordinadas o absorbidas por bloques <code>@media (min-width: 769px)</code>.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Cache Busting por Modificación de Archivo:</strong> En <code>store-pwa.blade.php</code> la hoja de estilos se referencia con <code>?v={{ filemtime(...) }}</code>, forzando la descarga inmediata del CSS corregido en navegadores móviles y dispositivos PWA sin requerir borrado de caché manual.
+    </div>
+  </li>
+  <li class="step-item">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Blindaje de Contraste Tipográfico en Hero:</strong> Los títulos, subtítulos y badges del Hero cuentan con selectores de alta especificidad que impiden que colores oscuros de texto global opaquen la legibilidad sobre fondos oscuros o con imágenes personalizadas.
+    </div>
+  </li>
+</ul>
+
 <div class="page-break"></div>
 
 <!-- CAPÍTULO 3: INVENTARIO, KARDEX & INBOUND (HUB 4) -->
