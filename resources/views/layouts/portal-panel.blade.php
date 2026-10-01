@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/revops-panel.css') }}?v=20260910">
+  <link rel="stylesheet" href="{{ asset('css/revops-panel.css') }}?v=20261001_v2">
   {{-- Tailwind CDN con preflight desactivado para coexistir con revops-panel.css (paridad con el prototipo UI-first) --}}
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { corePlugins: { preflight: false } };</script>
