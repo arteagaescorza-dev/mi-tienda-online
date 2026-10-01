@@ -262,6 +262,21 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 * **Barra Desplegable Reactiva (`#storeSearchBar`):** Al conmutar el botón, se despliega una barra de búsqueda con campo de entrada en vivo (`#storeLiveSearchInput`), placeholder contextual, botón de limpieza rápida y botón de cerrar.
 * **Filtrado en Tiempo Real:** Al escribir cualquier término, el storefront filtra dinámicamente los productos por nombre, categoría, descripción y SKU. Si el usuario no se encuentra en la pestaña de catálogo, el sistema conmuta automáticamente a la vista de Catálogo (`switchDockTab('catalog')`) para presentar los resultados instantáneamente.
 
+### Regla 6.26: Tarjetas de Explorar como Botones de Imagen Única con Overlay y Degradados
+* **Comportamiento Integral de Botón:** La visualización de la página de Explorar (`/explorar`), tanto en su versión móvil como desktop, se estructura con cada tarjeta funcionando íntegramente como un **botón interactivo**.
+* **Composición Visual Unificada:** Cada botón/tarjeta presenta una **sola imagen completa de fondo** complementada con una capa de **overlay con capacidad de degradados configurables** (`overlay_gradient`), eliminando la separación clásica entre contenedor de imagen superior y cajón de texto inferior.
+* **Textos y Acciones Sobrepuestas:** Los textos (título en tipografía de cabecera, descripción y badge de acción interactiva) se renderizan sobrepuestos en capas superiores (`z-index: 3`) sobre el degradado, garantizando contraste visual y legibilidad óptima.
+* **Interacción Directa:** 
+  - Si la página tiene configurados filtros de catálogo (`filter_universe` o `filter_category`), el clic sobre el botón ejecuta de forma instantánea el filtrado en caliente del catálogo y conmuta a la vista correspondiente. Si además cuenta con contenido editorial, se preserva un enlace complementario hacia `/pagina/{slug}`.
+  - Si no posee filtros de catálogo, el botón conduce directamente a la lectura del documento o página institucional (`/pagina/{slug}`).
+* **Nomenclatura y Gestión en Hub 2:** La administración de estas tarjetas reside en Hub 2 (Portal Store), pestaña titulada canónicamente **"3. Páginas de Explorar"** (suprimiendo definitivamente `"& navbar"`), en la sección **"Páginas de Explorar"**. Tanto el modal de creación (`createPageModal`) como el de edición (`editPageModal`) disponen del control para configurar el preset o gradiente de overlay (`overlay_gradient`).
+
+### Regla 6.27: Proporción Estricta 4:5 en Grid de Botones de Explorar
+* **Aspect Ratio 4:5 Mandatorio:** Todos los botones dentro de la página de Explorar se exhiben dentro de un grid con proporción fija 4:5 (`aspect-ratio: 4 / 5;`).
+* **Diseño Responsivo:** 
+  - En versión móvil: El grid se distribuye en 2 columnas equilibradas (`grid-template-columns: repeat(2, 1fr); gap: 12px;`), maximizando el aprovechamiento vertical del viewport táctil.
+  - En versión desktop: El grid se adapta fluidamente mediante columnas automáticas (`grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;`).
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -366,6 +381,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Navbar Canónico** | 5 Botones Oficiales (Desktop/Móvil) | Inicio, Explorar, Catálogo, Carrito y Cuenta permanentes |
 | **Revista Digital** | Home Modular = Revista Oficial | Cero blogs separados; Home dinámico orquestado desde Hub 2 Tab 1 |
 | **Explorar & Filtros** | Botones con Imágenes y Filtros Directos | Ruta `/explorar`, gestión en Hub 2 Tab 3 ("Páginas de Explorar"), filtros de universo/categoría |
+| **Explorar 4:5 & Overlay** | Botones de Imagen Única con Degradado | Tarjetas 4:5 como botones interactivos; degradados configurables; Hub 2 Tab 3 formalmente "Páginas de Explorar" |
 | **Catálogo** | Inmutabilidad Canónica | Multiverso con stock y facetas inmutable en estructura base |
 | **Carrito Avanzado** | Guardar para Después | Persistencia en `localStorage`, cero impacto en checkout ni subtotal |
 | **Iconografía** | Exclusividad SVG & Cero Emojis | Vectoriales SVG en 100% de vistas/scripts; prohibición absoluta de emojis en código |

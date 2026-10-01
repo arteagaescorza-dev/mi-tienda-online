@@ -227,4 +227,57 @@ class Hub2CmsPagesAndBlogTest extends TestCase
             'is_visible' => false,
         ]);
     }
+
+    public function test_admin_can_create_and_update_cms_explore_page_with_overlay_gradient_and_renders_as_4_to_5_button(): void
+    {
+        $createResp = $this->actingAs($this->portalUser)->post(route('portal.store.pages.store'), [
+            'title' => 'Cápsula Marte Vanguardia',
+            'slug' => 'capsula-marte-vanguardia',
+            'image_url' => 'https://images.unsplash.com/photo-test',
+            'overlay_gradient' => 'indigo',
+            'filter_universe' => 'marte',
+            'filter_category' => 'outerwear',
+            'content_html' => '<p>Prendas futuristas y resistentes confeccionadas para la cápsula Marte.</p>',
+            'status' => 'active',
+        ]);
+
+        $createResp->assertRedirect();
+        $this->assertDatabaseHas('cms_pages', [
+            'slug' => 'capsula-marte-vanguardia',
+            'overlay_gradient' => 'indigo',
+            'filter_universe' => 'marte',
+        ]);
+
+        $page = CmsPage::where('slug', 'capsula-marte-vanguardia')->firstOrFail();
+        $this->assertStringContainsString('linear-gradient', $page->getOverlayGradientCss());
+        $this->assertStringContainsString('30, 27, 75', $page->getOverlayGradientCss());
+
+        // Update with custom gradient
+        $updateResp = $this->actingAs($this->portalUser)->put(route('portal.store.pages.update', $page->id), [
+            'title' => 'Cápsula Marte Vanguardia Editada',
+            'slug' => 'capsula-marte-vanguardia',
+            'overlay_gradient' => 'rose',
+            'filter_universe' => 'marte',
+            'content_html' => '<p>Contenido actualizado.</p>',
+            'status' => 'active',
+        ]);
+
+        $updateResp->assertRedirect();
+        $this->assertDatabaseHas('cms_pages', [
+            'id' => $page->id,
+            'overlay_gradient' => 'rose',
+        ]);
+
+        $page->refresh();
+        $this->assertStringContainsString('76, 5, 25', $page->getOverlayGradientCss());
+
+        // Storefront rendering check
+        $homeResp = $this->get('/?tab=explore');
+        $homeResp->assertOk();
+        $homeResp->assertSee('aspect-ratio: 4 / 5', false);
+        $homeResp->assertSee('explore-button-card', false);
+        $homeResp->assertSee('data-action="explore-filter-catalog"', false);
+        $homeResp->assertSee('data-universe="marte"', false);
+        $homeResp->assertSee('Cápsula Marte Vanguardia Editada');
+    }
 }

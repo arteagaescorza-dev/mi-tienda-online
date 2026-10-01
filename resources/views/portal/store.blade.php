@@ -220,11 +220,11 @@
                 </div>
             </button>
 
-            <!-- TAB 3: PÁGINAS DE EXPLORAR & NAVBAR -->
+            <!-- TAB 3: PÁGINAS DE EXPLORAR -->
             <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="pages" onclick="window.switchStoreTab('pages')" type="button">
                 <div class="flex items-center gap-2 overflow-hidden">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    <span class="truncate">3. Páginas de Explorar &amp; Navbar</span>
+                    <span class="truncate">3. Páginas de Explorar</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ $pages->count() ?? 0 }} Págs</span>
@@ -1216,7 +1216,7 @@
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span>Páginas de Explorar &amp; Navbar (Desktop &amp; Móvil)</span>
+                        <span>Páginas de Explorar</span>
                     </h3>
                     <p class="text-xs text-slate-500">Crea y edita tarjetas interactivas de la vista Explorar (con imágenes y filtros de catálogo directos), y sincroniza enlaces en el Navbar y Footer.</p>
                 </div>
@@ -2413,6 +2413,19 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Overlay de Imagen & Degradado (Proporción 4:5)</label>
+                        <select name="overlay_gradient" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="dark">Noir Elegante (Oscuro vertical 25% &rarr; 85%)</option>
+                            <option value="indigo">Multiverso Índigo (Índigo místico 30% &rarr; 88%)</option>
+                            <option value="rose">Aterciopelado Vino (Borgoña / Vino 30% &rarr; 88%)</option>
+                            <option value="emerald">Esmeralda Profundo (Verde Botella 30% &rarr; 88%)</option>
+                            <option value="amber">Cuero &amp; Ámbar (Tierra tostada 30% &rarr; 88%)</option>
+                            <option value="subtle">Sutil Translúcido (Suave 15% &rarr; 65%)</option>
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1">Genera un contraste óptimo sobre la imagen 4:5 resaltando los textos y botones interactivos.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Filtrar Universo</label>
@@ -2542,6 +2555,19 @@
                             <label class="block font-semibold text-slate-700 mb-1">O Subir Nueva Imagen</label>
                             <input type="file" name="image_file" accept="image/*" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white">
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Overlay de Imagen & Degradado (Proporción 4:5)</label>
+                        <select id="edit_page_overlay_gradient" name="overlay_gradient" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <option value="dark">Noir Elegante (Oscuro vertical 25% &rarr; 85%)</option>
+                            <option value="indigo">Multiverso Índigo (Índigo místico 30% &rarr; 88%)</option>
+                            <option value="rose">Aterciopelado Vino (Borgoña / Vino 30% &rarr; 88%)</option>
+                            <option value="emerald">Esmeralda Profundo (Verde Botella 30% &rarr; 88%)</option>
+                            <option value="amber">Cuero &amp; Ámbar (Tierra tostada 30% &rarr; 88%)</option>
+                            <option value="subtle">Sutil Translúcido (Suave 15% &rarr; 65%)</option>
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1">Genera un contraste óptimo sobre la imagen 4:5 resaltando los textos y botones interactivos.</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -3041,6 +3067,7 @@
         const metaDescEl = document.getElementById('edit_page_meta_description');
         const statusEl = document.getElementById('edit_page_status');
         const imageUrlEl = document.getElementById('edit_page_image_url');
+        const overlayGradEl = document.getElementById('edit_page_overlay_gradient');
         const universeEl = document.getElementById('edit_page_filter_universe');
         const categoryEl = document.getElementById('edit_page_filter_category');
         const tagsEl = document.getElementById('edit_page_filter_tags');
@@ -3057,6 +3084,7 @@
         if (metaDescEl) metaDescEl.value = page.seo_description || page.meta_description || '';
         if (statusEl) statusEl.value = page.status || 'active';
         if (imageUrlEl) imageUrlEl.value = page.image_url || '';
+        if (overlayGradEl) overlayGradEl.value = page.overlay_gradient || 'dark';
         if (universeEl) universeEl.value = page.filter_universe || '';
         if (categoryEl) categoryEl.value = page.filter_category || '';
         if (tagsEl) tagsEl.value = page.filter_tags || '';

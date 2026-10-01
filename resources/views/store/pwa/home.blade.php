@@ -519,7 +519,7 @@
 
   </div>
 
-  <!-- VISTA: EXPLORAR (BOTONES CON IMÁGENES & FILTROS DE CATÁLOGO CONFIGURABLES) -->
+  <!-- VISTA: EXPLORAR (BOTONES CON IMAGEN 4:5, OVERLAY CON DEGRADADO & ACCIÓN DIRECTA) -->
   <div id="viewExplore" style="{{ ($initialTab ?? '') === 'explore' ? 'display: block;' : 'display: none;' }} padding-top: 16px;">
     <div class="catalog-section-header">
       <div>
@@ -528,43 +528,168 @@
       </div>
     </div>
 
-    <div class="explore-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; margin-bottom: 40px;">
+    <style>
+      .explore-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+        margin-bottom: 40px;
+      }
+      @media (max-width: 640px) {
+        .explore-buttons-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+      }
+      .explore-button-card {
+        aspect-ratio: 4 / 5;
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 16px;
+        text-decoration: none;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease;
+        text-align: left;
+        width: 100%;
+        background: #09090b;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .explore-button-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+      }
+      .explore-button-card:active {
+        transform: scale(0.98);
+      }
+      .explore-button-card .explore-card-bg-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .explore-button-card:hover .explore-card-bg-img {
+        transform: scale(1.05);
+      }
+      .explore-button-card .explore-card-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .explore-button-card .explore-card-top {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+        pointer-events: none;
+      }
+      .explore-button-card .explore-card-content {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        pointer-events: none;
+      }
+    </style>
+
+    <div class="explore-buttons-grid">
       @forelse($explorePages ?? [] as $ep)
-        <div class="explore-card-item" style="border-radius: var(--radius-md, 12px); overflow: hidden; border: 1px solid var(--border-subtle, #e4e4e7); background: var(--brand-surface, #ffffff); box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05)); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;">
-          <div style="height: 180px; width: 100%; position: relative; background: #18181b; overflow: hidden;">
-            @if(!empty($ep->image_url))
-              <img src="{{ $ep->image_url }}" alt="{{ $ep->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+        @php
+          $hasFilters = !empty($ep->filter_universe) || !empty($ep->filter_category);
+          $overlayCss = $ep->getOverlayGradientCss();
+        @endphp
+
+        @if($hasFilters)
+          <button type="button" 
+                  class="explore-button-card"
+                  data-action="explore-filter-catalog"
+                  data-universe="{{ $ep->filter_universe }}"
+                  data-category="{{ $ep->filter_category }}"
+                  title="{{ $ep->title }}">
+        @else
+          <a href="{{ url('/pagina/' . $ep->slug) }}" 
+             class="explore-button-card"
+             role="button"
+             title="{{ $ep->title }}">
+        @endif
+
+          {{-- 1. IMAGEN DE FONDO --}}
+          @if(!empty($ep->image_url))
+            <img src="{{ $ep->image_url }}" alt="{{ $ep->title }}" class="explore-card-bg-img" loading="lazy">
+          @else
+            <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #18181b, #09090b); color: #71717a;">
+              <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            </div>
+          @endif
+
+          {{-- 2. OVERLAY CON DEGRADADO --}}
+          <div class="explore-card-overlay" style="background: {!! $overlayCss !!};"></div>
+
+          {{-- 3. CABECERA / INSIGNIA SUPERIOR --}}
+          <div class="explore-card-top">
+            @if($hasFilters)
+              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
+                {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($ep->filter_category) ? '// ' . strtoupper($ep->filter_category) : '' }}
+              </span>
             @else
-              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1e1b4b, #0f172a); color: #ffffff;">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-              </div>
-            @endif
-            @if(!empty($ep->filter_universe) || !empty($ep->filter_category))
-              <span style="position: absolute; top: 10px; left: 10px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); color: #ffffff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.2);">
-                {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($ep->filter_category) ? ' // ' . strtoupper($ep->filter_category) : '' }}
+              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
+                EDITORIAL
               </span>
             @endif
-          </div>
-          <div style="padding: 16px; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
-            <div>
-              <h3 style="font-family: var(--font-heading); font-size: 1rem; font-weight: 800; margin: 0 0 6px; color: var(--text-primary, #09090b);">{{ $ep->title }}</h3>
-              @if(!empty($ep->seo_description))
-                <p style="font-size: 0.75rem; color: var(--text-secondary, #71717a); margin: 0 0 14px; line-height: 1.4;">{{ \Illuminate\Support\Str::limit($ep->seo_description, 90) }}</p>
-              @endif
-            </div>
 
-            <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-              @if(!empty($ep->filter_universe) || !empty($ep->filter_category))
-                <button type="button" class="btn-sheet-apply" data-action="explore-filter-catalog" data-universe="{{ $ep->filter_universe }}" data-category="{{ $ep->filter_category }}" style="flex: 1; padding: 8px 12px; font-size: 0.75rem; border-radius: var(--radius-sm, 8px); cursor: pointer; text-align: center;">
-                  Ver Catálogo Filtrado
-                </button>
-              @endif
-              <a href="{{ url('/pagina/' . $ep->slug) }}" class="btn-sheet-clear" style="padding: 8px 12px; font-size: 0.75rem; border-radius: var(--radius-sm, 8px); text-decoration: none; text-align: center; color: var(--text-primary); border: 1px solid var(--border-subtle); display: inline-flex; align-items: center; justify-content: center;">
-                Leer Contenido
+            @if($hasFilters)
+              <a href="{{ url('/pagina/' . $ep->slug) }}" 
+                 onclick="event.stopPropagation();" 
+                 style="pointer-events: auto; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; border-radius: 9999px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s;"
+                 title="Leer artículo editorial"
+                 aria-label="Leer artículo editorial">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
               </a>
+            @endif
+          </div>
+
+          {{-- 4. CONTENIDO INFERIOR INTEGRADO AL BOTÓN --}}
+          <div class="explore-card-content">
+            <h3 style="font-family: var(--font-heading, sans-serif); font-size: 1.05rem; font-weight: 800; color: #ffffff; margin: 0 0 4px; line-height: 1.25; text-shadow: 0 2px 6px rgba(0,0,0,0.6);">
+              {{ $ep->title }}
+            </h3>
+            @if(!empty($ep->seo_description))
+              <p style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.85); margin: 0 0 10px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">
+                {{ \Illuminate\Support\Str::limit($ep->seo_description, 80) }}
+              </p>
+            @endif
+
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #ffffff; background: rgba(255,255,255,0.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.35);">
+                @if($hasFilters)
+                  <span>Ver Catálogo</span>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                @else
+                  <span>Ver Página</span>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                @endif
+              </span>
             </div>
           </div>
-        </div>
+
+        @if($hasFilters)
+          </button>
+        @else
+          </a>
+        @endif
       @empty
         <div style="grid-column: 1 / -1; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle);">
           <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">No hay páginas de exploración configuradas aún. Créalas desde el Hub 2 en la sección "Páginas de Explorar".</p>
