@@ -460,7 +460,7 @@
           </div>
         </a>
 
-        <!-- Enlaces Centrales Oficiales (Regla: Inicio, Explorar, Catálogo, Carrito, Cuenta) -->
+        <!-- Enlaces Oficiales Canónicos (Regla 4.13: Inicio, Explorar, Catálogo, Carrito, Cuenta) -->
         <nav class="nav-links-desktop">
           <a href="#" class="nav-link-item active" data-action="switch-dock-tab" data-dock-tab="home">INICIO</a>
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="explore">EXPLORAR</a>
@@ -471,31 +471,6 @@
           </a>
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="account">CUENTA</a>
         </nav>
-
-        <!-- Acciones Desktop -->
-        <div class="nav-actions-desktop">
-          <button type="button" class="btn-pill-action" data-action="open-size-guide" title="Guía de Tallas Torzo">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="10" rx="2"></rect><line x1="6" y1="7" x2="6" y2="11"></line><line x1="10" y1="7" x2="10" y2="12"></line><line x1="14" y1="7" x2="14" y2="11"></line><line x1="18" y1="7" x2="18" y2="12"></line></svg>
-            <span>GUÍA DE TALLAS</span>
-          </button>
-
-          <button type="button" class="btn-pill-action" data-action="open-wishlist" title="Ver Lista de Deseos / Favoritos">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-            <span>DESEOS</span>
-            <span id="desktopWishlistCount" class="cart-count-badge">0</span>
-          </button>
-
-          <button type="button" class="btn-pill-action" data-action="open-cart" title="Ver Carrito">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-            <span>CARRITO</span>
-            <span id="desktopCartCount" class="cart-count-badge">0</span>
-          </button>
-
-          <a href="{{ route('portal.dashboard') }}" class="btn-pill-action" style="background: #09090b; color: #ffffff; border-color: #09090b;" title="Ir al Panel RevOps">
-            <span>RevOps Admin</span>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
       </div>
     </header>
 
