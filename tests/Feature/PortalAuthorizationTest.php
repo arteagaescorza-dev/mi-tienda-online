@@ -28,8 +28,8 @@ class PortalAuthorizationTest extends TestCase
             ->assertOk()
             ->assertSee('Editor Visual Multiverso', false)
             ->assertSee('Banners &amp; Marquesinas', false)
-            ->assertSee('Reglas Comerciales &amp; Fletes', false)
-            ->assertSee('Contenido Editorial &amp; Tallas', false)
+            ->assertSee('Reglas de Flete', false)
+            ->assertSee('Guía Oficial de Tallas', false)
             ->assertSee('Metro Chabacano', false);
     }
 

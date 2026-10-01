@@ -324,7 +324,7 @@
         @endif
         <span>ENVÍOS EXPRESS A TODO MÉXICO</span>
         <span class="marquee-sep">/</span>
-        <span>TRANSFERENCIAS SPEI SIN COMISIÓN</span>
+        <span>PAGOS 100% SEGUROS CON TARJETA & OXXO</span>
         <span class="marquee-sep">/</span>
         <span>STOCK FÍSICO CON ENTREGA INMEDIATA</span>
         <span class="marquee-sep">/</span>
@@ -461,7 +461,7 @@
           <ul class="footer-link-list">
             <li><span>Paqueteria nacional express ($149 / Gratis +$999)</span></li>
             <li><span>Entrega personal discreta y segura</span></li>
-            <li><span>Transferencias directas SPEI BBVA sin comisión</span></li>
+            <li><span>Pagos 100% seguros con Tarjeta & OXXO Pay</span></li>
           </ul>
         </div>
 
@@ -544,8 +544,8 @@
   <!-- Backdrop Compartido -->
   <div id="drawerBackdrop" class="drawer-backdrop" data-mobile-nav-backdrop></div>
 
-  <!-- A. Drawer de Filtros con Switcher Tipo ZARA -->
-  <aside id="filterDrawer" class="bottom-sheet-drawer" data-mobile-nav-drawer aria-label="Filtros del catálogo">
+  <!-- A. Drawer de Filtros Lateral Izquierdo con Switcher Tipo ZARA (Regla 1) -->
+  <aside id="filterDrawer" class="bottom-sheet-drawer drawer-left" data-mobile-nav-drawer aria-label="Filtros del catálogo">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header">
       <span class="sheet-title">Filtros & Universos</span>
@@ -1152,7 +1152,7 @@
         </form>
       </div>
 
-      <!-- PASO 2: MÉTODOS DE PAGO MÚLTIPLES (SPEI BBVA, TARJETAS, OXXO PAY) -->
+      <!-- PASO 2: MÉTODOS DE PAGO (TARJETAS BANCARIAS & OXXO PAY - REGLA 3 CERO SPEI) -->
       <div id="checkoutStep2" class="checkout-step-panel" style="display: none;">
         <div class="checkout-section-header">
           <h3 class="checkout-section-title">2. Selecciona tu Forma de Pago</h3>
@@ -1160,45 +1160,11 @@
         </div>
 
         <div class="payment-methods-grid">
-          <!-- Opción 1: SPEI BBVA Directo -->
-          <label class="payment-method-card active" for="payMethodSpei">
+          <!-- Opción 1: Tarjetas de Débito y Crédito (Predeterminada) -->
+          <label class="payment-method-card active" for="payMethodCard">
             <div class="payment-card-top">
               <div class="payment-radio-wrap">
-                <input type="radio" name="checkoutPaymentMethod" id="payMethodSpei" value="spei_bbva" checked>
-                <span class="payment-method-name">Transferencia Directa SPEI (BBVA)</span>
-              </div>
-              <span class="payment-badge-rec">0% COMISIÓN</span>
-            </div>
-            <div class="payment-card-body" id="speiDetailsArea">
-              <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
-                Transfiere desde cualquier banco de México hacia nuestra cuenta oficial. Tu pedido se reserva y se envía el comprobante vía WhatsApp.
-              </p>
-              <div class="bank-details-box">
-                <div class="bank-detail-row">
-                  <span class="bank-label">Banco:</span>
-                  <strong class="bank-value">BBVA México</strong>
-                </div>
-                <div class="bank-detail-row">
-                  <span class="bank-label">Beneficiario:</span>
-                  <strong class="bank-value">Miguel Arteaga</strong>
-                </div>
-                <div class="bank-detail-row">
-                  <span class="bank-label">CLABE Interbancaria:</span>
-                  <strong class="bank-value mono-clabe" id="bbvaClabeDisplay">012180004708283787</strong>
-                </div>
-                <button type="button" class="btn-copy-clabe" data-action="copy-clabe">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  <span id="copyClabeLabel">Copiar CLABE en 1 Tap</span>
-                </button>
-              </div>
-            </div>
-          </label>
-
-          <!-- Opción 2: Tarjetas de Débito y Crédito -->
-          <label class="payment-method-card" for="payMethodCard">
-            <div class="payment-card-top">
-              <div class="payment-radio-wrap">
-                <input type="radio" name="checkoutPaymentMethod" id="payMethodCard" value="credit_debit_card">
+                <input type="radio" name="checkoutPaymentMethod" id="payMethodCard" value="credit_debit_card" checked>
                 <span class="payment-method-name">Tarjetas de Débito / Crédito</span>
               </div>
               <div class="card-brand-logos">
@@ -1207,7 +1173,7 @@
                 <span class="card-tag">AMEX</span>
               </div>
             </div>
-            <div class="payment-card-body" id="cardDetailsArea" style="display: none;">
+            <div class="payment-card-body" id="cardDetailsArea" style="display: block;">
               <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
                 Procesamiento seguro mediante tokenización SSL de 256 bits.
               </p>

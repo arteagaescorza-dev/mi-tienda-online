@@ -894,6 +894,35 @@ body.store-body {
   }
 }
 
+/* ==========================================================================
+   DRAWER DE FILTROS LATERAL IZQUIERDO (REGLA 1 STOREFRONT)
+   ========================================================================== */
+#filterDrawer,
+.drawer-left {
+  left: 0 !important;
+  right: auto !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: min(380px, 88vw) !important;
+  max-width: 380px !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 16px 16px 0 !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+#filterDrawer.show,
+.drawer-left.show {
+  transform: translateX(0) !important;
+}
+
+#filterDrawer .sheet-handle-bar,
+.drawer-left .sheet-handle-bar {
+  display: none !important;
+}
+
 .sheet-handle-bar {
   width: 40px;
   height: 4px;

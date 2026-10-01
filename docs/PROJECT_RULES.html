@@ -346,6 +346,14 @@
       Ninguna tarea se considera "Completada" si sus tablas, columnas, esquemas JSON y FormRequests no están 100% formalizados de antemano en el contrato de backend maestro.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 1.4: Codificación Universal y Obligatoria UTF-8</strong>
+      Todo el ecosistema opera bajo <code>UTF-8 universal</code> (MySQL <code>utf8mb4_unicode_ci</code>). Toda plantilla Blade declara <code>&lt;meta charset="utf-8"&gt;</code>, las cabeceras HTTP emiten <code>charset=UTF-8</code> y los archivos fuente se guardan sin BOM, prohibiendo codificaciones legadas (ISO-8859-1, Windows-1252).
+    </div>
+  </div>
 </div>
 
 <!-- CAPÍTULO 2 -->
@@ -480,6 +488,30 @@
     <div class="rule-content">
       <strong>Regla 4.5: Ficha Independiente de Producto (PDP) — Supresión de WhatsApp & Galería con Swipe</strong>
       Las páginas independientes de producto (<code>/productos/{slug}</code>) nunca muestran botón o enlace a WhatsApp; la conversión se canaliza 100% al carrito nativo y pasarela de pago oficial sin fugas externas. Asimismo, las imágenes de producto permiten abrir un modal interactivo / visor lightbox a pantalla completa al hacer clic sobre la tarjeta o miniaturas, con soporte fluido para gestos táctiles de deslizamiento (swipe horizontal en móvil), arrastre con ratón en escritorio, atajos de teclado y botones prev/next.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">6</div>
+    <div class="rule-content">
+      <strong>Regla 4.6: Filtros del Storefront en Drawer Izquierdo (Off-Canvas)</strong>
+      Los filtros de segmentación de catálogo (<code>#filterDrawer</code>) se despliegan obligatoriamente como un <em>drawer lateral desde el lado izquierdo</em> (<code>left: 0; transform: translateX(-100%);</code> y <code>translateX(0)</code> al abrir) tanto en dispositivos móviles como en pantallas de escritorio. Se prohíben acordeones verticales en línea que desplacen el catálogo o barras laterales fijas invasivas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">7</div>
+    <div class="rule-content">
+      <strong>Regla 4.7: Cuenta Regresiva & Reserva de Stock Exclusiva en Checkout</strong>
+      El temporizador de 5 minutos y la reserva transaccional de prendas para evitar sobreventa <strong>solo se activan cuando inicia el checkout</strong> (<code>openCheckoutModal</code>). Si el tiempo expira, la reserva se libera pero las prendas <strong>permanecen en el carrito</strong> (prohibido vaciarlo). Si un producto se agota (<code>stock &lt;= 0</code>) o se descontinúa, la UI del carrito y del checkout despliega obligatoriamente la leyenda: <strong>"Ya no hay existencias"</strong> con badge rojo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">8</div>
+    <div class="rule-content">
+      <strong>Regla 4.8: Supresión Definitiva de SPEI & Enfoque Tarjetas / OXXO Pay</strong>
+      Queda formalmente eliminado el método de pago por transferencia SPEI en la tienda, marquesinas, cintillos de beneficios y checkout. El flujo transaccional D2C opera exclusivamente con: 1) Tarjetas de Débito y Crédito (Visa, Mastercard, AMEX) con tokenización bancaria, y 2) OXXO Pay con referencia digital de 14 dígitos y ventana de apartado de 48 horas.
     </div>
   </div>
 </div>

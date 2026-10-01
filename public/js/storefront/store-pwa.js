@@ -778,83 +778,61 @@
     });
   }
 
+  function isItemOutOfStock(item) {
+    if (!item) return false;
+    if (item.outOfStock || item.is_out_of_stock || item.discontinued) return true;
+    if (typeof item.availableStock === 'number' && item.availableStock <= 0 && (item.stockType || item.lineType) !== 'on_demand') return true;
+    const catProd = STORE_PRODUCTS.find(p => String(p.id) === String(item.productId || item.id) || p.sku === item.sku);
+    if (catProd) {
+      if (catProd.outOfStock || catProd.discontinued || catProd.visible === false) return true;
+      if (typeof catProd.availableStock === 'number' && catProd.availableStock <= 0 && catProd.stockType !== 'on_demand') return true;
+    }
+    return false;
+  }
+
   function handleStockLockExpiry() {
     if (stockLockInterval) {
       clearInterval(stockLockInterval);
       stockLockInterval = null;
     }
     const expiredItems = [...storeState.cart];
-    stockLockTimerRemaining = CART_STOCK_LOCK_SECONDS;
+    stockLockTimerRemaining = 0;
     pushNotificationState.stockWarningFired = false;
     localStorage.removeItem('multiverse_stock_lock_expires_at');
-    storeState.cart = [];
-    try {
-      localStorage.setItem('multiverse_store_cart', JSON.stringify([]));
-    } catch (e) {}
+    notifyStockLockReleased();
+
+    // REGLA 2: Si el tiempo se acaba, el producto PERMANECE en carrito!
+    // No vaciamos storeState.cart
+    saveCart();
     updateCartBadges();
     updateStockLockDisplay();
 
-    // Cerrar modal de checkout si estaba abierto
-    const checkoutModal = document.getElementById('checkoutModalBackdrop');
-    if (checkoutModal && checkoutModal.classList.contains('show')) {
-      if (typeof closeCheckoutModal === 'function') {
-        closeCheckoutModal();
-      } else {
-        checkoutModal.classList.remove('show');
-      }
-    }
+    // Notificar al usuario sin vaciar el carrito
+    showToastNotification('Tu tiempo de reserva temporal ha finalizado. Tus productos permanecen en el carrito sujetos a disponibilidad.');
 
-    const container = document.getElementById('cartItemsContainer');
-    const footerAction = document.getElementById('cartFooterActions');
-    if (container) {
-      container.innerHTML = `
-        <div class="cart-expiry-notice">
-          <div class="cart-expiry-title">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Reserva de Stock Expirada
-          </div>
-          <p class="cart-expiry-text">Tu reserva temporal de 5 minutos ha expirado. Las prendas se han liberado para otros clientes.</p>
-          <button type="button" class="cart-expiry-btn" onclick="location.reload()">Explorar Catálogo</button>
-        </div>
-      `;
+    if (typeof renderCartSheetContent === 'function') {
+      renderCartSheetContent();
     }
-    if (footerAction) footerAction.style.display = 'none';
 
     safeDispatchEvent('stock-lock-expired', {
       sessionId: getCartSessionId(),
       expiredItems
     });
-
-    showToastNotification('Tu reserva de stock temporal ha expirado.');
   }
 
-  // Gestión del Temporizador de Urgencia (5 Minutos / 300 Segundos)
-  function manageStockLockTimer() {
-    if (storeState.cart.length === 0) {
-      if (stockLockInterval) {
-        clearInterval(stockLockInterval);
-        stockLockInterval = null;
-      }
-      stockLockTimerRemaining = CART_STOCK_LOCK_SECONDS;
-      pushNotificationState.stockWarningFired = false;
-      localStorage.removeItem('multiverse_stock_lock_expires_at');
-      return;
-    }
+  // REGLA 2: La cuenta regresiva del apartado SOLO se activa cuando inicia el checkout
+  function startCheckoutStockLockTimer() {
+    if (storeState.cart.length === 0) return;
 
     const now = Date.now();
     let expiresAt = parseInt(localStorage.getItem('multiverse_stock_lock_expires_at'), 10);
-    if (!expiresAt || isNaN(expiresAt)) {
+    if (!expiresAt || isNaN(expiresAt) || expiresAt <= now) {
       expiresAt = now + (CART_STOCK_LOCK_SECONDS * 1000);
       localStorage.setItem('multiverse_stock_lock_expires_at', expiresAt.toString());
       stockLockTimerRemaining = CART_STOCK_LOCK_SECONDS;
       notifyStockLockAcquired();
     } else {
       stockLockTimerRemaining = Math.max(0, Math.round((expiresAt - now) / 1000));
-    }
-
-    if (stockLockTimerRemaining <= 0) {
-      handleStockLockExpiry();
-      return;
     }
 
     updateStockLockDisplay();
@@ -879,6 +857,18 @@
           updateStockLockDisplay();
         }
       }, 1000);
+    }
+  }
+
+  function manageStockLockTimer() {
+    // Si hay un lock activo proveniente del checkout, mantener la cuenta en sync
+    const expiresAt = parseInt(localStorage.getItem('multiverse_stock_lock_expires_at'), 10);
+    if (expiresAt && expiresAt > Date.now()) {
+      stockLockTimerRemaining = Math.max(0, Math.round((expiresAt - Date.now()) / 1000));
+      updateStockLockDisplay();
+    } else {
+      stockLockTimerRemaining = 0;
+      updateStockLockDisplay();
     }
   }
 
@@ -969,29 +959,29 @@
 
     if (footerAction) footerAction.style.display = 'flex';
 
-    // Banner de Urgencia de Reserva de Stock (5 Minutos)
-    const mins = Math.floor(stockLockTimerRemaining / 60);
-    const secs = stockLockTimerRemaining % 60;
-    const initialTimeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    const initialPct = Math.max(0, (stockLockTimerRemaining / CART_STOCK_LOCK_SECONDS) * 100);
+    // REGLA 2: La cuenta regresiva del apartado solo se activa cuando inicia el checkout
+    let urgencyBanner = '';
+    if (stockLockTimerRemaining > 0 && stockLockInterval) {
+      const mins = Math.floor(stockLockTimerRemaining / 60);
+      const secs = stockLockTimerRemaining % 60;
+      const initialTimeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const initialPct = Math.max(0, (stockLockTimerRemaining / CART_STOCK_LOCK_SECONDS) * 100);
 
-    const urgencyBanner = `
-      <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 14px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span style="font-family: var(--font-heading); font-size: 0.73rem; font-weight: 800; color: #9f1239; text-transform: uppercase; letter-spacing: 0.04em;">Stock Apartado Exclusivo</span>
+      urgencyBanner = `
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span style="font-family: var(--font-heading); font-size: 0.73rem; font-weight: 800; color: #9f1239; text-transform: uppercase; letter-spacing: 0.04em;">Stock Apartado en Checkout</span>
+            </div>
+            <span id="stockLockTimeRemaining" style="font-family: monospace; font-size: 0.82rem; font-weight: 800; color: #e11d48;">${initialTimeStr}</span>
           </div>
-          <span id="stockLockTimeRemaining" style="font-family: monospace; font-size: 0.82rem; font-weight: 800; color: #e11d48;">${initialTimeStr}</span>
+          <div style="width: 100%; height: 3px; background: #ffe4e6; border-radius: 2px; overflow: hidden; margin-top: 6px;">
+            <div id="stockLockProgressBar" style="width: ${initialPct}%; height: 100%; background: #e11d48; transition: width 1s linear;"></div>
+          </div>
         </div>
-        <div style="width: 100%; height: 3px; background: #ffe4e6; border-radius: 2px; overflow: hidden; margin-top: 6px;">
-          <div id="stockLockProgressBar" style="width: ${initialPct}%; height: 100%; background: #e11d48; transition: width 1s linear;"></div>
-        </div>
-        <div style="font-size: 0.67rem; color: #be123c; margin-top: 5px; line-height: 1.3;">
-          Completa tu compra antes de que expire el tiempo para no perder tus prendas exclusivas.
-        </div>
-      </div>
-    `;
+      `;
+    }
 
     // Barra de Progreso Envío Gratis Courier
     let shippingNotice = '';
@@ -1033,8 +1023,10 @@
       `;
     }
 
-    const renderItemHtml = ({ item, idx }) => `
-      <div style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); align-items: center;">
+    const renderItemHtml = ({ item, idx }) => {
+      const outOfStock = isItemOutOfStock(item);
+      return `
+      <div style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); align-items: center; ${outOfStock ? 'background: #fff5f5; border-radius: var(--radius-sm); padding: 10px;' : ''}">
         <div style="width: 50px; height: 50px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
           ${item.image && item.image !== '/user-avatar.png' ? `<img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
         </div>
@@ -1045,6 +1037,12 @@
             <span style="font-size: 0.7rem; color: var(--text-muted);">Talla: <strong style="color: var(--text-primary);">${item.size}</strong></span>
             <span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; ${((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'background: #fffbeb; color: #b45309;' : 'background: #ecfdf5; color: #047857;'}">${item.stockLabel || (((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'Bajo Pedido' : 'Stock Fisico')}</span>
           </div>
+          ${outOfStock ? `
+            <div class="cart-item-out-of-stock-notice" style="color: #dc2626; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Ya no hay existencias</span>
+            </div>
+          ` : ''}
           <div style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 800; color: #050505; margin-top: 4px;">MXN $${(item.price * item.quantity).toFixed(2)}</div>
         </div>
 
@@ -1057,7 +1055,8 @@
           </button>
         </div>
       </div>
-    `;
+      `;
+    };
 
     let itemsHtml = '';
     if (isMixedCart) {
@@ -1729,7 +1728,7 @@
       references: ''
     },
     createAccount: true,
-    paymentMethod: 'spei_bbva', // 'spei_bbva' | 'credit_debit_card' | 'oxxo_pay'
+    paymentMethod: 'credit_debit_card', // 'credit_debit_card' | 'oxxo_pay' (Regla 3: Cero SPEI)
     card: {
       number: '',
       expiry: '',
@@ -1868,6 +1867,22 @@
     if (storeState.cart.length === 0) {
       showToastNotification('Tu carrito está vacío. Agrega prendas para continuar.');
       return;
+    }
+
+    // REGLA 2: Verificar si algún producto ya no tiene existencias antes de iniciar checkout
+    const outOfStockItem = storeState.cart.find(isItemOutOfStock);
+    if (outOfStockItem) {
+      showToastNotification(`La prenda "${outOfStockItem.name}" ya no cuenta con existencias. Retírala del carrito para continuar.`);
+      openDrawer('cartSheet');
+      return;
+    }
+
+    // REGLA 2: La cuenta regresiva del apartado y reserva en inventario SOLO se activa cuando inicia el checkout
+    startCheckoutStockLockTimer();
+
+    // REGLA 3: Tarjeta de crédito/débito predeterminada (cero SPEI)
+    if (checkoutState.paymentMethod === 'spei_bbva' || !checkoutState.paymentMethod) {
+      checkoutState.paymentMethod = 'credit_debit_card';
     }
 
     closeAllDrawers();
@@ -2227,36 +2242,7 @@
 
     const paymentBox = document.getElementById('confirmedPaymentBox');
     if (paymentBox) {
-      if (checkoutState.paymentMethod === 'spei_bbva') {
-        paymentBox.innerHTML = `
-          <div style="background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 14px;">
-            <strong style="font-family: var(--font-heading); font-size: 0.85rem; display: block; margin-bottom: 6px;">
-              Instrucciones de Transferencia SPEI
-            </strong>
-            <div style="font-size: 0.78rem; line-height: 1.5; color: var(--text-secondary);">
-              <div>Banco: <strong style="color: #050505;">BBVA México</strong></div>
-              <div>Beneficiario: <strong style="color: #050505;">Miguel Arteaga</strong></div>
-              <div>CLABE: <strong style="color: #050505; font-family: monospace; font-size: 0.9rem;">012180004708283787</strong></div>
-              <div>Monto Exacto: <strong style="color: #050505;">MXN $${total.toFixed(2)}</strong></div>
-            </div>
-            <button type="button" class="btn-copy-clabe" data-action="copy-clabe" style="margin-top: 10px; width: 100%;">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Copiar CLABE Interbancaria</span>
-            </button>
-          </div>
-        `;
-      } else if (checkoutState.paymentMethod === 'credit_debit_card') {
-        paymentBox.innerHTML = `
-          <div style="background: var(--accent-emerald-soft); border: 1px solid var(--accent-emerald-border); border-radius: var(--radius-sm); padding: 14px;">
-            <strong style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--accent-emerald); display: block; margin-bottom: 4px;">
-              Pago con Tarjeta Aprobado
-            </strong>
-            <p style="font-size: 0.75rem; color: #065f46; margin: 0; line-height: 1.4;">
-              El cargo por MXN $${total.toFixed(2)} fue autorizado con tu tarjeta terminación <strong>${cardLast4}</strong>. Recibirás confirmación y guía de rastreo en tu correo.
-            </p>
-          </div>
-        `;
-      } else if (checkoutState.paymentMethod === 'oxxo_pay') {
+      if (checkoutState.paymentMethod === 'oxxo_pay') {
         paymentBox.innerHTML = `
           <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 14px; text-align: center;">
             <strong style="font-family: var(--font-heading); font-size: 0.82rem; color: #92400e; display: block; margin-bottom: 6px;">
@@ -2267,6 +2253,17 @@
             </div>
             <p style="font-size: 0.72rem; color: #92400e; margin: 0; line-height: 1.4;">
               Indica en caja que realizarás un pago OXXO Pay con esta referencia. Tu stock de prendas queda apartado por <strong>48 horas</strong>.
+            </p>
+          </div>
+        `;
+      } else {
+        paymentBox.innerHTML = `
+          <div style="background: var(--accent-emerald-soft); border: 1px solid var(--accent-emerald-border); border-radius: var(--radius-sm); padding: 14px;">
+            <strong style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--accent-emerald); display: block; margin-bottom: 4px;">
+              Pago con Tarjeta Aprobado
+            </strong>
+            <p style="font-size: 0.75rem; color: #065f46; margin: 0; line-height: 1.4;">
+              El cargo por MXN $${total.toFixed(2)} fue autorizado con tu tarjeta terminación <strong>${cardLast4}</strong>. Recibirás confirmación y guía de rastreo en tu correo.
             </p>
           </div>
         `;
@@ -2435,13 +2432,9 @@
     const vat = Math.round((total - (total / 1.16)) * 100) / 100;
     const { readyItems, onDemandItems } = getCartLines(storeState.cart);
 
-    let payLabel = 'Transferencia SPEI BBVA';
-    let paySub = 'CLABE Interbancaria BBVA: 012180004708283787 (Sin comision)';
-    if (checkoutState.paymentMethod === 'credit_debit_card') {
-      const last4 = (checkoutState.card.number || '0000').slice(-4);
-      payLabel = 'Tarjeta de Credito / Debito';
-      paySub = `Terminacion **** ${last4} | Titular: ${checkoutState.card.holder || checkoutState.customer.name}`;
-    } else if (checkoutState.paymentMethod === 'oxxo_pay') {
+    let payLabel = 'Tarjeta de Credito / Debito';
+    let paySub = `Terminacion **** ${(checkoutState.card.number || '0000').slice(-4)} | Titular: ${checkoutState.card.holder || checkoutState.customer.name || 'Cliente'}`;
+    if (checkoutState.paymentMethod === 'oxxo_pay') {
       payLabel = 'Pago en Efectivo OXXO Pay';
       paySub = 'Referencia digital de 14 digitos (Vigencia 48 horas en ventanilla)';
     }

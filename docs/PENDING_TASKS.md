@@ -96,6 +96,7 @@
 | `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR), Tag v1.1 |
 | `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5, Tag v1.1 |
 | `TASK-STR-07` | Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `resources/views/store/pwa/product-detail.blade.php`, `PROJECT_RULES.md` |
+| `TASK-STR-08` | Gobernanza Storefront: Filtros Drawer Izquierdo, Reserva en Checkout, Supresión SPEI y Norma UTF-8 | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.css`, `store-pwa.js`, `store-pwa.blade.php`, `PROJECT_RULES.md` |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Panorámico max-w-7xl, 4 KPIs Live, Margen Real, Tag v1.6 |
@@ -1576,6 +1577,40 @@ graph TD
 * **Archivos Modificados:**
   - `resources/views/store/pwa/product-detail.blade.php`
   - `tests/Feature/StorefrontPwaPdpTest.php`
+  - `docs/PROJECT_RULES.md`
+  - `docs/PROJECT_RULES.html`
+  - `docs/PROJECT_RULES.pdf`
+  - `docs/PENDING_TASKS.md`
+
+### `TASK-STR-08`: Gobernanza Storefront: Filtros Drawer Izquierdo, Reserva en Checkout, Supresión SPEI y Norma UTF-8
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Normativa de Gobierno:** `PROJECT_RULES.md` (Reglas 1.3, 6.8, 6.9, 6.10).
+* **Puntos Ciegos / Nuevas Reglas Solicitadas:**
+  1. **Filtros Invasivos en Storefront:** Los filtros de catálogo requerían un despliegue ergonómico off-canvas en drawer lateral izquierdo, tanto en móvil como en escritorio, sin desplazar el grid de productos ni saturar la pantalla.
+  2. **Reserva Prematura y Vaciado Indeseado del Carrito:** La cuenta regresiva de 5 minutos y la reserva de stock se disparaban de forma anticipada. Si el tiempo expiraba, se requería que los productos permanecieran en el carrito (sin vaciarse), y que si un producto se agotaba o descontinuaba, se presentara explícitamente la leyenda *"Ya no hay existencias"*.
+  3. **Fricción Operativa con SPEI:** La opción de pago por transferencia SPEI generaba fricción operativa en conciliación bancaria y validación manual de comprobantes, requiriéndose su retiro total para concentrarse en Tarjetas y OXXO Pay.
+  4. **Declaración Universal UTF-8:** Necesidad de formalizar y blindar UTF-8 universal en todo el proyecto (Blade, headers HTTP, MySQL utf8mb4, archivos de código).
+* **Solución Implementada:**
+  - **1. Filtros en Drawer Izquierdo (`#filterDrawer`, `.drawer-left`):**
+    * Configurado en `public/css/store-pwa.css` con anclaje lateral `left: 0 !important; right: auto !important; transform: translateX(-100%);` y apertura fluida a `translateX(0) !important;`.
+    * En `resources/views/layouts/store-pwa.blade.php`: Actualizado `<aside id="filterDrawer" class="bottom-sheet-drawer drawer-left" ...>` con botones de cierre, limpiar filtros y confirmación.
+  - **2. Reserva de Stock Exclusiva en Checkout & Preservación de Carrito:**
+    * En `public/js/storefront/store-pwa.js`: Creada función `startCheckoutStockLockTimer()` activada únicamente al invocar `openCheckoutModal()`.
+    * Modificado `handleStockLockExpiry()`: Libera el lock del backend pero **preserva intacto `storeState.cart`** (no vacía el carrito).
+    * Función `isItemOutOfStock(item)` y `renderCartSheetContent()`: Muestra la leyenda en rojo con badge e icono **"Ya no hay existencias"** para prendas con `stock <= 0` o descontinuadas, inhabilitando el avance al checkout hasta que el usuario las retire.
+  - **3. Supresión Total de SPEI en Storefront:**
+    * Eliminado SPEI del Marquee ticker y pie de beneficios en `store-pwa.blade.php` y `product-detail.blade.php` (reemplazado por Tarjetas Bancarias & OXXO Pay).
+    * Eliminada la opción 1 (SPEI BBVA Directo) del Paso 2 de Checkout en `store-pwa.blade.php`.
+    * Establecido Tarjetas de Débito/Crédito como método activo predeterminado (`checked`, `.active`), seguido de OXXO Pay con apartado por 48 horas.
+  - **4. Norma Universal UTF-8:**
+    * Formalizada como Regla 1.3 de gobernanza técnica en `PROJECT_RULES.md` y `PROJECT_RULES.html`.
+    * Validada en layouts Blade (`<meta charset="utf-8">`) y cabeceras de respuesta.
+* **Archivos Modificados:**
+  - `public/css/store-pwa.css`
+  - `public/js/storefront/store-pwa.js`
+  - `resources/views/layouts/store-pwa.blade.php`
+  - `resources/views/store/pwa/product-detail.blade.php`
+  - `tests/Feature/PortalAuthorizationTest.php`
   - `docs/PROJECT_RULES.md`
   - `docs/PROJECT_RULES.html`
   - `docs/PROJECT_RULES.pdf`

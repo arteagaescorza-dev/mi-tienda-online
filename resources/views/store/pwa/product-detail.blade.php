@@ -829,7 +829,7 @@
         </div>
         <div class="pdp-pillar-item">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
-          <div><strong>Pago Seguro</strong><br>SPEI BBVA directo sin comisión</div>
+          <div><strong>Pago Seguro</strong><br>Tarjetas bancarias & OXXO Pay</div>
         </div>
       </div>
 

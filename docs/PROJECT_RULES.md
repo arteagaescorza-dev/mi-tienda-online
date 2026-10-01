@@ -20,6 +20,12 @@ $$\text{Migración MySQL} \longrightarrow \text{Modelos Eloquent} \longrightarro
 * Se debe preservar de forma rigurosa la totalidad de comentarios, docstrings y anotaciones existentes en los archivos modificados, a menos que el usuario o un requerimiento técnico explícito ordene su reemplazo.
 * No se deben alterar métodos o controladores preexistentes de otros submódulos sin verificar que la suite completa de pruebas unitarias y funcionales continúe ejecutándose sin errores.
 
+### Regla 1.3: Declaración Universal y Obligatoria de Codificación UTF-8
+* **Estándar Inmutable UTF-8:** Todo el proyecto (código fuente, base de datos, comunicaciones HTTP y documentación técnica) se declara y opera bajo codificación **UTF-8 universal** (con cotejamiento MySQL `utf8mb4_unicode_ci` / conjunto de caracteres `utf8mb4`). Queda estrictamente prohibido el empleo de codificaciones legadas o regionales (ISO-8859-1, Windows-1252, Latin1).
+* **Cabeceras HTTP y Vistas Blade:** Todas las plantillas Blade y documentos HTML deben declarar explícitamente `<meta charset="utf-8">`. Las respuestas del servidor deben emitir cabeceras `Content-Type: text/html; charset=UTF-8` o `application/json; charset=UTF-8`.
+* **Capa de Persistencia y Conexión PDO:** Los archivos de configuración (`config/database.php`) y migraciones deben forzar `'charset' => 'utf8mb4'` y `'collation' => 'utf8mb4_unicode_ci'` para admitir caracteres acentuados en español, diacríticos y símbolos técnicos sin corrupción de datos.
+* **Archivos Fuente:** Todo archivo `.php`, `.js`, `.css`, `.json`, `.md` y `.html` debe guardarse obligatoriamente en codificación UTF-8 sin marca de orden de bytes (BOM).
+
 ---
 
 ## 2. Reglas de Persistencia, Modelado y Contratos de Backend
@@ -137,6 +143,26 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   - **Interacción Multidispositivo:** Adicionalmente, el modal debe proveer controles por clics (flechas prev/next y barra de indicadores/dots), arrastre con ratón en escritorio (`mousedown`/`mousemove`), atajos de teclado (`ArrowLeft`, `ArrowRight`, `Escape`) y contador de progreso (`1 / N`).
   - **Aislamiento Estructural:** En estricto cumplimiento de la Regla 5.1, el modal `#pdpGalleryModal` debe ser hijo directo del contenedor de la vista (`depth = 2`), garantizando visibilidad `z-index: 99999` libre de anidamientos en paneles ocultos.
 
+### Regla 6.8: Despliegue de Filtros del Storefront en Drawer Izquierdo (Off-Canvas)
+* Los filtros de segmentación de catálogo en el storefront PWA (`#filterDrawer`) deben desplegarse invariablemente como un **drawer lateral deslizante desde el extremo izquierdo de la pantalla (`left: 0 !important; right: auto !important; transform: translateX(-100%);`)**.
+* Al activarse (clase `.show`), transiciona de forma limpia a `transform: translateX(0) !important;` tanto en dispositivos móviles (`viewport < 768px`) como en pantallas de escritorio o tablets.
+* **Prohibición de Layouts Invasivos:** Queda estrictamente prohibido implementar filtros en acordeones que empujen el grid de productos hacia abajo o sidebars estáticas fijas que reduzcan el área útil de la vitrina.
+* **Interacción del Drawer:** Debe contar con backdrop oscuro semitransparente (`#drawerBackdrop`, `z-index: 10040`), botón de cierre rápido (X), botón de "Limpiar Filtros" y botón de acción principal para aplicar y cerrar ("Ver X Prendas").
+
+### Regla 6.9: Reserva Temporal de Inventario y Cuenta Regresiva Exclusiva en Checkout
+* **Activación Exclusiva en Checkout:** La cuenta regresiva del apartado temporal de productos (temporizador de 5 minutos / 300 segundos) y el bloqueo transaccional de stock para evitar sobreventa **se activan única y exclusivamente cuando el usuario inicia el flujo de checkout** (`openCheckoutModal()`). Queda prohibido disparar reservas de inventario o temporizadores de urgencia mientras el usuario navega por el catálogo o inspecciona pasivamente el carrito.
+* **Preservación Inmutable del Carrito al Expirar:** Si el temporizador de 5 minutos llega a cero sin que la orden se concrete, la reserva transaccional se libera en el backend para permitir la compra por otros usuarios, pero los productos **permanecen en el carrito de compras del usuario**. Queda terminantemente prohibido vaciar o purgar automáticamente el carrito ante la expiración del temporizador.
+* **Detección y Leyenda de Agotado/Descontinuado:** Si tras expirar el apartado temporal (o en visitas subsecuentes) la prenda se agota (`stock <= 0`) o es descontinuada del catálogo mientras permanece en el carrito del cliente, la interfaz del carrito y del checkout debe desplegar de forma inmediata y visible la leyenda:
+  $$\textbf{"Ya no hay existencias"}$$
+  (acompañada de badge visual en rojo `#dc2626`, bloqueo para proceder al checkout y notificación al usuario para retirar o sustituir la prenda).
+
+### Regla 6.10: Supresión Definitiva de SPEI y Estandarización de Pasarelas de Pago
+* **Cero SPEI en Storefront:** Queda formalmente retirado y prohibido el método de transferencia bancaria SPEI en la tienda pública, marquees, cintillos promocionales, pilares de confianza y embudo de checkout D2C.
+* **Pasarelas Digitales Homologadas:** El storefront opera de forma estricta y transparente con dos modalidades de pago seguro:
+  1. **Tarjetas de Débito y Crédito (Visa, Mastercard, American Express):** Procesadas en tiempo real mediante pasarela bancaria tokenizada con autorización instantánea y confirmación automática de pedido.
+  2. **OXXO Pay:** Generación de referencia digital numérica de 14 dígitos en tiempo real con ventana de apartado físico de stock por 48 horas para liquidación en sucursales de conveniencia a nivel nacional.
+* Se eliminan todas las referencias a CLABE interbancaria BBVA o validación manual de comprobantes en el storefront para erradicar fricción operativa y riesgos de conciliación.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -227,12 +253,16 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | Dominio | Regla Clave | Mecanismo de Verificación |
 | :--- | :--- | :--- |
 | **Ingeniería** | Vertical Slice End-to-End | Cero mocks; persistencia real en MySQL y modelos Eloquent |
+| **Codificación** | UTF-8 Universal Obligatorio | `<meta charset="utf-8">`, MySQL `utf8mb4_unicode_ci`, cabeceras HTTP UTF-8 |
 | **Contrato Backend** | Sincronización `BACKEND_INTEGRATION_SPEC.md` | Esquemas JSON, FormRequests y migraciones documentados |
 | **Arquitectura** | Single Inventory Pool Multiverso | Stock centralizado en Hub 4; vitrinas desacopladas |
 | **Workflows** | Flujos de la Aplicación sin Roles | Especificación centrada en interconexión de módulos y datos |
 | **Estructura DOM** | Aislamiento de Paneles y Modales | Nodos hermanos bajo `#storeAppRoot` (`depth = 2`); paridad de `<div>` |
 | **UI / PWA** | Full-width Breakout, Cache Busting & Resize Solo Vertical | `100vw` sin overflow; `?v=filemtime`; `textarea { resize: vertical !important; }` |
 | **PDP Storefront** | Cero WhatsApp & Galería Swipe | Sin botón wa.me en `/productos/{slug}`; modal lightbox interactivo con swipe táctil |
+| **Filtros Storefront**| Drawer Lateral Izquierdo | Off-canvas desde `left: 0`, backdrop modal, cero acordeones invasivos |
+| **Checkout & Stock** | Apartado Temporal Exclusivo en Checkout | Timer 5m en checkout; carrito nunca se vacía por timeout; badge "Ya no hay existencias" |
+| **Pasarelas de Pago**| Cero SPEI / Tarjetas & OXXO Pay | Tarjetas crédito/débito y OXXO Pay 48h; cero CLABE ni validación manual |
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |
