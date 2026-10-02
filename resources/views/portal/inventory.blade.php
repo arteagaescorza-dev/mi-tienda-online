@@ -1654,735 +1654,6 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- MODAL ERGONÓMICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="providerModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[120] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="z-index: 120 !important; display: none;"
-        >
-            <div 
-                @click.outside="providerModalOpen = false"
-                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
-                <!-- Cabecera del Modal -->
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingProvider ? 'Conectar / Registrar Nuevo Proveedor' : (isEditingProvider ? 'Editar Condiciones: ' + (providerForm.tradeName || providerForm.name) : 'Ficha de Proveedor & Scorecard SLA')"></h3>
-                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confección, fabricante cosmético o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' • ' + providerForm.name : 'Información técnica y comercial')"></p>
-                        </div>
-                    </div>
-                    <button 
-                        type="button" 
-                        @click="providerModalOpen = false" 
-                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        aria-label="Cerrar modal"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Selector de Pestañas del Modal de Proveedor (Regla 6.45: Alta Manual, Fiscal y Árbol de Marcas) -->
-                <div class="px-6 pt-2 pb-0 border-b border-slate-200/80 bg-slate-50/50 flex items-center gap-1 overflow-x-auto text-xs shrink-0">
-                    <button 
-                        type="button" 
-                        @click="providerModalTab = 'general'" 
-                        :class="providerModalTab === 'general' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
-                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
-                    >
-                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        <span>1. Contacto & Operativo</span>
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="providerModalTab = 'fiscal'" 
-                        :class="providerModalTab === 'fiscal' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
-                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
-                    >
-                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>2. Información Fiscal & Facturación</span>
-                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold" :class="providerForm.taxId ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'" x-text="providerForm.taxId ? 'RFC ✓' : 'Pendiente'"></span>
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="providerModalTab = 'brands'" 
-                        :class="providerModalTab === 'brands' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
-                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
-                    >
-                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                        <span>3. Marcas Desprendidas (Árbol)</span>
-                        <span class="text-[9px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 font-bold" x-text="(providerForm.brands || []).length"></span>
-                    </button>
-                </div>
-
-                <!-- Cuerpo del Modal (2 Columnas) -->
-                <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6">
-                    
-                    <!-- Columna Izquierda: Ficha Comercial, Fiscal o Marcas según Pestaña Activa (7 Cols) -->
-                    <div class="md:col-span-7 space-y-4">
-                        
-                        <!-- PESTAÑA 1: INFORMACIÓN GENERAL & CONTACTO -->
-                        <div x-show="providerModalTab === 'general'" class="space-y-4">
-                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información General, Origen & Contacto</h4>
-                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
-                            </div>
-
-                            <!-- Razón Social y Nombre Comercial -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre Comercial / Fantasía *</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.name" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Ej. Torzo Tech / ModaIntima MX" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Alias Comercial en Sistema *</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.tradeName" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Ej. Torzo B2B" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Origen del Proveedor y Giro Comercial -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Origen de Alta *</label>
-                                    <select 
-                                        x-model="providerForm.origin" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                        <option value="manual">Alta Manual (Taller / Distribuidor Directo)</option>
-                                        <option value="scraping">Scraping / Integración Automatizada B2B</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo / Giro Comercial *</label>
-                                    <select 
-                                        x-model="providerForm.type" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                        <option value="workshop">Taller de Confección Textil</option>
-                                        <option value="cosmetics">Fabricante Cosmética & Skincare</option>
-                                        <option value="distributor">Distribuidor Mayorista</option>
-                                        <option value="packaging">Insumos de Empaque & Cajas</option>
-                                        <option value="commercial">Proveedor Comercial Directo</option>
-                                        <option value="scraper">Integración Automatizada (Scraper/API)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Ciudad y Sitio Web -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / Ubicación Física</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.city" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Ej. CDMX, Puebla, Guadalajara" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Sitio Web / Catálogo Digital</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.website" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="https://..." 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Persona de Contacto, Teléfono y Correo -->
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Contacto Operativo *</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.contactName" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Nombre completo" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / Teléfono *</label>
-                                    <input 
-                                        type="tel" 
-                                        x-model="providerForm.phone" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="+52 55..." 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Pedidos</label>
-                                    <input 
-                                        type="email" 
-                                        x-model="providerForm.email" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="pedidos@empresa.com" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Condiciones Comerciales: Lead Time y Plazos de Pago -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (Días)</label>
-                                    <div class="flex items-center gap-2">
-                                        <input 
-                                            type="number" 
-                                            min="1" 
-                                            max="90" 
-                                            x-model="providerForm.leadTimeDays" 
-                                            :disabled="!isCreatingProvider && !isEditingProvider"
-                                            class="w-24 px-3 py-1.5 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200 text-center"
-                                        >
-                                        <span class="text-xs text-slate-500">días hábiles a rampa</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Términos de Pago</label>
-                                    <select 
-                                        x-model="providerForm.paymentTerms" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        class="w-full px-3 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200"
-                                    >
-                                        <option value="contado">Contado / Anticipo 100%</option>
-                                        <option value="credito_15">Crédito Comercial 15 días</option>
-                                        <option value="credito_30">Crédito Comercial 30 días</option>
-                                        <option value="credito_60">Crédito Comercial 60 días</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Notas Operativas -->
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Notas Internas & Acuerdos de Maquila</label>
-                                <textarea 
-                                    x-model="providerForm.notes" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    rows="2" 
-                                    placeholder="Detalles de maquila, acuerdos especiales de tela, MOQ o especificaciones..." 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
-                                ></textarea>
-                            </div>
-                        </div>
-
-                        <!-- PESTAÑA 2: INFORMACIÓN FISCAL & FACTURACIÓN (ALTA MANUAL COMPLETA) -->
-                        <div x-show="providerModalTab === 'fiscal'" class="space-y-4">
-                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                                <div>
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información Fiscal, CFDI & Facturación</h4>
-                                    <p class="text-[11px] text-slate-400">Captura de datos tributarios para compras con factura oficial y conciliación de cuentas por pagar</p>
-                                </div>
-                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
-                            </div>
-
-                            <!-- RFC y Razón Social Fiscal -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">RFC / Tax ID / NIF</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.taxId" 
-                                        @input="providerForm.taxId = $event.target.value.toUpperCase()"
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Ej. CTP850101XYZ" 
-                                        class="w-full px-3 py-2 text-xs font-mono font-bold uppercase border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Razón Social Fiscal Completa</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.legalName" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Ej. Confecciones Textiles Puebla SA de CV" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Régimen Fiscal y Código Postal Fiscal -->
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div class="sm:col-span-2">
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Régimen Fiscal (SAT / Tributario)</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.fiscalRegime" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="Ej. 601 - General de Ley Personas Morales" 
-                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Código Postal Fiscal</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="providerForm.fiscalZip" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        placeholder="72000" 
-                                        class="w-full px-3 py-2 text-xs font-mono border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 text-center"
-                                    >
-                                </div>
-                            </div>
-
-                            <!-- Domicilio Fiscal Completo -->
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Domicilio Fiscal Completo (Calle, No. Ext/Int, Colonia, Municipio)</label>
-                                <textarea 
-                                    x-model="providerForm.fiscalAddress" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    rows="2" 
-                                    placeholder="Av. Reforma 1234 Int 5, Col. Centro, Puebla, Puebla..." 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
-                                ></textarea>
-                            </div>
-
-                            <!-- Email para Envío/Recepción de CFDI / Facturas -->
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de Facturación / CFDI</label>
-                                <input 
-                                    type="email" 
-                                    x-model="providerForm.invoiceEmail" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="facturacion@proveedor.com" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- PESTAÑA 3: ÁRBOL DE MARCAS DESPRENDIDAS DEL PROVEEDOR (REGLA 6.45) -->
-                        <div x-show="providerModalTab === 'brands'" class="space-y-4">
-                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                                <div>
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Árbol de Marcas Desprendidas</h4>
-                                    <p class="text-[11px] text-slate-400">Marcas comerciales que nacen de este proveedor y se propagan al catálogo, vitrinas y filtros del storefront</p>
-                                </div>
-                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
-                            </div>
-
-                            <!-- Input para agregar nueva marca al árbol -->
-                            <div x-show="isCreatingProvider || isEditingProvider" class="p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
-                                <label class="block text-xs font-bold text-indigo-950">Desprender / Asociar Nueva Marca Comercial</label>
-                                <div class="flex items-center gap-2">
-                                    <input 
-                                        type="text" 
-                                        x-model="newBrandTag" 
-                                        @keydown.enter.prevent="addBrandToForm()" 
-                                        placeholder="Nombre de la marca (ej. Torzo Denim, ModaIntima Basic)..." 
-                                        class="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
-                                    >
-                                    <button 
-                                        type="button" 
-                                        @click="addBrandToForm()" 
-                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition cursor-pointer shrink-0"
-                                    >
-                                        + Agregar Marca
-                                    </button>
-                                </div>
-                                <span class="text-[10px] text-slate-500 block">Presiona Enter o haz click en Agregar para sumar la marca a la estructura en árbol.</span>
-                            </div>
-
-                            <!-- Visualización de Marcas Desprendidas (Chips / Árbol) -->
-                            <div class="space-y-2">
-                                <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Marcas registradas bajo este proveedor (<span x-text="(providerForm.brands || []).length"></span>):</span>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    <template x-for="(b, bIdx) in (providerForm.brands || [])" :key="bIdx">
-                                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold shadow-3xs">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                            <span x-text="b"></span>
-                                            <button 
-                                                type="button" 
-                                                x-show="isCreatingProvider || isEditingProvider"
-                                                @click="removeBrandFromForm(bIdx)" 
-                                                class="text-indigo-400 hover:text-rose-600 hover:bg-indigo-100 rounded p-0.5 transition cursor-pointer"
-                                                title="Remover marca"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <div x-show="!providerForm.brands || providerForm.brands.length === 0" class="p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-xs text-slate-500 w-full text-center">
-                                        No se han agregado marcas adicionales. El proveedor comercializará con su propio nombre.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- Columna Derecha: Scorecard SLA & Control de Estado (5 Cols) -->
-                    <div class="md:col-span-5 space-y-4">
-                        <div class="border-b border-slate-100 pb-2">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Desempeño SLA & Confiabilidad</h4>
-                        </div>
-
-                        <!-- Modo Proveedor Existente: Scorecard SLA -->
-                        <div x-show="!isCreatingProvider && selectedProvider" class="space-y-4">
-                            <!-- Tarjeta On-Time Delivery -->
-                            <div class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-xs font-bold text-emerald-900">Entregas a Tiempo (On-Time)</span>
-                                    <span class="text-sm font-black text-emerald-700" x-text="(selectedProvider?.slaOnTimePct || 100) + '%'"></span>
-                                </div>
-                                <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaOnTimePct || 100) + '%'"></div>
-                                </div>
-                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">Histórico validado en rampa de recepción contra fecha compromiso de OC.</p>
-                            </div>
-
-                            <!-- Tarjeta Fill Rate (Sin Faltantes) -->
-                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-xs font-bold text-indigo-900">Cumplimiento de Cantidad (Fill Rate)</span>
-                                    <span class="text-sm font-black text-indigo-700" x-text="(selectedProvider?.slaFillRatePct || 100) + '%'"></span>
-                                </div>
-                                <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaFillRatePct || 100) + '%'"></div>
-                                </div>
-                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas físicas recibidas completas sin remanentes pendientes.</p>
-                            </div>
-
-                            <!-- Comparativa Lead Time y Órdenes -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Demora Promedio</span>
-                                    <span class="text-base font-black text-slate-800" x-text="'+' + (selectedProvider?.avgDelayDays || 0) + ' d'"></span>
-                                    <span class="block text-[10px] text-slate-500">sobre fecha pactada</span>
-                                </div>
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Órdenes OCs</span>
-                                    <span class="text-base font-black text-slate-800" x-text="(selectedProvider?.completedOrders || 0) + ' / ' + (selectedProvider?.totalOrders || 0)"></span>
-                                    <span class="block text-[10px] text-slate-500">completadas</span>
-                                </div>
-                            </div>
-
-                            <!-- Selector de Estado Técnico / Operativo -->
-                            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                <label class="block text-[11px] font-bold text-slate-700 mb-2">Estado Operativo en Plataforma</label>
-                                <template x-if="selectedProvider?.status === 'archived'">
-                                    <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 text-center">
-                                        <div class="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                                            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
-                                            <span>Proveedor Archivado / Descontinuado</span>
-                                        </div>
-                                        <p class="text-[10px] text-slate-500 mb-2">No recibe pedidos automáticos ni órdenes de reabastecimiento.</p>
-                                        <button 
-                                            type="button" 
-                                            @click="restoreProvider(selectedProvider)"
-                                            class="w-full py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
-                                        >
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                            <span>Restaurar a Estado Conectado</span>
-                                        </button>
-                                    </div>
-                                </template>
-                                <template x-if="selectedProvider?.status !== 'archived'">
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'connected'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'connected')"
-                                            :class="providerForm.status === 'connected' ? 'bg-emerald-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Conectado
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'maintenance'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'maintenance')"
-                                            :class="providerForm.status === 'maintenance' ? 'bg-amber-500 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Mantenimiento
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'paused'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'paused')"
-                                            :class="providerForm.status === 'paused' ? 'bg-slate-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Pausado
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Modo Alta: Tarjeta informativa de SLA y Resumen del Alta Manual -->
-                        <div x-show="isCreatingProvider" class="space-y-3">
-                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 text-slate-700 space-y-2.5">
-                                <div class="flex items-center gap-2 font-bold text-xs text-indigo-900">
-                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    <span>Resumen de Alta (Regla 6.45)</span>
-                                </div>
-                                <div class="space-y-1.5 text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200/80">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-slate-400 text-[11px]">Tipo de Alta:</span>
-                                        <span class="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded text-[10px]" x-text="providerForm.origin === 'manual' ? 'Alta Manual Directa' : 'Conector Scraping'"></span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-slate-400 text-[11px]">RFC / Tax ID:</span>
-                                        <span class="font-mono font-bold text-slate-800" x-text="providerForm.taxId || 'Pendiente'"></span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-slate-400 text-[11px]">Marcas en Árbol:</span>
-                                        <span class="font-bold text-indigo-700" x-text="(providerForm.brands || []).length + ' marcas'"></span>
-                                    </div>
-                                </div>
-                                <p class="text-[11px] leading-relaxed text-slate-500">
-                                    Al guardar este proveedor, sus marcas se incorporan al árbol jerárquico de filtros faceteados y sus datos fiscales quedarán listos para facturación y Kardex.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Pie del Modal: Acciones -->
-                <div class="px-6 py-4 border-t border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span x-show="!isCreatingProvider && !isEditingProvider" class="text-xs text-slate-400 font-mono" x-text="'ID: ' + (selectedProvider?.id || '')"></span>
-                        <template x-if="!isCreatingProvider && !isEditingProvider && selectedProvider">
-                            <div class="inline-flex items-center gap-2 ml-3 pl-3 border-l border-slate-200">
-                                <template x-if="selectedProvider.status !== 'archived'">
-                                    <button 
-                                        type="button" 
-                                        @click="archiveProvider(selectedProvider)" 
-                                        class="px-2.5 py-1 text-xs text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-slate-200 hover:border-amber-200"
-                                        title="Archivar proveedor"
-                                    >
-                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                        <span>Archivar</span>
-                                    </button>
-                                </template>
-                                <template x-if="selectedProvider.status === 'archived'">
-                                    <button 
-                                        type="button" 
-                                        @click="restoreProvider(selectedProvider)" 
-                                        class="px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-emerald-300"
-                                        title="Restaurar proveedor a activo"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>Restaurar</span>
-                                    </button>
-                                </template>
-                                <button 
-                                    type="button" 
-                                    @click="deleteProvider(selectedProvider)" 
-                                    class="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-rose-200"
-                                    title="Eliminar definitivamente de la base de datos"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    <span>Eliminar</span>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="cancelProviderEdit()" 
-                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold rounded-xl hover:bg-slate-200/60 transition cursor-pointer"
-                        >
-                            <span x-text="isCreatingProvider ? 'Cancelar' : (isEditingProvider ? 'Descartar Cambios' : 'Cerrar')"></span>
-                        </button>
-                        <button 
-                            type="button" 
-                            x-show="!isCreatingProvider && !isEditingProvider"
-                            @click="editProviderFromModal()" 
-                            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition border border-indigo-200/80 cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            <span>Editar Condiciones</span>
-                        </button>
-                        <button 
-                            type="button" 
-                            x-show="isCreatingProvider || isEditingProvider"
-                            @click="saveProvider()" 
-                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span x-text="isCreatingProvider ? 'Guardar Proveedor' : 'Guardar Cambios'"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL ERGONÓMICO: ALTA Y EDICIÓN DE MARCAS COMERCIALES (TASK-BRD-01) -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="brandModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[130] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="z-index: 130 !important; display: none;"
-        >
-            <div 
-                @click.outside="brandModalOpen = false"
-                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl overflow-hidden flex flex-col"
-            >
-                <!-- Cabecera del Modal -->
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingBrand ? 'Nueva Marca Comercial' : 'Editar Marca: ' + brandForm.name"></h3>
-                            <p class="text-xs text-slate-500">Gobernanza comercial y vinculación con proveedores y storefront</p>
-                        </div>
-                    </div>
-                    <button 
-                        type="button" 
-                        @click="brandModalOpen = false" 
-                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        aria-label="Cerrar modal"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Formulario -->
-                <div class="p-6 space-y-4">
-                    <!-- Nombre y Slug -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial *</label>
-                            <input 
-                                type="text" 
-                                x-model="brandForm.name" 
-                                placeholder="Ej. Torzo Denim, ModaIntima Lux..." 
-                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
-                            >
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Slug URL (Opcional)</label>
-                            <input 
-                                type="text" 
-                                x-model="brandForm.slug" 
-                                placeholder="torzo-denim (auto-generado)" 
-                                class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600"
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Proveedor Asociado -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Proveedor del que se Desprende</label>
-                        <select 
-                            x-model="brandForm.supplier_id" 
-                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
-                        >
-                            <option value="">Marca Directa / Independiente (Sin Proveedor)</option>
-                            <template x-for="prov in providers" :key="prov.id">
-                                <option :value="String(prov.id)" x-text="(prov.tradeName || prov.name) + (prov.vendorCode ? ' (' + prov.vendorCode + ')' : '')"></option>
-                            </template>
-                        </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Al asociarla a un proveedor, aparecerá automáticamente como rama de su árbol en los ajustes y filtros.</p>
-                    </div>
-
-                    <!-- Descripción / Posicionamiento -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Descripción / Propuesta de Valor</label>
-                        <textarea 
-                            x-model="brandForm.description" 
-                            rows="2" 
-                            placeholder="Breve reseña del estilo, audiencia o catálogo de la marca..." 
-                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
-                        ></textarea>
-                    </div>
-
-                    <!-- Logotipo y Sitio Web -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">URL de Logotipo / Imagotipo</label>
-                            <input 
-                                type="url" 
-                                x-model="brandForm.logo_url" 
-                                placeholder="https://ejemplo.com/logo.png" 
-                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                            >
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Sitio Web Oficial</label>
-                            <input 
-                                type="url" 
-                                x-model="brandForm.website" 
-                                placeholder="https://..." 
-                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Estado Activo -->
-                    <div class="flex items-center gap-2 pt-1">
-                        <input 
-                            type="checkbox" 
-                            id="brandActiveCheck"
-                            x-model="brandForm.is_active" 
-                            class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        >
-                        <label for="brandActiveCheck" class="text-xs font-semibold text-slate-700 cursor-pointer">
-                            Marca Activa para comercialización en vitrinas y filtros
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Footer del Modal -->
-                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
-                    <button 
-                        type="button" 
-                        @click="brandModalOpen = false" 
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200 transition cursor-pointer"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="button" 
-                        @click="saveBrandModal()" 
-                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span x-text="isCreatingBrand ? 'Dar de Alta Marca' : 'Guardar Cambios'"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================================================================= -->
         <!-- MODAL KPI 1: RED Y ESTADO OPERATIVO DE PROVEEDORES                -->
         <!-- ================================================================= -->
         <div 
@@ -10759,6 +10030,737 @@
             </div>
         </div>
     </div>
+
+
+        <!-- ================================================================= -->
+        <!-- MODAL ERGONÓMICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="providerModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[120] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 120 !important; display: none;"
+        >
+            <div 
+                @click.outside="providerModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+                <!-- Cabecera del Modal -->
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingProvider ? 'Conectar / Registrar Nuevo Proveedor' : (isEditingProvider ? 'Editar Condiciones: ' + (providerForm.tradeName || providerForm.name) : 'Ficha de Proveedor & Scorecard SLA')"></h3>
+                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confección, fabricante cosmético o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' • ' + providerForm.name : 'Información técnica y comercial')"></p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="providerModalOpen = false" 
+                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                        aria-label="Cerrar modal"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Selector de Pestañas del Modal de Proveedor (Regla 6.45: Alta Manual, Fiscal y Árbol de Marcas) -->
+                <div class="px-6 pt-2 pb-0 border-b border-slate-200/80 bg-slate-50/50 flex items-center gap-1 overflow-x-auto text-xs shrink-0">
+                    <button 
+                        type="button" 
+                        @click="providerModalTab = 'general'" 
+                        :class="providerModalTab === 'general' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
+                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        <span>1. Contacto & Operativo</span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="providerModalTab = 'fiscal'" 
+                        :class="providerModalTab === 'fiscal' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
+                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>2. Información Fiscal & Facturación</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold" :class="providerForm.taxId ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'" x-text="providerForm.taxId ? 'RFC ✓' : 'Pendiente'"></span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="providerModalTab = 'brands'" 
+                        :class="providerModalTab === 'brands' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
+                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        <span>3. Marcas Desprendidas (Árbol)</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 font-bold" x-text="(providerForm.brands || []).length"></span>
+                    </button>
+                </div>
+
+                <!-- Cuerpo del Modal (2 Columnas) -->
+                <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6">
+                    
+                    <!-- Columna Izquierda: Ficha Comercial, Fiscal o Marcas según Pestaña Activa (7 Cols) -->
+                    <div class="md:col-span-7 space-y-4">
+                        
+                        <!-- PESTAÑA 1: INFORMACIÓN GENERAL & CONTACTO -->
+                        <div x-show="providerModalTab === 'general'" class="space-y-4">
+                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información General, Origen & Contacto</h4>
+                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
+                            </div>
+
+                            <!-- Razón Social y Nombre Comercial -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre Comercial / Fantasía *</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.name" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. Torzo Tech / ModaIntima MX" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Alias Comercial en Sistema *</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.tradeName" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. Torzo B2B" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Origen del Proveedor y Giro Comercial -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Origen de Alta *</label>
+                                    <select 
+                                        x-model="providerForm.origin" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                        <option value="manual">Alta Manual (Taller / Distribuidor Directo)</option>
+                                        <option value="scraping">Scraping / Integración Automatizada B2B</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo / Giro Comercial *</label>
+                                    <select 
+                                        x-model="providerForm.type" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                        <option value="workshop">Taller de Confección Textil</option>
+                                        <option value="cosmetics">Fabricante Cosmética & Skincare</option>
+                                        <option value="distributor">Distribuidor Mayorista</option>
+                                        <option value="packaging">Insumos de Empaque & Cajas</option>
+                                        <option value="commercial">Proveedor Comercial Directo</option>
+                                        <option value="scraper">Integración Automatizada (Scraper/API)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Ciudad y Sitio Web -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / Ubicación Física</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.city" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. CDMX, Puebla, Guadalajara" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Sitio Web / Catálogo Digital</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.website" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="https://..." 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Persona de Contacto, Teléfono y Correo -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Contacto Operativo *</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.contactName" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Nombre completo" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / Teléfono *</label>
+                                    <input 
+                                        type="tel" 
+                                        x-model="providerForm.phone" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="+52 55..." 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Pedidos</label>
+                                    <input 
+                                        type="email" 
+                                        x-model="providerForm.email" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="pedidos@empresa.com" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Condiciones Comerciales: Lead Time y Plazos de Pago -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (Días)</label>
+                                    <div class="flex items-center gap-2">
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            max="90" 
+                                            x-model="providerForm.leadTimeDays" 
+                                            :disabled="!isCreatingProvider && !isEditingProvider"
+                                            class="w-24 px-3 py-1.5 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200 text-center"
+                                        >
+                                        <span class="text-xs text-slate-500">días hábiles a rampa</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Términos de Pago</label>
+                                    <select 
+                                        x-model="providerForm.paymentTerms" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        class="w-full px-3 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200"
+                                    >
+                                        <option value="contado">Contado / Anticipo 100%</option>
+                                        <option value="credito_15">Crédito Comercial 15 días</option>
+                                        <option value="credito_30">Crédito Comercial 30 días</option>
+                                        <option value="credito_60">Crédito Comercial 60 días</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Notas Operativas -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Notas Internas & Acuerdos de Maquila</label>
+                                <textarea 
+                                    x-model="providerForm.notes" 
+                                    :disabled="!isCreatingProvider && !isEditingProvider"
+                                    rows="2" 
+                                    placeholder="Detalles de maquila, acuerdos especiales de tela, MOQ o especificaciones..." 
+                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <!-- PESTAÑA 2: INFORMACIÓN FISCAL & FACTURACIÓN (ALTA MANUAL COMPLETA) -->
+                        <div x-show="providerModalTab === 'fiscal'" class="space-y-4">
+                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información Fiscal, CFDI & Facturación</h4>
+                                    <p class="text-[11px] text-slate-400">Captura de datos tributarios para compras con factura oficial y conciliación de cuentas por pagar</p>
+                                </div>
+                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
+                            </div>
+
+                            <!-- RFC y Razón Social Fiscal -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">RFC / Tax ID / NIF</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.taxId" 
+                                        @input="providerForm.taxId = $event.target.value.toUpperCase()"
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. CTP850101XYZ" 
+                                        class="w-full px-3 py-2 text-xs font-mono font-bold uppercase border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Razón Social Fiscal Completa</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.legalName" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. Confecciones Textiles Puebla SA de CV" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Régimen Fiscal y Código Postal Fiscal -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Régimen Fiscal (SAT / Tributario)</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.fiscalRegime" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. 601 - General de Ley Personas Morales" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Código Postal Fiscal</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.fiscalZip" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="72000" 
+                                        class="w-full px-3 py-2 text-xs font-mono border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 text-center"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Domicilio Fiscal Completo -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Domicilio Fiscal Completo (Calle, No. Ext/Int, Colonia, Municipio)</label>
+                                <textarea 
+                                    x-model="providerForm.fiscalAddress" 
+                                    :disabled="!isCreatingProvider && !isEditingProvider"
+                                    rows="2" 
+                                    placeholder="Av. Reforma 1234 Int 5, Col. Centro, Puebla, Puebla..." 
+                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
+                                ></textarea>
+                            </div>
+
+                            <!-- Email para Envío/Recepción de CFDI / Facturas -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de Facturación / CFDI</label>
+                                <input 
+                                    type="email" 
+                                    x-model="providerForm.invoiceEmail" 
+                                    :disabled="!isCreatingProvider && !isEditingProvider"
+                                    placeholder="facturacion@proveedor.com" 
+                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- PESTAÑA 3: ÁRBOL DE MARCAS DESPRENDIDAS DEL PROVEEDOR (REGLA 6.45) -->
+                        <div x-show="providerModalTab === 'brands'" class="space-y-4">
+                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Árbol de Marcas Desprendidas</h4>
+                                    <p class="text-[11px] text-slate-400">Marcas comerciales que nacen de este proveedor y se propagan al catálogo, vitrinas y filtros del storefront</p>
+                                </div>
+                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
+                            </div>
+
+                            <!-- Input para agregar nueva marca al árbol -->
+                            <div x-show="isCreatingProvider || isEditingProvider" class="p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                                <label class="block text-xs font-bold text-indigo-950">Desprender / Asociar Nueva Marca Comercial</label>
+                                <div class="flex items-center gap-2">
+                                    <input 
+                                        type="text" 
+                                        x-model="newBrandTag" 
+                                        @keydown.enter.prevent="addBrandToForm()" 
+                                        placeholder="Nombre de la marca (ej. Torzo Denim, ModaIntima Basic)..." 
+                                        class="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="addBrandToForm()" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition cursor-pointer shrink-0"
+                                    >
+                                        + Agregar Marca
+                                    </button>
+                                </div>
+                                <span class="text-[10px] text-slate-500 block">Presiona Enter o haz click en Agregar para sumar la marca a la estructura en árbol.</span>
+                            </div>
+
+                            <!-- Visualización de Marcas Desprendidas (Chips / Árbol) -->
+                            <div class="space-y-2">
+                                <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Marcas registradas bajo este proveedor (<span x-text="(providerForm.brands || []).length"></span>):</span>
+                                <div class="flex flex-wrap gap-2 pt-1">
+                                    <template x-for="(b, bIdx) in (providerForm.brands || [])" :key="bIdx">
+                                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold shadow-3xs">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                            <span x-text="b"></span>
+                                            <button 
+                                                type="button" 
+                                                x-show="isCreatingProvider || isEditingProvider"
+                                                @click="removeBrandFromForm(bIdx)" 
+                                                class="text-indigo-400 hover:text-rose-600 hover:bg-indigo-100 rounded p-0.5 transition cursor-pointer"
+                                                title="Remover marca"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <div x-show="!providerForm.brands || providerForm.brands.length === 0" class="p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-xs text-slate-500 w-full text-center">
+                                        No se han agregado marcas adicionales. El proveedor comercializará con su propio nombre.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Columna Derecha: Scorecard SLA & Control de Estado (5 Cols) -->
+                    <div class="md:col-span-5 space-y-4">
+                        <div class="border-b border-slate-100 pb-2">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Desempeño SLA & Confiabilidad</h4>
+                        </div>
+
+                        <!-- Modo Proveedor Existente: Scorecard SLA -->
+                        <div x-show="!isCreatingProvider && selectedProvider" class="space-y-4">
+                            <!-- Tarjeta On-Time Delivery -->
+                            <div class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-bold text-emerald-900">Entregas a Tiempo (On-Time)</span>
+                                    <span class="text-sm font-black text-emerald-700" x-text="(selectedProvider?.slaOnTimePct || 100) + '%'"></span>
+                                </div>
+                                <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaOnTimePct || 100) + '%'"></div>
+                                </div>
+                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">Histórico validado en rampa de recepción contra fecha compromiso de OC.</p>
+                            </div>
+
+                            <!-- Tarjeta Fill Rate (Sin Faltantes) -->
+                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-bold text-indigo-900">Cumplimiento de Cantidad (Fill Rate)</span>
+                                    <span class="text-sm font-black text-indigo-700" x-text="(selectedProvider?.slaFillRatePct || 100) + '%'"></span>
+                                </div>
+                                <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaFillRatePct || 100) + '%'"></div>
+                                </div>
+                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas físicas recibidas completas sin remanentes pendientes.</p>
+                            </div>
+
+                            <!-- Comparativa Lead Time y Órdenes -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Demora Promedio</span>
+                                    <span class="text-base font-black text-slate-800" x-text="'+' + (selectedProvider?.avgDelayDays || 0) + ' d'"></span>
+                                    <span class="block text-[10px] text-slate-500">sobre fecha pactada</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Órdenes OCs</span>
+                                    <span class="text-base font-black text-slate-800" x-text="(selectedProvider?.completedOrders || 0) + ' / ' + (selectedProvider?.totalOrders || 0)"></span>
+                                    <span class="block text-[10px] text-slate-500">completadas</span>
+                                </div>
+                            </div>
+
+                            <!-- Selector de Estado Técnico / Operativo -->
+                            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                                <label class="block text-[11px] font-bold text-slate-700 mb-2">Estado Operativo en Plataforma</label>
+                                <template x-if="selectedProvider?.status === 'archived'">
+                                    <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 text-center">
+                                        <div class="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+                                            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                                            <span>Proveedor Archivado / Descontinuado</span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mb-2">No recibe pedidos automáticos ni órdenes de reabastecimiento.</p>
+                                        <button 
+                                            type="button" 
+                                            @click="restoreProvider(selectedProvider)"
+                                            class="w-full py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <span>Restaurar a Estado Conectado</span>
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="selectedProvider?.status !== 'archived'">
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button 
+                                            type="button" 
+                                            @click="providerForm.status = 'connected'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'connected')"
+                                            :class="providerForm.status === 'connected' ? 'bg-emerald-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
+                                        >
+                                            Conectado
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="providerForm.status = 'maintenance'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'maintenance')"
+                                            :class="providerForm.status === 'maintenance' ? 'bg-amber-500 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
+                                        >
+                                            Mantenimiento
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="providerForm.status = 'paused'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'paused')"
+                                            :class="providerForm.status === 'paused' ? 'bg-slate-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
+                                        >
+                                            Pausado
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Modo Alta: Tarjeta informativa de SLA y Resumen del Alta Manual -->
+                        <div x-show="isCreatingProvider" class="space-y-3">
+                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 text-slate-700 space-y-2.5">
+                                <div class="flex items-center gap-2 font-bold text-xs text-indigo-900">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Resumen de Alta (Regla 6.45)</span>
+                                </div>
+                                <div class="space-y-1.5 text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200/80">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-[11px]">Tipo de Alta:</span>
+                                        <span class="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded text-[10px]" x-text="providerForm.origin === 'manual' ? 'Alta Manual Directa' : 'Conector Scraping'"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-[11px]">RFC / Tax ID:</span>
+                                        <span class="font-mono font-bold text-slate-800" x-text="providerForm.taxId || 'Pendiente'"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-[11px]">Marcas en Árbol:</span>
+                                        <span class="font-bold text-indigo-700" x-text="(providerForm.brands || []).length + ' marcas'"></span>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] leading-relaxed text-slate-500">
+                                    Al guardar este proveedor, sus marcas se incorporan al árbol jerárquico de filtros faceteados y sus datos fiscales quedarán listos para facturación y Kardex.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Pie del Modal: Acciones -->
+                <div class="px-6 py-4 border-t border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span x-show="!isCreatingProvider && !isEditingProvider" class="text-xs text-slate-400 font-mono" x-text="'ID: ' + (selectedProvider?.id || '')"></span>
+                        <template x-if="!isCreatingProvider && !isEditingProvider && selectedProvider">
+                            <div class="inline-flex items-center gap-2 ml-3 pl-3 border-l border-slate-200">
+                                <template x-if="selectedProvider.status !== 'archived'">
+                                    <button 
+                                        type="button" 
+                                        @click="archiveProvider(selectedProvider)" 
+                                        class="px-2.5 py-1 text-xs text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-slate-200 hover:border-amber-200"
+                                        title="Archivar proveedor"
+                                    >
+                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                        <span>Archivar</span>
+                                    </button>
+                                </template>
+                                <template x-if="selectedProvider.status === 'archived'">
+                                    <button 
+                                        type="button" 
+                                        @click="restoreProvider(selectedProvider)" 
+                                        class="px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-emerald-300"
+                                        title="Restaurar proveedor a activo"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>Restaurar</span>
+                                    </button>
+                                </template>
+                                <button 
+                                    type="button" 
+                                    @click="deleteProvider(selectedProvider)" 
+                                    class="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-rose-200"
+                                    title="Eliminar definitivamente de la base de datos"
+                                >
+                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <span>Eliminar</span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            type="button" 
+                            @click="cancelProviderEdit()" 
+                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold rounded-xl hover:bg-slate-200/60 transition cursor-pointer"
+                        >
+                            <span x-text="isCreatingProvider ? 'Cancelar' : (isEditingProvider ? 'Descartar Cambios' : 'Cerrar')"></span>
+                        </button>
+                        <button 
+                            type="button" 
+                            x-show="!isCreatingProvider && !isEditingProvider"
+                            @click="editProviderFromModal()" 
+                            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition border border-indigo-200/80 cursor-pointer flex items-center gap-1.5"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Editar Condiciones</span>
+                        </button>
+                        <button 
+                            type="button" 
+                            x-show="isCreatingProvider || isEditingProvider"
+                            @click="saveProvider()" 
+                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span x-text="isCreatingProvider ? 'Guardar Proveedor' : 'Guardar Cambios'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL ERGONÓMICO: ALTA Y EDICIÓN DE MARCAS COMERCIALES (TASK-BRD-01) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="brandModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[130] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 130 !important; display: none;"
+        >
+            <div 
+                @click.outside="brandModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl overflow-hidden flex flex-col"
+            >
+                <!-- Cabecera del Modal -->
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingBrand ? 'Nueva Marca Comercial' : 'Editar Marca: ' + brandForm.name"></h3>
+                            <p class="text-xs text-slate-500">Gobernanza comercial y vinculación con proveedores y storefront</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="brandModalOpen = false" 
+                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                        aria-label="Cerrar modal"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Formulario -->
+                <div class="p-6 space-y-4">
+                    <!-- Nombre y Slug -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial *</label>
+                            <input 
+                                type="text" 
+                                x-model="brandForm.name" 
+                                placeholder="Ej. Torzo Denim, ModaIntima Lux..." 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                            <input 
+                                type="text" 
+                                x-model="brandForm.slug" 
+                                placeholder="torzo-denim (auto-generado)" 
+                                class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Proveedor Asociado -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Proveedor del que se Desprende</label>
+                        <select 
+                            x-model="brandForm.supplier_id" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                        >
+                            <option value="">Marca Directa / Independiente (Sin Proveedor)</option>
+                            <template x-for="prov in providers" :key="prov.id">
+                                <option :value="String(prov.id)" x-text="(prov.tradeName || prov.name) + (prov.vendorCode ? ' (' + prov.vendorCode + ')' : '')"></option>
+                            </template>
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1">Al asociarla a un proveedor, aparecerá automáticamente como rama de su árbol en los ajustes y filtros.</p>
+                    </div>
+
+                    <!-- Descripción / Posicionamiento -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Descripción / Propuesta de Valor</label>
+                        <textarea 
+                            x-model="brandForm.description" 
+                            rows="2" 
+                            placeholder="Breve reseña del estilo, audiencia o catálogo de la marca..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <!-- Logotipo y Sitio Web -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">URL de Logotipo / Imagotipo</label>
+                            <input 
+                                type="url" 
+                                x-model="brandForm.logo_url" 
+                                placeholder="https://ejemplo.com/logo.png" 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Sitio Web Oficial</label>
+                            <input 
+                                type="url" 
+                                x-model="brandForm.website" 
+                                placeholder="https://..." 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Estado Activo -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <input 
+                            type="checkbox" 
+                            id="brandActiveCheck"
+                            x-model="brandForm.is_active" 
+                            class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        >
+                        <label for="brandActiveCheck" class="text-xs font-semibold text-slate-700 cursor-pointer">
+                            Marca Activa para comercialización en vitrinas y filtros
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="brandModalOpen = false" 
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveBrandModal()" 
+                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span x-text="isCreatingBrand ? 'Dar de Alta Marca' : 'Guardar Cambios'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
 
 </div>
 @endsection
