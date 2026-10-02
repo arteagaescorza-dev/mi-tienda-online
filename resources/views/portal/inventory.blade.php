@@ -60,6 +60,7 @@
         window.serverApparelColors = @json($portalApparelColors ?? []);
         window.serverStoreSections = @json($portalStoreSections ?? []);
         window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
+        window.serverScrapedPendingItems = @json($portalScrapedPendingItems ?? []);
     </script>
 
     <!-- ========================================================================= -->
@@ -1403,21 +1404,57 @@
                         </div>
                     </div>
 
+                    <!-- Filtro y Búsqueda Rápida en Bandeja de Curaduría -->
+                    <div class="mt-4 flex flex-col sm:flex-row items-center gap-2">
+                        <div class="relative flex-1 w-full">
+                            <input 
+                                type="text" 
+                                x-model="scrapedSearchQuery" 
+                                placeholder="Buscar en prendas scrapeadas por SKU, nombre, tela o color..." 
+                                class="w-full bg-slate-800/90 text-xs text-white placeholder-slate-400 pl-8 pr-3 py-1.5 rounded-lg border border-slate-700 focus:outline-hidden focus:border-indigo-500"
+                            >
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <select 
+                            x-model="scrapedCategoryFilter" 
+                            class="w-full sm:w-auto bg-slate-800/90 text-xs text-slate-300 py-1.5 px-3 rounded-lg border border-slate-700 focus:outline-hidden focus:border-indigo-500 cursor-pointer"
+                        >
+                            <option value="all">Todas las categorías</option>
+                            <option value="Tanga">Tanga</option>
+                            <option value="Bikini">Bikini</option>
+                            <option value="Jockstraps">Jockstraps</option>
+                            <option value="Boxers">Boxers</option>
+                            <option value="Camisillas">Camisillas</option>
+                            <option value="Playeras">Playeras</option>
+                            <option value="Trajes de Baño">Trajes de Baño</option>
+                            <option value="Truzas">Truzas</option>
+                            <option value="Combos">Combos</option>
+                            <option value="Ropa Interior">Ropa Interior</option>
+                        </select>
+                    </div>
+
                     <!-- Listado Vertical Ergonómico de Prendas Scrapeadas -->
-                    <div class="space-y-3 mt-4">
-                        <template x-for="item in scrapedPendingItems" :key="item.id">
+                    <div class="space-y-3 mt-4 max-h-[780px] overflow-y-auto pr-1.5 custom-scrollbar">
+                        <template x-for="item in filteredScrapedPendingItems" :key="item.id">
                             <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-600 transition space-y-3">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs font-mono text-indigo-400 font-semibold" x-text="item.supplierSku || item.suggestedSku"></span>
-                                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-300" x-text="item.brand"></span>
+                                    <div class="flex items-start gap-3">
+                                        <!-- Miniatura de Imagen de la Prenda -->
+                                        <div class="w-14 h-16 rounded-lg bg-slate-900 overflow-hidden shrink-0 border border-slate-700/80 flex items-center justify-center">
+                                            <img :src="item.image || (item.images && item.images[0])" :alt="item.name" class="w-full h-full object-cover" onerror="this.src='https://torzo.kexe.mx/imagenes_productos/default.jpg'">
                                         </div>
-                                        <h4 class="text-sm font-bold text-white mt-1" x-text="item.name"></h4>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-mono text-indigo-400 font-semibold" x-text="item.supplierSku || item.suggestedSku"></span>
+                                                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-medium" x-text="item.brand"></span>
+                                            </div>
+                                            <h4 class="text-sm font-bold text-white mt-1 leading-snug" x-text="item.name"></h4>
+                                        </div>
                                     </div>
                                     <div class="text-right shrink-0">
                                         <span class="text-[10px] text-slate-400 block uppercase">Costo Fábrica</span>
                                         <span class="text-sm font-bold text-emerald-400 font-mono" x-text="'$' + (item.scrapedCost || item.cost || 0).toFixed(2)"></span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5" x-text="'PVP: $' + (item.suggestedPvp || 0).toFixed(2)"></span>
                                     </div>
                                 </div>
 
@@ -1450,11 +1487,11 @@
                             </div>
                         </template>
 
-                        <template x-if="scrapedPendingItems.length === 0">
+                        <template x-if="filteredScrapedPendingItems.length === 0">
                             <div class="py-8 text-center text-slate-400 bg-slate-800/40 rounded-xl border border-slate-800">
                                 <svg class="w-8 h-8 text-emerald-400 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <p class="text-sm font-semibold text-slate-300">Bandeja de curaduría al día</p>
-                                <p class="text-xs text-slate-400 mt-0.5">Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catálogo.</p>
+                                <p class="text-sm font-semibold text-slate-300">No hay prendas que coincidan</p>
+                                <p class="text-xs text-slate-400 mt-0.5" x-text="scrapedPendingItems.length === 0 ? 'Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catálogo.' : 'Prueba cambiando los términos de búsqueda o el filtro de categoría.'"></p>
                             </div>
                         </template>
                     </div>

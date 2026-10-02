@@ -130,6 +130,7 @@
 | `TASK-BRD-06` | Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | `newProductPanoramicModal`, `skuPanoramicModal`, `inventory-module.js` |
 | `TASK-BRD-08` | Asociación Mandatoria de Marcas a Proveedores, Fotos con Color y Taxonomías In Situ | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | Árbol Proveedores, Galería Fotos, QuickTaxonomies, Tag v1.6 |
 | `TASK-BRD-09` | Gobernanza Textil Integral: Asignación de Color por Foto, WebP 1080x1350, SKU Dinámico, Telas & Secciones E-Commerce | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Reglas de Oro)** | **Completada (Fullstack End-to-End)** | Catálogo, Ajustes Telas/Secciones, SkuGenerator, ImageNormalization, Tag v1.6 |
+| `TASK-BRD-10` | Poblado Real de la Bandeja de Curaduría de Scraping (259 Prendas Torzo, Cero Mocks y Persistencia End-to-End) | **Hub 4 (Inventario) $\leftrightarrow$ Scraping B2B** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | `scraped_pending_items`, Torzo B2B, End-to-End Curation API, Tag v1.6 |
 
 ---
 
@@ -2068,4 +2069,41 @@ graph TD
   - **Suite específica `ProductFabricsSectionsAndWebpRulesTest.php`: 7/7 tests pasando (100% verde, 31 aserciones).**
   - **No-regresión en `BrandCrudAndFiltersRulesTest.php`: 8/8 tests pasando (87 aserciones).**
   - **No-regresión en `EndToEndProjectRulesTest.php`: 7/7 tests pasando (53 aserciones).**
+
+---
+
+### `TASK-BRD-10`: Poblado Real de la Bandeja de Curaduría de Scraping (259 Prendas Torzo, Cero Mocks y Persistencia End-to-End)
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Hub 4 (Inventario) $\leftrightarrow$ Scraping B2B**
+* **Prioridad:** **Alta (Regla de Oro)**
+* **Solicitud del Usuario:**
+  > "Pasemos todos los productos scrapeados al estado donde se cura. 'La bandeja de curaduria de scraping', todavia no esta poblada con datos reales, ya dejar de usar ejemplos."
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Migración DDL (`database/migrations/2026_10_02_230000_enhance_scraped_pending_items_table.php`):*
+     - Columnas añadidas a `scraped_pending_items`: `supplier_product_id`, `suggested_category`, `suggested_subcategory`, `suggested_fabric`, `detected_color_name`, `detected_color_hex`, `color_type`, `origin_url`, `scraped_cost`, `supplier_stock`, `sizes` (JSON), `images` (JSON), `raw_snapshot` (JSON) y `scraped_description`.
+  2. *Modelo Eloquent (`App\Models\ScrapedPendingItem`):*
+     - Casts tipados: `sizes` (array/json), `images` (array/json), `raw_snapshot` (array/json), `external_price` (decimal:2), `scraped_cost` (decimal:2), `curated_price` (decimal:2).
+     - Relaciones formales: `supplier()` vinculada a `Supplier` y `supplierProduct()` vinculada a `SupplierProduct`.
+  3. *Seeder de Poblado Masivo (`database/seeders/PopulateScrapedPendingItemsSeeder.php`):*
+     - Migró 259 registros reales de Torzo B2B (`supplier_products`) al staging canónico `scraped_pending_items` en estado `curation_status = 'pending'`.
+     - Normalizó URLs directas de imágenes de alta resolución en CDN de Torzo (`https://torzo.kexe.mx/imagenes_productos/...`).
+     - Detectó automáticamente categorías (Tanga, Bikini, Jockstraps, Boxers, Arneses), telas (Microfibra Spandex / Licra, Algodón & Modal), colores cromáticos oficiales con su código `#hex`, costos reales de proveedor y curvas de tallas (`sizes`).
+  4. *Controladores Backend:*
+     - `StorefrontController@portalInventory`: Consulta en caliente los 259 ítems pendientes reales (`ScrapedPendingItem::where('curation_status', 'pending')`) y los inyecta en la vista Blade como `portalScrapedPendingItems`.
+     - `InventoryApiController@curateScrapedItem`: Soporte completo para `action: 'approve'` y `action: 'reject'`, resolviendo relacionalmente `fabric_id` (`ApparelFabric`), sección web (`cms_sections`), galería de imágenes por color y creación/actualización transaccional en el catálogo maestro (`products`).
+  5. *Frontend Alpine.js (`inventory-module.js`):*
+     - Eliminados definitivamente los mocks estáticos (`TOR-RAW-019` y `TOR-RAW-020`).
+     - Estado reactivo alimentado por `window.serverScrapedPendingItems`.
+     - Filtro reactivo en tiempo real por búsqueda de texto (`scrapedSearchQuery`) y por categoría de prenda (`scrapedCategoryFilter`).
+     - `approveScrapedItem()` y `discardScrapedItem()` integrados mediante llamadas asíncronas con token CSRF contra el endpoint `/api/v1/inventory/scraping/pending/{id}/curate`.
+  6. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Contenedor ergonómico con scroll vertical (`max-h-[780px] overflow-y-auto`) para navegar cómodamente las 259 prendas.
+     - Barra de herramientas con buscador y selector de categorías.
+     - Miniaturas de 56×64 px con bordes redondeados y badge de margen comercial en vivo.
+* **Documentación & Tríptico:**
+  - Registrada la **Regla 6.60** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `ScrapedPendingItemsCurationTest.php`: 3/3 tests pasando (100% verde, 15 aserciones).**
+  - **Pruebas de no-regresión: `ProductFabricsSectionsAndWebpRulesTest.php` (7/7 tests), `BrandCrudAndFiltersRulesTest.php` (8/8 tests), `SupplierSyncTest.php` (11/11 tests) y `EndToEndProjectRulesTest.php` (7/7 tests). Total de suite: 36 tests pasando, 226 aserciones en verde.**
+
 

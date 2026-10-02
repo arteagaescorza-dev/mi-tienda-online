@@ -710,7 +710,7 @@ class InventoryApiController extends Controller
             'curated_fabric' => 'nullable|string|max:80',
             'curated_color' => 'nullable|string|max:80',
             'curated_design_type' => 'nullable|string|in:sin_diseno,con_diseno',
-            'curated_website_section' => 'nullable|string|in:basicos,disenador,temporada,general',
+            'curated_website_section' => 'nullable|string|max:120',
             'curated_price' => 'required_if:action,approve|numeric|min:0',
             'curated_images' => 'nullable|array',
             'image_color_map' => 'nullable|array',
@@ -722,8 +722,8 @@ class InventoryApiController extends Controller
         if ($validated['action'] === 'approve') {
             $item->curated_title = $validated['curated_title'];
             $item->curated_brand = $validated['curated_brand'] ?? 'Torzo';
-            $item->curated_fabric = $validated['curated_fabric'] ?? 'Algodón Pima';
-            $item->curated_color = $validated['curated_color'] ?? 'Negro Ónix';
+            $item->curated_fabric = $validated['curated_fabric'] ?? 'Microfibra Spandex / Licra';
+            $item->curated_color = $validated['curated_color'] ?? 'Negro Profundo';
             $item->curated_design_type = $validated['curated_design_type'] ?? 'sin_diseno';
             $item->curated_website_section = $validated['curated_website_section'] ?? 'basicos';
             $item->curated_price = $validated['curated_price'];
@@ -759,16 +759,27 @@ class InventoryApiController extends Controller
                 }
             }
 
+            // Resolver Fabric (Reglas 6.57 y 6.58) y Sección (Regla 6.59)
+            $fabricName = $item->curated_fabric;
+            $fabricModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', \Illuminate\Support\Str::slug($fabricName))->first();
+            $fabricId = $fabricModel?->id;
+            $sectionName = $item->curated_website_section ?: 'basicos';
+
             $productMeta = [
-                'category' => $validated['curated_category'] ?? ($item->category ?? 'General'),
-                'subcategory' => $validated['curated_subcategory'] ?? '',
-                'fabric_type' => $item->curated_fabric,
+                'category' => $validated['curated_category'] ?? ($item->suggested_category ?? 'General'),
+                'subcategory' => $validated['curated_subcategory'] ?? ($item->suggested_subcategory ?? ''),
+                'fabric_type' => $fabricName,
+                'fabric' => $fabricName,
+                'fabric_id' => $fabricId,
                 'color_name' => $item->curated_color,
                 'design_type' => $item->curated_design_type,
-                'website_section' => $item->curated_website_section,
+                'website_section' => $sectionName,
+                'section_name' => $sectionName,
                 'supplier_id' => $validated['supplier_id'] ?? $item->supplier_id,
                 'images' => array_column($gallery, 'url'),
                 'gallery' => $gallery,
+                'images_by_color' => $colorMap ?: array_column($gallery, 'color_name', 'url'),
+                'image_color_map' => $colorMap ?: array_column($gallery, 'color_name', 'url'),
                 'image' => $primaryImg,
             ];
 
@@ -779,6 +790,9 @@ class InventoryApiController extends Controller
                     'title' => $item->curated_title,
                     'slug' => \Illuminate\Support\Str::slug($item->curated_title),
                     'brand' => $item->curated_brand,
+                    'fabric' => $fabricName,
+                    'fabric_id' => $fabricId,
+                    'section_name' => $sectionName,
                     'type' => 'dropship',
                     'price' => $item->curated_price,
                     'cost' => $item->external_price,
@@ -792,7 +806,11 @@ class InventoryApiController extends Controller
                 $product->update([
                     'title' => $item->curated_title,
                     'brand' => $item->curated_brand,
+                    'fabric' => $fabricName,
+                    'fabric_id' => $fabricId,
+                    'section_name' => $sectionName,
                     'price' => $item->curated_price,
+                    'visible' => true,
                     'meta' => array_merge((array)$product->meta, $productMeta),
                 ]);
             }

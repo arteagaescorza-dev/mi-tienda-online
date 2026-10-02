@@ -148,60 +148,28 @@ function hybridInventoryModule() {
             ],
 
         // TASK-INV-08: Staging de Curaduría Previa de Scraping (Validación humana antes de publicar)
-        scrapedPendingItems: [
-            {
-                id: 'SCRP-PEND-001',
-                suggestedSku: 'TOR-RAW-019',
-                name: 'Torzo Holographic Prism Jockstrap',
-                brand: 'Torzo B2B',
-                suggestedCategory: 'Jocks',
-                scrapedDescription: 'Prenda suspensorio atlético con elástico reflectante y tejido de malla técnica transpirable con destellos tornasol. Ideal para performance y diseño contemporáneo.',
-                originUrl: 'https://torzo.example.com/item/holo-prism-jock',
-                cost: 145.00,
-                suggestedPvp: 390.00,
-                detectedColorName: 'Plata Iridiscente Prism',
-                detectedColorHex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)',
-                colorType: 'iridescent',
-                suggestedFabric: 'Malla / Mesh Transpirable',
-                suggestedDesign: 'con_diseno',
-                suggestedSection: 'disenador',
-                supplierStock: 65,
-                sizes: { ch: 10, m: 25, g: 20, xl: 10 },
-                images: [
-                    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60',
-                    'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=60'
-                ],
-                imageColorMap: {
-                    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60': 'Plata Iridiscente Prism',
-                    'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=60': 'Plata Iridiscente Prism'
-                }
-            },
-            {
-                id: 'SCRP-PEND-002',
-                suggestedSku: 'TOR-RAW-020',
-                name: 'Torzo Bamboo Comfort Trunks Seamless',
-                brand: 'Torzo B2B',
-                suggestedCategory: 'Boxers',
-                scrapedDescription: 'Boxer corto liso elaborado en viscosa de bambú ecológico, costuras planas anti-rozaduras y pretina elástica afelpada para máxima comodidad.',
-                originUrl: 'https://torzo.example.com/item/bamboo-trunks',
-                cost: 120.00,
-                suggestedPvp: 340.00,
-                detectedColorName: 'Verde Militar Oliva',
-                detectedColorHex: '#365314',
-                colorType: 'solid',
-                suggestedFabric: 'Bambú Eco Air',
-                suggestedDesign: 'sin_diseno',
-                suggestedSection: 'basicos',
-                supplierStock: 90,
-                sizes: { ch: 20, m: 35, g: 25, xl: 10 },
-                images: [
-                    'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&auto=format&fit=crop&q=60'
-                ],
-                imageColorMap: {
-                    'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&auto=format&fit=crop&q=60': 'Verde Militar Oliva'
-                }
+        scrapedPendingItems: (window.serverScrapedPendingItems && Array.isArray(window.serverScrapedPendingItems))
+            ? window.serverScrapedPendingItems
+            : [],
+        scrapedSearchQuery: '',
+        scrapedCategoryFilter: 'all',
+        get filteredScrapedPendingItems() {
+            let list = this.scrapedPendingItems || [];
+            if (this.scrapedCategoryFilter && this.scrapedCategoryFilter !== 'all') {
+                list = list.filter(item => (item.suggestedCategory || '').toLowerCase() === this.scrapedCategoryFilter.toLowerCase());
             }
-        ],
+            if (this.scrapedSearchQuery && this.scrapedSearchQuery.trim()) {
+                const q = this.scrapedSearchQuery.toLowerCase().trim();
+                list = list.filter(item => 
+                    (item.name || '').toLowerCase().includes(q) ||
+                    (item.supplierSku || '').toLowerCase().includes(q) ||
+                    (item.brand || '').toLowerCase().includes(q) ||
+                    (item.detectedColorName || '').toLowerCase().includes(q) ||
+                    (item.suggestedFabric || '').toLowerCase().includes(q)
+                );
+            }
+            return list;
+        },
 
         // TASK-INV-08 / TASK-INV-11 / TASK-INV-17: Modal de Ajustes y Configuración del Módulo
         moduleSettingsModalOpen: false,
@@ -9721,64 +9689,127 @@ function hybridInventoryModule() {
             this.showToast('Fotografía agregada a la galería del producto.', 'success');
         },
 
-        approveScrapedItem() {
+        async approveScrapedItem() {
             if (!this.curatingItem) return;
             const item = this.curatingItem;
             const nextNum = String(this.products.length + 1).padStart(3, '0');
             const finalSku = item.suggestedSku || ('TOR-CUR-' + nextNum);
+            const itemId = item.dbId || item.id;
 
-            const newProductObj = {
-                sku: finalSku,
-                name: item.name,
-                category: item.suggestedCategory || 'Boxers',
-                type: 'dropship',
-                is_scraped: true,
-                stockLabel: 'Drop Bajo Pedido',
-                image: (item.images && item.images[0]) || item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60',
-                images: item.images && item.images.length ? [...item.images] : [(item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60')],
-                images_by_color: item.imageColorMap ? { ...item.imageColorMap } : {},
-                imageColorMap: item.imageColorMap ? { ...item.imageColorMap } : {},
-                brand: item.brand || 'Torzo B2B',
-                fabricType: item.suggestedFabric || 'Malla / Mesh Transpirable',
-                colorName: item.detectedColorName || 'Negro Profundo',
-                colorHex: item.detectedColorHex || '#0f172a',
-                colorType: item.colorType || 'solid',
-                designType: item.suggestedDesign || 'sin_diseno',
-                websiteSection: item.suggestedSection || 'general',
-                description: item.scrapedDescription || '',
-                isPublished: true,
-                localStock: 0,
-                committedStock: 0,
-                committedSizes: { ch: 0, m: 0, g: 0, xl: 0 },
-                supplierStock: item.supplierStock || 50,
-                location: 'Almacén Proveedor (Torzo B2B)',
-                status: 'Sincronizado',
-                providerUrl: item.originUrl || 'https://torzo.example.com',
-                isScraping: false,
-                pvp: parseFloat(item.suggestedPvp) || 390,
-                regularPrice: parseFloat(item.suggestedPvp) || 390,
-                cost: parseFloat(item.cost) || 150,
-                weightedAverageCost: parseFloat(item.cost) || 150,
-                discountPct: 0,
-                sizes: item.sizes || { ch: 10, m: 20, g: 15, xl: 5 },
-                adjustType: 'add',
-                adjustQty: '',
-                adjustReason: ''
+            const payload = {
+                action: 'approve',
+                curated_title: item.name,
+                curated_brand: item.brand || 'Torzo',
+                supplier_id: item.supplier_id || null,
+                curated_category: item.suggestedCategory || 'Boxers',
+                curated_subcategory: item.suggestedSubcategory || '',
+                curated_fabric: item.suggestedFabric || 'Microfibra Spandex / Licra',
+                curated_color: item.detectedColorName || 'Negro Profundo',
+                curated_design_type: item.suggestedDesign || 'sin_diseno',
+                curated_website_section: item.suggestedSection || 'basicos',
+                curated_price: parseFloat(item.suggestedPvp) || 390,
+                curated_images: item.images && item.images.length ? item.images : [item.image],
+                image_color_map: item.imageColorMap || {}
             };
 
-            this.products.unshift(newProductObj);
-            this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== item.id);
-            this.scrapingCurationModalOpen = false;
-            this.curatingItem = null;
-            this.showToast(`Prenda ${finalSku} curada con badge "Drop Bajo Pedido" y publicada en el inventario.`, 'success');
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/scraping/pending/${itemId}/curate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Error al aprobar la prenda scrapeada');
+                }
+
+                const newProductObj = {
+                    id: data.product_id || Date.now(),
+                    sku: finalSku,
+                    name: item.name,
+                    category: item.suggestedCategory || 'Boxers',
+                    type: 'dropship',
+                    is_scraped: true,
+                    stockLabel: 'Drop Bajo Pedido',
+                    image: (item.images && item.images[0]) || item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60',
+                    images: item.images && item.images.length ? [...item.images] : [(item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60')],
+                    images_by_color: item.imageColorMap ? { ...item.imageColorMap } : {},
+                    imageColorMap: item.imageColorMap ? { ...item.imageColorMap } : {},
+                    brand: item.brand || 'Torzo',
+                    fabricType: item.suggestedFabric || 'Microfibra Spandex / Licra',
+                    colorName: item.detectedColorName || 'Negro Profundo',
+                    colorHex: item.detectedColorHex || '#0f172a',
+                    colorType: item.colorType || 'solid',
+                    designType: item.suggestedDesign || 'sin_diseno',
+                    websiteSection: item.suggestedSection || 'basicos',
+                    description: item.scrapedDescription || '',
+                    isPublished: true,
+                    localStock: 0,
+                    committedStock: 0,
+                    committedSizes: { ch: 0, m: 0, g: 0, xl: 0 },
+                    supplierStock: item.supplierStock || 50,
+                    location: 'Almacén Proveedor (Torzo B2B)',
+                    status: 'Sincronizado',
+                    providerUrl: item.originUrl || 'https://torzo.example.com',
+                    isScraping: false,
+                    pvp: parseFloat(item.suggestedPvp) || 390,
+                    regularPrice: parseFloat(item.suggestedPvp) || 390,
+                    cost: parseFloat(item.cost) || 150,
+                    weightedAverageCost: parseFloat(item.cost) || 150,
+                    discountPct: 0,
+                    sizes: item.sizes || { ch: 10, m: 20, g: 15, xl: 5 },
+                    adjustType: 'add',
+                    adjustQty: '',
+                    adjustReason: ''
+                };
+
+                this.products.unshift(newProductObj);
+                this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== item.id && p.dbId !== itemId);
+                this.scrapingCurationModalOpen = false;
+                this.curatingItem = null;
+                this.showToast(`Prenda ${finalSku} curada con badge "Drop Bajo Pedido" y publicada en el catálogo.`, 'success');
+            } catch (err) {
+                console.error('Error aprobando prenda scrapeada:', err);
+                this.showToast(err.message || 'Error al persistir la curación en el servidor.', 'error');
+            }
         },
 
+        async discardScrapedItem(id) {
+            const itemId = this.curatingItem?.dbId || id;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/scraping/pending/${itemId}/curate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        action: 'reject',
+                        rejection_reason: 'Descartado por operador desde el panel de curaduría'
+                    })
+                });
 
-        discardScrapedItem(id) {
-            this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== id);
-            this.scrapingCurationModalOpen = false;
-            this.curatingItem = null;
-            this.showToast('Prenda scrapeada descartada de la bandeja de entrada.', 'info');
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Error al descartar la prenda');
+                }
+
+                this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== id && p.dbId !== itemId);
+                this.scrapingCurationModalOpen = false;
+                this.curatingItem = null;
+                this.showToast('Prenda scrapeada descartada de la bandeja de entrada.', 'info');
+            } catch (err) {
+                console.error('Error descartando prenda:', err);
+                this.showToast(err.message || 'Error al descartar en servidor.', 'error');
+            }
         },
 
         openProductDrawer(product) {

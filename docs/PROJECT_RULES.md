@@ -511,6 +511,19 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 * **Interconexión Modular con Hub 2 (Home Multiverso):** Las secciones creadas se sincronizan directamente como secciones modulares en el Home de Hub 2 (`store.blade.php`), permitiendo vincular productos a cada sección a través del campo `products.section_name` y `meta.section_name`.
 * **Dimensión de Filtrado Facetado:** Las secciones activas forman parte de las dimensiones de filtrado transversal que se aplican a los filtros de catálogo y facetas de exploración de Hub 2 y Storefront PWA.
 
+### Regla 6.60: Poblado Real de la Bandeja de Curaduría de Scraping (Cero Mocks, 259 Productos Reales de Torzo y Persistencia End-to-End)
+* **Erradicación Total de Ejemplos Mock:** La bandeja de curaduría de scraping en el módulo de Inventario (`portal.inventory`) está terminantemente desvinculada de datos simulados o hardcodeados (como `TOR-RAW-019` o `TOR-RAW-020`).
+* **Poblado de Catálogo Real en Staging (`scraped_pending_items`):**
+  1. Todos los productos scrapeados de proveedores aliados (como el catálogo real de Torzo B2B con 259 prendas íntimas masculinas) residen formalmente en la tabla `scraped_pending_items` con estado `curation_status = 'pending'`.
+  2. Cada ítem incluye sus fotografías reales de alta resolución hospedadas en el servidor de Torzo (`https://torzo.kexe.mx/imagenes_productos/...`), sus tallas disponibles con inventario en almacén proveedor (`sizes`), costos mayoristas netos (`scraped_cost`), precios de venta sugeridos (`curated_price`), composiciones textiles detectadas (`suggested_fabric`) y colores cromáticos oficiales con su código `#hex`.
+* **Ergonomía de Curaduría Masiva:**
+  1. La bandeja de curaduría dispone de un contenedor con scroll vertical delimitado (`max-h-[780px] overflow-y-auto`) para navegar cómodamente el lote completo de prendas sin saturar el layout.
+  2. Incorpora una barra de búsqueda reactiva en tiempo real (`scrapedSearchQuery`) y un filtro contextual por categoría de prenda (`scrapedCategoryFilter`) para localizar productos al instante.
+  3. Muestra miniaturas nítidas de 56×64 px con esquinas redondeadas y visualizador del margen comercial proyectado en vivo `((PVP - Costo) / PVP)`.
+* **Persistencia Transaccional End-to-End:**
+  1. **Aprobación (`approveScrapedItem`):** Dispara una petición asíncrona a `POST /api/v1/inventory/scraping/pending/{id}/curate` con `action: 'approve'`, actualizando el ítem a `approved`, creando o actualizando el producto en el catálogo maestro (`products`), asignando su tela relacional (`fabric_id`), sección web (`section_name`) y galería de imágenes con variantes de color, e insertándolo en el inventario activo con el badge *"Drop Bajo Pedido"*.
+  2. **Descarte (`discardScrapedItem`):** Envía `action: 'reject'` con el motivo de descarte y remueve la prenda de la bandeja de entrada sin recargar la pantalla.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -651,6 +664,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **CRUD de Telas** | Telas en Ajustes & In Situ (6.57) | Gestor CRUD en Pestaña 1 y botón + Tipo de Tela en Workstation con actualización reactiva |
 | **Asociación de Telas** | Vínculo Directo Producto-Tela (6.58) | Columnas fabric / fabric_id y relaciones formales Product <-> ApparelFabric |
 | **Secciones E-Commerce** | CRUD Secciones & Hub 2 Home (6.59) | Gestor Pestaña 7, modularidad en Home Hub 2 y dimensión transversal para filtros |
+| **Bandeja Curaduría Real** | 259 Prendas Torzo & Cero Mocks (6.60) | Poblado real en `scraped_pending_items`, búsqueda reactiva y persistencia end-to-end |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 

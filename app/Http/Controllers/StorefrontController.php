@@ -1327,6 +1327,57 @@ class StorefrontController extends Controller
                 ];
             });
 
+        $portalScrapedPendingItems = \App\Models\ScrapedPendingItem::query()
+            ->with(['supplier', 'supplierProduct'])
+            ->where('curation_status', 'pending')
+            ->orderBy('id', 'asc')
+            ->get()
+            ->map(function ($item) {
+                $images = is_array($item->images) && count($item->images) ? $item->images : array_values(array_filter([$item->external_image_url]));
+                $mainImg = $item->external_image_url ?: ($images[0] ?? 'https://torzo.kexe.mx/imagenes_productos/default.jpg');
+                $sizesObj = is_array($item->sizes) ? $item->sizes : ['ch' => 2, 'm' => 4, 'g' => 3, 'xl' => 1];
+                $availableSizes = [];
+                foreach ($sizesObj as $sz => $qty) {
+                    if ($qty > 0) $availableSizes[] = strtoupper($sz);
+                }
+                if (empty($availableSizes)) $availableSizes = ['CH', 'M', 'G', 'XL'];
+
+                $colorName = $item->detected_color_name ?: ($item->curated_color ?: 'Negro Profundo');
+                $imageColorMap = [];
+                foreach ($images as $im) {
+                    $imageColorMap[$im] = $colorName;
+                }
+
+                return [
+                    'id' => (string) $item->id,
+                    'dbId' => $item->id,
+                    'supplierSku' => $item->external_sku,
+                    'suggestedSku' => $item->external_sku,
+                    'name' => $item->external_title ?: $item->curated_title,
+                    'brand' => $item->curated_brand ?: ($item->supplier?->name ?: 'Torzo'),
+                    'supplier_id' => $item->supplier_id ?: 4,
+                    'suggestedCategory' => $item->suggested_category ?: 'Ropa Interior',
+                    'suggestedSubcategory' => $item->suggested_subcategory ?: 'Básicos',
+                    'suggestedFabric' => $item->suggested_fabric ?: 'Microfibra Spandex / Licra',
+                    'detectedColorName' => $colorName,
+                    'detectedColorHex' => $item->detected_color_hex ?: '#0f172a',
+                    'colorType' => $item->color_type ?: 'solid',
+                    'suggestedDesign' => $item->curated_design_type ?: 'sin_diseno',
+                    'suggestedSection' => $item->curated_website_section ?: 'basicos',
+                    'scrapedDescription' => $item->scraped_description ?: '',
+                    'originUrl' => $item->origin_url ?: 'https://torzo.kexe.mx',
+                    'cost' => (float) ($item->scraped_cost ?: ($item->external_price * 0.5)),
+                    'scrapedCost' => (float) ($item->scraped_cost ?: ($item->external_price * 0.5)),
+                    'suggestedPvp' => (float) ($item->curated_price ?: $item->external_price),
+                    'supplierStock' => (int) $item->supplier_stock,
+                    'sizes' => $sizesObj,
+                    'availableSizes' => $availableSizes,
+                    'image' => $mainImg,
+                    'images' => $images,
+                    'imageColorMap' => $imageColorMap,
+                ];
+            })->values();
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -1335,6 +1386,7 @@ class StorefrontController extends Controller
                 'last_scrape' => (string) $lastScrape,
             ],
             'portalProducts' => $portalProducts,
+            'portalScrapedPendingItems' => $portalScrapedPendingItems,
             'portalProviders' => $portalProviders,
             'portalBrands' => $portalBrands,
             'portalPurchaseOrders' => $portalPurchaseOrders,
