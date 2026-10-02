@@ -1543,5 +1543,136 @@ class InventoryApiController extends Controller
             ], 422);
         }
     }
+
+    /**
+     * Listado de productos archivados y descontinuados (Regla 5).
+     */
+    public function getArchivedProducts(Request $request): JsonResponse
+    {
+        $products = Product::query()
+            ->where('is_archived', true)
+            ->orWhere('visible', false)
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($p) {
+                $mainImage = data_get($p->meta, 'image')
+                    ?: (data_get($p->meta, 'images.0') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80');
+                return [
+                    'id' => $p->id,
+                    'sku' => $p->sku,
+                    'name' => $p->title,
+                    'brand' => $p->brand ?: 'Torzo',
+                    'category' => data_get($p->meta, 'category', 'Ropa Interior'),
+                    'price' => (float)$p->price,
+                    'cost' => (float)$p->cost,
+                    'image' => $mainImage,
+                    'isArchived' => (bool)$p->is_archived,
+                    'isVisible' => (bool)$p->visible,
+                    'discontinuedReason' => $p->discontinued_reason ?: ($p->is_archived ? 'Archivado por operador' : 'Retirado de vitrina'),
+                    'archivedAt' => $p->archived_at ? $p->archived_at->format('d/m/Y H:i') : ($p->updated_at ? $p->updated_at->format('d/m/Y H:i') : 'Reciente'),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    }
+
+    /**
+     * Resuelve una discrepancia de producto descontinuado por proveedor (Regla 4: Retirar, Archivar o Eliminar).
+     */
+    public function resolveDiscontinuedProduct(Request $request, int $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $validated = $request->validate([
+            'action' => 'required|in:hide,archive,delete',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $action = $validated['action'];
+        $reason = $validated['reason'] ?? 'Descontinuado por proveedor en origen tras barrido de scraping';
+
+        if ($action === 'hide') {
+            $product->update([
+                'visible' => false,
+                'discontinued_reason' => $reason,
+            ]);
+            $msg = "Producto {$product->sku} retirado del catálogo (oculto de la vitrina).";
+        } elseif ($action === 'archive') {
+            $product->update([
+                'is_archived' => true,
+                'visible' => false,
+                'archived_at' => now(),
+                'discontinued_reason' => $reason,
+            ]);
+            $msg = "Producto {$product->sku} archivado en la herramienta de productos archivados/descontinuados.";
+        } else {
+            $sku = $product->sku;
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'action' => 'delete',
+                'message' => "Producto {$sku} eliminado definitivamente de la base de datos.",
+                'product_id' => $id,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'action' => $action,
+            'message' => $msg,
+            'product' => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->title,
+                'is_archived' => (bool)$product->is_archived,
+                'visible' => (bool)$product->visible,
+                'discontinued_reason' => $product->discontinued_reason,
+            ],
+        ]);
+    }
+
+    /**
+     * Reactiva un producto archivado/descontinuado devolviéndolo al catálogo operativo (Regla 5).
+     */
+    public function reactivateArchivedProduct(Request $request, int $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $product->update([
+            'is_archived' => false,
+            'visible' => true,
+            'archived_at' => null,
+            'discontinued_reason' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Producto {$product->sku} reactivado exitosamente en el catálogo operativo.",
+            'product' => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->title,
+                'is_archived' => false,
+                'visible' => true,
+            ],
+        ]);
+    }
+
+    /**
+     * Elimina definitivamente un producto del catálogo (Regla 5).
+     */
+    public function destroyProduct(Request $request, int $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $sku = $product->sku;
+        $product->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Producto {$sku} eliminado definitivamente.",
+            'product_id' => $id,
+        ]);
+    }
 }
 

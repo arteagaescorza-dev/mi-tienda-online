@@ -953,6 +953,14 @@
       Erradicación total de ejemplos simulados (<code>TOR-RAW-019/020</code>). La bandeja de curaduría de inventario se puebla con 259 registros reales de Torzo B2B en <code>scraped_pending_items</code> (fotos reales de alta resolución, tallas, costos, PVPs sugeridos, telas y colores cromáticos #hex). Equipada con búsqueda reactiva, filtro por categoría, scroll ergonómico y persistencia bidireccional completa (aprobación/descarte contra API).
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">61</div>
+    <div class="rule-content">
+      <strong>Regla 6.61: Gobernanza del Ciclo de Scraping, Descontinuación en Origen y Herramienta de Productos Archivados</strong>
+      Ciclo de 5 fases estrictas: 1) Mapeo y normalización en VSC; 2) Visto bueno e inserción en bandeja de curaduría (<code>scraped_pending_items</code> en pending, prohibida la validación automática, estrictamente aislados del catálogo operativo); 3) Frecuencia de scrapeo regulable por proveedor en tabla interactiva persistida vía API (<code>PATCH suppliers/{id}/frequency</code>); 4) Notificación de discrepancia B2B por productos retirados en origen con modal resolutivo de 3 opciones (Retirar del Catálogo / Archivar / Eliminar); y 5) Herramienta permanente en catálogo operativo de Productos Archivados y Descontinuados para reactivación o eliminación definitiva.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1274,6 +1282,11 @@
       <td><strong>Bandeja Curaduría Real</strong></td>
       <td>259 Prendas Torzo & Cero Mocks (6.60)</td>
       <td>Poblado real en <code>scraped_pending_items</code>, búsqueda reactiva, fotos reales y persistencia end-to-end.</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Scraping & Archivo</strong></td>
+      <td>5 Fases, Descontinuación & Archivo (6.61)</td>
+      <td>Mapeo VSC, visto bueno curaduría, frecuencia regulable, modal discrepancias (retirar/archivar/eliminar) y herramienta de archivados.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>

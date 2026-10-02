@@ -518,9 +518,19 @@ function hybridInventoryModule() {
         inlineColorType: 'solid',
         showInlineAddFabric: false,
         inlineFabricName: '',
-        inlineFabricDesc: '',
         draggedCategoryIndex: null,
 
+        // Herramienta de Productos Archivados y Descontinuados (Regla 5)
+        archivedProducts: (typeof window !== 'undefined' && Array.isArray(window.serverArchivedProducts))
+            ? window.serverArchivedProducts
+            : [],
+        archivedProductsModalOpen: false,
+        archivedSearchQuery: '',
+
+        // Modal de Discrepancia por Producto Descontinuado en Origen (Regla 4)
+        discontinuedProductModalOpen: false,
+        selectedDiscontinuedAlert: null,
+        discontinuedActionReason: 'Producto descontinuado por proveedor en origen tras barrido de scraping',
 
         // Drawer Properties Extendidas
         drawerFabricType: 'Modal Seamless',
@@ -802,7 +812,7 @@ function hybridInventoryModule() {
             timeout: null
         },
 
-        products: (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts) && window.serverInventoryProducts.length > 0)
+        products: (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts))
             ? window.serverInventoryProducts
             : [
     {
@@ -4168,6 +4178,199 @@ function hybridInventoryModule() {
             alert.resolved = true;
         },
 
+        // Regla 3: Ajuste de Frecuencia de Actualización de Scraping por Proveedor
+        async updateSupplierFrequency(supplierId, frequency) {
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/suppliers/${supplierId}/frequency`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ frequency })
+                });
+
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(data.message || 'Error al actualizar frecuencia');
+                }
+
+                const prov = (this.providers || []).find(p => p.dbId === supplierId || p.id === supplierId || p.id === ('prov_' + supplierId));
+                if (prov) {
+                    prov.scrape_frequency = frequency;
+                    prov.frequency = frequency;
+                }
+                this.showToast(data.message || 'Frecuencia de sincronización de proveedor actualizada.', 'success');
+            } catch (err) {
+                console.error('Error actualizando frecuencia de proveedor:', err);
+                this.showToast(err.message || 'Error al actualizar frecuencia.', 'error');
+            }
+        },
+
+        // Regla 4: Modal de Discrepancia por Producto Descontinuado en Origen
+        openDiscontinuedModal(alert) {
+            this.selectedDiscontinuedAlert = alert;
+            this.discontinuedActionReason = 'Producto descontinuado por proveedor en origen tras barrido de scraping';
+            this.discontinuedProductModalOpen = true;
+        },
+
+        async resolveDiscontinuedProduct(action) {
+            if (!this.selectedDiscontinuedAlert) return;
+            const alert = this.selectedDiscontinuedAlert;
+            let prod = (this.products || []).find(p => p.sku === alert.sku || p.id === alert.productId || p.dbId === alert.productId);
+            const prodId = prod?.dbId || prod?.id || alert.productId || 1;
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/products/${prodId}/resolve-discontinued`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        reason: this.discontinuedActionReason || 'Descontinuado por proveedor'
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Error al procesar acción');
+                }
+
+                if (action === 'hide') {
+                    if (prod) {
+                        prod.isPublished = false;
+                        prod.status = 'Oculto';
+                    }
+                    this.showToast(`Producto ${alert.sku} retirado del catálogo operativo (oculto de vitrina).`, 'warning');
+                } else if (action === 'archive') {
+                    if (prod) {
+                        this.products = this.products.filter(p => p.sku !== alert.sku && p.id !== prodId);
+                        this.archivedProducts.unshift({
+                            id: prod.id,
+                            dbId: prod.id,
+                            sku: prod.sku,
+                            name: prod.name,
+                            brand: prod.brand,
+                            category: prod.category,
+                            price: prod.pvp || prod.price,
+                            cost: prod.cost,
+                            image: prod.image,
+                            isArchived: true,
+                            isVisible: false,
+                            discontinuedReason: this.discontinuedActionReason || 'Descontinuado por proveedor',
+                            archivedAt: 'Reciente'
+                        });
+                    }
+                    this.showToast(`Producto ${alert.sku} archivado en la herramienta de productos descontinuados.`, 'info');
+                } else if (action === 'delete') {
+                    this.products = this.products.filter(p => p.sku !== alert.sku && p.id !== prodId);
+                    this.archivedProducts = this.archivedProducts.filter(p => p.sku !== alert.sku && p.id !== prodId);
+                    this.showToast(`Producto ${alert.sku} eliminado definitivamente del sistema.`, 'success');
+                }
+
+                alert.resolved = true;
+                this.discontinuedProductModalOpen = false;
+                this.selectedDiscontinuedAlert = null;
+            } catch (err) {
+                console.error('Error al resolver producto descontinuado:', err);
+                this.showToast(err.message || 'Error al comunicar con el servidor.', 'error');
+            }
+        },
+
+        // Regla 5: Herramienta de Productos Archivados y Descontinuados (Reactivar y Eliminar)
+        get filteredArchivedProducts() {
+            if (!this.archivedSearchQuery) return this.archivedProducts;
+            const q = this.archivedSearchQuery.toLowerCase();
+            return (this.archivedProducts || []).filter(p => 
+                (p.sku && p.sku.toLowerCase().includes(q)) ||
+                (p.name && p.name.toLowerCase().includes(q)) ||
+                (p.brand && p.brand.toLowerCase().includes(q)) ||
+                (p.discontinuedReason && p.discontinuedReason.toLowerCase().includes(q))
+            );
+        },
+
+        async reactivateArchivedProduct(id) {
+            const prod = (this.archivedProducts || []).find(p => p.id === id || p.dbId === id);
+            const prodId = prod?.dbId || prod?.id || id;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/products/${prodId}/reactivate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Error al reactivar');
+                }
+
+                this.archivedProducts = this.archivedProducts.filter(p => p.id !== id && p.dbId !== prodId);
+                if (prod) {
+                    this.products.unshift({
+                        id: prod.id,
+                        dbId: prod.id,
+                        sku: prod.sku,
+                        name: prod.name,
+                        brand: prod.brand,
+                        category: prod.category,
+                        type: 'propio',
+                        pvp: prod.price,
+                        cost: prod.cost,
+                        image: prod.image,
+                        localStock: 10,
+                        committedStock: 0,
+                        supplierStock: 0,
+                        status: 'Saludable',
+                        location: 'Rack A-01 / Nivel 1',
+                        isPublished: true,
+                        sizes: { ch: 2, m: 5, g: 3, xl: 0 }
+                    });
+                }
+                this.showToast(`Producto reactivado exitosamente en el catálogo operativo.`, 'success');
+            } catch (err) {
+                console.error('Error reactivando producto:', err);
+                this.showToast(err.message || 'Error al reactivar.', 'error');
+            }
+        },
+
+        async deleteArchivedProduct(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar definitivamente este producto? Esta acción no se puede deshacer.')) return;
+            const prod = (this.archivedProducts || []).find(p => p.id === id || p.dbId === id);
+            const prodId = prod?.dbId || prod?.id || id;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/products/${prodId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Error al eliminar');
+                }
+
+                this.archivedProducts = this.archivedProducts.filter(p => p.id !== id && p.dbId !== prodId);
+                this.showToast('Producto eliminado definitivamente.', 'success');
+            } catch (err) {
+                console.error('Error eliminando producto:', err);
+                this.showToast(err.message || 'Error al eliminar.', 'error');
+            }
+        },
+
         // [P4.3] Métodos de Filtro Temporal y Análisis ABC (Pareto)
         setDashboardTimeRange(range) {
             this.dashboardTimeRange = range;
@@ -5406,6 +5609,19 @@ function hybridInventoryModule() {
                 impact: '-$55.00 descuento maquila',
                 message: 'Silk & Cotton aplico descuento comercial por volumen en lote de seda natural. Margen proyectado al 55.2%.',
                 resolved: false
+            },
+            {
+                id: 'ALT-SCR-006',
+                category: 'discontinued',
+                type: 'product_discontinued_in_origin',
+                severity: 'danger',
+                sku: 'TOR-DISC-DEMO',
+                productName: 'Bikini Microfibra Torzo (Retirado en Origen)',
+                supplier: 'Torzo B2B',
+                impact: 'Retirado por Proveedor',
+                message: 'El proveedor Torzo B2B ha descontinuado esta prenda en su catálogo en el último barrido de scraping.',
+                resolved: false,
+                productId: 4
             }
         ],
         inventoryMovements: [

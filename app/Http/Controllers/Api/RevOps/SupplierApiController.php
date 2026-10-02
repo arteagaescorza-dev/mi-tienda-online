@@ -415,7 +415,8 @@ class SupplierApiController extends Controller
             'phone' => $s->phone ?: '+52 55 0000 0000',
             'email' => $s->contact_email ?: ('b2b@' . Str::slug($s->name) . '.com'),
             'extractionMethod' => $s->extraction_method ?: 'Manual / Facturacion Directa',
-            'frequency' => 'Automatico (Cada 6 hrs)',
+            'scrape_frequency' => $s->scrape_frequency ?: 'every_6_hours',
+            'frequency' => $s->scrape_frequency ?: 'every_6_hours',
             'lastScrapeTime' => 'Hace 18 min',
             'syncedItemsCount' => (int) ($s->supplier_products_count ?? $s->supplierProducts()->count()),
             'status' => $s->status ?: 'connected',
@@ -501,6 +502,27 @@ class SupplierApiController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => "Marca '{$brand}' eliminada del proveedor '{$supplier->name}'.",
+            'data' => $this->transformSupplier($supplier->fresh()),
+        ]);
+    }
+
+    /**
+     * Actualiza la frecuencia de scrapeo del proveedor (Regla 3).
+     */
+    public function updateFrequency(Request $request, int $id): JsonResponse
+    {
+        $supplier = Supplier::findOrFail($id);
+        $validated = $request->validate([
+            'frequency' => 'required|string|max:60',
+        ]);
+
+        $supplier->update(['scrape_frequency' => $validated['frequency']]);
+
+        return response()->json([
+            'status' => 'success',
+            'success' => true,
+            'frequency' => $validated['frequency'],
+            'message' => "Frecuencia de actualización de '{$supplier->name}' actualizada exitosamente.",
             'data' => $this->transformSupplier($supplier->fresh()),
         ]);
     }

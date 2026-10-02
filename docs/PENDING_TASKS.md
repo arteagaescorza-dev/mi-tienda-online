@@ -2106,4 +2106,46 @@ graph TD
   - **Suite específica `ScrapedPendingItemsCurationTest.php`: 3/3 tests pasando (100% verde, 15 aserciones).**
   - **Pruebas de no-regresión: `ProductFabricsSectionsAndWebpRulesTest.php` (7/7 tests), `BrandCrudAndFiltersRulesTest.php` (8/8 tests), `SupplierSyncTest.php` (11/11 tests) y `EndToEndProjectRulesTest.php` (7/7 tests). Total de suite: 36 tests pasando, 226 aserciones en verde.**
 
+---
+
+### `TASK-BRD-11`: Gobernanza del Ciclo de Scraping, Descontinuación en Origen y Herramienta de Productos Archivados
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Hub 4 (Inventario) $\leftrightarrow$ RevOps $\leftrightarrow$ Centro de Auditoría B2B**
+* **Prioridad:** **Alta (Regla Operativa Fundamental)**
+* **Solicitud del Usuario:**
+  > "¿por que si estan normalizados y en estado de curaduria scraping, los productos se siguen viendo en el catalogo operativo?
+  > Regla: proceso de scraping en 5 fases (1. Mapeo en VSC; 2. Visto bueno VSC e inserción en curaduría previa al catálogo real, prohibida validación automática; 3. Frecuencia de actualización en tabla de proveedores; 4. Notificación y modal de discrepancia por descontinuados en origen ofreciendo retirar, archivar o eliminar; 5. Herramienta de productos archivados y descontinuados con reactivación o eliminación)."
+* **Causa Raíz Diagnosticada y Subsanada:**
+  - Los 259 productos de Torzo se veían en el catálogo operativo porque un seeder legacy del 26 de septiembre había insertado directamente los 259 registros en la tabla `products` (`Product::count() = 259`), además de estar en `supplier_products`.
+  - Se saneó la base de datos con `SanitizeCatalogAndPendingScrapesSeeder`, limpiando de `products` los ítems no curados, dejando en el catálogo activo únicamente 3 modelos de confección local propia y 1 producto archivado de demostración, manteniendo las 259 prendas de Torzo exclusivamente en `scraped_pending_items` (`pending`).
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Migración DDL (`database/migrations/2026_10_02_240000_enhance_products_archived_and_supplier_frequency.php`):*
+     - Añadidos a `products`: `is_archived` (boolean default false), `archived_at` (timestamp nullable), `discontinued_reason` (string nullable).
+     - Añadido a `suppliers`: `scrape_frequency` (string default 'every_6_hours').
+  2. *Modelos Eloquent:*
+     - `Product`: `$fillable` y `$casts` para `is_archived` (boolean), `archived_at` (datetime), `discontinued_reason` (string).
+     - `Supplier`: `$fillable` para `scrape_frequency`.
+  3. *Endpoints RESTful en `app/Http/Controllers/Api/RevOps/`:*
+     - `PATCH /api/v1/inventory/suppliers/{id}/frequency`: Actualiza y persiste la frecuencia (`SupplierApiController@updateFrequency`).
+     - `GET /api/v1/inventory/archived-products`: Lista prendas archivadas/descontinuadas (`InventoryApiController@getArchivedProducts`).
+     - `POST /api/v1/inventory/products/{id}/resolve-discontinued`: Resuelve la discrepancia con opciones `hide`, `archive`, `delete` (`InventoryApiController@resolveDiscontinuedProduct`).
+     - `POST /api/v1/inventory/products/{id}/reactivate`: Reactiva una prenda archivada devolviéndola al catálogo operativo (`InventoryApiController@reactivateArchivedProduct`).
+     - `DELETE /api/v1/inventory/products/{id}`: Eliminación física definitiva (`InventoryApiController@destroyProduct`).
+  4. *Frontend Alpine.js (`inventory-module.js`):*
+     - Variables de estado: `archivedProducts`, `archivedProductsModalOpen`, `archivedSearchQuery`, `discontinuedProductModalOpen`, `selectedDiscontinuedAlert`, `discontinuedActionReason`.
+     - Métodos integrados: `updateSupplierFrequency()`, `openDiscontinuedModal(alert)`, `resolveDiscontinuedProduct(action)`, `reactivateArchivedProduct(id)`, `deleteArchivedProduct(id)` y getter `filteredArchivedProducts`.
+  5. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Filtro estricto en catálogo operativo: `is_archived = false` y `visible = true`.
+     - Pestaña Proveedores: selector `<select>` interactivo para cambiar la frecuencia en 1 clic.
+     - Centro de Auditoría y Discrepancias B2B: tarjeta de alerta descontinuada con botón para abrir modal de discrepancia (Regla 4).
+     - Barra de herramientas del Catálogo Operativo: botón *"Archivados & Descontinuados"* con badge de conteo y opción 4 en el menú *"Herramientas de Stock"*.
+     - Modal de Discrepancia B2B por Producto Descontinuado (`discontinuedProductModalOpen`, `z-[130]`) con las 3 opciones requeridas: Retirar del Catálogo, Archivar Producto, Eliminar Producto.
+     - Modal / Herramienta de Productos Archivados y Descontinuados (`archivedProductsModalOpen`, `z-[130]`) con buscador reactivo, tabla y botones *"Volver a Activar"* y *"Eliminar"*.
+* **Documentación & Tríptico:**
+  - Registrada la **Regla 6.61** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `ScrapedLifecycleAndArchivedProductsTest.php`: 6/6 tests pasando (100% verde, 24 aserciones).**
+  - **Pruebas de no-regresión: `ScrapedPendingItemsCurationTest.php` (3/3 tests), `ProductApiTest.php` y `InventoryMovementTest.php` (9/9 tests). Total 100% verde.**
+
+
 

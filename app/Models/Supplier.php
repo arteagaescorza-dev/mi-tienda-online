@@ -29,6 +29,7 @@ class Supplier extends Model
         'payment_terms',
         'status',
         'extraction_method',
+        'scrape_frequency',
         'sla_on_time_pct',
         'sla_fill_rate_pct',
         'avg_delay_days',

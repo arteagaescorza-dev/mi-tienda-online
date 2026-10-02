@@ -61,6 +61,7 @@
         window.serverStoreSections = @json($portalStoreSections ?? []);
         window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
         window.serverScrapedPendingItems = @json($portalScrapedPendingItems ?? []);
+        window.serverArchivedProducts = @json($portalArchivedProducts ?? []);
     </script>
 
     <!-- ========================================================================= -->
@@ -323,6 +324,21 @@
                           x-text="activeStockLocksCount + ' en espera'"></span>
                 </button>
 
+                <!-- Botón Productos Archivados & Descontinuados (Regla 5) -->
+                <button 
+                    type="button"
+                    @click.stop="archivedProductsModalOpen = true" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 hover:text-amber-900 rounded-lg text-xs font-bold transition border border-amber-200 cursor-pointer"
+                    style="min-height: unset;"
+                    title="Herramienta de Productos Archivados y Descontinuados"
+                >
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    <span>Archivados & Descontinuados</span>
+                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900" x-text="archivedProducts.length"></span>
+                </button>
+
                 <!-- Menú Desplegable "Herramientas de Stock" (TASK-INV-10) -->
                 <div class="relative inline-block text-left" @click.outside="toolsDropdownOpen = false">
                     <button 
@@ -430,6 +446,27 @@
                                 :class="cycleCountModal.isCompletedToday ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-900 border-amber-200'"
                                 x-text="cycleCountModal.isCompletedToday ? 'OK' : '3 SKUs'"
                             ></span>
+                        </button>
+
+                        <!-- Opción 4: Catálogo de Archivados & Descontinuados (Regla 5) -->
+                        <button 
+                            type="button" 
+                            @click="toolsDropdownOpen = false; archivedProductsModalOpen = true;" 
+                            class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
+                            style="min-height: unset;"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="p-1 rounded-md bg-amber-50 text-amber-600 border border-amber-100 group-hover:bg-amber-100 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-800">Archivados & Descontinuados</div>
+                                    <div class="text-[10px] text-slate-400">Reactivar o eliminar productos</div>
+                                </div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" x-text="archivedProducts.length"></span>
                         </button>
                     </div>
                 </div>
@@ -1562,6 +1599,15 @@
                         >
                             Demoras SLA (<span x-text="(scrapingAlerts || []).filter(a => a.category === 'sla_delays').length"></span>)
                         </button>
+                        <button 
+                            type="button" 
+                            @click="discrepancyCategoryFilter = 'discontinued'"
+                            :class="discrepancyCategoryFilter === 'discontinued' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
+                            class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1"
+                        >
+                            <span>Descontinuados en Origen</span>
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-mono font-bold" x-text="(scrapingAlerts || []).filter(a => a.category === 'discontinued').length"></span>
+                        </button>
                     </div>
 
                     <!-- Feed de Discrepancias Operativas -->
@@ -1661,6 +1707,18 @@
                                             >
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                                 <span>Contactar Proveedor</span>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template x-if="!alert.resolved && alert.category === 'discontinued'">
+                                        <div class="flex items-center gap-1.5">
+                                            <button 
+                                                type="button" 
+                                                @click="openDiscontinuedModal(alert)"
+                                                class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                <span>Gestionar Descontinuado (Regla 4)</span>
                                             </button>
                                         </div>
                                     </template>
@@ -9060,8 +9118,23 @@
                                                         <span class="text-[10px] text-slate-400 font-normal" x-text="prov.origin === 'manual' || prov.isManual ? 'Captura Manual / Directa' : 'Sincronización Automatizada'"></span>
                                                     </td>
                                                     <td class="py-2.5 px-3 text-slate-600">
-                                                        <span class="block text-xs" x-text="prov.frequency"></span>
-                                                        <span class="text-[10px] text-slate-400" x-text="'Lead Time: ' + prov.leadTimeDays + ' d'"></span>
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <select 
+                                                                :value="prov.scrape_frequency || prov.frequency || 'every_6_hours'"
+                                                                @change="updateSupplierFrequency(prov.dbId || prov.id, $event.target.value)"
+                                                                class="text-[11px] bg-white border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-800 shadow-2xs hover:border-indigo-400 focus:ring-1 focus:ring-indigo-500 cursor-pointer transition"
+                                                                title="Ajustar tiempo de actualización de scraping (Regla 3)"
+                                                            >
+                                                                <option value="every_1_hour">Cada 1 hr</option>
+                                                                <option value="every_2_hours">Cada 2 hrs</option>
+                                                                <option value="every_6_hours">Cada 6 hrs</option>
+                                                                <option value="every_12_hours">Cada 12 hrs</option>
+                                                                <option value="daily">Diario (24 hrs)</option>
+                                                                <option value="weekly">Semanal</option>
+                                                                <option value="manual">Manual / Bajo demanda</option>
+                                                            </select>
+                                                        </div>
+                                                        <span class="text-[10px] text-slate-400 block" x-text="'Lead Time: ' + prov.leadTimeDays + ' d'"></span>
                                                     </td>
                                                     <td class="py-2.5 px-3 text-slate-500" x-text="prov.lastScrapeTime"></td>
                                                     <td class="py-2.5 px-3 text-center font-bold text-slate-800" x-text="(prov.syncedItemsCount || 0) + ' SKUs'"></td>
@@ -11792,6 +11865,339 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Crear y Asignar Color</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL DE DISCREPANCIA B2B: PRODUCTO DESCONTINUADO EN ORIGEN (REGLA 4)     -->
+        <!-- ========================================================================= -->
+        <div 
+            x-show="discontinuedProductModalOpen" 
+            class="fixed inset-0 z-[130] overflow-y-auto" 
+            style="display: none;"
+            @keydown.escape.window="discontinuedProductModalOpen = false"
+        >
+            <div 
+                x-show="discontinuedProductModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+                @click="discontinuedProductModalOpen = false"
+            ></div>
+
+            <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+                <div 
+                    x-show="discontinuedProductModalOpen"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="relative bg-white rounded-2xl max-w-xl w-full text-left shadow-2xl overflow-hidden border border-slate-200 z-10 my-8"
+                    @click.stop
+                >
+                    <!-- Header -->
+                    <div class="px-6 py-4 bg-amber-500 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white/20 rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white leading-tight">Discrepancia B2B: Prenda Descontinuada en Origen</h3>
+                                <p class="text-xs text-amber-100 font-medium mt-0.5">Regla 4: Notificación del Centro de Auditoría y Discrepancias B2B</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="discontinuedProductModalOpen = false" 
+                            class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6 space-y-4">
+                        <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
+                            <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <strong>Producto retirado por proveedor:</strong> La actualización de scraping detectó que esta referencia fue removida del catálogo del proveedor mayorista. Selecciona la acción operativa requerida.
+                            </div>
+                        </div>
+
+                        <!-- Ficha de la prenda -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200" x-show="selectedDiscontinuedAlert">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-white rounded-lg border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <template x-if="selectedDiscontinuedAlert?.image">
+                                        <img :src="selectedDiscontinuedAlert.image" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!selectedDiscontinuedAlert?.image">
+                                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </template>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100" x-text="selectedDiscontinuedAlert?.sku"></span>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500" x-text="selectedDiscontinuedAlert?.supplier || 'Proveedor B2B'"></span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-900 mt-1 truncate" x-text="selectedDiscontinuedAlert?.name || selectedDiscontinuedAlert?.productTitle"></h4>
+                                    <p class="text-xs text-slate-500 mt-0.5" x-text="'Alerta: ' + (selectedDiscontinuedAlert?.description || selectedDiscontinuedAlert?.issue || 'Descontinuado en origen')"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo / Justificación -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">
+                                Motivo / Justificación de la decisión operativa:
+                            </label>
+                            <input 
+                                type="text" 
+                                x-model="discontinuedActionReason" 
+                                placeholder="Ej: Confirmado con proveedor Torzo / Ya no se fabricará / Fuera de temporada"
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-800"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Acciones Operativas (Regla 4: Retirar, Archivar, Eliminar) -->
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <button 
+                            type="button" 
+                            @click="discontinuedProductModalOpen = false" 
+                            class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition cursor-pointer"
+                        >
+                            Cancelar
+                        </button>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                            <!-- Opción 1: Retirar del Catálogo (Ocultar) -->
+                            <button 
+                                type="button" 
+                                @click="resolveDiscontinuedProduct('hide')" 
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+                                title="Oculta la prenda de la vitrina sin destruirla"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                                <span>Retirar del Catálogo</span>
+                            </button>
+
+                            <!-- Opción 2: Archivar Producto -->
+                            <button 
+                                type="button" 
+                                @click="resolveDiscontinuedProduct('archive')" 
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+                                title="Mueve el producto a la herramienta de archivados y descontinuados"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                <span>Archivar Producto</span>
+                            </button>
+
+                            <!-- Opción 3: Eliminar Producto -->
+                            <button 
+                                type="button" 
+                                @click="resolveDiscontinuedProduct('delete')" 
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+                                title="Elimina definitivamente el producto del sistema"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                <span>Eliminar Producto</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL / HERRAMIENTA: PRODUCTOS ARCHIVADOS Y DESCONTINUADOS (REGLA 5)       -->
+        <!-- ========================================================================= -->
+        <div 
+            x-show="archivedProductsModalOpen" 
+            class="fixed inset-0 z-[130] overflow-y-auto" 
+            style="display: none;"
+            @keydown.escape.window="archivedProductsModalOpen = false"
+        >
+            <div 
+                x-show="archivedProductsModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+                @click="archivedProductsModalOpen = false"
+            ></div>
+
+            <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+                <div 
+                    x-show="archivedProductsModalOpen"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="relative bg-white rounded-2xl max-w-5xl w-full text-left shadow-2xl overflow-hidden border border-slate-200 z-10 my-8 flex flex-col max-h-[88vh]"
+                    @click.stop
+                >
+                    <!-- Header -->
+                    <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white leading-tight">Herramienta de Productos Archivados y Descontinuados</h3>
+                                <p class="text-xs text-slate-300 mt-0.5">Regla 5: Histórico de prendas fuera de catálogo. Puedes volver a activarlas o eliminarlas definitivamente.</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="archivedProductsModalOpen = false" 
+                            class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Toolbar de búsqueda y filtros -->
+                    <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                        <div class="relative flex-1 min-w-[240px] max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </span>
+                            <input 
+                                type="text" 
+                                x-model="archivedSearchQuery" 
+                                placeholder="Buscar por SKU, nombre, motivo o marca..."
+                                class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium text-slate-800 bg-white"
+                            >
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-500">Total en archivo:</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200" x-text="filteredArchivedProducts.length + ' prendas'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de productos archivados / descontinuados -->
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <template x-if="filteredArchivedProducts.length === 0">
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-3">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                    </svg>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-700">No hay productos archivados ni descontinuados</h4>
+                                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Cuando un proveedor retire productos en los escrapeos o decidas archivarlos desde la auditoría operativa, residirán en esta herramienta.</p>
+                            </div>
+                        </template>
+
+                        <template x-if="filteredArchivedProducts.length > 0">
+                            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3">Prenda / Modelo</th>
+                                            <th class="px-4 py-3">SKU</th>
+                                            <th class="px-4 py-3">Motivo de Retiro</th>
+                                            <th class="px-4 py-3">Fecha</th>
+                                            <th class="px-4 py-3 text-right">Acciones (Regla 5)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 bg-white">
+                                        <template x-for="prod in filteredArchivedProducts" :key="prod.id || prod.sku">
+                                            <tr class="hover:bg-slate-50 transition">
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                                                            <template x-if="prod.image">
+                                                                <img :src="prod.image" class="w-full h-full object-cover">
+                                                            </template>
+                                                            <template x-if="!prod.image">
+                                                                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                            </template>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="font-bold text-slate-900 truncate" x-text="prod.name"></div>
+                                                            <div class="text-[10px] text-slate-400" x-text="prod.brand || 'Marca General'"></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 font-mono font-semibold text-slate-700" x-text="prod.sku"></td>
+                                                <td class="px-4 py-3">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                        <span x-text="prod.discontinuedReason || 'Descontinuado'"></span>
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3 text-slate-500 font-mono text-[11px]" x-text="prod.archivedAt || 'Reciente'"></td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <!-- Botón Volver a Activar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="reactivateArchivedProduct(prod.id)" 
+                                                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition cursor-pointer"
+                                                            title="Volver a activar producto en el catálogo operativo"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                            </svg>
+                                                            <span>Activar</span>
+                                                        </button>
+
+                                                        <!-- Botón Eliminar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="deleteArchivedProduct(prod.id)" 
+                                                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition cursor-pointer"
+                                                            title="Eliminar producto definitivamente"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                            <span>Eliminar</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                        <div class="text-[11px] text-slate-500">
+                            Los productos activados volverán de inmediato a la vista del catálogo operativo y vitrina comercial.
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="archivedProductsModalOpen = false" 
+                            class="px-4 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition cursor-pointer"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

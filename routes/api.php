@@ -52,6 +52,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
         Route::post('/adjust', [InventoryApiController::class, 'adjustStock']);
         Route::post('/upload-image', [InventoryApiController::class, 'uploadImage']);
+        Route::get('/archived-products', [InventoryApiController::class, 'getArchivedProducts']);
+        Route::post('/products/{id}/resolve-discontinued', [InventoryApiController::class, 'resolveDiscontinuedProduct']);
+        Route::post('/products/{id}/reactivate', [InventoryApiController::class, 'reactivateArchivedProduct']);
+        Route::delete('/products/{id}', [InventoryApiController::class, 'destroyProduct']);
 
         // GESTION FULLSTACK DE PROVEEDORES & EXTRANET HUB 7 (TASK-PUR-02 / SLICE 4)
         Route::prefix('suppliers')->group(function () {
@@ -59,6 +63,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [SupplierApiController::class, 'store']);
             Route::get('/{id}', [SupplierApiController::class, 'show']);
             Route::put('/{id}', [SupplierApiController::class, 'update']);
+            Route::patch('/{id}/frequency', [SupplierApiController::class, 'updateFrequency']);
             Route::delete('/{id}', [SupplierApiController::class, 'destroy']);
             Route::post('/{id}/toggle-status', [SupplierApiController::class, 'toggleStatus']);
             Route::post('/{id}/invite-extranet', [SupplierApiController::class, 'inviteExtranet']);

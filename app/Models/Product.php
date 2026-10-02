@@ -19,6 +19,9 @@ class Product extends Model
         'fabric_id',
         'section_name',
         'visible',
+        'is_archived',
+        'archived_at',
+        'discontinued_reason',
         'type',
         'price',
         'cost',
@@ -29,6 +32,8 @@ class Product extends Model
     protected $casts = [
         'meta' => 'array',
         'visible' => 'boolean',
+        'is_archived' => 'boolean',
+        'archived_at' => 'datetime',
         'price' => 'decimal:2',
         'cost' => 'decimal:2',
     ];

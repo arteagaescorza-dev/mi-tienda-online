@@ -945,8 +945,40 @@ class StorefrontController extends Controller
                 'variants.inventories',
                 'supplierProducts.supplier',
             ])
+            ->where('is_archived', false)
             ->where('visible', true)
             ->orderBy('id');
+
+        $archivedProductsQuery = Product::query()
+            ->with([
+                'variants.inventories',
+                'supplierProducts.supplier',
+            ])
+            ->where(function ($q) {
+                $q->where('is_archived', true)
+                  ->orWhere('visible', false);
+            })
+            ->orderByDesc('id');
+
+        $portalArchivedProducts = $archivedProductsQuery->get()->map(function (Product $product) {
+            $mainImage = data_get($product->meta, 'image')
+                ?: (data_get($product->meta, 'images.0') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80');
+            return [
+                'id' => $product->id,
+                'dbId' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->title,
+                'brand' => $product->brand ?: 'Torzo',
+                'category' => data_get($product->meta, 'category', 'Ropa Interior'),
+                'price' => (float)$product->price,
+                'cost' => (float)$product->cost,
+                'image' => $mainImage,
+                'isArchived' => (bool)$product->is_archived,
+                'isVisible' => (bool)$product->visible,
+                'discontinuedReason' => $product->discontinued_reason ?: ($product->is_archived ? 'Archivado por operador' : 'Retirado de vitrina'),
+                'archivedAt' => $product->archived_at ? $product->archived_at->format('d/m/Y H:i') : ($product->updated_at ? $product->updated_at->format('d/m/Y H:i') : 'Reciente'),
+            ];
+        })->values();
 
         $dbProducts = $productsQuery->get();
 
@@ -1048,7 +1080,8 @@ class StorefrontController extends Controller
                 'phone' => $s->phone ?: '+52 55 0000 0000',
                 'email' => $s->contact_email ?: ('b2b@' . Str::slug($s->name) . '.com'),
                 'extractionMethod' => $s->extraction_method ?: 'Headless Scraper (Puppeteer)',
-                'frequency' => 'Automatico (Cada 6 hrs)',
+                'scrape_frequency' => $s->scrape_frequency ?: 'every_6_hours',
+                'frequency' => $s->scrape_frequency ?: 'every_6_hours',
                 'lastScrapeTime' => 'Hace 18 min',
                 'syncedItemsCount' => (int) $s->supplier_products_count,
                 'status' => $s->status ?: 'connected',
@@ -1386,6 +1419,7 @@ class StorefrontController extends Controller
                 'last_scrape' => (string) $lastScrape,
             ],
             'portalProducts' => $portalProducts,
+            'portalArchivedProducts' => $portalArchivedProducts,
             'portalScrapedPendingItems' => $portalScrapedPendingItems,
             'portalProviders' => $portalProviders,
             'portalBrands' => $portalBrands,

@@ -524,6 +524,19 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   1. **Aprobación (`approveScrapedItem`):** Dispara una petición asíncrona a `POST /api/v1/inventory/scraping/pending/{id}/curate` con `action: 'approve'`, actualizando el ítem a `approved`, creando o actualizando el producto en el catálogo maestro (`products`), asignando su tela relacional (`fabric_id`), sección web (`section_name`) y galería de imágenes con variantes de color, e insertándolo en el inventario activo con el badge *"Drop Bajo Pedido"*.
   2. **Descarte (`discardScrapedItem`):** Envía `action: 'reject'` con el motivo de descarte y remueve la prenda de la bandeja de entrada sin recargar la pantalla.
 
+### Regla 6.61: Gobernanza del Ciclo de Scraping, Descontinuación en Origen y Herramienta de Productos Archivados
+* **Ciclo Integral de Scraping en 5 Fases Estrictas:**
+  1. **Fase 1 (Mapeo y Normalización en VSC):** Al suministrar la URL o catálogo a escrapear, se identifican y cuadran los campos con el sistema (en VSC). Se determinan correspondencias para títulos, precios mayoristas, PVPs recomendados, tallas, composiciones textiles y paletas de color.
+  2. **Fase 2 (Visto Bueno y Aislamiento en Curaduría):** Al obtener el visto bueno en Visual Studio Code sobre la normalización, los productos scrapeados se insertan en estado de curaduría scraping (`scraped_pending_items` con `curation_status = 'pending'`). **Ningún escrapeo se valida automáticamente ni puede poblar el catálogo operativo real de forma desatendida; solamente el usuario puede aprobarlo**. Mientras un producto permanezca en curaduría, está estrictamente aislado y jamás se muestra en el catálogo operativo ni en la vitrina comercial.
+  3. **Fase 3 (Control de Frecuencia de Actualización):** La tabla de Proveedores & Scrapers permite configurar interactivamente el intervalo de refresco automático (`scrape_frequency`: cada 15m, 30m, 1h, 6h, 12h, 24h, 7d). El cambio se persiste de forma inmediata contra el backend mediante `PATCH /api/v1/inventory/suppliers/{id}/frequency` impactando la columna `suppliers.scrape_frequency`.
+  4. **Fase 4 (Detección de Descontinuación en Origen y Modal de Discrepancias B2B):** Cuando un ciclo de actualización de scraping detecta que un producto fue retirado del catálogo original del proveedor mayorista, el sistema emite una alerta prioritaria hacia el **Centro de Auditoría Operativa y Discrepancias B2B**. Al accionar dicha discrepancia, se despliega un modal interactivo con la ficha del producto descontinuado y ofrece las 3 opciones de resolución obligatorias:
+     - **Retirar del Catálogo (Ocultar):** Despublica la prenda de la vitrina comercial y del catálogo operativo activo sin destruirla (`visible = false`).
+     - **Archivar Producto:** Traslada la prenda a la herramienta de archivados y descontinuados (`is_archived = true`, `visible = false`, registrando fecha y motivo).
+     - **Eliminar Producto:** Supresión física definitiva del registro en la base de datos (`DELETE`).
+  5. **Fase 5 (Herramienta de Productos Archivados y Descontinuados):** El catálogo operativo cuenta con una herramienta permanente accesible desde la barra de herramientas principal (`archivedProductsModalOpen`) y desde el menú *"Herramientas de Stock"*, donde residen todas las prendas archivadas y descontinuadas. Dentro de ella, el usuario cuenta con un buscador reactivo y dos acciones resolutivas por prenda:
+     - **Volver a Activar (`reactivateArchivedProduct`):** Reincorpora la prenda inmediatamente al catálogo operativo activo (`is_archived = false`, `visible = true`).
+     - **Eliminar (`deleteArchivedProduct`):** Borrado definitivo e irreversible del producto.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -665,6 +678,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Asociación de Telas** | Vínculo Directo Producto-Tela (6.58) | Columnas fabric / fabric_id y relaciones formales Product <-> ApparelFabric |
 | **Secciones E-Commerce** | CRUD Secciones & Hub 2 Home (6.59) | Gestor Pestaña 7, modularidad en Home Hub 2 y dimensión transversal para filtros |
 | **Bandeja Curaduría Real** | 259 Prendas Torzo & Cero Mocks (6.60) | Poblado real en `scraped_pending_items`, búsqueda reactiva y persistencia end-to-end |
+| **Gobernanza Ciclo Scraping** | 5 Fases, Descontinuación & Archivo (6.61) | Mapeo VSC, visto bueno curaduría, frecuencia regulable, modal discrepancias (retirar/archivar/eliminar) y herramienta de archivados |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
