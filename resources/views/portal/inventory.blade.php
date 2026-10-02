@@ -766,9 +766,14 @@
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="relative w-11 h-11 mx-auto rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center cursor-pointer shadow-xs group-hover:shadow transition"
                                          @click="openProductDrawer(item)">
-                                        <svg class="w-6 h-6 text-slate-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                        </svg>
+                                        <template x-if="item.image">
+                                            <img :src="item.image" :alt="item.name" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                        </template>
+                                        <template x-if="!item.image">
+                                            <svg class="w-6 h-6 text-slate-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                            </svg>
+                                        </template>
                                         <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white"
                                               :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-emerald-500'"></span>
                                     </div>
@@ -3403,6 +3408,69 @@
                                     <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
                                           :class="drawerIsPublished ? 'translate-x-5' : 'translate-x-0'"></span>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Regla 9: Fotografía del Producto & Asignación de Variantes de Color -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Fotografía &amp; Variante de Color</span>
+                                </h4>
+                                <span class="text-[10px] text-slate-400 font-mono" x-text="(drawerImages?.length || (drawerImage ? 1 : 0)) + ' foto(s)'"></span>
+                            </div>
+
+                            <!-- Preview Principal de la Prenda -->
+                            <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
+                                <div class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <template x-if="drawerImage">
+                                        <img :src="drawerImage" alt="Prenda" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!drawerImage">
+                                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                    </template>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">URL Imagen Principal</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="drawerImage" 
+                                        class="w-full px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500" 
+                                        placeholder="https://... o /storage/..."
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Galería con Asignación de Color a cada Imagen -->
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-semibold text-slate-600 block">Asignar Variante de Color por Imagen (Conmutación)</label>
+                                <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                    <template x-for="(imgUrl, imgIdx) in (drawerImages?.length ? drawerImages : (drawerImage ? [drawerImage] : []))" :key="imgIdx">
+                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
+                                            <img :src="imgUrl" class="w-9 h-9 rounded object-cover border border-slate-200 shrink-0">
+                                            <div class="flex-1 min-w-0">
+                                                <select 
+                                                    :value="drawerImageColorMap[imgUrl] || drawerColorName"
+                                                    @change="drawerImageColorMap[imgUrl] = $event.target.value"
+                                                    class="w-full p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-700"
+                                                >
+                                                    <template x-for="col in apparelColors" :key="col.id">
+                                                        <option :value="col.name" x-text="col.name"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                            <button 
+                                                type="button" 
+                                                @click="drawerImage = imgUrl" 
+                                                class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 transition cursor-pointer"
+                                                title="Fijar como foto principal"
+                                            >
+                                                Principal
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
 
@@ -9876,6 +9944,37 @@
                                                 <option :value="fab.name" x-text="fab.name"></option>
                                             </template>
                                         </select>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- 2.1 Variabilidad de Color asociada a Fotografía Scrapeada (Regla 10) -->
+                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">
+                                    Curaduría de Fotografías & Variante de Color
+                                </label>
+                                <span class="text-[10px] text-slate-500 font-mono" x-text="(curatingItem.images?.length || 0) + ' fotografía(s)'"></span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Asigna la variante de color correspondiente a cada imagen scrapeada para conmutar las fotografías fielmente en el catálogo y PDP del storefront.</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <template x-for="(scrapedImg, imgIdx) in (curatingItem.images || [])" :key="imgIdx">
+                                    <div class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200">
+                                        <img :src="scrapedImg" alt="Foto Scrapeada" class="w-12 h-12 rounded object-cover border border-slate-200 shrink-0">
+                                        <div class="flex-1 min-w-0">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5" x-text="'Foto ' + (imgIdx + 1)"></label>
+                                            <select 
+                                                :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
+                                                @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
+                                                class="w-full p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                                <template x-for="col in apparelColors" :key="col.id">
+                                                    <option :value="col.name" :selected="col.name === (curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName)" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
+                                                </template>
+                                            </select>
+                                        </div>
                                     </div>
                                 </template>
                             </div>

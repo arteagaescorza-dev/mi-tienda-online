@@ -152,7 +152,15 @@ function hybridInventoryModule() {
                 suggestedDesign: 'con_diseno',
                 suggestedSection: 'disenador',
                 supplierStock: 65,
-                sizes: { ch: 10, m: 25, g: 20, xl: 10 }
+                sizes: { ch: 10, m: 25, g: 20, xl: 10 },
+                images: [
+                    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60',
+                    'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=60'
+                ],
+                imageColorMap: {
+                    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60': 'Plata Iridiscente Prism',
+                    'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=60': 'Plata Iridiscente Prism'
+                }
             },
             {
                 id: 'SCRP-PEND-002',
@@ -171,7 +179,13 @@ function hybridInventoryModule() {
                 suggestedDesign: 'sin_diseno',
                 suggestedSection: 'basicos',
                 supplierStock: 90,
-                sizes: { ch: 20, m: 35, g: 25, xl: 10 }
+                sizes: { ch: 20, m: 35, g: 25, xl: 10 },
+                images: [
+                    'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&auto=format&fit=crop&q=60'
+                ],
+                imageColorMap: {
+                    'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&auto=format&fit=crop&q=60': 'Verde Militar Oliva'
+                }
             }
         ],
 
@@ -470,6 +484,9 @@ function hybridInventoryModule() {
         drawerBrand: 'ModaIntima Textil MX',
         drawerDiscountPct: 0,
         drawerRegularPrice: 0,
+        drawerImage: '',
+        drawerImages: [],
+        drawerImageColorMap: {},
 
         // Regla 6: Paginación en tablas mediante "Cargar más"
         visibleCount: 8,
@@ -7934,6 +7951,17 @@ function hybridInventoryModule() {
 
         openScrapingCuration(pendingItem) {
             this.curatingItem = JSON.parse(JSON.stringify(pendingItem));
+            if (!this.curatingItem.images) {
+                this.curatingItem.images = this.curatingItem.image ? [this.curatingItem.image] : [
+                    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60'
+                ];
+            }
+            if (!this.curatingItem.imageColorMap) {
+                this.curatingItem.imageColorMap = {};
+                this.curatingItem.images.forEach(img => {
+                    this.curatingItem.imageColorMap[img] = this.curatingItem.detectedColorName || 'Negro Profundo';
+                });
+            }
             this.showInlineAddColor = false;
             this.showInlineAddFabric = false;
             this.inlineColorName = '';
@@ -8045,6 +8073,10 @@ function hybridInventoryModule() {
                 type: 'dropship',
                 is_scraped: true,
                 stockLabel: 'Drop Bajo Pedido',
+                image: (item.images && item.images[0]) || item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60',
+                images: item.images && item.images.length ? [...item.images] : [(item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60')],
+                images_by_color: item.imageColorMap ? { ...item.imageColorMap } : {},
+                imageColorMap: item.imageColorMap ? { ...item.imageColorMap } : {},
                 brand: item.brand || 'Torzo B2B',
                 fabricType: item.suggestedFabric || 'Malla / Mesh Transpirable',
                 colorName: item.detectedColorName || 'Negro Profundo',
@@ -8120,6 +8152,14 @@ function hybridInventoryModule() {
             this.drawerIsPublished = product.isPublished !== undefined ? product.isPublished : (product.is_published !== undefined ? product.is_published : true);
             this.drawerDescription = product.description || '';
             this.drawerBrand = product.brand || (product.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX');
+            this.drawerImage = product.image || (Array.isArray(product.images) && product.images[0]) || '';
+            this.drawerImages = Array.isArray(product.images) && product.images.length ? [...product.images] : (this.drawerImage ? [this.drawerImage] : []);
+            this.drawerImageColorMap = product.images_by_color ? { ...product.images_by_color } : (product.imageColorMap ? { ...product.imageColorMap } : {});
+            if (Object.keys(this.drawerImageColorMap).length === 0 && this.drawerImages.length > 0) {
+                this.drawerImages.forEach(img => {
+                    this.drawerImageColorMap[img] = this.drawerColorName;
+                });
+            }
 
             // Sugerir proveedor y cantidades para futura orden
             if (product.type === 'dropship') {
@@ -9154,6 +9194,10 @@ function hybridInventoryModule() {
             this.selectedProduct.isPublished = this.drawerIsPublished;
             this.selectedProduct.description = this.drawerDescription;
             this.selectedProduct.brand = this.drawerBrand;
+            this.selectedProduct.image = this.drawerImage;
+            this.selectedProduct.images = this.drawerImages.length ? [...this.drawerImages] : (this.drawerImage ? [this.drawerImage] : []);
+            this.selectedProduct.images_by_color = { ...this.drawerImageColorMap };
+            this.selectedProduct.imageColorMap = { ...this.drawerImageColorMap };
             if (this.drawerRequiresSanitaryControl || this.selectedProduct.requiresSanitaryControl) {
                 this.selectedProduct.batchNumber = this.drawerBatchNumber;
                 this.selectedProduct.expirationDate = this.drawerExpirationDate;
@@ -9173,6 +9217,9 @@ function hybridInventoryModule() {
                 const payload = {
                     name: this.selectedProduct.name,
                     brand: this.drawerBrand,
+                    image: this.drawerImage,
+                    images: this.drawerImages.length ? [...this.drawerImages] : (this.drawerImage ? [this.drawerImage] : []),
+                    images_by_color: { ...this.drawerImageColorMap },
                     description: this.drawerDescription,
                     is_published: !!this.drawerIsPublished,
                     fabric_type: this.drawerFabricType,
