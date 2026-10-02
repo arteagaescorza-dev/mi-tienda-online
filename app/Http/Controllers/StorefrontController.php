@@ -310,11 +310,41 @@ class StorefrontController extends Controller
     {
         $products = $this->catalogProducts();
 
+        $suppliersTree = \App\Models\Supplier::where('status', '!=', 'archived')
+            ->get()
+            ->map(function ($sup) {
+                return [
+                    'id' => $sup->id,
+                    'name' => $sup->trade_name ?? $sup->name,
+                    'brands' => $sup->getBrandsTree(),
+                ];
+            });
+
+        if ($suppliersTree->isEmpty()) {
+            $suppliersTree = collect([
+                [
+                    'id' => 1,
+                    'name' => 'Torzo B2B',
+                    'brands' => [
+                        ['name' => 'Torzo Denim', 'slug' => 'torzo-denim', 'origin' => 'scraping', 'is_active' => true],
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'ModaIntima Textil MX',
+                    'brands' => [
+                        ['name' => 'Marte', 'slug' => 'marte', 'origin' => 'manual', 'is_active' => true],
+                    ],
+                ],
+            ]);
+        }
+
         return view('store.products', [
             'products' => $products,
             'preorderProducts' => array_slice($products, 3, 3),
             'outletProducts' => $this->outletProducts(),
             'extendedProducts' => $this->scrapedCatalogProducts(),
+            'suppliersTree' => $suppliersTree,
         ]);
     }
 
@@ -1276,6 +1306,27 @@ class StorefrontController extends Controller
                 ];
             })->values();
 
+        $portalBrands = \App\Models\Brand::with('supplier:id,name,trade_name,vendor_code,origin,status')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($brand) {
+                return [
+                    'id' => $brand->id,
+                    'supplier_id' => $brand->supplier_id,
+                    'supplier_name' => $brand->supplier ? ($brand->supplier->trade_name ?? $brand->supplier->name) : 'Marca Directa / Independiente',
+                    'name' => $brand->name,
+                    'slug' => $brand->slug,
+                    'description' => $brand->description,
+                    'logo_url' => $brand->logo_url,
+                    'website' => $brand->website,
+                    'is_active' => (bool)$brand->is_active,
+                    'is_archived' => (bool)$brand->is_archived,
+                    'sort_order' => $brand->sort_order,
+                    'sku_count' => \App\Models\Product::where('brand', $brand->name)->count(),
+                ];
+            });
+
         return view('portal.inventory', [
             'summary' => [
                 'stock_local' => number_format($totalLocalStock) . ' piezas',
@@ -1285,6 +1336,7 @@ class StorefrontController extends Controller
             ],
             'portalProducts' => $portalProducts,
             'portalProviders' => $portalProviders,
+            'portalBrands' => $portalBrands,
             'portalPurchaseOrders' => $portalPurchaseOrders,
             'portalFuturePurchaseOrders' => $portalFuturePurchaseOrders,
             'portalPurchaseKardex' => $portalPurchaseKardex,

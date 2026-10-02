@@ -1606,7 +1606,16 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Proveedor</label>
+                            <select name="query_rules[supplier]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todos los proveedores</option>
+                                @foreach($suppliers as $sup)
+                                    <option value="{{ $sup->trade_name ?? $sup->name }}">{{ $sup->trade_name ?? $sup->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div>
                             <label class="block font-semibold text-slate-600 mb-1">Marca</label>
                             <select name="query_rules[brand]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
@@ -1995,7 +2004,16 @@
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Proveedor</label>
+                            <select name="query_rules[supplier]" id="editSupplier" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                <option value="">Todos los proveedores</option>
+                                @foreach($suppliers as $sup)
+                                    <option value="{{ $sup->trade_name ?? $sup->name }}">{{ $sup->trade_name ?? $sup->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div>
                             <label class="block font-semibold text-slate-600 mb-1">Marca</label>
                             <select name="query_rules[brand]" id="editBrand" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
@@ -3745,6 +3763,9 @@
 
         const brandSel = document.getElementById('editBrand');
         if (brandSel) brandSel.value = qr.brand || '';
+
+        const supSel = document.getElementById('editSupplier');
+        if (supSel) supSel.value = qr.supplier || '';
 
         const famSel = document.getElementById('editFamily');
         if (famSel) famSel.value = qr.family || '';

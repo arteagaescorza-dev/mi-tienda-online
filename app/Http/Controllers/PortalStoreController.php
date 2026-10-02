@@ -261,7 +261,13 @@ class PortalStoreController extends Controller
         $sections = CmsSection::orderBy('sort_order')->get();
         $categories = Category::whereNull('parent_id')->select('id', 'name', 'slug')->get();
         $subcategories = Category::whereNotNull('parent_id')->select('id', 'name', 'slug', 'parent_id')->get();
-        $brands = Product::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand');
+        $dbBrands = \App\Models\Brand::active()->pluck('name')->toArray();
+        $productBrands = Product::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand')->toArray();
+        $supplierBrands = \App\Models\Supplier::whereNotNull('brands')->get()->pluck('brands')->flatten()->toArray();
+        $brands = collect(array_values(array_unique(array_filter(array_merge($dbBrands, $productBrands, $supplierBrands)))))->sort()->values();
+        if ($brands->isEmpty()) {
+            $brands = collect(['Marte', 'Torzo Denim', 'Venus Intimates', 'Seda & Encaje']);
+        }
         $textileFamilies = ['Modal Velvet', 'Algodón Pima', 'Bambú Orgánico', 'Microfibra Dry-Fit', 'Malla Transpirable', 'Satín & Seda'];
         $garmentTypes = ['Boxer Trunk', 'Jockstrap', 'Brief', 'Bikini / Tanga', 'Harness / Arnés', 'Tank Top / Playera', 'Bodysuit'];
         $styleTags = ['Sensual', 'Deportivo / Gym', 'Afirmativo / Compresión', 'Minimalista', 'Edición Limitada', 'Básico Diario'];
@@ -277,7 +283,7 @@ class PortalStoreController extends Controller
         $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
         $tracking = CmsTrackingSetting::current();
         $catalogFilters = CmsCatalogFilter::orderBy('sort_order')->get();
-        $suppliers = \App\Models\Supplier::where('status', 'active')->select('id', 'name')->get();
+        $suppliers = \App\Models\Supplier::where('status', '!=', 'archived')->select('id', 'name', 'trade_name')->get();
         if ($suppliers->isEmpty()) {
             $suppliers = collect([
                 (object)['id' => 1, 'name' => 'Torzo B2B'],
