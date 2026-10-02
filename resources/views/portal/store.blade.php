@@ -1220,65 +1220,64 @@
                     </h3>
                     <p class="text-xs text-slate-500">Crea y edita tarjetas interactivas de la vista Explorar (con imágenes y filtros de catálogo directos), y sincroniza enlaces en el Navbar y Footer.</p>
                 </div>
-                <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createPageModal" type="button">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span>Nueva Página</span>
-                </button>
+                    <div class="flex items-center gap-2">
+                        <span id="pageReorderSyncStatus" class="hidden text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200"></span>
+                        <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer flex items-center gap-1.5" data-action="open-modal" data-modal="createPageModal" type="button">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Nueva Página</span>
+                        </button>
+                    </div>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-xs text-left">
                     <thead>
                         <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
-                            <th class="py-2.5 px-3">Título &amp; Slug</th>
-                            <th class="py-2.5 px-3 text-center">Explorar / Filtros</th>
-                            <th class="py-2.5 px-3 text-center">Desktop</th>
-                            <th class="py-2.5 px-3 text-center">Móvil</th>
-                            <th class="py-2.5 px-3 text-center">Footer</th>
+                            <th class="py-2.5 px-3 text-center w-12" title="Arrastra para reordenar en vivo">Orden</th>
+                            <th class="py-2.5 px-3">Tarjeta de Explorar</th>
+                            <th class="py-2.5 px-3 text-center">Filtros / Catálogo</th>
                             <th class="py-2.5 px-3 text-center">Estado</th>
                             <th class="py-2.5 px-3 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody id="pagesSortableBody" class="divide-y divide-slate-100">
                         @forelse($pages as $pg)
-                            <tr class="hover:bg-slate-50/60 transition">
+                            <tr class="hover:bg-slate-50/60 transition group cursor-grab active:cursor-grabbing" data-page-id="{{ $pg->id }}">
+                                <td class="py-3 px-3 text-center drag-handle-page">
+                                    <div class="inline-flex items-center gap-1 text-slate-400 group-hover:text-indigo-600 font-mono text-xs">
+                                        <svg class="w-4 h-4 cursor-grab" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                        <span class="page-order-badge font-bold">#{{ $loop->iteration }}</span>
+                                    </div>
+                                </td>
                                 <td class="py-3 px-3">
-                                    <strong class="font-bold text-slate-900 block">{{ $pg->title }}</strong>
-                                    <div class="flex items-center gap-1.5 mt-0.5">
-                                        <span class="text-[11px] font-mono text-slate-500">/pagina/{{ $pg->slug }}</span>
-                                        <button type="button" onclick="window.copyStoreRoute('/pagina/{{ $pg->slug }}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer underline flex items-center gap-0.5" title="Copiar ruta institucional para vincular en botones del Hero">
-                                            <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Copiar Ruta
-                                        </button>
+                                    <div class="flex items-center gap-3">
+                                        @php($imgCover = !empty($pg->image_url) ? $pg->image_url : null)
+                                        <div class="w-10 h-12 rounded-lg overflow-hidden bg-slate-900 border border-slate-200 shrink-0 relative flex items-center justify-center">
+                                            @if($imgCover)
+                                                <img src="{{ $imgCover }}" alt="{{ $pg->title }}" class="w-full h-full object-cover">
+                                            @else
+                                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                            @endif
+                                            <div class="absolute inset-0 pointer-events-none" style="background: {!! $pg->getOverlayGradientCss() !!}; opacity: 0.6;"></div>
+                                        </div>
+                                        <div>
+                                            <strong class="font-bold text-slate-900 block text-xs">{{ $pg->title }}</strong>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <span class="text-[11px] font-mono text-slate-500">/pagina/{{ $pg->slug }}</span>
+                                                <button type="button" onclick="window.copyStoreRoute('/pagina/{{ $pg->slug }}')" class="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer underline flex items-center gap-0.5" title="Copiar ruta">
+                                                    <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Copiar
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="py-3 px-3 text-center">
                                     @if(!empty($pg->filter_universe) || !empty($pg->filter_category))
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
                                             {{ strtoupper($pg->filter_universe ?? 'TODOS') }} {{ !empty($pg->filter_category) ? '// ' . strtoupper($pg->filter_category) : '' }}
                                         </span>
                                     @else
-                                        <span class="text-slate-400 text-[11px]">-</span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3 text-center">
-                                    @if($pg->show_in_navbar)
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Visible (#{{ $pg->navbar_order ?? 0 }})</span>
-                                    @else
-                                        <span class="text-slate-400 text-[11px]">Oculto</span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3 text-center">
-                                    @if($pg->show_in_mobile)
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Visible</span>
-                                    @else
-                                        <span class="text-slate-400 text-[11px]">Oculto</span>
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3 text-center">
-                                    @if($pg->show_in_footer)
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Visible (#{{ $pg->footer_order ?? 0 }})</span>
-                                    @else
-                                        <span class="text-slate-400 text-[11px]">Oculto</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">EDITORIAL</span>
                                     @endif
                                 </td>
                                 <td class="py-3 px-3 text-center">
@@ -1328,7 +1327,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="py-6 text-center text-slate-400 text-xs">No hay páginas registradas aún.</td>
+                                <td colspan="5" class="py-6 text-center text-slate-400 text-xs">No hay páginas registradas aún.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -2402,28 +2401,121 @@
                         <span class="text-[10px] text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full font-semibold">Vista /explorar</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">URL de Imagen (Tarjeta de Explorar)</label>
-                            <input type="text" name="image_url" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="https://... o /uploads/...">
+                    <!-- 1. MODO DE IMÁGENES & CARRUSEL -->
+                    <div class="space-y-2 bg-white/80 p-3 rounded-lg border border-violet-200/80">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-semibold text-slate-800 text-xs">Modo de Imágenes &amp; Carrusel</label>
+                            <span class="text-[10px] text-slate-500 font-mono">Carrusel o Catálogo</span>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">O Subir Archivo de Imagen</label>
-                            <input type="file" name="image_file" accept="image/*" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white">
+                        <select name="image_source_mode" id="create_page_image_mode" onchange="window.togglePageImageMode(this.value, 'create')" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+                            <option value="custom">Imágenes Manuales / Carrusel Personalizado</option>
+                            <option value="catalog">Conmutación Dinámica desde el Catálogo (según Filtros de Prenda)</option>
+                        </select>
+
+                        <div id="create_page_custom_images_wrap" class="space-y-2 mt-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imagen Principal</label>
+                                    <input type="text" name="image_url" id="create_page_image_url" oninput="window.updatePageModalPreview('create')" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="https://... o /uploads/...">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 text-[11px] mb-1">O Subir Archivo</label>
+                                    <input type="file" name="image_file" accept="image/*" class="w-full px-2 py-1 border border-slate-200 rounded-lg text-xs bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imágenes Adicionales para Carrusel Automático (URLs por línea o comas)</label>
+                                <textarea name="gallery_images_urls" rows="2" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg"></textarea>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Si se configuran 2 o más imágenes, rotarán en carrusel automático suave cada 3.5 segundos.</p>
+                            </div>
+                        </div>
+                        <div id="create_page_catalog_images_info" class="hidden p-2 rounded-lg bg-indigo-50/70 border border-indigo-200 text-indigo-900 text-[11px]">
+                            <svg class="w-3.5 h-3.5 inline mr-1 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            El carrusel rotará automáticamente fotografías de las prendas activas en el catálogo que coincidan con el universo y categoría configurados.
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Overlay de Imagen & Degradado (Proporción 4:5)</label>
-                        <select name="overlay_gradient" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="dark">Noir Elegante (Oscuro vertical 25% &rarr; 85%)</option>
-                            <option value="indigo">Multiverso Índigo (Índigo místico 30% &rarr; 88%)</option>
-                            <option value="rose">Aterciopelado Vino (Borgoña / Vino 30% &rarr; 88%)</option>
-                            <option value="emerald">Esmeralda Profundo (Verde Botella 30% &rarr; 88%)</option>
-                            <option value="amber">Cuero &amp; Ámbar (Tierra tostada 30% &rarr; 88%)</option>
-                            <option value="subtle">Sutil Translúcido (Suave 15% &rarr; 65%)</option>
-                        </select>
-                        <p class="text-[11px] text-slate-400 mt-1">Genera un contraste óptimo sobre la imagen 4:5 resaltando los textos y botones interactivos.</p>
+                    <!-- 2. OVERLAY, DEGRADADOS Y CONTRASTE DE TEXTO (REGLA 1.1) -->
+                    <div class="space-y-3 bg-white/80 p-3 rounded-lg border border-violet-200/80">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-semibold text-slate-800 text-xs">Overlay con Degradado Personalizable &amp; Contraste</label>
+                            <span class="text-[10px] text-indigo-600 font-semibold">100% Ajustable</span>
+                        </div>
+
+                        <!-- Presets rápidos -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-500 font-semibold">Presets:</span>
+                            <button type="button" onclick="window.applyPageGradientPreset('noir', 'create')" class="px-2 py-0.5 rounded text-[10px] bg-slate-900 text-white font-medium hover:bg-black">Noir</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('wine', 'create')" class="px-2 py-0.5 rounded text-[10px] bg-rose-900 text-white font-medium hover:bg-rose-950">Vino</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('indigo', 'create')" class="px-2 py-0.5 rounded text-[10px] bg-indigo-900 text-white font-medium hover:bg-indigo-950">Índigo</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('emerald', 'create')" class="px-2 py-0.5 rounded text-[10px] bg-emerald-900 text-white font-medium hover:bg-emerald-950">Esmeralda</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('amber', 'create')" class="px-2 py-0.5 rounded text-[10px] bg-amber-900 text-white font-medium hover:bg-amber-950">Ámbar</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('high_contrast', 'create')" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-amber-300 font-semibold hover:bg-black">Alto Contraste</button>
+                        </div>
+
+                        <!-- Controles de Color y Opacidad por cada Stop -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                                <span class="text-[11px] font-bold text-slate-700 block">Color Superior (Inicio)</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" name="overlay_color_start" id="create_overlay_color_start" value="#000000" onchange="window.updatePageModalPreview('create')" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                    <input type="text" id="create_overlay_color_start_txt" value="#000000" oninput="document.getElementById('create_overlay_color_start').value=this.value; window.updatePageModalPreview('create');" class="w-20 px-2 py-1 text-xs font-mono border border-slate-200 rounded">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                                        <span>Opacidad Superior:</span>
+                                        <strong id="create_overlay_opacity_start_val">25%</strong>
+                                    </div>
+                                    <input type="range" name="overlay_opacity_start" id="create_overlay_opacity_start" min="0" max="100" value="25" oninput="document.getElementById('create_overlay_opacity_start_val').textContent=this.value+'%'; window.updatePageModalPreview('create');" class="w-full accent-indigo-600">
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                                <span class="text-[11px] font-bold text-slate-700 block">Color Inferior (Fin)</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" name="overlay_color_end" id="create_overlay_color_end" value="#000000" onchange="window.updatePageModalPreview('create')" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                    <input type="text" id="create_overlay_color_end_txt" value="#000000" oninput="document.getElementById('create_overlay_color_end').value=this.value; window.updatePageModalPreview('create');" class="w-20 px-2 py-1 text-xs font-mono border border-slate-200 rounded">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                                        <span>Opacidad Inferior:</span>
+                                        <strong id="create_overlay_opacity_end_val">85%</strong>
+                                    </div>
+                                    <input type="range" name="overlay_opacity_end" id="create_overlay_opacity_end" min="0" max="100" value="85" oninput="document.getElementById('create_overlay_opacity_end_val').textContent=this.value+'%'; window.updatePageModalPreview('create');" class="w-full accent-indigo-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Color de Texto para Contraste Garantizado -->
+                        <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                                <strong class="text-[11px] text-slate-800 block">Color del Texto de la Tarjeta</strong>
+                                <span class="text-[10px] text-slate-400">Garantiza contraste óptimo para que no se pierda sobre la fotografía.</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="color" name="text_color" id="create_page_text_color" value="#ffffff" onchange="window.updatePageModalPreview('create')" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                <button type="button" onclick="document.getElementById('create_page_text_color').value='#ffffff'; window.updatePageModalPreview('create');" class="px-2 py-1 text-[10px] font-bold bg-white border border-slate-300 rounded text-slate-800">Blanco</button>
+                                <button type="button" onclick="document.getElementById('create_page_text_color').value='#fef08a'; window.updatePageModalPreview('create');" class="px-2 py-1 text-[10px] font-bold bg-amber-100 border border-amber-300 rounded text-amber-900">Cálido</button>
+                                <button type="button" onclick="document.getElementById('create_page_text_color').value='#09090b'; window.updatePageModalPreview('create');" class="px-2 py-1 text-[10px] font-bold bg-slate-900 border border-slate-900 rounded text-white">Negro</button>
+                            </div>
+                        </div>
+
+                        <!-- Miniatura Live Preview 4:5 -->
+                        <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between gap-4">
+                            <div>
+                                <span class="text-[11px] font-bold text-slate-700 block">Vista Previa en Vivo (Proporción 4:5)</span>
+                                <p class="text-[10px] text-slate-400">Simulación del contraste y legibilidad con la configuración actual.</p>
+                            </div>
+                            <div id="create_preview_card" class="w-24 h-30 rounded-xl overflow-hidden relative shrink-0 border border-white/20 shadow-sm flex flex-col justify-end p-2 bg-slate-900" style="aspect-ratio: 4 / 5;">
+                                <div id="create_preview_bg" class="absolute inset-0 bg-cover bg-center"></div>
+                                <div id="create_preview_overlay" class="absolute inset-0 pointer-events-none" style="background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                                <div class="relative z-10">
+                                    <span id="create_preview_badge" class="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-black/60 text-white uppercase border border-white/30 block w-fit mb-1">Colección</span>
+                                    <strong id="create_preview_title" class="text-[9px] font-extrabold leading-tight block text-white drop-shadow">Título</strong>
+                                    <span class="text-[7px] text-white/90 bg-white/20 px-1 py-0.5 rounded-full mt-1 inline-block border border-white/30 font-bold">Ver &rarr;</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2546,28 +2638,121 @@
                         <span class="text-[10px] text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full font-semibold">Vista /explorar</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">URL de Imagen (Tarjeta de Explorar)</label>
-                            <input type="text" id="edit_page_image_url" name="image_url" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="https://... o /uploads/...">
+                    <!-- 1. MODO DE IMÁGENES & CARRUSEL -->
+                    <div class="space-y-2 bg-white/80 p-3 rounded-lg border border-violet-200/80">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-semibold text-slate-800 text-xs">Modo de Imágenes &amp; Carrusel</label>
+                            <span class="text-[10px] text-slate-500 font-mono">Carrusel o Catálogo</span>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">O Subir Nueva Imagen</label>
-                            <input type="file" name="image_file" accept="image/*" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-white">
+                        <select name="image_source_mode" id="edit_page_image_mode" onchange="window.togglePageImageMode(this.value, 'edit')" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+                            <option value="custom">Imágenes Manuales / Carrusel Personalizado</option>
+                            <option value="catalog">Conmutación Dinámica desde el Catálogo (según Filtros de Prenda)</option>
+                        </select>
+
+                        <div id="edit_page_custom_images_wrap" class="space-y-2 mt-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imagen Principal</label>
+                                    <input type="text" id="edit_page_image_url" name="image_url" oninput="window.updatePageModalPreview('edit')" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="https://... o /uploads/...">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 text-[11px] mb-1">O Subir Nueva Imagen</label>
+                                    <input type="file" name="image_file" accept="image/*" class="w-full px-2 py-1 border border-slate-200 rounded-lg text-xs bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imágenes Adicionales para Carrusel Automático (URLs por línea o comas)</label>
+                                <textarea name="gallery_images_urls" id="edit_page_gallery_images_urls" rows="2" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg"></textarea>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Si se configuran 2 o más imágenes, rotarán en carrusel automático suave cada 3.5 segundos.</p>
+                            </div>
+                        </div>
+                        <div id="edit_page_catalog_images_info" class="hidden p-2 rounded-lg bg-indigo-50/70 border border-indigo-200 text-indigo-900 text-[11px]">
+                            <svg class="w-3.5 h-3.5 inline mr-1 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            El carrusel rotará automáticamente fotografías de las prendas activas en el catálogo que coincidan con el universo y categoría configurados.
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Overlay de Imagen & Degradado (Proporción 4:5)</label>
-                        <select id="edit_page_overlay_gradient" name="overlay_gradient" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="dark">Noir Elegante (Oscuro vertical 25% &rarr; 85%)</option>
-                            <option value="indigo">Multiverso Índigo (Índigo místico 30% &rarr; 88%)</option>
-                            <option value="rose">Aterciopelado Vino (Borgoña / Vino 30% &rarr; 88%)</option>
-                            <option value="emerald">Esmeralda Profundo (Verde Botella 30% &rarr; 88%)</option>
-                            <option value="amber">Cuero &amp; Ámbar (Tierra tostada 30% &rarr; 88%)</option>
-                            <option value="subtle">Sutil Translúcido (Suave 15% &rarr; 65%)</option>
-                        </select>
-                        <p class="text-[11px] text-slate-400 mt-1">Genera un contraste óptimo sobre la imagen 4:5 resaltando los textos y botones interactivos.</p>
+                    <!-- 2. OVERLAY, DEGRADADOS Y CONTRASTE DE TEXTO (REGLA 1.1) -->
+                    <div class="space-y-3 bg-white/80 p-3 rounded-lg border border-violet-200/80">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-semibold text-slate-800 text-xs">Overlay con Degradado Personalizable &amp; Contraste</label>
+                            <span class="text-[10px] text-indigo-600 font-semibold">100% Ajustable</span>
+                        </div>
+
+                        <!-- Presets rápidos -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-500 font-semibold">Presets:</span>
+                            <button type="button" onclick="window.applyPageGradientPreset('noir', 'edit')" class="px-2 py-0.5 rounded text-[10px] bg-slate-900 text-white font-medium hover:bg-black">Noir</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('wine', 'edit')" class="px-2 py-0.5 rounded text-[10px] bg-rose-900 text-white font-medium hover:bg-rose-950">Vino</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('indigo', 'edit')" class="px-2 py-0.5 rounded text-[10px] bg-indigo-900 text-white font-medium hover:bg-indigo-950">Índigo</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('emerald', 'edit')" class="px-2 py-0.5 rounded text-[10px] bg-emerald-900 text-white font-medium hover:bg-emerald-950">Esmeralda</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('amber', 'edit')" class="px-2 py-0.5 rounded text-[10px] bg-amber-900 text-white font-medium hover:bg-amber-950">Ámbar</button>
+                            <button type="button" onclick="window.applyPageGradientPreset('high_contrast', 'edit')" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-amber-300 font-semibold hover:bg-black">Alto Contraste</button>
+                        </div>
+
+                        <!-- Controles de Color y Opacidad por cada Stop -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                                <span class="text-[11px] font-bold text-slate-700 block">Color Superior (Inicio)</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" name="overlay_color_start" id="edit_overlay_color_start" value="#000000" onchange="window.updatePageModalPreview('edit')" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                    <input type="text" id="edit_overlay_color_start_txt" value="#000000" oninput="document.getElementById('edit_overlay_color_start').value=this.value; window.updatePageModalPreview('edit');" class="w-20 px-2 py-1 text-xs font-mono border border-slate-200 rounded">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                                        <span>Opacidad Superior:</span>
+                                        <strong id="edit_overlay_opacity_start_val">25%</strong>
+                                    </div>
+                                    <input type="range" name="overlay_opacity_start" id="edit_overlay_opacity_start" min="0" max="100" value="25" oninput="document.getElementById('edit_overlay_opacity_start_val').textContent=this.value+'%'; window.updatePageModalPreview('edit');" class="w-full accent-indigo-600">
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                                <span class="text-[11px] font-bold text-slate-700 block">Color Inferior (Fin)</span>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" name="overlay_color_end" id="edit_overlay_color_end" value="#000000" onchange="window.updatePageModalPreview('edit')" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                    <input type="text" id="edit_overlay_color_end_txt" value="#000000" oninput="document.getElementById('edit_overlay_color_end').value=this.value; window.updatePageModalPreview('edit');" class="w-20 px-2 py-1 text-xs font-mono border border-slate-200 rounded">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                                        <span>Opacidad Inferior:</span>
+                                        <strong id="edit_overlay_opacity_end_val">85%</strong>
+                                    </div>
+                                    <input type="range" name="overlay_opacity_end" id="edit_overlay_opacity_end" min="0" max="100" value="85" oninput="document.getElementById('edit_overlay_opacity_end_val').textContent=this.value+'%'; window.updatePageModalPreview('edit');" class="w-full accent-indigo-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Color de Texto para Contraste Garantizado -->
+                        <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                                <strong class="text-[11px] text-slate-800 block">Color del Texto de la Tarjeta</strong>
+                                <span class="text-[10px] text-slate-400">Garantiza contraste óptimo para que no se pierda sobre la fotografía.</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="color" name="text_color" id="edit_page_text_color" value="#ffffff" onchange="window.updatePageModalPreview('edit')" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white">
+                                <button type="button" onclick="document.getElementById('edit_page_text_color').value='#ffffff'; window.updatePageModalPreview('edit');" class="px-2 py-1 text-[10px] font-bold bg-white border border-slate-300 rounded text-slate-800">Blanco</button>
+                                <button type="button" onclick="document.getElementById('edit_page_text_color').value='#fef08a'; window.updatePageModalPreview('edit');" class="px-2 py-1 text-[10px] font-bold bg-amber-100 border border-amber-300 rounded text-amber-900">Cálido</button>
+                                <button type="button" onclick="document.getElementById('edit_page_text_color').value='#09090b'; window.updatePageModalPreview('edit');" class="px-2 py-1 text-[10px] font-bold bg-slate-900 border border-slate-900 rounded text-white">Negro</button>
+                            </div>
+                        </div>
+
+                        <!-- Miniatura Live Preview 4:5 -->
+                        <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between gap-4">
+                            <div>
+                                <span class="text-[11px] font-bold text-slate-700 block">Vista Previa en Vivo (Proporción 4:5)</span>
+                                <p class="text-[10px] text-slate-400">Simulación del contraste y legibilidad con la configuración actual.</p>
+                            </div>
+                            <div id="edit_preview_card" class="w-24 h-30 rounded-xl overflow-hidden relative shrink-0 border border-white/20 shadow-sm flex flex-col justify-end p-2 bg-slate-900" style="aspect-ratio: 4 / 5;">
+                                <div id="edit_preview_bg" class="absolute inset-0 bg-cover bg-center"></div>
+                                <div id="edit_preview_overlay" class="absolute inset-0 pointer-events-none" style="background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                                <div class="relative z-10">
+                                    <span id="edit_preview_badge" class="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-black/60 text-white uppercase border border-white/30 block w-fit mb-1">Colección</span>
+                                    <strong id="edit_preview_title" class="text-[9px] font-extrabold leading-tight block text-white drop-shadow">Título</strong>
+                                    <span class="text-[7px] text-white/90 bg-white/20 px-1 py-0.5 rounded-full mt-1 inline-block border border-white/30 font-bold">Ver &rarr;</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -3049,6 +3234,106 @@
         });
     };
 
+    window.togglePageImageMode = function(mode, context) {
+        const pfx = context === 'edit' ? 'edit_' : 'create_';
+        const customWrap = document.getElementById(pfx + 'page_custom_images_wrap');
+        const catalogInfo = document.getElementById(pfx + 'page_catalog_images_info');
+        if (mode === 'catalog') {
+            if (customWrap) customWrap.classList.add('hidden');
+            if (catalogInfo) catalogInfo.classList.remove('hidden');
+        } else {
+            if (customWrap) customWrap.classList.remove('hidden');
+            if (catalogInfo) catalogInfo.classList.add('hidden');
+        }
+        window.updatePageModalPreview(context);
+    };
+
+    window.applyPageGradientPreset = function(preset, context) {
+        const pfx = context === 'edit' ? 'edit_' : 'create_';
+        const colorStart = document.getElementById(pfx + 'overlay_color_start');
+        const colorStartTxt = document.getElementById(pfx + 'overlay_color_start_txt');
+        const opStart = document.getElementById(pfx + 'overlay_opacity_start');
+        const opStartVal = document.getElementById(pfx + 'overlay_opacity_start_val');
+
+        const colorEnd = document.getElementById(pfx + 'overlay_color_end');
+        const colorEndTxt = document.getElementById(pfx + 'overlay_color_end_txt');
+        const opEnd = document.getElementById(pfx + 'overlay_opacity_end');
+        const opEndVal = document.getElementById(pfx + 'overlay_opacity_end_val');
+
+        const textColor = document.getElementById(pfx + 'page_text_color');
+
+        const presets = {
+            noir: { start: '#000000', end: '#000000', opStart: 25, opEnd: 85, text: '#ffffff' },
+            wine: { start: '#4a0404', end: '#0f0505', opStart: 30, opEnd: 90, text: '#ffffff' },
+            indigo: { start: '#1e1b4b', end: '#09090b', opStart: 30, opEnd: 90, text: '#ffffff' },
+            emerald: { start: '#064e3b', end: '#022c22', opStart: 30, opEnd: 90, text: '#ffffff' },
+            amber: { start: '#78350f', end: '#1c1917', opStart: 30, opEnd: 90, text: '#fef08a' },
+            high_contrast: { start: '#000000', end: '#000000', opStart: 60, opEnd: 95, text: '#fde047' },
+        };
+
+        const cfg = presets[preset] || presets.noir;
+        if (colorStart) colorStart.value = cfg.start;
+        if (colorStartTxt) colorStartTxt.value = cfg.start;
+        if (opStart) opStart.value = cfg.opStart;
+        if (opStartVal) opStartVal.textContent = cfg.opStart + '%';
+
+        if (colorEnd) colorEnd.value = cfg.end;
+        if (colorEndTxt) colorEndTxt.value = cfg.end;
+        if (opEnd) opEnd.value = cfg.opEnd;
+        if (opEndVal) opEndVal.textContent = cfg.opEnd + '%';
+
+        if (textColor) textColor.value = cfg.text;
+
+        window.updatePageModalPreview(context);
+    };
+
+    window.updatePageModalPreview = function(context) {
+        const pfx = context === 'edit' ? 'edit_' : 'create_';
+        const card = document.getElementById(pfx + 'preview_card');
+        const bg = document.getElementById(pfx + 'preview_bg');
+        const overlay = document.getElementById(pfx + 'preview_overlay');
+        const titleEl = document.getElementById(pfx + 'preview_title');
+        const badgeEl = document.getElementById(pfx + 'preview_badge');
+
+        const inputTitle = document.querySelector(context === 'edit' ? '#edit_page_title' : '#createPageModal input[name="title"]');
+        const inputImg = document.getElementById(pfx + 'page_image_url');
+        const cStart = document.getElementById(pfx + 'overlay_color_start')?.value || '#000000';
+        const cEnd = document.getElementById(pfx + 'overlay_color_end')?.value || '#000000';
+        const opStart = (parseInt(document.getElementById(pfx + 'overlay_opacity_start')?.value || '25', 10) / 100);
+        const opEnd = (parseInt(document.getElementById(pfx + 'overlay_opacity_end')?.value || '85', 10) / 100);
+        const txtColor = document.getElementById(pfx + 'page_text_color')?.value || '#ffffff';
+
+        function hexToRgba(hex, alpha) {
+            let c = (hex || '#000000').replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+        }
+
+        if (bg) {
+            const url = inputImg ? inputImg.value.trim() : '';
+            if (url) {
+                bg.style.backgroundImage = `url("${url}")`;
+            } else {
+                bg.style.backgroundImage = 'none';
+            }
+        }
+
+        if (overlay) {
+            overlay.style.background = `linear-gradient(180deg, ${hexToRgba(cStart, opStart)} 0%, ${hexToRgba(cEnd, opEnd)} 100%)`;
+        }
+
+        if (titleEl) {
+            titleEl.textContent = inputTitle && inputTitle.value.trim() ? inputTitle.value : 'Título de Página';
+            titleEl.style.color = txtColor;
+        }
+
+        if (badgeEl) {
+            badgeEl.style.color = txtColor;
+            badgeEl.style.borderColor = hexToRgba(txtColor, 0.4);
+        }
+    };
+
     window.openEditPageModal = function(page) {
         if (!page) return;
         const form = document.getElementById('editPageForm');
@@ -3067,10 +3352,22 @@
         const metaDescEl = document.getElementById('edit_page_meta_description');
         const statusEl = document.getElementById('edit_page_status');
         const imageUrlEl = document.getElementById('edit_page_image_url');
-        const overlayGradEl = document.getElementById('edit_page_overlay_gradient');
+        const imageModeEl = document.getElementById('edit_page_image_mode');
+        const galleryUrlsEl = document.getElementById('edit_page_gallery_images_urls');
         const universeEl = document.getElementById('edit_page_filter_universe');
         const categoryEl = document.getElementById('edit_page_filter_category');
         const tagsEl = document.getElementById('edit_page_filter_tags');
+
+        // Color & Opacity controls
+        const colorStartEl = document.getElementById('edit_overlay_color_start');
+        const colorStartTxtEl = document.getElementById('edit_overlay_color_start_txt');
+        const opStartEl = document.getElementById('edit_overlay_opacity_start');
+        const opStartValEl = document.getElementById('edit_overlay_opacity_start_val');
+        const colorEndEl = document.getElementById('edit_overlay_color_end');
+        const colorEndTxtEl = document.getElementById('edit_overlay_color_end_txt');
+        const opEndEl = document.getElementById('edit_overlay_opacity_end');
+        const opEndValEl = document.getElementById('edit_overlay_opacity_end_val');
+        const textColorEl = document.getElementById('edit_page_text_color');
 
         if (titleEl) titleEl.value = page.title || '';
         if (slugEl) slugEl.value = page.slug || '';
@@ -3084,11 +3381,44 @@
         if (metaDescEl) metaDescEl.value = page.seo_description || page.meta_description || '';
         if (statusEl) statusEl.value = page.status || 'active';
         if (imageUrlEl) imageUrlEl.value = page.image_url || '';
-        if (overlayGradEl) overlayGradEl.value = page.overlay_gradient || 'dark';
+
+        const mode = page.image_source_mode || 'custom';
+        if (imageModeEl) imageModeEl.value = mode;
+        window.togglePageImageMode(mode, 'edit');
+
+        if (galleryUrlsEl) {
+            if (Array.isArray(page.gallery_images)) {
+                galleryUrlsEl.value = page.gallery_images.join('\n');
+            } else if (typeof page.gallery_images === 'string') {
+                galleryUrlsEl.value = page.gallery_images;
+            } else {
+                galleryUrlsEl.value = '';
+            }
+        }
+
+        const cStart = page.overlay_color_start || '#000000';
+        const cEnd = page.overlay_color_end || '#000000';
+        const opStart = page.overlay_opacity_start !== undefined && page.overlay_opacity_start !== null ? page.overlay_opacity_start : 25;
+        const opEnd = page.overlay_opacity_end !== undefined && page.overlay_opacity_end !== null ? page.overlay_opacity_end : 85;
+        const txtColor = page.text_color || '#ffffff';
+
+        if (colorStartEl) colorStartEl.value = cStart;
+        if (colorStartTxtEl) colorStartTxtEl.value = cStart;
+        if (opStartEl) opStartEl.value = opStart;
+        if (opStartValEl) opStartValEl.textContent = opStart + '%';
+
+        if (colorEndEl) colorEndEl.value = cEnd;
+        if (colorEndTxtEl) colorEndTxtEl.value = cEnd;
+        if (opEndEl) opEndEl.value = opEnd;
+        if (opEndValEl) opEndValEl.textContent = opEnd + '%';
+
+        if (textColorEl) textColorEl.value = txtColor;
+
         if (universeEl) universeEl.value = page.filter_universe || '';
         if (categoryEl) categoryEl.value = page.filter_category || '';
         if (tagsEl) tagsEl.value = page.filter_tags || '';
 
+        window.updatePageModalPreview('edit');
         window.openStoreModal('editPageModal');
     };
 
@@ -3527,6 +3857,42 @@
         });
     };
 
+    window.syncPagesOrder = function() {
+        const pagesBody = document.getElementById('pagesSortableBody');
+        if (!pagesBody) return;
+
+        const rows = pagesBody.querySelectorAll('tr[data-page-id]');
+        const order = [];
+        rows.forEach((row, idx) => {
+            const id = parseInt(row.getAttribute('data-page-id'), 10);
+            if (!isNaN(id)) order.push(id);
+            const badge = row.querySelector('.page-order-badge');
+            if (badge) badge.textContent = `#${idx + 1}`;
+        });
+
+        fetch('{{ route("portal.store.pages.reorder") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ order })
+        }).then(res => res.json()).then(data => {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 z-50 bg-emerald-900 text-white px-4 py-2.5 rounded-xl shadow-2xl font-sans text-xs flex items-center gap-2 border border-emerald-700 animate-bounce';
+            toast.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Orden de Páginas de Explorar sincronizado con éxito</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.4s ease';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 2500);
+        }).catch(err => {
+            console.error('[Store CMS] Error al sincronizar orden de páginas:', err);
+        });
+    };
+
     // ==========================================
     // 6. INICIALIZADOR DE INTERACCIÓN Y EVENTOS
     // ==========================================
@@ -3624,6 +3990,60 @@
             sectionsBody.addEventListener('drop', function(e) {
                 e.preventDefault();
                 window.syncSectionsOrder();
+            });
+        }
+
+        // Inicializar SortableJS para Drag & Drop de Páginas de Explorar
+        const pagesBody = document.getElementById('pagesSortableBody');
+        if (pagesBody) {
+            if (typeof Sortable !== 'undefined') {
+                new Sortable(pagesBody, {
+                    handle: '.drag-handle-page',
+                    animation: 200,
+                    ghostClass: 'bg-indigo-50/80',
+                    chosenClass: 'bg-indigo-100/60',
+                    dragClass: 'shadow-2xl',
+                    onEnd: function () {
+                        window.syncPagesOrder();
+                    }
+                });
+            }
+
+            // Fallback nativo HTML5 Drag & Drop
+            let draggedPageRow = null;
+            pagesBody.addEventListener('dragstart', function(e) {
+                draggedPageRow = e.target.closest('tr[data-page-id]');
+                if (draggedPageRow) {
+                    if (e.dataTransfer) {
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', draggedPageRow.getAttribute('data-page-id'));
+                    }
+                    draggedPageRow.classList.add('opacity-50');
+                }
+            });
+            pagesBody.addEventListener('dragend', function() {
+                if (draggedPageRow) {
+                    draggedPageRow.classList.remove('opacity-50');
+                    draggedPageRow = null;
+                }
+            });
+            pagesBody.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                const targetRow = e.target.closest('tr[data-page-id]');
+                if (targetRow && targetRow !== draggedPageRow && draggedPageRow) {
+                    const bounding = targetRow.getBoundingClientRect();
+                    const offset = e.clientY - bounding.top;
+                    if (offset > bounding.height / 2) {
+                        targetRow.parentNode.insertBefore(draggedPageRow, targetRow.nextSibling);
+                    } else {
+                        targetRow.parentNode.insertBefore(draggedPageRow, targetRow);
+                    }
+                }
+            });
+            pagesBody.addEventListener('drop', function(e) {
+                e.preventDefault();
+                window.syncPagesOrder();
             });
         }
 

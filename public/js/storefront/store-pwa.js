@@ -2853,8 +2853,80 @@
   // PORTAL DEL COMPRADOR D2C (TASK-STR-05)
   // Mi Cuenta, Mis Pedidos, Perfil Anatómico, Libreta Direcciones, Club MRR
   // ============================================================================
+  // MOTOR DE TEMA VISUAL: DARK / LIGHT / SYSTEM (REGLA 2)
+  // ============================================================================
+  function getAppTheme() {
+    try {
+      return localStorage.getItem('app_theme') || 'system';
+    } catch(e) {
+      return 'system';
+    }
+  }
+
+  function setAppTheme(mode, save = true) {
+    if (!['light', 'dark', 'system'].includes(mode)) mode = 'system';
+    if (save) {
+      try {
+        localStorage.setItem('app_theme', mode);
+      } catch (e) {}
+    }
+
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = (mode === 'dark') || (mode === 'system' && prefersDark);
+
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      if (document.body) document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      if (document.body) document.body.classList.remove('dark');
+    }
+
+    // Actualizar meta theme-color
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) {
+      themeMeta.setAttribute('content', isDark ? '#09090b' : '#ffffff');
+    }
+
+    // Actualizar botones de opción en pestaña Configuración
+    document.querySelectorAll('[data-action="set-app-theme"]').forEach(btn => {
+      const btnMode = btn.getAttribute('data-theme-mode');
+      btn.classList.toggle('active', btnMode === mode);
+    });
+
+    // Actualizar badge indicador
+    const badge = document.getElementById('currentThemeBadge');
+    if (badge) {
+      const labels = { light: 'CLARO', dark: 'OSCURO', system: 'SISTEMA' };
+      badge.textContent = labels[mode] || 'SISTEMA';
+    }
+
+    // Actualizar iconos de conmutación rápida
+    document.querySelectorAll('.theme-icon-sun').forEach(el => {
+      el.style.display = isDark ? 'inline-block' : 'none';
+    });
+    document.querySelectorAll('.theme-icon-moon').forEach(el => {
+      el.style.display = isDark ? 'none' : 'inline-block';
+    });
+
+    window.dispatchEvent(new CustomEvent('app-theme-changed', {
+      detail: { mode, isDark }
+    }));
+  }
+
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (getAppTheme() === 'system') {
+        setAppTheme('system', false);
+      }
+    });
+  }
+
+  // ============================================================================
   const accountState = {
-    activeTab: 'orders', // 'orders' | 'anatomy' | 'address' | 'subscription'
+    activeTab: 'orders', // 'orders' | 'anatomy' | 'address' | 'subscription' | 'settings'
     searchedFolio: null,
     editingAddress: false,
     pushEnabled: false
@@ -2871,6 +2943,12 @@
       panel.style.display = match ? 'block' : 'none';
     });
     renderAccountSheetContent();
+    if (tabKey === 'settings') {
+      if (typeof renderAccountPushPreferences === 'function') {
+        renderAccountPushPreferences();
+      }
+      setAppTheme(getAppTheme(), false);
+    }
   }
 
   function renderAccountSheetContent() {
@@ -4316,6 +4394,24 @@
       return;
     }
 
+    const themeOptionBtn = e.target.closest('[data-action="set-app-theme"]');
+    if (themeOptionBtn) {
+      e.preventDefault();
+      const mode = themeOptionBtn.getAttribute('data-theme-mode');
+      if (mode) setAppTheme(mode, true);
+      return;
+    }
+
+    const quickThemeBtn = e.target.closest('[data-action="toggle-app-theme-quick"]');
+    if (quickThemeBtn) {
+      e.preventDefault();
+      const current = getAppTheme();
+      const isCurrentlyDark = document.documentElement.classList.contains('dark');
+      const next = isCurrentlyDark ? 'light' : 'dark';
+      setAppTheme(next, true);
+      return;
+    }
+
     const accLookupBtn = e.target.closest('[data-action="account-lookup-folio"]');
     if (accLookupBtn) {
       e.preventDefault();
@@ -4669,6 +4765,7 @@
     renderWishlistDrawerContent();
     renderCouponBoxes();
     initPushNotifications();
+    setAppTheme(getAppTheme(), false);
 
     // Registro de Service Worker PWA
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
@@ -4678,6 +4775,8 @@
 
   // Exponer a Window para pruebas automatizadas
   if (typeof window !== 'undefined') {
+    window.setAppTheme = setAppTheme;
+    window.getAppTheme = getAppTheme;
     window.storeState = storeState;
     window.STORE_PRODUCTS = STORE_PRODUCTS;
     window.UNIVERSE_META = UNIVERSE_META;

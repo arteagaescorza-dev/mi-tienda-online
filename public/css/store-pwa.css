@@ -3966,6 +3966,224 @@ body.store-body {
   background: #27272a;
 }
 
+/* ============================================================================
+   DARK MODE & LIGHT MODE ENGINE (REGLA 2)
+   Soporte Integral Dark / Light / System
+   ============================================================================ */
+
+html.dark,
+[data-theme="dark"],
+body.dark {
+  --bg-primary: #09090b;
+  --bg-surface: #121215;
+  --bg-secondary: #18181b;
+  --bg-tertiary: #27272a;
+  
+  --border-subtle: #27272a;
+  --border-medium: #3f3f46;
+  --border-dark: #71717a;
+  --border-focus: #ffffff;
+  
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-inverted: #09090b;
+
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-dock: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-drawer: 0 -8px 30px rgba(0, 0, 0, 0.7);
+}
+
+html.dark body.store-body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .sticky-header-wrapper {
+  background: rgba(9, 9, 11, 0.95) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+html.dark .navbar-desktop,
+html.dark .navbar-mobile {
+  background: transparent !important;
+}
+
+html.dark .nav-link-item {
+  color: var(--text-secondary);
+}
+
+html.dark .nav-link-item:hover,
+html.dark .nav-link-item.active {
+  color: #ffffff;
+}
+
+html.dark .btn-pill-action {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-medium) !important;
+}
+
+html.dark .btn-pill-action:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--text-primary) !important;
+}
+
+html.dark .product-card {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+html.dark .product-body {
+  background: var(--bg-surface) !important;
+}
+
+html.dark .product-title a {
+  color: var(--text-primary) !important;
+}
+
+html.dark .size-pill-btn {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+html.dark .size-pill-btn.selected {
+  background: var(--brand-accent, #4f46e5) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-accent, #4f46e5) !important;
+}
+
+html.dark .btn-hero-secondary {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-medium) !important;
+}
+
+html.dark .bottom-app-dock {
+  background: rgba(18, 18, 21, 0.96) !important;
+  border-top-color: var(--border-subtle) !important;
+}
+
+html.dark .dock-tab-btn {
+  color: var(--text-muted) !important;
+}
+
+html.dark .dock-tab-btn.active {
+  color: var(--brand-accent, #818cf8) !important;
+}
+
+html.dark .bottom-sheet-drawer,
+html.dark .bottom-sheet-content,
+html.dark .pdp-modal-sheet {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .sheet-header {
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+html.dark .sheet-title {
+  color: var(--text-primary) !important;
+}
+
+html.dark .sheet-close-btn,
+html.dark .pdp-close-btn {
+  color: var(--text-muted) !important;
+}
+
+html.dark .sheet-close-btn:hover,
+html.dark .pdp-close-btn:hover {
+  color: var(--text-primary) !important;
+}
+
+html.dark .account-tab-btn {
+  color: var(--text-muted) !important;
+  border-bottom-color: transparent !important;
+}
+
+html.dark .account-tab-btn.active {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--text-primary) !important;
+}
+
+html.dark .account-lookup-box,
+html.dark .account-auth-card,
+html.dark .auth-logged-card,
+html.dark .auth-guest-card,
+html.dark .subscription-card,
+html.dark .push-notifications-card,
+html.dark .anatomy-slider-card,
+html.dark .admin-console-shortcut,
+html.dark .cart-item-card,
+html.dark .cart-summary-box,
+html.dark .wishlist-item-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .account-input,
+html.dark .checkout-input,
+html.dark input[type="text"],
+html.dark input[type="search"],
+html.dark input[type="email"],
+html.dark select,
+html.dark textarea {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .store-search-bar {
+  background: var(--bg-surface) !important;
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+html.dark .store-search-bar input {
+  color: var(--text-primary) !important;
+}
+
+html.dark .minimal-marquee-bar {
+  background: #000000 !important;
+  border-bottom-color: #27272a !important;
+  color: #a1a1aa !important;
+}
+
+html.dark .store-footer {
+  background: #050507 !important;
+  border-top-color: #27272a !important;
+}
+
+/* Selector visual de tema en Configuración */
+.theme-option-btn.active {
+  border-color: var(--brand-accent, #4f46e5) !important;
+  background: rgba(79, 70, 229, 0.12) !important;
+  color: var(--brand-accent, #4f46e5) !important;
+  font-weight: 800 !important;
+}
+
+.quick-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-theme-toggle-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-primary);
+}
+
 
 
 

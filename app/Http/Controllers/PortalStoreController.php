@@ -807,6 +807,13 @@ class PortalStoreController extends Controller
             'icon' => 'nullable|string|max:50',
             'image_url' => 'nullable|string|max:500',
             'overlay_gradient' => 'nullable|string|max:255',
+            'text_color' => 'nullable|string|max:30',
+            'image_source_mode' => 'nullable|string|in:custom,catalog',
+            'overlay_color_start' => 'nullable|string|max:30',
+            'overlay_color_end' => 'nullable|string|max:30',
+            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
+            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
+            'gallery_images_urls' => 'nullable|string',
             'filter_universe' => 'nullable|string|max:40',
             'filter_category' => 'nullable|string|max:80',
             'filter_tags' => 'nullable|string|max:255',
@@ -820,6 +827,7 @@ class PortalStoreController extends Controller
             'seo_description' => 'nullable|string',
             'status' => 'nullable|in:active,paused,draft,archived',
             'image_file' => 'nullable|image|max:5120',
+            'gallery_files.*' => 'nullable|image|max:5120',
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -829,10 +837,42 @@ class PortalStoreController extends Controller
             $validated['image_url'] = '/uploads/pages/' . $filename;
         }
 
+        // Galería de imágenes para carrusel automático
+        $gallery = [];
+        if (!empty($validated['image_url'])) {
+            $gallery[] = $validated['image_url'];
+        }
+        if ($request->filled('gallery_images_urls')) {
+            $lines = preg_split('/[\r\n,]+/', $request->input('gallery_images_urls'));
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/'))) {
+                    $gallery[] = $line;
+                }
+            }
+        }
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                if ($gFile && $gFile->isValid()) {
+                    $gName = 'page_gallery_' . time() . '_' . uniqid() . '.' . $gFile->getClientOriginalExtension();
+                    $gFile->move(public_path('uploads/pages'), $gName);
+                    $gallery[] = '/uploads/pages/' . $gName;
+                }
+            }
+        }
+        if (!empty($gallery)) {
+            $validated['gallery_images'] = array_values(array_unique($gallery));
+            if (empty($validated['image_url'])) {
+                $validated['image_url'] = $gallery[0];
+            }
+        }
+
         $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
         $validated['show_in_mobile'] = $request->boolean('show_in_mobile', true);
         $validated['show_in_footer'] = $request->boolean('show_in_footer');
         $validated['status'] = in_array($validated['status'] ?? 'active', ['active', 'paused', 'draft', 'archived']) ? $validated['status'] : 'active';
+        $validated['text_color'] = $validated['text_color'] ?? '#ffffff';
+        $validated['image_source_mode'] = $validated['image_source_mode'] ?? 'custom';
 
         $page = CmsPage::create($validated);
 
@@ -858,6 +898,13 @@ class PortalStoreController extends Controller
             'icon' => 'nullable|string|max:50',
             'image_url' => 'nullable|string|max:500',
             'overlay_gradient' => 'nullable|string|max:255',
+            'text_color' => 'nullable|string|max:30',
+            'image_source_mode' => 'nullable|string|in:custom,catalog',
+            'overlay_color_start' => 'nullable|string|max:30',
+            'overlay_color_end' => 'nullable|string|max:30',
+            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
+            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
+            'gallery_images_urls' => 'nullable|string',
             'filter_universe' => 'nullable|string|max:40',
             'filter_category' => 'nullable|string|max:80',
             'filter_tags' => 'nullable|string|max:255',
@@ -871,6 +918,7 @@ class PortalStoreController extends Controller
             'seo_description' => 'nullable|string',
             'status' => 'nullable|in:active,paused,draft,archived',
             'image_file' => 'nullable|image|max:5120',
+            'gallery_files.*' => 'nullable|image|max:5120',
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -880,12 +928,49 @@ class PortalStoreController extends Controller
             $validated['image_url'] = '/uploads/pages/' . $filename;
         }
 
+        // Galería de imágenes para carrusel automático
+        $gallery = is_array($page->gallery_images) ? $page->gallery_images : [];
+        if (!empty($validated['image_url']) && !in_array($validated['image_url'], $gallery)) {
+            $gallery[] = $validated['image_url'];
+        }
+        if ($request->filled('gallery_images_urls')) {
+            $lines = preg_split('/[\r\n,]+/', $request->input('gallery_images_urls'));
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/'))) {
+                    $gallery[] = $line;
+                }
+            }
+        }
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                if ($gFile && $gFile->isValid()) {
+                    $gName = 'page_gallery_' . time() . '_' . uniqid() . '.' . $gFile->getClientOriginalExtension();
+                    $gFile->move(public_path('uploads/pages'), $gName);
+                    $gallery[] = '/uploads/pages/' . $gName;
+                }
+            }
+        }
+        if (!empty($gallery)) {
+            $validated['gallery_images'] = array_values(array_unique($gallery));
+            if (empty($validated['image_url'])) {
+                $validated['image_url'] = $gallery[0];
+            }
+        }
+
         $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
         $validated['show_in_mobile'] = $request->boolean('show_in_mobile');
         $validated['show_in_footer'] = $request->boolean('show_in_footer');
         if (!empty($validated['status'])) {
             $validated['status'] = in_array($validated['status'], ['active', 'paused', 'draft', 'archived']) ? $validated['status'] : 'active';
         }
+        if (isset($validated['text_color'])) {
+            $validated['text_color'] = $validated['text_color'] ?: '#ffffff';
+        }
+        if (isset($validated['image_source_mode'])) {
+            $validated['image_source_mode'] = $validated['image_source_mode'] ?: 'custom';
+        }
+
         $page->update($validated);
 
         if ($request->wantsJson()) {
@@ -893,6 +978,25 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', "Página CMS '{$page->title}' actualizada exitosamente.");
+    }
+
+    /**
+     * Reordenar páginas de explorar con Drag & Drop.
+     */
+    public function reorderPages(Request $request)
+    {
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'required|integer',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['order'] as $index => $id) {
+                CmsPage::where('id', $id)->update(['navbar_order' => $index + 1]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Orden de páginas de explorar sincronizado correctamente.']);
     }
 
     /**

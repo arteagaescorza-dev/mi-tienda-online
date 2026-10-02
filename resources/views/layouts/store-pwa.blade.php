@@ -8,6 +8,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  <!-- Anti-FOUC Theme Switcher Engine (Regla 2: Dark / Light / System) -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('app_theme') || 'system';
+        var d = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (d) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch(e) {}
+    })();
+  </script>
+
   <title>{{ $currentStorefront['pageTitle'] ?? 'MARTE — Universo Masculino & Multiverso Store' }}</title>
   <meta name="description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
   <meta name="robots" content="index, follow">
@@ -472,7 +489,7 @@
           <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="account">CUENTA</a>
         </nav>
 
-        <!-- Botones de Acción Desktop: Búsqueda y Wishlist (Reglas 1 y 5) -->
+        <!-- Botones de Acción Desktop: Búsqueda, Wishlist y Tema (Reglas 1, 2 y 5) -->
         <div class="nav-actions-desktop">
           <button type="button" class="btn-pill-action" data-action="toggle-search" title="Buscar prendas" aria-label="Buscar prendas">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -482,6 +499,11 @@
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             <span>DESEOS</span>
             <span id="desktopWishlistCount" class="cart-count-badge" style="display:none;">0</span>
+          </button>
+          <button type="button" class="btn-pill-action quick-theme-toggle-btn" data-action="toggle-app-theme-quick" title="Alternar Modo Claro / Oscuro" aria-label="Cambiar tema">
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span>TEMA</span>
           </button>
         </div>
       </div>
@@ -504,8 +526,12 @@
         </div>
       </a>
 
-      <!-- Iconos de Acción Móvil: Búsqueda y Wishlist (Sin Carrito según Regla 2) -->
+      <!-- Iconos de Acción Móvil: Búsqueda, Wishlist y Tema (Reglas 1, 2 y 5) -->
       <div style="display: flex; align-items: center; gap: 4px;">
+        <button type="button" class="mobile-icon-btn" data-action="toggle-app-theme-quick" aria-label="Cambiar tema" title="Modo Claro / Oscuro">
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
         <button type="button" class="mobile-icon-btn" data-action="toggle-search" aria-label="Buscar prendas">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
@@ -830,9 +856,15 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         <span class="sheet-title">Mi Cuenta // Portal del Comprador</span>
       </div>
-      <button type="button" class="sheet-close-btn" data-action="close-drawer" aria-label="Cerrar cuenta">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="quick-theme-toggle-btn" data-action="toggle-app-theme-quick" title="Alternar Modo Oscuro / Claro" aria-label="Cambiar tema">
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button type="button" class="sheet-close-btn" data-action="close-drawer" aria-label="Cerrar cuenta">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
     </div>
 
     <div class="sheet-content-scroll" id="accountSheetScroll">
@@ -855,6 +887,9 @@
         </button>
         <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="subscription">
           <span>Club MRR</span>
+        </button>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="settings">
+          <span>Configuración</span>
         </button>
       </div>
 
@@ -1002,9 +1037,53 @@
         </div>
       </div>
 
-      <!-- Centro de Notificaciones Web Push PWA (TASK-STR-06) -->
-      <div class="push-notifications-card" id="accountPushCenter">
-        <!-- Renderizado dinámicamente desde store-pwa.js -->
+      <!-- Pestaña 5: Configuración & Preferencias (Tema Dark/Light/Sistema & Web Push) (Regla 2) -->
+      <div id="accountTabSettings" class="account-tab-panel" style="display: none;">
+        <div class="settings-panel-content" style="padding: 4px 0;">
+          <div class="settings-header" style="margin-bottom: 16px;">
+            <h4 style="font-family: var(--font-heading); font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">Configuración de la Cuenta</h4>
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0;">Personaliza la apariencia visual de la tienda y tus canales de comunicación directa.</p>
+          </div>
+
+          <!-- Selector de Modo Oscuro / Claro / Sistema -->
+          <div class="theme-selector-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <div>
+                  <strong style="font-size: 0.8rem; color: var(--text-primary); display: block;">Apariencia Visual</strong>
+                  <span style="font-size: 0.68rem; color: var(--text-muted);">Soporte Dark Mode &amp; Light Mode</span>
+                </div>
+              </div>
+              <span id="currentThemeBadge" class="theme-active-badge" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 9999px; background: rgba(79, 70, 229, 0.1); color: var(--brand-accent, #4f46e5); border: 1px solid rgba(79, 70, 229, 0.2);">SISTEMA</span>
+            </div>
+
+            <div class="theme-options-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="light" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Claro</span>
+              </button>
+
+              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="dark" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Oscuro</span>
+              </button>
+
+              <button type="button" class="theme-option-btn active" data-action="set-app-theme" data-theme-mode="system" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--brand-accent, #4f46e5); background: var(--bg-primary); color: var(--brand-accent, #4f46e5); cursor: pointer; transition: all 0.2s;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Sistema</span>
+              </button>
+            </div>
+            <p style="font-size: 0.68rem; color: var(--text-muted); margin: 8px 0 0; text-align: center;">
+              El modo "Sistema" sincroniza automáticamente la tienda con la configuración de apariencia de tu dispositivo.
+            </p>
+          </div>
+
+          <!-- Centro de Notificaciones Web Push PWA (REGLA 2: RESIDE EN CONFIGURACIÓN) -->
+          <div class="push-notifications-card" id="accountPushCenter">
+            <!-- Renderizado dinámicamente desde store-pwa.js -->
+          </div>
+        </div>
       </div>
 
       <!-- Acceso a Consola RevOps para Operadores -->

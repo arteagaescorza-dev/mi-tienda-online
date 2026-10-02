@@ -280,4 +280,100 @@ class Hub2CmsPagesAndBlogTest extends TestCase
         $homeResp->assertSee('data-universe="marte"', false);
         $homeResp->assertSee('Cápsula Marte Vanguardia Editada');
     }
+
+    public function test_pages_can_be_reordered_via_drag_and_drop_api(): void
+    {
+        $p1 = CmsPage::create([
+            'title' => 'Página Uno',
+            'slug' => 'pagina-uno',
+            'navbar_order' => 1,
+            'status' => 'active',
+        ]);
+        $p2 = CmsPage::create([
+            'title' => 'Página Dos',
+            'slug' => 'pagina-dos',
+            'navbar_order' => 2,
+            'status' => 'active',
+        ]);
+        $p3 = CmsPage::create([
+            'title' => 'Página Tres',
+            'slug' => 'pagina-tres',
+            'navbar_order' => 3,
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->portalUser)->postJson(route('portal.store.pages.reorder'), [
+            'order' => [$p3->id, $p1->id, $p2->id],
+        ]);
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+
+        $this->assertEquals(1, $p3->fresh()->navbar_order);
+        $this->assertEquals(2, $p1->fresh()->navbar_order);
+        $this->assertEquals(3, $p2->fresh()->navbar_order);
+    }
+
+    public function test_page_supports_custom_colors_carousel_and_renders_with_contrast(): void
+    {
+        $createResp = $this->actingAs($this->portalUser)->post(route('portal.store.pages.store'), [
+            'title' => 'Curaduría Seda & Encaje',
+            'slug' => 'curaduria-seda-encaje',
+            'image_source_mode' => 'custom',
+            'image_url' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600',
+            'gallery_images_urls' => "https://images.unsplash.com/photo-foto2.jpg\nhttps://images.unsplash.com/photo-foto3.jpg",
+            'overlay_color_start' => '#1e1b4b',
+            'overlay_color_end' => '#0f172a',
+            'overlay_opacity_start' => 30,
+            'overlay_opacity_end' => 90,
+            'text_color' => '#fef08a',
+            'content_html' => '<p>Colección especial de satén y seda.</p>',
+            'status' => 'active',
+        ]);
+
+        $createResp->assertRedirect();
+        $this->assertDatabaseHas('cms_pages', [
+            'slug' => 'curaduria-seda-encaje',
+            'text_color' => '#fef08a',
+            'overlay_color_start' => '#1e1b4b',
+            'overlay_color_end' => '#0f172a',
+            'overlay_opacity_start' => 30,
+            'overlay_opacity_end' => 90,
+        ]);
+
+        $page = CmsPage::where('slug', 'curaduria-seda-encaje')->firstOrFail();
+        $this->assertEquals('#fef08a', $page->getTextColor());
+        $this->assertCount(3, $page->getResolvedImages());
+        $this->assertStringContainsString('rgba(30, 27, 75, 0.3)', $page->getOverlayGradientCss());
+        $this->assertStringContainsString('rgba(15, 23, 42, 0.9)', $page->getOverlayGradientCss());
+
+        // Verificar renderizado en la tienda con carrusel y contraste
+        $homeResp = $this->get('/?tab=explore');
+        $homeResp->assertOk();
+        $homeResp->assertSee('Curaduría Seda & Encaje');
+        $homeResp->assertSee('color: #fef08a', false);
+        $homeResp->assertSee('explore-carousel-wrap', false);
+        $homeResp->assertSee('explore-carousel-dots', false);
+    }
+
+    public function test_storefront_and_account_include_dark_light_system_mode_and_settings_tab(): void
+    {
+        $resp = $this->get('/');
+        $resp->assertOk();
+        // Script inline Anti-FOUC
+        $resp->assertSee('Anti-FOUC Theme Switcher Engine', false);
+        $resp->assertSee('localStorage.getItem(\'app_theme\')', false);
+        // Botón de tema en navbar
+        $resp->assertSee('toggle-app-theme-quick', false);
+        // Pestaña de Configuración en cuenta
+        $resp->assertSee('data-tab="settings"', false);
+        $resp->assertSee('accountTabSettings', false);
+        // Selector visual de tema
+        $resp->assertSee('data-action="set-app-theme"', false);
+        $resp->assertSee('data-theme-mode="system"', false);
+        $resp->assertSee('data-theme-mode="light"', false);
+        $resp->assertSee('data-theme-mode="dark"', false);
+        // Push center dentro de la cuenta
+        $resp->assertSee('accountPushCenter', false);
+    }
 }

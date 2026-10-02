@@ -277,6 +277,35 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   - En versión móvil: El grid se distribuye en 2 columnas equilibradas (`grid-template-columns: repeat(2, 1fr); gap: 12px;`), maximizando el aprovechamiento vertical del viewport táctil.
   - En versión desktop: El grid se adapta fluidamente mediante columnas automáticas (`grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;`).
 
+### Regla 6.28: Ordenamiento Drag & Drop en Páginas de Explorar y Tabla Limpia (Sin Columnas Obsoletas)
+* **Drag & Drop Mandatorio:** La sección **Páginas de Explorar** en Hub 2 opera 100% mediante reordenamiento **Drag & Drop** en tiempo real (`pagesSortableBody`).
+* **Tabla Limpia:** Queda terminantemente prohibido mostrar columnas redundantes u obsoletas de visibilidad individual como `Desktop`, `Móvil` o `Footer` con números independientes (`#1, #2`), ya que las tarjetas de Explorar se ordenan como una secuencia única unificada.
+* **Persistencia en Base de Datos:** La API persiste el orden secuencial de forma asíncrona mediante `POST /admin/tienda-cms/paginas/reorder` actualizando el campo `navbar_order`.
+
+### Regla 6.29: Overlay, Degradados 100% Personalizables y Contraste Garantizado de Texto
+* Las tarjetas de Explorar cuentan con controles completamente personalizables para el degradado del overlay:
+  1. **Color de Inicio (Superior):** Selector cromático hexadecimal y slider de opacidad (0% a 100%).
+  2. **Color de Fin (Inferior):** Selector cromático hexadecimal y slider de opacidad (0% a 100%).
+  3. **Presets Rápidos:** Opciones preconfiguradas con combinaciones estéticas optimizadas (Noir, Vino, Índigo, Esmeralda, Ámbar, Alto Contraste).
+  4. **Color del Texto de la Tarjeta (`text_color`):** Selector cromático para el texto, permitiendo garantizar contraste absoluto sobre cualquier fotografía o fondo para evitar que los títulos o descripciones se pierdan.
+  5. **Live Preview en Tiempo Real:** Ambos modales de Hub 2 (creación y edición) renderizan una tarjeta miniatura interactiva en proporción 4:5 que simula la legibilidad y contraste con la configuración activa.
+
+### Regla 6.30: Carrusel Automático de Imágenes y Conmutación Dinámica desde Catálogo
+* Cada tarjeta de Explorar admite la incorporación de una o más imágenes:
+  1. **Carrusel Automático:** Si se configuran dos o más imágenes personalizadas, estas circulan de manera automática en carrusel suave con animación crossfade cada 3.5 segundos, acompañadas de indicadores/dots sutiles.
+  2. **Conmutación Dinámica desde Catálogo (`image_source_mode = 'catalog'`):** El usuario puede conmutar la fuente de imágenes para que el carrusel extraiga automáticamente las fotografías de las prendas activas en el catálogo que coincidan con los filtros de universo y categoría vinculados a la tarjeta.
+
+### Regla 6.31: Soporte Integral de Dark Mode, Light Mode y Sistema en Todo el Proyecto
+* Todo el proyecto cuenta con soporte oficial y nativo para tres modalidades de tema visual:
+  1. **Modo Claro (`light`):** Paleta blanca minimalista de alto brillo.
+  2. **Modo Oscuro (`dark`):** Paleta oscura de lujo contemporáneo (`#09090b` / `#121215`), superficies satinadas y contraste nocturno.
+  3. **Modo Sistema (`system`):** Detección automática y sincronización reactiva en tiempo real con la preferencia del sistema operativo (`prefers-color-scheme`).
+* **Ubicación Canónica de la Configuración:**
+  - Dentro del **Drawer de Cuenta** (`#accountSheet`), reside la pestaña especializada **`Configuración`** (`#accountTabSettings`), donde se encuentra el selector de apariencia visual y el **Centro de Notificaciones Web Push PWA** (`#accountPushCenter`).
+  - En el **Navbar de Cuenta** (tanto en desktop como en móvil), se integra un botón de conmutación rápida de tema (`data-action="toggle-app-theme-quick"`).
+* **Paridad en Portal Administrativo:** El Portal Panel (RevOps) cuenta con sincronización inmediata del tema y botón conmutador en la barra de herramientas superior (`.top-actions`).
+* **Prevención de Parpadeo (Anti-FOUC):** Todos los layouts implementan un script síncrono inline en el `<head>` antes de cualquier renderizado visual para aplicar la clase `.dark` o `.light` instantáneamente según `localStorage.getItem('app_theme')`.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)

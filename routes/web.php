@@ -101,6 +101,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::delete('/admin/tienda-cms/secciones/{section}', [PortalStoreController::class, 'destroySection'])->name('portal.store.sections.destroy');
 	Route::post('/admin/tienda-cms/documentos/{code}', [PortalStoreController::class, 'updateDocument'])->name('portal.store.documents.update');
 	Route::post('/admin/tienda-cms/paginas', [PortalStoreController::class, 'storePage'])->name('portal.store.pages.store');
+	Route::post('/admin/tienda-cms/paginas/reorder', [PortalStoreController::class, 'reorderPages'])->name('portal.store.pages.reorder');
 	Route::put('/admin/tienda-cms/paginas/{page}', [PortalStoreController::class, 'updatePage'])->name('portal.store.pages.update');
 	Route::post('/admin/tienda-cms/paginas/{page}/toggle-status', [PortalStoreController::class, 'togglePageStatus'])->name('portal.store.pages.toggle-status');
 	Route::post('/admin/tienda-cms/paginas/{page}/archivar', [PortalStoreController::class, 'archivePage'])->name('portal.store.pages.archive');

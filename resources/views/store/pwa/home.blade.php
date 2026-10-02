@@ -569,6 +569,13 @@
       .explore-button-card:active {
         transform: scale(0.98);
       }
+      .explore-carousel-wrap {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
       .explore-button-card .explore-card-bg-img {
         position: absolute;
         inset: 0;
@@ -576,10 +583,37 @@
         height: 100%;
         object-fit: cover;
         z-index: 1;
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: opacity 0.8s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .explore-carousel-wrap .explore-card-bg-img {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .explore-carousel-wrap .explore-card-bg-img.active {
+        opacity: 1;
       }
       .explore-button-card:hover .explore-card-bg-img {
         transform: scale(1.05);
+      }
+      .explore-carousel-dots {
+        position: absolute;
+        bottom: 8px;
+        right: 12px;
+        display: flex;
+        gap: 4px;
+        z-index: 4;
+        pointer-events: none;
+      }
+      .explore-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+      }
+      .explore-dot.active {
+        background: #ffffff;
+        width: 14px;
       }
       .explore-button-card .explore-card-overlay {
         position: absolute;
@@ -610,6 +644,9 @@
         @php
           $hasFilters = !empty($ep->filter_universe) || !empty($ep->filter_category);
           $overlayCss = $ep->getOverlayGradientCss();
+          $resolvedImages = $ep->getResolvedImages();
+          $textColor = $ep->getTextColor();
+          $hasCarousel = count($resolvedImages) > 1;
         @endphp
 
         @if($hasFilters)
@@ -626,26 +663,37 @@
              title="{{ $ep->title }}">
         @endif
 
-          {{-- 1. IMAGEN DE FONDO --}}
-          @if(!empty($ep->image_url))
-            <img src="{{ $ep->image_url }}" alt="{{ $ep->title }}" class="explore-card-bg-img" loading="lazy">
+          {{-- 1. IMAGEN DE FONDO / CARRUSEL AUTOMÁTICO (REGLA 1.2) --}}
+          @if($hasCarousel)
+            <div class="explore-carousel-wrap" data-carousel-explore="{{ $ep->id }}">
+              @foreach($resolvedImages as $imgIndex => $imgUrl)
+                <img src="{{ $imgUrl }}" alt="{{ $ep->title }}" class="explore-card-bg-img {{ $imgIndex === 0 ? 'active' : '' }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
+              @endforeach
+              <div class="explore-carousel-dots">
+                @foreach($resolvedImages as $dotIndex => $dot)
+                  <span class="explore-dot {{ $dotIndex === 0 ? 'active' : '' }}"></span>
+                @endforeach
+              </div>
+            </div>
+          @elseif(!empty($resolvedImages[0]))
+            <img src="{{ $resolvedImages[0] }}" alt="{{ $ep->title }}" class="explore-card-bg-img" loading="lazy">
           @else
             <div class="explore-card-bg-img" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #18181b, #09090b); color: #71717a;">
               <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
             </div>
           @endif
 
-          {{-- 2. OVERLAY CON DEGRADADO --}}
+          {{-- 2. OVERLAY CON DEGRADADO (REGLA 1.1) --}}
           <div class="explore-card-overlay" style="background: {!! $overlayCss !!};"></div>
 
           {{-- 3. CABECERA / INSIGNIA SUPERIOR --}}
           <div class="explore-card-top">
             @if($hasFilters)
-              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
+              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
                 {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($ep->filter_category) ? '// ' . strtoupper($ep->filter_category) : '' }}
               </span>
             @else
-              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
+              <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
                 EDITORIAL
               </span>
             @endif
@@ -653,7 +701,7 @@
             @if($hasFilters)
               <a href="{{ url('/pagina/' . $ep->slug) }}" 
                  onclick="event.stopPropagation();" 
-                 style="pointer-events: auto; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; border-radius: 9999px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s;"
+                 style="pointer-events: auto; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; border-radius: 9999px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s;"
                  title="Leer artículo editorial"
                  aria-label="Leer artículo editorial">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
@@ -661,19 +709,19 @@
             @endif
           </div>
 
-          {{-- 4. CONTENIDO INFERIOR INTEGRADO AL BOTÓN --}}
+          {{-- 4. CONTENIDO INFERIOR INTEGRADO AL BOTÓN (CONTRASTE GARANTIZADO) --}}
           <div class="explore-card-content">
-            <h3 style="font-family: var(--font-heading, sans-serif); font-size: 1.05rem; font-weight: 800; color: #ffffff; margin: 0 0 4px; line-height: 1.25; text-shadow: 0 2px 6px rgba(0,0,0,0.6);">
+            <h3 style="font-family: var(--font-heading, sans-serif); font-size: 1.05rem; font-weight: 800; color: {{ $textColor }}; margin: 0 0 4px; line-height: 1.25; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">
               {{ $ep->title }}
             </h3>
             @if(!empty($ep->seo_description))
-              <p style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.85); margin: 0 0 10px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">
+              <p style="font-size: 0.72rem; color: {{ $textColor }}; opacity: 0.9; margin: 0 0 10px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 4px rgba(0,0,0,0.7);">
                 {{ \Illuminate\Support\Str::limit($ep->seo_description, 80) }}
               </p>
             @endif
 
             <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #ffffff; background: rgba(255,255,255,0.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.35);">
+              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: {{ $textColor }}; background: rgba(255,255,255,0.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.35);">
                 @if($hasFilters)
                   <span>Ver Catálogo</span>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
@@ -696,6 +744,33 @@
         </div>
       @endforelse
     </div>
+
+    {{-- Script del carrusel automático para tarjetas de explorar --}}
+    <script>
+      (function() {
+        function initExploreCarousels() {
+          const carousels = document.querySelectorAll('[data-carousel-explore]');
+          carousels.forEach(carousel => {
+            const imgs = carousel.querySelectorAll('.explore-card-bg-img');
+            const dots = carousel.querySelectorAll('.explore-dot');
+            if (imgs.length <= 1) return;
+            let current = 0;
+            setInterval(() => {
+              imgs[current].classList.remove('active');
+              if (dots[current]) dots[current].classList.remove('active');
+              current = (current + 1) % imgs.length;
+              imgs[current].classList.add('active');
+              if (dots[current]) dots[current].classList.add('active');
+            }, 3500);
+          });
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initExploreCarousels);
+        } else {
+          initExploreCarousels();
+        }
+      })();
+    </script>
   </div>
 
   <!-- VISTA 2: CATÁLOGO COMPLETO -->
