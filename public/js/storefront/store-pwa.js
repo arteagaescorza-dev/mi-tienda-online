@@ -355,20 +355,37 @@
           return false;
         }
       }
-      // Filtro de Categoría
-      if (storeState.activeCategory !== 'all') {
+      // Filtro de Categoría (Árbol y Checkboxes)
+      if (Array.isArray(storeState.activeCategories) && storeState.activeCategories.length > 0) {
+        if (!storeState.activeCategories.includes(prod.category)) {
+          return false;
+        }
+      } else if (storeState.activeCategory && storeState.activeCategory !== 'all') {
         if (prod.category !== storeState.activeCategory) {
           return false;
         }
       }
       // Filtro de Talla
-      if (storeState.activeSize && storeState.activeSize !== 'all') {
+      if (Array.isArray(storeState.activeSizes) && storeState.activeSizes.length > 0) {
+        if (!prod.sizes || !prod.sizes.some(s => storeState.activeSizes.includes(s))) {
+          return false;
+        }
+      } else if (storeState.activeSize && storeState.activeSize !== 'all') {
         if (!prod.sizes || !prod.sizes.includes(storeState.activeSize)) {
           return false;
         }
       }
       // Filtro de Telas & Fibras (Regla Storefront)
-      if (storeState.activeFabric && storeState.activeFabric !== 'all') {
+      if (Array.isArray(storeState.activeFabrics) && storeState.activeFabrics.length > 0) {
+        const pFab = (prod.fabric_type || '').toLowerCase();
+        const pDesc = (prod.description || '').toLowerCase();
+        const pName = (prod.name || '').toLowerCase();
+        const matchesFab = storeState.activeFabrics.some(f => {
+          const target = f.toLowerCase();
+          return pFab.includes(target) || pDesc.includes(target) || pName.includes(target);
+        });
+        if (!matchesFab) return false;
+      } else if (storeState.activeFabric && storeState.activeFabric !== 'all') {
         const fabTarget = storeState.activeFabric.toLowerCase();
         const pFab = (prod.fabric_type || '').toLowerCase();
         const pDesc = (prod.description || '').toLowerCase();
@@ -378,7 +395,16 @@
         }
       }
       // Filtro de Colores & Tornasoles (Regla Storefront)
-      if (storeState.activeColor && storeState.activeColor !== 'all') {
+      if (Array.isArray(storeState.activeColors) && storeState.activeColors.length > 0) {
+        const matchesCol = storeState.activeColors.some(col => {
+          const colTarget = col.toLowerCase();
+          return (prod.variants || []).some(v => (v.color || '').toLowerCase().includes(colTarget)) ||
+                 (Array.isArray(prod.colors) && prod.colors.some(c => (c.name || '').toLowerCase().includes(colTarget))) ||
+                 (prod.name || '').toLowerCase().includes(colTarget) ||
+                 (prod.description || '').toLowerCase().includes(colTarget);
+        });
+        if (!matchesCol) return false;
+      } else if (storeState.activeColor && storeState.activeColor !== 'all') {
         const colTarget = storeState.activeColor.toLowerCase();
         const hasVariantColor = (prod.variants || []).some(v => (v.color || '').toLowerCase().includes(colTarget));
         const pName = (prod.name || '').toLowerCase();
@@ -388,7 +414,10 @@
         }
       }
       // Filtro de Volúmenes de Perfumería (Regla Storefront)
-      if (storeState.activeVolume && storeState.activeVolume !== 'all') {
+      if (Array.isArray(storeState.activeVolumes) && storeState.activeVolumes.length > 0) {
+        const matchesVol = storeState.activeVolumes.some(v => (prod.name || '').toLowerCase().includes(v.toLowerCase()));
+        if (!matchesVol) return false;
+      } else if (storeState.activeVolume && storeState.activeVolume !== 'all') {
         const volTarget = storeState.activeVolume.toLowerCase();
         const pName = (prod.name || '').toLowerCase();
         const pDesc = (prod.description || '').toLowerCase();
@@ -397,11 +426,26 @@
         }
       }
       // Filtro de Tonos Cosméticos & Shading (Regla Storefront)
-      if (storeState.activeShade && storeState.activeShade !== 'all') {
+      if (Array.isArray(storeState.activeShades) && storeState.activeShades.length > 0) {
+        const matchesSh = storeState.activeShades.some(sh => (prod.name || '').toLowerCase().includes(sh.toLowerCase()));
+        if (!matchesSh) return false;
+      } else if (storeState.activeShade && storeState.activeShade !== 'all') {
         const shTarget = storeState.activeShade.toLowerCase();
         const pName = (prod.name || '').toLowerCase();
         const pDesc = (prod.description || '').toLowerCase();
         if (!pName.includes(shTarget) && !pDesc.includes(shTarget)) {
+          return false;
+        }
+      }
+      // Filtro de Proveedor & Marcas (Regla 2)
+      if (Array.isArray(storeState.activeSuppliers) && storeState.activeSuppliers.length > 0) {
+        const prodSup = (prod.supplier || prod.brand || '').toLowerCase();
+        const matchesSup = storeState.activeSuppliers.some(s => prodSup.includes(s.toLowerCase()));
+        if (!matchesSup) return false;
+      } else if (storeState.activeSupplier && storeState.activeSupplier !== 'all') {
+        const supTarget = storeState.activeSupplier.toLowerCase();
+        const pSup = (prod.supplier || prod.brand || '').toLowerCase();
+        if (!pSup.includes(supTarget)) {
           return false;
         }
       }
@@ -471,6 +515,14 @@
                 <span class="product-price">MXN $${prod.price.toFixed(2)}</span>
                 <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
               </div>
+              ${Array.isArray(prod.colors) && prod.colors.length > 0 ? `
+                <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 6px; align-items: center;">
+                  ${prod.colors.map(c => `
+                    <span class="product-card-color-dot" title="${c.name}" style="width: 12px; height: 12px; border-radius: 50%; background: ${c.hex}; border: 1px solid rgba(0,0,0,0.2); display: inline-block;"></span>
+                  `).join('')}
+                  <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">${prod.colors.length} ${prod.colors.length === 1 ? 'color' : 'colores'}</span>
+                </div>
+              ` : ''}
             </div>
 
             <div>
@@ -653,6 +705,8 @@
         categoryName: product.categoryName,
         price: product.price,
         size: size,
+        image: product.image || '/user-avatar.png',
+        color: storeState.selectedModalColor || (Array.isArray(product.colors) && product.colors[0]?.name) || 'Único',
         variantId: explicitVariantId || null,
         stockType: product.stockType || 'ready',
         stockLabel: product.stockLabel || (product.stockType === 'on_demand' ? 'Bajo Pedido' : 'Stock Fisico'),
@@ -1738,29 +1792,8 @@
     }) : null;
 
     if (cartBox) {
-      if (coupon) {
-        cartBox.innerHTML = `
-          <div class="coupon-applied-card">
-            <div class="coupon-applied-badge">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-              <strong>${coupon.code} (-${coupon.discountPct}%)</strong>
-            </div>
-            <div class="coupon-ally-tag">${coupon.ally || 'Convenio Activo'}</div>
-            <button type="button" class="btn-remove-coupon" data-action="remove-coupon" aria-label="Remover cupón">
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-        `;
-      } else {
-        cartBox.innerHTML = `
-          <div class="coupon-input-group">
-            <input type="text" id="cartCouponInput" class="coupon-input-field" placeholder="Código de cupón o aliado..." aria-label="Ingresa cupón de descuento">
-            <button type="button" class="btn-apply-coupon" data-action="apply-cart-coupon">
-              APLICAR
-            </button>
-          </div>
-        `;
-      }
+      // Regla 8: En carrito del storefront el formulario de cupón no reside aquí, solo en el paso 1 del checkout
+      cartBox.innerHTML = '';
     }
 
     if (chkBox) {
@@ -4293,6 +4326,13 @@
     const applyBtn = e.target.closest('[data-action="apply-filters"]');
     if (applyBtn) {
       e.preventDefault();
+      storeState.activeCategories = Array.from(document.querySelectorAll('input[name="filter_category"]:checked')).map(cb => cb.value);
+      storeState.activeSuppliers = Array.from(document.querySelectorAll('input[name="filter_supplier"]:checked')).map(cb => cb.value);
+      storeState.activeSizes = Array.from(document.querySelectorAll('input[name="filter_size"]:checked')).map(cb => cb.value);
+      storeState.activeFabrics = Array.from(document.querySelectorAll('input[name="filter_fabric"]:checked')).map(cb => cb.value);
+      storeState.activeColors = Array.from(document.querySelectorAll('input[name="filter_color"]:checked')).map(cb => cb.value);
+      storeState.activeVolumes = Array.from(document.querySelectorAll('input[name="filter_volume"]:checked')).map(cb => cb.value);
+      storeState.activeShades = Array.from(document.querySelectorAll('input[name="filter_shade"]:checked')).map(cb => cb.value);
       closeAllDrawers();
       renderProductsGrid('homeProductsGrid');
       renderProductsGrid('catalogProductsGrid');
@@ -4304,7 +4344,16 @@
     const clearBtn = e.target.closest('[data-action="clear-filters"]');
     if (clearBtn) {
       e.preventDefault();
+      document.querySelectorAll('.filter-facet-checkbox').forEach(cb => { cb.checked = false; });
+      storeState.activeCategories = [];
+      storeState.activeSuppliers = [];
+      storeState.activeSizes = [];
+      storeState.activeFabrics = [];
+      storeState.activeColors = [];
+      storeState.activeVolumes = [];
+      storeState.activeShades = [];
       storeState.activeCategory = 'all';
+      storeState.activeSupplier = 'all';
       storeState.activeSize = 'all';
       storeState.activeFabric = 'all';
       storeState.activeColor = 'all';

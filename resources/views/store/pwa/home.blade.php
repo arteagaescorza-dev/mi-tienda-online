@@ -315,6 +315,13 @@
                       <div class="product-pricing-row">
                         <span class="product-price" style="font-size: 0.85rem;">{{ $prod['price_formatted'] ?? ('MXN $' . number_format((float)($prod['price'] ?? 0), 2)) }}</span>
                       </div>
+                      @if(!empty($prod['colors']))
+                        <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 5px; align-items: center;">
+                          @foreach($prod['colors'] as $c)
+                            <span class="product-card-color-dot" title="{{ $c['name'] }}" style="width: 10px; height: 10px; border-radius: 50%; background: {{ $c['hex'] }}; border: 1px solid rgba(0,0,0,0.18); display: inline-block;"></span>
+                          @endforeach
+                        </div>
+                      @endif
                     </div>
                     <div style="margin-top: 8px;">
                       <a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}" class="btn-hero-secondary" style="display: block; padding: 6px 10px; font-size: 0.68rem; border-radius: var(--radius-sm); text-decoration: none; text-align: center;" title="Ver ficha técnica">
@@ -518,6 +525,14 @@
                     <span class="product-price">{{ $prod['price_formatted'] }}</span>
                     <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
                   </div>
+                  @if(!empty($prod['colors']))
+                    <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 6px; align-items: center;">
+                      @foreach($prod['colors'] as $c)
+                        <span class="product-card-color-dot" title="{{ $c['name'] }}" style="width: 11px; height: 11px; border-radius: 50%; background: {{ $c['hex'] }}; border: 1px solid rgba(0,0,0,0.18); display: inline-block;"></span>
+                      @endforeach
+                      <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">{{ count($prod['colors']) }} {{ count($prod['colors']) === 1 ? 'color' : 'colores' }}</span>
+                    </div>
+                  @endif
                 </div>
                 <div>
                   <div class="product-sizes-selector">
@@ -851,6 +866,14 @@
                 <span class="product-price">{{ $prod['price_formatted'] }}</span>
                 <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
               </div>
+              @if(!empty($prod['colors']))
+                <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 6px; align-items: center;">
+                  @foreach($prod['colors'] as $c)
+                    <span class="product-card-color-dot" title="{{ $c['name'] }}" style="width: 11px; height: 11px; border-radius: 50%; background: {{ $c['hex'] }}; border: 1px solid rgba(0,0,0,0.18); display: inline-block;"></span>
+                  @endforeach
+                  <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">{{ count($prod['colors']) }} {{ count($prod['colors']) === 1 ? 'color' : 'colores' }}</span>
+                </div>
+              @endif
             </div>
             <div>
               <div class="product-sizes-selector">

@@ -201,6 +201,8 @@ class StorefrontController extends Controller
             'products' => $pwaProducts,
             'initialProducts' => $pwaProducts,
             'categories' => \App\Models\Category::all(),
+            'categoriesTree' => $this->getCategoriesTree(),
+            'suppliers' => $this->getActiveSuppliers(),
         ]);
     }
 
@@ -319,7 +321,7 @@ class StorefrontController extends Controller
     public function product(string $slug)
     {
         $dbProduct = Product::query()
-            ->with(['variants.inventories', 'categories'])
+            ->with(['variants.inventories', 'categories', 'supplierProducts.supplier'])
             ->where('visible', true)
             ->where(function ($query) use ($slug) {
                 $query->where('slug', $slug)
@@ -432,6 +434,18 @@ class StorefrontController extends Controller
 
         $image = data_get($dbProduct->meta, 'image') ?: (data_get($dbProduct->meta, 'images.0') ?: '/user-avatar.png');
         $images = data_get($dbProduct->meta, 'images') ?: [$image];
+        if (!is_array($images) || empty($images)) {
+            $images = [$image];
+        }
+
+        $colorData = self::resolveProductColorData($dbProduct, $image, $images);
+        $supplierName = (string) (
+            $dbProduct->supplierProducts->first()?->supplier?->name
+            ?? data_get($dbProduct->meta, 'supplier')
+            ?? data_get($dbProduct->meta, 'supplier_name')
+            ?? $dbProduct->brand
+            ?? ''
+        );
 
         $isScrapedProduct = ($dbProduct->type === 'dropship' || $dbProduct->type === 'scraped' || data_get($dbProduct->meta, 'is_scraped') || $dbProduct->supplierProducts->isNotEmpty());
 
@@ -468,6 +482,9 @@ class StorefrontController extends Controller
             'is_scraped' => $isScrapedProduct,
             'image' => $image,
             'images' => $images,
+            'colors' => $colorData['colors'],
+            'images_by_color' => $colorData['images_by_color'],
+            'supplier' => $supplierName,
             'description' => $dbProduct->description ?: 'Prenda anatómica confeccionada con textiles transpirables de alta elasticidad y costuras planas flatlock para confort total.',
             'fabricComposition' => data_get($dbProduct->meta, 'fabric_composition', 'Modal Pima peruano / Spandex / Microfibra transpirable.'),
             'sizes' => $variantList->pluck('size')->unique()->values()->all() ?: ['CH', 'M', 'G', 'XG'],
@@ -491,6 +508,9 @@ class StorefrontController extends Controller
             'shippingRule' => $shippingRule,
             'announcements' => $announcements,
             'initialProducts' => $pwaProducts,
+            'categories' => \App\Models\Category::all(),
+            'categoriesTree' => $this->getCategoriesTree(),
+            'suppliers' => $this->getActiveSuppliers(),
             'autoOpenProductId' => null, // PDP dedicado a pantalla completa: cero drawers
         ]);
     }
@@ -1665,12 +1685,131 @@ class StorefrontController extends Controller
         ]);
     }
 
+    public static function detectColorHex(?string $colorName): string
+    {
+        if (empty($colorName)) {
+            return '#0f172a';
+        }
+        $name = mb_strtolower(trim($colorName), 'UTF-8');
+        return match (true) {
+            str_contains($name, 'galaxia') || str_contains($name, 'holo') => 'linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%)',
+            str_contains($name, 'aurora') || str_contains($name, 'boreal') => 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #6366f1 100%)',
+            str_contains($name, 'tornasol') => 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
+            str_contains($name, 'negro') || str_contains($name, 'black') => '#0f172a',
+            str_contains($name, 'blanco') || str_contains($name, 'white') => '#ffffff',
+            str_contains($name, 'azul') || str_contains($name, 'blue') || str_contains($name, 'marino') => '#1e3a8a',
+            str_contains($name, 'rojo') || str_contains($name, 'red') || str_contains($name, 'vino') => '#b91c1c',
+            str_contains($name, 'verde') || str_contains($name, 'green') || str_contains($name, 'olivo') => '#15803d',
+            str_contains($name, 'gris') || str_contains($name, 'gray') || str_contains($name, 'plata') => '#64748b',
+            str_contains($name, 'beige') || str_contains($name, 'nude') || str_contains($name, 'arena') => '#d4b996',
+            str_contains($name, 'rosa') || str_contains($name, 'pink') => '#f43f5e',
+            str_contains($name, 'morado') || str_contains($name, 'purple') => '#7e22ce',
+            str_contains($name, 'amarillo') || str_contains($name, 'yellow') => '#eab308',
+            default => '#475569',
+        };
+    }
+
+    public static function resolveProductColorData(Product $product, string $mainImage, array $allImages): array
+    {
+        $colors = [];
+        $imagesByColor = [];
+        $variants = $product->variants;
+
+        foreach ($variants as $v) {
+            $cName = data_get($v->attributes, 'color');
+            if ($cName && trim((string)$cName) !== '' && !in_array(strtolower(trim((string)$cName)), ['único', 'unico'])) {
+                $cName = trim((string)$cName);
+                if (!isset($colors[$cName])) {
+                    $cHex = data_get($v->attributes, 'color_hex') ?: self::detectColorHex($cName);
+                    $cType = str_contains(strtolower($cName), 'tornasol') || str_contains(strtolower($cName), 'holo') || str_contains(strtolower($cName), 'aurora') ? 'iridescent' : 'solid';
+                    $vImg = data_get($v->attributes, 'image') ?: $mainImage;
+                    $colors[$cName] = [
+                        'name' => $cName,
+                        'hex' => $cHex,
+                        'type' => $cType,
+                        'image' => $vImg,
+                    ];
+                    $imagesByColor[$cName] = [$vImg];
+                }
+            }
+        }
+
+        if ($product->meta && isset($product->meta['colors']) && is_array($product->meta['colors'])) {
+            foreach ($product->meta['colors'] as $c) {
+                $cName = is_array($c) ? ($c['name'] ?? null) : (string)$c;
+                if ($cName && !isset($colors[$cName])) {
+                    $colors[$cName] = [
+                        'name' => $cName,
+                        'hex' => is_array($c) && !empty($c['hex']) ? $c['hex'] : self::detectColorHex($cName),
+                        'type' => is_array($c) && !empty($c['type']) ? $c['type'] : (str_contains(strtolower($cName), 'tornasol') ? 'iridescent' : 'solid'),
+                        'image' => is_array($c) && !empty($c['image']) ? $c['image'] : $mainImage,
+                    ];
+                    $imagesByColor[$cName] = [$colors[$cName]['image']];
+                }
+            }
+        }
+
+        if ($product->meta && isset($product->meta['images_by_color']) && is_array($product->meta['images_by_color'])) {
+            foreach ($product->meta['images_by_color'] as $cName => $cImgs) {
+                $imagesByColor[$cName] = (array)$cImgs;
+                if (!isset($colors[$cName])) {
+                    $colors[$cName] = [
+                        'name' => $cName,
+                        'hex' => self::detectColorHex($cName),
+                        'type' => str_contains(strtolower($cName), 'tornasol') ? 'iridescent' : 'solid',
+                        'image' => ((array)$cImgs)[0] ?? $mainImage,
+                    ];
+                }
+            }
+        }
+
+        if (empty($colors)) {
+            $colors['Negro'] = [
+                'name' => 'Negro',
+                'hex' => '#0f172a',
+                'type' => 'solid',
+                'image' => $mainImage,
+            ];
+            $imagesByColor['Negro'] = array_slice($allImages, 0, max(1, count($allImages)));
+        }
+
+        return [
+            'colors' => array_values($colors),
+            'images_by_color' => $imagesByColor,
+        ];
+    }
+
+    public function getCategoriesTree()
+    {
+        return \App\Models\Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
+    }
+
+    public function getActiveSuppliers(): array
+    {
+        $fromDb = \App\Models\Supplier::query()->where('status', '!=', 'inactive')->pluck('name')->toArray();
+        $fromProducts = \App\Models\Product::query()
+            ->whereNotNull('meta')
+            ->get()
+            ->map(fn($p) => data_get($p->meta, 'supplier') ?: data_get($p->meta, 'supplier_name'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+        $merged = array_values(array_unique(array_filter(array_merge($fromDb, $fromProducts))));
+        sort($merged);
+        if (empty($merged)) {
+            $merged = ['Torzo B2B', 'ModaIntima Textil MX', 'Silk & Cotton Iberia SL', 'Lingerie Drop Global', 'Seamless Tech Apparel'];
+        }
+        return $merged;
+    }
+
     public function getPwaStoreProducts(): array
     {
         return Product::query()
             ->with([
                 'variants.inventories',
                 'categories',
+                'supplierProducts.supplier',
             ])
             ->where('visible', true)
             ->orderBy('id')
@@ -1718,6 +1857,18 @@ class StorefrontController extends Controller
 
                 $image = data_get($product->meta, 'image') ?: (data_get($product->meta, 'images.0') ?: '/user-avatar.png');
                 $image = str_replace('/./', '/', $image);
+                $allImages = data_get($product->meta, 'images') ?: [$image];
+                if (!is_array($allImages) || empty($allImages)) {
+                    $allImages = [$image];
+                }
+                $colorData = self::resolveProductColorData($product, $image, $allImages);
+                $supplierName = (string) (
+                    $product->supplierProducts->first()?->supplier?->name
+                    ?? data_get($product->meta, 'supplier')
+                    ?? data_get($product->meta, 'supplier_name')
+                    ?? $product->brand
+                    ?? ''
+                );
 
                 $isScrapedProduct = ($product->type === 'dropship' || $product->type === 'scraped' || data_get($product->meta, 'is_scraped') || $product->supplierProducts->isNotEmpty());
 
@@ -1736,6 +1887,10 @@ class StorefrontController extends Controller
                     'is_scraped' => $isScrapedProduct,
                     'availableStock' => $availableStock,
                     'image' => $image,
+                    'images' => $allImages,
+                    'colors' => $colorData['colors'],
+                    'images_by_color' => $colorData['images_by_color'],
+                    'supplier' => $supplierName,
                     'sizes' => $sizes,
                     'description' => $product->description ?: 'Prenda anatómica confeccionada con textiles transpirables.',
                     'brand' => (string) ($product->brand ?? ''),

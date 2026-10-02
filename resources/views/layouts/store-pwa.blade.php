@@ -402,6 +402,93 @@
       background: rgba(0, 0, 0, 0.08);
     }
 
+    /* REGLAS 2 & 3: Acordeones, Árbol Taxonómico y Checkboxes Facetados */
+    .filter-accordion-block {
+      border-bottom: 1px solid var(--border-subtle, #e4e4e7);
+      padding: 10px 0;
+    }
+    .filter-accordion-block:last-child {
+      border-bottom: none;
+    }
+    .filter-accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 6px 0;
+      cursor: pointer;
+      font-family: var(--font-heading);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--text-primary, #09090b);
+      text-transform: uppercase;
+    }
+    .filter-accordion-header .accordion-chevron {
+      transition: transform 0.25s ease;
+      stroke: var(--text-muted, #71717a);
+    }
+    .filter-accordion-block.is-collapsed .filter-accordion-content {
+      display: none;
+    }
+    .filter-accordion-block.is-collapsed .accordion-chevron {
+      transform: rotate(-90deg);
+    }
+    .filter-accordion-content {
+      padding-top: 8px;
+      padding-bottom: 4px;
+    }
+    .filter-tree-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .filter-tree-node {
+      display: flex;
+      flex-direction: column;
+    }
+    .filter-tree-children {
+      padding-left: 18px;
+      margin-top: 3px;
+      margin-bottom: 5px;
+      border-left: 2px solid var(--border-subtle, #e4e4e7);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .filter-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-primary, #18181b);
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+    .filter-checkbox-label:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .filter-facet-checkbox {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--brand-primary, #09090b);
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+    .filter-checkbox-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
     @if(!empty($currentStorefront['customCss']))
       {!! $currentStorefront['customCss'] !!}
     @endif
@@ -696,128 +783,187 @@
         </div>
       </div>
 
-      <!-- 1. Categorías de Prenda -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Categorías de Prenda</div>
-        <div class="filter-category-pills">
-          @if(!empty($categories) && $categories->isNotEmpty())
-            @foreach($categories as $cat)
-              <button type="button" class="category-filter-pill" data-action="filter-category" data-category="{{ $cat->slug }}">{{ $cat->name }}</button>
+      <!-- 1. Categorías & Familias en Formato Árbol Jerárquico (Reglas 1 & 3) -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar categorías">
+          <span>Categorías &amp; Familias</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-tree-container">
+            @if(!empty($categoriesTree) && $categoriesTree->isNotEmpty())
+              @foreach($categoriesTree as $pCat)
+                <div class="filter-tree-node filter-tree-parent">
+                  <label class="filter-checkbox-label">
+                    <input type="checkbox" name="filter_category" value="{{ $pCat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $pCat->slug }}">
+                    <strong style="font-size: 0.8rem;">{{ $pCat->name }}</strong>
+                  </label>
+                  @if($pCat->children && $pCat->children->isNotEmpty())
+                    <div class="filter-tree-children">
+                      @foreach($pCat->children as $cCat)
+                        <div class="filter-tree-node filter-tree-child">
+                          <label class="filter-checkbox-label">
+                            <input type="checkbox" name="filter_category" value="{{ $cCat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cCat->slug }}">
+                            <span>{{ $cCat->name }}</span>
+                          </label>
+                        </div>
+                      @endforeach
+                    </div>
+                  @endif
+                </div>
+              @endforeach
+            @elseif(!empty($categories) && $categories->isNotEmpty())
+              @foreach($categories as $cat)
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" name="filter_category" value="{{ $cat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cat->slug }}">
+                  <span>{{ $cat->name }}</span>
+                </label>
+              @endforeach
+            @else
+              @foreach(['jocks' => 'Jockstraps', 'boxers' => 'Boxers', 'tangas' => 'Tangas', 'bikinis' => 'Bikinis', 'tanktops' => 'Tank Tops', 'swimwear' => 'Trajes de Baño'] as $cSlug => $cName)
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" name="filter_category" value="{{ $cSlug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cSlug }}">
+                  <span>{{ $cName }}</span>
+                </label>
+              @endforeach
+            @endif
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Proveedores & Marcas (Regla 2: los nombres de los proveedores forman parte de los filtros) -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar proveedores">
+          <span>Proveedores &amp; Marcas</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach(($suppliers ?? ['Torzo B2B', 'ModaIntima Textil MX', 'Silk & Cotton Iberia SL', 'Lingerie Drop Global', 'Seamless Tech Apparel']) as $sup)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_supplier" value="{{ $sup }}" class="filter-facet-checkbox filter-supplier-checkbox" data-action="filter-facet" data-facet-type="supplier" data-val="{{ $sup }}">
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $sup }}</span>
+              </label>
             @endforeach
-          @else
-            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="jocks">Jockstraps</button>
-            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="boxers">Boxers</button>
-            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tangas">Tangas</button>
-            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="bikinis">Bikinis</button>
-            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tanktops">Tank Tops</button>
-            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="swimwear">Trajes de Baño</button>
-          @endif
+          </div>
         </div>
       </div>
 
-      <!-- 2. Curva de Tallas Anatómicas Interactiva -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Curva de Tallas Anatómicas</div>
-        <div class="filter-category-pills" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="CH" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
-            <strong style="font-size: 0.8rem;">CH</strong>
-            <span style="font-size: 0.65rem; opacity: 0.7;">28-30</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="M" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
-            <strong style="font-size: 0.8rem;">M</strong>
-            <span style="font-size: 0.65rem; opacity: 0.7;">31-32</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="G" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
-            <strong style="font-size: 0.8rem;">G</strong>
-            <span style="font-size: 0.65rem; opacity: 0.7;">33-34</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="XG" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
-            <strong style="font-size: 0.8rem;">XG</strong>
-            <span style="font-size: 0.65rem; opacity: 0.7;">35-36</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="2XL" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
-            <strong style="font-size: 0.8rem;">2XL</strong>
-            <span style="font-size: 0.65rem; opacity: 0.7;">38-40</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="3XL" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
-            <strong style="font-size: 0.8rem;">3XL</strong>
-            <span style="font-size: 0.65rem; opacity: 0.7;">42-44</span>
-          </button>
+      <!-- 3. Curva de Tallas Anatómicas -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar tallas">
+          <span>Curva de Tallas Anatómicas</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+            @foreach([
+              'CH' => '28-30',
+              'M' => '31-32',
+              'G' => '33-34',
+              'XG' => '35-36',
+              '2XL' => '38-40',
+              '3XL' => '42-44'
+            ] as $talla => $medida)
+              <label class="filter-checkbox-label" style="border: 1px solid var(--border-subtle, #e4e4e7); padding: 5px 8px; border-radius: 6px;">
+                <input type="checkbox" name="filter_size" value="{{ $talla }}" class="filter-facet-checkbox filter-size-checkbox" data-action="filter-facet" data-facet-type="size" data-val="{{ $talla }}">
+                <span style="display: flex; justify-content: space-between; width: 100%;">
+                  <strong>{{ $talla }}</strong>
+                  <span style="font-size: 0.7rem; color: var(--text-muted);">{{ $medida }}</span>
+                </span>
+              </label>
+            @endforeach
+          </div>
         </div>
       </div>
 
-      <!-- 3. Telas & Fibras Textiles -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Telas &amp; Fibras Textiles</div>
-        <div class="filter-category-pills">
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="algodon">Algodón Pima</button>
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="modal">Modal Seamless</button>
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="spandex">Elastano / Spandex</button>
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="malla">Malla / Mesh</button>
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="microfibra">Microfibra Velvet</button>
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="bambu">Bambú Eco Air</button>
-          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="seda">Seda / Satín Premium</button>
+      <!-- 4. Telas & Fibras Textiles -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar telas">
+          <span>Telas &amp; Fibras Textiles</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach([
+              'algodon' => 'Algodón Pima',
+              'modal' => 'Modal Seamless',
+              'spandex' => 'Elastano / Spandex',
+              'malla' => 'Malla / Mesh',
+              'microfibra' => 'Microfibra Velvet',
+              'bambu' => 'Bambú Eco Air',
+              'seda' => 'Seda / Satín Premium'
+            ] as $fKey => $fLabel)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_fabric" value="{{ $fKey }}" class="filter-facet-checkbox filter-fabric-checkbox" data-action="filter-facet" data-facet-type="fabric" data-val="{{ $fKey }}">
+                <span>{{ $fLabel }}</span>
+              </label>
+            @endforeach
+          </div>
         </div>
       </div>
 
-      <!-- 4. Colores & Tornasoles Iridiscentes -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Colores &amp; Tornasoles</div>
-        <div class="filter-category-pills" style="gap: 6px;">
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="negro" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #0f172a; border: 1px solid rgba(255,255,255,0.4); display: inline-block;"></span>
-            <span>Negro</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="blanco" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #f8fafc; border: 1px solid #cbd5e1; display: inline-block;"></span>
-            <span>Blanco</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="gris" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #475569; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
-            <span>Gris</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="azul" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #1e3a8a; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
-            <span>Azul</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="rojo" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #881337; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
-            <span>Rojo</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="verde" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #365314; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
-            <span>Verde</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="galaxia" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899, #f59e0b); border: 1px solid rgba(255,255,255,0.3); display: inline-block;"></span>
-            <span>Galaxia Holo</span>
-          </button>
-          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="aurora" style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #06b6d4, #3b82f6); border: 1px solid rgba(255,255,255,0.3); display: inline-block;"></span>
-            <span>Aurora Boreal</span>
-          </button>
+      <!-- 5. Colores & Tornasoles Iridiscentes -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar colores">
+          <span>Colores &amp; Tornasoles</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach([
+              ['key' => 'negro', 'name' => 'Negro', 'hex' => '#0f172a'],
+              ['key' => 'blanco', 'name' => 'Blanco', 'hex' => '#f8fafc', 'border' => true],
+              ['key' => 'gris', 'name' => 'Gris', 'hex' => '#475569'],
+              ['key' => 'azul', 'name' => 'Azul', 'hex' => '#1e3a8a'],
+              ['key' => 'rojo', 'name' => 'Rojo', 'hex' => '#881337'],
+              ['key' => 'verde', 'name' => 'Verde', 'hex' => '#365314'],
+              ['key' => 'galaxia', 'name' => 'Galaxia Holo', 'grad' => 'linear-gradient(135deg, #6366f1, #ec4899, #f59e0b)'],
+              ['key' => 'aurora', 'name' => 'Aurora Boreal', 'grad' => 'linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)'],
+            ] as $cItem)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_color" value="{{ $cItem['key'] }}" class="filter-facet-checkbox filter-color-checkbox" data-action="filter-facet" data-facet-type="color" data-val="{{ $cItem['key'] }}">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: {{ $cItem['grad'] ?? $cItem['hex'] }}; border: 1px solid {{ !empty($cItem['border']) ? '#cbd5e1' : 'rgba(0,0,0,0.15)' }}; display: inline-block;"></span>
+                <span>{{ $cItem['name'] }}</span>
+              </label>
+            @endforeach
+          </div>
         </div>
       </div>
 
-      <!-- 5. Volúmenes de Perfumería -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Volúmenes de Perfumería</div>
-        <div class="filter-category-pills">
-          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="30ml">30ml Travel</button>
-          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="50ml">50ml EdP</button>
-          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="100ml">100ml Standard</button>
-          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="200ml">200ml Refill</button>
+      <!-- 6. Volúmenes de Perfumería -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar volúmenes">
+          <span>Volúmenes de Perfumería</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach(['30ml' => '30ml Travel', '50ml' => '50ml EdP', '100ml' => '100ml Standard', '200ml' => '200ml Refill'] as $vKey => $vLabel)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_volume" value="{{ $vKey }}" class="filter-facet-checkbox filter-volume-checkbox" data-action="filter-facet" data-facet-type="volume" data-val="{{ $vKey }}">
+                <span>{{ $vLabel }}</span>
+              </label>
+            @endforeach
+          </div>
         </div>
       </div>
 
-      <!-- 6. Tonos Cosméticos & Shading -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Tonos Cosméticos</div>
-        <div class="filter-category-pills">
-          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="claro">Tono 01 Claro</button>
-          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="medio">Tono 02 Medio</button>
-          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="bronce">Tono 03 Bronce</button>
-          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="profundo">Tono 04 Profundo</button>
+      <!-- 7. Tonos Cosméticos & Shading -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar tonos">
+          <span>Tonos Cosméticos</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach(['claro' => 'Tono 01 Claro', 'medio' => 'Tono 02 Medio', 'bronce' => 'Tono 03 Bronce', 'profundo' => 'Tono 04 Profundo'] as $tKey => $tLabel)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_shade" value="{{ $tKey }}" class="filter-facet-checkbox filter-shade-checkbox" data-action="filter-facet" data-facet-type="shade" data-val="{{ $tKey }}">
+                <span>{{ $tLabel }}</span>
+              </label>
+            @endforeach
+          </div>
         </div>
       </div>
     </div>
@@ -843,10 +989,7 @@
     </div>
 
     <div class="sheet-footer-actions" id="cartFooterActions" style="flex-direction: column; gap: 8px;">
-      <!-- Caja de Cupón de Descuento (Hub 7 TASK-STR-04) -->
-      <div class="cart-coupon-box" id="cartCouponBox">
-        <!-- Inyectado dinámicamente desde store-pwa.js -->
-      </div>
+      <!-- Regla 8: El formulario de cupón reside únicamente en el Paso 1 de Checkout -->
 
       <div style="display: flex; justify-content: space-between; width: 100%; font-family: var(--font-heading); font-size: 0.95rem; font-weight: 800;">
         <span>Subtotal</span>

@@ -701,6 +701,19 @@
 @section('content')
 <div class="pdp-page-container">
   
+  <!-- Regla 4: Botón Volver Atrás y Botón que Conmuta a Filtros -->
+  <div class="pdp-top-actions-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px;">
+    <button type="button" class="pdp-action-nav-btn" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href='{{ route('store.home', ['universo' => $activeUniverse]) }}'; }" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #ffffff; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #18181b; cursor: pointer; text-decoration: none;" aria-label="Volver atrás">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <span>Volver Atrás</span>
+    </button>
+
+    <button type="button" class="pdp-action-nav-btn" data-action="open-filters" onclick="window.openDrawer ? window.openDrawer('filterDrawer') : (document.getElementById('filterDrawer')?.classList.add('show'))" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #ffffff; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #18181b; cursor: pointer;" aria-label="Abrir filtros">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+      <span>Filtros</span>
+    </button>
+  </div>
+
   <!-- Breadcrumbs de Navegación -->
   <nav class="pdp-breadcrumb-nav" aria-label="Ruta de navegación">
     <a href="{{ route('store.home', ['universo' => $activeUniverse]) }}">INICIO</a>
@@ -765,6 +778,31 @@
         <span class="pdp-price-amount" id="pdpDisplayPrice">{{ $product['price_formatted'] }}</span>
         <span class="pdp-tax-badge">IVA 16% INCLUIDO</span>
       </div>
+
+      <!-- Reglas 5 & 6: Exhibidor de Color & Variabilidad de Color con Conmutación -->
+      @if(!empty($product['colors']))
+        <div style="margin-bottom: 6px;">
+          <div class="pdp-section-heading">
+            <span>Color: <strong id="pdpSelectedColorName">{{ $product['colors'][0]['name'] ?? 'Único' }}</strong></span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">{{ count($product['colors']) }} {{ count($product['colors']) === 1 ? 'color indexado' : 'colores indexados' }}</span>
+          </div>
+          <div class="pdp-color-swatches-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            @foreach($product['colors'] as $cIndex => $cData)
+              <button type="button"
+                      class="pdp-color-swatch-btn {{ $loop->first ? 'selected' : '' }}"
+                      data-color-name="{{ $cData['name'] }}"
+                      data-color-hex="{{ $cData['hex'] }}"
+                      data-color-image="{{ asset($cData['image'] ?? $product['image']) }}"
+                      onclick="selectPdpColor(this)"
+                      style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; border: 1.5px solid {{ $loop->first ? '#09090b' : '#d4d4d8' }}; background: {{ $loop->first ? '#fafafa' : '#ffffff' }}; cursor: pointer; transition: all 0.15s ease;"
+                      title="{{ $cData['name'] }}">
+                <span style="width: 14px; height: 14px; border-radius: 50%; background: {{ $cData['hex'] }}; border: 1px solid rgba(0,0,0,0.2); display: inline-block;"></span>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #18181b;">{{ $cData['name'] }}</span>
+              </button>
+            @endforeach
+          </div>
+        </div>
+      @endif
 
       <!-- Selector de Tallas con Conexión a Stock Real de Hub 4 -->
       <div>
@@ -1007,8 +1045,39 @@
 @push('scripts')
 <script>
   let currentSelectedSize = @json($product['sizes'][0] ?? 'M');
+  let currentSelectedColor = @json($product['colors'][0]['name'] ?? 'Único');
+  const pdpImagesByColor = @json($product['images_by_color'] ?? []);
   const productId = @json($product['id']);
   const productName = @json($product['name']);
+
+  function selectPdpColor(btn) {
+    document.querySelectorAll('.pdp-color-swatch-btn').forEach(el => {
+      el.classList.remove('selected');
+      el.style.borderColor = '#d4d4d8';
+      el.style.background = '#ffffff';
+    });
+    btn.classList.add('selected');
+    btn.style.borderColor = '#09090b';
+    btn.style.background = '#fafafa';
+
+    currentSelectedColor = btn.dataset.colorName;
+    const nameEl = document.getElementById('pdpSelectedColorName');
+    if (nameEl) nameEl.textContent = currentSelectedColor;
+
+    // Regla 6: Las imágenes del producto conmutan al color indexado acordado
+    const newImgSrc = btn.dataset.colorImage;
+    const mainImg = document.getElementById('pdpMainImg');
+    if (mainImg && newImgSrc) {
+      mainImg.src = newImgSrc;
+    }
+
+    if (pdpImagesByColor && pdpImagesByColor[currentSelectedColor] && pdpImagesByColor[currentSelectedColor].length > 0) {
+      const colorImgs = pdpImagesByColor[currentSelectedColor];
+      if (mainImg && colorImgs[0]) {
+        mainImg.src = colorImgs[0];
+      }
+    }
+  }
 
   function selectPdpSize(btn) {
     document.querySelectorAll('.pdp-size-pill').forEach(el => el.classList.remove('selected'));
@@ -1061,6 +1130,9 @@
     
     // Si la función global addToCart de store-pwa.js está disponible
     if (typeof window.addToCart === 'function') {
+      if (window.storeState) {
+        window.storeState.selectedModalColor = currentSelectedColor;
+      }
       for (let i = 0; i < qty; i++) {
         window.addToCart(productId, currentSelectedSize);
       }
@@ -1069,7 +1141,7 @@
       }
     } else {
       // Fallback nativo
-      alert('Prenda agregada a tu carrito: ' + productName + ' (Talla: ' + currentSelectedSize + ' x' + qty + ')');
+      alert('Prenda agregada a tu carrito: ' + productName + ' (Color: ' + currentSelectedColor + ' | Talla: ' + currentSelectedSize + ' x' + qty + ')');
     }
   }
 
