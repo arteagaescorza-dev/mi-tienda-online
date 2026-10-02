@@ -10357,59 +10357,136 @@
                             </div>
                         </div>
 
-                        <!-- PESTAÑA 3: ÁRBOL DE MARCAS DESPRENDIDAS DEL PROVEEDOR (REGLA 6.45) -->
+                        <!-- PESTAÑA 3: ÁRBOL DE MARCAS DESPRENDIDAS DEL PROVEEDOR (REGLAS 6.45 & 6.46) -->
                         <div x-show="providerModalTab === 'brands'" class="space-y-4">
-                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                            <div class="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                 <div>
-                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Árbol de Marcas Desprendidas</h4>
-                                    <p class="text-[11px] text-slate-400">Marcas comerciales que nacen de este proveedor y se propagan al catálogo, vitrinas y filtros del storefront</p>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800">Gobernanza de Marcas Comerciales Desprendidas</h4>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800" x-text="getDetailedBrandsForCurrentProvider().length + ' marcas'"></span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Crea, edita, archiva o desvincula marcas asociadas a este proveedor. Se sincronizan en Hub 4, Hub 2 y Storefront PWA.</p>
                                 </div>
-                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button 
+                                        type="button" 
+                                        @click="openCreateBrandModal(selectedProvider ? (selectedProvider.dbId || String(selectedProvider.id).replace('prov_', '')) : (providerForm.dbId || providerForm.id))" 
+                                        class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                        title="Dar de alta una nueva marca comercial con ficha completa"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ Nueva Marca</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- Input para agregar nueva marca al árbol -->
-                            <div x-show="isCreatingProvider || isEditingProvider" class="p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                            <!-- Input para desprendimiento rápido en caliente -->
+                            <div class="p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-2">
                                 <label class="block text-xs font-bold text-indigo-950">Desprender / Asociar Nueva Marca Comercial</label>
                                 <div class="flex items-center gap-2">
                                     <input 
                                         type="text" 
                                         x-model="newBrandTag" 
-                                        @keydown.enter.prevent="addBrandToForm()" 
-                                        placeholder="Nombre de la marca (ej. Torzo Denim, ModaIntima Basic)..." 
-                                        class="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
+                                        @keydown.enter.prevent="addAndPersistBrandToProvider()" 
+                                        placeholder="Nombre de la marca comercial (ej. Aura Lingerie, Torzo Denim)..." 
+                                        class="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 placeholder-slate-400"
                                     >
                                     <button 
                                         type="button" 
-                                        @click="addBrandToForm()" 
-                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition cursor-pointer shrink-0"
+                                        @click="addAndPersistBrandToProvider()" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition cursor-pointer shrink-0 flex items-center gap-1 shadow-2xs"
                                     >
-                                        + Agregar Marca
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        <span>Crear &amp; Vincular</span>
                                     </button>
                                 </div>
-                                <span class="text-[10px] text-slate-500 block">Presiona Enter o haz click en Agregar para sumar la marca a la estructura en árbol.</span>
+                                <span class="text-[10px] text-slate-500 block">Escribe el nombre y presiona Enter o el botón para crear la marca de inmediato y persistirla en la base de datos.</span>
                             </div>
 
-                            <!-- Visualización de Marcas Desprendidas (Chips / Árbol) -->
+                            <!-- Visualización de Marcas Desprendidas con Acciones CRUD Completas -->
                             <div class="space-y-2">
-                                <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Marcas registradas bajo este proveedor (<span x-text="(providerForm.brands || []).length"></span>):</span>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    <template x-for="(b, bIdx) in (providerForm.brands || [])" :key="bIdx">
-                                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold shadow-3xs">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                                            <span x-text="b"></span>
-                                            <button 
-                                                type="button" 
-                                                x-show="isCreatingProvider || isEditingProvider"
-                                                @click="removeBrandFromForm(bIdx)" 
-                                                class="text-indigo-400 hover:text-rose-600 hover:bg-indigo-100 rounded p-0.5 transition cursor-pointer"
-                                                title="Remover marca"
-                                            >
-                                                ✕
-                                            </button>
+                                <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                    <span>Marcas registradas bajo este proveedor:</span>
+                                    <span class="text-slate-400 font-normal normal-case" x-text="getDetailedBrandsForCurrentProvider().length + ' marcas'"></span>
+                                </div>
+
+                                <div class="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                                    <template x-for="brand in getDetailedBrandsForCurrentProvider()" :key="brand.id || brand.name">
+                                        <div class="p-3 bg-white rounded-xl border border-slate-200/90 shadow-3xs flex items-center justify-between gap-3 hover:border-indigo-300 transition">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 font-black text-xs uppercase" x-text="(brand.name || '').substring(0, 2)">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold text-xs text-slate-900 truncate" x-text="brand.name"></span>
+                                                        <span 
+                                                            class="px-2 py-0.2 rounded-full text-[10px] font-bold"
+                                                            :class="brand.is_archived ? 'bg-amber-100 text-amber-800' : (brand.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700')"
+                                                            x-text="brand.is_archived ? 'Archivada' : (brand.is_active ? 'Activa' : 'Inactiva')"
+                                                        ></span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                                                        <span class="font-mono text-indigo-600" x-text="'slug: ' + (brand.slug || '')"></span>
+                                                        <span>•</span>
+                                                        <span x-text="(brand.sku_count || 0) + ' SKUs vinculados'"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Botones de Acción: Editar, Activar/Pausar, Archivar, Eliminar -->
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <!-- Editar -->
+                                                <button 
+                                                    type="button" 
+                                                    @click="openEditBrandByName(brand.name, selectedProvider ? (selectedProvider.dbId || String(selectedProvider.id).replace('prov_', '')) : null)"
+                                                    class="px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-3xs"
+                                                    title="Editar nombre, slug, logo y detalles de la marca"
+                                                >
+                                                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    <span>Editar</span>
+                                                </button>
+
+                                                <!-- Conmutar Activo / Inactivo -->
+                                                <button 
+                                                    type="button" 
+                                                    x-show="!brand.is_archived"
+                                                    @click="toggleActiveBrandFromProvider(brand)"
+                                                    class="p-1 rounded-lg border transition cursor-pointer"
+                                                    :class="brand.is_active ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 border-slate-200' : 'text-emerald-600 hover:bg-emerald-50 border-emerald-200'"
+                                                    :title="brand.is_active ? 'Pausar / Desactivar marca' : 'Activar marca'"
+                                                >
+                                                    <svg x-show="brand.is_active" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <svg x-show="!brand.is_active" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </button>
+
+                                                <!-- Archivar / Restaurar -->
+                                                <button 
+                                                    type="button" 
+                                                    @click="toggleArchiveBrandFromProvider(brand)"
+                                                    class="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 transition cursor-pointer"
+                                                    :class="brand.is_archived ? 'text-emerald-600 hover:bg-emerald-50 border-emerald-200' : 'text-slate-400 hover:text-amber-600'"
+                                                    :title="brand.is_archived ? 'Restaurar marca archivada' : 'Archivar marca'"
+                                                >
+                                                    <svg x-show="!brand.is_archived" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                                    <svg x-show="brand.is_archived" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                </button>
+
+                                                <!-- Eliminar / Desvincular -->
+                                                <button 
+                                                    type="button" 
+                                                    @click="deleteOrDetachBrandFromProvider(brand)"
+                                                    class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer"
+                                                    title="Eliminar o desvincular marca permanentemente"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </template>
-                                    <div x-show="!providerForm.brands || providerForm.brands.length === 0" class="p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-xs text-slate-500 w-full text-center">
-                                        No se han agregado marcas adicionales. El proveedor comercializará con su propio nombre.
+
+                                    <div x-show="getDetailedBrandsForCurrentProvider().length === 0" class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-xs text-slate-500 text-center">
+                                        <p class="font-semibold text-slate-700">Sin marcas adicionales desprendidas</p>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Usa el campo superior para dar de alta una marca comercial y vincularla a este proveedor.</p>
                                     </div>
                                 </div>
                             </div>

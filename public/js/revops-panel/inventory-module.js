@@ -8436,6 +8436,173 @@ function hybridInventoryModule() {
             }
         },
 
+        getDetailedBrandsForCurrentProvider() {
+            const prov = this.selectedProvider || this.providerForm;
+            if (!prov) return [];
+            const supId = prov.dbId || String(prov.id || '').replace('prov_', '');
+            const supName = prov.tradeName || prov.name;
+
+            const registered = (this.brands || []).filter(b => 
+                (supId && b.supplier_id && String(b.supplier_id) === String(supId)) ||
+                (b.supplier_name && b.supplier_name === supName)
+            );
+
+            const registeredMap = new Map();
+            registered.forEach(b => registeredMap.set(b.name.toLowerCase().trim(), b));
+
+            const formBrands = Array.isArray(this.providerForm?.brands) 
+                ? this.providerForm.brands 
+                : (Array.isArray(prov.brands) ? prov.brands : []);
+
+            formBrands.forEach(name => {
+                const key = String(name).toLowerCase().trim();
+                if (key && !registeredMap.has(key)) {
+                    registeredMap.set(key, {
+                        id: null,
+                        supplier_id: supId || null,
+                        supplier_name: supName,
+                        name: String(name).trim(),
+                        slug: String(name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'),
+                        description: 'Marca desprendida del proveedor',
+                        is_active: true,
+                        is_archived: false,
+                        sku_count: (this.products || []).filter(p => p.brand === name).length,
+                        isVirtual: true,
+                    });
+                }
+            });
+
+            return Array.from(registeredMap.values());
+        },
+
+        async addAndPersistBrandToProvider() {
+            const tag = (this.newBrandTag || '').trim();
+            if (!tag) {
+                this.showToast('Ingresa el nombre de la marca comercial.', 'warning');
+                return;
+            }
+
+            const prov = this.selectedProvider || this.providerForm;
+            const supId = prov ? (prov.dbId || String(prov.id || '').replace('prov_', '')) : null;
+
+            if (!this.providerForm) this.providerForm = {};
+            if (!Array.isArray(this.providerForm.brands)) {
+                this.providerForm.brands = [];
+            }
+            if (!this.providerForm.brands.includes(tag)) {
+                this.providerForm.brands.push(tag);
+            }
+
+            if (supId) {
+                try {
+                    const res = await fetch('/api/v1/inventory/brands', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        body: JSON.stringify({
+                            name: tag,
+                            supplier_id: supId,
+                            is_active: true
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.status === 'success') {
+                        this.showToast(`Marca comercial '${tag}' creada y vinculada exitosamente.`, 'success');
+                        await this.loadBrands();
+                        if (this.selectedProvider && Array.isArray(this.selectedProvider.brands)) {
+                            if (!this.selectedProvider.brands.includes(tag)) {
+                                this.selectedProvider.brands.push(tag);
+                            }
+                        }
+                    } else {
+                        this.showToast(data.message || 'Error al persistir la marca comercial.', 'warning');
+                    }
+                } catch (e) {
+                    console.error('Error al persistir marca:', e);
+                    this.showToast(`Marca '${tag}' añadida a la lista temporal.`, 'info');
+                }
+            } else {
+                this.showToast(`Marca '${tag}' añadida. Se guardará al crear el proveedor.`, 'info');
+            }
+
+            this.newBrandTag = '';
+        },
+
+        async deleteOrDetachBrandFromProvider(brand) {
+            if (!brand) return;
+            const brandName = brand.name || brand;
+            if (!confirm(`¿Estás seguro de que deseas eliminar o desvincular la marca '${brandName}'?`)) {
+                return;
+            }
+
+            if (brand.id) {
+                try {
+                    const res = await fetch(`/api/v1/inventory/brands/${brand.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        }
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        this.showToast(`Marca '${brandName}' eliminada correctamente.`, 'success');
+                        this.brands = (this.brands || []).filter(b => b.id !== brand.id);
+                    }
+                } catch (e) {
+                    console.error('Error al eliminar marca:', e);
+                }
+            }
+
+            if (this.providerForm && Array.isArray(this.providerForm.brands)) {
+                this.providerForm.brands = this.providerForm.brands.filter(b => b !== brandName);
+            }
+            if (this.selectedProvider && Array.isArray(this.selectedProvider.brands)) {
+                this.selectedProvider.brands = this.selectedProvider.brands.filter(b => b !== brandName);
+            }
+
+            const prov = this.selectedProvider || this.providerForm;
+            const supId = prov ? (prov.dbId || String(prov.id || '').replace('prov_', '')) : null;
+            if (supId) {
+                try {
+                    await fetch(`/api/v1/inventory/suppliers/${supId}/brands`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        body: JSON.stringify({ brand: brandName })
+                    });
+                } catch (e) {
+                    // Ignore
+                }
+            }
+        },
+
+        async toggleArchiveBrandFromProvider(brand) {
+            if (!brand || !brand.id) {
+                this.showToast('Guarda primero la marca para poder archivarla.', 'warning');
+                return;
+            }
+            if (brand.is_archived) {
+                await this.restoreBrand(brand);
+            } else {
+                await this.archiveBrand(brand);
+            }
+        },
+
+        async toggleActiveBrandFromProvider(brand) {
+            if (!brand || !brand.id) {
+                brand.is_active = !brand.is_active;
+                return;
+            }
+            await this.toggleActiveBrand(brand);
+        },
+
         openScrapingCuration(pendingItem) {
             this.curatingItem = JSON.parse(JSON.stringify(pendingItem));
             if (!this.curatingItem.images) {

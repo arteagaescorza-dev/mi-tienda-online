@@ -165,6 +165,14 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $response->assertSee('+ Desprender Nueva Marca', false);
         $response->assertSee('openEditBrandByName', false);
         $response->assertSee('removeBrandFromSupplier', false);
+
+        // Gobernanza de marcas dentro del modal de proveedor (Pestaña 3)
+        $response->assertSee('Gobernanza de Marcas Comerciales Desprendidas', false);
+        $response->assertSee('Crear &amp; Vincular', false);
+        $response->assertSee('getDetailedBrandsForCurrentProvider()', false);
+        $response->assertSee('toggleActiveBrandFromProvider', false);
+        $response->assertSee('toggleArchiveBrandFromProvider', false);
+        $response->assertSee('deleteOrDetachBrandFromProvider', false);
     }
 
     /**
