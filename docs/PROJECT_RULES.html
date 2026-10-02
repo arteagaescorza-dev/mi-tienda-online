@@ -1,258 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Reglas Oficiales del Proyecto - Mi Tienda Online</title>
+<meta charset="utf-8">
+<title>Código Oficial de Reglas del Proyecto — Mi Tienda Online</title>
 <style>
   @page {
-    size: A4 portrait;
-    margin: 12mm 10mm 12mm 10mm;
+    size: A4;
+    margin: 14mm 12mm 14mm 12mm;
+    @bottom-right {
+      content: "Página " counter(page) " de " counter(pages);
+      font-size: 7pt;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #94a3b8;
+    }
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #1e293b;
     background: #ffffff;
-    font-size: 8.8pt;
     line-height: 1.45;
+    font-size: 8.5pt;
+    margin: 0;
+    padding: 0;
   }
-  .page-break { page-break-before: always; break-before: page; }
-  .avoid-break { page-break-inside: avoid; break-inside: avoid; }
-  
+
   /* Portada */
   .cover-container {
-    height: 94vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 38px 32px;
-    background: linear-gradient(145deg, #090d16 0%, #1e1b4b 55%, #0f172a 100%);
+    padding: 30px 20px 20px;
+    background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
     color: #ffffff;
     border-radius: 8px;
-    border: 1px solid #1e293b;
+    page-break-after: always;
   }
+
   .cover-badge {
     display: inline-block;
-    padding: 5px 12px;
     background: rgba(99, 102, 241, 0.25);
-    border: 1px solid #818cf8;
+    border: 1px solid rgba(165, 180, 252, 0.4);
     color: #c7d2fe;
-    border-radius: 20px;
-    font-size: 8.5pt;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 7.5pt;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+    margin-bottom: 12px;
   }
+
   .cover-title {
-    font-size: 24pt;
+    font-size: 26pt;
     font-weight: 900;
-    line-height: 1.2;
-    margin: 18px 0 10px 0;
+    line-height: 1.1;
+    margin: 0 0 8px;
     letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #ffffff 0%, #e0e7ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
+
   .cover-subtitle {
-    font-size: 11pt;
-    color: #94a3b8;
-    font-weight: 400;
-    line-height: 1.5;
-    max-width: 620px;
+    font-size: 10.5pt;
+    color: #cbd5e1;
+    margin: 0 0 20px;
+    max-width: 580px;
+    line-height: 1.4;
   }
-  .cover-meta {
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    background: rgba(15, 23, 42, 0.65);
-    padding: 14px 18px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .meta-item strong { display: block; font-size: 7.5pt; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px; }
-  .meta-item span { font-size: 9pt; font-weight: 600; color: #f8fafc; }
-  
+
   .cover-pillars {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin: 20px 0;
+    gap: 10px;
+    margin-top: 15px;
   }
+
   .pillar-card {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 6px;
+    padding: 10px 12px;
+    backdrop-filter: blur(10px);
   }
-  .pillar-card h4 { font-size: 9.5pt; color: #a5b4fc; font-weight: 700; margin-bottom: 4px; }
-  .pillar-card p { font-size: 8pt; color: #cbd5e1; line-height: 1.35; }
-  
+
+  .pillar-card h4 {
+    margin: 0 0 4px;
+    font-size: 9pt;
+    color: #a5b4fc;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .pillar-card p {
+    margin: 0;
+    font-size: 7.5pt;
+    color: #cbd5e1;
+    line-height: 1.35;
+  }
+
+  .cover-meta {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    font-size: 7.5pt;
+  }
+
+  .meta-item strong {
+    display: block;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-size: 6.5pt;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+
+  .meta-item span {
+    color: #f1f5f9;
+    font-weight: 600;
+  }
+
   .cover-footer {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    padding-top: 14px;
-    font-size: 8pt;
-    color: #64748b;
+    font-size: 7pt;
+    color: #94a3b8;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
-  .cover-footer strong { color: #94a3b8; }
 
-  /* Encabezados y Secciones */
+  /* Encabezados de Capítulo */
   .chapter-title {
-    font-size: 14pt;
+    font-size: 12.5pt;
     font-weight: 800;
     color: #0f172a;
     border-bottom: 2px solid #4f46e5;
     padding-bottom: 4px;
-    margin: 18px 0 10px 0;
+    margin: 18px 0 10px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     letter-spacing: -0.01em;
   }
+
   .rule-badge {
-    font-size: 7.5pt;
-    font-weight: 800;
-    padding: 3px 8px;
     background: #eef2ff;
     color: #4338ca;
-    border-radius: 4px;
     border: 1px solid #c7d2fe;
+    font-size: 7pt;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
     text-transform: uppercase;
   }
-  
-  .section-heading {
-    font-size: 10.5pt;
-    font-weight: 700;
-    color: #1e1b4b;
-    margin: 12px 0 6px 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .section-heading::before {
-    content: "■";
-    color: #4f46e5;
-    font-size: 8pt;
-  }
-  
-  p { margin-bottom: 7px; color: #334155; }
-  
-  /* Callouts & Alertas */
-  .callout-box {
-    background: #f8fafc;
-    border-left: 3.5px solid #4f46e5;
-    padding: 9px 12px;
-    margin: 9px 0;
-    border-radius: 0 4px 4px 0;
-    font-size: 8.5pt;
-  }
-  .callout-box.danger {
-    background: #fff1f2;
-    border-left-color: #e11d48;
-    color: #9f1239;
-  }
-  .callout-box.success {
-    background: #f0fdf4;
-    border-left-color: #16a34a;
-    color: #14532d;
-  }
-  .callout-box.warning {
-    background: #fffbeb;
-    border-left-color: #d97706;
-    color: #78350f;
-  }
-  .callout-box strong { font-weight: 700; }
 
-  /* Tablas de Reglas */
-  table.rules-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0;
-    font-size: 8pt;
-  }
-  table.rules-table th {
-    background: #0f172a;
-    color: #ffffff;
-    text-align: left;
-    padding: 6px 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 7.2pt;
-    letter-spacing: 0.5px;
-  }
-  table.rules-table td {
-    padding: 5.5px 8px;
-    border-bottom: 1px solid #e2e8f0;
-    vertical-align: top;
-  }
-  table.rules-table tr:nth-child(even) td {
-    background: #f8fafc;
-  }
-  table.rules-table td.rule-id {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-weight: 700;
-    color: #4338ca;
-    white-space: nowrap;
-  }
-
-  /* Listas de Pasos y Reglas */
+  /* Reglas Individuales */
   .rule-list {
-    list-style: none;
-    margin: 8px 0;
-  }
-  .rule-item {
-    margin-bottom: 8px;
-    padding: 8px 10px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 12px;
   }
+
+  .rule-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3.5px solid #4f46e5;
+    border-radius: 4px;
+    padding: 7px 10px;
+    display: flex;
+    gap: 9px;
+  }
+
   .rule-number {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #4f46e5;
-    color: #ffffff;
     font-weight: 800;
     font-size: 8pt;
+    color: #4f46e5;
+    background: #eef2ff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .rule-body {
-    flex: 1;
-  }
-  .rule-body strong {
-    color: #0f172a;
-    font-weight: 700;
-    display: block;
-    margin-bottom: 2px;
   }
 
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    background: #f1f5f9;
+  .rule-content {
+    flex: 1;
+    font-size: 8pt;
+    line-height: 1.4;
+  }
+
+  .rule-content strong {
     color: #0f172a;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 8.5pt;
+  }
+
+  .rule-content code {
+    background: #e2e8f0;
+    color: #334155;
     padding: 1px 4px;
     border-radius: 3px;
-    font-size: 8pt;
+    font-size: 7.5pt;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
   }
 
   .formula-banner {
     background: #0f172a;
     color: #38bdf8;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    padding: 8px 12px;
-    border-radius: 5px;
-    margin: 7px 0;
-    font-size: 8pt;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin: 5px 0;
+    font-size: 7.5pt;
     font-weight: 600;
     text-align: center;
     border: 1px solid #1e293b;
+  }
+
+  /* Tablas de Reglas */
+  table.rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 7.5pt;
+  }
+  table.rules-table th {
+    background: #0f172a;
+    color: #ffffff;
+    text-align: left;
+    padding: 5px 7px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 6.8pt;
+    letter-spacing: 0.04em;
+  }
+  table.rules-table td {
+    padding: 5px 7px;
+    border-bottom: 1px solid #e2e8f0;
+    line-height: 1.35;
+  }
+  table.rules-table tr:nth-child(even) td {
+    background: #f8fafc;
   }
 </style>
 </head>
@@ -264,7 +277,7 @@
     <span class="cover-badge">Estatuto de Ingeniería & Gobernanza</span>
     <h1 class="cover-title">CÓDIGO OFICIAL DE REGLAS DEL PROYECTO</h1>
     <p class="cover-subtitle">
-      Compendio normativo de arquitectura fullstack, directrices de base de datos, aislamiento DOM, sincronización multiverso y estándares de calidad para el ecosistema Mi Tienda Online.
+      Compendio canónico de arquitectura fullstack, directrices de base de datos, aislamiento DOM, sincronización multiverso, ergonomía de navegación y contratos de backend para el ecosistema Mi Tienda Online.
     </p>
 
     <div class="cover-pillars">
@@ -273,16 +286,16 @@
         <p>Cero datos mockeados o interfaces cosméticas. Toda funcionalidad persiste en MySQL, modelos Eloquent, FormRequests y pruebas PHPUnit.</p>
       </div>
       <div class="pillar-card">
-        <h4>2. Single Inventory Pool Desacoplado</h4>
-        <p>Un almacén central (Hub 4 Kardex) abastece cuatro vitrinas independientes (Marte, Venus, Tiresias, Terra) con reglas taxonómicas.</p>
+        <h4>2. Sincronización Mandatoria (Regla 1.3)</h4>
+        <p>Toda tabla, endpoint, FormRequest y esquema JSON debe quedar 100% formalizado y blindado en <code>BACKEND_INTEGRATION_SPEC.md</code>.</p>
       </div>
       <div class="pillar-card">
-        <h4>3. Aislamiento Estructural de Paneles y Modales</h4>
-        <p>Los 6 paneles y 7 modales operativos CMS residen como nodos hermanos bajo <code>#storeAppRoot</code> (depth=2), erradicando bloqueos por CSS.</p>
+        <h4>3. Ergonomía Sin Scroll Horizontal (Regla 6.4)</h4>
+        <p>Subnavegaciones en cuadrícula compacta (2x3). Conmutador de vitrinas accesible de forma transversal en el encabezado superior de todas las pestañas.</p>
       </div>
       <div class="pillar-card">
-        <h4>4. Workflows de Aplicación sin Roles</h4>
-        <p>La documentación modela cómo se interconectan los datos entre módulos, sin mezclarse con perfiles o descripciones de puestos laborales.</p>
+        <h4>4. Catálogo Multiverso & Curaduría de Color</h4>
+        <p>Filtros facetados en árbol, multi-color con conmutación dinámica de imágenes y trazabilidad desde curaduría previa de scraping hasta PDP.</p>
       </div>
     </div>
   </div>
@@ -306,7 +319,7 @@
     <div class="cover-footer">
       <div><strong>Estatus:</strong> Activo / Mandatorio</div>
       <div><strong>Compilación:</strong> Tríptico Documental (MD + HTML + PDF)</div>
-      <div><strong>Versión:</strong> Canon v2.4</div>
+      <div><strong>Versión:</strong> Canon v2.6 Sincronizado</div>
     </div>
   </div>
 </div>
@@ -324,7 +337,7 @@
     <div class="rule-number">1</div>
     <div class="rule-content">
       <strong>Regla 1.1: Metodología Fullstack Senior (Vertical Slice)</strong>
-      Queda estrictamente prohibido el desarrollo de interfaces cosméticas o "mockeadas" sin persistencia real. Toda tarea debe entregarse con persistencia en MySQL, modelos Eloquent con relaciones, validación en FormRequests, controladores RESTful/Blade, vistas interactivas PWA y batería de pruebas PHPUnit automatizadas.
+      Queda estrictamente prohibido el desarrollo cosmético sin persistencia real. Toda tarea debe entregarse como un Vertical Slice completo:
       <div class="formula-banner">
         MySQL (DDL) ➔ Eloquent ➔ Servicios ACID (Kardex) ➔ Endpoints REST ➔ UI PWA ➔ PHPUnit Tests
       </div>
@@ -343,7 +356,7 @@
     <div class="rule-number">3</div>
     <div class="rule-content">
       <strong>Regla 1.3: Sincronización Mandatoria con BACKEND_INTEGRATION_SPEC.md</strong>
-      Ninguna tarea se considera "Completada" si sus tablas, columnas, esquemas JSON y FormRequests no están 100% formalizados de antemano en el contrato de backend maestro.
+      Ninguna tarea se considera "Completada" si su arquitectura de persistencia, migración de base de datos, modelo Eloquent, endpoints RESTful con esquemas JSON de petición/respuesta y reglas de validación en FormRequests no están 100% formalizados y blindados en <code>BACKEND_INTEGRATION_SPEC.md</code>.
     </div>
   </div>
 
@@ -351,67 +364,30 @@
     <div class="rule-number">4</div>
     <div class="rule-content">
       <strong>Regla 1.4: Codificación Universal y Obligatoria UTF-8</strong>
-      Todo el ecosistema opera bajo <code>UTF-8 universal</code> (MySQL <code>utf8mb4_unicode_ci</code>). Toda plantilla Blade declara <code>&lt;meta charset="utf-8"&gt;</code>, las cabeceras HTTP emiten <code>charset=UTF-8</code> y los archivos fuente se guardan sin BOM, prohibiendo codificaciones legadas (ISO-8859-1, Windows-1252).
+      Todo el ecosistema opera bajo <code>UTF-8 universal</code> (MySQL <code>utf8mb4_unicode_ci</code>). Toda plantilla Blade declara <code>&lt;meta charset="utf-8"&gt;</code>, las cabeceras HTTP emiten <code>charset=UTF-8</code> y los archivos fuente se guardan sin BOM, erradicando Mojibake o codificaciones regionales.
     </div>
   </div>
 </div>
 
 <!-- CAPÍTULO 2 -->
 <h2 class="chapter-title">
-  <span>2. ARQUITECTURA MULTIVERSO & POOL CENTRAL DE INVENTARIO</span>
+  <span>2. PERSISTENCIA, MODELADO & CONTRATOS DE BACKEND</span>
   <span class="rule-badge">Norma 2.0</span>
 </h2>
 
-<p>
-  La plataforma opera un modelo desacoplado de vitrinas de venta que beben de una única bodega física:
-</p>
-
-<table class="rules-table avoid-break">
-  <thead>
-    <tr>
-      <th style="width: 18%;">Vitrina</th>
-      <th style="width: 25%;">Identidad Comercial</th>
-      <th style="width: 32%;">Regla de Filtrado Taxonómico</th>
-      <th style="width: 25%;">Acceso a Stock</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Marte</strong></td>
-      <td>Moda Masculina & Atlética</td>
-      <td><code>brand IN ('JOCKSTRAPS','BRIEF/BOXERS','TANGA')</code></td>
-      <td>Kardex Central Hub 4</td>
-    </tr>
-    <tr>
-      <td><strong>Venus</strong></td>
-      <td>Lencería & Cuidado Íntimo</td>
-      <td><code>brand IN ('BIKINI','SWIMWEAR','TANGA')</code></td>
-      <td>Kardex Central Hub 4</td>
-    </tr>
-    <tr>
-      <td><strong>Tiresias</strong></td>
-      <td>Afirmativo & Binders</td>
-      <td><code>brand IN ('TANK TOPS','T-SHIRTS','BRIEF/BOXERS')</code></td>
-      <td>Kardex Central Hub 4</td>
-    </tr>
-    <tr>
-      <td><strong>Terra</strong></td>
-      <td>Unisex & Suscripciones</td>
-      <td><code>brand IN ('COMBOS','Adrenaline Forte')</code></td>
-      <td>Kardex Central Hub 4</td>
-    </tr>
-  </tbody>
-</table>
-
-<div class="callout-box warning avoid-break">
-  <strong>Regla Inamovible:</strong> Queda prohibido clonar productos o SKUs en la base de datos para mostrarlos en distintas vitrinas. Una prenda en inventario es única en bodega; su presencia en cada vitrina responde a reglas dinámicas de catálogo y visibilidad.
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 2.1: Transaccionalidad y Atomicidad en Kardex y Finanzas (ACID)</strong>
+      Todo movimiento de inventario (entradas, ensambles BOM, apartados de checkout, despachos, devoluciones) se ejecuta bajo transacciones atómicas. El Kardex de Hub 4 es la fuente única de verdad contable y calcula rigurosamente el Costo Promedio Ponderado (CPP).
+    </div>
+  </div>
 </div>
-
-<div class="page-break"></div>
 
 <!-- CAPÍTULO 3 -->
 <h2 class="chapter-title">
-  <span>3. REGLAS DE ESTRUCTURA DOM, BLADE & AISLAMIENTO DE MODALES</span>
+  <span>3. ARQUITECTURA MULTIVERSO & POOL CENTRAL DE INVENTARIO</span>
   <span class="rule-badge">Norma 3.0</span>
 </h2>
 
@@ -419,34 +395,23 @@
   <div class="rule-item avoid-break">
     <div class="rule-number">1</div>
     <div class="rule-content">
-      <strong>Regla 3.1: Aislamiento Estructural de Paneles y Modales (Regla Anti-Anidamiento)</strong>
-      Todos los paneles de pestañas (<code>.tab-panel</code>) y todos los modales interactivos (<code>#createSectionModal</code>, <code>#editSectionModal</code>, <code>#editSizeGuideModal</code>, etc.) deben ser <strong>hermanos directos e independientes</strong> en el nivel <code>depth = 2</code> bajo <code>#storeAppRoot</code>.
-      <div class="callout-box danger">
-        <strong>Peligro Crítico:</strong> Nunca anidar un modal dentro de un panel con clase <code>tab-panel hidden</code>. La regla <code>.tab-panel.hidden { display: none !important; }</code> anula cualquier <code>fixed inset-0 z-50</code>, tornando el modal invisible e inerte al clic del usuario.
-      </div>
+      <strong>Regla 3.1: Desacoplamiento de Vitrinas frente al Stock Central (Single Inventory Pool)</strong>
+      Un único almacén físico central en Hub 4 abastece a 4 vitrinas multiverso (Marte, Venus, Tiresias, Terra). Cero inventarios duplicados; la asignación se gestiona mediante reglas taxonómicas, marcas y categorías. Si el stock se agota en Kardex, se oculta automáticamente en todas las vitrinas.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">2</div>
     <div class="rule-content">
-      <strong>Regla 3.2: Balance Matemático y Cierre Estricto de Etiquetas Blade</strong>
-      Toda vista Blade debe mantener paridad absoluta entre aperturas y cierres de <code>&lt;div&gt;</code>. Cada sección de acordeón debe cerrar explícitamente su body y su contenedor principal antes de iniciar la sección siguiente.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">3</div>
-    <div class="rule-content">
-      <strong>Regla 3.3: Limpieza y Control de Estilos en Apertura de Modales</strong>
-      Toda apertura de modal debe remover la propiedad inline (<code>modal.style.removeProperty('display')</code>) antes de asignar <code>display: flex</code>, e invocar el modo por defecto (Catálogo) para evitar estados corruptos.
+      <strong>Regla 3.2: Desacoplamiento de Contenido Editorial</strong>
+      Identidad de marca, tokens cromáticos, banners y páginas se configuran por vitrina en Hub 2 (CMS), con independencia total del inventario físico transaccional.
     </div>
   </div>
 </div>
 
 <!-- CAPÍTULO 4 -->
 <h2 class="chapter-title">
-  <span>4. REGLAS DE INTERFAZ, CSS & STOREFRONT PWA</span>
+  <span>4. INTERCONEXIÓN CROSS-HUB & WORKFLOWS (SIN ROLES)</span>
   <span class="rule-badge">Norma 4.0</span>
 </h2>
 
@@ -454,282 +419,57 @@
   <div class="rule-item avoid-break">
     <div class="rule-number">1</div>
     <div class="rule-content">
-      <strong>Regla 4.1: Sangrado de Pantalla Completa (Full-Width Breakout)</strong>
-      Los Hero banners pueden expandirse al 100% del viewport (<code>width: 100vw; margin-left: -50vw; left: 50%;</code>) sin desbordes horizontales, aplicando <code>overflow-x: hidden</code> en el layout raíz.
+      <strong>Regla 4.1: Especificación de Workflows Centrada en la Aplicación</strong>
+      La documentación técnica explica exhaustivamente cómo se interlazan los datos entre los 7 Hubs operativos, prohibiendo estructurar manuales como perfiles de puestos de recursos humanos.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">2</div>
     <div class="rule-content">
-      <strong>Regla 4.2: Cache Busting Dinámico Obligatorio</strong>
-      Todo activo crítico de estilos o scripts debe inyectar versionamiento dinámico basado en la fecha de modificación: <code>?v={{ filemtime(...) }}</code>. Esto garantiza que las correcciones móviles y de PWA se reflejen de inmediato sin exigir vaciado de caché al cliente.
+      <strong>Regla 4.2: Cascada de Margen Neto Real</strong>
+      Toda orden calcula su rentabilidad real: GMV - Descuentos - Pasarela - COGS Kardex - Flete - Empaque BOM - Impuestos = Margen Neto Real. Cero costos teóricos.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 5 -->
+<h2 class="chapter-title">
+  <span>5. INTEGRIDAD DOM, BLADE & AISLAMIENTO DE COMPONENTES</span>
+  <span class="rule-badge">Norma 5.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 5.1: Aislamiento Estructural de Paneles y Modales (Regla Anti-Anidamiento)</strong>
+      Los paneles de pestañas (<code>.tab-panel</code>) y modales operativos residen como elementos hermanos directos bajo <code>#storeAppRoot</code> (depth=2). Prohibido anidar modales dentro de contenedores con <code>display: none</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 5.2: Balance Matemático y Cierre Estricto de Etiquetas Blade</strong>
+      Paridad estricta entre aperturas <code>&lt;div&gt;</code> y cierres <code>&lt;/div&gt;</code>, con comentarios de cierre en secciones complejas de acordeón.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">3</div>
     <div class="rule-content">
-      <strong>Regla 4.3: Ergonomía de Navegación (Cero Scroll Horizontal)</strong>
-      Las subnavegaciones se ordenan en cuadrículas estructuradas (ej. 2 filas de 3 columnas). El conmutador de vitrinas (<code>.universe-selector-bar</code>) debe permanecer visible y persistente en todas las pestañas.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">4</div>
-    <div class="rule-content">
-      <strong>Regla 4.4: Restricción Estricta de Cajas de Texto (Solo Expansión Vertical)</strong>
-      Ninguna caja de texto (<code>&lt;textarea&gt;</code>, input multilínea o editor de código) puede expandirse de forma horizontal en ninguna pantalla o formulario del sistema. Queda terminantemente prohibido el uso de <code>resize: both</code> o <code>resize: horizontal</code>. Toda área de texto aplica obligatoriamente <code>resize: vertical !important; max-width: 100% !important; box-sizing: border-box !important;</code> para salvaguardar las cuadrículas y prevenir scroll horizontal parásito.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">5</div>
-    <div class="rule-content">
-      <strong>Regla 4.5: Ficha Independiente de Producto (PDP) — Supresión de WhatsApp & Galería con Swipe</strong>
-      Las páginas independientes de producto (<code>/productos/{slug}</code>) nunca muestran botón o enlace a WhatsApp; la conversión se canaliza 100% al carrito nativo y pasarela de pago oficial sin fugas externas. Asimismo, las imágenes de producto permiten abrir un modal interactivo / visor lightbox a pantalla completa al hacer clic sobre la tarjeta o miniaturas, con soporte fluido para gestos táctiles de deslizamiento (swipe horizontal en móvil), arrastre con ratón en escritorio, atajos de teclado y botones prev/next.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">6</div>
-    <div class="rule-content">
-      <strong>Regla 4.6: Filtros del Storefront en Drawer Izquierdo (Off-Canvas)</strong>
-      Los filtros de segmentación de catálogo (<code>#filterDrawer</code>) se despliegan obligatoriamente como un <em>drawer lateral desde el lado izquierdo</em> (<code>left: 0; transform: translateX(-100%);</code> y <code>translateX(0)</code> al abrir) tanto en dispositivos móviles como en pantallas de escritorio. Se prohíben acordeones verticales en línea que desplacen el catálogo o barras laterales fijas invasivas.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">7</div>
-    <div class="rule-content">
-      <strong>Regla 4.7: Cuenta Regresiva & Reserva de Stock Exclusiva en Checkout</strong>
-      El temporizador de 5 minutos y la reserva transaccional de prendas para evitar sobreventa <strong>solo se activan cuando inicia el checkout</strong> (<code>openCheckoutModal</code>). Si el tiempo expira, la reserva se libera pero las prendas <strong>permanecen en el carrito</strong> (prohibido vaciarlo). Si un producto se agota (<code>stock &lt;= 0</code>) o se descontinúa, la UI del carrito y del checkout despliega obligatoriamente la leyenda: <strong>"Ya no hay existencias"</strong> con badge rojo.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">8</div>
-    <div class="rule-content">
-      <strong>Regla 4.8: Supresión Definitiva de SPEI & Enfoque Tarjetas / OXXO Pay</strong>
-      Queda formalmente eliminado el método de pago por transferencia SPEI en la tienda, marquesinas, cintillos de beneficios y checkout. El flujo transaccional D2C opera exclusivamente con: 1) Tarjetas de Débito y Crédito (Visa, Mastercard, AMEX) con tokenización bancaria, y 2) OXXO Pay con referencia digital de 14 dígitos y ventana de apartado de 48 horas.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">9</div>
-    <div class="rule-content">
-      <strong>Regla 4.9: Navbar Sticky Visible Todo el Tiempo (Desktop & Móvil)</strong>
-      El encabezado del storefront (<code>.sticky-header-wrapper</code>) permanece permanentemente visible en scroll (<code>position: sticky !important; top: 0 !important; z-index: 999 !important; backdrop-filter: blur(16px);</code>) tanto en pantallas de escritorio como en móviles, prohibiendo cualquier comportamiento auto-hide o retráctil.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">10</div>
-    <div class="rule-content">
-      <strong>Regla 4.10: Edición de Navbar y Cinta Banner Superior desde Hub 2</strong>
-      La cinta banner informativa (marquesina continua) y la configuración del navbar se administran exclusivamente desde Hub 2, Pestaña Páginas y Navbar (<code>storePagesPanel</code>), erradicando textos estáticos duplicados o referencias a WhatsApp.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">11</div>
-    <div class="rule-content">
-      <strong>Regla 4.11: Gestión Dual Desktop y Móvil de Páginas Institucionales</strong>
-      La sección de páginas sincronizadas permite configurar de forma independiente la visualización en Desktop (<code>show_in_navbar</code>), Móvil (<code>show_in_mobile</code>) y Footer (<code>show_in_footer</code>), así como el ciclo completo: Crear, Editar (modal <code>depth = 2</code>), Activar/Pausar, Archivar y Eliminar.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">12</div>
-    <div class="rule-content">
-      <strong>Regla 4.12: Optimización SEO Integral & Sitemap XML Dinámico</strong>
-      Todo el storefront cuenta con optimización SEO de primer nivel: meta canonical, OpenGraph, Twitter Cards, microdatos Schema.org (JSON-LD para <code>Organization</code>, <code>WebSite</code>, <code>Product</code> y <code>WebPage</code>), y mapa del sitio dinámico en <code>/sitemap.xml</code> con frecuencias de cambio y prioridades.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">13</div>
-    <div class="rule-content">
-      <strong>Regla 4.13: Navbar Canónico Permanente de 5 Botones (Desktop & Móvil)</strong>
-      Tanto en versión de escritorio como en el dock de navegación inferior móvil, el navbar contiene estrictamente 5 botones canónicos: <strong>Inicio</strong>, <strong>Explorar</strong>, <strong>Catálogo</strong>, <strong>Carrito</strong> (con badge reactivo de prendas) y <strong>Cuenta</strong>. Queda prohibido alterar o suprimir esta quinteta oficial.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">14</div>
-    <div class="rule-content">
-      <strong>Regla 4.14: Inicio como Revista Digital Oficial (Erradicación de Blog Paralelo)</strong>
-      La vista de Inicio alimentada por las secciones modulares del Home (Hub 2 -> Editor Visual) constituye la <strong>Revista Digital Oficial</strong> de la marca. Queda erradicado cualquier submódulo o blog independiente; la narrativa editorial se articula en el Home modular.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">15</div>
-    <div class="rule-content">
-      <strong>Regla 4.15: Vista Explorar & Gestión en Hub 2 como "Páginas de Explorar" con Filtros de Catálogo</strong>
-      La ruta <code>/explorar</code> renderiza tarjetas interactivas ("botones con imágenes") para el descubrimiento temático. Se administra desde Hub 2 en la sección formalmente renombrada a <strong>"Páginas de Explorar"</strong> (antes "Páginas institucionales"), permitiendo vincular imágenes destacadas y filtros directos de catálogo (<code>filter_universe</code>, <code>filter_category</code>, <code>filter_tags</code>).
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">16</div>
-    <div class="rule-content">
-      <strong>Regla 4.16: Inmutabilidad Canónica del Catálogo</strong>
-      La estructura base del catálogo multiverso, con su taxonomía por universos, categorías, filtros facetados y visualización de existencias en tiempo real, permanece canónica e inmutable en el proyecto.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">17</div>
-    <div class="rule-content">
-      <strong>Regla 4.17: Carrito con Persistencia y Funcionalidad de "Guardar para Después"</strong>
-      El carrito permite guardar prendas para después en <code>localStorage</code> (<code>multiverse_store_saved_for_later</code>), sin computar en el subtotal activo ni consumir tiempo de apartado de stock en checkout, con acciones directas para mover de nuevo al carrito o eliminar.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">18</div>
-    <div class="rule-content">
-      <strong>Regla 4.18: Iconografía Estricta en SVG Vectorial y Prohibición Absoluta de Emojis</strong>
-      Todo el ecosistema utiliza exclusivamente íconos vectoriales SVG. Queda terminantemente prohibido el uso de emojis tipográficos en plantillas Blade, archivos JavaScript o estilos, reservándose únicamente para contenido libre escrito por usuarios.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">19</div>
-    <div class="rule-content">
-      <strong>Regla 4.19: Wishlist Integrada en Drawer de Carrito y Botón de Deseos en Navbar Desktop</strong>
-      La lista de deseos ("Mis Deseos") reside integrada en el Drawer de Carrito (<code>#cartSheet</code>), accesible con o sin productos activos. Cada ítem permite ver imagen, nombre, talla y precio, con botones directos para "Al carrito" o "Eliminar". En desktop, el botón de Wishlist (ícono corazón SVG y badge <code>#desktopWishlistCount</code>) reside en el navbar junto a los enlaces canónicos.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">20</div>
-    <div class="rule-content">
-      <strong>Regla 4.20: Header Móvil Superior Limpio (Filtros Condicionales, Logo Minimalista, Cero Carrito Redundante)</strong>
-      El botón de filtros móvil (<code>#mobileFilterToggleBtn</code>) se visualiza <strong>únicamente en la pestaña de Catálogo</strong>. El header móvil muestra exclusivamente el isotipo/logo oficial (sin texto de slogan), el botón de búsqueda y el corazón de la wishlist con badge reactivo, suprimiendo por completo el botón redundante de carrito que reside en el dock inferior.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">21</div>
-    <div class="rule-content">
-      <strong>Regla 4.21: Erradicación de la Barra Móvil de Páginas Institucionales</strong>
-      La barra horizontal de scroll <code>.mobile-institutional-bar</code> (guía de tallas, cuidados, etc.) queda totalmente erradicada del header superior móvil. Toda navegación institucional y editorial se gestiona y consulta a través de la sección <strong>Explorar</strong> del dock de navegación.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">22</div>
-    <div class="rule-content">
-      <strong>Regla 4.22: Erradicación de la Barra Superior de Universos en Móvil</strong>
-      La barra superior táctil <code>.universe-selector-bar</code> (MARTE, VENUS, TIRESIAS, TERRA) queda completamente eliminada del layout del storefront. La exploración de universos se canaliza a través de las tarjetas temáticas de la vista <strong>Explorar</strong> y del drawer de filtros tipo ZARA.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">23</div>
-    <div class="rule-content">
-      <strong>Regla 4.23: Función de Búsqueda Conmutable Universal (Desktop y Móvil)</strong>
-      Tanto en versión Desktop como Móvil aparece un botón con ícono de lupa SVG (<code>data-action="toggle-search"</code>) que conmute una barra de búsqueda desplegable (<code>#storeSearchBar</code>). Cuenta con campo en vivo (<code>#storeLiveSearchInput</code>) que filtra en tiempo real productos y redirige automáticamente al Catálogo si el usuario se encuentra en otra vista.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">24</div>
-    <div class="rule-content">
-      <strong>Regla 4.24: Tarjetas de Explorar como Botones de Imagen Única con Overlay y Degradados</strong>
-      En la vista Explorar (<code>/explorar</code>), tanto en móvil como desktop, cada elemento se renderiza como una sola imagen completa de fondo con overlay y degradados configurables (<code>overlay_gradient</code>), funcionando íntegramente como un botón interactivo de acción directa (filtro dinámico en catálogo o navegación a artículo editorial). En Hub 2, la pestaña y sección se titulan estrictamente <strong>"Páginas de Explorar"</strong> (erradicando la coletilla <code>&amp; navbar</code>).
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">25</div>
-    <div class="rule-content">
-      <strong>Regla 4.25: Proporción Estricta 4:5 en Grid de Botones de Explorar</strong>
-      Todos los botones dentro de la página de Explorar se exhiben dentro de un grid con formato de proporción 4:5 (<code>aspect-ratio: 4 / 5;</code>), garantizando equilibrio visual editorial con 2 columnas en móvil y distribución fluida auto-fill en versión de escritorio.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">26</div>
-    <div class="rule-content">
-      <strong>Regla 4.26: Ordenamiento Drag &amp; Drop en Páginas de Explorar y Tabla Limpia</strong>
-      La sección Páginas de Explorar en Hub 2 opera 100% mediante reordenamiento Drag &amp; Drop en tiempo real (<code>pagesSortableBody</code>). Se erradican definitivamente las columnas obsoletas de visibilidad individual (Desktop, Móvil, Footer) y números independientes, sincronizando el orden secuencial de forma reactiva en base de datos.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">27</div>
-    <div class="rule-content">
-      <strong>Regla 4.27: Overlay, Degradados 100% Personalizables y Contraste Garantizado de Texto</strong>
-      Las tarjetas 4:5 de Explorar disponen de controles 100% ajustables para color de inicio, color de fin y opacidad individual de cada stop, acompañados de presets estéticos rápidos, selector de color de texto (<code>text_color</code>) para garantizar contraste sobre cualquier fondo fotográfico, y miniatura Live Preview reactiva en tiempo real.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">28</div>
-    <div class="rule-content">
-      <strong>Regla 4.28: Carrusel Automático de Múltiples Imágenes y Conmutación Dinámica desde Catálogo</strong>
-      Capacidad de incorporar 1 o más imágenes por tarjeta: si se configuran múltiples fotografías circulan en carrusel suave crossfade cada 3.5 segundos con dots indicadores. Asimismo, el usuario puede conmutar la fuente para extraer automáticamente fotografías de las prendas activas en el catálogo según los filtros de universo y categoría vinculados.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">29</div>
-    <div class="rule-content">
-      <strong>Regla 4.29: Soporte Integral de Dark Mode, Light Mode y Modo Sistema en Todo el Proyecto</strong>
-      Soporte oficial para tres estados (Claro, Oscuro y Sistema sincronizado con <code>prefers-color-scheme</code>). Su configuración reside dentro del botón del navbar de cuenta y en la nueva pestaña <strong>Configuración</strong> del drawer de cuenta (donde también reside el Centro de Alertas Web Push PWA), con paridad de conmutación en el Portal Panel y prevención de parpadeo anti-FOUC en cabecera.
-    </div>
-  </div>
-
-  <div class="rule-item avoid-break">
-    <div class="rule-number">30</div>
-    <div class="rule-content">
-      <strong>Regla 4.30: Contraste Riguroso y Accesibilidad en Modo Dark y Light</strong>
-      Todo el soporte visual del proyecto (Dark, Light y Sistema) debe procurar y garantizar rigurosamente el contraste nítido con los textos (mínimo 4.5:1 en Light y >5.5:1 en Dark, prohibiendo grises lavados sobre blanco o grises oscuros sobre negro), delimitación visible en los bordes de tarjetas, inputs, tablas y modales (evitando que se fundan con el fondo), e indicadores de foco y estados interactivos accesibles en todos los elementos del proyecto.
+      <strong>Regla 5.3: Limpieza y Control de Estilos en Apertura de Modales</strong>
+      Toda apertura de modal ejecuta <code>modal.style.removeProperty('display')</code> antes de <code>display: flex</code>, restableciendo el estado inicial determinista.
     </div>
   </div>
 </div>
 
 <div class="page-break"></div>
 
-<!-- CAPÍTULO 5 -->
-<h2 class="chapter-title">
-  <span>5. MERCHANDISING, CMS & SECCIONES MODULARES (HUB 2)</span>
-  <span class="rule-badge">Norma 5.0</span>
-</h2>
-
-<table class="rules-table avoid-break">
-  <thead>
-    <tr>
-      <th style="width: 25%;">Tipo de Sección</th>
-      <th style="width: 40%;">Características Permitidas</th>
-      <th style="width: 35%;">Restricciones Estrictas</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Catálogo de Prendas</strong> (Tarjetas, Categorías, Familias, Tags)</td>
-      <td>Filtros dinámicos Hub 4, marcas, límite de prendas, layouts en cuadrícula o carrusel.</td>
-      <td><strong>Prohibido código custom:</strong> Cero HTML, CSS o JS libre para proteger integridad del catálogo.</td>
-    </tr>
-    <tr>
-      <td><strong>Contenido & Hero</strong> (Hero, Banners, Pilares, Modales, CTA)</td>
-      <td>Bifurcación excluyente (visual vs código), degradados overlay, imagen de fondo, código scoped.</td>
-      <td><strong>Sanitización en backend obligatoria:</strong> Todo input HTML/JS se purifica antes de persistir.</td>
-    </tr>
-    <tr>
-      <td><strong>Gestor Drag & Drop</strong> (Secciones del Home)</td>
-      <td>Reordenamiento en vivo, activación/pausa, archivado atómico, asignación de vitrina.</td>
-      <td><strong>Confinado a Tab 1:</strong> Exclusivo del <em>Editor Visual</em>; no aparece en las demás pestañas.</td>
-    </tr>
-  </tbody>
-</table>
-
 <!-- CAPÍTULO 6 -->
 <h2 class="chapter-title">
-  <span>6. SEGURIDAD, CALIDAD & DOCUMENTACIÓN VIVA</span>
+  <span>6. INTERFAZ DE USUARIO, CSS, PWA & EXPERIENCIA MÓVIL</span>
   <span class="rule-badge">Norma 6.0</span>
 </h2>
 
@@ -737,49 +477,272 @@
   <div class="rule-item avoid-break">
     <div class="rule-number">1</div>
     <div class="rule-content">
-      <strong>Regla 6.1: Cero Tests Rotos (100% Passing Test Suite)</strong>
-      Ningún commit se consolida si la suite de pruebas PHPUnit presenta un solo error o fallo. Todas las aserciones deben reportar estado verde.
+      <strong>Regla 6.1: Sangrado de Pantalla Completa (Full-Width Breakout)</strong>
+      Hero banners y carruseles pueden expandirse al 100% del viewport (<code>width: 100vw; margin-left: -50vw; left: 50%;</code>) con <code>overflow-x: hidden</code> en layout.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">2</div>
     <div class="rule-content">
-      <strong>Regla 6.2: Validación en Navegador Real con Chrome DevTools Protocol (CDP Headless)</strong>
-      Incidentes visuales o reactivos se diagnostican inspeccionando dimensiones reales (<code>offsetHeight</code>, <code>offsetWidth</code>) y la cadena de ancestros (<code>modalParentChain</code>) en Chrome Headless.
+      <strong>Regla 6.2: Paridad y Aislamiento en Media Queries</strong>
+      Bloques <code>@media</code> con apertura y cierre balanceados; prohibido anidar desktop en móvil o viceversa.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">3</div>
     <div class="rule-content">
-      <strong>Regla 6.3: La Regla del Tríptico Documental</strong>
-      Toda directriz arquitectónica o manual de flujos debe sincronizarse en tres formatos simultáneos:
-      <code>Markdown (*.md)</code> ➔ <code>HTML Editorial (*.html)</code> ➔ <code>PDF Imprimible (*.pdf vía Chrome)</code>.
+      <strong>Regla 6.3: Cache Busting Dinámico en Activos Críticos</strong>
+      Inyección obligatoria de <code>?v={{ filemtime(...) }}</code> en CSS y JS para invalidar caché en navegadores móviles y PWA.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">4</div>
     <div class="rule-content">
-      <strong>Regla 6.4: Registro Continuo en PENDING_TASKS.md & Commits Semánticos</strong>
-      Toda oportunidad o bug se registra formalmente con ID <code>TASK-XXX-NN</code>. Los commits de Git declaran de manera atómica el ID de tarea y la naturaleza de la solución (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>).
+      <strong>Regla 6.4: Ergonomía de Navegación y Subnavegaciones Sin Scroll Horizontal</strong>
+      Las barras de subnavegación complejas (Subnav Hub 2) se distribuyen en cuadrículas compactas sin scroll horizontal (ej. 2 filas de 3 columnas en desktop que colapsan a 2 o 1 en móvil). Los elementos de selección contextual frecuente (como el Conmutador de Vitrinas <code>.universe-selector-bar</code>) deben permanecer accesibles de manera transversal en el encabezado superior de todas las pestañas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">5</div>
+    <div class="rule-content">
+      <strong>Regla 6.5: Sobriedad Visual en Paneles Administrativos (Cero Emojis Informales)</strong>
+      Exclusividad de iconografía vectorial SVG y tipografía monoespaciada para claves técnicas, SKUs y métricas operativas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">6</div>
+    <div class="rule-content">
+      <strong>Regla 6.6: Restricción Estricta de Cajas de Texto (Solo Vertical, Jamás Horizontal)</strong>
+      Ninguna caja de texto (<code>&lt;textarea&gt;</code>) puede expandirse horizontalmente. Toda área aplica obligatoriamente <code>resize: vertical !important; max-width: 100% !important; box-sizing: border-box !important;</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">7</div>
+    <div class="rule-content">
+      <strong>Regla 6.7: Ficha Independiente de Producto (PDP) — Supresión de WhatsApp & Galería Modal con Swipe</strong>
+      Cero botón o gatillo de WhatsApp en PDP. Visor lightbox interactivo a pantalla completa con soporte de gestos táctiles de deslizamiento (swipe horizontal), flechas, atajos de teclado y dot indicators.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">8</div>
+    <div class="rule-content">
+      <strong>Regla 6.8: Despliegue de Filtros del Storefront en Drawer Izquierdo (Off-Canvas)</strong>
+      Los filtros de catálogo (<code>#filterDrawer</code>) se despliegan como drawer lateral deslizante desde la izquierda (<code>left: 0; transform: translateX(-100%);</code> a <code>translateX(0)</code>) con backdrop oscuro. Prohibidos acordeones que empujen el grid hacia abajo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">9</div>
+    <div class="rule-content">
+      <strong>Regla 6.9: Reserva Temporal de Inventario y Cuenta Regresiva Exclusiva en Checkout</strong>
+      El temporizador de 5 minutos y reserva de stock se activan exclusivamente en el checkout. Al expirar, las prendas permanecen en el carrito (nunca se vacía). Si se agota, despliega obligatoriamente "Ya no hay existencias" con badge rojo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">10</div>
+    <div class="rule-content">
+      <strong>Regla 6.10: Supresión Definitiva de SPEI & Estandarización de Pasarelas</strong>
+      Cero SPEI en storefront. El flujo opera estrictamente con: 1) Tarjetas de Crédito y Débito tokenizadas, y 2) OXXO Pay con referencia de 14 dígitos y ventana de 48 horas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">11</div>
+    <div class="rule-content">
+      <strong>Regla 6.11: Navbar Sticky Visible Todo el Tiempo (Desktop & Móvil)</strong>
+      El encabezado (<code>.sticky-header-wrapper</code>) permanece permanentemente visible en scroll (<code>position: sticky; top: 0; z-index: 999; backdrop-filter: blur(16px);</code>). Prohibido auto-hide o retráctil.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">12</div>
+    <div class="rule-content">
+      <strong>Regla 6.12: Edición de Navbar y Cinta Banner Superior desde Hub 2</strong>
+      Cinta marquesina superior y navegación se gestionan desde Hub 2 Pestaña Páginas & Navbar (<code>storePagesPanel</code>).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">13</div>
+    <div class="rule-content">
+      <strong>Regla 6.13: Gestión Dual Desktop y Móvil de Páginas Institucionales</strong>
+      Checkboxes independientes para Desktop (<code>show_in_navbar</code>), Móvil (<code>show_in_mobile</code>) y Footer (<code>show_in_footer</code>) con CRUD completo y modal en depth=2.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">14</div>
+    <div class="rule-content">
+      <strong>Regla 6.14: Optimización SEO Integral & Sitemap XML Dinámico</strong>
+      OpenGraph, Twitter Cards, Schema.org JSON-LD (<code>Organization</code>, <code>WebSite</code>, <code>Product</code>) y <code>/sitemap.xml</code> dinámico.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">15</div>
+    <div class="rule-content">
+      <strong>Regla 6.15: Navbar Canónico Permanente de 5 Botones (Desktop & Móvil)</strong>
+      Estrictamente 5 botones oficiales: Inicio, Explorar, Catálogo, Carrito (con badge reactivo) y Cuenta.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">16</div>
+    <div class="rule-content">
+      <strong>Regla 6.16: Home Modular como Revista Digital Oficial</strong>
+      La portada de la tienda es la revista digital oficial; no existen blogs separados desarticulados. Orquestado desde Hub 2 Tab 1.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">17</div>
+    <div class="rule-content">
+      <strong>Regla 6.17: Páginas de Explorar con Botones de Imagen y Filtros Directos</strong>
+      Ruta <code>/explorar</code> con tarjetas 4:5 que actúan como botones interactivos vinculados a filtros de universo, categoría o proveedor.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">18</div>
+    <div class="rule-content">
+      <strong>Regla 6.18: Inmutabilidad Canónica de Catálogo y Facetas</strong>
+      Multiverso con stock y facetas inmutable en estructura base.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">19</div>
+    <div class="rule-content">
+      <strong>Regla 6.19: Lista Guardar para Después en Carrito</strong>
+      Persistencia en <code>localStorage</code> para artículos diferidos sin impactar subtotales ni checkout.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">20</div>
+    <div class="rule-content">
+      <strong>Regla 6.20: Exclusividad de Iconografía Vectorial SVG</strong>
+      Vectoriales SVG puros en el 100% de plantillas y scripts; prohibición total de emojis informales en código fuente.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">21</div>
+    <div class="rule-content">
+      <strong>Regla 6.21: Modal Independiente de Edición de Páginas en Nivel Raíz</strong>
+      <code>#editPageModal</code> posicionado como hermano de <code>#storeAppRoot</code> (depth=2) para erradicar herencias de visibilidad oculta.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">22</div>
+    <div class="rule-content">
+      <strong>Regla 6.22: Wishlist en Drawer de Carrito y Botón Navbar</strong>
+      Sección Mis Deseos en <code>#cartSheet</code> y botón corazón en navbar desktop con badge <code>#desktopWishlistCount</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">23</div>
+    <div class="rule-content">
+      <strong>Regla 6.23: Header Móvil Limpio Sin Slogan & Sin Carrito Redundante</strong>
+      Solo logo de marca, corazón de deseos y lupa; botón de filtros condicionado al catálogo; cero carrito redundante en header superior.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">24</div>
+    <div class="rule-content">
+      <strong>Regla 6.24: Erradicación de Barras Móviles Redundantes</strong>
+      Suprimidas <code>.mobile-institutional-bar</code> y <code>.universe-selector-bar</code> del layout móvil del storefront para despejar la vista.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">25</div>
+    <div class="rule-content">
+      <strong>Regla 6.25: Barra de Búsqueda Desplegable Universal</strong>
+      Gatillo lupa interactivo que conmuta <code>#storeSearchBar</code> con filtrado reactivo en tiempo real.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">26</div>
+    <div class="rule-content">
+      <strong>Regla 6.26: Tarjetas de Explorar en Proporción 4:5 y Degradados Personalizables</strong>
+      Formato visual 4:5 con overlays degradados ajustables (hexadecimal y opacidad superior/inferior).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">27</div>
+    <div class="rule-content">
+      <strong>Regla 6.27: Hub 2 Tab 3 Formalizado como "Páginas de Explorar"</strong>
+      Panel CMS dedicado exclusivamente a curar las colecciones de la sección Explorar.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">28</div>
+    <div class="rule-content">
+      <strong>Regla 6.28: Ordenamiento Drag & Drop en Páginas de Explorar</strong>
+      Reordenamiento reactivo con persistencia asíncrona en <code>POST /admin/tienda-cms/paginas/reorder</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">29</div>
+    <div class="rule-content">
+      <strong>Regla 6.29: Overlay, Degradados y Contraste Garantizado de Texto</strong>
+      Selectores de color y opacidad con live preview 4:5 en modales de creación y edición.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">30</div>
+    <div class="rule-content">
+      <strong>Regla 6.30: Carrusel Automático de Imágenes y Conmutación Dinámica</strong>
+      Carrusel crossfade cada 3.5s o extracción dinámica de fotografías desde el catálogo filtrado (<code>catalog</code>).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">31</div>
+    <div class="rule-content">
+      <strong>Regla 6.31: Soporte Integral de Dark Mode, Light Mode y Sistema</strong>
+      Conmutación nativa con persistencia en <code>localStorage</code> y prevención de parpadeo (Anti-FOUC).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">32</div>
+    <div class="rule-content">
+      <strong>Regla 6.32: Contraste Riguroso y Accesibilidad Universal WCAG AA</strong>
+      Ratio superior a 4.5:1 en light y 5.5:1 en dark, bordes perimetrales visibles y campos de formulario de alto contraste.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">33</div>
     <div class="rule-content">
-      <strong>Regla 6.33: Ciclo de Vida y Curaduría de Productos Scrapeados (VS Code, Ingesta Hub 3 y Badge "Drop Bajo Pedido")</strong>
-      Depuración de datasets y saneamiento taxonómico/UTF-8 en el entorno de desarrollo (VS Code). Ingesta oficial en la <em>Bandeja de Curaduría Previa de Scraping</em> (Hub 3/4) con alta rápida interactiva de nuevos colores (<code>+ Dar de alta color</code>) y telas (<code>+ Dar de alta tela</code>). Todos los productos scrapeados o dropshipping exhiben obligatoriamente el distintivo <strong>"Drop Bajo Pedido"</strong> tanto en inventario como en storefront (cards, grids y PDP).
+      <strong>Regla 6.33: Ciclo de Vida y Curaduría de Scraping (VS Code, Hub 3 y Badge "Drop Bajo Pedido")</strong>
+      Limpieza previa en VS Code, ingesta a bandeja de curaduría de Hub 3, badge obligatorio "Drop Bajo Pedido" y alta rápida de color y tela.
     </div>
   </div>
 
   <div class="rule-item avoid-break">
     <div class="rule-number">34</div>
     <div class="rule-content">
-      <strong>Regla 6.34: Creación Jerárquica de Filtros desde Hub 4 (Categorías & Familia) y Sincronización</strong>
-      Creación de taxonomías y familias desde los ajustes de Hub 4 (pestaña Categorías & Familias) con nivel jerárquico (padre/child), descripción taxonómica y Drag & Drop completo. Esta jerarquía alimenta las opciones de filtro en Hub 2 (Filtros de Catálogo reordenables con Drag & Drop y selector en Páginas de Explorar), activando automáticamente el catálogo con el filtro seleccionado al pulsar la tarjeta en <code>/explorar</code>.
+      <strong>Regla 6.34: Creación Jerárquica de Filtros desde Hub 4 (Ajustes > Categorías & Familias)</strong>
+      Creación de categorías raíz y subcategorías child con Drag & Drop, alimentando filtros del storefront y Páginas de Explorar de Hub 2.
     </div>
   </div>
 
@@ -787,14 +750,335 @@
     <div class="rule-number">35</div>
     <div class="rule-content">
       <strong>Regla 6.35: Filtros Facetados Extendidos en Storefront</strong>
-      En el storefront (<code>#filterDrawer</code> y motor de filtrado reactivo), operan formalmente como filtros interactivos: Categorías & Familias, Curva de Tallas Anatómicas (CH a 3XL), Telas & Fibras Textiles, Colores & Tornasoles Iridiscentes, Volúmenes de Perfumería (30ml a 200ml) y Tonos Cosméticos (01 a 04), con soporte para selección combinada y restablecimiento total.
+      Facetas para Categorías, Proveedores, Tallas, Telas, Colores/Tornasol, Volúmenes y Tonos Cosméticos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">36</div>
+    <div class="rule-content">
+      <strong>Regla 6.36: Proveedores como Dimensión de Filtrado Transversal</strong>
+      Los proveedores forman parte de los filtros del sistema, incidiendo en Hub 4, Hub 2 (Explorar) y Storefront.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">37</div>
+    <div class="rule-content">
+      <strong>Regla 6.37: Formato de Árbol Plegable con Checkboxes en Filtros Facetados</strong>
+      Árbol jerárquico con checkboxes y acordeones colapsables/expandibles independientes en <code>#filterDrawer</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">38</div>
+    <div class="rule-content">
+      <strong>Regla 6.38: PDP — Botón de Retorno Rápido y Gatillo Conmutador de Filtros</strong>
+      Botón volver atrás y botón <code>data-action="open-filters"</code> directo en la cabecera de la ficha de producto.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">39</div>
+    <div class="rule-content">
+      <strong>Regla 6.39: Exhibidor Visual de Color Indexado en Catálogo y PDP</strong>
+      Muestras de color cromáticas (swatches) en tarjetas de vitrina y ficha PDP para colores sólidos y tornasoles.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">40</div>
+    <div class="rule-content">
+      <strong>Regla 6.40: Soporte Multi-Color por Modelo y Conmutación Dinámica de Imágenes</strong>
+      Modelos con 1 o más variantes de color. Al pulsar un color en PDP, la galería conmuta dinámicamente mostrando las fotos asociadas a ese color indexado.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">41</div>
+    <div class="rule-content">
+      <strong>Regla 6.41: Miniaturas Visuales de Producto en Carrito de Compras</strong>
+      El Drawer de Carrito (<code>#cartSheet</code>) y checkout muestran la miniatura de cada prenda agregada.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">42</div>
+    <div class="rule-content">
+      <strong>Regla 6.42: Formulario de Cupón Confinado Exclusivamente al Paso 1 del Checkout</strong>
+      El formulario de cupón no satura el carrito pasivo; aparece única y exclusivamente dentro del Primer Paso del Checkout.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">43</div>
+    <div class="rule-content">
+      <strong>Regla 6.43: Miniaturas en Inventario y Asignación de Color a Imágenes en Hub 4</strong>
+      Miniatura en tabla de inventario y sección de asignación de foto a variante de color en el modal de producto.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">44</div>
+    <div class="rule-content">
+      <strong>Regla 6.44: Curaduría de Scraping con Asignación de Variabilidad de Color a Imágenes</strong>
+      Mapeo obligatorio de imagen scrapeada a variante de color en bandeja previa antes de autorizar la ingesta oficial.
     </div>
   </div>
 </div>
 
-<div class="callout-box success avoid-break" style="margin-top: 15px;">
-  <strong>Vigencia y Mandato:</strong> Este código de reglas es de observancia obligatoria para cualquier agente, desarrollador o mantenedor del repositorio <em>Mi Tienda Online</em>. Cualquier desviación técnica debe ser corregida de inmediato para preservar la estabilidad, escalabilidad y excelencia operativa de la plataforma.
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 7 -->
+<h2 class="chapter-title">
+  <span>7. MERCHANDISING, CMS & SECCIONES MODULARES (HUB 2)</span>
+  <span class="rule-badge">Norma 7.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 7.1: Bifurcación Mutuamente Excluyente del Hero (Cero Duplicados)</strong>
+      Conmutación limpia entre Modo A (Visual Estructurado) y Modo B (Código Custom Scoped), renderizando uno solo en Blade.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 7.2: Regla de Oro del Catálogo vs Contenido Custom</strong>
+      Secciones de catálogo 100% dinámicas desde Hub 4 (cero HTML libre). Secciones de contenido permiten edición custom scoped.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 7.3: Confinamiento de Herramientas Especializadas</strong>
+      El gestor Drag & Drop de secciones modulares reside exclusivamente en el Editor Visual (Tab 1).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 7.4: Generación Asistida de Rutas y Anclas Modulares</strong>
+      Generación automática de anclas (<code>#section-{id}</code>) con botones de copiado rápido y selectores en Hero.
+    </div>
+  </div>
 </div>
+
+<!-- CAPÍTULO 8 -->
+<h2 class="chapter-title">
+  <span>8. SEGURIDAD, SANITIZACIÓN & PRIVACIDAD</span>
+  <span class="rule-badge">Norma 8.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 8.1: Sanitización de Entradas en Backend contra XSS</strong>
+      Limpieza estricta de inputs HTML/CSS antes de persistir o renderizar para bloquear scripts maliciosos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 8.2: Aislamiento Estricto por Rol (RBAC)</strong>
+      Segregación estricta entre Directores (financiero), Almacén (operativo) y Aliados B2B (extranet aislada).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 8.3: Protección Sanitaria y Normativa PROFECO</strong>
+      Política de no devolución de ropa íntima visible en PDP, checkout y etiquetas de empaque expedidas.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 9 -->
+<h2 class="chapter-title">
+  <span>9. CALIDAD, PRUEBAS AUTOMATIZADAS & VALIDACIÓN CDP</span>
+  <span class="rule-badge">Norma 9.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 9.1: Cero Pruebas Rotas (100% Passing Test Suite)</strong>
+      Toda suite PHPUnit debe permanecer 100% en verde; prohibido consolidar commits con tests fallidos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 9.2: Validación en Navegador Real con Chrome DevTools Protocol (CDP)</strong>
+      Auditoría en Chrome Headless para validar dimensiones reales, opacidades y jerarquía DOM sin emulaciones falsas.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 10 -->
+<h2 class="chapter-title">
+  <span>10. DOCUMENTACIÓN VIVA, TRÍPTICO & GOBERNANZA</span>
+  <span class="rule-badge">Norma 10.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 10.1: Tríptico Documental Obligatorio (Markdown + HTML + PDF)</strong>
+      Toda especificación se publica de manera sincrónica en <code>.md</code>, <code>.html</code> y compilado oficial <code>.pdf</code> generado con Chrome Headless.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 10.2: Registro Continuo en PENDING_TASKS.md</strong>
+      Cualquier nuevo requerimiento o punto ciego se registra de inmediato con identificador <code>TASK-XXX-NN</code>.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 11 -->
+<h2 class="chapter-title">
+  <span>11. CONTROL DE VERSIONES & COMMITS SEMÁNTICOS</span>
+  <span class="rule-badge">Norma 11.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 11.1: Commits Atómicos y Semánticos</strong>
+      Commits agrupados por alcance (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>) acompañados de su ID formal de tarea. Prohibidos mensajes genéricos.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- RESUMEN DE CUMPLIMIENTO -->
+<h2 class="chapter-title">
+  <span>MATRIZ DE CUMPLIMIENTO Y VERIFICACIÓN INMEDIATA</span>
+  <span class="rule-badge">Audit Canon</span>
+</h2>
+
+<table class="rules-table">
+  <thead>
+    <tr>
+      <th style="width: 18%;">Dominio</th>
+      <th style="width: 32%;">Regla Clave</th>
+      <th style="width: 50%;">Mecanismo de Verificación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ingeniería</strong></td>
+      <td>Vertical Slice End-to-End (1.1)</td>
+      <td>Cero mocks; persistencia real en MySQL, Eloquent, FormRequests y pruebas PHPUnit.</td>
+    </tr>
+    <tr>
+      <td><strong>Contrato Backend</strong></td>
+      <td>Sincronización BACKEND_INTEGRATION_SPEC (1.3)</td>
+      <td>Esquemas JSON, FormRequests, endpoints y migraciones formalizados al 100%.</td>
+    </tr>
+    <tr>
+      <td><strong>Codificación</strong></td>
+      <td>UTF-8 Universal Obligatorio (1.4)</td>
+      <td><code>&lt;meta charset="utf-8"&gt;</code>, MySQL <code>utf8mb4_unicode_ci</code>, saneamiento activo.</td>
+    </tr>
+    <tr>
+      <td><strong>Arquitectura</strong></td>
+      <td>Single Inventory Pool Multiverso (3.1)</td>
+      <td>Stock centralizado en Hub 4; 4 vitrinas desacopladas sin duplicidad de SKUs.</td>
+    </tr>
+    <tr>
+      <td><strong>Estructura DOM</strong></td>
+      <td>Aislamiento de Paneles y Modales (5.1)</td>
+      <td>Nodos hermanos bajo <code>#storeAppRoot</code> (depth=2); paridad de <code>&lt;div&gt;</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Navegación</strong></td>
+      <td>Ergonomía Sin Scroll Horizontal (6.4)</td>
+      <td>Subnav en cuadrícula 2x3 compacta; conmutador de vitrinas en encabezado superior transversal.</td>
+    </tr>
+    <tr>
+      <td><strong>Filtros Storefront</strong></td>
+      <td>Drawer Lateral Izquierdo (6.8)</td>
+      <td>Off-canvas desde <code>left: 0</code>, backdrop modal, formato de árbol con checkboxes.</td>
+    </tr>
+    <tr>
+      <td><strong>Categorías Hub 4</strong></td>
+      <td>Creación y Jerarquía Drag & Drop (6.34)</td>
+      <td>Alta de categorías raíz y subcategorías en Hub 4 Ajustes, alimentando Storefront y Hub 2.</td>
+    </tr>
+    <tr>
+      <td><strong>Proveedores Filtro</strong></td>
+      <td>Dimensión Transversal (6.36)</td>
+      <td>Proveedores como faceta en Hub 4, Hub 2 (Páginas de Explorar con <code>filter_supplier</code>) y Storefront.</td>
+    </tr>
+    <tr>
+      <td><strong>Filtros Facetados</strong></td>
+      <td>Árbol con Checkboxes y Acordeón (6.37)</td>
+      <td>Árbol jerárquico desplegable con pestañas contraíbles/expandibles en <code>#filterDrawer</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>PDP Navegación</strong></td>
+      <td>Botón Volver & Gatillo Filtros (6.38)</td>
+      <td>Retorno rápido y apertura de drawer de filtros <code>data-action="open-filters"</code> directo en PDP.</td>
+    </tr>
+    <tr>
+      <td><strong>Swatches de Color</strong></td>
+      <td>Exhibidor Visual Indexado (6.39)</td>
+      <td>Muestras de color sólidas y tornasoles en tarjetas de catálogo y ficha de producto PDP.</td>
+    </tr>
+    <tr>
+      <td><strong>Variante de Color</strong></td>
+      <td>Conmutación Dinámica de Fotos (6.40)</td>
+      <td>Fotos conmutan al color seleccionado en PDP mediante mapa relacional <code>images_by_color</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Miniaturas Carrito</strong></td>
+      <td>Fotografías en Drawer de Carrito (6.41)</td>
+      <td>Miniaturas visibles por cada prenda en <code>#cartSheet</code> y checkout.</td>
+    </tr>
+    <tr>
+      <td><strong>Cupón Descuento</strong></td>
+      <td>Confinado al Paso 1 del Checkout (6.42)</td>
+      <td>Formulario exclusivo en paso 1; suprimido del drawer pasivo de carrito.</td>
+    </tr>
+    <tr>
+      <td><strong>Inventario & Color</strong></td>
+      <td>Miniaturas y Mapeo Foto-Color (6.43)</td>
+      <td>Miniatura en tabla de Hub 4 y asignación de color a fotos en modal de edición.</td>
+    </tr>
+    <tr>
+      <td><strong>Scraping & Color</strong></td>
+      <td>Curaduría de Imágenes por Color (6.44)</td>
+      <td>Mapeo obligatorio imagen-color en bandeja de curaduría previa de scraping.</td>
+    </tr>
+    <tr>
+      <td><strong>Documentación</strong></td>
+      <td>Tríptico Documental & PDF (10.1)</td>
+      <td>Markdown + HTML estilizado + PDF compilado vía Chrome headless.</td>
+    </tr>
+    <tr>
+      <td><strong>Calidad</strong></td>
+      <td>100% Tests Green & Auditoría CDP (9.1)</td>
+      <td>PHPUnit sin errores; pruebas en Chrome Headless.</td>
+    </tr>
+  </tbody>
+</table>
 
 </body>
 </html>

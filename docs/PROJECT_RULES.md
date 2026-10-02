@@ -327,9 +327,9 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   - El selector de **Tipo de Tela** dispone de un botón interactivo `+ Dar de alta tela` para registrar un nuevo textil/composición en caliente y asignarlo de inmediato a la prenda; de lo contrario, se selecciona del dropdown existente de fibras de la plataforma.
 
 ### Regla 6.34: Creación Jerárquica de Filtros desde Hub 4 (Ajustes > Categorías & Familia)
-* **Creación Centralizada de Filtros:** Los filtros taxonómicos y familias de producto se crean exclusivamente desde los ajustes de Hub 4, pestaña **Categorías & Familias** (`activeSettingsTab === 'categories'`).
-* **Estructura Jerárquica Taxonómica:** Cada categoría se define asignando su nombre, nivel jerárquico (categoría raíz / familia principal, o subcategoría child asignada a un padre) y su descripción taxonómica para búsqueda y catalogación.
-* **Operatividad Drag & Drop y Gestión Completa:** El árbol de categorías opera con reordenamiento visual intuitivo mediante **Drag & Drop** y dispone de acciones completas para editar, activar/desactivar en e-commerce, archivar/restaurar y eliminar registros.
+* **Creación Centralizada de Filtros:** Los administradores disponen de la capacidad de **crear nuevas categorías y familias taxonómicas** directamente desde los ajustes de Hub 4, pestaña **Categorías & Familias** (`activeSettingsTab === 'categories'`).
+* **Estructura Jerárquica Taxonómica:** Cada categoría se crea y define asignando su nombre, nivel jerárquico (categoría raíz / familia principal, o subcategoría child asignada a un padre) y su descripción taxonómica para búsqueda y catalogación.
+* **Operatividad Drag & Drop y Gestión Completa:** El árbol de categorías opera con reordenamiento visual intuitivo mediante **Drag & Drop** y dispone de acciones completas para crear, editar, activar/desactivar en e-commerce, archivar/restaurar y eliminar registros.
 * **Sincronización con Storefront y Hub 2:**
   - Estas familias alimentan dinámicamente los filtros del catálogo de la tienda PWA.
   - La pestaña *Filtros de Catálogo* de Hub 2 se utiliza para organizar visualmente los filtros mediante **Drag & Drop** en tiempo real.
@@ -337,13 +337,53 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 
 ### Regla 6.35: Filtros Facetados Extendidos en Storefront
 * **Facetas Múltiples Obligatorias:** En el storefront (drawer de filtros `#filterDrawer` y motor de consulta en caliente), son formal y funcionalmente considerados filtros las siguientes facetas especializadas:
-  1. **Categorías & Familias:** Píldoras interactivas alimentadas dinámicamente desde Hub 4.
-  2. **Curva de Tallas Anatómicas:** Botones interactivos seleccionables por talla (CH, M, G, XG, 2XL, 3XL).
-  3. **Telas & Fibras Textiles:** Filtro por composición textil (Algodón Pima, Modal Seamless, Spandex, Malla/Mesh, Microfibra Velvet, Bambú Eco, Seda/Satín).
-  4. **Colores & Tornasoles Iridiscentes:** Muestras de color interactivas (Sólidos y Tornasoles como Galaxia Holo y Aurora Boreal).
-  5. **Volúmenes de Perfumería:** Filtros por presentación (30ml Travel, 50ml EdP, 100ml Regular, 200ml Refill).
-  6. **Tonos Cosméticos & Shading:** Filtros de pigmentación y maquillaje (Tono 01 Claro, Tono 02 Medio, Tono 03 Bronce, Tono 04 Profundo).
+  1. **Categorías & Familias:** Píldoras y árbol interactivo alimentado dinámicamente desde Hub 4.
+  2. **Proveedores / Fabricantes:** Filtro por marca o taller mayorista alimentado desde Ajustes de Hub 4.
+  3. **Curva de Tallas Anatómicas:** Botones interactivos seleccionables por talla (CH, M, G, XG, 2XL, 3XL).
+  4. **Telas & Fibras Textiles:** Filtro por composición textil (Algodón Pima, Modal Seamless, Spandex, Malla/Mesh, Microfibra Velvet, Bambú Eco, Seda/Satín).
+  5. **Colores & Tornasoles Iridiscentes:** Muestras de color interactivas (Sólidos y Tornasoles como Galaxia Holo y Aurora Boreal).
+  6. **Volúmenes de Perfumería:** Filtros por presentación (30ml Travel, 50ml EdP, 100ml Regular, 200ml Refill).
+  7. **Tonos Cosméticos & Shading:** Filtros de pigmentación y maquillaje (Tono 01 Claro, Tono 02 Medio, Tono 03 Bronce, Tono 04 Profundo).
 * Todas las facetas interactúan sinérgicamente con el buscador en tiempo real, el selector de universos y el botón de restablecimiento total ("Limpiar filtros").
+
+### Regla 6.36: Proveedores como Dimensión de Filtrado Transversal (Hub 4 $\leftrightarrow$ Hub 2 $\leftrightarrow$ Storefront)
+* **Proveedores como Filtros del Sistema:** Dentro de los ajustes de Hub 4, los nombres de los proveedores registrados forman formalmente parte del universo de filtros.
+* **Incidencia Transversal:**
+  - **Hub 2 (Filtros de Catálogo y Páginas de Explorar):** Los proveedores se reflejan en el gestor de filtros y dentro de los modales de creación y edición de *Páginas de Explorar*, permitiendo vincular un botón de Explorar directamente al catálogo filtrado por un fabricante específico.
+  - **Storefront:** Se presentan como una faceta seleccionable dentro del drawer de filtros para que el comprador pueda filtrar prendas por proveedor o marca asociada.
+
+### Regla 6.37: Formato de Árbol Plegable con Checkboxes en Filtros Facetados (Storefront)
+* **Estructura en Árbol con Checkboxes:** Los filtros facetados extendidos del storefront (`#filterDrawer`) se presentan organizados en **formato de árbol jerárquico** (padre/hijo, idéntico al esquema de Hub 4), con casillas de verificación (**checkboxes**) para selección precisa y múltiple.
+* **Pestañas Colapsables y Acordeones:** Cada grupo o dimensión de filtros cuenta con cabeceras interactivas que se **contraen y expanden suavemente** (acordeones independientes), optimizando el aprovechamiento vertical del drawer en pantallas móviles y permitiendo al usuario abrir exclusivamente las secciones de su interés.
+
+### Regla 6.38: PDP — Botón de Retorno Rápido y Gatillo Conmutador de Filtros
+* **Navegación de Retorno:** La cabecera de cada ficha independiente de producto (`/productos/{slug}`) incorpora obligatoriamente un **botón para volver atrás**, que restituye de inmediato la vista anterior del catálogo o sección previa sin perder el estado de desplazamiento.
+* **Gatillo de Filtros:** Dispone asimismo de un **botón que conmuta/despliega el drawer de filtros** directamente desde la ficha de producto, permitiendo al usuario continuar refinando su exploración del catálogo sin requerir regresar al inicio.
+
+### Regla 6.39: Exhibidor Visual de Color Indexado en Catálogo y PDP
+* **Muestras de Color en Tarjetas y Fichas:** Tanto las tarjetas de producto en los grids del catálogo (`.product-card`) como la página independiente de producto (PDP) exhiben un **exhibidor visual de color (muestras cromáticas / swatches)** correspondiente a los tonos y tornasoles con los cuales el producto fue indexado en la base de datos.
+* **Feedback Inmediato:** Cada swatch despliega su color sólido o degradado tornasol exacto, ofreciendo comprensión visual instantánea de la gama disponible.
+
+### Regla 6.40: Soporte Multi-Color por Modelo y Conmutación Dinámica de Imágenes
+* **Multi-Color por Prenda:** Cada modelo puede contener 1 o más variantes de color, incidiendo transversalmente en Hub 4 (gestión y SKU), Hub 2 (vitrinas) y Storefront (compra D2C).
+* **Conmutación Reactiva de Imágenes en PDP:** Cuando el comprador hace clic en cualquiera de las variantes de color en la ficha de producto, la galería principal de imágenes conmuta dinámicamente mostrando las fotografías asociadas específicamente al color seleccionado.
+* **Configuración en Alta y Edición:** Esta vinculación entre fotografías y variantes de color se define de manera obligatoria desde el modal de alta del producto y se gestiona en sus modales de edición.
+
+### Regla 6.41: Miniaturas Visuales de Producto en Carrito de Compras (Storefront)
+* **Miniaturas en Carrito:** El Drawer de Carrito (`#cartSheet`) y la vista previa de compra muestran visiblemente la **imagen miniatura de cada producto** agregado, junto con su título, variante de color seleccionada, talla y precio unitario.
+* **Garantía Visual:** El comprador valida con certeza fotográfica la prenda exacta antes de avanzar a la pasarela de pago.
+
+### Regla 6.42: Formulario de Cupón de Descuento Confinado Exclusivamente al Paso 1 del Checkout
+* **Despeje del Carrito Pasivo:** Queda prohibido saturar el drawer inicial de carrito o los pasos de pago con formularios persistentes de cupones.
+* **Ubicación Exclusiva en Paso 1:** El formulario y campo de texto para aplicar códigos de descuento se muestra **única y exclusivamente dentro del Primer Paso del Checkout** (`currentCheckoutStep === 1`), permitiendo aplicar el descuento y recalcular el total neto previo al llenado de datos de envío y selección de pasarela.
+
+### Regla 6.43: Miniaturas en Inventario y Asignación de Color a Imágenes en Hub 4
+* **Miniatura en Tabla de Inventario:** Cada fila del catálogo operativo y lista de inventario en Hub 4 renderiza la fotografía miniatura del producto.
+* **Edición y Mapeo en Modal de Producto:** Al abrir el modal de edición de producto en Hub 4, se exhibe la galería de imágenes del artículo, disponiendo de controles para añadir, editar o remover fotografías, así como **asignar la variante de color específica a la que pertenece cada imagen**.
+
+### Regla 6.44: Curaduría de Scraping con Asignación de Variabilidad de Color a Imágenes
+* **Curaduría Visual en Bandeja de Scraping:** En la *Bandeja de Curaduría Previa de Scraping* (Hub 3 / staging area), el protocolo de revisión humana incluye obligatoriamente la asociación de la variabilidad de color del producto a cada fotografía scrapeada.
+* **Garantía de Entrada al Catálogo:** Ninguna prenda scrapeada ingresa al inventario activo sin que sus imágenes queden debidamente enlazadas a sus respectivos colores, asegurando que la conmutación de fotos por color en el storefront funcione de forma óptima desde el primer instante.
 
 ---
 
@@ -463,6 +503,16 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |
 | **Modo Dark / Light**| Contraste Universal WCAG AA | Textos nítidos (>5.5:1), bordes perimetrales visibles, cero fondos oscuros con texto apagado |
+| **Categorías Hub 4** | Creación y Jerarquía Drag & Drop | Alta de categorías raíz y subcategorías en Hub 4 Ajustes |
+| **Proveedores Filtro** | Dimensión de Filtrado Transversal | Proveedores como filtro en Hub 4, Hub 2 (Explorar) y Storefront |
+| **Filtros Facetados** | Árbol con Checkboxes y Acordeón | Formato de árbol plegable que se contrae/expande en `#filterDrawer` |
+| **PDP Navegación** | Botón Volver & Gatillo de Filtros | Retorno rápido y apertura de drawer de filtros directo desde PDP |
+| **Swatches de Color** | Exhibidor Visual de Color Indexado | Muestras de color en tarjetas de catálogo y ficha de producto PDP |
+| **Variante de Color** | Conmutación Dinámica de Imágenes | Fotos conmutan al color seleccionado en PDP; asignado en alta/edición |
+| **Miniaturas Carrito** | Fotografías en Drawer de Carrito | Miniaturas visibles por cada prenda en `#cartSheet` y checkout |
+| **Cupón Descuento** | Confinado al Paso 1 del Checkout | Formulario de código exclusivo en paso 1; cero saturación en carrito |
+| **Inventario & Color** | Miniaturas y Mapeo Foto-Color | Miniatura en tabla de Hub 4 y asignación de color en modal de edición |
+| **Scraping & Color** | Curaduría de Imágenes por Color | Mapeo obligatorio imagen-color en bandeja de curaduría previa |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
