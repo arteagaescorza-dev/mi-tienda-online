@@ -127,6 +127,9 @@
 | `TASK-H2-21` | Corrección Crítica de Renderizado Móvil (< 769px) en Storefront PWA y Control de Caché | **Tienda Pública (Storefront D2C)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Breakpoints PWA, Cache Busting, Hero Contrast |
 | `TASK-H2-22` | Conmutador Global de Vitrinas, Reestructuración a 6 Pestañas y Acordeón de Contenidos & Reglas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Universe Selector Bar, Subnav 6 Tabs, Accordion |
 | `TASK-H2-23` | Aislamiento Estructural de Paneles y Desbloqueo Definitivo del Modal Crear Nueva Sección | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Balance de Divs Blade, CDP Headless Verification, Modales Globales |
+| `TASK-BRD-06` | Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | `newProductPanoramicModal`, `skuPanoramicModal`, `inventory-module.js` |
+| `TASK-BRD-08` | Asociación Mandatoria de Marcas a Proveedores, Fotos con Color y Taxonomías In Situ | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | Árbol Proveedores, Galería Fotos, QuickTaxonomies, Tag v1.6 |
+| `TASK-BRD-09` | Gobernanza Textil Integral: Asignación de Color por Foto, WebP 1080x1350, SKU Dinámico, Telas & Secciones E-Commerce | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Reglas de Oro)** | **Completada (Fullstack End-to-End)** | Catálogo, Ajustes Telas/Secciones, SkuGenerator, ImageNormalization, Tag v1.6 |
 
 ---
 
@@ -2017,4 +2020,52 @@ graph TD
   - Registradas las **Reglas 6.50, 6.51 y 6.52** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf` (472 KB vía Chrome headless).
 * **Verificación de Calidad:**
   - **382 pruebas automatizadas en verde (100% passing test suite, 2,504 aserciones).**
+
+---
+
+### `TASK-BRD-09`: Gobernanza Textil Integral: Asignación de Color por Fotografía, Normalización WebP Universal (1080x1350), SKU Dinámico Reactivo, CRUD y Alta In Situ de Telas y Colores, y Gestión de Secciones E-Commerce (Reglas 6.53 a 6.59)
+* **Prioridad:** **Crítica / Alta (Gobernanza de Catálogo & Arquitectura Textil)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 4 (Workstation de Alta de Producto, Ficha / Drawer de Producto, Ajustes de Inventario) $\leftrightarrow$ Hub 2 (CMS & Home Multiverso) $\leftrightarrow$ Storefront PWA $\leftrightarrow$ API REST RevOps
+* **Requerimientos Formalizados (7 Reglas Obligatorias):**
+  1. *Regla 1 (Regla 6.53):* Desde la ficha de producto / drawer (`skuPanoramicModal`), el operador puede subir o agregar fotografías, asociar a cada una una variante de color oficial (`color_name`), definir foto de portada (&starf;) y registrar nuevos colores in situ para conmutación reactiva en vitrinas y PDP.
+  2. *Regla 2 (Regla 6.54):* Todas las imágenes subidas al sistema se convierten obligatoriamente al formato WebP (`.webp`) y se normalizan al tamaño estándar universal e-commerce de 1080 &times; 1350 píxeles (proporción 4:5, fondo blanco neutral `#FFFFFF` centrado con antialiasing) para desktop y móvil.
+  3. *Regla 3 (Regla 6.55):* El Workstation de Alta de Producto permite dar de alta un nuevo color de producto in situ (`+ Color`) con modal liviano (`quickColorModalOpen`) sin abandonar el workstation ni recargar la pantalla.
+  4. *Regla 4 (Regla 6.56):* El código SKU es dinámico y reactivo: se recalcula en caliente conforme a las cualidades del producto (proveedor, marca, categoría, tela y color) invocando a `SkuGeneratorService`.
+  5. *Regla 5 (Regla 6.57):* El tipo de tela se selecciona dinámicamente de lo registrado en el CRUD maestro de telas de ajustes de inventario. Si no existe, el Workstation cuenta con un botón in situ `+ Tipo de Tela` (`quickFabricModalOpen`) para registrarla sin salir.
+  6. *Regla 6 (Regla 6.58):* El tipo de tela se asocia de forma directa y formal con los productos mediante columnas dedicadas `fabric` y `fabric_id` en la tabla `products`, con relaciones Eloquent en `Product` y `ApparelFabric`.
+  7. *Regla 7 (Regla 6.59):* CRUD integral de secciones del sitio web de e-commerce (`cms_sections`) en Ajustes de Inventario (crear, editar, activar/pausar, archivar/restaurar, eliminar). Se vincula modularmente al Home de Hub 2 (`store.blade.php`, `products.section_name`) y conforma dimensiones activas para los filtros facetados.
+* **Componentes Implementados:**
+  1. *Base de Datos & Migración:*
+     - Migración `2026_10_02_211249_enhance_products_fabrics_and_sections.php` agregó columnas `fabric`, `fabric_id` y `section_name` a `products`, indexó claves y sembró registros canónicos en `apparel_fabrics` y `cms_sections`.
+  2. *Modelos Eloquent:*
+     - `Product`: `$fillable` enriquecido (`fabric`, `fabric_id`, `section_name`), relaciones formales `fabricRelation()` y `fabric()`, accessors `getImagesAttribute()` y `getImagesByColorAttribute()`.
+     - `ApparelFabric`: relación inversa `products() -> hasMany(Product::class)`.
+     - `ApparelColor`: soporte ampliado para `name`, `hex_code`, `color_type`, `gradient_css`, `is_active`.
+     - `CmsSection`: soporte de vitrina, tipo, orden y estados (`is_active`, `is_archived`).
+  3. *Servicio de Normalización de Imágenes:*
+     - `App\Services\ImageNormalizationService`: procesamiento gráfico con GD (`imagecreatefromstring`), canvas estándar 1080x1350 px centrado con padding blanco e-commerce, antialiasing y exportación WebP (`imagewebp(..., 85)`) en `storage/app/public/products/` y `public/storage/products/`.
+  4. *Backend API (`InventorySettingsApiController`, `InventoryApiController`, `ProductSkuAndDuplicateApiController`):*
+     - Endpoint `POST /api/v1/inventory/upload-image` para normalización de archivos y URLs remotas a WebP.
+     - CRUD completo de Telas (`/api/v1/inventory/settings/fabrics`).
+     - CRUD completo de Colores (`/api/v1/inventory/settings/colors`).
+     - CRUD completo de Secciones Web (`/api/v1/inventory/settings/store-sections`).
+     - Persistencia de `fabric`, `fabric_id`, `section_name`, `images`, `gallery`, `images_by_color` e `image_color_map` en `storeProduct` y `updateComplete`.
+     - Generación reactiva de SKU con resolutores dinámicos de tela y color en `SkuGeneratorService`.
+  5. *Frontend Alpine.js (`inventory-module.js`):*
+     - Estado reactivo para `apparelFabrics`, `apparelColors`, `storeSections`.
+     - Modales rápidos in situ: `openQuickFabricModal(context)`, `saveQuickFabric()`, `openQuickColorModal(context, targetImg)`, `saveQuickColor()`.
+     - Métodos de subida y normalización: `uploadImageFile(event, context, targetImg)`, `addManualImageToDrawer()`, `removeDrawerImage()`.
+     - Métodos para CRUD de Secciones: `addNewStoreSection()`, `editStoreSection()`, `saveStoreSection()`, `toggleStoreSectionActive()`, `archiveStoreSection()`, `deleteStoreSection()`.
+     - Recálculo reactivo de SKU: `updateDynamicSku(silent)`.
+  6. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Ficha de Producto (Drawer): botón `+ Subir Foto (WebP)`, input manual, selector de color por foto, botón `+ Color` in situ, botón de portada ★, selector de tela con `+ Nueva Tela` in situ, selector de secciones dinámico.
+     - Workstation: selectores con botones `+ Tipo de Tela` y `+ Color`, dropzone con normalización WebP, miniaturas con asignación de color y SKU dinámico reactivo.
+     - Pestaña 7 de Ajustes: CRUD visual de Secciones Web con badges de estado y acciones completas.
+     - Modales rápidos `quickFabricModalOpen` y `quickColorModalOpen` (`z-[140]`).
+* **Documentación & Tríptico:**
+  - Registradas las **Reglas 6.53 a 6.59** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `ProductFabricsSectionsAndWebpRulesTest.php`: 7/7 tests pasando (100% verde, 31 aserciones).**
+  - **No-regresión en `BrandCrudAndFiltersRulesTest.php`: 8/8 tests pasando (87 aserciones).**
+  - **No-regresión en `EndToEndProjectRulesTest.php`: 7/7 tests pasando (53 aserciones).**
 

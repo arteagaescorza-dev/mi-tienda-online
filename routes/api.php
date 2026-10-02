@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
         Route::post('/adjust', [InventoryApiController::class, 'adjustStock']);
+        Route::post('/upload-image', [InventoryApiController::class, 'uploadImage']);
 
         // GESTION FULLSTACK DE PROVEEDORES & EXTRANET HUB 7 (TASK-PUR-02 / SLICE 4)
         Route::prefix('suppliers')->group(function () {
@@ -107,6 +108,31 @@ Route::prefix('v1')->group(function () {
             Route::post('/categories/{id}/archive', [InventorySettingsApiController::class, 'archiveCategory']);
             Route::post('/categories/{id}/restore', [InventorySettingsApiController::class, 'restoreCategory']);
             Route::delete('/categories/{id}', [InventorySettingsApiController::class, 'destroyCategory']);
+
+            // GESTOR DE TELAS & FIBRAS (REGLA 5 Y 6)
+            Route::get('/fabrics', [InventorySettingsApiController::class, 'getFabrics']);
+            Route::post('/fabrics', [InventorySettingsApiController::class, 'storeFabric']);
+            Route::put('/fabrics/{id}', [InventorySettingsApiController::class, 'updateFabric']);
+            Route::patch('/fabrics/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleFabricActive']);
+            Route::match(['post', 'patch'], '/fabrics/{id}/archive', [InventorySettingsApiController::class, 'archiveFabric']);
+            Route::match(['post', 'patch'], '/fabrics/{id}/restore', [InventorySettingsApiController::class, 'restoreFabric']);
+            Route::delete('/fabrics/{id}', [InventorySettingsApiController::class, 'destroyFabric']);
+
+            // GESTOR DE COLORES & SWATCHES (REGLA 3)
+            Route::get('/colors', [InventorySettingsApiController::class, 'getColors']);
+            Route::post('/colors', [InventorySettingsApiController::class, 'storeColor']);
+            Route::put('/colors/{id}', [InventorySettingsApiController::class, 'updateColor']);
+            Route::patch('/colors/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleColorActive']);
+            Route::delete('/colors/{id}', [InventorySettingsApiController::class, 'destroyColor']);
+
+            // SECCIONES DEL SITIO WEB E-COMMERCE (REGLA 7)
+            Route::get('/store-sections', [InventorySettingsApiController::class, 'getStoreSections']);
+            Route::post('/store-sections', [InventorySettingsApiController::class, 'storeStoreSection']);
+            Route::put('/store-sections/{id}', [InventorySettingsApiController::class, 'updateStoreSection']);
+            Route::patch('/store-sections/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleStoreSectionActive']);
+            Route::match(['post', 'patch'], '/store-sections/{id}/archive', [InventorySettingsApiController::class, 'archiveStoreSection']);
+            Route::match(['post', 'patch'], '/store-sections/{id}/restore', [InventorySettingsApiController::class, 'restoreStoreSection']);
+            Route::delete('/store-sections/{id}', [InventorySettingsApiController::class, 'destroyStoreSection']);
 
             // GESTIÓN INTEGRAL DE MARCAS COMERCIALES (TASK-BRD-01)
             Route::get('/brands', [BrandApiController::class, 'index']);

@@ -1347,6 +1347,9 @@ class StorefrontController extends Controller
             'portalSizeCurves' => $portalSizeCurves,
             'portalFragranceVolumes' => $portalFragranceVolumes,
             'portalCategories' => $portalCategories,
+            'portalFabrics' => \App\Models\ApparelFabric::orderBy('name')->get(),
+            'portalApparelColors' => \App\Models\ApparelColor::where('is_active', true)->orderBy('name')->get(),
+            'portalStoreSections' => \App\Models\CmsSection::orderBy('sort_order')->orderBy('name')->get(),
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()

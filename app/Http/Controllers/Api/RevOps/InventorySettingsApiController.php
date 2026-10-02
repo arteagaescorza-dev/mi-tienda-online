@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api\RevOps;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApparelColor;
+use App\Models\ApparelFabric;
+use App\Models\CmsSection;
 use App\Services\Inventory\VariantDimensionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class InventorySettingsApiController extends Controller
 {
@@ -375,6 +379,394 @@ class InventorySettingsApiController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Categoria eliminada definitivamente.',
+        ]);
+    }
+
+    // =========================================================================
+    // TELAS & FIBRAS TEXTILES (CRUD COMPLETO - REGLAS 5 Y 6)
+    // =========================================================================
+
+    public function getFabrics(Request $request): JsonResponse
+    {
+        $query = ApparelFabric::query();
+        if (!$request->boolean('include_archived', true)) {
+            $query->where('is_active', true);
+        }
+        $fabrics = $query->orderBy('name')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $fabrics,
+        ]);
+    }
+
+    public function storeFabric(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:80|unique:apparel_fabrics,name',
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
+        ], [
+            'name.required' => 'El nombre del tipo de tela es obligatorio.',
+            'name.unique' => 'Ya existe un tipo de tela registrado con este nombre.',
+        ]);
+
+        $slug = Str::slug($validated['name']);
+        $baseSlug = $slug;
+        $counter = 1;
+        while (ApparelFabric::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        $fabric = ApparelFabric::create([
+            'name' => trim($validated['name']),
+            'slug' => $slug,
+            'description' => isset($validated['description']) ? trim($validated['description']) : null,
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tipo de tela '{$fabric->name}' guardado correctamente.",
+            'data' => $fabric,
+        ], 201);
+    }
+
+    public function updateFabric(Request $request, int $id): JsonResponse
+    {
+        $fabric = ApparelFabric::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:80|unique:apparel_fabrics,name,' . $id,
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        if (!empty($validated['name'])) {
+            $fabric->name = trim($validated['name']);
+            $fabric->slug = Str::slug($fabric->name);
+        }
+        if (array_key_exists('description', $validated)) {
+            $fabric->description = $validated['description'];
+        }
+        if (array_key_exists('is_active', $validated)) {
+            $fabric->is_active = (bool) $validated['is_active'];
+        }
+        $fabric->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tipo de tela '{$fabric->name}' actualizado correctamente.",
+            'data' => $fabric,
+        ]);
+    }
+
+    public function toggleFabricActive(int $id): JsonResponse
+    {
+        $fabric = ApparelFabric::findOrFail($id);
+        $fabric->is_active = !$fabric->is_active;
+        $fabric->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Estado de la tela '{$fabric->name}' actualizado.",
+            'data' => $fabric,
+        ]);
+    }
+
+    public function archiveFabric(int $id): JsonResponse
+    {
+        $fabric = ApparelFabric::findOrFail($id);
+        $fabric->is_active = false;
+        $fabric->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tipo de tela '{$fabric->name}' archivado correctamente.",
+            'data' => $fabric,
+        ]);
+    }
+
+    public function restoreFabric(int $id): JsonResponse
+    {
+        $fabric = ApparelFabric::findOrFail($id);
+        $fabric->is_active = true;
+        $fabric->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tipo de tela '{$fabric->name}' restaurado.",
+            'data' => $fabric,
+        ]);
+    }
+
+    public function destroyFabric(int $id): JsonResponse
+    {
+        $fabric = ApparelFabric::findOrFail($id);
+        $name = $fabric->name;
+        $fabric->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tipo de tela '{$name}' eliminado permanentemente.",
+        ]);
+    }
+
+    // =========================================================================
+    // COLORES DE PRENDA & SWATCHES (ALTA IN SITU - REGLA 3)
+    // =========================================================================
+
+    public function getColors(Request $request): JsonResponse
+    {
+        $colors = ApparelColor::orderBy('name')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $colors,
+        ]);
+    }
+
+    public function storeColor(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:80|unique:apparel_colors,name',
+            'hex_code' => 'nullable|string|max:250',
+            'hex' => 'nullable|string|max:250',
+            'color_type' => 'nullable|string|max:30',
+            'type' => 'nullable|string|max:30',
+            'gradient_css' => 'nullable|string|max:250',
+        ], [
+            'name.required' => 'El nombre del color es obligatorio.',
+            'name.unique' => 'Este color ya se encuentra registrado.',
+        ]);
+
+        $rawHex = $request->input('hex_code', $request->input('hex', '#000000'));
+        $colorType = $request->input('color_type', $request->input('type', 'solid'));
+        $gradientCss = $request->input('gradient_css');
+
+        if (str_starts_with($rawHex, 'linear-gradient')) {
+            $gradientCss = $rawHex;
+            $hex = '#6366f1';
+            $colorType = $colorType === 'solid' ? 'iridescent' : $colorType;
+        } else {
+            $hex = str_starts_with($rawHex, '#') ? $rawHex : '#' . $rawHex;
+        }
+
+        $color = ApparelColor::create([
+            'name' => trim($validated['name']),
+            'hex_code' => $hex,
+            'color_type' => $colorType,
+            'gradient_css' => $gradientCss,
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Color de prenda '{$color->name}' registrado exitosamente.",
+            'data' => array_merge($color->toArray(), [
+                'type' => $color->color_type,
+                'hex' => $color->gradient_css ?: $color->hex_code,
+            ]),
+        ], 201);
+    }
+
+    public function updateColor(Request $request, int $id): JsonResponse
+    {
+        $color = ApparelColor::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:80|unique:apparel_colors,name,' . $id,
+            'hex_code' => 'nullable|string|max:250',
+            'hex' => 'nullable|string|max:250',
+            'color_type' => 'nullable|string|max:30',
+            'type' => 'nullable|string|max:30',
+            'gradient_css' => 'nullable|string|max:250',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        if (!empty($validated['name'])) $color->name = trim($validated['name']);
+        
+        $rawHex = $request->input('hex_code', $request->input('hex'));
+        if ($rawHex) {
+            if (str_starts_with($rawHex, 'linear-gradient')) {
+                $color->gradient_css = $rawHex;
+            } else {
+                $color->hex_code = str_starts_with($rawHex, '#') ? $rawHex : '#' . $rawHex;
+            }
+        }
+        if ($request->has('color_type') || $request->has('type')) {
+            $color->color_type = $request->input('color_type', $request->input('type'));
+        }
+        if ($request->has('gradient_css')) $color->gradient_css = $request->input('gradient_css');
+        if (isset($validated['is_active'])) $color->is_active = (bool) $validated['is_active'];
+        $color->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Color '{$color->name}' actualizado.",
+            'data' => $color,
+        ]);
+    }
+
+    public function toggleColorActive(int $id): JsonResponse
+    {
+        $color = ApparelColor::findOrFail($id);
+        $color->is_active = !$color->is_active;
+        $color->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Estado del color actualizado.",
+            'data' => $color,
+        ]);
+    }
+
+    public function destroyColor(int $id): JsonResponse
+    {
+        $color = ApparelColor::findOrFail($id);
+        $name = $color->name;
+        $color->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Color '{$name}' eliminado.",
+        ]);
+    }
+
+    // =========================================================================
+    // SECCIONES DEL SITIO WEB E-COMMERCE (CRUD COMPLETO - REGLA 7)
+    // =========================================================================
+
+    public function getStoreSections(Request $request): JsonResponse
+    {
+        $sections = CmsSection::orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $sections,
+        ]);
+    }
+
+    public function storeStoreSection(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:120',
+            'title' => 'nullable|string|max:200',
+            'subtitle' => 'nullable|string|max:500',
+            'universe' => 'nullable|string|max:32',
+            'type' => 'nullable|string|max:60',
+            'badge' => 'nullable|string|max:80',
+            'sort_order' => 'nullable|integer',
+            'status' => 'nullable|string|in:active,draft,archived',
+        ], [
+            'name.required' => 'El nombre de la sección de tienda es obligatorio.',
+        ]);
+
+        $section = CmsSection::create([
+            'name' => trim($validated['name']),
+            'title' => !empty($validated['title']) ? trim($validated['title']) : strtoupper(trim($validated['name'])),
+            'subtitle' => $validated['subtitle'] ?? null,
+            'universe' => $validated['universe'] ?? 'all',
+            'type' => $validated['type'] ?? 'catalog_section',
+            'badge' => $validated['badge'] ?? 'E-Commerce',
+            'query_rules' => ['section' => trim($validated['name'])],
+            'sort_order' => $validated['sort_order'] ?? 0,
+            'status' => $validated['status'] ?? 'active',
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Sección '{$section->name}' creada exitosamente.",
+            'data' => $section,
+        ], 201);
+    }
+
+    public function updateStoreSection(Request $request, int $id): JsonResponse
+    {
+        $section = CmsSection::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:120',
+            'title' => 'nullable|string|max:200',
+            'subtitle' => 'nullable|string|max:500',
+            'universe' => 'nullable|string|max:32',
+            'type' => 'nullable|string|max:60',
+            'badge' => 'nullable|string|max:80',
+            'sort_order' => 'nullable|integer',
+            'status' => 'nullable|string|in:active,draft,archived',
+        ]);
+
+        if (!empty($validated['name'])) {
+            $section->name = trim($validated['name']);
+            $section->query_rules = array_merge($section->query_rules ?? [], ['section' => $section->name]);
+        }
+        if (array_key_exists('title', $validated)) $section->title = $validated['title'];
+        if (array_key_exists('subtitle', $validated)) $section->subtitle = $validated['subtitle'];
+        if (array_key_exists('universe', $validated)) $section->universe = $validated['universe'];
+        if (array_key_exists('type', $validated)) $section->type = $validated['type'];
+        if (array_key_exists('badge', $validated)) $section->badge = $validated['badge'];
+        if (array_key_exists('sort_order', $validated)) $section->sort_order = $validated['sort_order'];
+        if (array_key_exists('status', $validated)) $section->status = $validated['status'];
+
+        $section->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Sección '{$section->name}' actualizada correctamente.",
+            'data' => $section,
+        ]);
+    }
+
+    public function toggleStoreSectionActive(int $id): JsonResponse
+    {
+        $section = CmsSection::findOrFail($id);
+        $section->status = ($section->status === 'active') ? 'draft' : 'active';
+        $section->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Estado de la sección '{$section->name}' conmutado a '{$section->status}'.",
+            'data' => $section,
+        ]);
+    }
+
+    public function archiveStoreSection(int $id): JsonResponse
+    {
+        $section = CmsSection::findOrFail($id);
+        $section->status = 'archived';
+        $section->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Sección '{$section->name}' archivada.",
+            'data' => $section,
+        ]);
+    }
+
+    public function restoreStoreSection(int $id): JsonResponse
+    {
+        $section = CmsSection::findOrFail($id);
+        $section->status = 'active';
+        $section->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Sección '{$section->name}' restaurada a activa.",
+            'data' => $section,
+        ]);
+    }
+
+    public function destroyStoreSection(int $id): JsonResponse
+    {
+        $section = CmsSection::findOrFail($id);
+        $name = $section->name;
+        $section->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Sección '{$name}' eliminada permanentemente.",
         ]);
     }
 }

@@ -1487,5 +1487,43 @@ class InventoryApiController extends Controller
             ], 200);
         });
     }
+
+    /**
+     * Subida y normalización de imágenes: conversión mandatoria a WebP y normalización uniforme de dimensiones (Regla 2).
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,webp,avif,bmp|max:15360',
+            'image_url' => 'nullable|string|url|max:1000',
+        ]);
+
+        $file = $request->file('image');
+        $url = $request->input('image_url');
+
+        if (!$file && empty($url)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Debes proporcionar un archivo de imagen o una URL válida.',
+            ], 422);
+        }
+
+        try {
+            $normalizationService = app(\App\Services\ImageNormalizationService::class);
+            $result = $normalizationService->normalizeToWebp($file ?: $url);
+
+            return response()->json(array_merge([
+                'status' => 'success',
+                'success' => true,
+                'message' => 'Imagen convertida a WebP y normalizada exitosamente para catálogo web.',
+                'data' => $result,
+            ], $result), 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al procesar y normalizar la imagen: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
 }
 

@@ -889,6 +889,62 @@
       Tanto en el Workstation como en la Curaduría de Scraping se incorporan botones in situ <code>+ Categoría</code> y <code>+ Subcategoría</code> con un modal interactivo rápido (<code>quickCategoryModalOpen</code>) que crea y auto-asigna la taxonomía al formulario activo y al árbol reactivo en memoria sin perder los datos del producto en captura.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">53</div>
+    <div class="rule-content">
+      <strong>Regla 6.53: Asignación de Variantes de Color por Fotografía en la Ficha de Producto (Drawer) y Conmutación Reactiva</strong>
+      En la ficha / drawer de producto (<code>skuPanoramicModal</code>), el operador puede cargar fotos, asociar cada una a una variante de color de la paleta oficial (<code>color_name</code>), designar foto principal (&starf;) y registrar nuevos colores in situ. Los metadatos persisten en <code>images_by_color</code> y <code>gallery</code> para conmutación reactiva de fotos en vitrina y PDP.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">54</div>
+    <div class="rule-content">
+      <strong>Regla 6.54: Conversión Universal Obligatoria a WebP y Normalización Estándar (1080x1350 px, Proporción 4:5)</strong>
+      Toda imagen subida al sistema se convierte forzosamente a formato <code>.webp</code> (calidad 85) y se normaliza al estándar universal e-commerce de <strong>1080 &times; 1350 px</strong> (proporción 4:5) con fondo blanco neutral (#FFFFFF) centrado y antialiasing, garantizando uniformidad visual perfecta en desktop y móvil.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">55</div>
+    <div class="rule-content">
+      <strong>Regla 6.55: Alta In Situ de Nuevos Colores de Prenda en el Workstation (Sin Salir del Workstation)</strong>
+      El Workstation de Alta de Producto dispone de botones <code>+ Color</code> en el selector principal y en cada foto para abrir un modal rápido (<code>quickColorModalOpen</code>). Permite capturar nombre, código hexadecimal y tipo (sólido o degradado CSS), insertándose de inmediato en memoria y seleccionándose sin recargar ni perder la captura.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">56</div>
+    <div class="rule-content">
+      <strong>Regla 6.56: Código SKU Dinámico Reactivo Basado en Cualidades del Producto</strong>
+      El SKU es inteligente y reactivo: se recalcula y actualiza en caliente mediante <code>SkuGeneratorService</code> ante cambios en el proveedor, marca, categoría, tipo de tela o color del producto, garantizando consistencia taxonómica y evitando duplicidades en el Kardex.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">57</div>
+    <div class="rule-content">
+      <strong>Regla 6.57: CRUD Integral de Telas en Ajustes de Inventario y Alta In Situ en el Workstation (+ Tipo de Tela)</strong>
+      Gestor CRUD completo de telas textiles en los ajustes de inventario (creación, edición, activación, archivo y eliminación). Si una tela requerida no existe, el Workstation provee el botón <code>+ Tipo de Tela</code> con modal liviano (<code>quickFabricModalOpen</code>) para darla de alta al vuelo sin abandonar el formulario.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">58</div>
+    <div class="rule-content">
+      <strong>Regla 6.58: Asociación Directa y Estricta del Tipo de Tela con los Productos (fabric / fabric_id)</strong>
+      El tipo de tela se asocia de forma directa y formal en la tabla <code>products</code> a través de las columnas <code>fabric</code> y <code>fabric_id</code>, con relaciones Eloquent formales <code>fabricRelation()</code> y <code>fabric()</code> en <code>Product</code> y <code>products()</code> en <code>ApparelFabric</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">59</div>
+    <div class="rule-content">
+      <strong>Regla 6.59: CRUD Integral de Secciones del Sitio Web E-Commerce (Home Hub 2, Dimensiones y Filtros Facetados)</strong>
+      Pestaña dedicada en Ajustes de Inventario con CRUD completo (crear, editar, activar, archivar, eliminar) de secciones web (<code>cms_sections</code>). Se vinculan modularmente con el Home de Hub 2 y constituyen dimensiones activas para los filtros facetados de catálogo.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1170,6 +1226,41 @@
       <td><strong>Alta In Situ</strong></td>
       <td>Categorías y Subcategorías al Vuelo (6.52)</td>
       <td>Botones y modal liviano para dar de alta taxonomías sin perder el formulario de producto activo.</td>
+    </tr>
+    <tr>
+      <td><strong>Variantes Color Ficha</strong></td>
+      <td>Conmutación Foto-Color en Drawer (6.53)</td>
+      <td>Carga de fotos, asignación de color por foto, portada &starf; y alta de color in situ en ficha.</td>
+    </tr>
+    <tr>
+      <td><strong>WebP & Normalización</strong></td>
+      <td>WebP Universal & 1080x1350 px (6.54)</td>
+      <td>Conversión obligatoria a .webp, lienzo 4:5 centrado y fondo blanco neutral para desktop y móvil.</td>
+    </tr>
+    <tr>
+      <td><strong>Alta In Situ Color</strong></td>
+      <td>Color al Vuelo en Workstation (6.55)</td>
+      <td>Botones + Color y modal interactivo hex/degradado sin abandonar el alta ni recargar.</td>
+    </tr>
+    <tr>
+      <td><strong>SKU Dinámico</strong></td>
+      <td>Reactividad por Atributos (6.56)</td>
+      <td>Auto-actualización sensible a cambios de proveedor, marca, categoría, tela y color.</td>
+    </tr>
+    <tr>
+      <td><strong>CRUD de Telas</strong></td>
+      <td>Telas en Ajustes & In Situ (6.57)</td>
+      <td>Gestor CRUD en Pestaña 1 y botón + Tipo de Tela en Workstation con actualización reactiva.</td>
+    </tr>
+    <tr>
+      <td><strong>Asociación de Telas</strong></td>
+      <td>Vínculo Directo Producto-Tela (6.58)</td>
+      <td>Columnas fabric / fabric_id y relaciones formales Product &harr; ApparelFabric.</td>
+    </tr>
+    <tr>
+      <td><strong>Secciones E-Commerce</strong></td>
+      <td>CRUD Secciones & Hub 2 Home (6.59)</td>
+      <td>Gestor Pestaña 7, modularidad en Home Hub 2 y dimensión transversal para filtros.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>

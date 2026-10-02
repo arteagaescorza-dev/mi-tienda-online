@@ -56,6 +56,9 @@
         window.serverFragranceVolumes = @json($portalFragranceVolumes ?? []);
         window.serverCategories = @json($portalCategories ?? []);
         window.serverBrands = @json($portalBrands ?? []);
+        window.serverFabrics = @json($portalFabrics ?? []);
+        window.serverApparelColors = @json($portalApparelColors ?? []);
+        window.serverStoreSections = @json($portalStoreSections ?? []);
         window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
     </script>
 
@@ -3092,29 +3095,87 @@
 
                             <!-- Galería con Asignación de Color a cada Imagen -->
                             <div class="space-y-2">
-                                <label class="text-[11px] font-semibold text-slate-600 block">Asignar Variante de Color por Imagen (Conmutación)</label>
-                                <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-[11px] font-semibold text-slate-600 block">Asignar Variante de Color por Imagen (Conmutación)</label>
+                                    <input 
+                                        type="file" 
+                                        x-ref="drawerFileInput" 
+                                        @change="uploadImageFile($event, 'drawer')" 
+                                        accept="image/jpeg,image/png,image/webp,image/avif" 
+                                        class="hidden"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="$refs.drawerFileInput.click()" 
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer"
+                                        title="Subir archivo normalizado a WebP"
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>+ Subir Foto (WebP)</span>
+                                    </button>
+                                </div>
+
+                                <!-- Entrada de Foto Manual por URL en Drawer -->
+                                <div class="flex items-center gap-1.5">
+                                    <input 
+                                        type="url" 
+                                        x-model="drawerNewImageUrl" 
+                                        @keydown.enter.prevent="addManualImageToDrawer()" 
+                                        placeholder="Pegar URL de foto adicional..." 
+                                        class="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="addManualImageToDrawer()" 
+                                        class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                        title="Agregar foto por URL"
+                                    >
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ URL</span>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                                     <template x-for="(imgUrl, imgIdx) in (drawerImages?.length ? drawerImages : (drawerImage ? [drawerImage] : []))" :key="imgIdx">
-                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
-                                            <img :src="imgUrl" class="w-9 h-9 rounded object-cover border border-slate-200 shrink-0">
+                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition">
+                                            <img :src="imgUrl" class="w-10 h-10 rounded object-cover border border-slate-200 shrink-0">
                                             <div class="flex-1 min-w-0">
-                                                <select 
-                                                    :value="drawerImageColorMap[imgUrl] || drawerColorName"
-                                                    @change="drawerImageColorMap[imgUrl] = $event.target.value"
-                                                    class="w-full p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-700"
-                                                >
-                                                    <template x-for="col in apparelColors" :key="col.id">
-                                                        <option :value="col.name" x-text="col.name"></option>
-                                                    </template>
-                                                </select>
+                                                <div class="flex items-center gap-1.5">
+                                                    <select 
+                                                        :value="drawerImageColorMap[imgUrl] || drawerColorName"
+                                                        @change="drawerImageColorMap[imgUrl] = $event.target.value"
+                                                        class="flex-1 p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                        <template x-for="col in apparelColors" :key="col.id">
+                                                            <option :value="col.name" x-text="col.name"></option>
+                                                        </template>
+                                                    </select>
+                                                    <button 
+                                                        type="button" 
+                                                        @click="openQuickColorModal('drawer', imgUrl)" 
+                                                        class="px-1.5 py-1 text-[10px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                        title="Crear y asignar nuevo color para esta foto"
+                                                    >
+                                                        + Color
+                                                    </button>
+                                                </div>
                                             </div>
                                             <button 
                                                 type="button" 
                                                 @click="drawerImage = imgUrl" 
-                                                class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 transition cursor-pointer"
+                                                class="px-1.5 py-1 text-[10px] font-bold rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 transition cursor-pointer shrink-0"
+                                                :class="drawerImage === imgUrl ? 'bg-indigo-600 text-white hover:bg-indigo-700' : ''"
                                                 title="Fijar como foto principal"
                                             >
-                                                Principal
+                                                <span x-text="drawerImage === imgUrl ? 'Principal ★' : 'Principal'"></span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="removeDrawerImage(imgIdx)" 
+                                                class="p-1 rounded text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
+                                                title="Eliminar foto de la prenda"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             </button>
                                         </div>
                                     </template>
@@ -3193,10 +3254,9 @@
                                             x-model="drawerWebsiteSection" 
                                             class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                                         >
-                                            <option value="basicos">Línea Básicos Esenciales</option>
-                                            <option value="disenador">Línea Diseñador & Autor</option>
-                                            <option value="temporada">Colección Temporada / Drops</option>
-                                            <option value="general">Catálogo General</option>
+                                            <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                <option :value="sec.slug" :selected="drawerWebsiteSection === sec.slug" x-text="sec.name"></option>
+                                            </template>
                                         </select>
                                     </div>
                                 </div>
@@ -3232,7 +3292,7 @@
                                 <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
                                 <button 
                                     type="button" 
-                                    @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
+                                    @click="openQuickFabricModal('drawer')" 
                                     class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
                                 >
                                     + Nueva Tela
@@ -4004,7 +4064,7 @@
                                         </div>
                                         <select 
                                             x-model="newProduct.supplier_id" 
-                                            @change="onNewProductSupplierChange(); checkProductDuplicate();"
+                                            @change="onNewProductSupplierChange(); checkProductDuplicate(); updateDynamicSku();"
                                             class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
                                         >
                                             <option value="">-- Seleccionar Proveedor --</option>
@@ -4033,7 +4093,7 @@
                                         </div>
                                         <select 
                                             x-model="newProduct.brand" 
-                                            @change="checkProductDuplicate()"
+                                            @change="checkProductDuplicate(); updateDynamicSku();"
                                             class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
                                         >
                                             <option value="">-- Seleccionar Marca --</option>
@@ -4061,7 +4121,7 @@
                                         </div>
                                         <select 
                                             x-model="newProduct.category" 
-                                            @change="onNewProductCategoryChange()"
+                                            @change="onNewProductCategoryChange(); updateDynamicSku();"
                                             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
                                         >
                                             <template x-for="cat in categoriesTree" :key="cat.id">
@@ -4130,10 +4190,9 @@
                                             x-model="newProduct.websiteSection"
                                             class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none"
                                         >
-                                            <option value="basicos">Coleccion Basicos</option>
-                                            <option value="ofertas">Seccion Ofertas</option>
-                                            <option value="temporada">Nueva Temporada</option>
-                                            <option value="destacados">Vitrina Principal</option>
+                                            <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                <option :value="sec.slug" :selected="newProduct.websiteSection === sec.slug" x-text="sec.name"></option>
+                                            </template>
                                         </select>
                                     </div>
                                     <div class="flex items-center gap-2 pt-3">
@@ -4300,28 +4359,56 @@
                                 <!-- Atributos Físicos: Tela & Color -->
                                 <div class="grid grid-cols-2 gap-3 pt-2">
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Tipo de Tela</label>
-                                        <input 
-                                            type="text" 
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Tipo de Tela</label>
+                                            <button 
+                                                type="button" 
+                                                @click="openQuickFabricModal('newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta tipo de tela in situ si no existe"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Tipo de Tela</span>
+                                            </button>
+                                        </div>
+                                        <select 
                                             x-model="newProduct.fabricType" 
-                                            placeholder="Modal Seamless / Algodon" 
+                                            @change="updateDynamicSku()"
                                             class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
                                         >
+                                            <template x-for="fab in apparelFabrics" :key="fab.id">
+                                                <option :value="fab.name" :selected="newProduct.fabricType === fab.name" x-text="fab.name"></option>
+                                            </template>
+                                        </select>
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Color / Swatch</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Color / Swatch</label>
+                                            <button 
+                                                type="button" 
+                                                @click="openQuickColorModal('newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta nuevo color in situ sin salir del workstation"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Color</span>
+                                            </button>
+                                        </div>
                                         <div class="flex items-center gap-2">
                                             <input 
                                                 type="color" 
                                                 x-model="newProduct.colorHex" 
                                                 class="w-7 h-7 p-0 border border-slate-300 rounded cursor-pointer shrink-0"
                                             >
-                                            <input 
-                                                type="text" 
+                                            <select 
                                                 x-model="newProduct.colorName" 
-                                                placeholder="Negro Profundo" 
+                                                @change="const c = apparelColors.find(x => x.name === newProduct.colorName); if(c && c.hex && !c.hex.includes('gradient')) newProduct.colorHex = c.hex; updateDynamicSku();"
                                                 class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
                                             >
+                                                <template x-for="col in apparelColors" :key="col.id">
+                                                    <option :value="col.name" :selected="newProduct.colorName === col.name" x-text="col.name"></option>
+                                                </template>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -4356,11 +4443,11 @@
                                         <span class="text-[10px] font-semibold text-slate-400" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
                                     </div>
                                     
-                                    <!-- Dropzone -->
+                                    <!-- Dropzone con conversión automática a WebP (1080x1350) -->
                                     <div 
                                         @dragover.prevent="isDraggingImages = true"
                                         @dragleave.prevent="isDraggingImages = false"
-                                        @drop.prevent="handleImageDrop($event)"
+                                        @drop.prevent="uploadImageFile($event, 'newProduct')"
                                         class="border-2 border-dashed rounded-xl p-2.5 text-center transition cursor-pointer"
                                         :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-slate-200 bg-slate-50 hover:bg-slate-100/60'"
                                         @click="$refs.newProductFileInput.click()"
@@ -4368,7 +4455,7 @@
                                         <input 
                                             type="file" 
                                             x-ref="newProductFileInput" 
-                                            @change="handleImageUpload($event)"
+                                            @change="uploadImageFile($event, 'newProduct')"
                                             multiple 
                                             accept="image/jpeg,image/png,image/webp,image/avif" 
                                             class="hidden"
@@ -4377,8 +4464,8 @@
                                             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <span class="text-[10px] font-semibold text-slate-700">Arrastra fotos o haz clic para subir archivo</span>
-                                            <span class="text-[9px] text-slate-400">JPG, PNG, WEBP, AVIF (Máx 5MB)</span>
+                                            <span class="text-[10px] font-semibold text-slate-700">Arrastra fotos o haz clic para subir (Conversión WebP 1080x1350)</span>
+                                            <span class="text-[9px] text-slate-400">Normalización automática a estándar web desktop y móvil</span>
                                         </div>
                                     </div>
 
@@ -4421,7 +4508,7 @@
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <!-- Selector de Color de Prenda para esta Foto -->
+                                                        <!-- Selector de Color de Prenda para esta Foto + Botón In Situ + Color -->
                                                         <div class="flex items-center gap-1.5">
                                                             <span class="text-[9px] text-slate-400 font-semibold uppercase">Color:</span>
                                                             <select 
@@ -4432,6 +4519,14 @@
                                                                     <option :value="col.name" :selected="col.name === img.color_name" x-text="col.name"></option>
                                                                 </template>
                                                             </select>
+                                                            <button 
+                                                                type="button" 
+                                                                @click="openQuickColorModal('newProduct', img.preview || img.url)" 
+                                                                class="px-1 py-0.5 text-[9px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                                title="Dar de alta color in situ para esta foto"
+                                                            >
+                                                                + Color
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -9307,29 +9402,148 @@
                         </div>
                     </template>
 
-                    <!-- TAB 7: SECCIONES WEB -->
+                    <!-- TAB 7: SECCIONES WEB E-COMMERCE (CRUD COMPLETO - REGLA 7) -->
                     <template x-if="activeSettingsTab === 'sections'">
                         <div class="space-y-4">
-                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Secciones del Sitio Web E-Commerce</h4>
-                                <ul class="space-y-2 text-xs">
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea Básicos Esenciales</span>
-                                        <span class="text-slate-400">Prendas lisas de alta rotación</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea Diseñador & Autor</span>
-                                        <span class="text-slate-400">Prendas con diseño, estampados y tornasoles</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Colección Temporada / Drops</span>
-                                        <span class="text-slate-400">Lanzamientos de edición limitada</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Catálogo General</span>
-                                        <span class="text-slate-400">Vitrina multiverso estándar</span>
-                                    </li>
-                                </ul>
+                            <!-- Formulario de Alta / Edición de Sección Web -->
+                            <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="storeSectionEditState.isEditing ? 'Editar Sección: ' + storeSectionEditState.form.name : 'Dar de Alta Nueva Sección de Tienda Web'"></h4>
+                                    <span x-show="storeSectionEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Sección</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="storeSectionEditState.isEditing ? storeSectionEditState.form.name : newStoreSectionForm.name" 
+                                            placeholder="Ej: Línea Básicos Esenciales" 
+                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Slug / Identificador</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="storeSectionEditState.isEditing ? storeSectionEditState.form.slug : newStoreSectionForm.slug" 
+                                            placeholder="Ej: basicos (autogenerado si vacío)" 
+                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito Comercial</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="storeSectionEditState.isEditing ? storeSectionEditState.form.description : newStoreSectionForm.description" 
+                                            placeholder="Ej: Prendas lisas de alta rotación para uso diario continuo" 
+                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <template x-if="!storeSectionEditState.isEditing">
+                                        <button 
+                                            type="button" 
+                                            @click="addNewStoreSection()" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                                        >
+                                            + Guardar Sección
+                                        </button>
+                                    </template>
+                                    <template x-if="storeSectionEditState.isEditing">
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="saveStoreSection()" 
+                                                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                                            >
+                                                Actualizar Sección
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="cancelEditStoreSection()" 
+                                                class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition cursor-pointer"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de Secciones Web Registradas -->
+                            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                                <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Secciones del Sitio Web E-Commerce</h4>
+                                    <span class="text-xs text-slate-500 font-semibold" x-text="storeSections.length + ' secciones configuradas'"></span>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                                            <tr>
+                                                <th class="py-2.5 px-4">Sección / Nombre</th>
+                                                <th class="py-2.5 px-4">Identificador / Slug</th>
+                                                <th class="py-2.5 px-4">Descripción / Propósito</th>
+                                                <th class="py-2.5 px-4 text-center">Estado</th>
+                                                <th class="py-2.5 px-4 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                <tr class="hover:bg-slate-50/80 transition" :class="sec.is_archived ? 'opacity-60 bg-slate-50/40' : ''">
+                                                    <td class="py-2.5 px-4 font-bold text-slate-800" x-text="sec.name"></td>
+                                                    <td class="py-2.5 px-4 font-mono text-[11px] text-indigo-700 font-semibold" x-text="sec.slug"></td>
+                                                    <td class="py-2.5 px-4 text-slate-500 max-w-xs truncate" x-text="sec.description || 'Sin descripción'"></td>
+                                                    <td class="py-2.5 px-4 text-center">
+                                                        <span 
+                                                            x-show="!sec.is_archived" 
+                                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                                            :class="sec.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                                                            x-text="sec.is_active ? 'Activo' : 'En Pausa'"
+                                                        ></span>
+                                                        <span 
+                                                            x-show="sec.is_archived" 
+                                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800"
+                                                        >
+                                                            Archivado
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-2.5 px-4 text-right space-x-1.5">
+                                                        <button 
+                                                            type="button" 
+                                                            @click="editStoreSection(sec)" 
+                                                            class="text-indigo-600 hover:text-indigo-900 font-bold text-[11px] cursor-pointer"
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                        <span class="text-slate-300">|</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="toggleStoreSectionActive(sec)" 
+                                                            class="text-slate-600 hover:text-slate-900 text-[11px] cursor-pointer"
+                                                            x-text="sec.is_active ? 'Pausar' : 'Activar'"
+                                                        ></button>
+                                                        <span class="text-slate-300">|</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="archiveStoreSection(sec)" 
+                                                            class="text-amber-600 hover:text-amber-800 text-[11px] cursor-pointer"
+                                                            x-text="sec.is_archived ? 'Restaurar' : 'Archivar'"
+                                                        ></button>
+                                                        <span class="text-slate-300">|</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="deleteStoreSection(sec.id)" 
+                                                            class="text-rose-600 hover:text-rose-800 text-[11px] cursor-pointer"
+                                                        >
+                                                            Eliminar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -11309,6 +11523,237 @@
                     >
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Guardar y Asignar In Situ</span>
+                    </button>
+                </div>
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE TIPO DE TELA (Regla 5)              -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickFabricModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[140] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 140 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickFabricModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Nuevo Tipo de Tela In Situ</h3>
+                            <p class="text-[10px] text-slate-300">Catálogo de Fibras Textiles RevOps</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickFabricModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal de tela"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span>Nombre de la Tela / Fibra</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickFabricForm.name" 
+                            @keydown.enter.prevent="saveQuickFabric()"
+                            placeholder="Ej: Modal Peinado Premium, Seda / Satín, Algodón Pima" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Descripción / Propiedad Textil (Opcional)</label>
+                        <textarea 
+                            x-model="quickFabricForm.description" 
+                            rows="2" 
+                            placeholder="Ej: 95% celulosa natural ultra-sedosa con secado rápido..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Regla 5 &amp; 6: La tela se asociará directamente al producto y quedará disponible permanentemente en los ajustes de inventario.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickFabricModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickFabric()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Crear y Asignar Tela</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE COLOR / TORNASOL (Reglas 1 y 3)     -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickColorModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[140] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 140 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickColorModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-purple-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Nuevo Color / Tornasol In Situ</h3>
+                            <p class="text-[10px] text-purple-200">Variantes de Color para Conmutación Web</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickColorModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal de color"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <!-- Toggle Sólido vs Tornasol -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Tipo de Acabado</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button 
+                                type="button" 
+                                @click="quickColorForm.type = 'solid'" 
+                                class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
+                                :class="quickColorForm.type === 'solid' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                            >
+                                Color Sólido
+                            </button>
+                            <button 
+                                type="button" 
+                                @click="quickColorForm.type = 'iridescent'" 
+                                class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
+                                :class="quickColorForm.type === 'iridescent' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                            >
+                                Tornasol / Degradado
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nombre del Color -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span>Nombre del Color</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickColorForm.name" 
+                            @keydown.enter.prevent="saveQuickColor()"
+                            placeholder="Ej: Negro Profundo, Azul Eléctrico, Galaxia Tornasol" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <!-- Selector de Color Sólido -->
+                    <div x-show="quickColorForm.type === 'solid'">
+                        <label class="block font-bold text-slate-700 mb-1">Muestra Hexadecimal</label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="color" 
+                                x-model="quickColorForm.hex" 
+                                class="w-10 h-10 p-0 border border-slate-300 rounded-lg cursor-pointer shrink-0"
+                            >
+                            <input 
+                                type="text" 
+                                x-model="quickColorForm.hex" 
+                                placeholder="#0f172a" 
+                                class="w-full px-3 py-2 text-xs font-mono font-bold border border-slate-300 rounded-lg text-slate-900 uppercase"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Selector de Tornasol / Degradado -->
+                    <div x-show="quickColorForm.type === 'iridescent'" class="space-y-2">
+                        <label class="block font-bold text-slate-700 mb-1">Paradas de Degradado Tornasol (3 Tonos)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-0.5">Tono 1</span>
+                                <input type="color" x-model="quickColorForm.gradientColor1" class="w-full h-8 p-0 border border-slate-300 rounded cursor-pointer">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-0.5">Tono 2</span>
+                                <input type="color" x-model="quickColorForm.gradientColor2" class="w-full h-8 p-0 border border-slate-300 rounded cursor-pointer">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-0.5">Tono 3</span>
+                                <input type="color" x-model="quickColorForm.gradientColor3" class="w-full h-8 p-0 border border-slate-300 rounded cursor-pointer">
+                            </div>
+                        </div>
+                        <!-- Preview Tornasol -->
+                        <div 
+                            class="h-8 rounded-lg border border-slate-300 shadow-inner"
+                            :style="'background: linear-gradient(135deg, ' + quickColorForm.gradientColor1 + ' 0%, ' + quickColorForm.gradientColor2 + ' 50%, ' + quickColorForm.gradientColor3 + ' 100%)'"
+                        ></div>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Reglas 1 y 3: Se asociará automáticamente a la prenda o a la fotografía activa para la correcta conmutación por filtros en tienda web.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickColorModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickColor()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Crear y Asignar Color</span>
                     </button>
                 </div>
             </div>

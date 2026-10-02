@@ -9,7 +9,22 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sku','title','slug','description','brand','visible','type','price','cost','weight','meta'];
+    protected $fillable = [
+        'sku',
+        'title',
+        'slug',
+        'description',
+        'brand',
+        'fabric',
+        'fabric_id',
+        'section_name',
+        'visible',
+        'type',
+        'price',
+        'cost',
+        'weight',
+        'meta',
+    ];
 
     protected $casts = [
         'meta' => 'array',
@@ -55,6 +70,27 @@ class Product extends Model
         $this->attributes['title'] = static::sanitizeUtf8($value);
     }
 
+    public function getImagesAttribute(): array
+    {
+        $meta = $this->meta ?? [];
+        if (!empty($meta['images']) && is_array($meta['images'])) {
+            return $meta['images'];
+        }
+        if (!empty($meta['gallery']) && is_array($meta['gallery'])) {
+            return array_column($meta['gallery'], 'url');
+        }
+        if (!empty($meta['image'])) {
+            return [$meta['image']];
+        }
+        return [];
+    }
+
+    public function getImagesByColorAttribute(): array
+    {
+        $meta = $this->meta ?? [];
+        return $meta['images_by_color'] ?? ($meta['image_color_map'] ?? []);
+    }
+
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
@@ -68,5 +104,15 @@ class Product extends Model
     public function supplierProducts()
     {
         return $this->hasMany(SupplierProduct::class);
+    }
+
+    public function fabric()
+    {
+        return $this->belongsTo(ApparelFabric::class, 'fabric_id');
+    }
+
+    public function fabricRelation()
+    {
+        return $this->belongsTo(ApparelFabric::class, 'fabric_id');
     }
 }

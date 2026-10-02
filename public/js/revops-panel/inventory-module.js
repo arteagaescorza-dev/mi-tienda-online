@@ -106,32 +106,46 @@ function hybridInventoryModule() {
         stockLocksModalOpen: false,
 
         // TASK-INV-08 / TASK-INV-11: Catálogo de Telas y Fibras Textiles
-        apparelFabrics: [
-            { id: 'algodon_pima', name: 'Algodón Pima', description: 'Fibra natural extra suave de hilo largo de alta durabilidad', is_active: true },
-            { id: 'algodon_peinado', name: 'Algodón Peinado', description: '100% algodón transpirable sin impurezas para uso diario', is_active: true },
-            { id: 'modal', name: 'Modal Seamless', description: 'Fibra celulósica ultra-sedosa con secado rápido y máxima elasticidad', is_active: true },
-            { id: 'elastano', name: 'Elastano / Spandex Fit', description: 'Alta compresión anatómica y memoria elástica activa', is_active: true },
-            { id: 'malla_mesh', name: 'Malla / Mesh Transpirable', description: 'Tejido técnico micro-perforado para ventilación y control térmico', is_active: true },
-            { id: 'microfibra_velvet', name: 'Microfibra Velvet Touch', description: 'Tacto aterciopelado ultraligero que evita rozaduras', is_active: true },
-            { id: 'bambu_eco', name: 'Bambú Eco Air', description: 'Fibra ecológica antibacteriana natural y termorreguladora', is_active: true },
-            { id: 'seda_satin', name: 'Seda / Satín Premium', description: 'Acabado brillante de lujo para lencería de autor', is_active: true }
-        ],
+        apparelFabrics: (typeof window !== 'undefined' && Array.isArray(window.serverFabrics) && window.serverFabrics.length > 0)
+            ? window.serverFabrics
+            : [
+                { id: 'algodon_pima', name: 'Algodón Pima', description: 'Fibra natural extra suave de hilo largo de alta durabilidad', is_active: true },
+                { id: 'algodon_peinado', name: 'Algodón Peinado', description: '100% algodón transpirable sin impurezas para uso diario', is_active: true },
+                { id: 'modal', name: 'Modal Seamless', description: 'Fibra celulósica ultra-sedosa con secado rápido y máxima elasticidad', is_active: true },
+                { id: 'elastano', name: 'Elastano / Spandex Fit', description: 'Alta compresión anatómica y memoria elástica activa', is_active: true },
+                { id: 'malla_mesh', name: 'Malla / Mesh Transpirable', description: 'Tejido técnico micro-perforado para ventilación y control térmico', is_active: true },
+                { id: 'microfibra_velvet', name: 'Microfibra Velvet Touch', description: 'Tacto aterciopelado ultraligero que evita rozaduras', is_active: true },
+                { id: 'bambu_eco', name: 'Bambú Eco Air', description: 'Fibra ecológica antibacteriana natural y termorreguladora', is_active: true },
+                { id: 'seda_satin', name: 'Seda / Satín Premium', description: 'Acabado brillante de lujo para lencería de autor', is_active: true }
+            ],
 
         // TASK-INV-08 / TASK-INV-11: Paleta de Colores Sólidos y Tornasoles Iridiscentes
-        apparelColors: [
-            { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', type: 'solid', is_active: true },
-            { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid', is_active: true },
-            { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', type: 'solid', is_active: true },
-            { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid', is_active: true },
-            { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', type: 'solid', is_active: true },
-            { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', type: 'solid', is_active: true },
-            { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', type: 'solid', is_active: true },
-            { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', type: 'solid', is_active: true },
-            { id: 'galaxia_holo', name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent', is_active: true },
-            { id: 'esmeralda_aurora', name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent', is_active: true },
-            { id: 'plata_iridiscente', name: 'Plata Iridiscente Prism', hex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', type: 'iridescent', is_active: true },
-            { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', is_active: true }
-        ],
+        apparelColors: (typeof window !== 'undefined' && Array.isArray(window.serverApparelColors) && window.serverApparelColors.length > 0)
+            ? window.serverApparelColors
+            : [
+                { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', type: 'solid', is_active: true },
+                { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid', is_active: true },
+                { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', type: 'solid', is_active: true },
+                { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid', is_active: true },
+                { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', type: 'solid', is_active: true },
+                { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', type: 'solid', is_active: true },
+                { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', type: 'solid', is_active: true },
+                { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', type: 'solid', is_active: true },
+                { id: 'galaxia_holo', name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent', is_active: true },
+                { id: 'esmeralda_aurora', name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent', is_active: true },
+                { id: 'plata_iridiscente', name: 'Plata Iridiscente Prism', hex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', type: 'iridescent', is_active: true },
+                { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', is_active: true }
+            ],
+
+        // Regla 7: Secciones Modulares del Sitio Web E-Commerce y Filtros Hub 2
+        storeSections: (typeof window !== 'undefined' && Array.isArray(window.serverStoreSections) && window.serverStoreSections.length > 0)
+            ? window.serverStoreSections
+            : [
+                { id: 1, name: 'Línea Básicos Esenciales', slug: 'basicos', description: 'Prendas lisas de alta rotación para uso diario continuo', is_active: true, is_archived: false },
+                { id: 2, name: 'Línea Diseñador & Autor', slug: 'disenador', description: 'Prendas con diseño exclusivo, cortes audaces y tornasoles', is_active: true, is_archived: false },
+                { id: 3, name: 'Colección Temporada / Drops', slug: 'temporada', description: 'Lanzamientos de edición limitada y cápsulas experimentales', is_active: true, is_archived: false },
+                { id: 4, name: 'Catálogo General', slug: 'general', description: 'Vitrina multiverso estándar con todas las líneas disponibles', is_active: true, is_archived: false }
+            ],
 
         // TASK-INV-08: Staging de Curaduría Previa de Scraping (Validación humana antes de publicar)
         scrapedPendingItems: [
@@ -258,6 +272,22 @@ function hybridInventoryModule() {
         // Regla 2: Inputs para URLs de imágenes manuales
         curatingNewImageUrl: '',
         newProductManualImageUrl: '',
+        drawerNewImageUrl: '',
+        isUploadingImage: false,
+
+        // Reglas 1, 3, 5: Modales Rápidos In Situ para Alta de Telas y Colores
+        quickFabricModalOpen: false,
+        quickFabricContext: 'newProduct', // 'newProduct' | 'drawer' | 'curating'
+        quickFabricForm: { name: '', description: '' },
+
+        quickColorModalOpen: false,
+        quickColorContext: 'newProduct', // 'newProduct' | 'drawer' | 'curating'
+        quickColorTargetImg: null,
+        quickColorForm: { name: '', hex: '#0f172a', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b' },
+
+        // Regla 7: Estado de Edición y Alta de Secciones de Tienda Web
+        newStoreSectionForm: { name: '', slug: '', description: '', is_active: true },
+        storeSectionEditState: { isEditing: false, editingId: null, form: { name: '', slug: '', description: '', is_active: true } },
 
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
         providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
@@ -6986,6 +7016,477 @@ function hybridInventoryModule() {
             }
             this.apparelColors = this.apparelColors.filter(c => c.id !== colId);
             this.showToast(`Color "${col.name}" eliminado de la paleta.`, 'success');
+        },
+
+        // =========================================================================
+        // REGLAS 1, 3, 5: MODALES RÁPIDOS IN SITU (TELAS & COLORES)
+        // =========================================================================
+        openQuickFabricModal(context = 'newProduct') {
+            this.quickFabricContext = context;
+            this.quickFabricForm = { name: '', description: '' };
+            this.quickFabricModalOpen = true;
+        },
+
+        async saveQuickFabric() {
+            const name = (this.quickFabricForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa el nombre de la tela.', 'warning');
+                return;
+            }
+            const description = (this.quickFabricForm.description || '').trim() || 'Fibra textil para indumentaria';
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newObj = { id: id, name: name, description: description, is_active: true };
+            this.apparelFabrics.push(newObj);
+
+            if (this.quickFabricContext === 'newProduct') {
+                this.newProduct.fabricType = name;
+                this.updateDynamicSku();
+            } else if (this.quickFabricContext === 'drawer') {
+                this.drawerFabricType = name;
+            }
+
+            this.quickFabricModalOpen = false;
+            this.showToast(`Tipo de tela "${name}" creado y asignado in situ.`, 'success');
+
+            try {
+                const res = await fetch('/api/v1/inventory/settings/fabrics', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({ name: name, description: description, is_active: true })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.data && data.data.id) {
+                        newObj.id = data.data.id;
+                    }
+                }
+            } catch (e) {
+                console.warn('Sync quick fabric fallback:', e);
+            }
+        },
+
+        openQuickColorModal(context = 'newProduct', targetImg = null) {
+            this.quickColorContext = context;
+            this.quickColorTargetImg = targetImg;
+            this.quickColorForm = {
+                name: '',
+                hex: '#0f172a',
+                type: 'solid',
+                gradientColor1: '#6366f1',
+                gradientColor2: '#ec4899',
+                gradientColor3: '#f59e0b'
+            };
+            this.quickColorModalOpen = true;
+        },
+
+        async saveQuickColor() {
+            const name = (this.quickColorForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa el nombre del color.', 'warning');
+                return;
+            }
+            let hexVal = this.quickColorForm.hex;
+            if (this.quickColorForm.type === 'iridescent') {
+                hexVal = `linear-gradient(135deg, ${this.quickColorForm.gradientColor1} 0%, ${this.quickColorForm.gradientColor2} 50%, ${this.quickColorForm.gradientColor3} 100%)`;
+            }
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newObj = {
+                id: id,
+                name: name,
+                hex: hexVal,
+                type: this.quickColorForm.type,
+                is_active: true
+            };
+            this.apparelColors.push(newObj);
+
+            if (this.quickColorContext === 'newProduct') {
+                this.newProduct.colorName = name;
+                this.newProduct.colorHex = hexVal;
+                this.newProduct.colorType = this.quickColorForm.type;
+                if (this.quickColorTargetImg && Array.isArray(this.newProduct.images)) {
+                    const img = this.newProduct.images.find(im => (im.url === this.quickColorTargetImg || im.preview === this.quickColorTargetImg));
+                    if (img) img.color_name = name;
+                }
+                this.updateDynamicSku();
+            } else if (this.quickColorContext === 'drawer') {
+                this.drawerColorName = name;
+                this.drawerColorHex = hexVal;
+                this.drawerColorType = this.quickColorForm.type;
+                if (this.quickColorTargetImg) {
+                    if (!this.drawerImageColorMap) this.drawerImageColorMap = {};
+                    this.drawerImageColorMap[this.quickColorTargetImg] = name;
+                }
+            } else if (this.quickColorContext === 'curating' && this.curatingItem) {
+                this.curatingItem.detectedColorName = name;
+                this.curatingItem.detectedColorHex = hexVal;
+                this.curatingItem.colorType = this.quickColorForm.type;
+                if (this.quickColorTargetImg) {
+                    if (!this.curatingItem.imageColorMap) this.curatingItem.imageColorMap = {};
+                    this.curatingItem.imageColorMap[this.quickColorTargetImg] = name;
+                }
+            }
+
+            this.quickColorModalOpen = false;
+            this.showToast(`Color "${name}" agregado y asignado in situ.`, 'success');
+
+            try {
+                const res = await fetch('/api/v1/inventory/settings/colors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        hex: hexVal,
+                        type: this.quickColorForm.type,
+                        is_active: true
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.data && data.data.id) {
+                        newObj.id = data.data.id;
+                    }
+                }
+            } catch (e) {
+                console.warn('Sync quick color fallback:', e);
+            }
+        },
+
+        // =========================================================================
+        // REGLA 7: SECCIONES WEB E-COMMERCE (CRUD REACTIVO)
+        // =========================================================================
+        async addNewStoreSection() {
+            const name = (this.newStoreSectionForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa el nombre de la sección.', 'warning');
+                return;
+            }
+            let slug = (this.newStoreSectionForm.slug || '').trim();
+            if (!slug) {
+                slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            }
+            const desc = (this.newStoreSectionForm.description || '').trim();
+            const newSec = {
+                id: Date.now(),
+                name: name,
+                slug: slug,
+                description: desc,
+                is_active: this.newStoreSectionForm.is_active !== false,
+                is_archived: false
+            };
+            this.storeSections.push(newSec);
+            this.newStoreSectionForm = { name: '', slug: '', description: '', is_active: true };
+            this.showToast(`Sección "${name}" creada exitosamente.`, 'success');
+
+            try {
+                const res = await fetch('/api/v1/inventory/settings/store-sections', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        slug: slug,
+                        description: desc,
+                        is_active: true
+                    })
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json && json.data && json.data.id) {
+                        newSec.id = json.data.id;
+                    }
+                }
+            } catch (e) {
+                console.warn('Sync store section fallback:', e);
+            }
+        },
+
+        editStoreSection(sec) {
+            this.storeSectionEditState.isEditing = true;
+            this.storeSectionEditState.editingId = sec.id;
+            this.storeSectionEditState.form = {
+                name: sec.name,
+                slug: sec.slug,
+                description: sec.description || '',
+                is_active: sec.is_active !== false
+            };
+        },
+
+        cancelEditStoreSection() {
+            this.storeSectionEditState.isEditing = false;
+            this.storeSectionEditState.editingId = null;
+            this.storeSectionEditState.form = { name: '', slug: '', description: '', is_active: true };
+        },
+
+        async saveStoreSection() {
+            const name = (this.storeSectionEditState.form.name || '').trim();
+            if (!name) {
+                this.showToast('El nombre de la sección no puede estar vacío.', 'warning');
+                return;
+            }
+            const sec = this.storeSections.find(s => s.id === this.storeSectionEditState.editingId);
+            if (!sec) return;
+            sec.name = name;
+            sec.slug = (this.storeSectionEditState.form.slug || sec.slug).trim();
+            sec.description = (this.storeSectionEditState.form.description || '').trim();
+            sec.is_active = this.storeSectionEditState.form.is_active;
+
+            const secId = sec.id;
+            const payload = { ...this.storeSectionEditState.form };
+            this.cancelEditStoreSection();
+            this.showToast(`Sección "${name}" actualizada.`, 'success');
+
+            try {
+                await fetch(`/api/v1/inventory/settings/store-sections/${secId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                console.warn('Sync store section edit fallback:', e);
+            }
+        },
+
+        async toggleStoreSectionActive(sec) {
+            sec.is_active = !sec.is_active;
+            const statusLabel = sec.is_active ? 'activada' : 'pausada';
+            this.showToast(`Sección "${sec.name}" ${statusLabel}.`, 'info');
+
+            try {
+                await fetch(`/api/v1/inventory/settings/store-sections/${sec.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+            } catch (e) {
+                console.warn('Sync toggle active section fallback:', e);
+            }
+        },
+
+        async archiveStoreSection(sec) {
+            sec.is_archived = !sec.is_archived;
+            const statusLabel = sec.is_archived ? 'archivada' : 'restaurada';
+            this.showToast(`Sección "${sec.name}" ${statusLabel}.`, 'info');
+
+            try {
+                const endpoint = sec.is_archived ? 'archive' : 'restore';
+                await fetch(`/api/v1/inventory/settings/store-sections/${sec.id}/${endpoint}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+            } catch (e) {
+                console.warn('Sync archive section fallback:', e);
+            }
+        },
+
+        async deleteStoreSection(secId) {
+            const sec = this.storeSections.find(s => s.id === secId);
+            if (!sec) return;
+            const inUseCount = (this.products || []).filter(p => (p.websiteSection === sec.slug || p.website_section === sec.slug || p.section_name === sec.name)).length;
+            if (inUseCount > 0) {
+                this.showToast(`No es posible eliminar "${sec.name}" porque tiene ${inUseCount} productos asociados. Se recomienda archivarla.`, 'warning');
+                return;
+            }
+            this.storeSections = this.storeSections.filter(s => s.id !== secId);
+            this.showToast(`Sección "${sec.name}" eliminada.`, 'success');
+
+            try {
+                await fetch(`/api/v1/inventory/settings/store-sections/${secId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+            } catch (e) {
+                console.warn('Sync delete section fallback:', e);
+            }
+        },
+
+        // =========================================================================
+        // REGLA 2: NORMALIZACIÓN & CONVERSIÓN UNIVERSAL A WEBP (1080x1350)
+        // =========================================================================
+        async uploadImageFile(event, context = 'newProduct', targetImg = null) {
+            const files = event && event.target ? event.target.files : (event && event.dataTransfer ? event.dataTransfer.files : null);
+            if (!files || !files.length) return;
+            const file = files[0];
+
+            this.isUploadingImage = true;
+            this.showToast('Normalizando y convirtiendo imagen a formato WebP...', 'info');
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const res = await fetch('/api/v1/inventory/upload-image', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    throw new Error('Error al procesar la imagen en el servidor');
+                }
+
+                const json = await res.json();
+                if (!json.success || !json.url) {
+                    throw new Error(json.message || 'Respuesta inválida al subir imagen');
+                }
+
+                const webpUrl = json.url;
+
+                if (context === 'newProduct') {
+                    if (!Array.isArray(this.newProduct.images)) this.newProduct.images = [];
+                    const isFirst = this.newProduct.images.length === 0;
+                    this.newProduct.images.push({
+                        id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                        name: file.name ? file.name.replace(/\.[^/.]+$/, "") + '.webp' : 'Foto ' + (this.newProduct.images.length + 1),
+                        size: json.size_bytes || file.size || 0,
+                        type: 'image/webp',
+                        preview: webpUrl,
+                        url: webpUrl,
+                        color_name: this.newProduct.colorName || (this.apparelColors && this.apparelColors[0] ? this.apparelColors[0].name : 'Negro Profundo'),
+                        is_primary: isFirst,
+                        sort_order: this.newProduct.images.length
+                    });
+                } else if (context === 'drawer') {
+                    if (!Array.isArray(this.drawerImages)) this.drawerImages = [];
+                    this.drawerImages.push(webpUrl);
+                    if (!this.drawerImageColorMap) this.drawerImageColorMap = {};
+                    this.drawerImageColorMap[webpUrl] = this.drawerColorName || (this.apparelColors && this.apparelColors[0] ? this.apparelColors[0].name : 'Negro Profundo');
+                    if (!this.drawerImage) {
+                        this.drawerImage = webpUrl;
+                    }
+                } else if (context === 'curating' && this.curatingItem) {
+                    if (!Array.isArray(this.curatingItem.images)) this.curatingItem.images = [];
+                    this.curatingItem.images.push(webpUrl);
+                    if (!this.curatingItem.imageColorMap) this.curatingItem.imageColorMap = {};
+                    this.curatingItem.imageColorMap[webpUrl] = this.curatingItem.detectedColorName || (this.apparelColors && this.apparelColors[0] ? this.apparelColors[0].name : 'Negro Profundo');
+                }
+
+                this.showToast('Imagen normalizada a WebP (1080x1350) exitosamente.', 'success');
+            } catch (err) {
+                console.error('Error subiendo imagen normalizada:', err);
+                this.showToast('No se pudo normalizar la imagen: ' + (err.message || 'Error de red'), 'warning');
+            } finally {
+                this.isUploadingImage = false;
+                if (event && event.target) {
+                    event.target.value = '';
+                }
+            }
+        },
+
+        // Regla 1: Entrada manual de URL para Ficha de Producto (Drawer) con normalización WebP
+        async addManualImageToDrawer() {
+            const url = (this.drawerNewImageUrl || '').trim();
+            if (!url) {
+                this.showToast('Ingresa una URL válida de imagen.', 'warning');
+                return;
+            }
+            if (!Array.isArray(this.drawerImages)) this.drawerImages = [];
+
+            this.showToast('Normalizando imagen externa a WebP...', 'info');
+            try {
+                const res = await fetch('/api/v1/inventory/upload-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({ image_url: url })
+                });
+                const json = await res.json();
+                const finalUrl = (json.success && json.url) ? json.url : url;
+
+                this.drawerImages.push(finalUrl);
+                if (!this.drawerImageColorMap) this.drawerImageColorMap = {};
+                this.drawerImageColorMap[finalUrl] = this.drawerColorName || 'Negro Profundo';
+                if (!this.drawerImage) this.drawerImage = finalUrl;
+                this.drawerNewImageUrl = '';
+                this.showToast('Fotografía normalizada agregada a la prenda.', 'success');
+            } catch (e) {
+                this.drawerImages.push(url);
+                if (!this.drawerImageColorMap) this.drawerImageColorMap = {};
+                this.drawerImageColorMap[url] = this.drawerColorName || 'Negro Profundo';
+                if (!this.drawerImage) this.drawerImage = url;
+                this.drawerNewImageUrl = '';
+                this.showToast('Fotografía agregada a la prenda.', 'success');
+            }
+        },
+
+        removeDrawerImage(index) {
+            if (!Array.isArray(this.drawerImages) || !this.drawerImages[index]) return;
+            const removedUrl = this.drawerImages.splice(index, 1)[0];
+            if (removedUrl && this.drawerImageColorMap) {
+                delete this.drawerImageColorMap[removedUrl];
+            }
+            if (this.drawerImage === removedUrl) {
+                this.drawerImage = this.drawerImages.length ? this.drawerImages[0] : '';
+            }
+            this.showToast('Fotografía removida.', 'info');
+        },
+
+        // =========================================================================
+        // REGLA 4: SKU DINÁMICO REACTIVO CONFORME A CUALIDADES DEL PRODUCTO
+        // =========================================================================
+        async updateDynamicSku(silent = true) {
+            try {
+                const payload = {
+                    category: this.newProduct.category || 'Boxers',
+                    brand: this.newProduct.brand || 'ModaIntima Textil MX',
+                    supplier_id: this.newProduct.supplier_id || null,
+                    fabric: this.newProduct.fabricType || null,
+                    color: this.newProduct.colorName || null,
+                    variant_code: (this.newProduct.variantDimension === 'size' && this.newProduct.sizes) ? Object.keys(this.newProduct.sizes)[0] : null
+                };
+                const res = await fetch('/api/v1/inventory/products/generate-sku', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json && json.status === 'success' && json.data && json.data.sku) {
+                        this.newProduct.sku = json.data.sku;
+                        if (!silent) {
+                            this.showToast('SKU dinámico actualizado: ' + json.data.sku, 'info');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Recálculo dinámico de SKU fallback:', e);
+            }
         },
 
         // --- SLOTTING FÍSICO (UBICACIONES DE ALMACÉN) ---

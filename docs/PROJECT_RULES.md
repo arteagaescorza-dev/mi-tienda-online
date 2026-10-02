@@ -453,6 +453,64 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. Al confirmarse el guardado vía `/api/v1/inventory/settings/categories`, la nueva entidad se inserta en tiempo real en la estructura en memoria `categoriesTree`.
   3. Se auto-selecciona automáticamente en el formulario del producto activo (Workstation o Curaduría), permitiendo al operador continuar la captura o aprobación sin interrupción.
 
+### Regla 6.53: Asignación de Variantes de Color por Fotografía en la Ficha de Producto (Drawer) y Conmutación Reactiva
+* **Asignación Dinámica en la Ficha de Producto:** Desde el drawer / modal de edición de producto (`skuPanoramicModal`), el operador tiene la capacidad de:
+  1. Subir nuevas fotografías mediante carga directa de archivos o ingreso de URLs manuales con botón `+ Agregar Imagen`.
+  2. Asignar de forma explícita un color de prenda (`color_name`) a cada fotografía mediante un selector interactivo basado en la paleta oficial de colores (`apparelColors`).
+  3. Designar la imagen de portada / principal (`is_primary`) con un clic mediante botón con estrella ★.
+  4. Crear un color nuevo in situ sin salir de la ficha ni recargar la página.
+* **Persistencia Estructurada y Acceso Transparente:** La API transaccional (`ProductSkuAndDuplicateApiController@updateComplete`) procesa y almacena la colección en `meta.gallery`, `meta.images`, `meta.images_by_color` y `meta.image_color_map`. El modelo `Product` expone los accessors `$product->images` y `$product->images_by_color`.
+* **Conmutación Visual en Vitrina:** Esta relación permite la conmutación reactiva e inmediata de la fotografía principal de la tarjeta cuando el comprador o el operador selecciona un color en el catálogo, en la ficha de detalle (PDP) o en las vistas modulares.
+
+### Regla 6.54: Conversión Universal Obligatoria a WebP y Normalización Estándar (1080x1350 px, Proporción 4:5)
+* **Conversión Universal a WebP:** Todas las imágenes que se suben a la aplicación —sin importar su formato original (JPEG, PNG, GIF, BMP) ni su peso o resolución— se convierten forzosamente al formato moderno **WebP** (`.webp`) con factor de compresión equilibrado (calidad 85).
+* **Normalización Uniforme de Dimensiones (Estándar E-Commerce de Moda):**
+  1. Las imágenes se redimensionan y ajustan a un tamaño canónico universal de **1080 × 1350 píxeles** (proporción vertical 4:5), el estándar de oro en el comercio electrónico de moda y retail para visualización óptima tanto en desktop como en dispositivos móviles y pantallas de alta densidad (Retina).
+  2. La imagen se ajusta preservando su relación de aspecto original (`aspect ratio`) y se encuadra en el centro de un lienzo sólido de fondo blanco neutral (`#FFFFFF`) con antialiasing de alta calidad.
+* **Servicio Especializado:** La lógica se encapsula en `App\Services\ImageNormalizationService` y se expone a través del endpoint transaccional `POST /api/v1/inventory/upload-image`, garantizando que ninguna imagen cruda o heterogénea contamine el almacenamiento ni degrade la velocidad de carga de la tienda.
+
+### Regla 6.55: Alta In Situ de Nuevos Colores de Prenda en el Workstation (Sin Salir del Workstation)
+* **Continuidad sin Interrupciones en el Workstation:** Durante el alta de producto (`newProductPanoramicModal`), el catalogador puede dar de alta un nuevo color de producto in situ si este no existe previamente en el catálogo de colores, sin abandonar el workstation ni recargar la pantalla.
+* **Botones In Situ (`+ Color`):** Se disponen botones de alta in situ tanto en la cabecera del selector de color principal como junto al selector de color de cada miniatura fotográfica cargada.
+* **Modal Rápido de Color (`quickColorModalOpen`, `z-[140]`):**
+  1. Permite registrar el nombre del color, su valor hexadecimal (`#hex`) con selector nativo interactivo y el tipo de color (sólido o gradiente CSS).
+  2. Al confirmarse el guardado vía `POST /api/v1/inventory/settings/colors`, la entidad se persiste en `apparel_colors`, se inserta reactivamente en la lista en memoria `apparelColors` y se autoselecciona de inmediato en el formulario o en la imagen destino.
+
+### Regla 6.56: Código SKU Dinámico Reactivo Basado en Cualidades del Producto (Proveedor, Marca, Categoría, Tela, Color)
+* **Reactividad Dinámica del SKU:** El código SKU no es una cadena fija ni se genera una única vez de forma estática; es reactivo y evoluciona dinámicamente conforme a las cualidades esenciales del producto.
+* **Parámetros Determinantes:** El SKU se recalcula automáticamente si cualquiera de los siguientes atributos cambia en el formulario del Workstation:
+  1. Proveedor / Fabricante (`supplier_id`).
+  2. Marca Comercial (`brand`).
+  3. Categoría / Línea de Prenda (`category`).
+  4. Tipo de Tela / Composición (`fabric_type` / `fabric_id`).
+  5. Color Oficial (`color_name` / `color_hex`).
+* **Motor de Generación:** La lógica se coordina a través del método reactivo `updateDynamicSku(silent)` que invoca al servicio `SkuGeneratorService` vía `POST /api/v1/inventory/generate-sku`, previniendo colisiones de identificadores y garantizando una taxonomía lógica y trazable en el Kardex.
+
+### Regla 6.57: CRUD Integral de Telas en Ajustes de Inventario y Alta In Situ en el Workstation (+ Tipo de Tela)
+* **CRUD Maestro de Telas:** En los Ajustes de Inventario (Pestaña 1, *Telas*), la plataforma dispone de un gestor CRUD completo para tipos de telas y composiciones textiles (`apparel_fabrics`): creación, edición, activación/desactivación reactiva, archivado y eliminación definitiva.
+* **Selección Contextual en Workstation y Drawer:** En el Workstation de Alta de Producto y en la Ficha de Edición, el tipo de tela se selecciona dinámicamente de entre las telas activas registradas en el CRUD maestro.
+* **Botón de Alta In Situ (`+ Tipo de Tela` / `+ Nueva Tela`):** Si la tela deseada no existe en el catálogo:
+  1. Un botón in situ abre el modal rápido `quickFabricModalOpen` (`z-[140]`).
+  2. Permite capturar el nombre comercial de la tela, su composición textil porcentual y una descripción técnica.
+  3. Al confirmarse vía `POST /api/v1/inventory/settings/fabrics`, la nueva tela se persiste en la base de datos, se incorpora a la colección en memoria `apparelFabrics` y se selecciona automáticamente en el formulario en edición, disparando además la actualización del SKU dinámico.
+
+### Regla 6.58: Asociación Directa y Estricta del Tipo de Tela con los Productos (fabric / fabric_id)
+* **Asociación Formal en la Capa de Datos:** El tipo de tela no es un texto libre o volátil sin control; se asocia formalmente a nivel relacional en la tabla `products` mediante dos columnas dedicadas:
+  - `fabric`: Cadena descriptiva con el nombre y composición canónica de la tela (ej. `Algodón & Modal`, `Microfibra Spandex`).
+  - `fabric_id`: Clave foránea entera no nulable vinculada a `apparel_fabrics.id`.
+* **Modelado Eloquent:** El modelo `Product` declara las relaciones formales `fabricRelation()` y `fabric()` vinculadas a `ApparelFabric`, mientras que `ApparelFabric` define la relación inversa `products() -> hasMany(Product::class)`.
+* **Gobernanza:** Esta estructura formal garantiza la integridad referencial, habilita auditorías de calidad de materiales en Kardex y alimenta los filtros facetados de búsqueda por composición textil en el Storefront y Hub 2.
+
+### Regla 6.59: CRUD Integral de Secciones del Sitio Web E-Commerce (Home Hub 2, Dimensiones y Filtros Facetados)
+* **CRUD Autónomo de Secciones Web:** En los Ajustes de Inventario (Pestaña 7, *Secciones Web*), la plataforma dispone de un gestor CRUD integral para las secciones del sitio web de e-commerce (`cms_sections`):
+  1. **Creación:** Registro de nuevas secciones con nombre, slug, vitrina asociada (`storefront_id`), tipo (`catalog`, `editorial`, `banners`, `promo`), orden (`order_index`) y estado inicial.
+  2. **Edición:** Modificación de atributos, nombres y asignación de vitrina.
+  3. **Activación / Pausa:** Conmutación rápida de estado activo (`is_active: 1` vs `0`) mediante botón toggle en 1 clic.
+  4. **Archivado / Restauración:** Archivado preventivo (`is_archived: 1`) sin pérdida de historial y reactivación instantánea.
+  5. **Eliminación:** Borrado definitivo con confirmación de seguridad.
+* **Interconexión Modular con Hub 2 (Home Multiverso):** Las secciones creadas se sincronizan directamente como secciones modulares en el Home de Hub 2 (`store.blade.php`), permitiendo vincular productos a cada sección a través del campo `products.section_name` y `meta.section_name`.
+* **Dimensión de Filtrado Facetado:** Las secciones activas forman parte de las dimensiones de filtrado transversal que se aplican a los filtros de catálogo y facetas de exploración de Hub 2 y Storefront PWA.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -586,6 +644,13 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Gobernanza Marcas** | Asociación Mandatoria a Proveedor | Cero marcas huérfanas; `supplier_id` requerido; sincronización bidireccional reactiva |
 | **Fotos & Variantes Color** | Galería Manual con Variante de Color | Entrada ágil de URLs en Workstation y Curaduría; selector de color de prenda por foto y portada |
 | **Alta In Situ Taxonomías**| Categorías y Subcategorías al Vuelo | Botones in situ y modal rápido en Workstation y Curaduría sin abandonar la captura de producto |
+| **Variantes de Color Ficha** | Conmutación Foto-Color en Drawer (6.53) | Carga de fotos, asignación de color por foto, portada ★ y alta de color in situ en ficha |
+| **WebP & Normalización** | WebP Universal & 1080x1350 px (6.54) | Conversión obligatoria a .webp, lienzo 4:5 centrado y fondo blanco neutral para desktop y móvil |
+| **Alta In Situ Color** | Color al Vuelo en Workstation (6.55) | Botones + Color y modal interactivo hex/degradado sin abandonar el alta ni recargar |
+| **SKU Dinámico** | Reactividad por Atributos (6.56) | Auto-actualización sensible a cambios de proveedor, marca, categoría, tela y color |
+| **CRUD de Telas** | Telas en Ajustes & In Situ (6.57) | Gestor CRUD en Pestaña 1 y botón + Tipo de Tela en Workstation con actualización reactiva |
+| **Asociación de Telas** | Vínculo Directo Producto-Tela (6.58) | Columnas fabric / fabric_id y relaciones formales Product <-> ApparelFabric |
+| **Secciones E-Commerce** | CRUD Secciones & Hub 2 Home (6.59) | Gestor Pestaña 7, modularidad en Home Hub 2 y dimensión transversal para filtros |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
