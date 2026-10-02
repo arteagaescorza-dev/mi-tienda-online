@@ -14169,6 +14169,89 @@ Schema::table('suppliers', function (Blueprint $table) {
    - Pestaña 2: Información Fiscal, RFC, Régimen, Domicilio y Facturación CFDI.
    - Pestaña 3: Árbol de Marcas Desprendidas con chips interactivos y soporte de captura rápida vía teclado.
 
+### 21.5. Gestión Integral de Marcas Comerciales (Brand CRUD - TASK-BRD-01)
+
+#### 1. Esquema de Base de Datos (`brands`)
+```php
+Schema::create('brands', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
+    $table->string('name')->unique();
+    $table->string('slug')->unique();
+    $table->text('description')->nullable();
+    $table->string('logo_url')->nullable();
+    $table->string('website')->nullable();
+    $table->boolean('is_active')->default(true);
+    $table->boolean('is_archived')->default(false);
+    $table->integer('sort_order')->default(0);
+    $table->json('meta')->nullable();
+    $table->timestamps();
+    $table->softDeletes();
+
+    $table->index(['is_active', 'is_archived']);
+    $table->index('supplier_id');
+});
+```
+
+#### 2. Endpoints de la API de Marcas Comerciales
+- **GET** `/api/v1/inventory/brands`: Listado paginado o completo de marcas maestras con conteo de SKUs asociados y filtros por `status` (active, inactive, archived) y `supplier_id`.
+- **POST** `/api/v1/inventory/brands`: Alta de nueva marca comercial (genera slug único y sincroniza array de marcas del proveedor asignado).
+- **GET** `/api/v1/inventory/brands/{id}`: Detalle de una marca con información del proveedor asociado y conteo de productos.
+- **PUT** `/api/v1/inventory/brands/{id}`: Actualización integral de nombre, slug, descripción, logo, web y asignación de proveedor.
+- **PATCH** `/api/v1/inventory/brands/{id}/toggle-active`: Conmuta reactivamente el estado activo/inactivo (`is_active`).
+- **POST** `/api/v1/inventory/brands/{id}/archive`: Archiva la marca (`is_archived = true`, `is_active = false`).
+- **POST** `/api/v1/inventory/brands/{id}/restore`: Restaura la marca archivada (`is_archived = false`, `is_active = true`).
+- **DELETE** `/api/v1/inventory/brands/{id}`: Eliminación física o soft-delete con desvinculación segura de productos.
+- **POST** `/api/v1/inventory/brands/{id}/assign-supplier`: Asocia o desvincula en caliente un proveedor de la marca.
+
+#### 3. Esquema JSON de Respuesta Canónica (`BrandApiController`)
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "supplier_id": 4,
+    "supplier": {
+      "id": 4,
+      "name": "Torzo Official B2B",
+      "tradeName": "Torzo B2B"
+    },
+    "name": "Torzo Active",
+    "slug": "torzo-active",
+    "description": "Línea deportiva de alta compresión y secado rápido.",
+    "logo_url": "https://example.com/logo.png",
+    "website": "https://torzoactive.com",
+    "is_active": true,
+    "is_archived": false,
+    "sku_count": 28
+  }
+}
+```
+
+### 21.6. Sincronización Transversal de Filtros Dependientes (Hub 4 $\leftrightarrow$ Hub 2 $\leftrightarrow$ Storefront)
+
+1. **Hub 4 (Catálogo de Inventario):**
+   - El selector `brandFilter` en la barra superior de herramientas del catálogo se alimenta dinámicamente de `availableBrandNames`.
+   - `filteredProducts` computa coincidencias en cascada: `q`, `categoryFilter`, `brandFilter`, `supplierFilter`, `stockFilter` y `statusFilter`.
+
+2. **Hub 2 (Tienda & CMS Multiverso):**
+   - En `PortalStoreController@index`, se suministran las marcas registradas consolidadas desde `Brand::active()`, `Product` y `Supplier`.
+   - Los modales de creación y edición de vitrinas en `resources/views/portal/store.blade.php` incorporan selectores dependientes de `Proveedor` y `Marca Comercial` vinculando las tarjetas de *Páginas de Explorar* a rutas parametrizadas (`/catalogo?brand={slug}` o `/catalogo?supplier={id}`).
+
+3. **Storefront PWA (`products.blade.php` & `site.js`):**
+   - En `#filterDrawer`, la faceta de proveedores y marcas se despliega mediante una estructura jerárquica colapsable:
+     ```html
+     <details class="filter-tree" open>
+       <summary>Marcas & Proveedores (Árbol)</summary>
+       <div class="filter-tree-content">
+         <!-- Proveedor Padre con Checkbox -->
+         <!-- Marcas Hijas Indentadas con Checkbox -->
+       </div>
+     </details>
+     ```
+   - El motor de filtrado reactivo de `site.js` incluye `'supplier'` y `'brand'` en `filterKeys`, aplicando lógica multi-criterio OR dentro de la misma faceta y AND entre diferentes dimensiones.
+
+
 
 
 

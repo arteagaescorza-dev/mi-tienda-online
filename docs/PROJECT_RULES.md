@@ -392,6 +392,14 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. **Información Fiscal y Facturación:** RFC / Tax ID / NIF con formateo automático en mayúsculas, razón social fiscal completa, régimen fiscal (SAT / tributario), domicilio fiscal completo (calle, número exterior/interior, colonia, municipio/alcaldía), código postal fiscal (CP) y correo electrónico especializado para facturación electrónica CFDI / comprobantes.
   3. **Marcas Comerciales Desprendidas:** Interfaz interactiva de chips/etiquetas para asociar, desprender y remover marcas al vuelo mediante atajo de teclado (`Enter`) o botón de acción, persistiendo en el modelo `Supplier` (columna `brands` JSON y accessor `brandsTree`) para su propagación inmediata a los filtros faceteados de Hub 2 y del storefront.
 
+### Regla 6.46: Gestión Integral de Marcas Comerciales (CRUD Completo, Ficha Fiscal Reactiva y Sincronización Transversal de Filtros)
+* **Gestión Autónoma y CRUD Completo de Marcas en Hub 4:** Dentro de los ajustes de Hub 4 (pestaña Marcas Comerciales `activeSettingsTab === 'brands'`), los administradores disponen de la capacidad de dar de alta, editar, eliminar, archivar, restaurar y alternar el estado activo de marcas comerciales, así como asignarlas libremente o desvincularlas de proveedores. La interfaz cuenta con KPIs de marcas activas, archivadas y total de SKUs, buscador en tiempo real, filtros por estado y proveedor, y modal autónomo (`brandModalOpen`). Desde el árbol de proveedores (`activeSettingsTab === 'suppliers'`), cada tarjeta dispone de acceso rápido para "+ Desprender Nueva Marca", editar y desvincular marcas en caliente.
+* **Reactividad Inmediata en Botón "Ficha / Fiscal":** El botón "Ficha / Fiscal" presente en cada nodo de la tabla y árbol de proveedores debe abrir de forma reactiva e instantánea el modal de proveedor conmutando directamente a la pestaña fiscal (`openProviderFiscalModal(prov)`). El modal debe garantizar un `z-index` de elevación (`z-[120]` con `style="z-index: 120 !important;"`) y erradicar cualquier propiedad `display: none` residual o bloqueo por superposición en el DOM.
+* **Sincronización Transversal de Funcionalidades Dependientes (Filtros en Cascada):** La tabla maestra de marcas (`brands`) y su relación con proveedores impacta obligatoriamente y en tiempo real a:
+  1. **Hub 4 (Inventario):** Filtro `brandFilter` en la barra de herramientas del catálogo, alimentado dinámicamente por `availableBrandNames`, filtrando la tabla de productos de forma combinada con proveedores, categorías y stock.
+  2. **Hub 2 (Tienda & CMS):** Selectores de Proveedor y Marca Comercial en los modales de creación y edición de vitrinas de *Páginas de Explorar* (`store.blade.php`), permitiendo direccionar al comprador al catálogo filtrado por marca o fabricante.
+  3. **Storefront PWA:** Estructura de árbol faceteado colapsable (`<details class="filter-tree">`) en el drawer de filtros (`#filterDrawer`), con casillas de verificación (**checkboxes**) indentadas que agrupan a cada proveedor con sus respectivas marcas comerciales desprendidas, sincronizado con el motor reactivo de coincidencia (`site.js`).
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -520,6 +528,9 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Cupón Descuento** | Confinado al Paso 1 del Checkout | Formulario de código exclusivo en paso 1; cero saturación en carrito |
 | **Inventario & Color** | Miniaturas y Mapeo Foto-Color | Miniatura en tabla de Hub 4 y asignación de color en modal de edición |
 | **Scraping & Color** | Curaduría de Imágenes por Color | Mapeo obligatorio imagen-color en bandeja de curaduría previa |
+| **Proveedores Árbol & Fiscal** | Árbol Proveedor-Marcas y Alta Manual | Visualización en árbol, pestañas contacto/fiscal/marcas, botón reactivo Ficha Fiscal |
+| **Marcas Comerciales** | CRUD Autónomo & Filtros Transversales | Alta, edición, archivo y borrado de marcas en Hub 4; filtros en Hub 4, Hub 2 y Storefront |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
+
 
