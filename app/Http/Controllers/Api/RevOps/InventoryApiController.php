@@ -704,11 +704,16 @@ class InventoryApiController extends Controller
             'action' => 'required|in:approve,reject',
             'curated_title' => 'required_if:action,approve|string|max:200',
             'curated_brand' => 'nullable|string|max:80',
+            'supplier_id' => 'nullable',
+            'curated_category' => 'nullable|string|max:100',
+            'curated_subcategory' => 'nullable|string|max:100',
             'curated_fabric' => 'nullable|string|max:80',
             'curated_color' => 'nullable|string|max:80',
             'curated_design_type' => 'nullable|string|in:sin_diseno,con_diseno',
             'curated_website_section' => 'nullable|string|in:basicos,disenador,temporada,general',
             'curated_price' => 'required_if:action,approve|numeric|min:0',
+            'curated_images' => 'nullable|array',
+            'image_color_map' => 'nullable|array',
             'rejection_reason' => 'required_if:action,reject|string|max:500',
         ]);
 
@@ -725,6 +730,48 @@ class InventoryApiController extends Controller
             $item->curation_status = 'approved';
             $item->save();
 
+            // Procesar galería de fotos con variantes de color asignadas (Regla 2)
+            $gallery = [];
+            $primaryImg = null;
+            $rawImages = $validated['curated_images'] ?? (is_array($item->images) ? $item->images : []);
+            $colorMap = $validated['image_color_map'] ?? [];
+
+            foreach ($rawImages as $idx => $imgEntry) {
+                $imgUrl = is_array($imgEntry) ? ($imgEntry['url'] ?? '') : (string)$imgEntry;
+                if (empty($imgUrl)) continue;
+
+                $colorName = is_array($imgEntry) && !empty($imgEntry['color_name']) 
+                    ? $imgEntry['color_name'] 
+                    : ($colorMap[$imgUrl] ?? $item->curated_color);
+                
+                $isPrimary = is_array($imgEntry) && isset($imgEntry['is_primary']) 
+                    ? (bool)$imgEntry['is_primary'] 
+                    : ($idx === 0);
+
+                $gallery[] = [
+                    'url' => $imgUrl,
+                    'color_name' => $colorName,
+                    'is_primary' => $isPrimary,
+                ];
+
+                if ($isPrimary || !$primaryImg) {
+                    $primaryImg = $imgUrl;
+                }
+            }
+
+            $productMeta = [
+                'category' => $validated['curated_category'] ?? ($item->category ?? 'General'),
+                'subcategory' => $validated['curated_subcategory'] ?? '',
+                'fabric_type' => $item->curated_fabric,
+                'color_name' => $item->curated_color,
+                'design_type' => $item->curated_design_type,
+                'website_section' => $item->curated_website_section,
+                'supplier_id' => $validated['supplier_id'] ?? $item->supplier_id,
+                'images' => array_column($gallery, 'url'),
+                'gallery' => $gallery,
+                'image' => $primaryImg,
+            ];
+
             // Insertar o sincronizar en catálogo de productos
             $product = Product::firstOrCreate(
                 ['sku' => $item->external_sku ?: 'SKU-' . uniqid()],
@@ -736,12 +783,32 @@ class InventoryApiController extends Controller
                     'price' => $item->curated_price,
                     'cost' => $item->external_price,
                     'visible' => true,
+                    'meta' => $productMeta,
                 ]
             );
 
+            // Actualizar meta si ya existía
+            if (!$product->wasRecentlyCreated) {
+                $product->update([
+                    'title' => $item->curated_title,
+                    'brand' => $item->curated_brand,
+                    'price' => $item->curated_price,
+                    'meta' => array_merge((array)$product->meta, $productMeta),
+                ]);
+            }
+
+            // Vincular a categoría oficial
+            if (!empty($productMeta['category'])) {
+                $catModel = \App\Models\Category::firstOrCreate(
+                    ['name' => trim($productMeta['category'])],
+                    ['slug' => \Illuminate\Support\Str::slug(trim($productMeta['category'])), 'is_active' => true]
+                );
+                $product->categories()->syncWithoutDetaching([$catModel->id]);
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Producto aprobado e insertado en catálogo maestro',
+                'message' => 'Producto aprobado e insertado en catálogo maestro con su galería y categorización.',
                 'product_id' => $product->id,
                 'status' => 'approved',
             ]);

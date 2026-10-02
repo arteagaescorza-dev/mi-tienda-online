@@ -248,6 +248,17 @@ function hybridInventoryModule() {
         newCategoryForm: { name: '', description: '', parent_id: '', is_active: true },
         categoryEditState: { isEditing: false, editingId: null, form: { name: '', description: '', parent_id: '', is_active: true } },
 
+        // Regla 3: Alta in situ de Categoría y Subcategoría (Workstation & Curaduría)
+        quickCategoryModalOpen: false,
+        quickCategoryType: 'category', // 'category' | 'subcategory'
+        quickCategoryContext: 'newProduct', // 'newProduct' | 'curating'
+        quickCategoryParentName: '',
+        quickCategoryForm: { name: '', description: '', parent_id: null },
+
+        // Regla 2: Inputs para URLs de imágenes manuales
+        curatingNewImageUrl: '',
+        newProductManualImageUrl: '',
+
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
         providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
             ? window.serverSuppliers
@@ -7676,6 +7687,107 @@ function hybridInventoryModule() {
             }
         },
 
+        // --- ALTA IN SITU DE CATEGORÍA Y SUBCATEGORÍA (Regla 3) ---
+        openQuickCategoryModal(type = 'category', context = 'newProduct') {
+            this.quickCategoryType = type;
+            this.quickCategoryContext = context;
+            this.quickCategoryForm = {
+                name: '',
+                description: '',
+                parent_id: null,
+            };
+
+            if (type === 'subcategory') {
+                const currentCatName = context === 'newProduct' 
+                    ? (this.newProduct ? this.newProduct.category : '') 
+                    : (this.curatingItem ? this.curatingItem.suggestedCategory : '');
+
+                this.quickCategoryParentName = currentCatName || 'Categoría Principal';
+                const parentCat = (this.categoriesTree || []).find(c => 
+                    String(c.name).toLowerCase().trim() === String(currentCatName).toLowerCase().trim()
+                );
+                if (parentCat) {
+                    this.quickCategoryForm.parent_id = parentCat.id;
+                }
+            } else {
+                this.quickCategoryParentName = '';
+            }
+
+            this.quickCategoryModalOpen = true;
+        },
+
+        async saveQuickCategory() {
+            const name = (this.quickCategoryForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa un nombre para la ' + (this.quickCategoryType === 'subcategory' ? 'subcategoría' : 'categoría') + '.', 'warning');
+                return;
+            }
+
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const payload = {
+                    name: name,
+                    description: (this.quickCategoryForm.description || '').trim() || null,
+                    parent_id: this.quickCategoryForm.parent_id ? parseInt(this.quickCategoryForm.parent_id) : null,
+                    is_active: true
+                };
+
+                const res = await fetch('/api/v1/inventory/settings/categories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    this.showToast(data.message || 'Error al dar de alta la categoría.', 'warning');
+                    return;
+                }
+
+                const createdCat = data.data || { name: name, id: Date.now() };
+
+                // Insertar en el árbol reactivo en memoria
+                if (payload.parent_id) {
+                    const parent = (this.categoriesTree || []).find(c => c.id === payload.parent_id);
+                    if (parent) {
+                        if (!Array.isArray(parent.children)) parent.children = [];
+                        parent.children.push(createdCat);
+                    } else {
+                        this.categoriesTree.push(createdCat);
+                    }
+                } else {
+                    createdCat.children = [];
+                    this.categoriesTree.push(createdCat);
+                }
+
+                // Auto-asignación inmediata sin perder contexto de trabajo
+                if (this.quickCategoryContext === 'newProduct' && this.newProduct) {
+                    if (this.quickCategoryType === 'category') {
+                        this.newProduct.category = createdCat.name;
+                        this.onNewProductCategoryChange();
+                    } else {
+                        this.newProduct.subcategory = createdCat.name;
+                    }
+                } else if (this.quickCategoryContext === 'curating' && this.curatingItem) {
+                    if (this.quickCategoryType === 'category') {
+                        this.curatingItem.suggestedCategory = createdCat.name;
+                    } else {
+                        this.curatingItem.suggestedSubcategory = createdCat.name;
+                    }
+                }
+
+                this.quickCategoryModalOpen = false;
+                this.showToast(`"${createdCat.name}" dada de alta y seleccionada exitosamente.`, 'success');
+            } catch (e) {
+                console.error('Error guardando categoría rápida:', e);
+                this.showToast('Error de red al guardar categoría/subcategoría.', 'error');
+            }
+        },
+
         editCategory(cat) {
             this.categoryEditState.isEditing = true;
             this.categoryEditState.editingId = cat.id;
@@ -8375,10 +8487,19 @@ function hybridInventoryModule() {
                 return;
             }
 
+            const cleanSupplierId = this.brandForm.supplier_id 
+                ? parseInt(String(this.brandForm.supplier_id).replace('prov_', '')) 
+                : null;
+
+            if (!cleanSupplierId) {
+                this.showToast('Toda marca comercial debe estar obligatoriamente asociada a un proveedor registrado (Regla 1).', 'warning');
+                return;
+            }
+
             const payload = {
                 name: this.brandForm.name.trim(),
                 slug: this.brandForm.slug ? this.brandForm.slug.trim() : '',
-                supplier_id: this.brandForm.supplier_id ? parseInt(this.brandForm.supplier_id) : null,
+                supplier_id: cleanSupplierId,
                 description: this.brandForm.description ? this.brandForm.description.trim() : null,
                 logo_url: this.brandForm.logo_url ? this.brandForm.logo_url.trim() : null,
                 website: this.brandForm.website ? this.brandForm.website.trim() : null,
@@ -8410,24 +8531,51 @@ function hybridInventoryModule() {
                     this.brandModalOpen = false;
                     await this.loadBrands();
 
-                    // Sincronizar arbol de proveedores en memoria
+                    // Sincronizar arbol de proveedores en memoria reactivamente (Regla 1)
                     if (payload.supplier_id) {
-                        const prov = (this.providers || []).find(p => String(p.id) === String(payload.supplier_id));
+                        const supIdStr = String(payload.supplier_id);
+                        const prov = (this.providers || []).find(p => 
+                            String(p.id) === supIdStr || 
+                            p.id === 'prov_' + supIdStr || 
+                            String(p.dbId) === supIdStr
+                        );
                         if (prov) {
                             prov.brands = prov.brands || [];
                             if (!prov.brands.includes(payload.name)) {
                                 prov.brands.push(payload.name);
                             }
-                            prov.brandsTree = prov.brandsTree || [];
-                            if (!prov.brandsTree.some(b => b.name === payload.name)) {
-                                prov.brandsTree.push({
-                                    name: payload.name,
-                                    slug: data.data?.slug || payload.slug || payload.name.toLowerCase().replace(/\s+/g, '-'),
-                                    origin: prov.origin || 'manual',
-                                    is_active: true
-                                });
+                            if (data.data?.supplier_brands_tree && Array.isArray(data.data.supplier_brands_tree)) {
+                                prov.brandsTree = data.data.supplier_brands_tree;
+                            } else {
+                                prov.brandsTree = prov.brandsTree || [];
+                                if (!prov.brandsTree.some(b => b.name === payload.name)) {
+                                    prov.brandsTree.push({
+                                        name: payload.name,
+                                        slug: data.data?.slug || payload.slug || payload.name.toLowerCase().replace(/\s+/g, '-'),
+                                        origin: prov.origin || 'manual',
+                                        is_active: true
+                                    });
+                                }
                             }
                         }
+
+                        // Sincronizar en selectedProvider si está abierto
+                        if (this.selectedProvider && (
+                            String(this.selectedProvider.id) === supIdStr || 
+                            this.selectedProvider.id === 'prov_' + supIdStr || 
+                            String(this.selectedProvider.dbId) === supIdStr
+                        )) {
+                            this.selectedProvider.brands = this.selectedProvider.brands || [];
+                            if (!this.selectedProvider.brands.includes(payload.name)) {
+                                this.selectedProvider.brands.push(payload.name);
+                            }
+                            if (prov && prov.brandsTree) {
+                                this.selectedProvider.brandsTree = [...prov.brandsTree];
+                            }
+                        }
+
+                        // Recargar proveedores en segundo plano para asegurar consistencia
+                        this.loadProviders();
                     }
 
                     // Regla 6.47: Auto-seleccionar marca en modales y formularios activos
@@ -8669,11 +8817,54 @@ function hybridInventoryModule() {
                     if (res.ok && data.status === 'success') {
                         this.showToast(`Marca comercial '${tag}' creada y vinculada exitosamente.`, 'success');
                         await this.loadBrands();
-                        if (this.selectedProvider && Array.isArray(this.selectedProvider.brands)) {
+
+                        const brandSlug = data.data?.slug || tag.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        const brandNode = {
+                            name: tag,
+                            slug: brandSlug,
+                            origin: prov?.origin || 'manual',
+                            is_active: true
+                        };
+
+                        // 1. Sincronizar en el proveedor activo en memoria
+                        if (this.selectedProvider) {
+                            if (!Array.isArray(this.selectedProvider.brands)) this.selectedProvider.brands = [];
                             if (!this.selectedProvider.brands.includes(tag)) {
                                 this.selectedProvider.brands.push(tag);
                             }
+                            if (data.data?.supplier_brands_tree && Array.isArray(data.data.supplier_brands_tree)) {
+                                this.selectedProvider.brandsTree = data.data.supplier_brands_tree;
+                            } else {
+                                if (!Array.isArray(this.selectedProvider.brandsTree)) this.selectedProvider.brandsTree = [];
+                                if (!this.selectedProvider.brandsTree.some(b => b.name === tag)) {
+                                    this.selectedProvider.brandsTree.push(brandNode);
+                                }
+                            }
                         }
+
+                        // 2. Sincronizar en la lista principal de proveedores (tabla de proveedores)
+                        const tableProv = (this.providers || []).find(p => 
+                            String(p.id) === String(supId) || 
+                            p.id === 'prov_' + supId || 
+                            String(p.dbId) === String(supId)
+                        );
+                        if (tableProv) {
+                            if (!Array.isArray(tableProv.brands)) tableProv.brands = [];
+                            if (!tableProv.brands.includes(tag)) {
+                                tableProv.brands.push(tag);
+                            }
+                            if (data.data?.supplier_brands_tree && Array.isArray(data.data.supplier_brands_tree)) {
+                                tableProv.brandsTree = data.data.supplier_brands_tree;
+                            } else {
+                                if (!Array.isArray(tableProv.brandsTree)) tableProv.brandsTree = [];
+                                if (!tableProv.brandsTree.some(b => b.name === tag)) {
+                                    tableProv.brandsTree.push(brandNode);
+                                }
+                            }
+                        }
+
+                        // Recargar proveedores en background para consistencia total
+                        this.loadProviders();
                     } else {
                         this.showToast(data.message || 'Error al persistir la marca comercial.', 'warning');
                     }
@@ -8968,6 +9159,65 @@ function hybridInventoryModule() {
             this.categoriesTree.splice(targetIndex, 0, moved);
             this.draggedCategoryIndex = null;
             this.showToast('Jerarquía de categorías reorganizada correctamente con Drag & Drop.', 'success');
+        },
+
+        // --- GESTIÓN MANUAL DE FOTOGRAFÍAS Y VARIANTES DE COLOR (Regla 2) ---
+        addManualImageToCuratingItem() {
+            if (!this.curatingItem) return;
+            const url = (this.curatingNewImageUrl || '').trim();
+            if (!url) {
+                this.showToast('Ingresa una URL válida de fotografía para la prenda.', 'warning');
+                return;
+            }
+            if (!Array.isArray(this.curatingItem.images)) this.curatingItem.images = [];
+            this.curatingItem.images.push(url);
+            if (!this.curatingItem.imageColorMap) this.curatingItem.imageColorMap = {};
+            this.curatingItem.imageColorMap[url] = this.curatingItem.detectedColorName || (this.apparelColors && this.apparelColors[0] ? this.apparelColors[0].name : 'Negro Profundo');
+            this.curatingNewImageUrl = '';
+            this.showToast('Fotografía manual añadida a la prenda curada.', 'success');
+        },
+
+        removeImageFromCuratingItem(index) {
+            if (!this.curatingItem || !Array.isArray(this.curatingItem.images)) return;
+            const removedUrl = this.curatingItem.images.splice(index, 1)[0];
+            if (removedUrl && this.curatingItem.imageColorMap) {
+                delete this.curatingItem.imageColorMap[removedUrl];
+            }
+            this.showToast('Fotografía removida.', 'info');
+        },
+
+        setPrimaryCuratingImage(index) {
+            if (!this.curatingItem || !Array.isArray(this.curatingItem.images) || index <= 0) return;
+            const moved = this.curatingItem.images.splice(index, 1)[0];
+            this.curatingItem.images.unshift(moved);
+            this.showToast('Fotografía asignada como Portada.', 'success');
+        },
+
+        addManualImageUrlToNewProduct() {
+            const url = (this.newProductManualImageUrl || '').trim();
+            if (!url) {
+                this.showToast('Ingresa una URL válida de imagen.', 'warning');
+                return;
+            }
+            if (!Array.isArray(this.newProduct.images)) this.newProduct.images = [];
+            if (this.newProduct.images.length >= 10) {
+                this.showToast('Límite alcanzado: Máximo 10 imágenes por producto.', 'warning');
+                return;
+            }
+            const isFirst = this.newProduct.images.length === 0;
+            this.newProduct.images.push({
+                id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                name: 'Foto ' + (this.newProduct.images.length + 1),
+                size: 0,
+                type: 'image/jpeg',
+                preview: url,
+                url: url,
+                color_name: this.newProduct.colorName || (this.apparelColors && this.apparelColors[0] ? this.apparelColors[0].name : 'Negro'),
+                is_primary: isFirst,
+                sort_order: this.newProduct.images.length
+            });
+            this.newProductManualImageUrl = '';
+            this.showToast('Fotografía agregada a la galería del producto.', 'success');
         },
 
         approveScrapedItem() {
@@ -9814,6 +10064,11 @@ function hybridInventoryModule() {
                 pao_months: parseInt(this.newProduct.paoMonths) || 12,
                 provider: this.newProduct.provider || 'Torzo B2B',
                 provider_url: this.newProduct.providerUrl || '',
+                images: (this.newProduct.images || []).map(img => ({
+                    url: img.url || img.preview,
+                    color_name: img.color_name || this.newProduct.colorName || 'Negro',
+                    is_primary: !!img.is_primary
+                })),
             };
 
             const createdItem = {

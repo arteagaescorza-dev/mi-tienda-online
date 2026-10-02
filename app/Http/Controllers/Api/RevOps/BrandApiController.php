@@ -93,24 +93,29 @@ class BrandApiController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $rawName = trim((string) $request->input('name', ''));
+        if ($rawName !== '' && Supplier::isProductLineCategory($rawName)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "El término '{$rawName}' corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.",
+            ], 422);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:150',
-            'supplier_id' => 'nullable|exists:suppliers,id',
+            'supplier_id' => 'required|exists:suppliers,id',
             'slug' => 'nullable|string|max:150|unique:brands,slug',
             'description' => 'nullable|string|max:1000',
             'logo_url' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+        ], [
+            'supplier_id.required' => 'Toda marca comercial debe estar obligatoriamente asociada a un proveedor (Regla 1).',
+            'supplier_id.exists' => 'El proveedor seleccionado no existe en el registro.',
         ]);
 
         $name = trim($validated['name']);
-        if (Supplier::isProductLineCategory($name)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => "El término '{$name}' corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.",
-            ], 422);
-        }
 
         $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($name);
 
@@ -124,7 +129,7 @@ class BrandApiController extends Controller
         $brand = Brand::create([
             'name' => $name,
             'slug' => $slug,
-            'supplier_id' => $validated['supplier_id'] ?? null,
+            'supplier_id' => (int) $validated['supplier_id'],
             'description' => $validated['description'] ?? null,
             'logo_url' => $validated['logo_url'] ?? null,
             'website' => $validated['website'] ?? null,
@@ -133,25 +138,24 @@ class BrandApiController extends Controller
             'sort_order' => $validated['sort_order'] ?? 0,
         ]);
 
-        // Si se asignó a un proveedor, sincronizar el array de brands del proveedor
-        if ($brand->supplier_id) {
-            $supplier = Supplier::find($brand->supplier_id);
-            if ($supplier) {
-                $supplierBrands = is_array($supplier->brands) ? $supplier->brands : [];
-                if (!in_array($brand->name, $supplierBrands, true)) {
-                    $supplierBrands[] = $brand->name;
-                    $supplier->brands = array_values(array_unique($supplierBrands));
-                    $supplier->save();
-                }
+        // Sincronizar bidireccionalmente el array de brands del proveedor y retornar estado fresco
+        $supplier = Supplier::find($brand->supplier_id);
+        if ($supplier) {
+            $supplierBrands = is_array($supplier->brands) ? $supplier->brands : [];
+            if (!in_array($brand->name, $supplierBrands, true)) {
+                $supplierBrands[] = $brand->name;
+                $supplier->brands = array_values(array_unique(array_filter($supplierBrands, fn($b) => !Supplier::isProductLineCategory($b))));
+                $supplier->save();
             }
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => "Marca comercial '{$brand->name}' dada de alta exitosamente.",
+            'message' => "Marca comercial '{$brand->name}' dada de alta y asociada al proveedor exitosamente.",
             'data' => [
                 'id' => $brand->id,
                 'supplier_id' => $brand->supplier_id,
+                'supplier_name' => $supplier ? ($supplier->trade_name ?? $supplier->name) : null,
                 'name' => $brand->name,
                 'slug' => $brand->slug,
                 'description' => $brand->description,
@@ -159,6 +163,7 @@ class BrandApiController extends Controller
                 'website' => $brand->website,
                 'is_active' => (bool)$brand->is_active,
                 'is_archived' => (bool)$brand->is_archived,
+                'supplier_brands_tree' => $supplier ? $supplier->getBrandsTree() : [],
             ],
         ], 201);
     }

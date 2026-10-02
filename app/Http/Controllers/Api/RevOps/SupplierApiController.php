@@ -443,17 +443,39 @@ class SupplierApiController extends Controller
         ]);
 
         $brand = trim($validated['brand']);
+        if (Supplier::isProductLineCategory($brand)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "El término '{$brand}' corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.",
+            ], 422);
+        }
+
         $brands = is_array($supplier->brands) ? $supplier->brands : [];
 
         if (! in_array($brand, $brands, true)) {
             $brands[] = $brand;
-            $supplier->update(['brands' => array_values($brands)]);
+            $supplier->update(['brands' => array_values(array_filter($brands, fn($b) => !Supplier::isProductLineCategory($b)))]);
+        }
+
+        // REGLA 1: Sincronizar o crear en la tabla de marcas comerciales asociándola al proveedor
+        $brandModel = \App\Models\Brand::where('name', $brand)->first();
+        if ($brandModel) {
+            $brandModel->supplier_id = $supplier->id;
+            $brandModel->is_active = true;
+            $brandModel->save();
+        } else {
+            \App\Models\Brand::create([
+                'supplier_id' => $supplier->id,
+                'name' => $brand,
+                'slug' => \Illuminate\Support\Str::slug($brand),
+                'is_active' => true,
+            ]);
         }
 
         return response()->json([
             'status' => 'success',
             'message' => "Marca '{$brand}' agregada exitosamente al proveedor '{$supplier->name}'.",
-            'data' => $this->transformSupplier($supplier),
+            'data' => $this->transformSupplier($supplier->fresh()),
         ]);
     }
 
@@ -473,10 +495,14 @@ class SupplierApiController extends Controller
 
         $supplier->update(['brands' => $filtered]);
 
+        // Sincronizar tabla brands: si pertenece a este proveedor, marcar supplier_id null o archivar
+        \App\Models\Brand::where('supplier_id', $supplier->id)->where('name', $brand)->update(['supplier_id' => null]);
+
         return response()->json([
             'status' => 'success',
             'message' => "Marca '{$brand}' eliminada del proveedor '{$supplier->name}'.",
-            'data' => $this->transformSupplier($supplier),
+            'data' => $this->transformSupplier($supplier->fresh()),
         ]);
     }
 }
+

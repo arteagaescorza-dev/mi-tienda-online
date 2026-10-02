@@ -64,11 +64,6 @@ class Brand extends Model
         return $this->hasMany(Product::class, 'brand', 'name');
     }
 
-    public function sizeCurves()
-    {
-        return $this->hasMany(ApparelSizeCurve::class);
-    }
-
     public function scopeActive($query)
     {
         return $query->where('is_active', true)->where('is_archived', false);

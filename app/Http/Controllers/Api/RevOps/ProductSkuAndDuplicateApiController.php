@@ -245,6 +245,10 @@ class ProductSkuAndDuplicateApiController extends Controller
             'pao_months' => 'nullable|integer|min:0',
             'provider' => 'nullable|string|max:100',
             'provider_url' => 'nullable|string|max:255',
+            'images' => 'nullable|array',
+            'images.*.url' => 'nullable|string|max:1000',
+            'images.*.color_name' => 'nullable|string|max:100',
+            'images.*.is_primary' => 'nullable|boolean',
         ]);
 
         $cleanSku = trim(strtoupper($validated['sku']));
@@ -268,6 +272,33 @@ class ProductSkuAndDuplicateApiController extends Controller
                     $localStock += max(0, (int) ($sVal['stock'] ?? $sVal['quantity'] ?? 0));
                 } else {
                     $localStock += max(0, (int) $sVal);
+                }
+            }
+        }
+
+        // Procesar imágenes con variante de color de prenda (Regla 2)
+        $rawImages = $validated['images'] ?? [];
+        $formattedGallery = [];
+        $primaryImageUrl = null;
+        if (is_array($rawImages)) {
+            foreach ($rawImages as $img) {
+                if (is_string($img) && !empty($img)) {
+                    $formattedGallery[] = [
+                        'url' => $img,
+                        'color_name' => $validated['color_name'] ?? null,
+                        'is_primary' => empty($formattedGallery),
+                    ];
+                    if (!$primaryImageUrl) $primaryImageUrl = $img;
+                } elseif (is_array($img) && !empty($img['url'])) {
+                    $isPrim = !empty($img['is_primary']);
+                    $formattedGallery[] = [
+                        'url' => $img['url'],
+                        'color_name' => $img['color_name'] ?? ($validated['color_name'] ?? null),
+                        'is_primary' => $isPrim,
+                    ];
+                    if ($isPrim || !$primaryImageUrl) {
+                        $primaryImageUrl = $img['url'];
+                    }
                 }
             }
         }
@@ -299,6 +330,9 @@ class ProductSkuAndDuplicateApiController extends Controller
             'supplier_id' => $validated['supplier_id'] ?? null,
             'provider' => $validated['provider'] ?? 'ModaIntima Textil MX',
             'provider_url' => $validated['provider_url'] ?? '',
+            'images' => array_column($formattedGallery, 'url'),
+            'gallery' => $formattedGallery,
+            'image' => $primaryImageUrl,
         ];
 
         return DB::transaction(function () use ($cleanSku, $title, $validated, $pvp, $cost, $dbType, $meta, $effectivePrice, $localStock, $marginPct, $sizes) {
@@ -314,6 +348,15 @@ class ProductSkuAndDuplicateApiController extends Controller
                 'description' => $validated['description'] ?? '',
                 'meta' => $meta,
             ]);
+
+            // Vincular automáticamente a la categoría si existe
+            if (!empty($validated['category'])) {
+                $categoryModel = \App\Models\Category::firstOrCreate(
+                    ['name' => trim($validated['category'])],
+                    ['slug' => Str::slug(trim($validated['category'])), 'is_active' => true]
+                );
+                $product->categories()->syncWithoutDetaching([$categoryModel->id]);
+            }
 
             if (!empty($sizes) && is_array($sizes)) {
                 foreach ($sizes as $szKey => $qty) {

@@ -430,6 +430,29 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. En el modal panorámico de alta de producto (`newProductPanoramicModal`), el selector `getAvailableSizeCurves(supplier_id, brand)` prioriza o filtra las curvas correspondientes al fabricante y la marca del producto.
 * **Prohibición de Ternarios en `x-model` (Integridad Reactiva):** Queda estrictamente prohibido utilizar expresiones ternarias dentro de directivas `x-model`. La captura y edición de curvas y tallas debe realizarse a través de objetos de formulario unificados (`curveForm` y `sizeForm`), previniendo errores de asignación izquierda inválida (`Invalid left-hand side in assignment`) y asegurando la persistencia inmediata al editar.
 
+### Regla 6.50: Asociación Mandatoria de Marcas Comerciales a un Proveedor y Sincronización Reactiva de Árbol
+* **Gobernanza Mandatoria (Cero Marcas Huérfanas):** Toda marca de producto se debe asociar de forma obligatoria a un proveedor registrado en la plataforma. Queda estrictamente prohibido persistir o dar de alta marcas comerciales sin `supplier_id` asignado.
+  1. **Validación Backend (`BrandApiController@store`):** La regla `supplier_id => 'required|exists:suppliers,id'` es obligatoria. Cualquier solicitud sin proveedor es rechazada con HTTP 422 y mensaje descriptivo de gobernanza.
+  2. **Formularios Frontend (`brandModalOpen`):** El selector de proveedor es mandatorio (`required`), etiquetado como "Obligatorio (Regla 1)", impidiendo el envío con selección vacía.
+  3. **Migración y Normalización de BD:** Todas las marcas comerciales existentes (incluyendo firmas como *Mazho* y *Torzo Sexywear*) deben vincularse a su respectivo proveedor fabricante (`Torzo`, `supplier_id = 4`), erradicando inconsistencias históricas.
+* **Sincronización Bidireccional y Reactividad en Caliente:** Al registrar o asociar una marca comercial a un proveedor, el backend sincroniza la columna `suppliers.brands` y devuelve el árbol relacional fresco (`supplier_brands_tree`). El módulo Alpine.js (`inventory-module.js`) actualiza reactivamente en memoria `prov.brands`, `prov.brandsTree` y la fila correspondiente de la tabla de proveedores sin necesidad de recargar la página.
+
+### Regla 6.51: Fotografías Manuales con Asignación de Color de Prenda para Conmutación y Filtros de Variante
+* **Captura Flexible de Imágenes en Workstation y Curaduría:** Tanto en el Workstation de Alta de Producto (`newProductPanoramicModal`) como en la Curaduría de Scraping (`scrapingCurationModalOpen`), el operador puede añadir manualmente URLs de fotografías adicionales del producto mediante un campo de entrada ágil con botón `+ Agregar Imagen`.
+* **Asignación Obligatoria de Variante de Color por Fotografía:** Cada fotografía capturada en la galería cuenta con un selector de color de prenda (`color_name`) basado en la paleta oficial (Negro, Blanco, Rojo Pasión, Azul Marino, Gris Jaspe, etc.).
+* **Designación de Foto de Portada (`is_primary`):** Cada imagen cuenta con un botón interactivo de selección de portada para definir la fotografía principal de vitrina.
+* **Persistencia Estructurada en Catálogo (`meta.gallery` / `meta.images`):** La API almacena la colección de imágenes con sus respectivos metadatos de color, permitiendo que:
+  1. En el catálogo público (Storefront y Hub 2), al hacer clic en un swatch de color, la fotografía de la tarjeta conmute instantáneamente a la variante de color correspondiente.
+  2. En la ficha de detalle de producto (PDP), la galería sincronice la imagen visualizada con el selector de color activo.
+
+### Regla 6.52: Alta In Situ de Categorías y Subcategorías sin Abandonar la Línea de Trabajo
+* **Continuidad Operativa del Catalogador:** Durante el proceso de alta o curaduría, si una prenda pertenece a una categoría o subcategoría que aún no existe en el sistema, el operador nunca debe verse forzado a abandonar la pantalla, perder los datos capturados y trasladarse a los ajustes de inventario.
+* **Botones In Situ (`+ Categoría` y `+ Subcategoría`):** En las cabeceras de los selectores taxonómicos del Workstation y de la Curaduría Scraping, se incorporan botones interactivos de alta in situ.
+* **Modal Liviano de Creación Rápida (`quickCategoryModalOpen`, `z-[140]`):**
+  1. Permite introducir nombre y descripción de la nueva categoría o subcategoría con preasignación automática del `parent_id` cuando se trate de una subcategoría.
+  2. Al confirmarse el guardado vía `/api/v1/inventory/settings/categories`, la nueva entidad se inserta en tiempo real en la estructura en memoria `categoriesTree`.
+  3. Se auto-selecciona automáticamente en el formulario del producto activo (Workstation o Curaduría), permitiendo al operador continuar la captura o aprobación sin interrupción.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -560,6 +583,9 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Scraping & Color** | Curaduría de Imágenes por Color | Mapeo obligatorio imagen-color en bandeja de curaduría previa |
 | **Proveedores Árbol & Fiscal** | Árbol Proveedor-Marcas y Alta Manual | Visualización en árbol, pestañas contacto/fiscal/marcas, botón reactivo Ficha Fiscal |
 | **Marcas Comerciales** | CRUD Autónomo & Filtros Transversales | Alta, edición, archivo y borrado de marcas en Hub 4; filtros en Hub 4, Hub 2 y Storefront |
+| **Gobernanza Marcas** | Asociación Mandatoria a Proveedor | Cero marcas huérfanas; `supplier_id` requerido; sincronización bidireccional reactiva |
+| **Fotos & Variantes Color** | Galería Manual con Variante de Color | Entrada ágil de URLs en Workstation y Curaduría; selector de color de prenda por foto y portada |
+| **Alta In Situ Taxonomías**| Categorías y Subcategorías al Vuelo | Botones in situ y modal rápido en Workstation y Curaduría sin abandonar la captura de producto |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 

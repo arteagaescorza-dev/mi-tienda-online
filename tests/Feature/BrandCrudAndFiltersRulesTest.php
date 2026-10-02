@@ -242,5 +242,130 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $this->assertTrue(Supplier::isProductLineCategory('Brief/Boxers'));
         $this->assertFalse(Supplier::isProductLineCategory('Torzo'));
     }
+
+    /**
+     * Regla 1: Toda marca de producto se debe asociar a un proveedor obligatoriamente.
+     */
+    public function test_mandatory_supplier_id_rule_1_on_brand_creation(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // 1. Sin supplier_id debe fallar 422
+        $resNoSup = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
+            'name' => 'Marca Huérfana',
+        ]);
+        $resNoSup->assertStatus(422);
+        $resNoSup->assertJsonValidationErrors(['supplier_id']);
+
+        // 2. Con supplier_id inexistente debe fallar 422
+        $resInvalidSup = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
+            'name' => 'Marca Huérfana',
+            'supplier_id' => 999999,
+        ]);
+        $resInvalidSup->assertStatus(422);
+        $resInvalidSup->assertJsonValidationErrors(['supplier_id']);
+
+        // 3. Con supplier_id válido se asocia y actualiza el árbol de marcas del proveedor
+        $supplier = Supplier::create([
+            'name' => 'Torzo Sexywear Direct',
+            'legal_name' => 'Torzo Sexywear SA de CV',
+            'vendor_code' => 'SUP-TRZ-RULE1',
+            'origin' => 'manual',
+            'status' => 'connected',
+            'brands' => [],
+        ]);
+
+        $resValid = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
+            'name' => 'Mazho Underwear',
+            'supplier_id' => $supplier->id,
+        ]);
+        $resValid->assertStatus(201);
+        $resValid->assertJsonPath('data.supplier_id', $supplier->id);
+
+        $supplier->refresh();
+        $this->assertContains('Mazho Underwear', $supplier->brands);
+    }
+
+    /**
+     * Regla 2: Soporte de fotos manuales con variante de color en workstation y curaduría.
+     */
+    public function test_images_with_color_variant_assignment_rule_2(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $supplier = Supplier::create([
+            'name' => 'Proveedor Moda',
+            'legal_name' => 'Moda SA',
+            'vendor_code' => 'SUP-MODA-01',
+            'origin' => 'manual',
+            'status' => 'connected',
+        ]);
+
+        // Workstation alta de producto con imágenes y colores asignados
+        $payload = [
+            'name' => 'Bikini Microfibra Escarlata',
+            'sku' => 'BIK-ESCARLATA-01',
+            'pvp' => 299.00,
+            'cost' => 120.00,
+            'stock' => 15,
+            'brand' => 'Moda Sexy',
+            'supplier_id' => $supplier->id,
+            'images' => [
+                [
+                    'url' => 'https://example.com/rojo-front.jpg',
+                    'color_name' => 'Rojo Pasión',
+                    'is_primary' => true,
+                ],
+                [
+                    'url' => 'https://example.com/negro-back.jpg',
+                    'color_name' => 'Negro',
+                    'is_primary' => false,
+                ],
+            ],
+        ];
+
+        $res = $this->actingAs($admin)->postJson('/api/v1/inventory/products', $payload);
+        $res->assertStatus(201);
+        $res->assertJsonPath('status', 'success');
+
+        $productId = $res->json('data.id');
+        $product = \App\Models\Product::find($productId);
+        $this->assertNotNull($product);
+        $this->assertEquals('https://example.com/rojo-front.jpg', $product->meta['image'] ?? null);
+        $this->assertIsArray($product->meta);
+        $this->assertNotEmpty($product->meta['gallery'] ?? []);
+        $this->assertEquals('Rojo Pasión', $product->meta['gallery'][0]['color_name'] ?? null);
+        $this->assertEquals('Negro', $product->meta['gallery'][1]['color_name'] ?? null);
+    }
+
+    /**
+     * Regla 3: Crear categoría y subcategoría in situ y reflejarlo en el árbol.
+     */
+    public function test_quick_category_and_subcategory_creation_rule_3(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // Crear Categoría Padre
+        $parentRes = $this->actingAs($admin)->postJson('/api/v1/inventory/settings/categories', [
+            'name' => 'Ropa Interior Sensual',
+            'description' => 'Categoría creada in situ desde Workstation',
+        ]);
+        $parentRes->assertStatus(201);
+        $parentId = $parentRes->json('data.id');
+
+        // Crear Subcategoría vinculada a la padre
+        $subRes = $this->actingAs($admin)->postJson('/api/v1/inventory/settings/categories', [
+            'name' => 'Harness y Correas',
+            'parent_id' => $parentId,
+            'description' => 'Subcategoría creada in situ desde Curaduría',
+        ]);
+        $subRes->assertStatus(201);
+        $subId = $subRes->json('data.id');
+
+        $this->assertDatabaseHas('categories', [
+            'id' => $subId,
+            'name' => 'Harness y Correas',
+            'parent_id' => $parentId,
+        ]);
+    }
 }
 

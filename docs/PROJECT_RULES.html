@@ -865,6 +865,30 @@
       Capacidad relacional en <code>apparel_size_curves</code> para vincularse a un Proveedor (<code>supplier_id</code>) y/o a una Marca Comercial (<code>brand_id</code>) o mantenerse universales. El gestor en Hub 4 incorpora selectores jerárquicos y badges informativos (<code>Prov: ...</code>, <code>Marca: ...</code> o <code>Curva Universal</code>). Se prohíben estrictamente las expresiones ternarias en directivas <code>x-model</code>, unificando los formularios <code>curveForm</code> y <code>sizeForm</code> para garantizar reactividad inmediata y prevenir fallas de asignación al editar.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">50</div>
+    <div class="rule-content">
+      <strong>Regla 6.50: Asociación Mandatoria de Marcas Comerciales a un Proveedor y Sincronización Reactiva de Árbol</strong>
+      Gobernanza mandatoria: ninguna marca puede existir sin proveedor (<code>supplier_id</code> obligatorio en backend y frontend). Sincronización relacional bidireccional automática con la columna <code>brands</code> del proveedor y actualización reactiva en memoria de <code>prov.brands</code>, <code>prov.brandsTree</code> y la tabla de proveedores sin recargar pantalla.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">51</div>
+    <div class="rule-content">
+      <strong>Regla 6.51: Fotografías Manuales con Asignación de Color de Prenda para Conmutación y Filtros de Variante</strong>
+      Tanto en el Workstation de Alta de Producto como en la Curaduría de Scraping, el catalogador puede añadir manualmente fotografías adicionales por URL o subida. Cada imagen cuenta con asignación de color de prenda (<code>color_name</code>) de la paleta oficial y designación de fotografía de portada (<code>is_primary</code>), garantizando la conmutación inmediata de variantes de color en filtros y catálogo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">52</div>
+    <div class="rule-content">
+      <strong>Regla 6.52: Alta In Situ de Categorías y Subcategorías sin Abandonar la Línea de Trabajo</strong>
+      Tanto en el Workstation como en la Curaduría de Scraping se incorporan botones in situ <code>+ Categoría</code> y <code>+ Subcategoría</code> con un modal interactivo rápido (<code>quickCategoryModalOpen</code>) que crea y auto-asigna la taxonomía al formulario activo y al árbol reactivo en memoria sin perder los datos del producto en captura.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1131,6 +1155,21 @@
       <td><strong>Curvas de Tallas</strong></td>
       <td>Asociación a Proveedor & Marca (6.49)</td>
       <td>Vínculo relacional a proveedor y marca, erradicación de ternarios en x-model y edición reactiva inmediata.</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Marcas</strong></td>
+      <td>Asociación Mandatoria a Proveedor (6.50)</td>
+      <td>Toda marca requiere supplier_id (cero marcas huérfanas) y sincronización reactiva de árbol en memoria.</td>
+    </tr>
+    <tr>
+      <td><strong>Fotos & Color</strong></td>
+      <td>Galería Manual & Variante de Color (6.51)</td>
+      <td>Entrada ágil de URLs en Workstation y Curaduría; selector de color de prenda por foto y portada.</td>
+    </tr>
+    <tr>
+      <td><strong>Alta In Situ</strong></td>
+      <td>Categorías y Subcategorías al Vuelo (6.52)</td>
+      <td>Botones y modal liviano para dar de alta taxonomías sin perder el formulario de producto activo.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>

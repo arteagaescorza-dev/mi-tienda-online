@@ -1987,3 +1987,34 @@ graph TD
 * **Verificación de Calidad:**
   - **377 pruebas superadas, 2,455 aserciones en verde (100% pasando sin regresiones)**.
 
+---
+
+### `TASK-BRD-08`: Asociación Mandatoria de Marcas a Proveedores, Fotografías Manuales con Variante de Color y Alta In Situ de Taxonomías (Reglas 6.50, 6.51 y 6.52)
+* **Prioridad:** **Crítica / Alta (Gobernanza de Catálogo e Inventario)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 4 (Gestor de Marcas, Árbol de Proveedores, Workstation Alta de Producto, Curaduría Scraping) $\leftrightarrow$ Hub 2 $\leftrightarrow$ Storefront $\leftrightarrow$ API REST RevOps
+* **Requerimientos Formalizados:**
+  1. *Regla 1 (Regla 6.50):* Toda marca de producto se debe asociar a un proveedor obligatoriamente. Sincronización bidireccional y actualización reactiva inmediata en memoria de `prov.brands`, `prov.brandsTree` y la tabla principal de proveedores en Alpine.js sin recargar pantalla.
+  2. *Regla 2 (Regla 6.51):* Tanto en el Workstation de Alta de Producto como en la Curaduría de Scraping, el operador puede añadir manualmente más fotografías de la prenda mediante URLs y asignarles un tipo de color de prenda (`color_name`) de la paleta oficial, además de definir la imagen principal (`is_primary`) para conmutación precisa de variantes por filtros y catálogo.
+  3. *Regla 3 (Regla 6.52):* Tanto desde el Workstation como desde la Curaduría Scraping, se puede añadir una categoría o subcategoría in situ si no existe (`+ Categoría`, `+ Subcategoría`) mediante modal liviano (`quickCategoryModalOpen`) sin abandonar la captura de datos ni recargar la pantalla.
+* **Componentes Implementados:**
+  1. *Migración de Gobernanza:* `2026_10_02_160000_enforce_supplier_brands_association.php` asoció marcas existentes huérfanas (*Mazho*, *Torzo Sexywear*) al proveedor fabricante Torzo (`supplier_id = 4`) y sincronizó `suppliers.brands`.
+  2. *Backend API (`BrandApiController`, `SupplierApiController`, `ProductSkuAndDuplicateApiController`, `InventoryApiController`):*
+     - `supplier_id` requerido con validación de existencia en `BrandApiController@store`.
+     - Exclusión preventiva de tipos de prenda (`Supplier::isProductLineCategory`) antes de la validación del request.
+     - Sincronización bidireccional de `Supplier` y `Brand` en `addBrand()` y `removeBrand()`.
+     - Soporte para `images` y `curated_images` con `color_name` y `is_primary` persistidas en `meta.gallery` y `meta.images`.
+     - Retorno de `supplier_brands_tree` enriquecido en respuestas JSON.
+  3. *Frontend Alpine.js (`inventory-module.js`):*
+     - Corregida la concordancia de IDs de proveedor en `saveBrandModal()` y `addAndPersistBrandToProvider()` (`supId` normalizado vs `'prov_' + supId`).
+     - Actualización reactiva en memoria de `prov.brands`, `prov.brandsTree` y la fila de la tabla en caliente.
+     - Métodos de fotos manuales con variante de color: `addManualImageUrlToNewProduct()`, `removeNewProductImage()`, `setPrimaryNewProductImage()`, `addManualImageToCuratingItem()`, `removeImageFromCuratingItem()`, `setPrimaryCuratingImage()`.
+     - Métodos de alta in situ de categorías y subcategorías: `openQuickCategoryModal(type, context)` y `saveQuickCategory()`.
+  4. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Selector mandatorio de proveedor en `brandModalOpen` con indicador "Obligatorio (Regla 1)".
+     - Workstation y Curaduría Scraping equipados con selectores de color de prenda por foto, botones de portada, eliminación y captura de URL manual.
+     - Botones in situ `+ Categoría` y `+ Subcategoría` con modal interactivo rápido (`quickCategoryModalOpen`, `z-[140]`).
+* **Documentación & Tríptico:**
+  - Registradas las **Reglas 6.50, 6.51 y 6.52** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf` (472 KB vía Chrome headless).
+* **Verificación de Calidad:**
+  - **382 pruebas automatizadas en verde (100% passing test suite, 2,504 aserciones).**
+

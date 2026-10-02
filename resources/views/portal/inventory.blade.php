@@ -4044,15 +4044,29 @@
                                     </div>
                                 </div>
 
-                                <!-- Categoría y Subcategoría -->
-                                <div class="grid grid-cols-2 gap-3">
+                                <!-- Categoría y Subcategoría (Regla 3: Alta in situ) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Categoria</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Categoría</label>
+                                            <button 
+                                                type="button" 
+                                                @click="openQuickCategoryModal('category', 'newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta categoría in situ sin salir de la ficha"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Categoría</span>
+                                            </button>
+                                        </div>
                                         <select 
                                             x-model="newProduct.category" 
                                             @change="onNewProductCategoryChange()"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
                                         >
+                                            <template x-for="cat in categoriesTree" :key="cat.id">
+                                                <option :value="cat.name" :selected="newProduct.category === cat.name" x-text="cat.name"></option>
+                                            </template>
                                             <option value="Boxers">Boxers</option>
                                             <option value="Jocks">Jocks</option>
                                             <option value="Tangas">Tangas</option>
@@ -4064,12 +4078,23 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Subcategoria</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Subcategoría</label>
+                                            <button 
+                                                type="button" 
+                                                @click="openQuickCategoryModal('subcategory', 'newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta subcategoría para esta categoría in situ"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Subcategoría</span>
+                                            </button>
+                                        </div>
                                         <input 
                                             type="text" 
                                             x-model="newProduct.subcategory" 
-                                            placeholder="Ej: Trunks / Briefs" 
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                            placeholder="Ej: Trunks / Briefs / Deportivo" 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                         >
                                     </div>
                                 </div>
@@ -4324,10 +4349,10 @@
                                     </div>
                                 </div>
 
-                                <!-- Galería de Imágenes -->
-                                <div class="pt-2 border-t border-slate-100">
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Fotografias de Producto</label>
+                                <!-- Galería de Imágenes con Asignación de Color de Prenda (Regla 2) -->
+                                <div class="pt-2 border-t border-slate-100 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Fotografías & Variante de Color</label>
                                         <span class="text-[10px] font-semibold text-slate-400" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
                                     </div>
                                     
@@ -4336,7 +4361,7 @@
                                         @dragover.prevent="isDraggingImages = true"
                                         @dragleave.prevent="isDraggingImages = false"
                                         @drop.prevent="handleImageDrop($event)"
-                                        class="border-2 border-dashed rounded-xl p-3 text-center transition cursor-pointer"
+                                        class="border-2 border-dashed rounded-xl p-2.5 text-center transition cursor-pointer"
                                         :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-slate-200 bg-slate-50 hover:bg-slate-100/60'"
                                         @click="$refs.newProductFileInput.click()"
                                     >
@@ -4348,26 +4373,67 @@
                                             accept="image/jpeg,image/png,image/webp,image/avif" 
                                             class="hidden"
                                         >
-                                        <div class="flex flex-col items-center justify-center gap-1 text-slate-500">
-                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex flex-col items-center justify-center gap-0.5 text-slate-500">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <span class="text-[11px] font-semibold text-slate-700">Arrastra fotos o haz clic para subir</span>
-                                            <span class="text-[10px] text-slate-400">JPG, PNG, WEBP, AVIF (Max 5MB)</span>
+                                            <span class="text-[10px] font-semibold text-slate-700">Arrastra fotos o haz clic para subir archivo</span>
+                                            <span class="text-[9px] text-slate-400">JPG, PNG, WEBP, AVIF (Máx 5MB)</span>
                                         </div>
                                     </div>
 
-                                    <!-- Thumbnails -->
+                                    <!-- Entrada de Foto Manual por URL (Regla 2) -->
+                                    <div class="flex items-center gap-1.5">
+                                        <input 
+                                            type="url" 
+                                            x-model="newProductManualImageUrl" 
+                                            @keydown.enter.prevent="addManualImageUrlToNewProduct()" 
+                                            placeholder="Pegar URL de foto adicional (https://...)" 
+                                            class="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                                        >
+                                        <button 
+                                            type="button" 
+                                            @click="addManualImageUrlToNewProduct()" 
+                                            class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                            title="Agregar fotografía manualmente por URL"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Foto Manual</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Galería de Miniaturas con Asignación de Color de Prenda (Regla 2) -->
                                     <template x-if="newProduct.images && newProduct.images.length > 0">
-                                        <div class="grid grid-cols-4 gap-2 mt-2">
+                                        <div class="space-y-2 mt-2 max-h-56 overflow-y-auto pr-1">
                                             <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
-                                                <div class="relative group rounded-lg overflow-hidden border border-slate-200 aspect-square bg-slate-100">
-                                                    <img :src="img.preview" class="w-full h-full object-cover">
-                                                    <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1">
-                                                        <button type="button" @click.stop="setPrimaryImage(idx)" class="p-1 rounded bg-white/90 text-slate-800 text-[9px] font-bold" title="Hacer Portada">P</button>
-                                                        <button type="button" @click.stop="removeImage(idx)" class="p-1 rounded bg-rose-600 text-white text-[9px] font-bold" title="Eliminar">X</button>
+                                                <div class="flex items-center gap-2 p-1.5 bg-slate-50 rounded-lg border border-slate-200 hover:border-indigo-300 transition">
+                                                    <div class="relative w-12 h-12 rounded overflow-hidden border border-slate-200 bg-white shrink-0">
+                                                        <img :src="img.preview || img.url" class="w-full h-full object-cover">
+                                                        <span x-show="img.is_primary" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-bold px-1 rounded shadow-xs">Portada</span>
                                                     </div>
-                                                    <span x-show="img.is_primary" class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-bold px-1 rounded">Portada</span>
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center justify-between mb-0.5">
+                                                            <span class="text-[10px] font-bold text-slate-700 truncate" x-text="img.name || ('Foto ' + (idx + 1))"></span>
+                                                            <div class="flex items-center gap-1">
+                                                                <button type="button" @click.stop="setPrimaryImage(idx)" class="px-1.5 py-0.5 rounded bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 text-[9px] font-bold transition" title="Hacer Portada Principal">Portada</button>
+                                                                <button type="button" @click.stop="removeImage(idx)" class="p-0.5 rounded text-rose-500 hover:bg-rose-50 transition" title="Eliminar foto">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Selector de Color de Prenda para esta Foto -->
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span class="text-[9px] text-slate-400 font-semibold uppercase">Color:</span>
+                                                            <select 
+                                                                x-model="img.color_name" 
+                                                                class="flex-1 p-0.5 text-[11px] bg-white border border-slate-200 rounded font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                            >
+                                                                <template x-for="col in apparelColors" :key="col.id">
+                                                                    <option :value="col.name" :selected="col.name === img.color_name" x-text="col.name"></option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </div>
@@ -10003,6 +10069,69 @@
                             </div>
                         </div>
 
+                        <!-- Categoría & Subcategoría del Producto con Alta Instantánea (Regla 3) -->
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                    <span>Categoría & Subcategoría del Catálogo</span>
+                                </label>
+                                <span class="text-[10px] text-slate-400 font-mono">Regla 3: In situ</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Categoría</label>
+                                        <button 
+                                            type="button" 
+                                            @click="openQuickCategoryModal('category', 'curating')" 
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            title="Dar de alta categoría in situ sin salir de la curaduría"
+                                        >
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Categoría</span>
+                                        </button>
+                                    </div>
+                                    <select 
+                                        x-model="curatingItem.suggestedCategory" 
+                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                    >
+                                        <template x-for="cat in categoriesTree" :key="cat.id">
+                                            <option :value="cat.name" :selected="curatingItem.suggestedCategory === cat.name" x-text="cat.name"></option>
+                                        </template>
+                                        <option value="Boxers">Boxers</option>
+                                        <option value="Jocks">Jocks</option>
+                                        <option value="Tangas">Tangas</option>
+                                        <option value="Bikinis">Bikinis</option>
+                                        <option value="Camisillas">Camisillas</option>
+                                        <option value="Cosmetica / Skincare">Cosmetica / Skincare</option>
+                                        <option value="Perfumeria / Fragancias">Perfumeria / Fragancias</option>
+                                        <option value="Accesorios & Cuidado">Accesorios & Cuidado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Subcategoría</label>
+                                        <button 
+                                            type="button" 
+                                            @click="openQuickCategoryModal('subcategory', 'curating')" 
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            title="Dar de alta subcategoría in situ"
+                                        >
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Subcategoría</span>
+                                        </button>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        x-model="curatingItem.suggestedSubcategory" 
+                                        placeholder="Ej: Trunks / Briefs / Deportivo" 
+                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- 1. Validación / Edición de la Descripción Scrapeada -->
                         <div>
                             <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Descripción del Producto (Validación Humana)</label>
@@ -10130,7 +10259,7 @@
                             </div>
                         </div>
 
-                        <!-- 2.1 Variabilidad de Color asociada a Fotografía Scrapeada (Regla 10) -->
+                        <!-- 2.1 Curaduría de Fotografías & Variante de Color (Reglas 2 y 10) -->
                         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
                             <div class="flex items-center justify-between">
                                 <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">
@@ -10138,14 +10267,45 @@
                                 </label>
                                 <span class="text-[10px] text-slate-500 font-mono" x-text="(curatingItem.images?.length || 0) + ' fotografía(s)'"></span>
                             </div>
-                            <p class="text-[11px] text-slate-500">Asigna la variante de color correspondiente a cada imagen scrapeada para conmutar las fotografías fielmente en el catálogo y PDP del storefront.</p>
+                            <p class="text-[11px] text-slate-500">Añade más fotos manualmente si se requiere y asigna la variante de color correspondiente a cada imagen para conmutar las fotografías fielmente en el catálogo y storefront.</p>
+
+                            <!-- Entrada de Foto Manual por URL (Regla 2) -->
+                            <div class="flex items-center gap-1.5">
+                                <input 
+                                    type="url" 
+                                    x-model="curatingNewImageUrl" 
+                                    @keydown.enter.prevent="addManualImageToCuratingItem()" 
+                                    placeholder="Pegar URL de fotografía adicional (https://...)" 
+                                    class="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                                >
+                                <button 
+                                    type="button" 
+                                    @click="addManualImageToCuratingItem()" 
+                                    class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                    title="Añadir fotografía manualmente a esta prenda"
+                                >
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                    <span>+ Foto Manual</span>
+                                </button>
+                            </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                 <template x-for="(scrapedImg, imgIdx) in (curatingItem.images || [])" :key="imgIdx">
-                                    <div class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200">
-                                        <img :src="scrapedImg" alt="Foto Scrapeada" class="w-12 h-12 rounded object-cover border border-slate-200 shrink-0">
+                                    <div class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition">
+                                        <div class="relative w-12 h-12 rounded overflow-hidden border border-slate-200 shrink-0">
+                                            <img :src="scrapedImg" alt="Foto Prenda" class="w-full h-full object-cover">
+                                            <span x-show="imgIdx === 0" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-bold px-1 rounded shadow-xs">Portada</span>
+                                        </div>
                                         <div class="flex-1 min-w-0">
-                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5" x-text="'Foto ' + (imgIdx + 1)"></label>
+                                            <div class="flex items-center justify-between mb-0.5">
+                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block truncate" x-text="'Foto ' + (imgIdx + 1)"></label>
+                                                <div class="flex items-center gap-1">
+                                                    <button type="button" @click="setPrimaryCuratingImage(imgIdx)" class="px-1 py-0.2 rounded text-[9px] font-bold bg-slate-50 hover:bg-indigo-50 text-indigo-700 border border-slate-200 transition" title="Hacer Portada Principal">Portada</button>
+                                                    <button type="button" @click="removeImageFromCuratingItem(imgIdx)" class="p-0.5 rounded text-rose-500 hover:bg-rose-50 transition" title="Quitar foto">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                             <select 
                                                 :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
                                                 @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
@@ -10973,19 +11133,23 @@
                         </div>
                     </div>
 
-                    <!-- Proveedor Asociado -->
+                    <!-- Proveedor Asociado (Regla 1: Mandatorio) -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Proveedor del que se Desprende</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700">Proveedor Comercial Asociado <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.2 rounded">Obligatorio (Regla 1)</span>
+                        </div>
                         <select 
                             x-model="brandForm.supplier_id" 
-                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-semibold text-slate-800"
+                            required
                         >
-                            <option value="">Marca Directa / Independiente (Sin Proveedor)</option>
+                            <option value="">-- Selecciona el Proveedor Obligatorio --</option>
                             <template x-for="prov in providers" :key="prov.id">
-                                <option :value="String(prov.id)" x-text="(prov.tradeName || prov.name) + (prov.vendorCode ? ' (' + prov.vendorCode + ')' : '')"></option>
+                                <option :value="String(prov.dbId || String(prov.id).replace('prov_', ''))" x-text="(prov.tradeName || prov.name) + (prov.vendorCode ? ' (' + prov.vendorCode + ')' : '')"></option>
                             </template>
                         </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Al asociarla a un proveedor, aparecerá automáticamente como rama de su árbol en los ajustes y filtros.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Regla 1: Toda marca comercial debe estar asociada a un proveedor registrado para integrarse a su árbol jerárquico y reflejarse en catálogos y filtros.</p>
                     </div>
 
                     <!-- Descripción / Posicionamiento -->
@@ -11056,6 +11220,99 @@
             </div>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE CATEGORÍA / SUBCATEGORÍA (Regla 3) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickCategoryModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[140] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 140 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickCategoryModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white" x-text="quickCategoryType === 'subcategory' ? 'Nueva Subcategoría In Situ' : 'Nueva Categoría In Situ'"></h3>
+                            <p class="text-[10px] text-slate-300" x-text="quickCategoryType === 'subcategory' ? ('Asociada a: ' + quickCategoryParentName) : 'Catálogo Maestro RevOps'"></p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickCategoryModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal rápido"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <div x-show="quickCategoryType === 'subcategory'" class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100 flex items-center gap-2 text-indigo-900">
+                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                        <span class="text-[11px] font-semibold">Categoría Padre: <b class="font-bold text-indigo-950" x-text="quickCategoryParentName"></b></span>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span x-text="quickCategoryType === 'subcategory' ? 'Nombre de la Subcategoría' : 'Nombre de la Categoría'"></span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickCategoryForm.name" 
+                            @keydown.enter.prevent="saveQuickCategory()"
+                            :placeholder="quickCategoryType === 'subcategory' ? 'Ej: Micro-Briefs, Seamless, Compresión...' : 'Ej: Jockstraps Deportivos, Loungewear...'" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Descripción / Notas (Opcional)</label>
+                        <textarea 
+                            x-model="quickCategoryForm.description" 
+                            rows="2" 
+                            placeholder="Detalle o clasificación técnica..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Regla 3: Se creará en el catálogo maestro y se auto-seleccionará inmediatamente en tu línea de trabajo activa sin perder tu progreso.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickCategoryModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickCategory()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Guardar y Asignar In Situ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
 </div>
 @endsection
