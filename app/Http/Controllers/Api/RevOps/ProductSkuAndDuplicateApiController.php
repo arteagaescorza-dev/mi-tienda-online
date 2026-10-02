@@ -216,6 +216,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'title' => 'nullable|string|max:255',
             'name' => 'nullable|string|max:255',
             'brand' => 'nullable|string|max:100',
+            'supplier_id' => 'nullable',
             'category' => 'nullable|string|max:100',
             'subcategory' => 'nullable|string|max:100',
             'type' => 'nullable|string|in:propio,physical,dropship,both',
@@ -295,6 +296,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'batch_number' => $validated['batch_number'] ?? null,
             'expiration_date' => $validated['expiration_date'] ?? null,
             'pao_months' => $validated['pao_months'] ?? 12,
+            'supplier_id' => $validated['supplier_id'] ?? null,
             'provider' => $validated['provider'] ?? 'ModaIntima Textil MX',
             'provider_url' => $validated['provider_url'] ?? '',
         ];
@@ -418,6 +420,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'batch_number' => 'nullable|string|max:100',
             'expiration_date' => 'nullable|string|max:50',
             'pao_months' => 'nullable|integer|min:0',
+            'supplier_id' => 'nullable',
             'provider' => 'nullable|string|max:100',
             'provider_url' => 'nullable|string|max:255',
         ]);
@@ -463,6 +466,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'batch_number' => $validated['batch_number'] ?? ($existingMeta['batch_number'] ?? null),
             'expiration_date' => $validated['expiration_date'] ?? ($existingMeta['expiration_date'] ?? null),
             'pao_months' => $validated['pao_months'] ?? ($existingMeta['pao_months'] ?? 12),
+            'supplier_id' => $validated['supplier_id'] ?? ($existingMeta['supplier_id'] ?? null),
             'provider' => $validated['provider'] ?? ($existingMeta['provider'] ?? 'ModaIntima Textil MX'),
             'provider_url' => $validated['provider_url'] ?? ($existingMeta['provider_url'] ?? ''),
         ]);

@@ -403,6 +403,16 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. **Hub 2 (Tienda & CMS):** Selectores de Proveedor y Marca Comercial en los modales de creación y edición de vitrinas de *Páginas de Explorar* (`store.blade.php`), permitiendo direccionar al comprador al catálogo filtrado por marca o fabricante.
   3. **Storefront PWA:** Estructura de árbol faceteado colapsable (`<details class="filter-tree">`) en el drawer de filtros (`#filterDrawer`), con casillas de verificación (**checkboxes**) indentadas que agrupan a cada proveedor con sus respectivas marcas comerciales desprendidas, sincronizado con el motor reactivo de coincidencia (`site.js`).
 
+### Regla 6.47: Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría con Alta Rápida In Situ
+* **Presencia Universal en Toda Ficha de Producto:** En todos los puntos de captura, edición y curaduría del catálogo comercial:
+  1. **Alta de Nuevo Producto (`newProductPanoramicModal`):** Es mandatorio disponer de un selector reactivo de *Proveedor / Fabricante* (`supplier_id`) y un selector dependiente de *Marca Comercial* (`brand`), eliminando inputs de texto libre ambiguos.
+  2. **Curaduría Previa de Scraping (`scrapingCurationModalOpen`):** Toda prenda en staging debe permitir asignar interactivamente su proveedor oficial y la marca comercial con la que se comercializará antes de conceder la aprobación a inventario.
+  3. **Ficha de Edición / Drawer Panorámico (`skuPanoramicModal`):** La sección de *Catalogación & Proveedor* debe estructurarse mediante selectores sincronizados de proveedor y marca comercial vinculada.
+* **Botones de Alta Rápida In Situ ("+ Nuevo Proveedor" y "+ Nueva Marca"):** Cada selector de proveedor y marca en estas fichas debe incorporar un botón de acción rápida en cabecera:
+  - `+ Nuevo Proveedor`: Despliega de inmediato el modal de registro de proveedor (`providerModalOpen`, `z-[120]`) para capturar información operativa y fiscal sin perder los datos ya introducidos en la ficha de producto. Al guardarse exitosamente, el nuevo proveedor se selecciona automáticamente en el formulario activo.
+  - `+ Nueva Marca`: Despliega de inmediato el modal de marca comercial (`brandModalOpen`, `z-[130]`) preasignando el proveedor actualmente seleccionado. Al guardarse, la nueva marca se asocia y se autoselecciona de inmediato en el producto.
+* **Filtrado Dinámico en Cascada:** Al seleccionar un proveedor en cualquiera de estas fichas, el listado de marcas comerciales disponibles debe filtrar automáticamente las marcas pertenecientes o comercializadas por dicho proveedor mediante `getBrandsForSupplier(supplierId)`, manteniendo consistencia relacional en toda la plataforma.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)

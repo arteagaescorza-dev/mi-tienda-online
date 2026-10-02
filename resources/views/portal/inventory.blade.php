@@ -3122,31 +3122,83 @@
                             </div>
                         </div>
 
-                        <!-- 2. Catalogación & Proveedor -->
+                        <!-- 2. Catalogación & Proveedor (Regla 6.47) -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">Regla 6.47</span>
+                            </div>
                             
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-3">
+                                <!-- Selector de Proveedor -->
                                 <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="drawerBrand" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        placeholder="Ej: Torzo B2B, ModaIntima MX"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                            <span>Proveedor / Fabricante</span>
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <button 
+                                            type="button" 
+                                            @click="openCreateProviderModal()" 
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            title="Dar de alta proveedor si no existe"
+                                        >
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Nuevo Proveedor</span>
+                                        </button>
+                                    </div>
                                     <select 
-                                        x-model="drawerWebsiteSection" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        x-model="drawerSupplierId" 
+                                        @change="onDrawerSupplierChange()"
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                                     >
-                                        <option value="basicos">Línea Básicos Esenciales</option>
-                                        <option value="disenador">Línea Diseñador & Autor</option>
-                                        <option value="temporada">Colección Temporada / Drops</option>
-                                        <option value="general">Catálogo General</option>
+                                        <option value="">-- Seleccionar Proveedor --</option>
+                                        <template x-for="p in providers" :key="p.id">
+                                            <option :value="p.id" :selected="String(drawerSupplierId) === String(p.id)" x-text="p.tradeName || p.name"></option>
+                                        </template>
                                     </select>
+                                </div>
+
+                                <!-- Fila: Marca y Sección Web -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                                <span>Marca Comercial</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openCreateBrandModal(drawerSupplierId)" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta marca para este proveedor"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Marca</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="drawerBrand" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                            <option value="">-- Seleccionar Marca --</option>
+                                            <template x-for="b in getBrandsForSupplier(drawerSupplierId)" :key="b.name">
+                                                <option :value="b.name" :selected="drawerBrand === b.name" x-text="b.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Sección en Tienda Web</label>
+                                        <select 
+                                            x-model="drawerWebsiteSection" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                            <option value="basicos">Línea Básicos Esenciales</option>
+                                            <option value="disenador">Línea Diseñador & Autor</option>
+                                            <option value="temporada">Colección Temporada / Drops</option>
+                                            <option value="general">Catálogo General</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -3931,16 +3983,65 @@
                                     </div>
                                 </div>
 
-                                <!-- Marca / Fabricante -->
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Marca / Proveedor</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="newProduct.brand" 
-                                        @input.debounce.350ms="checkProductDuplicate()"
-                                        placeholder="ModaIntima Textil MX / Torzo B2B" 
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
+                                <!-- Proveedor y Marca Comercial con Botones de Alta Instantánea (Regla 6.47) -->
+                                <div class="space-y-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/90">
+                                    <!-- Proveedor -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                                <span>Proveedor / Fabricante</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openCreateProviderModal()" 
+                                                class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta un nuevo proveedor en caso de no existir"
+                                            >
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Nuevo Proveedor</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="newProduct.supplier_id" 
+                                            @change="onNewProductSupplierChange(); checkProductDuplicate();"
+                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
+                                        >
+                                            <option value="">-- Seleccionar Proveedor --</option>
+                                            <template x-for="p in providers" :key="p.id">
+                                                <option :value="p.id" :selected="String(newProduct.supplier_id) === String(p.id)" x-text="(p.tradeName || p.name) + (p.origin === 'scraping' ? ' [Scraping]' : ' [Directo]')"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Marca Comercial Asociada -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                                <span>Marca Comercial</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openCreateBrandModal(newProduct.supplier_id)" 
+                                                class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta una nueva marca y asociarla a este proveedor/producto"
+                                            >
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Nueva Marca</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="newProduct.brand" 
+                                            @change="checkProductDuplicate()"
+                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
+                                        >
+                                            <option value="">-- Seleccionar Marca --</option>
+                                            <template x-for="b in getBrandsForSupplier(newProduct.supplier_id)" :key="b.name">
+                                                <option :value="b.name" :selected="newProduct.brand === b.name" x-text="b.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <!-- Categoría y Subcategoría -->
@@ -9777,11 +9878,80 @@
                             <div>
                                 <span class="text-xs font-mono font-bold text-indigo-600" x-text="curatingItem.suggestedSku"></span>
                                 <h4 class="font-bold text-slate-900 text-base mt-0.5" x-text="curatingItem.name"></h4>
-                                <span class="text-xs text-slate-500" x-text="'Proveedor: ' + curatingItem.brand + ' • ' + curatingItem.suggestedCategory"></span>
+                                <span class="text-xs text-slate-500" x-text="'Prenda Scrapeada • ' + curatingItem.suggestedCategory"></span>
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-slate-400 block">Costo Mayorista</span>
                                 <span class="text-lg font-extrabold text-emerald-600 font-mono" x-text="'$' + curatingItem.cost.toFixed(2)"></span>
+                            </div>
+                        </div>
+
+                        <!-- Proveedor & Marca Comercial con Botones de Alta Instantánea (Regla 6.47) -->
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    <span>Asignación de Proveedor & Marca Comercial</span>
+                                </label>
+                                <span class="text-[10px] text-slate-400 font-mono">Regla 6.47</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Selector Proveedor -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                            <span>Proveedor / Fabricante</span>
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <button 
+                                            type="button" 
+                                            @click="openCreateProviderModal()" 
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            title="Dar de alta proveedor si no existe"
+                                        >
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Proveedor</span>
+                                        </button>
+                                    </div>
+                                    <select 
+                                        x-model="curatingItem.supplier_id" 
+                                        @change="onCuratingSupplierChange()"
+                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                    >
+                                        <option value="">-- Seleccionar Proveedor --</option>
+                                        <template x-for="p in providers" :key="p.id">
+                                            <option :value="p.id" :selected="String(curatingItem.supplier_id) === String(p.id)" x-text="p.tradeName || p.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
+                                <!-- Selector Marca -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                            <span>Marca Comercial</span>
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <button 
+                                            type="button" 
+                                            @click="openCreateBrandModal(curatingItem.supplier_id)" 
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            title="Dar de alta marca para este proveedor"
+                                        >
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Marca</span>
+                                        </button>
+                                    </div>
+                                    <select 
+                                        x-model="curatingItem.brand" 
+                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                    >
+                                        <option value="">-- Seleccionar Marca --</option>
+                                        <template x-for="b in getBrandsForSupplier(curatingItem.supplier_id)" :key="b.name">
+                                            <option :value="b.name" :selected="curatingItem.brand === b.name" x-text="b.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 

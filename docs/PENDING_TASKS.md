@@ -1964,3 +1964,26 @@ graph TD
       - `modalParentChain[0]: div#storeAppRoot`
     - Cierre comprobado mediante `[data-action="close-modal"]`: `computedDisplay: "none"`, `offsetHeight: 0`.
   - **Pruebas de Regresión:** 27 pruebas pasando al 100% (134 aserciones) en `Hub2AdminStoreControllerTest`.
+
+---
+
+### `TASK-BRD-06`: Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría con Alta Rápida In Situ (Regla 6.47)
+* **Prioridad:** **Alta (Regla de Oro del Catálogo)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 4 (Inventario, Alta de Producto y Curaduría de Scraping) $\leftrightarrow$ Hub 2 (CMS & Storefront) $\leftrightarrow$ API REST RevOps
+* **Requerimiento & Regla 6.47:**
+  - Garantizar que en cada punto donde se dé de alta, edite o cure un producto del catálogo existan selectores interactivos y sincronizados de Proveedor y Marca Comercial.
+  - Proveer botones de alta instantánea `+ Nuevo Proveedor` y `+ Nueva Marca` en cada uno de estos formularios para registrar entidades inexistentes sin perder la captura activa.
+* **Componentes Actualizados:**
+  1. *Alta de Nuevo Producto (`newProductPanoramicModal`):* Reemplazado input de texto plano por selectores reactivos de Proveedor (`supplier_id`) y Marca Comercial (`brand`) con botones `+ Nuevo Proveedor` (`openCreateProviderModal`, `z-[120]`) y `+ Nueva Marca` (`openCreateBrandModal`, `z-[130]`).
+  2. *Curaduría Previa de Scraping (`scrapingCurationModalOpen`):* Incorporado bloque de asignación de Proveedor y Marca oficial con botones de alta rápida `+ Proveedor` y `+ Marca`, permitiendo catalogar con precisión antes de conceder la aprobación a stock.
+  3. *Ficha de Edición / Drawer de Producto (`skuPanoramicModal`):* Sección *Catalogación & Proveedor* modernizada con selectores vinculados de Proveedor (`drawerSupplierId`) y Marca Comercial (`drawerBrand`) y botones de creación instantánea.
+  4. *Lógica Alpine en `inventory-module.js`:*
+     - Métodos auxiliares `getBrandsForSupplier(supplierId)`, `onNewProductSupplierChange()`, `onDrawerSupplierChange()` y `onCuratingSupplierChange()`.
+     - Auto-selección reactiva en caliente en los 3 formularios cuando se completa el guardado en `saveProvider()` o `saveBrand()`.
+  5. *Persistencia Backend (`ProductSkuAndDuplicateApiController.php`):*
+     - Soporte y validación de `supplier_id` en `storeProduct` y `updateComplete`, persistiendo en los metadatos del producto y enlazando con la gobernanza de inventario.
+* **Documentación & Tríptico:**
+  - Codificada la **Regla 6.47** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y recompilado `docs/PROJECT_RULES.pdf` (427 KB vía Chrome Headless).
+* **Verificación de Calidad:**
+  - **377 pruebas superadas, 2,455 aserciones en verde (100% pasando sin regresiones)**.
+

@@ -518,6 +518,8 @@ function hybridInventoryModule() {
         drawerIsPublished: true,
         drawerDescription: '',
         drawerBrand: 'ModaIntima Textil MX',
+        drawerSupplierId: null,
+        drawerSupplierName: '',
         drawerDiscountPct: 0,
         drawerRegularPrice: 0,
         drawerImage: '',
@@ -763,6 +765,7 @@ function hybridInventoryModule() {
             volumes: { v10: 15, v50: 30, v100: 10 },
             unitStock: 50,
             supplierStock: 40,
+            supplier_id: null,
             provider: 'ModaIntima Textil MX',
             providerUrl: '',
             images: [],
@@ -7987,6 +7990,21 @@ function hybridInventoryModule() {
                     if (isCreating) {
                         this.providers.unshift(saved);
                         this.providerModalOpen = false;
+
+                        // Regla 6.47: Auto-seleccionar en modales activos
+                        if (this.newProductDrawerOpen) {
+                            this.newProduct.supplier_id = saved.id;
+                            this.newProduct.provider = saved.tradeName || saved.name;
+                            this.onNewProductSupplierChange();
+                        }
+                        if (this.scrapingCurationModalOpen && this.curatingItem) {
+                            this.curatingItem.supplier_id = saved.id;
+                            this.onCuratingSupplierChange();
+                        }
+                        if (this.drawerOpen) {
+                            this.drawerSupplierId = saved.id;
+                            this.onDrawerSupplierChange();
+                        }
                     } else {
                         const idx = this.providers.findIndex(p => p.id === this.selectedProvider.id);
                         if (idx !== -1) {
@@ -8315,6 +8333,30 @@ function hybridInventoryModule() {
                             }
                         }
                     }
+
+                    // Regla 6.47: Auto-seleccionar marca en modales y formularios activos
+                    const savedBrandName = data.data?.name || payload.name;
+                    if (this.newProductDrawerOpen) {
+                        this.newProduct.brand = savedBrandName;
+                        if (payload.supplier_id) {
+                            this.newProduct.supplier_id = payload.supplier_id;
+                            this.onNewProductSupplierChange();
+                        }
+                    }
+                    if (this.scrapingCurationModalOpen && this.curatingItem) {
+                        this.curatingItem.brand = savedBrandName;
+                        if (payload.supplier_id) {
+                            this.curatingItem.supplier_id = payload.supplier_id;
+                            this.onCuratingSupplierChange();
+                        }
+                    }
+                    if (this.drawerOpen) {
+                        this.drawerBrand = savedBrandName;
+                        if (payload.supplier_id) {
+                            this.drawerSupplierId = payload.supplier_id;
+                            this.onDrawerSupplierChange();
+                        }
+                    }
                 } else {
                     this.showToast(data.message || 'No se pudo guardar la marca comercial.', 'error');
                 }
@@ -8603,6 +8645,83 @@ function hybridInventoryModule() {
             await this.toggleActiveBrand(brand);
         },
 
+        // Regla 6.47: Vinculación Obligatoria de Proveedor y Marcas en Fichas
+        getBrandsForSupplier(supplierId) {
+            const allBrands = (this.brands || []).filter(b => !b.is_archived && b.is_active !== false);
+            if (!supplierId) {
+                return allBrands.length > 0 ? allBrands : [{ name: 'Torzo B2B' }, { name: 'ModaIntima Textil MX' }];
+            }
+            const cleanId = String(supplierId).replace('prov_', '');
+            const prov = (this.providers || []).find(p => String(p.id) === String(supplierId) || String(p.id) === cleanId || (p.dbId && String(p.dbId) === cleanId));
+
+            // 1. Filtrar marcas registradas por supplier_id directo
+            const matching = allBrands.filter(b => b.supplier_id && (String(b.supplier_id) === String(supplierId) || String(b.supplier_id) === cleanId));
+            if (matching.length > 0) {
+                return matching;
+            }
+
+            // 2. Si no hay marcas en tabla brands, buscar en prov.brandsTree o prov.brands
+            if (prov) {
+                if (Array.isArray(prov.brandsTree) && prov.brandsTree.length > 0) {
+                    return prov.brandsTree.filter(b => b.is_active !== false);
+                }
+                if (Array.isArray(prov.brands) && prov.brands.length > 0) {
+                    return prov.brands.map(name => ({ name: String(name), is_active: true }));
+                }
+                const fallbackName = prov.tradeName || prov.name;
+                if (fallbackName) {
+                    return [{ name: fallbackName, is_active: true }];
+                }
+            }
+
+            return allBrands.length > 0 ? allBrands : [{ name: 'Torzo B2B' }, { name: 'ModaIntima Textil MX' }];
+        },
+
+        onNewProductSupplierChange() {
+            const supId = this.newProduct.supplier_id;
+            const cleanId = String(supId || '').replace('prov_', '');
+            const prov = (this.providers || []).find(p => String(p.id) === String(supId) || String(p.id) === cleanId || (p.dbId && String(p.dbId) === cleanId));
+            if (prov) {
+                this.newProduct.provider = prov.tradeName || prov.name;
+                const brands = this.getBrandsForSupplier(supId);
+                if (brands && brands.length > 0) {
+                    if (!this.newProduct.brand || !brands.some(b => b.name === this.newProduct.brand)) {
+                        this.newProduct.brand = brands[0].name;
+                    }
+                }
+            }
+        },
+
+        onDrawerSupplierChange() {
+            const supId = this.drawerSupplierId;
+            const cleanId = String(supId || '').replace('prov_', '');
+            const prov = (this.providers || []).find(p => String(p.id) === String(supId) || String(p.id) === cleanId || (p.dbId && String(p.dbId) === cleanId));
+            if (prov) {
+                this.drawerSupplierName = prov.tradeName || prov.name;
+                const brands = this.getBrandsForSupplier(supId);
+                if (brands && brands.length > 0) {
+                    if (!this.drawerBrand || !brands.some(b => b.name === this.drawerBrand)) {
+                        this.drawerBrand = brands[0].name;
+                    }
+                }
+            }
+        },
+
+        onCuratingSupplierChange() {
+            if (!this.curatingItem) return;
+            const supId = this.curatingItem.supplier_id;
+            const cleanId = String(supId || '').replace('prov_', '');
+            const prov = (this.providers || []).find(p => String(p.id) === String(supId) || String(p.id) === cleanId || (p.dbId && String(p.dbId) === cleanId));
+            if (prov) {
+                const brands = this.getBrandsForSupplier(supId);
+                if (brands && brands.length > 0) {
+                    if (!this.curatingItem.brand || !brands.some(b => b.name === this.curatingItem.brand)) {
+                        this.curatingItem.brand = brands[0].name;
+                    }
+                }
+            }
+        },
+
         openScrapingCuration(pendingItem) {
             this.curatingItem = JSON.parse(JSON.stringify(pendingItem));
             if (!this.curatingItem.images) {
@@ -8616,6 +8735,25 @@ function hybridInventoryModule() {
                     this.curatingItem.imageColorMap[img] = this.curatingItem.detectedColorName || 'Negro Profundo';
                 });
             }
+
+            // Regla 6.47: Vincular automáticamente proveedor y marca disponible
+            const matchedProv = (this.providers || []).find(p => 
+                (this.curatingItem.supplier_id && (String(p.id) === String(this.curatingItem.supplier_id) || (p.dbId && String(p.dbId) === String(this.curatingItem.supplier_id)))) ||
+                (this.curatingItem.brand && (
+                    (p.tradeName && p.tradeName.toLowerCase() === this.curatingItem.brand.toLowerCase()) ||
+                    (p.name && p.name.toLowerCase() === this.curatingItem.brand.toLowerCase()) ||
+                    (Array.isArray(p.brands) && p.brands.some(b => b.toLowerCase() === this.curatingItem.brand.toLowerCase()))
+                ))
+            ) || (this.providers && this.providers[0]) || null;
+
+            if (matchedProv) {
+                this.curatingItem.supplier_id = matchedProv.id;
+                if (!this.curatingItem.brand) {
+                    const brands = this.getBrandsForSupplier(matchedProv.id);
+                    this.curatingItem.brand = (brands && brands[0]?.name) || matchedProv.tradeName || matchedProv.name;
+                }
+            }
+
             this.showInlineAddColor = false;
             this.showInlineAddFabric = false;
             this.inlineColorName = '';
@@ -8805,7 +8943,26 @@ function hybridInventoryModule() {
             this.drawerWebsiteSection = product.websiteSection || product.website_section || 'basicos';
             this.drawerIsPublished = product.isPublished !== undefined ? product.isPublished : (product.is_published !== undefined ? product.is_published : true);
             this.drawerDescription = product.description || '';
-            this.drawerBrand = product.brand || (product.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX');
+            const prodBrand = product.brand || (product.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX');
+            this.drawerBrand = prodBrand;
+
+            // Regla 6.47: Identificar proveedor y marcas vinculadas
+            const matchedProv = (this.providers || []).find(p => 
+                (product.supplier_id && (String(p.id) === String(product.supplier_id) || (p.dbId && String(p.dbId) === String(product.supplier_id)))) ||
+                (product.meta?.supplier_id && (String(p.id) === String(product.meta.supplier_id) || (p.dbId && String(p.dbId) === String(product.meta.supplier_id)))) ||
+                (product.meta?.provider && (
+                    (p.tradeName && p.tradeName.toLowerCase() === String(product.meta.provider).toLowerCase()) ||
+                    (p.name && p.name.toLowerCase() === String(product.meta.provider).toLowerCase())
+                )) ||
+                (prodBrand && (
+                    (p.tradeName && p.tradeName.toLowerCase() === prodBrand.toLowerCase()) ||
+                    (p.name && p.name.toLowerCase() === prodBrand.toLowerCase()) ||
+                    (Array.isArray(p.brands) && p.brands.some(b => b.toLowerCase() === prodBrand.toLowerCase()))
+                ))
+            ) || (this.providers && this.providers[0]) || null;
+
+            this.drawerSupplierId = matchedProv ? matchedProv.id : null;
+            this.drawerSupplierName = matchedProv ? (matchedProv.tradeName || matchedProv.name) : '';
             this.drawerImage = product.image || (Array.isArray(product.images) && product.images[0]) || '';
             this.drawerImages = Array.isArray(product.images) && product.images.length ? [...product.images] : (this.drawerImage ? [this.drawerImage] : []);
             this.drawerImageColorMap = product.images_by_color ? { ...product.images_by_color } : (product.imageColorMap ? { ...product.imageColorMap } : {});
@@ -8919,7 +9076,9 @@ function hybridInventoryModule() {
                 bulletPoints: [],
                 seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
                 newTagInput: '',
-                brand: 'ModaIntima Textil MX',
+                supplier_id: (this.providers && this.providers.length > 0) ? this.providers[0].id : null,
+                provider: (this.providers && this.providers.length > 0) ? (this.providers[0].tradeName || this.providers[0].name) : 'ModaIntima Textil MX',
+                brand: (this.providers && this.providers.length > 0) ? ((this.getBrandsForSupplier(this.providers[0].id)[0]?.name) || this.providers[0].tradeName || this.providers[0].name) : 'ModaIntima Textil MX',
                 discountPct: 0,
                 regularPrice: 399.00,
                 pvp: 399.00,
@@ -8930,7 +9089,6 @@ function hybridInventoryModule() {
                 volumes: { v10: 0, v50: 0, v100: 0 },
                 unitStock: 0,
                 supplierStock: 40,
-                provider: 'ModaIntima Textil MX',
                 providerUrl: '',
                 images: [],
                 // TASK-INV-15: Auto-SKU, Deteccion de Duplicados & Copiloto IA
@@ -9500,6 +9658,7 @@ function hybridInventoryModule() {
                 subcategory: this.newProduct.subcategory || '',
                 type: this.newProduct.type,
                 brand: this.newProduct.brand || 'ModaIntima Textil MX',
+                supplier_id: this.newProduct.supplier_id || null,
                 location: this.newProduct.location || 'A-02-B',
                 pvp: pvp,
                 regular_price: parseFloat(this.newProduct.regularPrice) || pvp,
@@ -9848,6 +10007,10 @@ function hybridInventoryModule() {
             this.selectedProduct.isPublished = this.drawerIsPublished;
             this.selectedProduct.description = this.drawerDescription;
             this.selectedProduct.brand = this.drawerBrand;
+            this.selectedProduct.supplier_id = this.drawerSupplierId;
+            if (this.drawerSupplierName) {
+                this.selectedProduct.provider = this.drawerSupplierName;
+            }
             this.selectedProduct.image = this.drawerImage;
             this.selectedProduct.images = this.drawerImages.length ? [...this.drawerImages] : (this.drawerImage ? [this.drawerImage] : []);
             this.selectedProduct.images_by_color = { ...this.drawerImageColorMap };
@@ -9871,6 +10034,8 @@ function hybridInventoryModule() {
                 const payload = {
                     name: this.selectedProduct.name,
                     brand: this.drawerBrand,
+                    supplier_id: this.drawerSupplierId,
+                    provider: this.drawerSupplierName || undefined,
                     image: this.drawerImage,
                     images: this.drawerImages.length ? [...this.drawerImages] : (this.drawerImage ? [this.drawerImage] : []),
                     images_by_color: { ...this.drawerImageColorMap },
