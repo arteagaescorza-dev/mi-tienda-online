@@ -34,6 +34,8 @@ class InventorySettingsApiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'category_scope' => 'nullable|string|max:50',
+            'supplier_id' => 'nullable',
+            'brand_id' => 'nullable',
             'description' => 'nullable|string|max:500',
             'is_default' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
@@ -60,6 +62,8 @@ class InventorySettingsApiController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:100',
             'category_scope' => 'nullable|string|max:50',
+            'supplier_id' => 'nullable',
+            'brand_id' => 'nullable',
             'description' => 'nullable|string|max:500',
             'is_default' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',

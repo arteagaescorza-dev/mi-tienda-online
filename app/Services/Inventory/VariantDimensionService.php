@@ -245,12 +245,16 @@ class VariantDimensionService
 
     public function getAllCurves(bool $includeArchived = false)
     {
-        $query = ApparelSizeCurve::query()->with(['sizes' => function ($q) use ($includeArchived) {
-            if ($includeArchived) {
-                $q->withTrashed();
-            }
-            $q->orderBy('sort_order');
-        }]);
+        $query = ApparelSizeCurve::query()->with([
+            'sizes' => function ($q) use ($includeArchived) {
+                if ($includeArchived) {
+                    $q->withTrashed();
+                }
+                $q->orderBy('sort_order');
+            },
+            'supplier:id,name,legal_name,vendor_code',
+            'brand:id,supplier_id,name,slug'
+        ]);
 
         if ($includeArchived) {
             $query->withTrashed();
@@ -276,6 +280,8 @@ class VariantDimensionService
                 'name' => $data['name'],
                 'slug' => $slug,
                 'category_scope' => $data['category_scope'] ?? 'textil',
+                'supplier_id' => !empty($data['supplier_id']) ? (int)$data['supplier_id'] : null,
+                'brand_id' => !empty($data['brand_id']) ? (int)$data['brand_id'] : null,
                 'description' => $data['description'] ?? null,
                 'is_default' => !empty($data['is_default']),
                 'is_active' => $data['is_active'] ?? true,
@@ -294,7 +300,7 @@ class VariantDimensionService
                 }
             }
 
-            return $curve->load('sizes');
+            return $curve->load(['sizes', 'supplier:id,name,legal_name,vendor_code', 'brand:id,supplier_id,name,slug']);
         });
     }
 
@@ -306,10 +312,16 @@ class VariantDimensionService
             ApparelSizeCurve::where('id', '!=', $curve->id)->update(['is_default' => false]);
         }
 
-        $fillable = array_intersect_key($data, array_flip(['name', 'category_scope', 'description', 'is_default', 'is_active']));
+        $fillable = array_intersect_key($data, array_flip(['name', 'category_scope', 'supplier_id', 'brand_id', 'description', 'is_default', 'is_active']));
+        if (array_key_exists('supplier_id', $data)) {
+            $fillable['supplier_id'] = (!empty($data['supplier_id']) && $data['supplier_id'] !== 'all') ? (int)$data['supplier_id'] : null;
+        }
+        if (array_key_exists('brand_id', $data)) {
+            $fillable['brand_id'] = (!empty($data['brand_id']) && $data['brand_id'] !== 'all') ? (int)$data['brand_id'] : null;
+        }
         $curve->update($fillable);
 
-        return $curve->load('sizes');
+        return $curve->load(['sizes', 'supplier:id,name,legal_name,vendor_code', 'brand:id,supplier_id,name,slug']);
     }
 
     public function toggleActiveCurve(int $id): ApparelSizeCurve
@@ -317,7 +329,7 @@ class VariantDimensionService
         $curve = ApparelSizeCurve::withTrashed()->findOrFail($id);
         $curve->is_active = !$curve->is_active;
         $curve->save();
-        return $curve->load('sizes');
+        return $curve->load(['sizes', 'supplier:id,name,legal_name,vendor_code', 'brand:id,supplier_id,name,slug']);
     }
 
     public function archiveCurve(int $id): bool
@@ -330,7 +342,7 @@ class VariantDimensionService
     {
         $curve = ApparelSizeCurve::withTrashed()->findOrFail($id);
         $curve->restore();
-        return $curve->load('sizes');
+        return $curve->load(['sizes', 'supplier:id,name,legal_name,vendor_code', 'brand:id,supplier_id,name,slug']);
     }
 
     public function deleteCurve(int $id): bool

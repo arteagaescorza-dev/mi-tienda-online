@@ -95,3 +95,4 @@ return new class extends Migration
         // No es reversible la re-introducción de categorías erróneas en marcas comerciales
     }
 };
+

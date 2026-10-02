@@ -161,4 +161,9 @@ class Supplier extends Model
     {
         return $this->hasMany(SupplierColorMapping::class);
     }
+
+    public function sizeCurves()
+    {
+        return $this->hasMany(ApparelSizeCurve::class);
+    }
 }

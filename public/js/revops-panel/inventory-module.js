@@ -230,8 +230,13 @@ function hybridInventoryModule() {
         // TASK-INV-14: Gestión Configurable de Curvas de Tallas, Volúmenes y Categorías
         sizeCurves: [],
         selectedCurveId: null,
-        newCurveForm: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true },
-        curveEditState: { isEditing: false, editingId: null, form: { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true } },
+        curveForm: { id: null, name: '', category_scope: 'textil', supplier_id: '', brand_id: '', description: '', is_default: false, is_active: true },
+        isEditingCurve: false,
+        newCurveForm: { name: '', category_scope: 'textil', supplier_id: '', brand_id: '', description: '', is_default: false, is_active: true },
+        curveEditState: { isEditing: false, editingId: null, form: { name: '', category_scope: 'textil', supplier_id: '', brand_id: '', description: '', is_default: false, is_active: true } },
+
+        sizeForm: { id: null, code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true },
+        isEditingSize: false,
         newSizeForm: { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true },
         sizeEditState: { isEditing: false, editingId: null, form: { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true } },
 
@@ -7111,23 +7116,51 @@ function hybridInventoryModule() {
 
         selectCurve(curveId) {
             this.selectedCurveId = curveId;
-            this.cancelEditCurve();
+            if (this.isEditingCurve && this.curveForm.id !== curveId) {
+                this.cancelEditCurve();
+            }
             this.cancelEditSize();
+        },
+
+        getBrandsForCurveSupplier() {
+            const supId = this.curveForm.supplier_id;
+            const allBrands = (this.brands || []).filter(b => !b.is_archived && b.is_active !== false && !this.isProductLineCategory(b.name));
+            if (!supId) {
+                return allBrands;
+            }
+            return this.getBrandsForSupplier(supId);
+        },
+
+        onCurveSupplierChange() {
+            if (!this.curveForm.supplier_id) return;
+            const available = this.getBrandsForCurveSupplier();
+            if (this.curveForm.brand_id && !available.some(b => String(b.id) === String(this.curveForm.brand_id))) {
+                this.curveForm.brand_id = '';
+            }
         },
 
         // --- CURVAS DE TALLAS CRUD ---
         async addNewCurve() {
-            const name = (this.newCurveForm.name || '').trim();
+            const name = (this.curveForm.name || '').trim();
             if (!name) {
-                this.showToast('Ingresa un nombre valido para la curva de tallas.', 'warning');
+                this.showToast('Ingresa un nombre válido para la curva de tallas.', 'warning');
                 return;
             }
+            const payload = {
+                name: name,
+                category_scope: this.curveForm.category_scope || 'textil',
+                supplier_id: this.curveForm.supplier_id ? parseInt(this.curveForm.supplier_id) : null,
+                brand_id: this.curveForm.brand_id ? parseInt(this.curveForm.brand_id) : null,
+                description: (this.curveForm.description || '').trim() || null,
+                is_default: !!this.curveForm.is_default,
+                is_active: this.curveForm.is_active !== false,
+            };
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch('/api/v1/inventory/settings/size-curves', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
-                    body: JSON.stringify(this.newCurveForm)
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -7136,55 +7169,87 @@ function hybridInventoryModule() {
                 }
                 this.sizeCurves.push(data.data);
                 this.selectedCurveId = data.data.id;
-                this.newCurveForm = { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true };
-                this.showToast(`Curva "${data.data.name}" creada con exito.`, 'success');
+                this.cancelEditCurve();
+                this.showToast(`Curva "${data.data.name}" creada con éxito.`, 'success');
             } catch (err) {
-                this.showToast('Error de comunicacion con el servidor.', 'warning');
+                this.showToast('Error de comunicación con el servidor.', 'warning');
             }
         },
 
         editCurve(curve) {
-            this.curveEditState.isEditing = true;
-            this.curveEditState.editingId = curve.id;
-            this.curveEditState.form = {
-                name: curve.name,
+            this.isEditingCurve = true;
+            this.selectedCurveId = curve.id;
+            this.curveForm = {
+                id: curve.id,
+                name: curve.name || '',
                 category_scope: curve.category_scope || 'textil',
+                supplier_id: curve.supplier_id ? String(curve.supplier_id) : '',
+                brand_id: curve.brand_id ? String(curve.brand_id) : '',
                 description: curve.description || '',
                 is_default: Boolean(curve.is_default),
                 is_active: curve.is_active !== false
             };
+            this.curveEditState.isEditing = true;
+            this.curveEditState.editingId = curve.id;
+            this.curveEditState.form = { ...this.curveForm };
+
+            const formCard = document.getElementById('curveManagementFormCard');
+            if (formCard) {
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         },
 
         cancelEditCurve() {
+            this.isEditingCurve = false;
+            this.curveForm = {
+                id: null,
+                name: '',
+                category_scope: 'textil',
+                supplier_id: '',
+                brand_id: '',
+                description: '',
+                is_default: false,
+                is_active: true
+            };
             this.curveEditState.isEditing = false;
             this.curveEditState.editingId = null;
-            this.curveEditState.form = { name: '', category_scope: 'textil', description: '', is_default: false, is_active: true };
+            this.curveEditState.form = { ...this.curveForm };
         },
 
         async saveCurve() {
-            const name = (this.curveEditState.form.name || '').trim();
+            const curveId = this.curveForm.id || this.curveEditState.editingId;
+            const name = (this.curveForm.name || '').trim();
             if (!name) {
-                this.showToast('El nombre de la curva no puede estar vacio.', 'warning');
+                this.showToast('El nombre de la curva no puede estar vacío.', 'warning');
                 return;
             }
+            const payload = {
+                name: name,
+                category_scope: this.curveForm.category_scope || 'textil',
+                supplier_id: this.curveForm.supplier_id ? parseInt(this.curveForm.supplier_id) : null,
+                brand_id: this.curveForm.brand_id ? parseInt(this.curveForm.brand_id) : null,
+                description: (this.curveForm.description || '').trim() || null,
+                is_default: !!this.curveForm.is_default,
+                is_active: this.curveForm.is_active !== false,
+            };
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                const res = await fetch(`/api/v1/inventory/settings/size-curves/${this.curveEditState.editingId}`, {
+                const res = await fetch(`/api/v1/inventory/settings/size-curves/${curveId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
-                    body: JSON.stringify(this.curveEditState.form)
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) {
                     this.showToast(data.message || 'Error al actualizar la curva.', 'warning');
                     return;
                 }
-                const idx = this.sizeCurves.findIndex(c => c.id === this.curveEditState.editingId);
+                const idx = this.sizeCurves.findIndex(c => c.id === curveId);
                 if (idx !== -1) {
                     this.sizeCurves[idx] = data.data;
                 }
                 this.cancelEditCurve();
-                this.showToast(`Curva "${data.data.name}" actualizada con exito.`, 'success');
+                this.showToast(`Curva "${data.data.name}" actualizada con éxito.`, 'success');
             } catch (err) {
                 this.showToast('Error al guardar la curva.', 'warning');
             }
@@ -7254,17 +7319,20 @@ function hybridInventoryModule() {
                 this.showToast('Selecciona primero una curva de tallas.', 'warning');
                 return;
             }
-            const code = (this.newSizeForm.code || '').trim();
+            const code = (this.sizeForm.code || '').trim();
             if (!code) {
-                this.showToast('Ingresa el codigo de talla (ej: XS, 32, XL).', 'warning');
+                this.showToast('Ingresa el código de talla (ej: XS, 32, XL).', 'warning');
                 return;
             }
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const payload = {
-                    ...this.newSizeForm,
-                    label: (this.newSizeForm.label || '').trim() || code,
-                    sort_order: parseInt(this.newSizeForm.sort_order) || 1
+                    code: code,
+                    label: (this.sizeForm.label || '').trim() || code,
+                    sort_order: parseInt(this.sizeForm.sort_order) || 1,
+                    waist_min_cm: this.sizeForm.waist_min_cm ? parseFloat(this.sizeForm.waist_min_cm) : null,
+                    waist_max_cm: this.sizeForm.waist_max_cm ? parseFloat(this.sizeForm.waist_max_cm) : null,
+                    is_active: this.sizeForm.is_active !== false,
                 };
                 const res = await fetch(`/api/v1/inventory/settings/size-curves/${this.selectedCurveId}/sizes`, {
                     method: 'POST',
@@ -7282,17 +7350,17 @@ function hybridInventoryModule() {
                     curve.sizes.push(data.data);
                     curve.sizes.sort((a, b) => a.sort_order - b.sort_order);
                 }
-                this.newSizeForm = { code: '', label: '', sort_order: (curve?.sizes?.length || 0) + 1, waist_min_cm: null, waist_max_cm: null, is_active: true };
-                this.showToast(`Talla "${data.data.code}" registrada con exito.`, 'success');
+                this.cancelEditSize();
+                this.showToast(`Talla "${data.data.code}" registrada con éxito.`, 'success');
             } catch (err) {
                 this.showToast('Error al agregar talla.', 'warning');
             }
         },
 
         editSize(size) {
-            this.sizeEditState.isEditing = true;
-            this.sizeEditState.editingId = size.id;
-            this.sizeEditState.form = {
+            this.isEditingSize = true;
+            this.sizeForm = {
+                id: size.id,
                 code: size.code,
                 label: size.label || size.code,
                 sort_order: size.sort_order || 1,
@@ -7300,26 +7368,49 @@ function hybridInventoryModule() {
                 waist_max_cm: size.waist_max_cm,
                 is_active: size.is_active !== false
             };
+            this.sizeEditState.isEditing = true;
+            this.sizeEditState.editingId = size.id;
+            this.sizeEditState.form = { ...this.sizeForm };
         },
 
         cancelEditSize() {
+            const curve = this.selectedCurve;
+            this.isEditingSize = false;
+            this.sizeForm = {
+                id: null,
+                code: '',
+                label: '',
+                sort_order: (curve?.sizes?.length || 0) + 1,
+                waist_min_cm: null,
+                waist_max_cm: null,
+                is_active: true
+            };
             this.sizeEditState.isEditing = false;
             this.sizeEditState.editingId = null;
-            this.sizeEditState.form = { code: '', label: '', sort_order: 1, waist_min_cm: null, waist_max_cm: null, is_active: true };
+            this.sizeEditState.form = { ...this.sizeForm };
         },
 
         async saveSize() {
-            const code = (this.sizeEditState.form.code || '').trim();
+            const sizeId = this.sizeForm.id || this.sizeEditState.editingId;
+            const code = (this.sizeForm.code || '').trim();
             if (!code) {
-                this.showToast('El codigo de talla no puede estar vacio.', 'warning');
+                this.showToast('El código de talla no puede estar vacío.', 'warning');
                 return;
             }
+            const payload = {
+                code: code,
+                label: (this.sizeForm.label || '').trim() || code,
+                sort_order: parseInt(this.sizeForm.sort_order) || 1,
+                waist_min_cm: this.sizeForm.waist_min_cm ? parseFloat(this.sizeForm.waist_min_cm) : null,
+                waist_max_cm: this.sizeForm.waist_max_cm ? parseFloat(this.sizeForm.waist_max_cm) : null,
+                is_active: this.sizeForm.is_active !== false,
+            };
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                const res = await fetch(`/api/v1/inventory/settings/sizes/${this.sizeEditState.editingId}`, {
+                const res = await fetch(`/api/v1/inventory/settings/sizes/${sizeId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
-                    body: JSON.stringify(this.sizeEditState.form)
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -7328,14 +7419,14 @@ function hybridInventoryModule() {
                 }
                 const curve = this.selectedCurve;
                 if (curve && Array.isArray(curve.sizes)) {
-                    const idx = curve.sizes.findIndex(s => s.id === this.sizeEditState.editingId);
+                    const idx = curve.sizes.findIndex(s => s.id === sizeId);
                     if (idx !== -1) {
                         curve.sizes[idx] = data.data;
                         curve.sizes.sort((a, b) => a.sort_order - b.sort_order);
                     }
                 }
                 this.cancelEditSize();
-                this.showToast(`Talla "${data.data.code}" actualizada con exito.`, 'success');
+                this.showToast(`Talla "${data.data.code}" actualizada con éxito.`, 'success');
             } catch (err) {
                 this.showToast('Error al guardar talla.', 'warning');
             }
@@ -9376,10 +9467,22 @@ function hybridInventoryModule() {
             this.newProduct.seoTags.splice(index, 1);
         },
 
-        getAvailableSizeCurves() {
+        getAvailableSizeCurves(supplierId = null, brandId = null) {
+            let active = [];
             if (Array.isArray(this.sizeCurves) && this.sizeCurves.length > 0) {
-                const active = this.sizeCurves.filter(c => c.is_active !== false && !c.deleted_at);
-                if (active.length > 0) return active;
+                active = this.sizeCurves.filter(c => c.is_active !== false && !c.deleted_at);
+            }
+            if (active.length > 0) {
+                if (supplierId || brandId) {
+                    const cleanSupId = supplierId ? String(supplierId).replace('prov_', '') : null;
+                    const matching = active.filter(c => {
+                        const matchSup = !c.supplier_id || String(c.supplier_id) === String(cleanSupId);
+                        const matchBrand = !c.brand_id || (brandId && (String(c.brand_id) === String(brandId) || (c.brand && c.brand.name === brandId)));
+                        return matchSup && matchBrand;
+                    });
+                    if (matching.length > 0) return matching;
+                }
+                return active;
             }
             return [
                 {

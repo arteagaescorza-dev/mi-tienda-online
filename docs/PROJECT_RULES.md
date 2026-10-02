@@ -422,6 +422,14 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   3. **Frontend Interactivo (`inventory-module.js`):** El gestor de inventario y los modales de alta (`getDetailedBrandsForCurrentProvider`, `getBrandsForSupplier`, `addAndPersistBrandToProvider`, `saveBrandModal`) aplican una lista de exclusión en caliente (`isProductLineCategory`), impidiendo al operador añadir categorías como marcas y filtrando cualquier registro residual.
   4. **Normalización de Base de Datos:** Los productos existentes deben vincularse a su marca comercial real en `products.brand` y conservar su tipología de prenda en `meta.category` y `meta.garment_type`.
 
+### Regla 6.49: Asociación de Curvas de Tallas a Marcas y Proveedores y Reactividad de Edición
+* **Asociación Relacional Opcional:** Las curvas maestras de tallas (`apparel_size_curves`) pueden asociarse a un Proveedor (`supplier_id`) y/o a una Marca Comercial (`brand_id`), permitiendo curvas patronales exclusivas por casa confeccionista o submarca, o mantenerse sin asignación para operar como *Curvas Universales*.
+* **Selectores Jerárquicos en el Gestor:** En la pestaña *Curvas & Tallas* de Hub 4, el formulario de creación y edición incorpora selectores de Proveedor y Marca. Al seleccionar un proveedor, el listado de marcas comerciales filtra dinámicamente las firmas vinculadas a dicho fabricante.
+* **Badges y Filtrado Contextual en Fichas:**
+  1. Cada tarjeta de curva en la vitrina administrativa despliega badges distintivos (`Prov: ...`, `Marca: ...` o `Curva Universal`).
+  2. En el modal panorámico de alta de producto (`newProductPanoramicModal`), el selector `getAvailableSizeCurves(supplier_id, brand)` prioriza o filtra las curvas correspondientes al fabricante y la marca del producto.
+* **Prohibición de Ternarios en `x-model` (Integridad Reactiva):** Queda estrictamente prohibido utilizar expresiones ternarias dentro de directivas `x-model`. La captura y edición de curvas y tallas debe realizarse a través de objetos de formulario unificados (`curveForm` y `sizeForm`), previniendo errores de asignación izquierda inválida (`Invalid left-hand side in assignment`) y asegurando la persistencia inmediata al editar.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)

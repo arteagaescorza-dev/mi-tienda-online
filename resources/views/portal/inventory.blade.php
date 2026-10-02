@@ -4167,8 +4167,8 @@
                                                 @change="onSizeCurveChange()"
                                                 class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                             >
-                                                <template x-for="curve in getAvailableSizeCurves()" :key="curve.id">
-                                                    <option :value="curve.id" x-text="curve.name"></option>
+                                                <template x-for="curve in getAvailableSizeCurves(newProduct.supplier_id, newProduct.brand)" :key="curve.id">
+                                                    <option :value="curve.id" x-text="curve.name + (curve.supplier ? ' [' + (curve.supplier.trade_name || curve.supplier.name) + ']' : (curve.brand ? ' [' + curve.brand.name + ']' : ''))"></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -7880,55 +7880,83 @@
                     <template x-if="activeSettingsTab === 'sizes'">
                         <div class="space-y-6">
                             <!-- Top: Gestor de Curvas Maestras -->
-                            <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
+                            <div id="curveManagementFormCard" class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
                                 <div class="flex items-center justify-between flex-wrap gap-2">
                                     <div>
-                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="curveEditState.isEditing ? 'Editar Curva de Tallas: ' + curveEditState.form.name : 'Crear Nueva Curva de Tallas'"></h4>
-                                        <p class="text-[11px] text-slate-600">Configura escalas maestras de tallas (Americana, Pantalones numéricos, Lencería, Unitalla).</p>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingCurve ? 'Editar Curva de Tallas: ' + curveForm.name : 'Crear Nueva Curva de Tallas'"></h4>
+                                        <p class="text-[11px] text-slate-600">Configura escalas maestras de tallas (Americana, Pantalones numéricos, Lencería, Unitalla) asociadas a marcas o proveedores.</p>
                                     </div>
-                                    <span x-show="curveEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Curva</span>
+                                    <span x-show="isEditingCurve" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Curva</span>
                                 </div>
 
                                 <!-- Formulario Alta / Edición Curva -->
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Curva</label>
-                                        <input type="text" x-model="curveEditState.isEditing ? curveEditState.form.name : newCurveForm.name" placeholder="Ej: Curva Americana Estándar" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <div class="space-y-3">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Curva</label>
+                                            <input type="text" x-model="curveForm.name" placeholder="Ej: Curva Americana Estándar" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Ámbito / Scope</label>
+                                            <select x-model="curveForm.category_scope" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                                <option value="textil">Textil (Ropa Interior, Boxers, Playeras)</option>
+                                                <option value="calzado">Calzado & Sneakers</option>
+                                                <option value="one_size">Unitalla / Accesorios</option>
+                                                <option value="general">General</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
+                                            <input type="text" x-model="curveForm.description" placeholder="Ej: Tallas comerciales XS a 4XL" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Ámbito / Scope</label>
-                                        <select x-model="curveEditState.isEditing ? curveEditState.form.category_scope : newCurveForm.category_scope" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
-                                            <option value="textil">Textil (Ropa Interior, Boxers, Playeras)</option>
-                                            <option value="calzado">Calzado & Sneakers</option>
-                                            <option value="one_size">Unitalla / Accesorios</option>
-                                            <option value="general">General</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
-                                        <input type="text" x-model="curveEditState.isEditing ? curveEditState.form.description : newCurveForm.description" placeholder="Ej: Tallas comerciales XS a 4XL" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+
+                                    <!-- Regla: Las curvas de tallas se pueden asociar a marcas y proveedores -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-indigo-100/70">
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">
+                                                Proveedor Asociado <span class="text-slate-400 font-normal">(Opcional)</span>
+                                            </label>
+                                            <select x-model="curveForm.supplier_id" @change="onCurveSupplierChange()" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700">
+                                                <option value="">(Global / Aplica a todos los Proveedores)</option>
+                                                <template x-for="p in providers" :key="p.id">
+                                                    <option :value="p.dbId || String(p.id).replace('prov_', '')" x-text="p.tradeName || p.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">
+                                                Marca Comercial Asociada <span class="text-slate-400 font-normal">(Opcional)</span>
+                                            </label>
+                                            <select x-model="curveForm.brand_id" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700">
+                                                <option value="">(Global / Aplica a todas las Marcas)</option>
+                                                <template x-for="b in getBrandsForCurveSupplier()" :key="b.id || b.name">
+                                                    <option :value="b.id" x-text="b.name + (b.supplier_name ? ' — Prov: ' + b.supplier_name : '')"></option>
+                                                </template>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
                                     <div class="flex items-center gap-4 text-xs">
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                            <input type="checkbox" x-model="curveEditState.isEditing ? curveEditState.form.is_default : newCurveForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            <input type="checkbox" x-model="curveForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
                                             <span class="font-medium text-slate-700">Curva Predeterminada</span>
                                         </label>
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                            <input type="checkbox" x-model="curveEditState.isEditing ? curveEditState.form.is_active : newCurveForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            <input type="checkbox" x-model="curveForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
                                             <span class="font-medium text-slate-700">Activa</span>
                                         </label>
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <template x-if="!curveEditState.isEditing">
+                                        <template x-if="!isEditingCurve">
                                             <button type="button" @click="addNewCurve()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Crear Curva de Tallas
                                             </button>
                                         </template>
-                                        <template x-if="curveEditState.isEditing">
+                                        <template x-if="isEditingCurve">
                                             <div class="flex items-center gap-2">
                                                 <button type="button" @click="saveCurve()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                     Actualizar Curva
@@ -7953,7 +7981,7 @@
                                             :class="selectedCurveId === curve.id ? 'bg-indigo-50/50 border-indigo-500 shadow-xs ring-1 ring-indigo-500' : 'bg-white border-slate-200 hover:border-slate-300'"
                                         >
                                             <div class="flex items-start justify-between gap-2">
-                                                <div>
+                                                <div class="w-full">
                                                     <div class="flex items-center gap-1.5 flex-wrap">
                                                         <span class="font-bold text-xs text-slate-900" x-text="curve.name"></span>
                                                         <template x-if="curve.is_default">
@@ -7965,21 +7993,41 @@
                                                             x-text="curve.deleted_at ? 'Archivada' : (curve.is_active ? 'Activa' : 'Inactiva')"
                                                         ></span>
                                                     </div>
-                                                    <p class="text-[11px] text-slate-500 mt-1" x-text="curve.description || 'Sin descripcion'"></p>
+                                                    
+                                                    <!-- Badges de Asociación: Proveedor & Marca -->
+                                                    <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
+                                                        <template x-if="curve.supplier || curve.supplier_id">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                                                                Prov: <span x-text="curve.supplier ? (curve.supplier.trade_name || curve.supplier.name) : ('ID ' + curve.supplier_id)"></span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="curve.brand || curve.brand_id">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-purple-50 text-purple-800 border border-purple-200">
+                                                                Marca: <span x-text="curve.brand ? curve.brand.name : ('ID ' + curve.brand_id)"></span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="!curve.supplier_id && !curve.brand_id">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-normal bg-slate-100 text-slate-600 border border-slate-200">
+                                                                Curva Universal
+                                                            </span>
+                                                        </template>
+                                                    </div>
+
+                                                    <p class="text-[11px] text-slate-500 mt-1" x-text="curve.description || 'Sin descripción'"></p>
                                                     <div class="text-[10px] text-slate-400 mt-0.5">
-                                                        Ambito: <span class="font-semibold text-slate-600 uppercase" x-text="curve.category_scope"></span> | <span class="font-bold text-indigo-700" x-text="(curve.sizes || []).length"></span> tallas
+                                                        Ámbito: <span class="font-semibold text-slate-600 uppercase" x-text="curve.category_scope"></span> | <span class="font-bold text-indigo-700" x-text="(curve.sizes || []).length"></span> tallas
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- Acciones de la Curva (Universal Rule) -->
                                             <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5" @click.stop>
-                                                <button type="button" @click="editCurve(curve)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar curva">
+                                                <button type="button" @click.stop="editCurve(curve)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar curva">
                                                     Editar
                                                 </button>
-                                                <button type="button" @click="toggleActiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="curve.is_active ? 'Desactivar' : 'Activar'" x-text="curve.is_active ? 'Desactivar' : 'Activar'"></button>
-                                                <button type="button" @click="archiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="curve.deleted_at ? 'Restaurar' : 'Archivar'" x-text="curve.deleted_at ? 'Restaurar' : 'Archivar'"></button>
-                                                <button type="button" @click="deleteCurve(curve.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                <button type="button" @click.stop="toggleActiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="curve.is_active ? 'Desactivar' : 'Activar'" x-text="curve.is_active ? 'Desactivar' : 'Activar'"></button>
+                                                <button type="button" @click.stop="archiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="curve.deleted_at ? 'Restaurar' : 'Archivar'" x-text="curve.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                <button type="button" @click.stop="deleteCurve(curve.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
                                                     Eliminar
                                                 </button>
                                             </div>
@@ -7998,7 +8046,7 @@
                                             </h4>
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800" x-text="(selectedCurve.sizes || []).length + ' Tallas'"></span>
                                         </div>
-                                        <span x-show="sizeEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Talla</span>
+                                        <span x-show="isEditingSize" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Talla</span>
                                     </div>
 
                                     <!-- Formulario Alta / Edición Talla Individual -->
@@ -8006,39 +8054,39 @@
                                         <div class="grid grid-cols-1 sm:grid-cols-6 gap-3">
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código (ej: XS, 32)</label>
-                                                <input type="text" x-model="sizeEditState.isEditing ? sizeEditState.form.code : newSizeForm.code" placeholder="XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold uppercase">
+                                                <input type="text" x-model="sizeForm.code" placeholder="XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold uppercase">
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Etiqueta Descriptiva</label>
-                                                <input type="text" x-model="sizeEditState.isEditing ? sizeEditState.form.label : newSizeForm.label" placeholder="Extra Chica / XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <input type="text" x-model="sizeForm.label" placeholder="Extra Chica / XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             </div>
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Orden (Sort)</label>
-                                                <input type="number" x-model.number="sizeEditState.isEditing ? sizeEditState.form.sort_order : newSizeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                                <input type="number" x-model.number="sizeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                             </div>
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Cintura Min (cm)</label>
-                                                <input type="number" step="0.5" x-model.number="sizeEditState.isEditing ? sizeEditState.form.waist_min_cm : newSizeForm.waist_min_cm" placeholder="65" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                                <input type="number" step="0.5" x-model.number="sizeForm.waist_min_cm" placeholder="65" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                             </div>
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Cintura Max (cm)</label>
-                                                <input type="number" step="0.5" x-model.number="sizeEditState.isEditing ? sizeEditState.form.waist_max_cm : newSizeForm.waist_max_cm" placeholder="70" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                                <input type="number" step="0.5" x-model.number="sizeForm.waist_max_cm" placeholder="70" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                             </div>
                                         </div>
 
                                         <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-200">
                                             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
-                                                <input type="checkbox" x-model="sizeEditState.isEditing ? sizeEditState.form.is_active : newSizeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                                <input type="checkbox" x-model="sizeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
                                                 <span class="font-medium text-slate-700">Talla Activa para Catálogo</span>
                                             </label>
 
                                             <div class="flex items-center gap-2">
-                                                <template x-if="!sizeEditState.isEditing">
+                                                <template x-if="!isEditingSize">
                                                     <button type="button" @click="addNewSize()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                         + Agregar Talla
                                                     </button>
                                                 </template>
-                                                <template x-if="sizeEditState.isEditing">
+                                                <template x-if="isEditingSize">
                                                     <div class="flex items-center gap-2">
                                                         <button type="button" @click="saveSize()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                             Actualizar Talla

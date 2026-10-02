@@ -857,6 +857,14 @@
       Separación taxonómica tajante: Queda estrictamente prohibido listar o registrar tipos de prenda / líneas de producto (ej. <code>TANGA</code>, <code>BIKINI</code>, <code>JOCKSTRAPS</code>, <code>BRIEF/BOXERS</code>, <code>TANK TOPS</code>, <code>T-SHIRTS</code>, etc.) como marcas comerciales. Las tipologías pertenecen con exclusividad a <code>category</code> y <code>meta.garment_type</code>. Blindaje en backend (<code>Supplier::getBrandsTree</code> y <code>BrandApiController</code> con validación 422 frente a <code>PRODUCT_LINE_CATEGORIES</code>) y frontend (<code>inventory-module.js</code> con filtro <code>isProductLineCategory</code>).
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">49</div>
+    <div class="rule-content">
+      <strong>Regla 6.49: Asociación de Curvas de Tallas a Marcas y Proveedores y Reactividad de Edición</strong>
+      Capacidad relacional en <code>apparel_size_curves</code> para vincularse a un Proveedor (<code>supplier_id</code>) y/o a una Marca Comercial (<code>brand_id</code>) o mantenerse universales. El gestor en Hub 4 incorpora selectores jerárquicos y badges informativos (<code>Prov: ...</code>, <code>Marca: ...</code> o <code>Curva Universal</code>). Se prohíben estrictamente las expresiones ternarias en directivas <code>x-model</code>, unificando los formularios <code>curveForm</code> y <code>sizeForm</code> para garantizar reactividad inmediata y prevenir fallas de asignación al editar.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1118,6 +1126,11 @@
       <td><strong>Líneas vs Marcas</strong></td>
       <td>Separación Taxonómica Estricta (6.48)</td>
       <td>Tipos de prenda (Tanga, Bikini, etc.) pertenecen a categoría; blindaje en backend y frontend con exclusión de marcas.</td>
+    </tr>
+    <tr>
+      <td><strong>Curvas de Tallas</strong></td>
+      <td>Asociación a Proveedor & Marca (6.49)</td>
+      <td>Vínculo relacional a proveedor y marca, erradicación de ternarios en x-model y edición reactiva inmediata.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>
