@@ -433,6 +433,10 @@ function hybridInventoryModule() {
         providerSearch: '',
         providerStatusFilter: 'all',
         providerTypeFilter: 'all',
+        providerOriginFilter: 'all',
+        expandedProviders: {},
+        providerModalTab: 'general',
+        newBrandTag: '',
         providerModalOpen: false,
         providerKpiModalOpen: false,
         latencyKpiModalOpen: false,
@@ -445,13 +449,23 @@ function hybridInventoryModule() {
         providerForm: {
             name: '',
             tradeName: '',
+            legalName: '',
+            vendorCode: '',
+            taxId: '',
+            fiscalRegime: '601 - General de Ley Personas Morales',
+            fiscalAddress: '',
+            fiscalZip: '',
+            invoiceEmail: '',
+            website: '',
             type: 'workshop',
             typeLabel: 'Taller de Confeccion Textil',
+            origin: 'manual',
             city: 'CDMX',
             contactName: '',
             phone: '',
             email: '',
-            extractionMethod: 'Manual / Facturacion Directa',
+            brands: [],
+            extractionMethod: 'Alta Manual / Contacto Directo',
             syncFrequency: 'Manual / On-demand',
             leadTimeDays: 5,
             paymentTerms: 'credito_30',
@@ -7661,15 +7675,108 @@ function hybridInventoryModule() {
                 const matchesSearch = !search || 
                     (p.name && p.name.toLowerCase().includes(search)) ||
                     (p.tradeName && p.tradeName.toLowerCase().includes(search)) ||
+                    (p.legalName && p.legalName.toLowerCase().includes(search)) ||
+                    (p.taxId && p.taxId.toLowerCase().includes(search)) ||
                     (p.contactName && p.contactName.toLowerCase().includes(search)) ||
                     (p.city && p.city.toLowerCase().includes(search)) ||
-                    (p.vendorCode && p.vendorCode.toLowerCase().includes(search));
+                    (p.vendorCode && p.vendorCode.toLowerCase().includes(search)) ||
+                    (Array.isArray(p.brands) && p.brands.some(b => String(b).toLowerCase().includes(search))) ||
+                    (Array.isArray(p.brandsTree) && p.brandsTree.some(b => (b.name || '').toLowerCase().includes(search)));
                 const matchesStatus = this.providerStatusFilter === 'all' 
                     ? p.status !== 'archived' 
                     : p.status === this.providerStatusFilter;
                 const matchesType = this.providerTypeFilter === 'all' || p.type === this.providerTypeFilter;
-                return matchesSearch && matchesStatus && matchesType;
+                const matchesOrigin = !this.providerOriginFilter || this.providerOriginFilter === 'all'
+                    || (this.providerOriginFilter === 'manual' && (p.origin === 'manual' || p.isManual))
+                    || (this.providerOriginFilter === 'scraping' && (p.origin === 'scraping' || !p.isManual));
+                return matchesSearch && matchesStatus && matchesType && matchesOrigin;
             });
+        },
+
+        toggleSupplierExpanded(provId) {
+            this.expandedProviders[provId] = !this.expandedProviders[provId];
+        },
+
+        isSupplierExpanded(provId) {
+            return !!this.expandedProviders[provId];
+        },
+
+        expandAllSuppliers() {
+            (this.providers || []).forEach(p => {
+                this.expandedProviders[p.id] = true;
+            });
+        },
+
+        collapseAllSuppliers() {
+            this.expandedProviders = {};
+        },
+
+        addBrandToForm() {
+            const tag = (this.newBrandTag || '').trim();
+            if (!tag) return;
+            if (!Array.isArray(this.providerForm.brands)) {
+                this.providerForm.brands = [];
+            }
+            if (!this.providerForm.brands.includes(tag)) {
+                this.providerForm.brands.push(tag);
+            }
+            this.newBrandTag = '';
+        },
+
+        removeBrandFromForm(index) {
+            if (Array.isArray(this.providerForm.brands)) {
+                this.providerForm.brands.splice(index, 1);
+            }
+        },
+
+        async addBrandToProvider(prov, brandName) {
+            const name = (brandName || '').trim();
+            if (!name) return;
+            const dbId = prov.dbId || String(prov.id).replace('prov_', '');
+            try {
+                const res = await fetch(`/api/v1/inventory/suppliers/${dbId}/brands`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({ brand: name })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    prov.brands = data.data.brands;
+                    prov.brandsTree = data.data.brandsTree;
+                    this.showToast(data.message, 'success');
+                }
+            } catch (e) {
+                console.error('Error adding brand:', e);
+            }
+        },
+
+        async removeBrandFromProvider(prov, brandName) {
+            const name = (brandName || '').trim();
+            if (!name) return;
+            const dbId = prov.dbId || String(prov.id).replace('prov_', '');
+            try {
+                const res = await fetch(`/api/v1/inventory/suppliers/${dbId}/brands`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify({ brand: name })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    prov.brands = data.data.brands;
+                    prov.brandsTree = data.data.brandsTree;
+                    this.showToast(data.message, 'success');
+                }
+            } catch (e) {
+                console.error('Error removing brand:', e);
+            }
         },
 
         get connectedProvidersCount() {
@@ -7711,16 +7818,28 @@ function hybridInventoryModule() {
             this.isCreatingProvider = true;
             this.isEditingProvider = false;
             this.selectedProvider = null;
+            this.providerModalTab = 'general';
+            this.newBrandTag = '';
             this.providerForm = {
                 name: '',
                 tradeName: '',
+                legalName: '',
+                vendorCode: '',
+                taxId: '',
+                fiscalRegime: '601 - General de Ley Personas Morales',
+                fiscalAddress: '',
+                fiscalZip: '',
+                invoiceEmail: '',
+                website: '',
                 type: 'workshop',
                 typeLabel: 'Taller de Confeccion Textil',
+                origin: 'manual',
                 city: 'CDMX',
                 contactName: '',
                 phone: '',
                 email: '',
-                extractionMethod: 'Manual / Facturacion Directa',
+                brands: [],
+                extractionMethod: 'Alta Manual / Contacto Directo',
                 syncFrequency: 'Manual / On-demand',
                 leadTimeDays: 5,
                 paymentTerms: 'credito_30',
@@ -7734,7 +7853,23 @@ function hybridInventoryModule() {
             this.isCreatingProvider = false;
             this.isEditingProvider = false;
             this.selectedProvider = provider;
-            this.providerForm = { ...provider };
+            this.providerModalTab = 'general';
+            this.newBrandTag = '';
+            const existingBrands = Array.isArray(provider.brands) && provider.brands.length > 0
+                ? [...provider.brands]
+                : (Array.isArray(provider.brandsTree) ? provider.brandsTree.map(b => b.name) : [provider.name]);
+            this.providerForm = {
+                ...provider,
+                legalName: provider.legalName || provider.tradeName || provider.name,
+                taxId: provider.taxId || '',
+                fiscalRegime: provider.fiscalRegime || '',
+                fiscalAddress: provider.fiscalAddress || '',
+                fiscalZip: provider.fiscalZip || '',
+                invoiceEmail: provider.invoiceEmail || provider.email || '',
+                website: provider.website || '',
+                origin: provider.origin || (provider.type === 'scraper' ? 'scraping' : 'manual'),
+                brands: existingBrands,
+            };
             this.providerModalOpen = true;
         },
 
@@ -7768,15 +7903,24 @@ function hybridInventoryModule() {
             const payload = {
                 name: this.providerForm.name.trim(),
                 tradeName: (this.providerForm.tradeName || this.providerForm.name).trim(),
+                legalName: (this.providerForm.legalName || this.providerForm.tradeName || this.providerForm.name).trim(),
                 vendorCode: this.providerForm.vendorCode,
+                taxId: (this.providerForm.taxId || '').trim(),
+                fiscalRegime: (this.providerForm.fiscalRegime || '').trim(),
+                fiscalAddress: (this.providerForm.fiscalAddress || '').trim(),
+                fiscalZip: (this.providerForm.fiscalZip || '').trim(),
+                invoiceEmail: (this.providerForm.invoiceEmail || '').trim(),
+                website: (this.providerForm.website || '').trim(),
                 type: this.providerForm.type || 'workshop',
+                origin: this.providerForm.origin || (this.providerForm.type === 'scraper' ? 'scraping' : 'manual'),
                 city: this.providerForm.city ? this.providerForm.city.trim() : 'CDMX',
                 contactName: this.providerForm.contactName.trim(),
                 phone: this.providerForm.phone.trim(),
                 email: this.providerForm.email ? this.providerForm.email.trim() : '',
+                brands: Array.isArray(this.providerForm.brands) ? this.providerForm.brands : [],
                 leadTimeDays: parseInt(this.providerForm.leadTimeDays, 10) || 3,
                 paymentTerms: this.providerForm.paymentTerms || 'contado',
-                extractionMethod: this.providerForm.extractionMethod || 'Manual / Facturacion Directa',
+                extractionMethod: this.providerForm.extractionMethod || 'Alta Manual / Contacto Directo',
                 status: this.providerForm.status || 'connected',
                 notes: this.providerForm.notes || ''
             };
