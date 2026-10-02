@@ -55,6 +55,7 @@
         window.serverSizeCurves = @json($portalSizeCurves ?? []);
         window.serverFragranceVolumes = @json($portalFragranceVolumes ?? []);
         window.serverCategories = @json($portalCategories ?? []);
+        window.serverBrands = @json($portalBrands ?? []);
         window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
     </script>
 
@@ -468,6 +469,18 @@
                     <option value="all">Todos los orígenes</option>
                     <option value="propio">Stock Propio</option>
                     <option value="dropship">Dropshipping (Torzo)</option>
+                </select>
+
+                <!-- Filtro Marca Comercial / Proveedor (TASK-BRD-FILTERS) -->
+                <select 
+                    x-model="brandFilter" 
+                    class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-medium"
+                    title="Filtrar catálogo por marca comercial o proveedor"
+                >
+                    <option value="all">Todas las Marcas / Proveedores</option>
+                    <template x-for="bName in availableBrandNames" :key="bName">
+                        <option :value="bName" x-text="bName"></option>
+                    </template>
                 </select>
 
                 <!-- Filtro Clase ABC (Pareto) -->
@@ -1651,8 +1664,8 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[90] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
+            class="fixed inset-0 z-[120] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 120 !important; display: none;"
         >
             <div 
                 @click.outside="providerModalOpen = false"
@@ -2219,6 +2232,152 @@
                             <span x-text="isCreatingProvider ? 'Guardar Proveedor' : 'Guardar Cambios'"></span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL ERGONÓMICO: ALTA Y EDICIÓN DE MARCAS COMERCIALES (TASK-BRD-01) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="brandModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[130] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 130 !important; display: none;"
+        >
+            <div 
+                @click.outside="brandModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl overflow-hidden flex flex-col"
+            >
+                <!-- Cabecera del Modal -->
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingBrand ? 'Nueva Marca Comercial' : 'Editar Marca: ' + brandForm.name"></h3>
+                            <p class="text-xs text-slate-500">Gobernanza comercial y vinculación con proveedores y storefront</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="brandModalOpen = false" 
+                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                        aria-label="Cerrar modal"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Formulario -->
+                <div class="p-6 space-y-4">
+                    <!-- Nombre y Slug -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial *</label>
+                            <input 
+                                type="text" 
+                                x-model="brandForm.name" 
+                                placeholder="Ej. Torzo Denim, ModaIntima Lux..." 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                            <input 
+                                type="text" 
+                                x-model="brandForm.slug" 
+                                placeholder="torzo-denim (auto-generado)" 
+                                class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Proveedor Asociado -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Proveedor del que se Desprende</label>
+                        <select 
+                            x-model="brandForm.supplier_id" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
+                        >
+                            <option value="">Marca Directa / Independiente (Sin Proveedor)</option>
+                            <template x-for="prov in providers" :key="prov.id">
+                                <option :value="String(prov.id)" x-text="(prov.tradeName || prov.name) + (prov.vendorCode ? ' (' + prov.vendorCode + ')' : '')"></option>
+                            </template>
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1">Al asociarla a un proveedor, aparecerá automáticamente como rama de su árbol en los ajustes y filtros.</p>
+                    </div>
+
+                    <!-- Descripción / Posicionamiento -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Descripción / Propuesta de Valor</label>
+                        <textarea 
+                            x-model="brandForm.description" 
+                            rows="2" 
+                            placeholder="Breve reseña del estilo, audiencia o catálogo de la marca..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <!-- Logotipo y Sitio Web -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">URL de Logotipo / Imagotipo</label>
+                            <input 
+                                type="url" 
+                                x-model="brandForm.logo_url" 
+                                placeholder="https://ejemplo.com/logo.png" 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Sitio Web Oficial</label>
+                            <input 
+                                type="url" 
+                                x-model="brandForm.website" 
+                                placeholder="https://..." 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Estado Activo -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <input 
+                            type="checkbox" 
+                            id="brandActiveCheck"
+                            x-model="brandForm.is_active" 
+                            class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        >
+                        <label for="brandActiveCheck" class="text-xs font-semibold text-slate-700 cursor-pointer">
+                            Marca Activa para comercialización en vitrinas y filtros
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="brandModalOpen = false" 
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveBrandModal()" 
+                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span x-text="isCreatingBrand ? 'Dar de Alta Marca' : 'Guardar Cambios'"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -8122,6 +8281,15 @@
                     </button>
                     <button 
                         type="button" 
+                        @click="activeSettingsTab = 'brands'" 
+                        :class="activeSettingsTab === 'brands' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <span>Marcas Comerciales</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'brands' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(brands || []).length"></span>
+                    </button>
+                    <button 
+                        type="button" 
                         @click="activeSettingsTab = 'sections'" 
                         class="cursor-pointer whitespace-nowrap px-2"
                     >
@@ -9324,7 +9492,7 @@
                                                         <div class="inline-flex items-center gap-1">
                                                             <button 
                                                                 type="button"
-                                                                @click="openProviderDetails(prov)" 
+                                                                @click="openProviderFiscalModal(prov)" 
                                                                 class="px-2 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer shadow-3xs"
                                                                 title="Ver ficha técnica, datos fiscales, marcas y Scorecard de SLA"
                                                             >
@@ -9381,25 +9549,53 @@
                                                 <tr x-show="isSupplierExpanded(prov.id)" class="bg-indigo-50/20 border-b border-indigo-100/60">
                                                     <td colspan="8" class="p-0">
                                                         <div class="py-3 px-6 pl-10 border-l-4 border-indigo-500 bg-gradient-to-r from-indigo-50/50 via-white to-transparent">
-                                                            <div class="flex items-center justify-between mb-2">
+                                                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
                                                                 <div class="flex items-center gap-2">
                                                                     <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                                                                     <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Marcas Comerciales Desprendidas (Árbol Jerárquico):</span>
                                                                     <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="(prov.brandsTree || []).length + ' marcas activas'"></span>
                                                                 </div>
-                                                                <span class="text-[11px] text-slate-400">Jerarquía: Proveedor &rarr; Marcas &rarr; Catálogo / Storefront</span>
+                                                                <div class="flex items-center gap-2">
+                                                                    <button 
+                                                                        type="button" 
+                                                                        @click="openCreateBrandModal(prov.id)" 
+                                                                        class="px-2.5 py-1 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                                                                        title="Dar de alta y asociar una nueva marca comercial a este proveedor"
+                                                                    >
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                                        <span>+ Desprender Nueva Marca</span>
+                                                                    </button>
+                                                                    <span class="text-[11px] text-slate-400 hidden sm:inline">Proveedor &rarr; Marcas &rarr; Catálogo / Storefront</span>
+                                                                </div>
                                                             </div>
                                                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1">
                                                                 <template x-for="brand in (prov.brandsTree || [])" :key="brand.name">
                                                                     <div class="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200 shadow-3xs group hover:border-indigo-300 transition">
-                                                                        <div class="flex items-center gap-2">
-                                                                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                                                                            <div>
-                                                                                <span class="font-bold text-xs text-slate-900 block" x-text="brand.name"></span>
-                                                                                <span class="text-[10px] text-slate-400 font-mono" x-text="'slug: ' + brand.slug"></span>
+                                                                        <div class="flex items-center gap-2 min-w-0">
+                                                                            <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+                                                                            <div class="truncate">
+                                                                                <span class="font-bold text-xs text-slate-900 block truncate" x-text="brand.name"></span>
+                                                                                <span class="text-[10px] text-slate-400 font-mono truncate" x-text="'slug: ' + brand.slug"></span>
                                                                             </div>
                                                                         </div>
-                                                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold" x-text="brand.origin === 'manual' ? 'Marca Directa' : 'Scraped Brand'"></span>
+                                                                        <div class="flex items-center gap-1 shrink-0">
+                                                                            <button 
+                                                                                type="button" 
+                                                                                @click="openEditBrandByName(brand.name, prov.id)" 
+                                                                                class="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition cursor-pointer"
+                                                                                title="Editar marca comercial"
+                                                                            >
+                                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                                            </button>
+                                                                            <button 
+                                                                                type="button" 
+                                                                                @click="removeBrandFromSupplier(prov, brand.name)" 
+                                                                                class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
+                                                                                title="Desvincular marca de este proveedor"
+                                                                            >
+                                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
                                                                 </template>
                                                                 <div x-show="(prov.brandsTree || []).length === 0" class="col-span-full py-2 text-xs text-slate-400 italic">
@@ -9413,6 +9609,209 @@
                                             <tr x-show="filteredProviders.length === 0">
                                                 <td colspan="8" class="py-6 text-center text-slate-400 text-xs">
                                                     No se encontraron proveedores que coincidan con los filtros seleccionados.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- TAB: GESTIÓN INTEGRAL DE MARCAS COMERCIALES (CRUD COMPLETO - REGLAS MARCAS & PROVEEDORES) -->
+                    <template x-if="activeSettingsTab === 'brands'">
+                        <div class="space-y-5">
+                            <!-- Cabecera de la Sección de Marcas -->
+                            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-xl border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-base font-bold text-white leading-none">Gestor de Marcas Comerciales</h4>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30" x-text="(brands || []).length + ' Marcas'"></span>
+                                        </div>
+                                        <p class="text-xs text-slate-300 mt-1">Gobernanza de marcas comerciales, despiece de marcas por proveedor y sincronización automática con filtros de catálogo, vitrinas de Hub 2 y facetas del Storefront.</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    @click="openCreateBrandModal()" 
+                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer shrink-0 self-start sm:self-auto"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                    <span>+ Nueva Marca Comercial</span>
+                                </button>
+                            </div>
+
+                            <!-- KPIs Resumen de Marcas -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Marcas</span>
+                                    <span class="text-xl font-black text-slate-900 mt-0.5 block" x-text="(brands || []).length"></span>
+                                    <span class="text-[10px] text-slate-500 font-medium">Catálogo unificado</span>
+                                </div>
+                                <div class="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">Marcas Activas</span>
+                                    <span class="text-xl font-black text-emerald-700 mt-0.5 block" x-text="(brands || []).filter(b => b.is_active && !b.is_archived).length"></span>
+                                    <span class="text-[10px] text-emerald-600 font-medium">En Storefront & Filtros</span>
+                                </div>
+                                <div class="bg-amber-50/50 p-3.5 rounded-xl border border-amber-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">Marcas Archivadas</span>
+                                    <span class="text-xl font-black text-amber-700 mt-0.5 block" x-text="(brands || []).filter(b => b.is_archived).length"></span>
+                                    <span class="text-[10px] text-amber-600 font-medium">Fuera de comercialización</span>
+                                </div>
+                                <div class="bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 block">Marcas con Proveedor</span>
+                                    <span class="text-xl font-black text-indigo-700 mt-0.5 block" x-text="(brands || []).filter(b => b.supplier_id).length"></span>
+                                    <span class="text-[10px] text-indigo-600 font-medium">Desprendidas en árbol</span>
+                                </div>
+                            </div>
+
+                            <!-- Filtros y Búsqueda de Marcas -->
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                                <div class="relative flex-1 max-w-sm">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    </span>
+                                    <input 
+                                        type="text" 
+                                        x-model="brandSearch" 
+                                        placeholder="Buscar por marca, slug o proveedor..." 
+                                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500 text-slate-700"
+                                    >
+                                </div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <div class="flex items-center gap-1 text-xs text-slate-500">
+                                        <span class="font-medium">Estado:</span>
+                                        <select x-model="brandStatusFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
+                                            <option value="all">Todas</option>
+                                            <option value="active">Activas</option>
+                                            <option value="archived">Archivadas</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-xs text-slate-500">
+                                        <span class="font-medium">Proveedor:</span>
+                                        <select x-model="brandSupplierFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white max-w-[200px] truncate">
+                                            <option value="all">Todos los proveedores</option>
+                                            <option value="unassigned">Marcas Directas (Sin Proveedor)</option>
+                                            <template x-for="prov in providers" :key="prov.id">
+                                                <option :value="prov.id" x-text="prov.tradeName || prov.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla Maestra de Marcas Comerciales -->
+                            <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                                                <th class="py-2.5 px-3">Marca Comercial & Slug</th>
+                                                <th class="py-2.5 px-3">Proveedor Asociado</th>
+                                                <th class="py-2.5 px-3">Descripción / Posicionamiento</th>
+                                                <th class="py-2.5 px-3 text-center">SKUs en Catálogo</th>
+                                                <th class="py-2.5 px-3 text-center">Estado</th>
+                                                <th class="py-2.5 px-3 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                            <template x-for="brand in filteredBrands" :key="brand.id">
+                                                <tr class="hover:bg-slate-50 transition" :class="brand.is_archived ? 'opacity-60 bg-slate-50/40' : ''">
+                                                    <td class="py-2.5 px-3">
+                                                        <div class="flex items-center gap-2.5">
+                                                            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-700 text-xs shrink-0">
+                                                                <template x-if="brand.logo_url">
+                                                                    <img :src="brand.logo_url" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'">
+                                                                </template>
+                                                                <span x-show="!brand.logo_url" x-text="brand.name.substring(0, 2).toUpperCase()"></span>
+                                                            </div>
+                                                            <div>
+                                                                <span class="font-bold text-slate-900 block" x-text="brand.name"></span>
+                                                                <span class="text-[10px] text-slate-400 font-mono" x-text="'slug: ' + brand.slug"></span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2.5 px-3">
+                                                        <template x-if="brand.supplier_id">
+                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                                                <span x-text="brand.supplier_name"></span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="!brand.supplier_id">
+                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                                                <span>Marca Directa / Independiente</span>
+                                                            </span>
+                                                        </template>
+                                                    </td>
+                                                    <td class="py-2.5 px-3 max-w-xs text-slate-500 truncate" x-text="brand.description || 'Sin descripción comercial registrada'"></td>
+                                                    <td class="py-2.5 px-3 text-center font-bold text-slate-800 font-mono" x-text="(brand.sku_count || 0) + ' SKUs'"></td>
+                                                    <td class="py-2.5 px-3 text-center">
+                                                        <span 
+                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                                                            :class="brand.is_archived ? 'bg-slate-200 text-slate-600 border-slate-300' : (brand.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200')"
+                                                        >
+                                                            <span class="w-1.5 h-1.5 rounded-full" :class="brand.is_archived ? 'bg-slate-500' : (brand.is_active ? 'bg-emerald-500' : 'bg-amber-500')"></span>
+                                                            <span x-text="brand.is_archived ? 'Archivada' : (brand.is_active ? 'Activa' : 'Inactiva')"></span>
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-right">
+                                                        <div class="inline-flex items-center gap-1">
+                                                            <button 
+                                                                type="button" 
+                                                                @click="openEditBrandModal(brand)" 
+                                                                class="px-2 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer shadow-3xs"
+                                                                title="Editar marca comercial"
+                                                            >
+                                                                Editar
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                x-show="!brand.is_archived"
+                                                                @click="toggleActiveBrand(brand)" 
+                                                                class="px-2 py-1 text-xs font-semibold rounded-lg transition cursor-pointer"
+                                                                :class="brand.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-700' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'"
+                                                                :title="brand.is_active ? 'Desactivar de filtros' : 'Activar en filtros'"
+                                                                x-text="brand.is_active ? 'Desactivar' : 'Activar'"
+                                                            ></button>
+                                                            <button 
+                                                                type="button" 
+                                                                x-show="!brand.is_archived"
+                                                                @click="archiveBrand(brand)" 
+                                                                class="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
+                                                                title="Archivar marca comercial"
+                                                            >
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                x-show="brand.is_archived"
+                                                                @click="restoreBrand(brand)" 
+                                                                class="px-2 py-1 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition cursor-pointer flex items-center gap-1"
+                                                                title="Restaurar marca"
+                                                            >
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                                <span>Restaurar</span>
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                @click="deleteBrand(brand)" 
+                                                                class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                                                                title="Eliminar permanentemente"
+                                                            >
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            <tr x-show="filteredBrands.length === 0">
+                                                <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+                                                    No se encontraron marcas comerciales que coincidan con los filtros seleccionados.
                                                 </td>
                                             </tr>
                                         </tbody>

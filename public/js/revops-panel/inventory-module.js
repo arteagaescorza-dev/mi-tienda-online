@@ -435,6 +435,28 @@ function hybridInventoryModule() {
         providerTypeFilter: 'all',
         providerOriginFilter: 'all',
         expandedProviders: {},
+        // TASK-BRD-01: Estado y Gobernanza de Marcas Comerciales (Reglas Marcas & Proveedores)
+        brands: (typeof window !== 'undefined' && Array.isArray(window.serverBrands) && window.serverBrands.length > 0)
+            ? window.serverBrands
+            : [],
+        brandFilter: 'all',
+        brandSearch: '',
+        brandStatusFilter: 'all',
+        brandSupplierFilter: 'all',
+        brandModalOpen: false,
+        isCreatingBrand: false,
+        isEditingBrand: false,
+        brandForm: {
+            id: null,
+            name: '',
+            slug: '',
+            supplier_id: '',
+            description: '',
+            logo_url: '',
+            website: '',
+            is_active: true,
+            sort_order: 0,
+        },
         providerModalTab: 'general',
         newBrandTag: '',
         providerModalOpen: false,
@@ -4305,6 +4327,11 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverCategories) && window.serverCategories.length > 0) {
                 this.categoriesTree = window.serverCategories;
             }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverBrands) && window.serverBrands.length > 0) {
+                this.brands = window.serverBrands;
+            } else {
+                this.loadBrands();
+            }
             if (typeof window !== 'undefined' && Array.isArray(window.serverOnDemandRequests) && window.serverOnDemandRequests.length > 0) {
                 this.customerOnDemandRequests = window.serverOnDemandRequests;
             }
@@ -4627,7 +4654,7 @@ function hybridInventoryModule() {
         get filteredProducts() {
             const cf = this.colFilters || {};
             const colQuery = `${cf.sku || ''}|${cf.product || ''}|${cf.stockLocal || 'all'}|${cf.stockProv || 'all'}|${cf.minPvp ?? ''}|${cf.maxCost ?? ''}|${cf.margin || 'all'}|${cf.location || ''}|${cf.status || 'all'}`;
-            const currentQuery = `${this.searchFilter}|${this.typeFilter}|${this.abcFilter}|${this.ropFilter}|${this.sanitaryFilter}|${colQuery}`;
+            const currentQuery = `${this.searchFilter}|${this.typeFilter}|${this.brandFilter || 'all'}|${this.abcFilter}|${this.ropFilter}|${this.sanitaryFilter}|${colQuery}`;
             if (this._lastFilterQuery !== currentQuery) {
                 this._lastFilterQuery = currentQuery;
                 this.visibleCount = this.pageSize || 8;
@@ -4637,6 +4664,11 @@ function hybridInventoryModule() {
                 const q = (this.searchFilter || '').toLowerCase().trim();
                 const matchesSearch = !q || item.name.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q);
                 const matchesType = this.typeFilter === 'all' || item.type === this.typeFilter;
+                const matchesBrand = !this.brandFilter || this.brandFilter === 'all' ||
+                    (item.brand && item.brand.toLowerCase() === this.brandFilter.toLowerCase()) ||
+                    (item.provider && item.provider.toLowerCase() === this.brandFilter.toLowerCase());
+                if (!matchesBrand) return false;
+
                 const matchesAbc = !this.abcFilter || this.abcFilter === 'all' || this.getAbcClass(item) === this.abcFilter;
                 const matchesRop = !this.ropFilter || this.ropFilter === 'all' || (this.ropFilter === 'under_rop' && this.isUnderROP(item));
                 
@@ -7849,11 +7881,15 @@ function hybridInventoryModule() {
             this.providerModalOpen = true;
         },
 
-        openProviderDetails(provider) {
+        openProviderFiscalModal(provider) {
+            this.openProviderDetails(provider, 'fiscal');
+        },
+
+        openProviderDetails(provider, tab = 'general') {
             this.isCreatingProvider = false;
             this.isEditingProvider = false;
             this.selectedProvider = provider;
-            this.providerModalTab = 'general';
+            this.providerModalTab = tab || 'general';
             this.newBrandTag = '';
             const existingBrands = Array.isArray(provider.brands) && provider.brands.length > 0
                 ? [...provider.brands]
@@ -8091,6 +8127,313 @@ function hybridInventoryModule() {
                 provider.lastScrapeTime = 'Hace unos momentos';
                 this.showToast('Sincronizacion completada para ' + provider.tradeName + ': ' + provider.syncedItemsCount + ' SKUs al dia.', 'success');
             }, 800);
+        },
+
+        // =========================================================================
+        // TASK-BRD-01: GOBERNANZA & CRUD MAESTRO DE MARCAS COMERCIALES (REGLA 6.45)
+        // =========================================================================
+        get availableBrandNames() {
+            const set = new Set();
+            (this.brands || []).forEach(b => {
+                if (b.name) set.add(b.name);
+            });
+            (this.products || []).forEach(p => {
+                if (p.brand) set.add(p.brand);
+            });
+            (this.providers || []).forEach(prov => {
+                if (prov.tradeName) set.add(prov.tradeName);
+                if (Array.isArray(prov.brands)) {
+                    prov.brands.forEach(b => set.add(b));
+                }
+                if (Array.isArray(prov.brandsTree)) {
+                    prov.brandsTree.forEach(b => set.add(b.name));
+                }
+            });
+            return Array.from(set).filter(Boolean).sort();
+        },
+
+        get filteredBrands() {
+            const list = Array.isArray(this.brands) ? this.brands : [];
+            const q = (this.brandSearch || '').toLowerCase().trim();
+            const status = this.brandStatusFilter || 'all';
+            const supplier = this.brandSupplierFilter || 'all';
+
+            return list.filter(b => {
+                const matchesSearch = !q ||
+                    (b.name && b.name.toLowerCase().includes(q)) ||
+                    (b.slug && b.slug.toLowerCase().includes(q)) ||
+                    (b.supplier_name && b.supplier_name.toLowerCase().includes(q)) ||
+                    (b.description && b.description.toLowerCase().includes(q));
+
+                let matchesStatus = true;
+                if (status === 'active') {
+                    matchesStatus = b.is_active && !b.is_archived;
+                } else if (status === 'archived') {
+                    matchesStatus = b.is_archived;
+                }
+
+                let matchesSupplier = true;
+                if (supplier !== 'all') {
+                    if (supplier === 'unassigned') {
+                        matchesSupplier = !b.supplier_id;
+                    } else {
+                        matchesSupplier = String(b.supplier_id) === String(supplier);
+                    }
+                }
+
+                return matchesSearch && matchesStatus && matchesSupplier;
+            });
+        },
+
+        async loadBrands() {
+            try {
+                const res = await fetch('/api/v1/inventory/brands');
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.status === 'success' && Array.isArray(json.data)) {
+                        this.brands = json.data;
+                    }
+                }
+            } catch (e) {
+                console.error('Error al cargar marcas comerciales:', e);
+            }
+        },
+
+        openCreateBrandModal(supplierId = null) {
+            this.isCreatingBrand = true;
+            this.isEditingBrand = false;
+            this.brandForm = {
+                id: null,
+                name: '',
+                slug: '',
+                supplier_id: supplierId ? String(supplierId) : '',
+                description: '',
+                logo_url: '',
+                website: '',
+                is_active: true,
+                sort_order: (this.brands || []).length + 1,
+            };
+            this.brandModalOpen = true;
+        },
+
+        openEditBrandModal(brand) {
+            this.isCreatingBrand = false;
+            this.isEditingBrand = true;
+            this.brandForm = {
+                id: brand.id,
+                name: brand.name || '',
+                slug: brand.slug || '',
+                supplier_id: brand.supplier_id ? String(brand.supplier_id) : '',
+                description: brand.description || '',
+                logo_url: brand.logo_url || '',
+                website: brand.website || '',
+                is_active: brand.is_active !== false,
+                sort_order: brand.sort_order || 0,
+            };
+            this.brandModalOpen = true;
+        },
+
+        openEditBrandByName(brandName, supplierId = null) {
+            const found = (this.brands || []).find(b => b.name === brandName || b.slug === brandName);
+            if (found) {
+                this.openEditBrandModal(found);
+            } else {
+                this.isCreatingBrand = false;
+                this.isEditingBrand = true;
+                this.brandForm = {
+                    id: null,
+                    name: brandName,
+                    slug: brandName.toLowerCase().replace(/\s+/g, '-'),
+                    supplier_id: supplierId ? String(supplierId) : '',
+                    description: '',
+                    logo_url: '',
+                    website: '',
+                    is_active: true,
+                    sort_order: (this.brands || []).length + 1,
+                };
+                this.brandModalOpen = true;
+            }
+        },
+
+        async saveBrandModal() {
+            if (!this.brandForm.name || !this.brandForm.name.trim()) {
+                this.showToast('El nombre de la marca comercial es obligatorio.', 'warning');
+                return;
+            }
+
+            const payload = {
+                name: this.brandForm.name.trim(),
+                slug: this.brandForm.slug ? this.brandForm.slug.trim() : '',
+                supplier_id: this.brandForm.supplier_id ? parseInt(this.brandForm.supplier_id) : null,
+                description: this.brandForm.description ? this.brandForm.description.trim() : null,
+                logo_url: this.brandForm.logo_url ? this.brandForm.logo_url.trim() : null,
+                website: this.brandForm.website ? this.brandForm.website.trim() : null,
+                is_active: !!this.brandForm.is_active,
+                sort_order: parseInt(this.brandForm.sort_order) || 0,
+            };
+
+            try {
+                let url = '/api/v1/inventory/brands';
+                let method = 'POST';
+                if (this.isEditingBrand && this.brandForm.id) {
+                    url = `/api/v1/inventory/brands/${this.brandForm.id}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.showToast(data.message || 'Marca guardada exitosamente.', 'success');
+                    this.brandModalOpen = false;
+                    await this.loadBrands();
+
+                    // Sincronizar arbol de proveedores en memoria
+                    if (payload.supplier_id) {
+                        const prov = (this.providers || []).find(p => String(p.id) === String(payload.supplier_id));
+                        if (prov) {
+                            prov.brands = prov.brands || [];
+                            if (!prov.brands.includes(payload.name)) {
+                                prov.brands.push(payload.name);
+                            }
+                            prov.brandsTree = prov.brandsTree || [];
+                            if (!prov.brandsTree.some(b => b.name === payload.name)) {
+                                prov.brandsTree.push({
+                                    name: payload.name,
+                                    slug: data.data?.slug || payload.slug || payload.name.toLowerCase().replace(/\s+/g, '-'),
+                                    origin: prov.origin || 'manual',
+                                    is_active: true
+                                });
+                            }
+                        }
+                    }
+                } else {
+                    this.showToast(data.message || 'No se pudo guardar la marca comercial.', 'error');
+                }
+            } catch (err) {
+                console.error('Error guardando marca:', err);
+                this.showToast('Error de red al guardar la marca comercial.', 'error');
+            }
+        },
+
+        async toggleActiveBrand(brand) {
+            try {
+                const res = await fetch(`/api/v1/inventory/brands/${brand.id}/toggle-active`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    brand.is_active = data.data.is_active;
+                    this.showToast(data.message, 'success');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+
+        async archiveBrand(brand) {
+            if (!confirm(`¿Archivar la marca comercial "${brand.name}"?`)) return;
+            try {
+                const res = await fetch(`/api/v1/inventory/brands/${brand.id}/archive`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    brand.is_archived = true;
+                    brand.is_active = false;
+                    this.showToast(data.message, 'success');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+
+        async restoreBrand(brand) {
+            try {
+                const res = await fetch(`/api/v1/inventory/brands/${brand.id}/restore`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    brand.is_archived = false;
+                    brand.is_active = true;
+                    this.showToast(data.message, 'success');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+
+        async deleteBrand(brand) {
+            if (!confirm(`¿Eliminar permanentemente la marca "${brand.name}"?`)) return;
+            try {
+                const res = await fetch(`/api/v1/inventory/brands/${brand.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.brands = (this.brands || []).filter(b => b.id !== brand.id);
+                    this.showToast(data.message, 'success');
+                    if (brand.supplier_id) {
+                        const prov = (this.providers || []).find(p => String(p.id) === String(brand.supplier_id));
+                        if (prov) {
+                            prov.brands = (prov.brands || []).filter(b => b !== brand.name);
+                            prov.brandsTree = (prov.brandsTree || []).filter(b => b.name !== brand.name);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+
+        async removeBrandFromSupplier(prov, brandName) {
+            if (!confirm(`¿Desvincular la marca "${brandName}" del proveedor "${prov.tradeName || prov.name}"?`)) return;
+            const dbId = prov.dbId || String(prov.id).replace('prov_', '');
+            try {
+                const res = await fetch(`/api/v1/inventory/suppliers/${dbId}/brands`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    body: JSON.stringify({ brand: brandName })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    prov.brands = (prov.brands || []).filter(b => b !== brandName);
+                    prov.brandsTree = (prov.brandsTree || []).filter(b => b.name !== brandName);
+                    this.showToast(data.message, 'success');
+                    await this.loadBrands();
+                }
+            } catch (e) {
+                console.error(e);
+            }
         },
 
         openScrapingCuration(pendingItem) {
