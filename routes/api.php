@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RevOps\InventoryApiController;
 use App\Http\Controllers\Api\RevOps\InventorySettingsApiController;
 use App\Http\Controllers\Api\RevOps\ProductSkuAndDuplicateApiController;
 use App\Http\Controllers\Api\RevOps\SupplierApiController;
+use App\Http\Controllers\Api\RevOps\BrandApiController;
 use App\Http\Controllers\Api\RevOps\StockReservationApiController;
 use App\Http\Controllers\Api\RevOps\MarketingApiController;
 use App\Http\Controllers\Api\RevOps\FinanceApiController;
@@ -106,6 +107,30 @@ Route::prefix('v1')->group(function () {
             Route::post('/categories/{id}/archive', [InventorySettingsApiController::class, 'archiveCategory']);
             Route::post('/categories/{id}/restore', [InventorySettingsApiController::class, 'restoreCategory']);
             Route::delete('/categories/{id}', [InventorySettingsApiController::class, 'destroyCategory']);
+
+            // GESTIÓN INTEGRAL DE MARCAS COMERCIALES (TASK-BRD-01)
+            Route::get('/brands', [BrandApiController::class, 'index']);
+            Route::post('/brands', [BrandApiController::class, 'store']);
+            Route::get('/brands/{id}', [BrandApiController::class, 'show']);
+            Route::put('/brands/{id}', [BrandApiController::class, 'update']);
+            Route::patch('/brands/{id}/toggle-active', [BrandApiController::class, 'toggleActive']);
+            Route::post('/brands/{id}/archive', [BrandApiController::class, 'archive']);
+            Route::post('/brands/{id}/restore', [BrandApiController::class, 'restore']);
+            Route::delete('/brands/{id}', [BrandApiController::class, 'destroy']);
+            Route::post('/brands/{id}/assign-supplier', [BrandApiController::class, 'assignSupplier']);
+        });
+
+        // RUTA DIRECTA DE MARCAS EN INVENTARIO
+        Route::prefix('brands')->group(function () {
+            Route::get('/', [BrandApiController::class, 'index']);
+            Route::post('/', [BrandApiController::class, 'store']);
+            Route::get('/{id}', [BrandApiController::class, 'show']);
+            Route::put('/{id}', [BrandApiController::class, 'update']);
+            Route::patch('/{id}/toggle-active', [BrandApiController::class, 'toggleActive']);
+            Route::post('/{id}/archive', [BrandApiController::class, 'archive']);
+            Route::post('/{id}/restore', [BrandApiController::class, 'restore']);
+            Route::delete('/{id}', [BrandApiController::class, 'destroy']);
+            Route::post('/{id}/assign-supplier', [BrandApiController::class, 'assignSupplier']);
         });
     });
 

@@ -57,6 +57,13 @@ class Supplier extends Model
     {
         $explicitBrands = is_array($this->brands) ? $this->brands : [];
 
+        $dbBrands = [];
+        if ($this->relationLoaded('brandsList')) {
+            $dbBrands = $this->brandsList->pluck('name')->toArray();
+        } elseif ($this->id) {
+            $dbBrands = Brand::where('supplier_id', $this->id)->pluck('name')->toArray();
+        }
+
         // Deduccion automatica de marcas desde productos asociados si esta cargada la relacion o existe
         $productBrands = [];
         if ($this->relationLoaded('supplierProducts')) {
@@ -68,7 +75,7 @@ class Supplier extends Model
                 ->toArray();
         }
 
-        $allBrandNames = array_values(array_unique(array_filter(array_merge($explicitBrands, $productBrands))));
+        $allBrandNames = array_values(array_unique(array_filter(array_merge($explicitBrands, $dbBrands, $productBrands))));
 
         if (empty($allBrandNames)) {
             $allBrandNames = [$this->name];
@@ -82,6 +89,11 @@ class Supplier extends Model
                 'is_active' => $this->status !== 'archived',
             ];
         }, $allBrandNames);
+    }
+
+    public function brandsList()
+    {
+        return $this->hasMany(Brand::class);
     }
 
     public function users()
