@@ -8279,6 +8279,11 @@ function hybridInventoryModule() {
                 return;
             }
 
+            if (this.isProductLineCategory(this.brandForm.name)) {
+                this.showToast(`"${this.brandForm.name}" corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.`, 'warning');
+                return;
+            }
+
             const payload = {
                 name: this.brandForm.name.trim(),
                 slug: this.brandForm.slug ? this.brandForm.slug.trim() : '',
@@ -8478,6 +8483,18 @@ function hybridInventoryModule() {
             }
         },
 
+        isProductLineCategory(name) {
+            if (!name) return false;
+            const blacklist = [
+                'tanga', 'tangas', 'bikini', 'bikinis', 'jockstraps', 'jockstrap', 'jocks',
+                'brief/boxers', 'briefs', 'boxers', 'boxer', 'brief', 'tank tops', 'tank top',
+                't-shirts', 't-shirt', 'camisillas', 'camisilla', 'playera', 'playeras',
+                'swimwear', 'trajes de bano', 'trajes de baño', 'combos', 'combo',
+                'accesorios', 'accesorio', 'skincare', 'perfumeria', 'perfumería', 'lenceria', 'lencería'
+            ];
+            return blacklist.includes(String(name).toLowerCase().trim());
+        },
+
         getDetailedBrandsForCurrentProvider() {
             const prov = this.selectedProvider || this.providerForm;
             if (!prov) return [];
@@ -8485,8 +8502,10 @@ function hybridInventoryModule() {
             const supName = prov.tradeName || prov.name;
 
             const registered = (this.brands || []).filter(b => 
-                (supId && b.supplier_id && String(b.supplier_id) === String(supId)) ||
-                (b.supplier_name && b.supplier_name === supName)
+                !this.isProductLineCategory(b.name) && (
+                    (supId && b.supplier_id && String(b.supplier_id) === String(supId)) ||
+                    (b.supplier_name && b.supplier_name === supName)
+                )
             );
 
             const registeredMap = new Map();
@@ -8498,7 +8517,7 @@ function hybridInventoryModule() {
 
             formBrands.forEach(name => {
                 const key = String(name).toLowerCase().trim();
-                if (key && !registeredMap.has(key)) {
+                if (key && !this.isProductLineCategory(key) && !registeredMap.has(key)) {
                     registeredMap.set(key, {
                         id: null,
                         supplier_id: supId || null,
@@ -8521,6 +8540,11 @@ function hybridInventoryModule() {
             const tag = (this.newBrandTag || '').trim();
             if (!tag) {
                 this.showToast('Ingresa el nombre de la marca comercial.', 'warning');
+                return;
+            }
+
+            if (this.isProductLineCategory(tag)) {
+                this.showToast(`"${tag}" corresponde a una línea de producto o categoría de prenda, no a una marca comercial.`, 'warning');
                 return;
             }
 
@@ -8647,7 +8671,8 @@ function hybridInventoryModule() {
 
         // Regla 6.47: Vinculación Obligatoria de Proveedor y Marcas en Fichas
         getBrandsForSupplier(supplierId) {
-            const allBrands = (this.brands || []).filter(b => !b.is_archived && b.is_active !== false);
+            const allBrands = (this.brands || [])
+                .filter(b => !b.is_archived && b.is_active !== false && !this.isProductLineCategory(b.name));
             if (!supplierId) {
                 return allBrands.length > 0 ? allBrands : [{ name: 'Torzo B2B' }, { name: 'ModaIntima Textil MX' }];
             }
@@ -8663,13 +8688,15 @@ function hybridInventoryModule() {
             // 2. Si no hay marcas en tabla brands, buscar en prov.brandsTree o prov.brands
             if (prov) {
                 if (Array.isArray(prov.brandsTree) && prov.brandsTree.length > 0) {
-                    return prov.brandsTree.filter(b => b.is_active !== false);
+                    return prov.brandsTree.filter(b => b.is_active !== false && !this.isProductLineCategory(b.name));
                 }
                 if (Array.isArray(prov.brands) && prov.brands.length > 0) {
-                    return prov.brands.map(name => ({ name: String(name), is_active: true }));
+                    return prov.brands
+                        .filter(name => !this.isProductLineCategory(name))
+                        .map(name => ({ name: String(name), is_active: true }));
                 }
                 const fallbackName = prov.tradeName || prov.name;
-                if (fallbackName) {
+                if (fallbackName && !this.isProductLineCategory(fallbackName)) {
                     return [{ name: fallbackName, is_active: true }];
                 }
             }

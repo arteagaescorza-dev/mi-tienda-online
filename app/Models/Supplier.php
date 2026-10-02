@@ -47,6 +47,32 @@ class Supplier extends Model
     ];
 
     /**
+     * Lista canónica de términos reconocidos como Líneas de Producto / Tipos de Prenda (Categorías),
+     * los cuales NUNCA deben tratarse como Marcas Comerciales (Regla de separación de Marcas vs Líneas).
+     */
+    public const PRODUCT_LINE_CATEGORIES = [
+        'tanga', 'tangas',
+        'bikini', 'bikinis',
+        'jockstraps', 'jockstrap', 'jocks',
+        'brief/boxers', 'briefs', 'boxers', 'boxer', 'brief',
+        'tank tops', 'tank top',
+        't-shirts', 't-shirt', 'camisillas', 'camisilla', 'playera', 'playeras',
+        'swimwear', 'trajes de bano', 'trajes de baño',
+        'combos', 'combo',
+        'accesorios', 'accesorio',
+        'skincare', 'perfumeria', 'perfumería', 'lenceria', 'lencería',
+    ];
+
+    public static function isProductLineCategory(?string $name): bool
+    {
+        if (empty($name)) {
+            return false;
+        }
+        $normalized = mb_strtolower(trim($name), 'UTF-8');
+        return in_array($normalized, self::PRODUCT_LINE_CATEGORIES, true);
+    }
+
+    /**
      * Accesor para trade_name que mapea al nombre comercial (columna name).
      */
     public function getTradeNameAttribute(): string
@@ -57,19 +83,26 @@ class Supplier extends Model
     /**
      * Obtiene el listado de marcas comerciales que se desprenden del proveedor en formato de arbol.
      * Si no estan explicitamente definidas en la columna brands, se deducen dinamicamente
-     * de los productos vinculados o del nombre comercial.
+     * de los productos vinculados o del nombre comercial, EXCLUYENDO rigurosamente tipos de prenda/líneas.
      *
-     * @return array<int, array{name: string, sku_count: int, origin: string}>
+     * @return array<int, array{name: string, slug: string, origin: string, is_active: bool}>
      */
     public function getBrandsTree(): array
     {
-        $explicitBrands = is_array($this->brands) ? $this->brands : [];
+        $explicitBrands = array_filter(
+            is_array($this->brands) ? $this->brands : [],
+            fn($b) => !empty($b) && !self::isProductLineCategory($b)
+        );
 
         $dbBrands = [];
         if ($this->relationLoaded('brandsList')) {
-            $dbBrands = $this->brandsList->pluck('name')->toArray();
+            $dbBrands = $this->brandsList->pluck('name')
+                ->filter(fn($b) => !empty($b) && !self::isProductLineCategory($b))
+                ->toArray();
         } elseif ($this->id) {
-            $dbBrands = Brand::where('supplier_id', $this->id)->pluck('name')->toArray();
+            $dbBrands = Brand::where('supplier_id', $this->id)->pluck('name')
+                ->filter(fn($b) => !empty($b) && !self::isProductLineCategory($b))
+                ->toArray();
         }
 
         // Deduccion automatica de marcas desde productos asociados si esta cargada la relacion o existe
@@ -77,7 +110,7 @@ class Supplier extends Model
         if ($this->relationLoaded('supplierProducts')) {
             $productBrands = $this->supplierProducts
                 ->pluck('product.brand')
-                ->filter()
+                ->filter(fn($b) => !empty($b) && !self::isProductLineCategory($b))
                 ->unique()
                 ->values()
                 ->toArray();
@@ -86,7 +119,7 @@ class Supplier extends Model
         $allBrandNames = array_values(array_unique(array_filter(array_merge($explicitBrands, $dbBrands, $productBrands))));
 
         if (empty($allBrandNames)) {
-            $allBrandNames = [$this->name];
+            $allBrandNames = [!self::isProductLineCategory($this->name) ? $this->name : 'General'];
         }
 
         return array_map(function (string $brandName) {

@@ -413,6 +413,15 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   - `+ Nueva Marca`: Despliega de inmediato el modal de marca comercial (`brandModalOpen`, `z-[130]`) preasignando el proveedor actualmente seleccionado. Al guardarse, la nueva marca se asocia y se autoselecciona de inmediato en el producto.
 * **Filtrado Dinámico en Cascada:** Al seleccionar un proveedor en cualquiera de estas fichas, el listado de marcas comerciales disponibles debe filtrar automáticamente las marcas pertenecientes o comercializadas por dicho proveedor mediante `getBrandsForSupplier(supplierId)`, manteniendo consistencia relacional en toda la plataforma.
 
+### Regla 6.48: Distinción Estricta e Inviolable entre Marcas Comerciales y Líneas de Producto / Tipos de Prenda
+* **Separación Taxonómica Inviolable:** Queda terminantemente prohibido categorizar, registrar o listar Tipos de Prenda o Líneas de Producto (`TANGA`, `BIKINI`, `JOCKSTRAPS`, `BRIEF/BOXERS`, `TANK TOPS`, `T-SHIRTS`, `SWIMWEAR`, `COMBOS`, etc.) como si fuesen Marcas Comerciales (`brand`).
+* **Pertenencia Categorial (`category` / `garment_type`):** Las líneas de producto son taxonomías de tipología y clasificación de prenda y deben residir exclusivamente en las propiedades de categorización (`meta.category`, `meta.garment_type`, `category`). Las marcas comerciales representan la identidad de la casa fabricante o firma comercial (ej. `Torzo`, `Adrenaline Forte`).
+* **Blindaje y Gobernanza Transversal (Backend & Frontend):**
+  1. **Modelo Proveedor (`Supplier::getBrandsTree`):** El cálculo dinámico del árbol de marcas filtra de forma obligatoria contra la lista canónica `PRODUCT_LINE_CATEGORIES`, impidiendo que valores categoriales heredados de productos o sincronizaciones se interpreten o proyecten como marcas del proveedor.
+  2. **API de Marcas (`BrandApiController`):** Las acciones `store()`, `update()` y `seedInitialBrands()` validan contra `Supplier::isProductLineCategory()`. Cualquier intento de registrar un tipo de prenda como marca comercial es rechazado con error de validación HTTP 422.
+  3. **Frontend Interactivo (`inventory-module.js`):** El gestor de inventario y los modales de alta (`getDetailedBrandsForCurrentProvider`, `getBrandsForSupplier`, `addAndPersistBrandToProvider`, `saveBrandModal`) aplican una lista de exclusión en caliente (`isProductLineCategory`), impidiendo al operador añadir categorías como marcas y filtrando cualquier registro residual.
+  4. **Normalización de Base de Datos:** Los productos existentes deben vincularse a su marca comercial real en `products.brand` y conservar su tipología de prenda en `meta.category` y `meta.garment_type`.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)

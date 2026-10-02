@@ -105,6 +105,13 @@ class BrandApiController extends Controller
         ]);
 
         $name = trim($validated['name']);
+        if (Supplier::isProductLineCategory($name)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "El término '{$name}' corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.",
+            ], 422);
+        }
+
         $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($name);
 
         // Garantizar unicidad de slug
@@ -207,7 +214,14 @@ class BrandApiController extends Controller
         $oldName = $brand->name;
 
         if (isset($validated['name'])) {
-            $brand->name = trim($validated['name']);
+            $candidateName = trim($validated['name']);
+            if (Supplier::isProductLineCategory($candidateName)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "El término '{$candidateName}' corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.",
+                ], 422);
+            }
+            $brand->name = $candidateName;
             if (empty($validated['slug'])) {
                 $baseSlug = Str::slug($brand->name);
                 $slug = $baseSlug;
@@ -421,7 +435,7 @@ class BrandApiController extends Controller
             }
             foreach ($brandsList as $bName) {
                 $bName = trim($bName);
-                if (empty($bName)) continue;
+                if (empty($bName) || Supplier::isProductLineCategory($bName)) continue;
                 Brand::firstOrCreate(
                     ['name' => $bName],
                     [
@@ -442,7 +456,7 @@ class BrandApiController extends Controller
 
         foreach ($productBrands as $pBrand) {
             $pBrand = trim($pBrand);
-            if (empty($pBrand)) continue;
+            if (empty($pBrand) || Supplier::isProductLineCategory($pBrand)) continue;
             Brand::firstOrCreate(
                 ['name' => $pBrand],
                 [

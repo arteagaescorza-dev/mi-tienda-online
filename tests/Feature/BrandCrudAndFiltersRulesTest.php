@@ -198,4 +198,49 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $storefrontRes->assertSee('data-filter-group="supplier"', false);
         $storefrontRes->assertSee('data-filter-group="brand"', false);
     }
+
+    /**
+     * Test de separación estricta: Las líneas de producto / tipos de prenda (TANGA, BIKINI, JOCKSTRAPS, etc.)
+     * NUNCA deben permitirse como marcas comerciales ni deducirse en getBrandsTree.
+     */
+    public function test_product_line_categories_cannot_be_commercial_brands_and_are_excluded_from_tree(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // 1. Intentar crear una marca llamada 'TANGA' o 'JOCKSTRAPS' debe ser rechazado con 422
+        $resTanga = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
+            'name' => 'TANGA',
+        ]);
+        $resTanga->assertStatus(422);
+        $resTanga->assertJsonFragment([
+            'status' => 'error',
+        ]);
+
+        $resJock = $this->actingAs($admin)->postJson('/api/v1/inventory/brands', [
+            'name' => 'JOCKSTRAPS',
+        ]);
+        $resJock->assertStatus(422);
+
+        // 2. getBrandsTree en un proveedor que tenga productos con categorías en 'brand' o en su array brands
+        $supplier = Supplier::create([
+            'name' => 'Torzo Premium',
+            'legal_name' => 'Torzo S.A.P.I.',
+            'vendor_code' => 'SUP-TRZ-99',
+            'origin' => 'scraping',
+            'status' => 'connected',
+            'brands' => ['Torzo', 'TANGA', 'BIKINI', 'JOCKSTRAPS'],
+        ]);
+
+        $tree = $supplier->getBrandsTree();
+        $brandNames = array_column($tree, 'name');
+
+        $this->assertContains('Torzo', $brandNames);
+        $this->assertNotContains('TANGA', $brandNames);
+        $this->assertNotContains('BIKINI', $brandNames);
+        $this->assertNotContains('JOCKSTRAPS', $brandNames);
+        $this->assertTrue(Supplier::isProductLineCategory('tanga'));
+        $this->assertTrue(Supplier::isProductLineCategory('Brief/Boxers'));
+        $this->assertFalse(Supplier::isProductLineCategory('Torzo'));
+    }
 }
+

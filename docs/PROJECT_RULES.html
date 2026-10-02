@@ -849,6 +849,14 @@
       Presencia obligatoria de selectores reactivos jerárquicos de Proveedor y Marca Comercial en: (1) Alta de Producto (<code>newProductPanoramicModal</code>), (2) Curaduría de Scraping (<code>scrapingCurationModalOpen</code>) y (3) Ficha de Edición / Drawer (<code>skuPanoramicModal</code>). Cada selector incluye botones rápidos de alta instantánea (<code>+ Nuevo Proveedor</code> a <code>z-[120]</code> y <code>+ Nueva Marca</code> a <code>z-[130]</code>) que abren sobre el formulario sin perder datos de captura y auto-seleccionan de inmediato la entidad creada.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">48</div>
+    <div class="rule-content">
+      <strong>Regla 6.48: Distinción Estricta e Inviolable entre Marcas Comerciales y Líneas de Producto / Tipos de Prenda</strong>
+      Separación taxonómica tajante: Queda estrictamente prohibido listar o registrar tipos de prenda / líneas de producto (ej. <code>TANGA</code>, <code>BIKINI</code>, <code>JOCKSTRAPS</code>, <code>BRIEF/BOXERS</code>, <code>TANK TOPS</code>, <code>T-SHIRTS</code>, etc.) como marcas comerciales. Las tipologías pertenecen con exclusividad a <code>category</code> y <code>meta.garment_type</code>. Blindaje en backend (<code>Supplier::getBrandsTree</code> y <code>BrandApiController</code> con validación 422 frente a <code>PRODUCT_LINE_CATEGORIES</code>) y frontend (<code>inventory-module.js</code> con filtro <code>isProductLineCategory</code>).
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1105,6 +1113,11 @@
       <td><strong>Fichas & Curaduría</strong></td>
       <td>Proveedor y Marca In Situ (6.47)</td>
       <td>Selectores jerárquicos y botones de alta rápida de Proveedor y Marca en Alta de Producto, Curaduría de Scraping y Drawer.</td>
+    </tr>
+    <tr>
+      <td><strong>Líneas vs Marcas</strong></td>
+      <td>Separación Taxonómica Estricta (6.48)</td>
+      <td>Tipos de prenda (Tanga, Bikini, etc.) pertenecen a categoría; blindaje en backend y frontend con exclusión de marcas.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>
