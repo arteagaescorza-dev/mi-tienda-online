@@ -60,6 +60,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{id}', [SupplierApiController::class, 'destroy']);
             Route::post('/{id}/toggle-status', [SupplierApiController::class, 'toggleStatus']);
             Route::post('/{id}/invite-extranet', [SupplierApiController::class, 'inviteExtranet']);
+            Route::post('/{id}/brands', [SupplierApiController::class, 'addBrand']);
+            Route::delete('/{id}/brands', [SupplierApiController::class, 'removeBrand']);
         });
 
         // ALTA DE PRODUCTO DESDE MODAL PANORAMICO (TASK-INV-20 / SLICE 6)

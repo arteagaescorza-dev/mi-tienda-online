@@ -986,7 +986,7 @@ class StorefrontController extends Controller
             ? now()->parse(SupplierProduct::max('last_checked_at'))->format('d/m/Y H:i')
             : 'Hace 14 min';
 
-        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->with('users')->orderBy('name')->get();
+        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->with(['users', 'supplierProducts.product'])->orderBy('name')->get();
         $portalProviders = $dbSuppliers->map(function ($s) {
             $hasExtranet = $s->users->where('role', 'supplier')->isNotEmpty();
             return [
@@ -995,6 +995,17 @@ class StorefrontController extends Controller
                 'vendorCode' => $s->vendor_code ?: ('VND-' . strtoupper(Str::slug($s->name)) . '-001'),
                 'name' => $s->name,
                 'tradeName' => $s->name,
+                'legalName' => $s->legal_name ?: $s->name,
+                'taxId' => $s->tax_id ?: '',
+                'fiscalRegime' => $s->fiscal_regime ?: '',
+                'fiscalAddress' => $s->fiscal_address ?: '',
+                'fiscalZip' => $s->fiscal_zip ?: '',
+                'invoiceEmail' => $s->invoice_email ?: '',
+                'website' => $s->website ?: '',
+                'origin' => $s->origin ?: ($s->type === 'dropship_scrape' ? 'scraping' : 'manual'),
+                'isManual' => ($s->origin === 'manual' || $s->type !== 'dropship_scrape'),
+                'brands' => is_array($s->brands) ? $s->brands : [],
+                'brandsTree' => $s->getBrandsTree(),
                 'type' => $s->type,
                 'typeLabel' => match ($s->type) {
                     'dropship_scrape' => 'Fabricante Mayorista & Scraping B2B',
