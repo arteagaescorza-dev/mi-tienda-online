@@ -14078,6 +14078,98 @@ Cada objeto de prenda inyectado para el motor reactivo de filtros en caliente (`
    - El formulario de descuento `#checkoutCouponBox` opera única y exclusivamente cuando `currentCheckoutStep === 1`.
    - El drawer pasivo de carrito (`#cartSheet`) tiene estrictamente suprimido cualquier input de código promocional para evitar saturación visual y fricción en la intención de compra.
 
+---
+
+### 21.7. Hub 4 Ajustes: Estructura en Árbol de Proveedor-Marcas y Alta Manual Fiscal/Contacto (Regla Canónica 6.45)
+
+#### 1. Migración y Modelo `Supplier` (`database/migrations/2026_10_02_120000_add_fiscal_details_and_brands_to_suppliers_table.php`)
+Ampliación de la tabla `suppliers` para soportar tanto proveedores scrapeados como proveedores manuales con datos de facturación oficial y árbol de marcas comerciales desprendidas:
+
+```php
+Schema::table('suppliers', function (Blueprint $table) {
+    $table->string('tax_id', 50)->nullable()->after('vendor_code'); // RFC / Tax ID / NIF
+    $table->string('legal_name', 255)->nullable()->after('name'); // Razon Social Fiscal Completa
+    $table->string('fiscal_regime', 150)->nullable()->after('tax_id'); // Regimen Fiscal (SAT)
+    $table->text('fiscal_address')->nullable()->after('fiscal_regime'); // Domicilio Fiscal Completo
+    $table->string('fiscal_zip', 20)->nullable()->after('fiscal_address'); // Codigo Postal Fiscal
+    $table->string('invoice_email', 150)->nullable()->after('contact_email'); // Email para CFDI / Facturas
+    $table->string('origin', 30)->default('manual')->after('type'); // 'manual' o 'scraping'
+    $table->json('brands')->nullable()->after('credentials'); // Array JSON con marcas comerciales desprendidas
+});
+```
+
+#### 2. Endpoints de Gestión de Proveedores & Marcas en Árbol
+- **POST** `/api/v1/inventory/suppliers`: Registra un nuevo proveedor capturando datos de contacto, fiscales y marcas desprendidas.
+- **PUT** `/api/v1/inventory/suppliers/{id}`: Actualiza condiciones comerciales, datos de contacto, régimen fiscal y lista de marcas.
+- **POST** `/api/v1/inventory/suppliers/{id}/brands`: Asocia una nueva marca al árbol de marcas del proveedor.
+- **DELETE** `/api/v1/inventory/suppliers/{id}/brands`: Desvincula una marca del árbol del proveedor.
+
+#### 3. Esquema JSON Canónico del Proveedor (`transformSupplier`)
+```json
+{
+  "id": "prov_1",
+  "dbId": 1,
+  "vendorCode": "VND-TORZ-001",
+  "name": "Torzo Official B2B",
+  "tradeName": "Torzo B2B",
+  "legalName": "Torzo Internacional SA de CV",
+  "taxId": "TIN980401XYZ",
+  "fiscalRegime": "601 - General de Ley Personas Morales",
+  "fiscalAddress": "Av. Insurgentes Sur 1200, Col. Del Valle, Benito Juárez, CDMX",
+  "fiscalZip": "03100",
+  "invoiceEmail": "cfdi@torzo.com",
+  "website": "https://torzo.com",
+  "origin": "manual",
+  "isManual": true,
+  "brands": [
+    "Torzo Men",
+    "Torzo Denim",
+    "Torzo Active"
+  ],
+  "brandsTree": [
+    {
+      "name": "Torzo Men",
+      "slug": "torzo-men",
+      "origin": "manual",
+      "is_active": true
+    },
+    {
+      "name": "Torzo Denim",
+      "slug": "torzo-denim",
+      "origin": "manual",
+      "is_active": true
+    },
+    {
+      "name": "Torzo Active",
+      "slug": "torzo-active",
+      "origin": "manual",
+      "is_active": true
+    }
+  ],
+  "type": "workshop",
+  "city": "CDMX",
+  "contactName": "Carlos Mendoza",
+  "phone": "+52 55 4182 9901",
+  "email": "pedidos@torzo.com",
+  "extractionMethod": "Alta Manual / Contacto Directo",
+  "status": "connected",
+  "leadTimeDays": 5,
+  "paymentTerms": "credito_30",
+  "hasExtranetAccess": true
+}
+```
+
+#### 4. Comportamiento en Frontend de Hub 4 (Ajustes)
+1. **Árbol de Proveedores:**
+   - Cada fila de proveedor incluye control chevron para alternar entre estado contraído y expandido.
+   - El nodo secundario despliega las marcas desprendidas con visualización en ramas tipo árbol.
+   - Filtro por origen (`providerOriginFilter`: `all`, `manual`, `scraping`) y botones masivos `Expandir Árbol` / `Contraer`.
+2. **Modal de Alta / Edición de Proveedor (`providerModalOpen`):**
+   - Pestaña 1: Información General, Contacto y Operativa.
+   - Pestaña 2: Información Fiscal, RFC, Régimen, Domicilio y Facturación CFDI.
+   - Pestaña 3: Árbol de Marcas Desprendidas con chips interactivos y soporte de captura rápida vía teclado.
+
+
 
 
 

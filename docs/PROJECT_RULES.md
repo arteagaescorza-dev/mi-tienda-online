@@ -385,6 +385,13 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 * **Curaduría Visual en Bandeja de Scraping:** En la *Bandeja de Curaduría Previa de Scraping* (Hub 3 / staging area), el protocolo de revisión humana incluye obligatoriamente la asociación de la variabilidad de color del producto a cada fotografía scrapeada.
 * **Garantía de Entrada al Catálogo:** Ninguna prenda scrapeada ingresa al inventario activo sin que sus imágenes queden debidamente enlazadas a sus respectivos colores, asegurando que la conmutación de fotos por color en el storefront funcione de forma óptima desde el primer instante.
 
+### Regla 6.45: Estructura en Árbol de Proveedor-Marcas y Alta Manual con Información de Contacto y Fiscal en Hub 4 (Ajustes)
+* **Visualización Jerárquica en Árbol:** En los ajustes de Hub 4 (pestaña Proveedores & Scrapers), los proveedores deben presentarse en **formato de árbol desplegable / jerárquico** (`Proveedor ──┬── Marca A`, `└── Marca B`) para explicar con absoluta claridad las marcas comerciales que se desprenden o son comercializadas por cada uno de ellos. Cada nodo de proveedor cuenta con chevron interactivo de expansión/colapso, insignias de conteo de marcas y controles masivos de "Expandir Árbol" / "Contraer".
+* **Alta Manual Completa (Contacto y Fiscal):** Dado que no todos los proveedores provienen de scrapeo automatizado, el sistema debe habilitar el registro y edición manual completa capturando:
+  1. **Información de Contacto y Operativa:** Nombre comercial, razón social, tipo de proveedor/taller, origen (Manual vs Scraping), ciudad, persona de contacto operativo, teléfono/WhatsApp, email de pedidos, sitio web o catálogo digital, lead time prometido en días a rampa, términos comerciales de pago y notas de maquila.
+  2. **Información Fiscal y Facturación:** RFC / Tax ID / NIF con formateo automático en mayúsculas, razón social fiscal completa, régimen fiscal (SAT / tributario), domicilio fiscal completo (calle, número exterior/interior, colonia, municipio/alcaldía), código postal fiscal (CP) y correo electrónico especializado para facturación electrónica CFDI / comprobantes.
+  3. **Marcas Comerciales Desprendidas:** Interfaz interactiva de chips/etiquetas para asociar, desprender y remover marcas al vuelo mediante atajo de teclado (`Enter`) o botón de acción, persistiendo en el modelo `Supplier` (columna `brands` JSON y accessor `brandsTree`) para su propagación inmediata a los filtros faceteados de Hub 2 y del storefront.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
