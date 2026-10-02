@@ -76,6 +76,22 @@
         .store-accordion-chevron {
             transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .store-subnav-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+        @media (max-width: 1024px) {
+            .store-subnav-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .store-subnav-grid {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+        }
         .store-subnav-btn {
             display: flex !important;
             align-items: center !important;
@@ -256,6 +272,41 @@
     </div>
 
     {{-- ========================================================================= --}}
+    {{-- REGLA 6.4: CONMUTADOR DE VITRINA MULTIVERSO GLOBAL EN EL ENCABEZADO SUPERIOR DE TODAS LAS PESTAÑAS --}}
+    {{-- ========================================================================= --}}
+    <div class="universe-selector-bar bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mr-1">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <span>Seleccionar Vitrina:</span>
+            </span>
+            <button class="universe-pill-btn active" data-action="switch-store-universe" data-universe="marte" onclick="window.switchStoreUniverse('marte')" type="button">
+                <span class="universe-dot-indicator" style="background: #4f46e5;"></span>
+                <span>Marte (Masculino / Queer)</span>
+            </button>
+            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="venus" onclick="window.switchStoreUniverse('venus')" type="button">
+                <span class="universe-dot-indicator" style="background: #db2777;"></span>
+                <span>Venus (Lencería / Beauty)</span>
+            </button>
+            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="tiresias" onclick="window.switchStoreUniverse('tiresias')" type="button">
+                <span class="universe-dot-indicator" style="background: #8b5cf6;"></span>
+                <span>Tiresias (Moda Afirmativa)</span>
+            </button>
+            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="terra" onclick="window.switchStoreUniverse('terra')" type="button">
+                <span class="universe-dot-indicator" style="background: #0284c7;"></span>
+                <span>Terra (Matriz / Unisex)</span>
+            </button>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium">Universo Activo:</span>
+            <span id="activeUniverseContextBadge" class="px-3 py-1 rounded-full font-bold text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span id="activeUniverseContextText">Marte Store &bull; {{ $storefronts['marte']['activeSkus'] }} Modelos</span>
+            </span>
+        </div>
+    </div>
+
+    {{-- ========================================================================= --}}
     {{-- REGLA 10: SECCIÓN 2: TARJETAS DE KPIS CONTEXTUALES (NIVEL 2)               --}}
     {{-- ========================================================================= --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -317,41 +368,6 @@
                 <span class="text-xs font-bold text-emerald-700 font-mono" data-kpi-preview-universe>Marte Store</span>
             </div>
             <div class="mt-2 text-[11px] text-slate-400">Escala adaptativa en tiempo real</div>
-        </div>
-    </div>
-
-    {{-- ========================================================================= --}}
-    {{-- CONMUTADOR DE VITRINA MULTIVERSO GLOBAL (PRESENTE EN TODAS LAS PESTAÑAS)   --}}
-    {{-- ========================================================================= --}}
-    <div class="universe-selector-bar bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mr-1">
-                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                <span>Seleccionar Vitrina:</span>
-            </span>
-            <button class="universe-pill-btn active" data-action="switch-store-universe" data-universe="marte" onclick="window.switchStoreUniverse('marte')" type="button">
-                <span class="universe-dot-indicator" style="background: #4f46e5;"></span>
-                <span>Marte (Masculino / Queer)</span>
-            </button>
-            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="venus" onclick="window.switchStoreUniverse('venus')" type="button">
-                <span class="universe-dot-indicator" style="background: #db2777;"></span>
-                <span>Venus (Lencería / Beauty)</span>
-            </button>
-            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="tiresias" onclick="window.switchStoreUniverse('tiresias')" type="button">
-                <span class="universe-dot-indicator" style="background: #8b5cf6;"></span>
-                <span>Tiresias (Moda Afirmativa)</span>
-            </button>
-            <button class="universe-pill-btn" data-action="switch-store-universe" data-universe="terra" onclick="window.switchStoreUniverse('terra')" type="button">
-                <span class="universe-dot-indicator" style="background: #0284c7;"></span>
-                <span>Terra (Matriz / Unisex)</span>
-            </button>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 font-medium">Universo Activo:</span>
-            <span id="activeUniverseContextBadge" class="px-3 py-1 rounded-full font-bold text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                <span id="activeUniverseContextText">Marte Store &bull; {{ $storefronts['marte']['activeSkus'] }} Modelos</span>
-            </span>
         </div>
     </div>
 
@@ -2522,7 +2538,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Filtrar Universo</label>
                             <select name="filter_universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
@@ -2549,6 +2565,17 @@
                                             <option value="{{ $subcat->slug }}">{{ $subcat->name }}</option>
                                         @endforeach
                                     </optgroup>
+                                @endif
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Filtrar Proveedor (Hub 4)</label>
+                            <select name="filter_supplier" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-slate-800">
+                                <option value="">-- Sin Filtro (Todos) --</option>
+                                @if(!empty($suppliers))
+                                    @foreach($suppliers as $sup)
+                                        <option value="{{ $sup->name }}">{{ $sup->name }}</option>
+                                    @endforeach
                                 @endif
                             </select>
                         </div>
@@ -2773,7 +2800,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Filtrar Universo</label>
                             <select id="edit_page_filter_universe" name="filter_universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
@@ -2800,6 +2827,17 @@
                                             <option value="{{ $subcat->slug }}">{{ $subcat->name }}</option>
                                         @endforeach
                                     </optgroup>
+                                @endif
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Filtrar Proveedor (Hub 4)</label>
+                            <select id="edit_page_filter_supplier" name="filter_supplier" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-slate-800">
+                                <option value="">-- Sin Filtro (Todos) --</option>
+                                @if(!empty($suppliers))
+                                    @foreach($suppliers as $sup)
+                                        <option value="{{ $sup->name }}">{{ $sup->name }}</option>
+                                    @endforeach
                                 @endif
                             </select>
                         </div>
@@ -3448,6 +3486,8 @@
 
         if (universeEl) universeEl.value = page.filter_universe || '';
         if (categoryEl) categoryEl.value = page.filter_category || '';
+        const supplierEl = document.getElementById('edit_page_filter_supplier');
+        if (supplierEl) supplierEl.value = page.filter_supplier || '';
         if (tagsEl) tagsEl.value = page.filter_tags || '';
 
         window.updatePageModalPreview('edit');
