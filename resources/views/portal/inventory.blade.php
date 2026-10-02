@@ -3258,9 +3258,9 @@
                                         </td>
                                         <td class="py-3.5 px-3 text-center">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
-                                                  :class="item.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
-                                                <span class="w-1.5 h-1.5 rounded-full" :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-emerald-500'"></span>
-                                                <span x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropshipping'"></span>
+                                                  :class="item.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-amber-50 text-amber-800 border border-amber-200'">
+                                                <span class="w-1.5 h-1.5 rounded-full" :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-amber-500'"></span>
+                                                <span x-text="item.type === 'propio' ? 'Stock Propio' : 'Drop Bajo Pedido'"></span>
                                             </span>
                                         </td>
                                         <td class="py-3.5 px-4 text-right">
@@ -3352,8 +3352,8 @@
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1 text-sm font-mono font-bold rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200" x-text="selectedProduct?.sku"></span>
                     <span class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider"
-                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
-                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
+                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-amber-50 text-amber-800 border border-amber-200'"
+                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Drop Bajo Pedido'">
                     </span>
                     <span class="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5"
                           :class="drawerIsPublished ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700 border border-slate-300'">
@@ -8538,12 +8538,22 @@
                             <!-- Árbol Jerárquico de Categorías & Subcategorías -->
                             <div>
                                 <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-3">Familias Principales & Subcategorías Activas</h4>
-                                <div class="space-y-3">
-                                    <template x-for="rootCat in categoriesTree" :key="rootCat.id">
-                                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                                 <div class="space-y-3">
+                                    <template x-for="(rootCat, catIdx) in categoriesTree" :key="rootCat.id">
+                                        <div 
+                                            class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs transition-shadow"
+                                            draggable="true" 
+                                            @dragstart="handleCategoryDragStart($event, catIdx)" 
+                                            @dragover="handleCategoryDragOver($event)" 
+                                            @drop="handleCategoryDrop($event, catIdx)"
+                                        >
                                             <!-- Fila Padre (Categoría Raíz) -->
                                             <div class="p-3.5 bg-slate-50 flex items-center justify-between gap-3 border-b border-slate-200/80">
                                                 <div class="flex items-center gap-2.5 min-w-0">
+                                                    <!-- Drag handle icon -->
+                                                    <span class="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1 -ml-1 rounded select-none" title="Arrastra para reordenar esta categoría jerárquicamente">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                                    </span>
                                                     <span class="p-2 bg-indigo-100 text-indigo-700 rounded-lg shrink-0">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                                     </span>
@@ -8551,6 +8561,7 @@
                                                         <div class="flex items-center gap-2 flex-wrap">
                                                             <span class="font-bold text-xs text-slate-900" x-text="rootCat.name"></span>
                                                             <span class="font-mono text-[10px] text-slate-500 bg-slate-200 px-1.5 py-0.2 rounded" x-text="'/' + rootCat.slug"></span>
+
                                                             <span 
                                                                 class="px-2 py-0.2 rounded-full text-[9px] font-bold border"
                                                                 :class="rootCat.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (rootCat.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
@@ -9758,39 +9769,115 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Selector de Color / Tornasol -->
                             <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Tornasol Exacto</label>
-                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
-                                    <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0" :style="'background: ' + curatingItem.detectedColorHex"></span>
-                                    <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
+                                <div class="flex items-center justify-between">
+                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Tornasol Exacto</label>
+                                    <button 
+                                        type="button" 
+                                        @click="toggleInlineAddColor()" 
+                                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer"
+                                        x-text="showInlineAddColor ? 'Cancelar' : '+ Dar de alta color'"
+                                    ></button>
                                 </div>
-                                <select 
-                                    @change="
-                                        const c = apparelColors.find(x => x.name === $event.target.value);
-                                        if (c) {
-                                            curatingItem.detectedColorName = c.name;
-                                            curatingItem.detectedColorHex = c.hex;
-                                            curatingItem.colorType = c.type;
-                                        }
-                                    "
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <template x-for="col in apparelColors" :key="col.id">
-                                        <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                    </template>
-                                </select>
+
+                                <!-- Formulario inline para dar de alta nuevo color -->
+                                <template x-if="showInlineAddColor">
+                                    <div class="p-2.5 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                                        <div>
+                                            <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Nombre del Color</label>
+                                            <input type="text" x-model="inlineColorName" placeholder="Ej: Rojo Óxido" class="w-full px-2 py-1 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Tipo</label>
+                                                <select x-model="inlineColorType" class="w-full p-1 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700">
+                                                    <option value="solid">Sólido</option>
+                                                    <option value="iridescent">Tornasol</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Muestra Color</label>
+                                                <input type="color" x-model="inlineColorHex" class="w-full h-7 p-0.5 bg-white border border-slate-300 rounded cursor-pointer">
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="saveInlineColor()" class="w-full py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer">
+                                            Guardar y Asignar Color
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Dropdown existente y preview de color -->
+                                <template x-if="!showInlineAddColor">
+                                    <div>
+                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
+                                            <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0 shadow-2xs" :style="'background: ' + curatingItem.detectedColorHex"></span>
+                                            <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
+                                            <span class="text-[10px] px-1.5 py-0.2 rounded font-mono ml-auto font-semibold" :class="curatingItem.colorType === 'iridescent' ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600 border border-slate-200'" x-text="curatingItem.colorType === 'iridescent' ? 'Tornasol' : 'Sólido'"></span>
+                                        </div>
+                                        <select 
+                                            @change="
+                                                const c = apparelColors.find(x => x.name === $event.target.value);
+                                                if (c) {
+                                                    curatingItem.detectedColorName = c.name;
+                                                    curatingItem.detectedColorHex = c.hex;
+                                                    curatingItem.colorType = c.type;
+                                                }
+                                            "
+                                            class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                            <template x-for="col in apparelColors" :key="col.id">
+                                                <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </template>
                             </div>
 
                             <!-- Selector de Tela -->
                             <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela</label>
-                                <select 
-                                    x-model="curatingItem.suggestedFabric" 
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" x-text="fab.name"></option>
-                                    </template>
-                                </select>
+                                <div class="flex items-center justify-between">
+                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela</label>
+                                    <button 
+                                        type="button" 
+                                        @click="toggleInlineAddFabric()" 
+                                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer"
+                                        x-text="showInlineAddFabric ? 'Cancelar' : '+ Dar de alta tela'"
+                                    ></button>
+                                </div>
+
+                                <!-- Formulario inline para dar de alta nueva tela -->
+                                <template x-if="showInlineAddFabric">
+                                    <div class="p-2.5 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
+                                        <div>
+                                            <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Nombre de la Tela</label>
+                                            <input type="text" x-model="inlineFabricName" placeholder="Ej: Lino & Seda Natural" class="w-full px-2 py-1 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Descripción de la Composición</label>
+                                            <input type="text" x-model="inlineFabricDesc" placeholder="Ej: Tejido transpirable de alta suavidad" class="w-full px-2 py-1 text-xs bg-white border border-slate-300 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
+                                        <button type="button" @click="saveInlineFabric()" class="w-full py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer">
+                                            Guardar y Asignar Tela
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Dropdown existente de telas -->
+                                <template x-if="!showInlineAddFabric">
+                                    <div>
+                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
+                                            <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                                            <span class="text-xs font-bold text-slate-900 truncate" x-text="curatingItem.suggestedFabric"></span>
+                                        </div>
+                                        <select 
+                                            x-model="curatingItem.suggestedFabric" 
+                                            class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                            <template x-for="fab in apparelFabrics" :key="fab.id">
+                                                <option :value="fab.name" x-text="fab.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 

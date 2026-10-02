@@ -696,55 +696,130 @@
         </div>
       </div>
 
-      <!-- Filtro por Categoría Oficial Torzo -->
+      <!-- 1. Categorías de Prenda -->
       <div class="filter-group-block">
         <div class="filter-group-title">Categorías de Prenda</div>
         <div class="filter-category-pills">
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="jocks">Jockstraps ($250)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="boxers">Boxers ($280)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tangas">Tangas ($180)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="bikinis">Bikinis ($220)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tanktops">Tank Tops ($320)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="swimwear">Trajes de Baño ($460)</button>
+          @if(!empty($categories) && $categories->isNotEmpty())
+            @foreach($categories as $cat)
+              <button type="button" class="category-filter-pill" data-action="filter-category" data-category="{{ $cat->slug }}">{{ $cat->name }}</button>
+            @endforeach
+          @else
+            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="jocks">Jockstraps</button>
+            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="boxers">Boxers</button>
+            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tangas">Tangas</button>
+            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="bikinis">Bikinis</button>
+            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tanktops">Tank Tops</button>
+            <button type="button" class="category-filter-pill" data-action="filter-category" data-category="swimwear">Trajes de Baño</button>
+          @endif
         </div>
       </div>
 
-      <!-- Guía de Tallas Rápida -->
+      <!-- 2. Curva de Tallas Anatómicas Interactiva -->
       <div class="filter-group-block">
         <div class="filter-group-title">Curva de Tallas Anatómicas</div>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">CH</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">28-30</span>
-          </div>
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">M</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">31-32</span>
-          </div>
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">G</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">33-34</span>
-          </div>
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">XG</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">35-36</span>
-          </div>
+        <div class="filter-category-pills" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="CH" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
+            <strong style="font-size: 0.8rem;">CH</strong>
+            <span style="font-size: 0.65rem; opacity: 0.7;">28-30</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="M" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
+            <strong style="font-size: 0.8rem;">M</strong>
+            <span style="font-size: 0.65rem; opacity: 0.7;">31-32</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="G" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
+            <strong style="font-size: 0.8rem;">G</strong>
+            <span style="font-size: 0.65rem; opacity: 0.7;">33-34</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="XG" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
+            <strong style="font-size: 0.8rem;">XG</strong>
+            <span style="font-size: 0.65rem; opacity: 0.7;">35-36</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="2XL" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
+            <strong style="font-size: 0.8rem;">2XL</strong>
+            <span style="font-size: 0.65rem; opacity: 0.7;">38-40</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-size" data-size="3XL" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 6px 4px;">
+            <strong style="font-size: 0.8rem;">3XL</strong>
+            <span style="font-size: 0.65rem; opacity: 0.7;">42-44</span>
+          </button>
         </div>
       </div>
 
-      @if(!empty($mobilePages) && $mobilePages->isNotEmpty())
-        <div class="filter-group-block">
-          <div class="filter-group-title">Páginas Institucionales</div>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            @foreach($mobilePages as $mp)
-              <a href="{{ url('/pagina/' . $mp->slug) }}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--border-subtle, #e4e4e7); color: var(--text-primary, #09090b); text-decoration: none; font-size: 0.8rem; font-weight: 600;">
-                <span>{{ $mp->title }}</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </a>
-            @endforeach
-          </div>
+      <!-- 3. Telas & Fibras Textiles -->
+      <div class="filter-group-block">
+        <div class="filter-group-title">Telas &amp; Fibras Textiles</div>
+        <div class="filter-category-pills">
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="algodon">Algodón Pima</button>
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="modal">Modal Seamless</button>
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="spandex">Elastano / Spandex</button>
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="malla">Malla / Mesh</button>
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="microfibra">Microfibra Velvet</button>
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="bambu">Bambú Eco Air</button>
+          <button type="button" class="category-filter-pill" data-action="filter-fabric" data-fabric="seda">Seda / Satín Premium</button>
         </div>
-      @endif
+      </div>
+
+      <!-- 4. Colores & Tornasoles Iridiscentes -->
+      <div class="filter-group-block">
+        <div class="filter-group-title">Colores &amp; Tornasoles</div>
+        <div class="filter-category-pills" style="gap: 6px;">
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="negro" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #0f172a; border: 1px solid rgba(255,255,255,0.4); display: inline-block;"></span>
+            <span>Negro</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="blanco" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #f8fafc; border: 1px solid #cbd5e1; display: inline-block;"></span>
+            <span>Blanco</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="gris" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #475569; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
+            <span>Gris</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="azul" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #1e3a8a; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
+            <span>Azul</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="rojo" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #881337; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
+            <span>Rojo</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="verde" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #365314; border: 1px solid rgba(255,255,255,0.2); display: inline-block;"></span>
+            <span>Verde</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="galaxia" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #ec4899, #f59e0b); border: 1px solid rgba(255,255,255,0.3); display: inline-block;"></span>
+            <span>Galaxia Holo</span>
+          </button>
+          <button type="button" class="category-filter-pill" data-action="filter-color" data-color="aurora" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #06b6d4, #3b82f6); border: 1px solid rgba(255,255,255,0.3); display: inline-block;"></span>
+            <span>Aurora Boreal</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. Volúmenes de Perfumería -->
+      <div class="filter-group-block">
+        <div class="filter-group-title">Volúmenes de Perfumería</div>
+        <div class="filter-category-pills">
+          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="30ml">30ml Travel</button>
+          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="50ml">50ml EdP</button>
+          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="100ml">100ml Standard</button>
+          <button type="button" class="category-filter-pill" data-action="filter-volume" data-volume="200ml">200ml Refill</button>
+        </div>
+      </div>
+
+      <!-- 6. Tonos Cosméticos & Shading -->
+      <div class="filter-group-block">
+        <div class="filter-group-title">Tonos Cosméticos</div>
+        <div class="filter-category-pills">
+          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="claro">Tono 01 Claro</button>
+          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="medio">Tono 02 Medio</button>
+          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="bronce">Tono 03 Bronce</button>
+          <button type="button" class="category-filter-pill" data-action="filter-shade" data-shade="profundo">Tono 04 Profundo</button>
+        </div>
+      </div>
     </div>
 
     <div class="sheet-footer-actions">

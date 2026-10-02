@@ -152,6 +152,12 @@
     background: #059669;
     color: #ffffff;
   }
+  .pdp-image-stock-badge.drop_on_demand,
+  .pdp-image-stock-badge.dropship {
+    background: #d97706;
+    color: #ffffff;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+  }
   .pdp-image-stock-badge.on_demand {
     background: #d97706;
     color: #ffffff;
@@ -324,6 +330,10 @@
     border-radius: 50%;
     background: #059669;
     flex-shrink: 0;
+  }
+  .pdp-stock-dot.drop_on_demand,
+  .pdp-stock-dot.dropship {
+    background: #d97706;
   }
   .pdp-stock-dot.on_demand {
     background: #d97706;
@@ -789,7 +799,9 @@
       <div class="pdp-stock-notice-box" id="pdpStockNoticeBox">
         <span class="pdp-stock-dot {{ $product['stockType'] }}" id="pdpStockDot"></span>
         <div id="pdpStockNoticeText">
-          @if(($product['availableStock'] ?? 0) > 0)
+          @if(($product['stockType'] ?? '') === 'drop_on_demand')
+            <strong>Drop Bajo Pedido:</strong> Despacho directo desde proveedor internacional/aliado en 5-8 días hábiles.
+          @elseif(($product['availableStock'] ?? 0) > 0)
             <strong>En existencia física:</strong> {{ $product['availableStock'] }} piezas listas para despacho express inmediato.
           @else
             <strong>Confección bajo pedido:</strong> Se produce y despacha en 3-5 días hábiles.

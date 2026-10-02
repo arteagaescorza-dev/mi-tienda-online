@@ -1427,6 +1427,7 @@
                     <table class="w-full text-xs text-left">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+                                <th class="py-2.5 px-2 text-center w-8" title="Arrastrar para reordenar">Reordenar</th>
                                 <th class="py-2.5 px-3">Clave de Filtro</th>
                                 <th class="py-2.5 px-3">Etiqueta Pública</th>
                                 <th class="py-2.5 px-3 text-center">Tipo de Control</th>
@@ -1434,9 +1435,12 @@
                                 <th class="py-2.5 px-3 text-center">Visible</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody id="catalogFiltersSortableBody" class="divide-y divide-slate-100">
                             @forelse($catalogFilters as $flt)
-                                <tr>
+                                <tr class="catalog-filter-row transition-colors hover:bg-slate-50/80 cursor-default" draggable="true">
+                                    <td class="py-2.5 px-2 text-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-indigo-600 select-none drag-handle" title="Arrastra para reordenar visualmente">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                    </td>
                                     <td class="py-2.5 px-3 font-mono font-bold text-slate-800">
                                         {{ $flt->filter_key }}
                                     </td>
@@ -1447,7 +1451,7 @@
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ strtoupper($flt->display_type) }}</span>
                                     </td>
                                     <td class="py-2.5 px-3 text-center">
-                                        <input type="number" name="filters[{{ $flt->id }}][sort_order]" value="{{ $flt->sort_order }}" class="w-16 px-2 py-1 border border-slate-200 rounded-lg text-center text-xs">
+                                        <input type="number" name="filters[{{ $flt->id }}][sort_order]" value="{{ $flt->sort_order }}" class="filter-sort-input w-16 px-2 py-1 border border-slate-200 rounded-lg text-center text-xs">
                                     </td>
                                     <td class="py-2.5 px-3 text-center">
                                         <input type="checkbox" name="filters[{{ $flt->id }}][is_visible]" value="1" {{ $flt->is_visible ? 'checked' : '' }} class="rounded text-indigo-600">
@@ -1455,7 +1459,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-6 text-center text-slate-400">No hay filtros configurados en la base de datos.</td>
+                                    <td colspan="6" class="py-6 text-center text-slate-400">No hay filtros configurados en la base de datos.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -2531,8 +2535,22 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Filtrar Categoría</label>
-                            <input type="text" name="filter_category" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: playeras, tops, etc.">
+                            <label class="block font-semibold text-slate-700 mb-1">Filtrar Categoría (Hub 4)</label>
+                            <select name="filter_category" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-slate-800">
+                                <option value="">-- Sin Filtro (Todo el Catálogo) --</option>
+                                <optgroup label="Familias Principales (Hub 4)">
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->slug }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                @if(!empty($subcategories) && $subcategories->isNotEmpty())
+                                    <optgroup label="Subcategorías (Hub 4)">
+                                        @foreach($subcategories as $subcat)
+                                            <option value="{{ $subcat->slug }}">{{ $subcat->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                            </select>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Etiquetas (Tags)</label>
@@ -2768,8 +2786,22 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Filtrar Categoría</label>
-                            <input type="text" id="edit_page_filter_category" name="filter_category" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: playeras, pantalones, etc.">
+                            <label class="block font-semibold text-slate-700 mb-1">Filtrar Categoría (Hub 4)</label>
+                            <select id="edit_page_filter_category" name="filter_category" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-slate-800">
+                                <option value="">-- Sin Filtro (Todo el Catálogo) --</option>
+                                <optgroup label="Familias Principales (Hub 4)">
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->slug }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                @if(!empty($subcategories) && $subcategories->isNotEmpty())
+                                    <optgroup label="Subcategorías (Hub 4)">
+                                        @foreach($subcategories as $subcat)
+                                            <option value="{{ $subcat->slug }}">{{ $subcat->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                            </select>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Etiquetas (Tags)</label>
@@ -4044,6 +4076,69 @@
             pagesBody.addEventListener('drop', function(e) {
                 e.preventDefault();
                 window.syncPagesOrder();
+            });
+        }
+
+        // Inicializar SortableJS para Drag & Drop de Filtros de Catálogo (TASK-H2-18)
+        const filtersBody = document.getElementById('catalogFiltersSortableBody');
+        function reindexFilterInputs() {
+            if (!filtersBody) return;
+            const rows = filtersBody.querySelectorAll('tr.catalog-filter-row');
+            rows.forEach((row, idx) => {
+                const sortInput = row.querySelector('.filter-sort-input');
+                if (sortInput) {
+                    sortInput.value = idx + 1;
+                }
+            });
+        }
+        if (filtersBody) {
+            if (typeof Sortable !== 'undefined') {
+                new Sortable(filtersBody, {
+                    handle: '.drag-handle',
+                    animation: 200,
+                    ghostClass: 'bg-indigo-50/80',
+                    chosenClass: 'bg-indigo-100/60',
+                    dragClass: 'shadow-2xl',
+                    onEnd: function () {
+                        reindexFilterInputs();
+                    }
+                });
+            }
+
+            // Fallback nativo HTML5 Drag & Drop
+            let draggedFilterRow = null;
+            filtersBody.addEventListener('dragstart', function(e) {
+                draggedFilterRow = e.target.closest('tr.catalog-filter-row');
+                if (draggedFilterRow) {
+                    if (e.dataTransfer) {
+                        e.dataTransfer.effectAllowed = 'move';
+                    }
+                    draggedFilterRow.classList.add('opacity-50');
+                }
+            });
+            filtersBody.addEventListener('dragend', function() {
+                if (draggedFilterRow) {
+                    draggedFilterRow.classList.remove('opacity-50');
+                    draggedFilterRow = null;
+                }
+            });
+            filtersBody.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                const targetRow = e.target.closest('tr.catalog-filter-row');
+                if (targetRow && targetRow !== draggedFilterRow && draggedFilterRow) {
+                    const bounding = targetRow.getBoundingClientRect();
+                    const offset = e.clientY - bounding.top;
+                    if (offset > bounding.height / 2) {
+                        targetRow.parentNode.insertBefore(draggedFilterRow, targetRow.nextSibling);
+                    } else {
+                        targetRow.parentNode.insertBefore(draggedFilterRow, targetRow);
+                    }
+                }
+            });
+            filtersBody.addEventListener('drop', function(e) {
+                e.preventDefault();
+                reindexFilterInputs();
             });
         }
 

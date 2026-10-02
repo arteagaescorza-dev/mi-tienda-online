@@ -669,6 +669,13 @@ body.store-body {
   background: var(--accent-emerald-soft);
 }
 
+.product-stock-badge.drop_on_demand,
+.product-stock-badge.dropship {
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(254, 243, 199, 0.96);
+}
+
 .product-body {
   padding: 12px;
   display: flex;
@@ -1060,6 +1067,23 @@ body.store-body {
   background: #050505;
   color: #ffffff;
   border-color: #050505;
+}
+
+html.dark .category-filter-pill {
+  background: rgba(24, 24, 27, 0.85);
+  border-color: rgba(63, 63, 70, 0.9);
+  color: #f4f4f5;
+}
+
+html.dark .category-filter-pill:hover {
+  background: rgba(39, 39, 42, 0.95);
+  border-color: #71717a;
+}
+
+html.dark .category-filter-pill.active {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
 }
 
 .sheet-footer-actions {
@@ -4116,6 +4140,13 @@ html.dark .product-stock-badge.ready {
   background: rgba(6, 78, 59, 0.88) !important;
   border-color: #059669 !important;
   color: #a7f3d0 !important;
+}
+
+html.dark .product-stock-badge.drop_on_demand,
+html.dark .product-stock-badge.dropship {
+  background: rgba(120, 53, 15, 0.90) !important;
+  border-color: #d97706 !important;
+  color: #fef3c7 !important;
 }
 
 /* Botones CTA Principales y Secundarios */

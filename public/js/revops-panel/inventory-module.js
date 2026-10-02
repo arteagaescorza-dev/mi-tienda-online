@@ -448,6 +448,15 @@ function hybridInventoryModule() {
         // TASK-INV-08: Modal de Curaduría de Scraping
         scrapingCurationModalOpen: false,
         curatingItem: null,
+        showInlineAddColor: false,
+        inlineColorName: '',
+        inlineColorHex: '#6366f1',
+        inlineColorType: 'solid',
+        showInlineAddFabric: false,
+        inlineFabricName: '',
+        inlineFabricDesc: '',
+        draggedCategoryIndex: null,
+
 
         // Drawer Properties Extendidas
         drawerFabricType: 'Modal Seamless',
@@ -7925,7 +7934,102 @@ function hybridInventoryModule() {
 
         openScrapingCuration(pendingItem) {
             this.curatingItem = JSON.parse(JSON.stringify(pendingItem));
+            this.showInlineAddColor = false;
+            this.showInlineAddFabric = false;
+            this.inlineColorName = '';
+            this.inlineFabricName = '';
             this.scrapingCurationModalOpen = true;
+        },
+
+        toggleInlineAddColor() {
+            this.showInlineAddColor = !this.showInlineAddColor;
+            if (this.showInlineAddColor) {
+                this.inlineColorName = '';
+                this.inlineColorHex = '#6366f1';
+                this.inlineColorType = 'solid';
+            }
+        },
+
+        saveInlineColor() {
+            if (!this.inlineColorName || !this.inlineColorName.trim()) {
+                this.showToast('Ingresa el nombre del nuevo color.', 'warning');
+                return;
+            }
+            const name = this.inlineColorName.trim();
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const hexVal = this.inlineColorHex;
+            const existing = this.apparelColors.find(c => c.name.toLowerCase() === name.toLowerCase());
+            if (!existing) {
+                this.apparelColors.push({
+                    id: id,
+                    name: name,
+                    hex: hexVal,
+                    type: this.inlineColorType,
+                    is_active: true
+                });
+            }
+            if (this.curatingItem) {
+                this.curatingItem.detectedColorName = name;
+                this.curatingItem.detectedColorHex = hexVal;
+                this.curatingItem.colorType = this.inlineColorType;
+            }
+            this.showInlineAddColor = false;
+            this.showToast(`Color "${name}" registrado y asignado a la prenda.`, 'success');
+        },
+
+        toggleInlineAddFabric() {
+            this.showInlineAddFabric = !this.showInlineAddFabric;
+            if (this.showInlineAddFabric) {
+                this.inlineFabricName = '';
+                this.inlineFabricDesc = '';
+            }
+        },
+
+        saveInlineFabric() {
+            if (!this.inlineFabricName || !this.inlineFabricName.trim()) {
+                this.showToast('Ingresa el nombre del tipo de tela.', 'warning');
+                return;
+            }
+            const name = this.inlineFabricName.trim();
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const existing = this.apparelFabrics.find(f => f.name.toLowerCase() === name.toLowerCase());
+            if (!existing) {
+                this.apparelFabrics.push({
+                    id: id,
+                    name: name,
+                    description: (this.inlineFabricDesc && this.inlineFabricDesc.trim()) || 'Fibra textil para indumentaria',
+                    is_active: true
+                });
+            }
+            if (this.curatingItem) {
+                this.curatingItem.suggestedFabric = name;
+            }
+            this.showInlineAddFabric = false;
+            this.showToast(`Tipo de tela "${name}" registrado y asignado a la prenda.`, 'success');
+        },
+
+        handleCategoryDragStart(event, index) {
+            this.draggedCategoryIndex = index;
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', index);
+            }
+        },
+
+        handleCategoryDragOver(event) {
+            event.preventDefault();
+            if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = 'move';
+            }
+        },
+
+        handleCategoryDrop(event, targetIndex) {
+            event.preventDefault();
+            if (this.draggedCategoryIndex === null || this.draggedCategoryIndex === targetIndex) return;
+            const moved = this.categoriesTree.splice(this.draggedCategoryIndex, 1)[0];
+            this.categoriesTree.splice(targetIndex, 0, moved);
+            this.draggedCategoryIndex = null;
+            this.showToast('Jerarquía de categorías reorganizada correctamente con Drag & Drop.', 'success');
         },
 
         approveScrapedItem() {
@@ -7939,6 +8043,8 @@ function hybridInventoryModule() {
                 name: item.name,
                 category: item.suggestedCategory || 'Boxers',
                 type: 'dropship',
+                is_scraped: true,
+                stockLabel: 'Drop Bajo Pedido',
                 brand: item.brand || 'Torzo B2B',
                 fabricType: item.suggestedFabric || 'Malla / Mesh Transpirable',
                 colorName: item.detectedColorName || 'Negro Profundo',
@@ -7971,8 +8077,9 @@ function hybridInventoryModule() {
             this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== item.id);
             this.scrapingCurationModalOpen = false;
             this.curatingItem = null;
-            this.showToast(`Prenda ${finalSku} curada, validada y publicada en el catálogo.`, 'success');
+            this.showToast(`Prenda ${finalSku} curada con badge "Drop Bajo Pedido" y publicada en el inventario.`, 'success');
         },
+
 
         discardScrapedItem(id) {
             this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== id);

@@ -318,6 +318,33 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   - Inputs, textareas y selectores deben poseer fondos contrastados (`--bg-tertiary` o `#0f172a` en dark; `#ffffff` en light), bordes claramente definidos, placeholders legibles (`#94a3b8` en dark; `#52525b` en light) y anillos de foco visibles (`outline` / `box-shadow` de 2px en `--border-focus`).
   - Badges de estado, pills de selección, botones primarios/secundarios y encabezados de tabla deben cumplir con combinaciones de alto contraste cromático y legibilidad instantánea.
 
+### Regla 6.33: Ciclo de Vida y Curaduría de Productos Scrapeados (VS Code, Ingesta en Hub 3 y Badge "Drop Bajo Pedido")
+* **Depuración e Indexación en Entorno de Desarrollo (VS Code):** Cada vez que se da de alta un nuevo catálogo scrapeado o dataset de proveedor externo, la limpieza, normalización taxonómica, saneamiento de codificación UTF-8 / Mojibake y depuración de datos sucede dentro del entorno de desarrollo de Visual Studio Code mediante scripts técnicos especializados antes de cualquier inyección.
+* **Ingesta Oficial en Bandeja de Curaduría Previa (Hub 3 / Hub 4):** Una vez validado técnicamente el dataset y recibida la luz verde, la ingesta entra a la *Bandeja de Curaduría Previa de Scraping* (Staging Area). En esta bandeja el equipo operativo revisa, ajusta márgenes comerciales, asocia variantes y da de alta oficial la prenda dentro del inventario activo del sistema.
+* **Badge Obligatorio "Drop Bajo Pedido":** Todos los productos originados de scraping o esquemas de dropshipping mayorista portan obligatoriamente el distintivo **"Drop Bajo Pedido"** tanto en el panel de inventario como en el storefront público (tarjetas del catálogo, grids modulares, vistas de inicio y fichas de producto PDP), distinguiéndolos nítidamente del "Stock Físico" de confección local o stock propio.
+* **Alta Rápida de Colores y Telas en Modal de Curaduría:** Durante la curaduría en la bandeja de scraping:
+  - El selector de **Color / Tornasol** dispone de un botón interactivo `+ Dar de alta color` para registrar un nuevo color o tornasol en caliente (con nombre, tipo sólido/tornasol y selector de color) y asignarlo de inmediato a la prenda; de lo contrario, se selecciona del catálogo de colores preexistentes.
+  - El selector de **Tipo de Tela** dispone de un botón interactivo `+ Dar de alta tela` para registrar un nuevo textil/composición en caliente y asignarlo de inmediato a la prenda; de lo contrario, se selecciona del dropdown existente de fibras de la plataforma.
+
+### Regla 6.34: Creación Jerárquica de Filtros desde Hub 4 (Ajustes > Categorías & Familia)
+* **Creación Centralizada de Filtros:** Los filtros taxonómicos y familias de producto se crean exclusivamente desde los ajustes de Hub 4, pestaña **Categorías & Familias** (`activeSettingsTab === 'categories'`).
+* **Estructura Jerárquica Taxonómica:** Cada categoría se define asignando su nombre, nivel jerárquico (categoría raíz / familia principal, o subcategoría child asignada a un padre) y su descripción taxonómica para búsqueda y catalogación.
+* **Operatividad Drag & Drop y Gestión Completa:** El árbol de categorías opera con reordenamiento visual intuitivo mediante **Drag & Drop** y dispone de acciones completas para editar, activar/desactivar en e-commerce, archivar/restaurar y eliminar registros.
+* **Sincronización con Storefront y Hub 2:**
+  - Estas familias alimentan dinámicamente los filtros del catálogo de la tienda PWA.
+  - La pestaña *Filtros de Catálogo* de Hub 2 se utiliza para organizar visualmente los filtros mediante **Drag & Drop** en tiempo real.
+  - Asimismo, alimenta el selector de categorías al crear o editar tarjetas en *Páginas de Explorar* de Hub 2, permitiendo seleccionar con precisión qué filtro se le aplicará al botón de la sección Explorar. Al hacer clic en dicho botón dentro del storefront (`/explorar`), el catálogo se despliega automáticamente con ese filtro preaplicado.
+
+### Regla 6.35: Filtros Facetados Extendidos en Storefront
+* **Facetas Múltiples Obligatorias:** En el storefront (drawer de filtros `#filterDrawer` y motor de consulta en caliente), son formal y funcionalmente considerados filtros las siguientes facetas especializadas:
+  1. **Categorías & Familias:** Píldoras interactivas alimentadas dinámicamente desde Hub 4.
+  2. **Curva de Tallas Anatómicas:** Botones interactivos seleccionables por talla (CH, M, G, XG, 2XL, 3XL).
+  3. **Telas & Fibras Textiles:** Filtro por composición textil (Algodón Pima, Modal Seamless, Spandex, Malla/Mesh, Microfibra Velvet, Bambú Eco, Seda/Satín).
+  4. **Colores & Tornasoles Iridiscentes:** Muestras de color interactivas (Sólidos y Tornasoles como Galaxia Holo y Aurora Boreal).
+  5. **Volúmenes de Perfumería:** Filtros por presentación (30ml Travel, 50ml EdP, 100ml Regular, 200ml Refill).
+  6. **Tonos Cosméticos & Shading:** Filtros de pigmentación y maquillaje (Tono 01 Claro, Tono 02 Medio, Tono 03 Bronce, Tono 04 Profundo).
+* Todas las facetas interactúan sinérgicamente con el buscador en tiempo real, el selector de universos y el botón de restablecimiento total ("Limpiar filtros").
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)

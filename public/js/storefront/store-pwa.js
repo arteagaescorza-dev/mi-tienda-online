@@ -169,6 +169,10 @@
     activeTab: 'home',       // 'home', 'explore', 'catalog'
     activeCategory: 'all',
     activeSize: 'all',
+    activeFabric: 'all',
+    activeColor: 'all',
+    activeVolume: 'all',
+    activeShade: 'all',
     searchQuery: '',         // Búsqueda en tiempo real (Regla 5)
     cart: [],
     savedForLater: [],       // Array de prendas guardadas para después
@@ -363,6 +367,44 @@
           return false;
         }
       }
+      // Filtro de Telas & Fibras (Regla Storefront)
+      if (storeState.activeFabric && storeState.activeFabric !== 'all') {
+        const fabTarget = storeState.activeFabric.toLowerCase();
+        const pFab = (prod.fabric_type || '').toLowerCase();
+        const pDesc = (prod.description || '').toLowerCase();
+        const pName = (prod.name || '').toLowerCase();
+        if (!pFab.includes(fabTarget) && !pDesc.includes(fabTarget) && !pName.includes(fabTarget)) {
+          return false;
+        }
+      }
+      // Filtro de Colores & Tornasoles (Regla Storefront)
+      if (storeState.activeColor && storeState.activeColor !== 'all') {
+        const colTarget = storeState.activeColor.toLowerCase();
+        const hasVariantColor = (prod.variants || []).some(v => (v.color || '').toLowerCase().includes(colTarget));
+        const pName = (prod.name || '').toLowerCase();
+        const pDesc = (prod.description || '').toLowerCase();
+        if (!hasVariantColor && !pName.includes(colTarget) && !pDesc.includes(colTarget)) {
+          return false;
+        }
+      }
+      // Filtro de Volúmenes de Perfumería (Regla Storefront)
+      if (storeState.activeVolume && storeState.activeVolume !== 'all') {
+        const volTarget = storeState.activeVolume.toLowerCase();
+        const pName = (prod.name || '').toLowerCase();
+        const pDesc = (prod.description || '').toLowerCase();
+        if (!pName.includes(volTarget) && !pDesc.includes(volTarget)) {
+          return false;
+        }
+      }
+      // Filtro de Tonos Cosméticos & Shading (Regla Storefront)
+      if (storeState.activeShade && storeState.activeShade !== 'all') {
+        const shTarget = storeState.activeShade.toLowerCase();
+        const pName = (prod.name || '').toLowerCase();
+        const pDesc = (prod.description || '').toLowerCase();
+        if (!pName.includes(shTarget) && !pDesc.includes(shTarget)) {
+          return false;
+        }
+      }
       return true;
     });
   }
@@ -398,7 +440,7 @@
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             </button>
 
-            <span class="product-stock-badge ${prod.stockType === 'ready' ? 'ready' : ''}">
+            <span class="product-stock-badge ${prod.stockType === 'ready' ? 'ready' : (prod.stockType === 'drop_on_demand' ? 'drop_on_demand' : '')}">
               ${prod.stockLabel}
             </span>
 
@@ -4085,6 +4127,9 @@
           if (variant && variant.available > 0) {
             stockBadge.className = 'product-stock-badge ready';
             stockBadge.textContent = 'Stock Físico';
+          } else if (modalProd.is_scraped || modalProd.stockType === 'drop_on_demand') {
+            stockBadge.className = 'product-stock-badge drop_on_demand';
+            stockBadge.textContent = 'Drop Bajo Pedido';
           } else {
             stockBadge.className = 'product-stock-badge';
             stockBadge.textContent = 'Bajo Pedido';
@@ -4184,6 +4229,66 @@
       return;
     }
 
+    // 13.1 Filtro de Talla Anatómica en Drawer
+    const sizePill = e.target.closest('[data-action="filter-size"]');
+    if (sizePill) {
+      e.preventDefault();
+      const sz = sizePill.dataset.size;
+      storeState.activeSize = (storeState.activeSize === sz) ? 'all' : sz;
+      document.querySelectorAll('[data-action="filter-size"]').forEach(p => {
+        p.classList.toggle('active', p.dataset.size === storeState.activeSize);
+      });
+      return;
+    }
+
+    // 13.2 Filtro de Telas & Fibras en Drawer
+    const fabricPill = e.target.closest('[data-action="filter-fabric"]');
+    if (fabricPill) {
+      e.preventDefault();
+      const fab = fabricPill.dataset.fabric;
+      storeState.activeFabric = (storeState.activeFabric === fab) ? 'all' : fab;
+      document.querySelectorAll('[data-action="filter-fabric"]').forEach(p => {
+        p.classList.toggle('active', p.dataset.fabric === storeState.activeFabric);
+      });
+      return;
+    }
+
+    // 13.3 Filtro de Colores & Tornasoles en Drawer
+    const colorPill = e.target.closest('[data-action="filter-color"]');
+    if (colorPill) {
+      e.preventDefault();
+      const col = colorPill.dataset.color;
+      storeState.activeColor = (storeState.activeColor === col) ? 'all' : col;
+      document.querySelectorAll('[data-action="filter-color"]').forEach(p => {
+        p.classList.toggle('active', p.dataset.color === storeState.activeColor);
+      });
+      return;
+    }
+
+    // 13.4 Filtro de Volúmenes de Perfumería en Drawer
+    const volPill = e.target.closest('[data-action="filter-volume"]');
+    if (volPill) {
+      e.preventDefault();
+      const vol = volPill.dataset.volume;
+      storeState.activeVolume = (storeState.activeVolume === vol) ? 'all' : vol;
+      document.querySelectorAll('[data-action="filter-volume"]').forEach(p => {
+        p.classList.toggle('active', p.dataset.volume === storeState.activeVolume);
+      });
+      return;
+    }
+
+    // 13.5 Filtro de Tonos Cosméticos en Drawer
+    const shadePill = e.target.closest('[data-action="filter-shade"]');
+    if (shadePill) {
+      e.preventDefault();
+      const sh = shadePill.dataset.shade;
+      storeState.activeShade = (storeState.activeShade === sh) ? 'all' : sh;
+      document.querySelectorAll('[data-action="filter-shade"]').forEach(p => {
+        p.classList.toggle('active', p.dataset.shade === storeState.activeShade);
+      });
+      return;
+    }
+
     // 14. Aplicar Filtros del Drawer
     const applyBtn = e.target.closest('[data-action="apply-filters"]');
     if (applyBtn) {
@@ -4200,7 +4305,20 @@
     if (clearBtn) {
       e.preventDefault();
       storeState.activeCategory = 'all';
+      storeState.activeSize = 'all';
+      storeState.activeFabric = 'all';
+      storeState.activeColor = 'all';
+      storeState.activeVolume = 'all';
+      storeState.activeShade = 'all';
       document.querySelectorAll('[data-action="filter-category"]').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('[data-action="filter-size"]').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('[data-action="filter-fabric"]').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('[data-action="filter-color"]').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('[data-action="filter-volume"]').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('[data-action="filter-shade"]').forEach(p => p.classList.remove('active'));
+      renderProductsGrid('homeProductsGrid');
+      renderProductsGrid('catalogProductsGrid');
+      showToastNotification('Filtros restablecidos');
       return;
     }
 
