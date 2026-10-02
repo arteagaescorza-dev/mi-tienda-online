@@ -4057,6 +4057,10 @@ html.dark .product-card:hover {
   border-color: var(--border-medium) !important;
 }
 
+html.dark .product-image-wrap {
+  background: var(--bg-tertiary) !important;
+}
+
 html.dark .product-body {
   background: var(--bg-surface) !important;
 }
