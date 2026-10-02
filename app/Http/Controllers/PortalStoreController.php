@@ -277,6 +277,15 @@ class PortalStoreController extends Controller
         $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
         $tracking = CmsTrackingSetting::current();
         $catalogFilters = CmsCatalogFilter::orderBy('sort_order')->get();
+        $suppliers = \App\Models\Supplier::where('status', 'active')->select('id', 'name')->get();
+        if ($suppliers->isEmpty()) {
+            $suppliers = collect([
+                (object)['id' => 1, 'name' => 'Torzo B2B'],
+                (object)['id' => 2, 'name' => 'ModaIntima Textil MX'],
+                (object)['id' => 3, 'name' => 'Seamless Tech Apparel'],
+                (object)['id' => 4, 'name' => 'Silk & Cotton Iberia SL'],
+            ]);
+        }
 
         return view('portal.store', [
             'storefronts' => $storefronts,
@@ -287,6 +296,7 @@ class PortalStoreController extends Controller
             'sections' => $sections,
             'categories' => $categories,
             'subcategories' => $subcategories,
+            'suppliers' => $suppliers,
             'brands' => $brands,
             'textileFamilies' => $textileFamilies,
             'garmentTypes' => $garmentTypes,
@@ -817,6 +827,7 @@ class PortalStoreController extends Controller
             'filter_universe' => 'nullable|string|max:40',
             'filter_category' => 'nullable|string|max:80',
             'filter_tags' => 'nullable|string|max:255',
+            'filter_supplier' => 'nullable|string|max:100',
             'content_html' => 'required|string',
             'show_in_navbar' => 'nullable|boolean',
             'show_in_mobile' => 'nullable|boolean',
@@ -908,6 +919,7 @@ class PortalStoreController extends Controller
             'filter_universe' => 'nullable|string|max:40',
             'filter_category' => 'nullable|string|max:80',
             'filter_tags' => 'nullable|string|max:255',
+            'filter_supplier' => 'nullable|string|max:100',
             'content_html' => 'required|string',
             'show_in_navbar' => 'nullable|boolean',
             'show_in_mobile' => 'nullable|boolean',

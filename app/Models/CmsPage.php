@@ -30,6 +30,7 @@ class CmsPage extends Model
         'filter_universe',
         'filter_category',
         'filter_tags',
+        'filter_supplier',
         'navbar_order',
         'show_in_footer',
         'footer_order',
