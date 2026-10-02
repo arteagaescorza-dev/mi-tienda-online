@@ -113,8 +113,8 @@ class BrandCrudAndFiltersRulesTest extends TestCase
     public function test_supplier_and_brand_tree_relationship(): void
     {
         $supplier = Supplier::create([
-            'name' => 'Fábrica de Corsetería de León',
-            'trade_name' => 'Corsetería León',
+            'name' => 'Corsetería León',
+            'legal_name' => 'Fábrica de Corsetería de León SA de CV',
             'vendor_code' => 'SUP-CLN-02',
             'origin' => 'manual',
             'status' => 'connected',
@@ -178,6 +178,10 @@ class BrandCrudAndFiltersRulesTest extends TestCase
         $hub2Res->assertStatus(200);
         $hub2Res->assertSee('query_rules[brand]', false);
         $hub2Res->assertSee('query_rules[supplier]', false);
+
+        // Validar ruta específica reportada por usuario con tab=pages&universe=marte
+        $hub2PagesRes = $this->actingAs($admin)->get('/admin/tienda-cms?tab=pages&universe=marte');
+        $hub2PagesRes->assertStatus(200);
 
         // 2. Storefront Catálogo con árbol de marcas y proveedores
         $storefrontRes = $this->get(route('store.products'));

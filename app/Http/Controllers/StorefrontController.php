@@ -1306,7 +1306,7 @@ class StorefrontController extends Controller
                 ];
             })->values();
 
-        $portalBrands = \App\Models\Brand::with('supplier:id,name,trade_name,vendor_code,origin,status')
+        $portalBrands = \App\Models\Brand::with('supplier:id,name,legal_name,vendor_code,origin,status')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get()

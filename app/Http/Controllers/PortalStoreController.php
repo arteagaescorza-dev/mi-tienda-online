@@ -283,7 +283,7 @@ class PortalStoreController extends Controller
         $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
         $tracking = CmsTrackingSetting::current();
         $catalogFilters = CmsCatalogFilter::orderBy('sort_order')->get();
-        $suppliers = \App\Models\Supplier::where('status', '!=', 'archived')->select('id', 'name', 'trade_name')->get();
+        $suppliers = \App\Models\Supplier::where('status', '!=', 'archived')->select('id', 'name', 'legal_name')->get();
         if ($suppliers->isEmpty()) {
             $suppliers = collect([
                 (object)['id' => 1, 'name' => 'Torzo B2B'],

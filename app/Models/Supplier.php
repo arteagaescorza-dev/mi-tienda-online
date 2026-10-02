@@ -47,6 +47,14 @@ class Supplier extends Model
     ];
 
     /**
+     * Accesor para trade_name que mapea al nombre comercial (columna name).
+     */
+    public function getTradeNameAttribute(): string
+    {
+        return $this->attributes['name'] ?? '';
+    }
+
+    /**
      * Obtiene el listado de marcas comerciales que se desprenden del proveedor en formato de arbol.
      * Si no estan explicitamente definidas en la columna brands, se deducen dinamicamente
      * de los productos vinculados o del nombre comercial.

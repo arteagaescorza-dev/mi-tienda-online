@@ -21,7 +21,7 @@ class BrandApiController extends Controller
         $supplierId = $request->query('supplier_id');
         $search = $request->query('search');
 
-        $query = Brand::with(['supplier:id,name,trade_name,vendor_code,origin,status']);
+        $query = Brand::with(['supplier:id,name,legal_name,vendor_code,origin,status']);
 
         if ($status === 'active') {
             $query->where('is_active', true)->where('is_archived', false);
@@ -45,7 +45,7 @@ class BrandApiController extends Controller
                     ->orWhere('description', 'like', "%{$term}%")
                     ->orWhereHas('supplier', function ($sq) use ($term) {
                         $sq->where('name', 'like', "%{$term}%")
-                            ->orWhere('trade_name', 'like', "%{$term}%");
+                            ->orWhere('legal_name', 'like', "%{$term}%");
                     });
             });
         }
@@ -55,7 +55,7 @@ class BrandApiController extends Controller
         // Si la tabla de marcas está vacía, auto-poblar desde productos y proveedores existentes para garantizar continuidad
         if ($brands->isEmpty() && empty($search) && empty($supplierId)) {
             $this->seedInitialBrands();
-            $brands = Brand::with(['supplier:id,name,trade_name,vendor_code,origin,status'])
+            $brands = Brand::with(['supplier:id,name,legal_name,vendor_code,origin,status'])
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get();

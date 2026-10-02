@@ -12,14 +12,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('suppliers', function (Blueprint $table) {
-            $table->string('tax_id', 50)->nullable()->after('vendor_code'); // RFC / Tax ID / NIF
-            $table->string('legal_name', 255)->nullable()->after('name'); // Razon Social Fiscal
-            $table->string('fiscal_regime', 150)->nullable()->after('tax_id'); // Regimen Fiscal
-            $table->text('fiscal_address')->nullable()->after('fiscal_regime'); // Domicilio Fiscal Completo
-            $table->string('fiscal_zip', 20)->nullable()->after('fiscal_address'); // Codigo Postal Fiscal
-            $table->string('invoice_email', 150)->nullable()->after('contact_email'); // Email para Facturacion CFDI
-            $table->string('origin', 30)->default('manual')->after('type'); // 'manual' o 'scraping'
-            $table->json('brands')->nullable()->after('credentials'); // Marcas comerciales que se desprenden del proveedor
+            if (!Schema::hasColumn('suppliers', 'legal_name')) {
+                $table->string('legal_name')->nullable()->after('name');
+            }
+            if (!Schema::hasColumn('suppliers', 'tax_id')) {
+                $table->string('tax_id', 50)->nullable()->after('vendor_code');
+            }
+            if (!Schema::hasColumn('suppliers', 'fiscal_regime')) {
+                $table->string('fiscal_regime', 150)->nullable()->after('tax_id');
+            }
+            if (!Schema::hasColumn('suppliers', 'fiscal_address')) {
+                $table->text('fiscal_address')->nullable()->after('fiscal_regime');
+            }
+            if (!Schema::hasColumn('suppliers', 'fiscal_zip')) {
+                $table->string('fiscal_zip', 20)->nullable()->after('fiscal_address');
+            }
+            if (!Schema::hasColumn('suppliers', 'invoice_email')) {
+                $table->string('invoice_email', 150)->nullable()->after('contact_email');
+            }
+            if (!Schema::hasColumn('suppliers', 'origin')) {
+                $table->string('origin', 30)->default('manual')->after('type');
+            }
+            if (!Schema::hasColumn('suppliers', 'brands')) {
+                $table->json('brands')->nullable()->after('credentials');
+            }
         });
     }
 
@@ -29,16 +45,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('suppliers', function (Blueprint $table) {
-            $table->dropColumn([
-                'tax_id',
-                'legal_name',
-                'fiscal_regime',
-                'fiscal_address',
-                'fiscal_zip',
-                'invoice_email',
-                'origin',
-                'brands',
-            ]);
+            $cols = [];
+            foreach (['legal_name', 'tax_id', 'fiscal_regime', 'fiscal_address', 'fiscal_zip', 'invoice_email', 'origin', 'brands'] as $col) {
+                if (Schema::hasColumn('suppliers', $col)) {
+                    $cols[] = $col;
+                }
+            }
+            if (!empty($cols)) {
+                $table->dropColumn($cols);
+            }
         });
     }
 };
