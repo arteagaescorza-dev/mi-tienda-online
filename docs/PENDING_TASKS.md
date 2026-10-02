@@ -2147,5 +2147,41 @@ graph TD
   - **Suite específica `ScrapedLifecycleAndArchivedProductsTest.php`: 6/6 tests pasando (100% verde, 24 aserciones).**
   - **Pruebas de no-regresión: `ScrapedPendingItemsCurationTest.php` (3/3 tests), `ProductApiTest.php` y `InventoryMovementTest.php` (9/9 tests). Total 100% verde.**
 
+---
+
+### `TASK-AI-01`: Integración Nativa con Google Gemini AI (Copiloto de Producto, Chat Estratégico Ejecutivo y Telemetría de Salud)
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Transversal (Hub 1 Dashboard $\leftrightarrow$ Hub 4 Inventario $\leftrightarrow$ Google Generative AI)**
+* **Prioridad:** **Alta (Inteligencia Artificial y Copilotos)**
+* **Solicitud del Usuario:**
+  > "ok, conectemos la ia y sus funcionalidades. Guiame para conectarlo con gemini esta es la api key ... nombre Gemini API Key nombre del proyecto projects/506510812817 numero del proyecto 506510812817"
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Variables de Entorno y Configuración:*
+     - `.env`: `GEMINI_API_KEY`, `GEMINI_MODEL="gemini-flash-lite-latest"`, `GEMINI_FALLBACK_MODEL="gemini-flash-latest"`, `GEMINI_PROJECT_NAME="projects/506510812817"`, `GEMINI_PROJECT_NUMBER="506510812817"`, `GEMINI_BASE_URL` y `GEMINI_TIMEOUT=25`.
+     - `config/services.php`: Clave `'gemini'` con resolución de entorno y timeout.
+  2. *Servicio Centralizado de IA (`App\Services\Ai\GeminiService`):*
+     - Métodos de alto rendimiento: `generateText`, `generateJson` (con `responseMimeType: "application/json"`) y `chat` multi-turno.
+     - Mecanismo de reintentos (`retry(2, 500)`) con conmutación transparente a modelo fallback en caso de 503/429.
+     - Método de diagnóstico en vivo: `testConnection()`.
+  3. *Copiloto IA de Producto (`ProductAiCopilotService`):*
+     - Genera dinámicamente descripciones comerciales en dos párrafos enfocadas en ergonomía, soporte anatómico, durabilidad y transpirabilidad.
+     - Genera bullets técnicos y tags SEO en JSON parseable.
+     - Conserva fallback determinístico local si la red estuviese interrumpida.
+  4. *Chat Estratégico del Dashboard Ejecutivo (`DashboardApiController@copilotChat`):*
+     - Integra memoria conversacional de los últimos mensajes (`AiCopilotChatMessage`).
+     - System prompt ejecutivo como Director de RevOps / Asesor de Negocios para *Mi Tienda Online*.
+     - Genera chips de acción interactiva contextuales (gráfica cascada EBITDA, mesa de empaque DHL, ROP, carritos abandonados).
+  5. *Monitor de Salud y Estado de IA:*
+     - Endpoint `GET /api/v1/dashboard/copilot/status` exponiendo latencia en milisegundos, estado de conexión y módulos activos.
+  6. *Frontend:*
+     - `public/js/revops-panel/app.js`: `sendCopilotChatMessage` conectado asíncronamente con token CSRF contra el endpoint del chat ejecutivo.
+     - `public/js/revops-panel/inventory-module.js`: `generateAiDescription()` conectado al workstation para auto-redacción comercial en 1 clic.
+* **Documentación & Tríptico:**
+  - Registrada la **Regla 6.62** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `GeminiAiIntegrationTest.php`: 6/6 tests pasando contra Google Gemini API real (100% verde, 30 aserciones).**
+  - **Pruebas de no-regresión: `ScrapedLifecycleAndArchivedProductsTest.php` y `ScrapedPendingItemsCurationTest.php` (9/9 tests pasando, 39 aserciones).**
+
+
 
 

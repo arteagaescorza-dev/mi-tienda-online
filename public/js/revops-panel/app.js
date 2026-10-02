@@ -1960,59 +1960,91 @@ function sendCopilotChatMessage(query) {
     text: query.trim()
   });
 
+  // Indicador de procesamiento IA
+  aiCopilotState.chatHistory[roleKey].push({
+    sender: 'assistant',
+    text: 'Analizando con Copiloto IA...',
+    isTyping: true
+  });
   renderCopilotChatMessages();
 
-  // Respuesta determinista contextual por rol (cero llamadas externas bloqueantes)
-  setTimeout(() => {
-    let reply = '';
-    const qLower = query.toLowerCase();
-
-    if (roleKey === 'warehouse') {
-      if (qLower.includes('corte') || qLower.includes('dhl') || qLower.includes('hora')) {
-        reply = 'El corte de DHL Express es a las 14:00 hrs. La orden #MIX-1048 requiere empaque inmediato para asegurar la recoleccion.';
-      } else if (qLower.includes('rop') || qLower.includes('quiebre') || qLower.includes('stock')) {
-        reply = 'El anaquel A-02 tiene 4 piezas restantes de Boxer Modal Negro Talla M. Se requiere traslado de 20 unidades desde el Rack B-04.';
-      } else if (qLower.includes('manifiesto') || qLower.includes('estafeta')) {
-        reply = 'El manifiesto de Estafeta cuenta con 12 paquetes verificados listos en rampa para firma del operador recolector.';
-      } else {
-        reply = 'Consulta procesada. Las operaciones de bodega marchan conforme a la ruta de pasillos sin discrepancias criticas.';
-      }
-    } else if (roleKey === 'sales') {
-      if (qLower.includes('carrito') || qLower.includes('abandonado')) {
-        reply = 'Hay 12 carritos abandonados hoy ($8,450 MXN). 4 de ellos superan los $1,000 MXN y tienen disponible la plantilla con cupon RETORNO10.';
-      } else if (qLower.includes('direccion') || qLower.includes('sepomex') || qLower.includes('postal')) {
-        reply = 'Se detectaron 3 pedidos retenidos con CP dudoso. La orden #ORD-991 en Iztacalco fue ajustada con el catalogo oficial Sepomex.';
-      } else {
-        reply = 'Estrategia comercial activa: la tasa de redencion de cupones se mantiene en 18.5% con excelente respuesta en WhatsApp.';
-      }
-    } else if (roleKey === 'finance') {
-      if (qLower.includes('margen') || qLower.includes('neto') || qLower.includes('real')) {
-        reply = 'El margen neto real ponderado es del 57.9% tras deducir $1,024.20 MXN de pasarelas, $712.50 MXN de empaque y $1,980 MXN de fletes.';
-      } else if (qLower.includes('mrr') || qLower.includes('suscripcion')) {
-        reply = 'El proximo corte proyecta $13,400 MXN en cargos recurrentes con una tasa de exito de cobro del 98.8% en pasarela Stripe.';
-      } else {
-        reply = 'Auditoria financiera al dia. Los lotes de pago cuadran con el libro diario y las retenciones fiscales de ley.';
-      }
-    } else {
-      // admin
-      if (qLower.includes('categoria') || qLower.includes('menor margen')) {
-        reply = 'La linea de cuidado personal deja un margen neto del 52.4% debido al flete volumetrico, mientras que la ropa interior alcanza el 68.2%.';
-      } else if (qLower.includes('envio gratis') || qLower.includes('1199')) {
-        reply = 'Simulacion completada: Establecer envio gratis en $1,199 MXN incrementaria el ticket promedio en +18%, absorbiendo el costo de flete con 2.4 piezas por pedido.';
-      } else if (qLower.includes('vitrina') || qLower.includes('marte') || qLower.includes('distribuye')) {
-        reply = 'Marte representa el 38.5% de la facturacion, Venus el 29.2%, Terra el 20.1% y Tiresias el 12.2%. Todas descuentan del inventario central.';
-      } else {
-        reply = 'Ecosistema RevOps operando a capacidad optima con 99.98% de disponibilidad y crecimiento sostenido en membresias recurrentes.';
-      }
-    }
-
-    aiCopilotState.chatHistory[roleKey].push({
-      sender: 'assistant',
-      text: reply
+  // Llamada asíncrona al Copiloto IA (Google Gemini + Fallback local)
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const res = await fetch('/api/v1/dashboard/copilot/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: JSON.stringify({ message: query.trim() })
     });
 
-    renderCopilotChatMessages();
-  }, 180);
+    const data = await res.json();
+    aiCopilotState.chatHistory[roleKey] = aiCopilotState.chatHistory[roleKey].filter(m => !m.isTyping);
+
+    const reply = (data && data.success && data.reply) ? data.reply : getDeterministicCopilotReply(roleKey, query);
+    aiCopilotState.chatHistory[roleKey].push({
+      sender: 'assistant',
+      text: reply,
+      actionChips: data.action_chips || []
+    });
+  } catch (err) {
+    console.warn('[Copilot AI] Fallback local activado:', err);
+    aiCopilotState.chatHistory[roleKey] = aiCopilotState.chatHistory[roleKey].filter(m => !m.isTyping);
+    aiCopilotState.chatHistory[roleKey].push({
+      sender: 'assistant',
+      text: getDeterministicCopilotReply(roleKey, query)
+    });
+  }
+
+  renderCopilotChatMessages();
+}
+
+function getDeterministicCopilotReply(roleKey, query) {
+  let reply = '';
+  const qLower = query.toLowerCase();
+
+  if (roleKey === 'warehouse') {
+    if (qLower.includes('corte') || qLower.includes('dhl') || qLower.includes('hora')) {
+      reply = 'El corte de DHL Express es a las 14:00 hrs. La orden #MIX-1048 requiere empaque inmediato para asegurar la recoleccion.';
+    } else if (qLower.includes('rop') || qLower.includes('quiebre') || qLower.includes('stock')) {
+      reply = 'El anaquel A-02 tiene 4 piezas restantes de Boxer Modal Negro Talla M. Se requiere traslado de 20 unidades desde el Rack B-04.';
+    } else if (qLower.includes('manifiesto') || qLower.includes('estafeta')) {
+      reply = 'El manifiesto de Estafeta cuenta con 12 paquetes verificados listos en rampa para firma del operador recolector.';
+    } else {
+      reply = 'Consulta procesada. Las operaciones de bodega marchan conforme a la ruta de pasillos sin discrepancias criticas.';
+    }
+  } else if (roleKey === 'sales') {
+    if (qLower.includes('carrito') || qLower.includes('abandonado')) {
+      reply = 'Hay 12 carritos abandonados hoy ($8,450 MXN). 4 de ellos superan los $1,000 MXN y tienen disponible la plantilla con cupon RETORNO10.';
+    } else if (qLower.includes('direccion') || qLower.includes('sepomex') || qLower.includes('postal')) {
+      reply = 'Se detectaron 3 pedidos retenidos con CP dudoso. La orden #ORD-991 en Iztacalco fue ajustada con el catalogo oficial Sepomex.';
+    } else {
+      reply = 'Estrategia comercial activa: la tasa de redencion de cupones se mantiene en 18.5% con excelente respuesta en WhatsApp.';
+    }
+  } else if (roleKey === 'finance') {
+    if (qLower.includes('margen') || qLower.includes('neto') || qLower.includes('real')) {
+      reply = 'El margen neto real ponderado es del 57.9% tras deducir $1,024.20 MXN de pasarelas, $712.50 MXN de empaque y $1,980 MXN de fletes.';
+    } else if (qLower.includes('mrr') || qLower.includes('suscripcion')) {
+      reply = 'El proximo corte proyecta $13,400 MXN en cargos recurrentes con una tasa de exito de cobro del 98.8% en pasarela Stripe.';
+    } else {
+      reply = 'Auditoria financiera al dia. Los lotes de pago cuadran con el libro diario y las retenciones fiscales de ley.';
+    }
+  } else {
+    // admin
+    if (qLower.includes('categoria') || qLower.includes('menor margen')) {
+      reply = 'La linea de cuidado personal deja un margen neto del 52.4% debido al flete volumetrico, mientras que la ropa interior alcanza el 68.2%.';
+    } else if (qLower.includes('envio gratis') || qLower.includes('1199')) {
+      reply = 'Simulacion completada: Establecer envio gratis en $1,199 MXN incrementaria el ticket promedio en +18%, absorbiendo el costo de flete con 2.4 piezas por pedido.';
+    } else if (qLower.includes('vitrina') || qLower.includes('marte') || qLower.includes('distribuye')) {
+      reply = 'Marte representa el 38.5% de la facturacion, Venus el 29.2%, Terra el 20.1% y Tiresias el 12.2%. Todas descuentan del inventario central.';
+    } else {
+      reply = 'Ecosistema RevOps operando a capacidad optima con 99.98% de disponibilidad y crecimiento sostenido en membresias recurrentes.';
+    }
+  }
+  return reply;
 }
 
 function executeCopilotRecommendation(recId) {

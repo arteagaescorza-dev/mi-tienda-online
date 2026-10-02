@@ -255,6 +255,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/system-health/ping', [DashboardApiController::class, 'pingSystemHealth']);
         Route::post('/environment/switch', [DashboardApiController::class, 'switchEnvironment']);
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
+        Route::get('/copilot/status', [DashboardApiController::class, 'getCopilotStatus']);
     });
 
     // 8. STOREFRONT D2C CATALOG, PDP & CARRITO CON RESERVA TEMPORAL (PRIORIDAD 1 - SLICE 1.2 & 1.3)

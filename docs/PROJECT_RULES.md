@@ -537,6 +537,19 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
      - **Volver a Activar (`reactivateArchivedProduct`):** Reincorpora la prenda inmediatamente al catálogo operativo activo (`is_archived = false`, `visible = true`).
      - **Eliminar (`deleteArchivedProduct`):** Borrado definitivo e irreversible del producto.
 
+### Regla 6.62: Integración Nativa con Google Gemini AI (Copiloto de Producto, Chat Estratégico Ejecutivo y Telemetría de Salud)
+* **Credenciales y Configuración de Entorno:**
+  1. La conexión con Google Generative Language se gobierna de forma centralizada en el archivo `.env` mediante `GEMINI_API_KEY`, `GEMINI_MODEL="gemini-flash-lite-latest"`, `GEMINI_FALLBACK_MODEL="gemini-flash-latest"`, `GEMINI_PROJECT_NAME` y `GEMINI_PROJECT_NUMBER`.
+  2. Las credenciales se mapean en `config/services.php` bajo la clave `'gemini'` con control de timeout (25s) y URL base oficial (`https://generativelanguage.googleapis.com/v1beta`).
+* **Servicio Centralizado de Alta Resiliencia (`App\Services\Ai\GeminiService`):**
+  1. **Generación de Texto (`generateText`):** Soporta system instructions, reintentos automáticos (`retry(2, 500)`) y conmutación transparente a modelo fallback si el modelo principal experimenta alta demanda (HTTP 503 o 429).
+  2. **JSON Estructurado Nativo (`generateJson`):** Configurado con `responseMimeType: "application/json"`, garantizando objetos JSON parseables sin bloques markdown para títulos, descripciones persuasivas y tags.
+  3. **Chat Multi-Turno Contextual (`chat`):** Mantiene memoria conversacional a partir del histórico de mensajes almacenados en la tabla `ai_copilot_chat_messages`.
+* **Funcionalidades Operativas Conectadas en la Plataforma:**
+  1. **Copiloto IA de Producto (`ProductAiCopilotService`):** En el Workstation de Alta de Producto y en la ficha de edición, genera descripciones de 2 párrafos resaltando ergonomía y transpirabilidad, bullets técnicos y tags SEO. Cuenta con fallback determinístico local si la red no estuviese disponible.
+  2. **Chat Estratégico del Dashboard Ejecutivo (`DashboardApiController@copilotChat`):** Procesa consultas en lenguaje natural sobre márgenes EBITDA, cortes de paquetería DHL a las 14:00 hrs, quiebres de inventario ROP y recuperación de carritos abandonados con gatillos de WhatsApp y chips de acción interactivos.
+  3. **Monitor y Endpoint de Telemetría (`GET /api/v1/dashboard/copilot/status`):** Expone el estado en vivo de la conexión con Google Gemini, latencia en milisegundos y resumen de módulos potenciados por IA.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -679,6 +692,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Secciones E-Commerce** | CRUD Secciones & Hub 2 Home (6.59) | Gestor Pestaña 7, modularidad en Home Hub 2 y dimensión transversal para filtros |
 | **Bandeja Curaduría Real** | 259 Prendas Torzo & Cero Mocks (6.60) | Poblado real en `scraped_pending_items`, búsqueda reactiva y persistencia end-to-end |
 | **Gobernanza Ciclo Scraping** | 5 Fases, Descontinuación & Archivo (6.61) | Mapeo VSC, visto bueno curaduría, frecuencia regulable, modal discrepancias (retirar/archivar/eliminar) y herramienta de archivados |
+| **Integración Google Gemini** | Copiloto Producto & Chat Ejecutivo (6.62) | Servicio GeminiService con fallback, descripciones comerciales en Workstation y chat multi-turno en Dashboard |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 

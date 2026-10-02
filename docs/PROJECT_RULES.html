@@ -961,6 +961,14 @@
       Ciclo de 5 fases estrictas: 1) Mapeo y normalización en VSC; 2) Visto bueno e inserción en bandeja de curaduría (<code>scraped_pending_items</code> en pending, prohibida la validación automática, estrictamente aislados del catálogo operativo); 3) Frecuencia de scrapeo regulable por proveedor en tabla interactiva persistida vía API (<code>PATCH suppliers/{id}/frequency</code>); 4) Notificación de discrepancia B2B por productos retirados en origen con modal resolutivo de 3 opciones (Retirar del Catálogo / Archivar / Eliminar); y 5) Herramienta permanente en catálogo operativo de Productos Archivados y Descontinuados para reactivación o eliminación definitiva.
     </div>
   </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">62</div>
+    <div class="rule-content">
+      <strong>Regla 6.62: Integración Nativa con Google Gemini AI (Copiloto de Producto, Chat Estratégico Ejecutivo y Telemetría de Salud)</strong>
+      Conexión centralizada en <code>.env</code> con <code>GEMINI_API_KEY</code>, modelo primario <code>gemini-flash-lite-latest</code> y fallback a <code>gemini-flash-latest</code>. Motor <code>GeminiService</code> con reintentos y JSON nativo (<code>responseMimeType: "application/json"</code>). Conecta el Copiloto IA de Producto en el Workstation (redacción comercial persuasiva, bullets y SEO tags), el Chat Estratégico Ejecutivo del Dashboard (análisis EBITDA, cortes DHL 14:00h, quiebres ROP y rescate de carritos) y endpoint de telemetría en vivo (<code>GET /api/v1/dashboard/copilot/status</code>).
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1287,6 +1295,11 @@
       <td><strong>Gobernanza Scraping & Archivo</strong></td>
       <td>5 Fases, Descontinuación & Archivo (6.61)</td>
       <td>Mapeo VSC, visto bueno curaduría, frecuencia regulable, modal discrepancias (retirar/archivar/eliminar) y herramienta de archivados.</td>
+    </tr>
+    <tr>
+      <td><strong>Integración Google Gemini AI</strong></td>
+      <td>Copiloto Producto & Chat Ejecutivo (6.62)</td>
+      <td>Motor GeminiService con fallback, descripciones en Workstation y chat multi-turno en Dashboard.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>
