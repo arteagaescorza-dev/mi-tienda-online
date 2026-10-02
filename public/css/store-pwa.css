@@ -650,6 +650,8 @@ body.store-body {
   position: absolute;
   top: 8px;
   left: 8px;
+  z-index: 4;
+  pointer-events: none;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
@@ -4100,8 +4102,20 @@ html.dark .size-pill-btn.selected {
 
 html.dark .badge-stock,
 html.dark .badge-pill,
-html.dark .stock-pill {
+html.dark .stock-pill,
+html.dark .product-stock-badge {
   border: 1px solid var(--border-medium) !important;
+}
+
+html.dark .product-stock-badge {
+  background: rgba(18, 18, 22, 0.92) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .product-stock-badge.ready {
+  background: rgba(6, 78, 59, 0.88) !important;
+  border-color: #059669 !important;
+  color: #a7f3d0 !important;
 }
 
 /* Botones CTA Principales y Secundarios */
