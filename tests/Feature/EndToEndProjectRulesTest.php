@@ -122,4 +122,88 @@ class EndToEndProjectRulesTest extends TestCase
         $response->assertSee('Curaduría de Fotografías & Variante de Color', false);
         $response->assertSee('curatingItem.imageColorMap', false);
     }
+
+    /**
+     * Regla 6.45: Estructura de Árbol Proveedor -> Marcas desprendidas en Hub 4 Ajustes,
+     * y Alta Manual completa con información de Contacto y Fiscal.
+     */
+    public function test_rule_6_45_supplier_tree_structure_and_manual_onboarding_with_fiscal_contact_data(): void
+    {
+        $payload = [
+            'name' => 'Maquilas Textiles Mexicanas SA de CV',
+            'tradeName' => 'Maquilas MX',
+            'legalName' => 'Maquilas Textiles Mexicanas SA de CV',
+            'taxId' => 'MTM990101XYZ',
+            'fiscalRegime' => '601 - General de Ley Personas Morales',
+            'fiscalAddress' => 'Calzada de Tlalpan 456, Col. Álamos, Benito Juárez, CDMX',
+            'fiscalZip' => '03400',
+            'invoiceEmail' => 'facturas@maquilasmx.com',
+            'website' => 'https://maquilasmx.com',
+            'contactName' => 'Lic. Roberto Garza',
+            'phone' => '+52 55 5555 1234',
+            'email' => 'pedidos@maquilasmx.com',
+            'city' => 'CDMX',
+            'origin' => 'manual',
+            'type' => 'workshop',
+            'leadTimeDays' => 4,
+            'paymentTerms' => 'credito_30',
+            'brands' => ['Seda & Encaje', 'Aura Lingerie', 'Lenceria Premium MX'],
+        ];
+
+        // 1. Alta manual completa
+        $res = $this->postJson('/api/v1/inventory/suppliers', $payload);
+        $res->assertStatus(201);
+        $res->assertJsonPath('status', 'success');
+        $res->assertJsonPath('data.taxId', 'MTM990101XYZ');
+        $res->assertJsonPath('data.legalName', 'Maquilas Textiles Mexicanas SA de CV');
+        $res->assertJsonPath('data.fiscalRegime', '601 - General de Ley Personas Morales');
+        $res->assertJsonPath('data.fiscalZip', '03400');
+        $res->assertJsonPath('data.invoiceEmail', 'facturas@maquilasmx.com');
+        $res->assertJsonPath('data.isManual', true);
+        $res->assertJsonPath('data.origin', 'manual');
+        $res->assertJsonCount(3, 'data.brands');
+        $res->assertJsonCount(3, 'data.brandsTree');
+        $res->assertJsonPath('data.brandsTree.0.name', 'Seda & Encaje');
+        $res->assertJsonPath('data.brandsTree.0.slug', 'seda-encaje');
+
+        $supplierId = $res->json('data.dbId');
+
+        // 2. Asociación de nueva marca al árbol
+        $addBrandRes = $this->postJson("/api/v1/inventory/suppliers/{$supplierId}/brands", [
+            'brand' => 'Nueva Marca Hija',
+        ]);
+        $addBrandRes->assertStatus(200);
+        $addBrandRes->assertJsonCount(4, 'data.brands');
+        $addBrandRes->assertJsonCount(4, 'data.brandsTree');
+
+        // 3. Desvinculación de marca del árbol
+        $removeBrandRes = $this->deleteJson("/api/v1/inventory/suppliers/{$supplierId}/brands", [
+            'brand' => 'Nueva Marca Hija',
+        ]);
+        $removeBrandRes->assertStatus(200);
+        $removeBrandRes->assertJsonCount(3, 'data.brands');
+
+        // 4. Actualización de datos fiscales
+        $updateRes = $this->putJson("/api/v1/inventory/suppliers/{$supplierId}", [
+            'fiscalRegime' => '626 - Régimen Simplificado de Confianza (RESICO)',
+            'taxId' => 'MTM990101ABC',
+        ]);
+        $updateRes->assertStatus(200);
+        $updateRes->assertJsonPath('data.fiscalRegime', '626 - Régimen Simplificado de Confianza (RESICO)');
+        $updateRes->assertJsonPath('data.taxId', 'MTM990101ABC');
+
+        // 5. Verificación de UI en Blade
+        $admin = User::factory()->create(['role' => 'admin']);
+        $portalResponse = $this->actingAs($admin)->get(route('portal.inventory'));
+        $portalResponse->assertStatus(200);
+        $portalResponse->assertSee('Proveedor / Estructura en Árbol', false);
+        $portalResponse->assertSee('Marcas Comerciales Desprendidas (Árbol Jerárquico)', false);
+        $portalResponse->assertSee('Expandir Árbol', false);
+        $portalResponse->assertSee('providerOriginFilter', false);
+        $portalResponse->assertSee('Información Fiscal & Facturación', false);
+        $portalResponse->assertSee('RFC / Tax ID / NIF', false);
+        $portalResponse->assertSee('Régimen Fiscal (SAT / Tributario)', false);
+        $portalResponse->assertSee('Domicilio Fiscal Completo', false);
+        $portalResponse->assertSee('Desprender / Asociar Nueva Marca Comercial', false);
+    }
 }
