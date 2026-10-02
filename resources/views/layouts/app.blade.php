@@ -9,6 +9,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/crm.css?v=20260908">
+    <script>
+        (function() {
+            try {
+                var savedTheme = localStorage.getItem('theme_preference') || localStorage.getItem('app_theme') || 'system';
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
 @php($isHome = request()->path() === '/')
 @php($isStorePage = request()->is('/') || request()->is('productos') || request()->is('productos/*') || request()->is('categorias') || request()->is('ofertas') || request()->is('nosotros') || request()->is('contacto') || request()->is('carrito') || request()->is('checkout') || request()->is('checkout/*') || request()->is('search') || request()->is('privacidad') || request()->is('cookies'))

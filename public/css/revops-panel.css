@@ -4859,7 +4859,8 @@ section:has([x-data*="tip"]:hover) {
 }
 
 /* ============================================================================
-   DARK MODE & LIGHT MODE ENGINE (REGLA 2) - PORTAL PANEL REVOPS
+   DARK MODE & LIGHT MODE ENGINE (REGLA 6.31 & 6.32) - PORTAL PANEL REVOPS
+   Contraste Riguroso Garantizado para Textos, Bordes y Componentes
    ============================================================================ */
 
 html.dark,
@@ -4870,6 +4871,7 @@ body.dark {
   --line: #334155;
   --soft: #0f172a;
   --surface: #1e293b;
+  --border-strong: #475569;
 }
 
 html.dark body {
@@ -4877,56 +4879,80 @@ html.dark body {
   color: var(--ink);
 }
 
+/* Header & Sidebar */
 html.dark .topbar {
-  background: #0f172a;
-  border-bottom-color: #1e293b;
+  background: #0f172a !important;
+  border-bottom: 1px solid #334155 !important;
 }
 
 html.dark .sidebar {
-  background: #0f172a;
-  border-right-color: #1e293b;
+  background: #0f172a !important;
+  border-right: 1px solid #334155 !important;
 }
 
 html.dark .main {
-  background: #0b0f19;
+  background: #0b0f19 !important;
 }
 
+/* Tarjetas y Paneles con Delimitación Clara */
 html.dark .card,
 html.dark .panel {
-  background: #1e293b;
-  border-color: #334155;
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
+html.dark .panel-header {
+  border-bottom: 1px solid #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Botones de Control */
 html.dark .button,
 html.dark .button-light,
 html.dark .button-quiet {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  color: #f8fafc !important;
 }
 
 html.dark .button:hover,
 html.dark .button-light:hover,
 html.dark .button-quiet:hover {
-  background: #334155;
-  border-color: #475569;
+  background: #334155 !important;
+  border-color: #64748b !important;
+  color: #ffffff !important;
 }
 
+html.dark .button.is-primary {
+  background: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+html.dark .button.is-primary:hover {
+  background: #1d4ed8 !important;
+  border-color: #60a5fa !important;
+}
+
+/* Tipografía de Títulos y Enlaces de Navegación */
 html.dark .topbar-hub-title,
 html.dark .brand strong,
 html.dark h1,
 html.dark h2,
-html.dark h3 {
-  color: #f8fafc;
+html.dark h3,
+html.dark h4 {
+  color: #f8fafc !important;
 }
 
 html.dark .module-link {
-  color: #94a3b8;
+  color: #94a3b8 !important;
 }
 
 html.dark .module-link:hover {
-  background: #1e293b;
-  color: #f8fafc;
+  background: #1e293b !important;
+  color: #ffffff !important;
 }
 
 html.dark .module-link.active {
@@ -4935,43 +4961,132 @@ html.dark .module-link.active {
   border-color: #4338ca !important;
 }
 
-html.dark .table th,
-html.dark .table td,
-html.dark .panel-header {
-  border-bottom-color: #334155;
+/* Tablas Administrativas con Encabezados y Filas Contrastadas */
+html.dark .table th {
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
+  border-bottom: 2px solid #475569 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .table td {
+  border-bottom: 1px solid #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .table tr:hover td {
+  background: #243048 !important;
 }
 
 html.dark .table td strong {
-  color: #f8fafc;
+  color: #f8fafc !important;
 }
 
+/* Campos de Formulario con Bordes e Indicador de Foco */
 html.dark .field input,
 html.dark .field select,
 html.dark textarea,
 html.dark input[type="text"],
 html.dark input[type="number"],
+html.dark input[type="email"],
 html.dark select {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f8fafc;
+  background: #0f172a !important;
+  border: 1px solid #475569 !important;
+  color: #f8fafc !important;
 }
 
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+  outline: none !important;
+}
+
+/* Elementos de Estado Vaciado */
 html.dark .empty-mark {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f8fafc;
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  color: #cbd5e1 !important;
 }
 
+/* Notificaciones y Popovers */
 html.dark .notif-popover {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 html.dark .notif-header {
-  border-bottom-color: #334155;
+  border-bottom: 1px solid #334155 !important;
 }
 
 html.dark .notif-title {
-  color: #f8fafc;
+  color: #f8fafc !important;
+}
+
+/* Badges de Estado y Tags con Alto Contraste */
+html.dark .badge,
+html.dark .pill,
+html.dark .tag {
+  border: 1px solid #475569 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .badge-success,
+html.dark .pill-success,
+html.dark .is-success {
+  background: #064e3b !important;
+  border-color: #059669 !important;
+  color: #a7f3d0 !important;
+}
+
+html.dark .badge-warning,
+html.dark .pill-warning,
+html.dark .is-warning {
+  background: #78350f !important;
+  border-color: #d97706 !important;
+  color: #fde68a !important;
+}
+
+html.dark .badge-danger,
+html.dark .badge-error,
+html.dark .pill-danger,
+html.dark .is-danger {
+  background: #7f1d1d !important;
+  border-color: #dc2626 !important;
+  color: #fecaca !important;
+}
+
+html.dark .badge-info,
+html.dark .pill-info,
+html.dark .is-info {
+  background: #1e3a8a !important;
+  border-color: #2563eb !important;
+  color: #bfdbfe !important;
+}
+
+/* Modales Administrativos */
+html.dark .modal-card,
+html.dark .modal-content,
+html.dark .modal-box {
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75) !important;
+}
+
+html.dark .drag-handle-page {
+  color: #94a3b8 !important;
+}
+
+html.dark .drag-handle-page:hover {
+  color: #ffffff !important;
 }

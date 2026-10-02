@@ -306,6 +306,18 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 * **Paridad en Portal Administrativo:** El Portal Panel (RevOps) cuenta con sincronización inmediata del tema y botón conmutador en la barra de herramientas superior (`.top-actions`).
 * **Prevención de Parpadeo (Anti-FOUC):** Todos los layouts implementan un script síncrono inline en el `<head>` antes de cualquier renderizado visual para aplicar la clase `.dark` o `.light` instantáneamente según `localStorage.getItem('app_theme')`.
 
+### Regla 6.32: Contraste Riguroso y Accesibilidad Universal en Modo Dark y Light
+* **Mandato de Contraste Absoluto:** Todo el soporte visual del proyecto (tanto en Modo Oscuro como en Modo Claro) debe garantizar rigurosamente el contraste nítido, legible y accesible (estándar WCAG AA o superior) en textos, bordes y la totalidad de los elementos de la interfaz.
+* **Contraste Tipográfico:**
+  - **Modo Claro (`light`):** El texto principal utiliza tonalidades oscuras puras (`#09090b` / `#000000`), el texto secundario `#3f3f46` y el texto atenuado o de metadatos `#52525b` (garantizando ratio mínimo de 4.5:1 contra fondos blancos o marfiles). Queda estrictamente prohibido utilizar grises claros o desteñidos (`#9ca3af`, `#a1a1aa`, `#8e8e93`) que comprometan la legibilidad sobre fondos claros.
+  - **Modo Oscuro (`dark`):** El texto principal utiliza blanco brillante (`#f8fafc` / `#ffffff`), el texto secundario `#cbd5e1` (slate-300) y el texto atenuado `#94a3b8` (slate-400), garantizando un contraste superior a 5.5:1 contra superficies oscuras (`#09090b`, `#131317`, `#1e293b`). Queda terminantemente prohibido utilizar grises oscuros o apagados (`#52525b`, `#64748b`, `#71717a`) sobre fondos oscuros.
+* **Delimitación y Contraste de Bordes:**
+  - Todas las tarjetas (`.product-card`, `.cart-item-card`, `.panel`, `.card`), inputs, tablas, drawers y modales deben disponer de un borde perimetral explícito (`--border-subtle`, `--border-medium`, `--line`) que delimite su silueta y evite el "efecto pantalla plana" o la fundición de elementos con el fondo.
+  - En Modo Oscuro, los bordes sutiles deben ser al menos `#2e2e3c` / `#334155` y los bordes medios `#49495c` / `#475569`.
+* **Controles, Formularios y Estados Interactivos:**
+  - Inputs, textareas y selectores deben poseer fondos contrastados (`--bg-tertiary` o `#0f172a` en dark; `#ffffff` en light), bordes claramente definidos, placeholders legibles (`#94a3b8` en dark; `#52525b` en light) y anillos de foco visibles (`outline` / `box-shadow` de 2px en `--border-focus`).
+  - Badges de estado, pills de selección, botones primarios/secundarios y encabezados de tabla deben cumplir con combinaciones de alto contraste cromático y legibilidad instantánea.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -423,6 +435,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **CMS Hub 2** | Hero Excluyente & Regla de Oro | Cero duplicados; catálogo sin custom code; editor visual en Tab 1 |
 | **Seguridad** | Sanitización XSS & RBAC | Limpieza en backend de inputs HTML/CSS; aislamiento de métricas |
 | **Calidad** | 100% Tests Green & Auditoría CDP | PHPUnit sin errores; pruebas en Chrome Headless |
+| **Modo Dark / Light**| Contraste Universal WCAG AA | Textos nítidos (>5.5:1), bordes perimetrales visibles, cero fondos oscuros con texto apagado |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
