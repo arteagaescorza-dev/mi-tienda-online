@@ -4696,7 +4696,7 @@
                                     <button 
                                         type="button" 
                                         @click="generateAiDescription()" 
-                                        :disabled="newProduct.isGeneratingAi || !newProduct.name || newProduct.name.trim().length === 0"
+                                        :disabled="newProduct.isGeneratingAi"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Generar descripcion persuasiva y tags SEO con IA"
                                     >
@@ -10723,7 +10723,7 @@
                                 <button 
                                     type="button" 
                                     @click="generateAiDescription('curating')" 
-                                    :disabled="isCuratingAiGenerating || !curatingItem.name || curatingItem.name.trim().length === 0"
+                                    :disabled="isCuratingAiGenerating"
                                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
                                     title="Generar descripción persuasiva comercial con Google Gemini"
                                 >

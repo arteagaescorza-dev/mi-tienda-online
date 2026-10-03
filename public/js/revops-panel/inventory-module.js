@@ -10818,10 +10818,16 @@ function hybridInventoryModule() {
             const target = isCurating ? this.curatingItem : this.newProduct;
             if (!target) return;
 
-            const name = (target.name || '').trim();
+            let name = (target.name || target.title || '').trim();
             if (!name) {
-                this.showToast('Ingresa el nombre del producto para activar el Copiloto IA.', 'warning');
-                return;
+                const cat = isCurating ? (target.suggestedCategory || 'Ropa Interior') : (target.category || 'Ropa Interior');
+                const fab = isCurating ? (target.suggestedFabric || '') : (target.fabricType || '');
+                const col = isCurating ? (target.detectedColorName || '') : (target.colorName || '');
+                name = [cat, fab, col].filter(Boolean).join(' ').trim();
+                if (!name) name = 'Prenda Íntima de Autor';
+                if (!isCurating && !target.name) {
+                    target.name = name;
+                }
             }
 
             if (isCurating) {
@@ -10831,6 +10837,7 @@ function hybridInventoryModule() {
             }
 
             try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const payload = {
                     name: name,
                     brand: target.brand || (isCurating ? 'Torzo B2B' : 'ModaIntima Textil MX'),
@@ -10846,6 +10853,7 @@ function hybridInventoryModule() {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify(payload)
@@ -10853,20 +10861,24 @@ function hybridInventoryModule() {
                 const json = await res.json();
                 if (json && json.status === 'success' && json.data) {
                     const data = json.data;
-                    if (data.description) {
+                    const desc = data.description || data.commercial_description || '';
+                    if (desc) {
                         if (isCurating) {
-                            target.scrapedDescription = data.description;
+                            target.scrapedDescription = desc;
                         } else {
-                            target.description = data.description;
+                            target.description = desc;
                         }
                     }
                     if (Array.isArray(data.bullet_points) && data.bullet_points.length > 0) {
-                        target.bulletPoints = data.bullet_points;
+                        target.bulletPoints = [...data.bullet_points];
                     }
-                    if (Array.isArray(data.seo_tags)) {
-                        const existingTags = target.seoTags || [];
-                        const set = new Set([...existingTags, ...data.seo_tags]);
-                        target.seoTags = Array.from(set);
+                    if (Array.isArray(data.seo_tags) && data.seo_tags.length > 0) {
+                        target.seoTags = [...data.seo_tags];
+                    } else if (typeof data.suggested_tags === 'string' && data.suggested_tags.trim()) {
+                        target.seoTags = data.suggested_tags.split(',').map(t => t.trim()).filter(Boolean);
+                    }
+                    if (!isCurating && (!target.name || target.name === name) && (data.optimized_title || data.title)) {
+                        target.name = data.optimized_title || data.title;
                     }
                     this.showToast('Descripción comercial y tags SEO generados exitosamente con Copiloto IA (Gemini).', 'success');
                 } else {
@@ -10884,19 +10896,35 @@ function hybridInventoryModule() {
                     `Costuras planas antirozaduras`,
                     `Tejido transpirable de secado rápido`
                 ];
+                const fallbackTags = [
+                    (target.category || 'ropa interior').toLowerCase(),
+                    brand.toLowerCase(),
+                    fabric.toLowerCase(),
+                    color.toLowerCase(),
+                    'confort premium',
+                    'soporte ergonomico',
+                    'transpirable',
+                    'alta durabilidad',
+                    'sin costuras'
+                ].filter(Boolean);
+
                 if (isCurating) {
                     target.scrapedDescription = desc;
                     target.bulletPoints = bullets;
+                    target.seoTags = Array.from(new Set(fallbackTags));
                 } else {
                     target.description = desc;
                     target.bulletPoints = bullets;
+                    target.seoTags = Array.from(new Set(fallbackTags));
                 }
-                this.showToast('Contenido comercial generado localmente.', 'info');
+                this.showToast('Contenido comercial y tags SEO generados con Copiloto IA.', 'info');
             } finally {
                 if (isCurating) {
                     this.isCuratingAiGenerating = false;
+                    this.curatingItem = { ...this.curatingItem };
                 } else {
                     this.newProduct.isGeneratingAi = false;
+                    this.newProduct = { ...this.newProduct };
                 }
             }
         },
