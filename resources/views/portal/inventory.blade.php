@@ -705,7 +705,7 @@
                             </th>
                             <th class="py-3 px-3 text-center">Margen</th>
                             <th class="py-3 px-3">Ubicación</th>
-                            <th class="py-3 px-3 min-w-[260px]">
+                            <th class="py-3 px-3 min-w-[180px] max-w-[220px]">
                                 <div class="inline-flex items-center gap-1">
                                     <span>Ajuste Rápido de Stock</span>
                                     <!-- Help Icon -->
@@ -858,10 +858,10 @@
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="relative w-11 h-11 mx-auto rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center cursor-pointer shadow-xs group-hover:shadow transition"
                                          @click="openProductDrawer(item)">
-                                        <template x-if="item.image">
-                                            <img :src="item.image" :alt="item.name" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                        <template x-if="resolveProductImage(item)">
+                                            <img :src="resolveProductImage(item)" :alt="item.name" class="w-full h-full object-cover">
                                         </template>
-                                        <template x-if="!item.image">
+                                        <template x-if="!resolveProductImage(item)">
                                             <svg class="w-6 h-6 text-slate-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                             </svg>
@@ -902,7 +902,10 @@
                                               x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo'">
                                         </span>
                                         <span class="text-slate-300">&bull;</span>
-                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX')"></span>
+                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || item.provider || 'Marca'"></span>
+                                        <template x-if="item.provider && item.brand && item.provider !== item.brand">
+                                            <span class="text-[10px] text-slate-400 font-mono" x-text="'(' + item.provider + ')'"></span>
+                                        </template>
                                     </div>
 
                                     <!-- Swatches Cromáticos de Cosmética (TASK-INV-09) -->
@@ -927,15 +930,19 @@
                                     <template x-if="item.variantDimension !== 'shade'">
                                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
                                             <!-- Swatch Color & Tornasol -->
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200" :title="'Color: ' + (item.colorName || 'Negro')">
-                                                <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
-                                                <span x-text="item.colorName || 'Negro'"></span>
-                                            </span>
+                                            <template x-if="item.colorName">
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200" :title="'Color: ' + item.colorName">
+                                                    <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
+                                                    <span x-text="item.colorName"></span>
+                                                </span>
+                                            </template>
 
                                             <!-- Badge Tipo de Tela -->
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'Composición textil: ' + (item.fabricType || 'Modal')">
-                                                <span x-text="item.fabricType || 'Modal'"></span>
-                                            </span>
+                                            <template x-if="item.fabricType">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'Composición textil: ' + item.fabricType">
+                                                    <span x-text="item.fabricType"></span>
+                                                </span>
+                                            </template>
 
                                             <!-- Badge Variante Diseño -->
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
@@ -1180,53 +1187,60 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: AJUSTE RÁPIDO -->
-                                <td class="py-3.5 px-4">
+                                <!-- Columna: AJUSTE RÁPIDO (2 SALTOS DE LÍNEA) -->
+                                <td class="py-2.5 px-2">
                                     <!-- FILA TIPO 1: STOCK PROPIO -->
                                     <template x-if="item.type === 'propio'">
-                                        <div class="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                                            <select 
-                                                x-model="item.adjustType" 
-                                                class="text-xs py-1 px-1.5 bg-white border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                                <option value="add">+ Entr.</option>
-                                                <option value="sub">- Sal.</option>
-                                            </select>
+                                        <div class="flex flex-col gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200 min-w-[160px] max-w-[210px]">
+                                            <!-- Línea 1: Dropdown (+ Entr. / - Sal.) + Cantidad -->
+                                            <div class="flex items-center gap-1.5">
+                                                <select 
+                                                    x-model="item.adjustType" 
+                                                    class="text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 shrink-0"
+                                                >
+                                                    <option value="add">+ Entr.</option>
+                                                    <option value="sub">- Sal.</option>
+                                                </select>
 
-                                            <input 
-                                                type="number" 
-                                                min="1" 
-                                                x-model.number="item.adjustQty" 
-                                                placeholder="Cant." 
-                                                class="w-14 text-xs py-1 px-1.5 bg-white border border-slate-200 rounded text-center text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+                                                <input 
+                                                    type="number" 
+                                                    min="1" 
+                                                    x-model.number="item.adjustQty" 
+                                                    placeholder="Cant." 
+                                                    class="flex-1 min-w-0 text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded text-center text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                >
+                                            </div>
 
-                                            <input 
-                                                type="text" 
-                                                x-model="item.adjustReason" 
-                                                placeholder="Motivo..." 
-                                                class="flex-1 text-xs py-1 px-2 bg-white border border-slate-200 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+                                            <!-- Línea 2: Motivo + Botón Aplicar -->
+                                            <div class="flex items-center gap-1.5">
+                                                <input 
+                                                    type="text" 
+                                                    x-model="item.adjustReason" 
+                                                    placeholder="Motivo..." 
+                                                    class="flex-1 min-w-0 text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                >
 
-                                            <button 
-                                                @click="applyQuickStockAdjustment(item)" 
-                                                :disabled="item.isAdjusting"
-                                                class="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded transition shadow-xs cursor-pointer inline-flex items-center gap-1 shrink-0"
-                                                title="Aplicar ajuste"
-                                            >
-                                                <svg x-show="item.isAdjusting" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                <span x-text="item.isAdjusting ? '...' : 'Aplicar'"></span>
-                                            </button>
+                                                <button 
+                                                    @click="applyQuickStockAdjustment(item)" 
+                                                    :disabled="item.isAdjusting"
+                                                    class="px-2 py-1 text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded transition shadow-xs cursor-pointer inline-flex items-center gap-1 shrink-0"
+                                                    title="Aplicar ajuste"
+                                                >
+                                                    <svg x-show="item.isAdjusting" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                    <span x-text="item.isAdjusting ? '...' : 'Aplicar'"></span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </template>
 
                                     <!-- FILA TIPO 2: DROPSHIPPING -->
                                     <template x-if="item.type === 'dropship'">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex flex-col gap-1.5 min-w-[140px] max-w-[190px]">
                                             <a 
-                                                :href="item.providerUrl" 
+                                                :href="item.providerUrl || item.supplierUrl || item.originUrl || '#'" 
                                                 target="_blank" 
-                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition"
+                                                rel="noopener noreferrer"
+                                                class="inline-flex items-center justify-center gap-1 px-2 py-1 text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition"
                                             >
                                                 <span>Ver en Proveedor</span>
                                                 <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
@@ -1235,7 +1249,7 @@
                                             <button 
                                                 @click="rescrapeProduct(item)" 
                                                 :disabled="item.isScraping"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition disabled:opacity-50 cursor-pointer"
+                                                class="inline-flex items-center justify-center gap-1 px-2 py-1 text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition disabled:opacity-50 cursor-pointer"
                                             >
                                                 <svg :class="item.isScraping ? 'animate-spin' : ''" class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                                 <span x-text="item.isScraping ? 'Scraping...' : 'Re-scrape'"></span>
@@ -3218,7 +3232,7 @@
                             <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
                                 <div class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
                                     <template x-if="drawerImage">
-                                        <img :src="drawerImage" alt="Prenda" class="w-full h-full object-cover">
+                                        <img :src="resolveProductImage(drawerImage)" alt="Prenda" class="w-full h-full object-cover">
                                     </template>
                                     <template x-if="!drawerImage">
                                         <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -3280,7 +3294,7 @@
                                 <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                                     <template x-for="(imgUrl, imgIdx) in (drawerImages?.length ? drawerImages : (drawerImage ? [drawerImage] : []))" :key="imgIdx">
                                         <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition">
-                                            <img :src="imgUrl" class="w-10 h-10 rounded object-cover border border-slate-200 shrink-0">
+                                            <img :src="resolveProductImage(imgUrl)" class="w-10 h-10 rounded object-cover border border-slate-200 shrink-0">
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center gap-1.5">
                                                     <select 
@@ -3385,6 +3399,9 @@
                                             class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                                         >
                                             <option value="">-- Seleccionar Marca --</option>
+                                            <template x-if="drawerBrand && !getBrandsForSupplier(drawerSupplierId).some(b => b.name === drawerBrand)">
+                                                <option :value="drawerBrand" selected x-text="drawerBrand"></option>
+                                            </template>
                                             <template x-for="b in getBrandsForSupplier(drawerSupplierId)" :key="b.name">
                                                 <option :value="b.name" :selected="drawerBrand === b.name" x-text="b.name"></option>
                                             </template>
@@ -3584,73 +3601,98 @@
                                     <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
                                 </div>
 
-                                <!-- Fila 1: Tallas Centrales (CH a XL) -->
-                                <div class="grid grid-cols-4 gap-2">
-                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.ch" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
+                                <!-- Caso 1: Talla Única / Unitalla (UNI) -->
+                                <template x-if="isDrawerUnitalla()">
+                                    <div class="bg-white p-3.5 rounded-xl border border-indigo-200 shadow-2xs space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-xs font-bold text-indigo-700 block">Unitalla (UNI)</span>
+                                                <span class="text-[11px] text-slate-400">Modelo con talla única universal adaptable</span>
+                                            </div>
+                                            <div class="w-28">
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.uni" 
+                                                    class="w-full text-center bg-indigo-50/40 border border-indigo-200 rounded-lg py-1.5 px-2 font-extrabold text-indigo-700 text-base focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
-                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.m" 
-                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
-                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.g" 
-                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.xl" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                </div>
+                                </template>
 
-                                <!-- Fila 2: Tallas Extendidas (Plus Size) -->
-                                <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
-                                    <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                        <span>Tallas Extendidas (Plus Size)</span>
-                                        <span>Volumen reducido</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerSizes['2xl']" 
-                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+                                <!-- Caso 2: Curva Torso Estándar (CH a 3XL) -->
+                                <template x-if="!isDrawerUnitalla()">
+                                    <div class="space-y-3">
+                                        <!-- Fila 1: Tallas Centrales (CH a XL) -->
+                                        <div class="grid grid-cols-4 gap-2">
+                                            <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                                <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.ch" 
+                                                    class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                            <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                                <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.m" 
+                                                    class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                            <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                                <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.g" 
+                                                    class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                            <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                                <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.xl" 
+                                                    class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
                                         </div>
-                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerSizes['3xl']" 
-                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+
+                                        <!-- Fila 2: Tallas Extendidas (Plus Size) -->
+                                        <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
+                                            <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                                <span>Tallas Extendidas (Plus Size)</span>
+                                                <span>Volumen reducido</span>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                                    <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
+                                                    <input 
+                                                        type="number" 
+                                                        min="0" 
+                                                        x-model.number="drawerSizes['2xl']" 
+                                                        class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                                <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                                    <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
+                                                    <input 
+                                                        type="number" 
+                                                        min="0" 
+                                                        x-model.number="drawerSizes['3xl']" 
+                                                        class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
                         </template>
 
@@ -4114,162 +4156,263 @@
                     </div>
                 </div>
 
-                <!-- Contenedor de 3 Paneles Ergonómicos con Scroll -->
-                <div class="p-6 overflow-y-auto flex-1">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Contenedor Principal: 2 Columnas (Col 1: Pasos de Captura, Col 2: Resumen Ficha Técnica en Vivo) -->
+                <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
                         <!-- ========================================================= -->
-                        <!-- PANEL 1: IDENTIDAD, SKU Y CONTROL DE DUPLICADOS (4 COLS)  -->
+                        <!-- COLUMNA 1: FORMULARIO SECUENCIAL POR PASOS (7 COLS)       -->
                         <!-- ========================================================= -->
-                        <div class="lg:col-span-4 space-y-5">
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
+                        <div class="lg:col-span-7 space-y-6">
+
+                            <!-- Mini Stepper de Navegación Rápida Interactiva (Regla UX 1) -->
+                            <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs grid grid-cols-4 gap-1.5 text-[11px] font-bold">
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(1)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 1 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 1 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">1</span>
+                                    <span class="truncate">Fotos & Colores</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(2)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 2 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 2 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">2</span>
+                                    <span class="truncate">Datos & Diseño</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(3)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 3 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 3 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">3</span>
+                                    <span class="truncate">Variantes & Slot</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(4)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 4 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 4 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">4</span>
+                                    <span class="truncate">Copiloto & Pricing</span>
+                                </button>
+                            </div>
+
+                            <!-- PASO 1: FOTOGRAFÍAS, CROP 4:5, PORTADA & VARIANTES DE COLOR -->
+                            <div id="step-1-photos" x-show="workstationStep === 1" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">1</div>
-                                        <h3 class="font-bold text-slate-800 text-sm">Identidad & Codificacion</h3>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">1</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Fotografías del Producto & Variantes de Color</h3>
+                                            <p class="text-[11px] text-slate-500">Carga interactiva, encuadre 4:5, selección de portada y asociación de color</p>
+                                        </div>
                                     </div>
-                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Unicidad</span>
+                                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
                                 </div>
 
-                                <!-- Código SKU Oficial con Auto-Generador y Candado -->
-                                <div>
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Codigo SKU Oficial</label>
-                                        <button 
-                                            type="button" 
-                                            @click="toggleSkuLock()" 
-                                            class="text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
-                                            :class="newProduct.skuLocked ? 'text-slate-500 hover:text-slate-700' : 'text-amber-600 hover:text-amber-700'"
-                                        >
-                                            <svg x-show="newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                <!-- Dropzone interactivo con recorte 4:5 -->
+                                <div 
+                                    @dragover.prevent="isDraggingImages = true"
+                                    @dragleave.prevent="isDraggingImages = false"
+                                    @drop.prevent="handleWorkstationImageDrop($event)"
+                                    class="border-2 border-dashed rounded-xl p-4 text-center transition cursor-pointer"
+                                    :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/70'"
+                                    @click="$refs.newProductFileInput.click()"
+                                >
+                                    <input 
+                                        type="file" 
+                                        x-ref="newProductFileInput" 
+                                        @change="handleWorkstationImageSelect($event)" 
+                                        accept="image/jpeg,image/png,image/webp,image/avif" 
+                                        class="hidden"
+                                    >
+                                    <div class="flex flex-col items-center justify-center gap-1.5 text-slate-600">
+                                        <div class="w-10 h-10 rounded-xl bg-white border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-2xs">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <svg x-show="!newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span x-text="newProduct.skuLocked ? 'Bloqueado' : 'Edicion Manual'"></span>
-                                        </button>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-800">Cargar Foto & Encuadrar 4:5</span>
+                                        <span class="text-[11px] text-slate-500">Abre editor interactivo con recorte estandarizado a 1080×1350 px</span>
                                     </div>
-                                    <div class="relative flex items-center">
-                                        <input 
-                                            type="text" 
-                                            x-model="newProduct.sku" 
-                                            :disabled="newProduct.skuLocked"
-                                            placeholder="TXT-TRZ-0001" 
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 disabled:opacity-75 disabled:cursor-not-allowed"
-                                        >
-                                    </div>
-                                    <p class="text-[10px] text-slate-400 mt-1">Formato: [PREFIJO]-[MARCA]-[CORRELATIVO 4D]-[VARIANTE]</p>
                                 </div>
 
-                                <!-- Nombre del Producto con Análisis Reactivo de Duplicados -->
+                                <!-- Entrada de Foto Manual por URL -->
+                                <div class="flex items-center gap-1.5">
+                                    <input 
+                                        type="url" 
+                                        x-model="newProductManualImageUrl" 
+                                        @keydown.enter.prevent="addManualImageUrlToNewProduct()" 
+                                        placeholder="Pegar URL de foto adicional (https://...)" 
+                                        class="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="addManualImageUrlToNewProduct()" 
+                                        class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ URL</span>
+                                    </button>
+                                </div>
+
+                                <!-- Galería de Miniaturas con Portada & Variantes de Color -->
+                                <template x-if="newProduct.images && newProduct.images.length > 0">
+                                    <div class="space-y-2 pt-2 border-t border-slate-100 max-h-64 overflow-y-auto pr-1">
+                                        <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
+                                            <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 transition">
+                                                <div class="relative w-14 h-17 rounded-lg overflow-hidden border border-slate-200 bg-white shrink-0 shadow-2xs">
+                                                    <img :src="resolveProductImage(img)" class="w-full h-full object-cover">
+                                                    <span x-show="img.is_primary" class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-xs">Portada</span>
+                                                </div>
+                                                <div class="flex-1 min-w-0 space-y-1.5">
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="text-xs font-bold text-slate-800 truncate" x-text="img.name || ('Foto ' + (idx + 1))"></span>
+                                                        <div class="flex items-center gap-1.5">
+                                                            <button 
+                                                                type="button" 
+                                                                @click.stop="setPrimaryImage(idx)" 
+                                                                class="px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer"
+                                                                :class="img.is_primary ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-indigo-50 text-indigo-700 border-slate-200'"
+                                                            >
+                                                                <span x-text="img.is_primary ? 'Es Portada' : 'Hacer Portada'"></span>
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                @click.stop="removeImage(idx)" 
+                                                                class="p-1 rounded text-rose-500 hover:bg-rose-50 transition cursor-pointer" 
+                                                                title="Eliminar foto"
+                                                            >
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Selector de Color de Prenda para esta Foto + Botón In Situ + Color -->
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider shrink-0">Color Variante:</span>
+                                                        <select 
+                                                            x-model="img.color_name" 
+                                                            class="flex-1 px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                        >
+                                                            <template x-for="col in apparelColors" :key="col.id">
+                                                                <option :value="col.name" :selected="col.name === img.color_name" x-text="col.name"></option>
+                                                            </template>
+                                                        </select>
+                                                        <button 
+                                                            type="button" 
+                                                            @click.stop="openQuickColorModal('targetImg', resolveProductImage(img))" 
+                                                            class="px-2 py-1 text-[10px] font-bold rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                            title="Dar de alta color in situ para esta foto"
+                                                        >
+                                                            + Color
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- Pie de Navegación del Paso 1 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(2)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>Continuar a Datos & Diseño</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- PASO 2: PROVEEDOR, MARCA, CATEGORÍA, SUBCATEGORÍA, LISO O CON DISEÑO, MODALIDAD LOGÍSTICA -->
+                            <div id="step-2-taxonomy" x-show="workstationStep === 2" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">2</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Proveedor, Marca, Categoría & Modalidad</h3>
+                                            <p class="text-[11px] text-slate-500">Identidad comercial, clasificación, tipificación de diseño y logística</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Taxonomía</span>
+                                </div>
+
+                                <!-- Nombre Comercial del Modelo con Análisis Reactivo de Duplicados -->
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre Comercial del Modelo</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre Comercial del Modelo <span class="text-rose-500">*</span></label>
                                     <input 
                                         type="text" 
                                         x-model="newProduct.name" 
-                                        @input.debounce.350ms="checkProductDuplicate()"
+                                        @input.debounce.350ms="checkProductDuplicate()" 
                                         placeholder="Ej: Boxer Trunk Modal Eco Air" 
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                        class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                     >
 
                                     <!-- Indicador de Alerta de Duplicados Reactivo -->
                                     <div class="mt-2" x-cloak>
-                                        <!-- Analizando en progreso -->
                                         <div x-show="newProduct.isCheckingDuplicate" class="flex items-center gap-1.5 text-[11px] text-slate-500 py-1">
-                                            <svg class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                            </svg>
-                                            <span>Verificando unicidad en catalogo...</span>
+                                            <svg class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Verificando unicidad en catálogo operativo...</span>
                                         </div>
-
-                                        <!-- Duplicado crítico detectado -->
-                                        <div 
-                                            x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'duplicate_match'" 
-                                            class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5"
-                                        >
+                                        <div x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'duplicate_match'" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-1.5 font-bold">
-                                                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                                    </svg>
+                                                <span class="flex items-center gap-1.5 font-bold">
+                                                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                                     <span>Posible Duplicado Detectado</span>
-                                                </div>
+                                                </span>
                                                 <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-200 text-rose-900" x-text="newProduct.duplicateScore + '% match'"></span>
                                             </div>
-                                            <p class="text-[11px] text-rose-700 leading-snug">
-                                                Ya existe un producto con caracteristicas y nombre altamente similares.
-                                            </p>
-                                            <button 
-                                                type="button" 
-                                                @click="openDuplicateModal()" 
-                                                class="w-full text-center py-1 px-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition cursor-pointer"
-                                            >
-                                                Resolver Conflicto Lado a Lado
-                                            </button>
+                                            <p class="text-[11px] text-rose-700 leading-snug">Ya existe un producto con características similares en el catálogo aprobado.</p>
+                                            <button type="button" @click="openDuplicateModal()" class="w-full text-center py-1 px-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition cursor-pointer">Resolver Conflicto Lado a Lado</button>
                                         </div>
-
-                                        <!-- Advertencia moderada -->
-                                        <div 
-                                            x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'warning'" 
-                                            class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-1"
-                                        >
+                                        <div x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'warning'" class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-1">
                                             <div class="flex items-center justify-between font-bold">
                                                 <span class="flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
-                                                    </svg>
+                                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/></svg>
                                                     <span>Similitud Moderada</span>
                                                 </span>
                                                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900" x-text="newProduct.duplicateScore + '%'"></span>
                                             </div>
-                                            <button 
-                                                type="button" 
-                                                @click="openDuplicateModal()" 
-                                                class="text-[10px] font-bold text-amber-800 hover:underline block"
-                                            >
-                                                Revisar coincidencias en catalogo
-                                            </button>
+                                            <button type="button" @click="openDuplicateModal()" class="text-[10px] font-bold text-amber-800 hover:underline block">Revisar coincidencias en catálogo</button>
                                         </div>
-
-                                        <!-- Verificado limpio -->
-                                        <div 
-                                            x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateChecked && newProduct.duplicateRisk === 'none' && newProduct.name.length >= 3" 
-                                            class="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 py-1"
-                                        >
-                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                            </svg>
-                                            <span>Nombre verificado: sin duplicados en catalogo.</span>
+                                        <div x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateChecked && newProduct.duplicateRisk === 'none' && newProduct.name.length >= 3" class="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 py-1">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Nombre verificado: sin duplicados en catálogo.</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Proveedor y Marca Comercial con Botones de Alta Instantánea (Regla 6.47) -->
-                                <div class="space-y-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/90">
-                                    <!-- Proveedor -->
-                                    <div>
+                                <!-- Proveedor / Fabricante & Marca Comercial (Grid 2 cols) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
                                         <div class="flex items-center justify-between mb-1">
-                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                                                 <span>Proveedor / Fabricante</span>
                                                 <span class="text-rose-500">*</span>
                                             </label>
                                             <button 
                                                 type="button" 
                                                 @click="openCreateProviderModal()" 
-                                                class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer"
-                                                title="Dar de alta un nuevo proveedor en caso de no existir"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                             >
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                                <span>+ Nuevo Proveedor</span>
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Proveedor</span>
                                             </button>
                                         </div>
                                         <select 
                                             x-model="newProduct.supplier_id" 
-                                            @change="onNewProductSupplierChange(); checkProductDuplicate(); updateDynamicSku();"
-                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
+                                            @change="onNewProductSupplierChange(); checkProductDuplicate(); updateDynamicSku();" 
+                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
                                         >
                                             <option value="">-- Seleccionar Proveedor --</option>
                                             <template x-for="p in providers" :key="p.id">
@@ -4277,28 +4420,25 @@
                                             </template>
                                         </select>
                                     </div>
-
-                                    <!-- Marca Comercial Asociada -->
-                                    <div>
+                                    <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
                                         <div class="flex items-center justify-between mb-1">
-                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                                                 <span>Marca Comercial</span>
                                                 <span class="text-rose-500">*</span>
                                             </label>
                                             <button 
                                                 type="button" 
                                                 @click="openCreateBrandModal(newProduct.supplier_id)" 
-                                                class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2 py-0.5 rounded transition cursor-pointer"
-                                                title="Dar de alta una nueva marca y asociarla a este proveedor/producto"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                             >
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                                <span>+ Nueva Marca</span>
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Marca</span>
                                             </button>
                                         </div>
                                         <select 
                                             x-model="newProduct.brand" 
-                                            @change="checkProductDuplicate(); updateDynamicSku();"
-                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
+                                            @change="checkProductDuplicate(); updateDynamicSku();" 
+                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
                                         >
                                             <option value="">-- Seleccionar Marca --</option>
                                             <template x-for="b in getBrandsForSupplier(newProduct.supplier_id)" :key="b.name">
@@ -4308,8 +4448,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Categoría y Subcategoría (Regla 3: Alta in situ) -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Categoría & Subcategoría (Grid 2 cols) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
                                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Categoría</label>
@@ -4317,7 +4457,6 @@
                                                 type="button" 
                                                 @click.stop="openQuickCategoryModal('category', 'newProduct')" 
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                                title="Dar de alta categoría in situ sin salir de la ficha"
                                             >
                                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                                 <span>+ Categoría</span>
@@ -4325,8 +4464,8 @@
                                         </div>
                                         <select 
                                             x-model="newProduct.category" 
-                                            @change="onNewProductCategoryChange(); updateDynamicSku();"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer"
+                                            @change="onNewProductCategoryChange(); updateDynamicSku();" 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
                                         >
                                             <template x-for="cat in categoriesTree" :key="cat.id">
                                                 <option :value="cat.name" :selected="newProduct.category === cat.name" x-text="cat.name"></option>
@@ -4348,7 +4487,6 @@
                                                 type="button" 
                                                 @click.stop="openQuickCategoryModal('subcategory', 'newProduct')" 
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                                title="Dar de alta subcategoría para esta categoría in situ"
                                             >
                                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                                 <span>+ Subcategoría</span>
@@ -4358,70 +4496,122 @@
                                             type="text" 
                                             x-model="newProduct.subcategory" 
                                             placeholder="Ej: Trunks / Briefs / Deportivo" 
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
                                         >
                                     </div>
                                 </div>
 
-                                <!-- Modalidad Logística -->
+                                <!-- Regla: Tipificación si el producto tiene color liso o cuenta con diseño -->
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Modalidad Logistica</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Acabado / Diseño del Producto</label>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <label 
-                                            class="flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition"
-                                            :class="newProduct.type === 'propio' ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                        <button 
+                                            type="button" 
+                                            @click="newProduct.designType = 'sin_diseno'" 
+                                            class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                            :class="newProduct.designType === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-900 shadow-2xs ring-1 ring-indigo-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
                                         >
-                                            <input type="radio" value="propio" x-model="newProduct.type" class="sr-only">
-                                            <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
-                                            <span>Propio (Bodega)</span>
-                                        </label>
-                                        <label 
-                                            class="flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition"
-                                            :class="newProduct.type === 'dropship' ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                            <span class="w-2.5 h-2.5 rounded-full" :class="newProduct.designType === 'sin_diseno' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                            <span>Color Liso (Sólido)</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="newProduct.designType = 'con_diseno'" 
+                                            class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                            :class="newProduct.designType === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-900 shadow-2xs ring-1 ring-purple-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
                                         >
-                                            <input type="radio" value="dropship" x-model="newProduct.type" class="sr-only">
-                                            <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'dropship' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
-                                            <span>Dropshipping</span>
-                                        </label>
+                                            <span class="w-2.5 h-2.5 rounded-full" :class="newProduct.designType === 'con_diseno' ? 'bg-purple-600' : 'bg-slate-300'"></span>
+                                            <span>Con Diseño (Estampado / Pattern)</span>
+                                        </button>
                                     </div>
                                 </div>
 
-                                <!-- Sección Vitrina y Publicación -->
-                                <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                    <div class="flex-1 mr-3">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Seccion Vitrina</label>
-                                        <select 
-                                            x-model="newProduct.websiteSection"
-                                            class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none"
-                                        >
-                                            <template x-for="sec in storeSections" :key="sec.id || sec.slug">
-                                                <option :value="sec.slug" :selected="newProduct.websiteSection === sec.slug" x-text="sec.name"></option>
-                                            </template>
-                                        </select>
+                                <!-- Modalidad Logística & Sección Vitrina -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-slate-100">
+                                    <!-- Modalidad Logística -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Modalidad Logística</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <label 
+                                                class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                :class="newProduct.type === 'propio' ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                            >
+                                                <input type="radio" value="propio" x-model="newProduct.type" class="sr-only">
+                                                <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                                <span>Propio</span>
+                                            </label>
+                                            <label 
+                                                class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                :class="newProduct.type === 'dropship' ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                            >
+                                                <input type="radio" value="dropship" x-model="newProduct.type" class="sr-only">
+                                                <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'dropship' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                                                <span>Dropship</span>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-2 pt-3">
-                                        <input 
-                                            type="checkbox" 
-                                            id="new_prod_published" 
-                                            x-model="newProduct.isPublished"
-                                            class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                        >
-                                        <label for="new_prod_published" class="text-xs font-bold text-slate-700 cursor-pointer">Publicar</label>
+
+                                    <!-- Regla: Sección Vitrina con Botón + Vitrina -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Sección Vitrina</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickStoreSectionModal('newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta una nueva vitrina web in situ"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Vitrina</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <select 
+                                                x-model="newProduct.websiteSection" 
+                                                class="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                                <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                    <option :value="sec.slug" :selected="newProduct.websiteSection === sec.slug" x-text="sec.name"></option>
+                                                </template>
+                                            </select>
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <input type="checkbox" id="new_prod_published_step2" x-model="newProduct.isPublished" class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                                <label for="new_prod_published_step2" class="text-xs font-bold text-slate-700 cursor-pointer">Publicar</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Pie de Navegación del Paso 2 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(1)" 
+                                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        <span>Paso 1: Fotos & Colores</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(3)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>Continuar a Variantes & Slotting</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- ========================================================= -->
-                        <!-- PANEL 2: MATRIZ DE TALLAS, CURVAS & ATRIBUTOS (4 COLS)    -->
-                        <!-- ========================================================= -->
-                        <div class="lg:col-span-4 space-y-5">
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
+                            <!-- PASO 3: DIMENSIÓN DE VARIANTE, MATRIZ DE STOCK, TELA (SOLO TEXTIL) & SLOTTING -->
+                            <div id="step-3-matrix" x-show="workstationStep === 3" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">2</div>
-                                        <h3 class="font-bold text-slate-800 text-sm">Matriz & Curva de Tallas</h3>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">3</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Dimensión de Variante, Stock & Almacén</h3>
+                                            <p class="text-[11px] text-slate-500">Curvas de patronaje, matriz dinámica, composición textil y slotting</p>
+                                        </div>
                                     </div>
                                     <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Inventario</span>
                                 </div>
@@ -4440,7 +4630,7 @@
                                     </div>
                                     <select 
                                         x-model="newProduct.variantDimension" 
-                                        @change="onVariantDimensionChange()"
+                                        @change="onVariantDimensionChange()" 
                                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                     >
                                         <option value="size">Tallas Textiles (Curvas de Patronaje)</option>
@@ -4453,7 +4643,6 @@
                                 <!-- Matriz Dinámica para Dimensión Tallas (Textil) -->
                                 <template x-if="newProduct.variantDimension === 'size'">
                                     <div class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                        <!-- Selector de Curva de Tallas Configurable (TASK-INV-14) -->
                                         <div>
                                             <div class="flex items-center justify-between mb-1">
                                                 <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Curva de Tallas del Proveedor</label>
@@ -4461,7 +4650,7 @@
                                             </div>
                                             <select 
                                                 x-model="newProduct.selectedSizeCurveId" 
-                                                @change="onSizeCurveChange()"
+                                                @change="onSizeCurveChange()" 
                                                 class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                             >
                                                 <template x-for="curve in getAvailableSizeCurves(newProduct.supplier_id, newProduct.brand)" :key="curve.id">
@@ -4470,10 +4659,9 @@
                                             </select>
                                         </div>
 
-                                        <!-- Grid Reactivo de Tallas Dinámicas -->
                                         <div>
                                             <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Stock Inicial por Talla (Piezas)</label>
-                                            <div class="grid grid-cols-3 gap-2">
+                                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                                 <template x-for="sz in getCurrentNewProductSizes()" :key="sz.code">
                                                     <div class="bg-white p-2 rounded-lg border border-slate-200 text-center shadow-2xs">
                                                         <span class="text-xs font-bold text-indigo-700 block" x-text="sz.code"></span>
@@ -4481,7 +4669,7 @@
                                                             type="number" 
                                                             min="0" 
                                                             x-model.number="newProduct.sizes[(sz.code || '').toLowerCase()]" 
-                                                            placeholder="0"
+                                                            placeholder="0" 
                                                             class="w-full text-center mt-1 py-0.5 text-xs font-bold border border-slate-200 rounded focus:border-indigo-600 focus:outline-none"
                                                         >
                                                     </div>
@@ -4500,7 +4688,7 @@
                                 <template x-if="newProduct.variantDimension === 'shade'">
                                     <div class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
                                         <div class="flex items-center justify-between">
-                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tonos Cosmeticos (Shades)</label>
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tonos Cosméticos (Shades)</label>
                                             <span class="text-[10px] text-slate-400">6 Tonos</span>
                                         </div>
                                         <div class="grid grid-cols-3 gap-2">
@@ -4536,7 +4724,7 @@
                                 <template x-if="newProduct.variantDimension === 'volume'">
                                     <div class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
                                         <div class="flex items-center justify-between">
-                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Volumenes de Presentacion</label>
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Volúmenes de Presentación</label>
                                             <span class="text-[10px] text-slate-400">Mililitros</span>
                                         </div>
                                         <div class="grid grid-cols-3 gap-2">
@@ -4556,10 +4744,10 @@
                                     </div>
                                 </template>
 
-                                <!-- Pieza Única / Accesorio -->
+                                <!-- Pieza Única / Accesorio Fijo -->
                                 <template x-if="newProduct.variantDimension === 'none'">
                                     <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Stock Fisico Inicial</label>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Stock Físico Inicial (Pieza Única)</label>
                                         <input 
                                             type="number" 
                                             min="0" 
@@ -4569,15 +4757,15 @@
                                     </div>
                                 </template>
 
-                                <!-- Atributos Físicos: Tela & Color -->
-                                <div class="grid grid-cols-2 gap-3 pt-2">
-                                    <div>
-                                        <div class="flex items-center justify-between mb-1">
-                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Tipo de Tela</label>
+                                <!-- Regla CRÍTICA: Tipo de Tela solo visible si la dimensión es textil (size) -->
+                                <template x-if="newProduct.variantDimension === 'size'">
+                                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tipo de Tela & Fibras Textiles</label>
                                             <button 
                                                 type="button" 
                                                 @click.stop="openQuickFabricModal('newProduct')" 
-                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
                                                 title="Dar de alta tipo de tela in situ si no existe"
                                             >
                                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -4586,223 +4774,102 @@
                                         </div>
                                         <select 
                                             x-model="newProduct.fabricType" 
-                                            @change="updateDynamicSku()"
-                                            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            @change="updateDynamicSku()" 
+                                            class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                         >
                                             <template x-for="fab in apparelFabrics" :key="fab.id">
                                                 <option :value="fab.name" :selected="newProduct.fabricType === fab.name" x-text="fab.name"></option>
                                             </template>
                                         </select>
                                     </div>
-                                    <div>
-                                        <div class="flex items-center justify-between mb-1">
-                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Color / Swatch</label>
-                                            <button 
-                                                type="button" 
-                                                @click.stop="openQuickColorModal('newProduct')" 
-                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                                title="Dar de alta nuevo color in situ sin salir del workstation"
-                                            >
-                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                                <span>+ Color</span>
-                                            </button>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <input 
-                                                type="color" 
-                                                x-model="newProduct.colorHex" 
-                                                class="w-7 h-7 p-0 border border-slate-300 rounded cursor-pointer shrink-0"
-                                            >
-                                            <select 
-                                                x-model="newProduct.colorName" 
-                                                @change="const c = apparelColors.find(x => x.name === newProduct.colorName); if(c && c.hex && !c.hex.includes('gradient')) newProduct.colorHex = c.hex; updateDynamicSku();"
-                                                class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
-                                            >
-                                                <template x-for="col in apparelColors" :key="col.id">
-                                                    <option :value="col.name" :selected="newProduct.colorName === col.name" x-text="col.name"></option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+                                </template>
 
-                                <!-- Slotting de Almacén en Bodega -->
-                                <div class="pt-2 border-t border-slate-100">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Ubicacion en Bodega (Slotting)</label>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <div>
-                                            <span class="text-[10px] text-slate-400 block mb-0.5">Pasillo</span>
-                                            <select x-model="newProduct.aisle" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold">
+                                <!-- Ubicación en Bodega (Slotting) (Color Principal removido por Regla UX 3) -->
+                                <div class="pt-3 border-t border-slate-100">
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Ubicación en Bodega (Slotting)</label>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Pasillo</span>
+                                            <select x-model="newProduct.aisle" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-slate-800">
                                                 <option value="A">Pasillo A</option>
                                                 <option value="B">Pasillo B</option>
                                                 <option value="C">Pasillo C</option>
+                                                <option value="D">Pasillo D</option>
                                             </select>
                                         </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-400 block mb-0.5">Rack</span>
-                                            <input type="text" x-model="newProduct.rack" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-center">
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Rack / Estante</span>
+                                            <input type="text" x-model="newProduct.rack" placeholder="01" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-slate-800">
                                         </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-400 block mb-0.5">Gaveta</span>
-                                            <input type="text" x-model="newProduct.bin" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-center">
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Gaveta / Bin</span>
+                                            <input type="text" x-model="newProduct.bin" placeholder="A" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-slate-800">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Galería de Imágenes con Estandarización 4:5 y Asignación de Color -->
-                                <div class="pt-2 border-t border-slate-100 space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Fotografías Estándar 4:5</label>
-                                        <span class="text-[10px] font-semibold text-slate-400" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
-                                    </div>
-                                    
-                                    <!-- Dropzone que dispara el Modal de Recorte 4:5 -->
-                                    <div 
-                                        @dragover.prevent="isDraggingImages = true"
-                                        @dragleave.prevent="isDraggingImages = false"
-                                        @drop.prevent="handleWorkstationImageDrop($event)"
-                                        class="border-2 border-dashed rounded-xl p-3 text-center transition cursor-pointer"
-                                        :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/70'"
-                                        @click="$refs.newProductFileInput.click()"
+                                <!-- Pie de Navegación del Paso 3 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(2)" 
+                                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                        <input 
-                                            type="file" 
-                                            x-ref="newProductFileInput" 
-                                            @change="handleWorkstationImageSelect($event)"
-                                            accept="image/jpeg,image/png,image/webp,image/avif" 
-                                            class="hidden"
-                                        >
-                                        <div class="flex flex-col items-center justify-center gap-1 text-slate-600">
-                                            <div class="w-8 h-8 rounded-lg bg-white border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-2xs">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                </svg>
-                                            </div>
-                                            <span class="text-xs font-bold text-slate-800">Cargar Foto & Encuadrar 4:5</span>
-                                            <span class="text-[10px] text-slate-500">Abre editor interactivo con recorte a 1080×1350 px</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Entrada de Foto Manual por URL (Regla 2) -->
-                                    <div class="flex items-center gap-1.5">
-                                        <input 
-                                            type="url" 
-                                            x-model="newProductManualImageUrl" 
-                                            @keydown.enter.prevent="addManualImageUrlToNewProduct()" 
-                                            placeholder="Pegar URL de foto adicional (https://...)" 
-                                            class="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
-                                        >
-                                        <button 
-                                            type="button" 
-                                            @click="addManualImageUrlToNewProduct()" 
-                                            class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
-                                            title="Agregar fotografía manualmente por URL"
-                                        >
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>+ URL</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- Galería de Miniaturas con Asignación de Color de Prenda (Regla 2) -->
-                                    <template x-if="newProduct.images && newProduct.images.length > 0">
-                                        <div class="space-y-2 mt-2 max-h-56 overflow-y-auto pr-1">
-                                            <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
-                                                <div class="flex items-center gap-2 p-1.5 bg-slate-50 rounded-lg border border-slate-200 hover:border-indigo-300 transition">
-                                                    <div class="relative w-12 h-15 rounded overflow-hidden border border-slate-200 bg-white shrink-0">
-                                                        <img :src="resolveProductImage(img)" class="w-full h-full object-cover">
-                                                        <span x-show="img.is_primary" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-bold px-1 rounded shadow-xs">Portada</span>
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center justify-between mb-0.5">
-                                                            <span class="text-[10px] font-bold text-slate-700 truncate" x-text="img.name || ('Foto ' + (idx + 1))"></span>
-                                                            <div class="flex items-center gap-1">
-                                                                <button type="button" @click.stop="setPrimaryImage(idx)" class="px-1.5 py-0.5 rounded bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 text-[9px] font-bold transition" title="Hacer Portada Principal">Portada</button>
-                                                                <button type="button" @click.stop="removeImage(idx)" class="p-0.5 rounded text-rose-500 hover:bg-rose-50 transition" title="Eliminar foto">
-                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <!-- Selector de Color de Prenda para esta Foto + Botón In Situ + Color -->
-                                                        <div class="flex items-center gap-1.5">
-                                                            <span class="text-[9px] text-slate-400 font-semibold uppercase">Color:</span>
-                                                            <select 
-                                                                x-model="img.color_name" 
-                                                                class="flex-1 p-0.5 text-[11px] bg-white border border-slate-200 rounded font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                            >
-                                                                <template x-for="col in apparelColors" :key="col.id">
-                                                                    <option :value="col.name" :selected="col.name === img.color_name" x-text="col.name"></option>
-                                                                </template>
-                                                            </select>
-                                                            <button 
-                                                                type="button" 
-                                                                @click.stop="openQuickColorModal('newProduct', resolveProductImage(img))" 
-                                                                class="px-1 py-0.5 text-[9px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
-                                                                title="Dar de alta color in situ para esta foto"
-                                                            >
-                                                                + Color
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        <span>Paso 2: Datos & Diseño</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(4)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>Continuar a Copiloto & Pricing</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
                                 </div>
-
                             </div>
-                        </div>
 
-                        <!-- ========================================================= -->
-                        <!-- PANEL 3: COPILOTO IA, SEO & PRICING COMERCIAL (4 COLS)    -->
-                        <!-- ========================================================= -->
-                        <div class="lg:col-span-4 space-y-5">
-                            
-                            <!-- Tarjeta Copiloto IA Comercial -->
-                            <div class="bg-white p-5 rounded-2xl border border-indigo-200/90 shadow-2xs space-y-4 relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-28 h-28 bg-indigo-50 rounded-bl-full pointer-events-none -z-0 opacity-60"></div>
-                                
-                                <div class="flex items-center justify-between pb-3 border-b border-indigo-100 relative z-10">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">3</div>
-                                        <h3 class="font-bold text-slate-800 text-sm">Copiloto Comercial IA</h3>
+                            <!-- PASO 4: COPILOTO COMERCIAL IA, PRICING & AUTO-SKU -->
+                            <div id="step-4-copilot-sku" x-show="workstationStep === 4" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">4</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Copiloto IA, Pricing Comercial & Auto-SKU</h3>
+                                            <p class="text-[11px] text-slate-500">Copy persuasivo B2C, tags SEO, cálculo de margen y codificación SKU</p>
+                                        </div>
                                     </div>
                                     <button 
                                         type="button" 
                                         @click="generateAiDescription()" 
-                                        :disabled="newProduct.isGeneratingAi"
+                                        :disabled="newProduct.isGeneratingAi" 
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                        title="Generar descripcion persuasiva y tags SEO con IA"
                                     >
-                                        <svg x-show="!newProduct.isGeneratingAi" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        <svg x-show="newProduct.isGeneratingAi" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                        </svg>
+                                        <svg x-show="!newProduct.isGeneratingAi" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                        <svg x-show="newProduct.isGeneratingAi" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                         <span x-text="newProduct.isGeneratingAi ? 'Redactando...' : 'Generar con IA'"></span>
                                     </button>
                                 </div>
 
                                 <!-- Descripción Persuasiva Comercial (Regla: Máximo 75 caracteres) -->
-                                <div class="relative z-10">
+                                <div>
                                     <div class="flex items-center justify-between mb-1">
                                         <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Descripción Persuasiva (B2C)</label>
-                                        <span class="text-[10px] font-semibold" :class="(newProduct.description || '').length > 75 ? 'text-rose-600 font-bold' : 'text-slate-400'" x-text="((newProduct.description || '').length) + ' / 75 car.'"></span>
+                                        <span class="text-[10px] font-bold" :class="(newProduct.description || '').length > 75 ? 'text-rose-600 font-extrabold' : 'text-slate-400'" x-text="((newProduct.description || '').length) + ' / 75 car.'"></span>
                                     </div>
                                     <textarea 
                                         x-model="newProduct.description" 
-                                        maxlength="75"
+                                        maxlength="75" 
                                         rows="2" 
-                                        placeholder="Máximo 75 caracteres. Confort premium, soporte y máxima suavidad..."
+                                        placeholder="Máximo 75 caracteres. Confort premium, soporte y máxima suavidad..." 
                                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 resize-none"
                                     ></textarea>
                                 </div>
 
                                 <!-- Viñetas / Puntos Clave Técnicos -->
                                 <template x-if="newProduct.bulletPoints && newProduct.bulletPoints.length > 0">
-                                    <div class="relative z-10 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
-                                        <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1.5">Especificaciones Tecnicas</span>
+                                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                        <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1.5">Especificaciones Técnicas</span>
                                         <ul class="space-y-1 text-[11px] text-slate-700">
                                             <template x-for="(bp, bIdx) in newProduct.bulletPoints" :key="bIdx">
                                                 <li class="flex items-start gap-1.5">
@@ -4814,9 +4881,9 @@
                                     </div>
                                 </template>
 
-                                <!-- Tags SEO & Vitrina Web -->
-                                <div class="relative z-10">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Tags SEO & Busqueda Storefront</label>
+                                <!-- Tags SEO & Búsqueda Storefront -->
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Tags SEO & Búsqueda Frontstore</label>
                                     <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[44px]">
                                         <template x-for="(tag, tIdx) in newProduct.seoTags" :key="tIdx">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200 shadow-2xs">
@@ -4834,78 +4901,355 @@
                                     </div>
                                     <p class="text-[10px] text-slate-400 mt-1">Escribe una palabra clave y presiona Enter para agregarla.</p>
                                 </div>
-                            </div>
 
-                            <!-- Tarjeta Pricing & Margen en Tiempo Real -->
-                            <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl border border-slate-800 shadow-sm space-y-4">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-                                    <h4 class="font-bold text-xs text-white uppercase tracking-wider">Margen Comercial & Pricing</h4>
-                                    <span class="text-[10px] text-indigo-300 font-semibold">Calculo Reactivo</span>
-                                </div>
+                                <!-- Margen Comercial & Pricing -->
+                                <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-4.5 rounded-2xl border border-slate-800 space-y-3.5 shadow-sm">
+                                    <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                                        <h4 class="font-bold text-xs text-white uppercase tracking-wider">Margen Comercial & Pricing</h4>
+                                        <span class="text-[10px] text-indigo-300 font-semibold">Cálculo Reactivo</span>
+                                    </div>
 
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="text-[10px] text-slate-300 block mb-1">Precio Venta (PVP)</label>
-                                        <div class="relative">
-                                            <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="text-[10px] text-slate-300 block mb-1">Precio Venta (PVP)</label>
+                                            <div class="relative">
+                                                <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.5" 
+                                                    x-model.number="newProduct.pvp" 
+                                                    class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                                >
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-slate-300 block mb-1">Costo Unitario</label>
+                                            <div class="relative">
+                                                <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.5" 
+                                                    x-model.number="newProduct.cost" 
+                                                    class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block">Utilidad por Pieza:</span>
+                                            <strong class="text-emerald-400 text-sm font-mono" x-text="formatCurrency(calculateNewProductProfit())"></strong>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] text-slate-400 block">Margen Bruto:</span>
+                                            <div class="flex items-center gap-1.5 justify-end">
+                                                <span 
+                                                    class="text-sm font-extrabold font-mono" 
+                                                    :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
+                                                    x-text="calculateNewProductMargin() + '%'"
+                                                ></span>
+                                                <span 
+                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" 
+                                                    :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateNewProductMargin() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')" 
+                                                    x-text="calculateNewProductMargin() >= 50 ? 'Saludable' : (calculateNewProductMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
+                                                ></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Proveedor URL si es dropshipping -->
+                                    <template x-if="newProduct.type === 'dropship'">
+                                        <div class="pt-2 border-t border-slate-800">
+                                            <label class="text-[10px] text-slate-400 block mb-1">Enlace / SKU Proveedor Mayorista</label>
                                             <input 
-                                                type="number" 
-                                                step="0.5" 
-                                                x-model.number="newProduct.pvp" 
-                                                class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                                type="text" 
+                                                x-model="newProduct.providerUrl" 
+                                                placeholder="https://torzo.com/items/..." 
+                                                class="w-full px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 focus:outline-none"
                                             >
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] text-slate-300 block mb-1">Costo Unitario</label>
-                                        <div class="relative">
-                                            <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
-                                            <input 
-                                                type="number" 
-                                                step="0.5" 
-                                                x-model.number="newProduct.cost" 
-                                                class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                    </template>
+                                </div>
+
+                                <!-- Codificación SKU Oficial con Botón Auto-SKU y Candado -->
+                                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Código SKU Oficial</label>
+                                            <button 
+                                                type="button" 
+                                                @click="generateAutoSku()" 
+                                                :disabled="newProduct.isGeneratingSku" 
+                                                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition cursor-pointer shadow-2xs"
+                                                title="Generar SKU automático"
                                             >
+                                                <svg x-show="!newProduct.isGeneratingSku" class="w-3 h-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                <svg x-show="newProduct.isGeneratingSku" class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                <span>Auto-SKU</span>
+                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                                    <div>
-                                        <span class="text-[10px] text-slate-400 block">Utilidad por Pieza:</span>
-                                        <strong class="text-emerald-400 text-sm font-mono" x-text="formatCurrency(calculateNewProductProfit())"></strong>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[10px] text-slate-400 block">Margen Bruto:</span>
-                                        <div class="flex items-center gap-1.5 justify-end">
-                                            <span 
-                                                class="text-sm font-extrabold font-mono" 
-                                                :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
-                                                x-text="calculateNewProductMargin() + '%'"
-                                            ></span>
-                                            <span 
-                                                class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
-                                                :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateNewProductMargin() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
-                                                x-text="calculateNewProductMargin() >= 50 ? 'Saludable' : (calculateNewProductMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
-                                            ></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Proveedor URL si es dropshipping -->
-                                <template x-if="newProduct.type === 'dropship'">
-                                    <div class="pt-2 border-t border-slate-800">
-                                        <label class="text-[10px] text-slate-400 block mb-1">Enlace / SKU Proveedor Mayorista</label>
-                                        <input 
-                                            type="text" 
-                                            x-model="newProduct.providerUrl" 
-                                            placeholder="https://torzo.com/items/..." 
-                                            class="w-full px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 focus:outline-none"
+                                        <button 
+                                            type="button" 
+                                            @click="toggleSkuLock()" 
+                                            class="text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer" 
+                                            :class="newProduct.skuLocked ? 'text-slate-500 hover:text-slate-700' : 'text-amber-600 hover:text-amber-700'"
                                         >
+                                            <svg x-show="newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            <svg x-show="!newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                            <span x-text="newProduct.skuLocked ? 'Bloqueado' : 'Edición Manual'"></span>
+                                        </button>
                                     </div>
-                                </template>
+                                    <input 
+                                        type="text" 
+                                        x-model="newProduct.sku" 
+                                        :disabled="newProduct.skuLocked" 
+                                        placeholder="TXT-DAJ-0001-UNI" 
+                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-80 disabled:cursor-not-allowed"
+                                    >
+                                    <p class="text-[10px] text-slate-400">Formato: [PREFIJO]-[MARCA]-[CORRELATIVO 4D]-[VARIANTE]</p>
+                                </div>
+
+                                <!-- Pie de Navegación del Paso 4 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(3)" 
+                                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        <span>Paso 3: Variantes & Slotting</span>
+                                    </button>
+                                    <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Listo para Dar de Alta en el Footer</span>
+                                    </span>
+                                </div>
                             </div>
 
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- COLUMNA 2: RESUMEN DE FICHA DE PRODUCTO EN VIVO (5 COLS)  -->
+                        <!-- ========================================================= -->
+                        <div class="lg:col-span-5 sticky top-0">
+                            <div class="bg-white rounded-3xl border border-slate-200/90 shadow-lg overflow-hidden flex flex-col h-[650px] max-h-[82vh]">
+                                
+                                <!-- ========================================================= -->
+                                <!-- SECCIÓN SUPERIOR (30% DE LA ALTURA): GALERÍA DE RESUMEN  -->
+                                <!-- ========================================================= -->
+                                <div class="h-[30%] min-h-[170px] max-h-[210px] bg-slate-950 p-3 relative flex flex-col justify-between shrink-0 border-b border-slate-800">
+                                    <!-- Header de la Galería -->
+                                    <div class="flex items-center justify-between pb-1 z-10">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-300">Galería de Ficha</span>
+                                            <span class="text-[9px] font-bold text-slate-400" x-text="'(' + (newProduct.images ? newProduct.images.length : 0) + ')'"></span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 tracking-wide uppercase">Live Preview</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Render de todas las imágenes cargadas del producto (Portada 10% más grande) -->
+                                    <div class="flex-1 flex items-center justify-center overflow-hidden py-1">
+                                        <!-- Cuando hay imágenes cargadas -->
+                                        <template x-if="newProduct.images && newProduct.images.length > 0">
+                                            <div class="flex items-center gap-2.5 overflow-x-auto px-2 py-1 h-full w-full justify-start scrollbar-thin">
+                                                <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
+                                                    <div 
+                                                        @click="setPrimaryImage(idx)"
+                                                        class="relative shrink-0 rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col items-center justify-center group"
+                                                        :class="img.is_primary 
+                                                            ? 'w-[75px] h-[95px] scale-110 z-10 mx-1.5 ring-2 ring-indigo-500 border-indigo-400 shadow-md shadow-indigo-500/20' 
+                                                            : 'w-[68px] h-[86px] border-slate-700/80 opacity-80 hover:opacity-100 hover:border-slate-500'"
+                                                        :title="img.is_primary ? 'Imagen de Portada (10% destacada)' : 'Hacer portada'"
+                                                    >
+                                                        <img :src="resolveProductImage(img)" class="w-full h-full object-cover">
+                                                        
+                                                        <!-- Badge Portada en la imagen principal -->
+                                                        <div x-show="img.is_primary" class="absolute top-1 left-1 bg-indigo-600/90 text-white text-[7px] font-extrabold px-1 py-0.5 rounded shadow-xs uppercase tracking-wider backdrop-blur-xs">
+                                                            Portada
+                                                        </div>
+
+                                                        <!-- Badge de color asociado a la variante de la foto -->
+                                                        <div class="absolute bottom-1 inset-x-1 flex items-center justify-center pointer-events-none">
+                                                            <span class="px-1 py-0.5 rounded text-[8px] font-bold bg-slate-900/85 text-white truncate max-w-full backdrop-blur-xs border border-white/10" x-text="img.color_name || 'Color'"></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Estado Vacío cuando no hay imágenes -->
+                                        <template x-if="!newProduct.images || newProduct.images.length === 0">
+                                            <div class="flex flex-col items-center justify-center text-slate-500 p-2 text-center">
+                                                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-1">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                </div>
+                                                <span class="text-[11px] font-bold text-slate-400">Sin Fotografías Cargadas</span>
+                                                <span class="text-[9px] text-slate-600">Sube fotos en el Paso 1</span>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Badges flotantes en la barra inferior de galería -->
+                                    <div class="flex items-center justify-between text-[9px] pt-1 border-t border-slate-800/80 text-slate-400">
+                                        <span class="font-mono font-bold text-slate-300" x-text="newProduct.sku || 'SKU PENDIENTE'"></span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span 
+                                                class="px-1.5 py-0.5 rounded font-bold uppercase text-[8px]"
+                                                :class="newProduct.type === 'dropship' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-indigo-950 text-indigo-300 border border-indigo-800'"
+                                                x-text="newProduct.type === 'dropship' ? 'Dropship' : 'Propio'"
+                                            ></span>
+                                            <span 
+                                                class="px-1.5 py-0.5 rounded font-extrabold uppercase text-[8px]"
+                                                :class="newProduct.isPublished ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-700/60' : 'bg-slate-800 text-slate-400 border border-slate-700'"
+                                                x-text="newProduct.isPublished ? 'Público' : 'Borrador'"
+                                            ></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ========================================================= -->
+                                <!-- SECCIÓN INFERIOR (70% DE LA ALTURA): INFORMACIÓN EN VIVO  -->
+                                <!-- ========================================================= -->
+                                <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs bg-white">
+                                    <!-- Nombre & Clasificación & Tipificación -->
+                                    <div class="space-y-1 pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="newProduct.category || 'Categoría'"></span>
+                                            <template x-if="newProduct.subcategory">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" x-text="newProduct.subcategory"></span>
+                                            </template>
+                                            <span 
+                                                class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                                :class="newProduct.designType === 'con_diseno' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-slate-100 text-slate-700 border border-slate-200'"
+                                                x-text="newProduct.designType === 'con_diseno' ? 'Con Diseño' : 'Color Liso'"
+                                            ></span>
+                                        </div>
+                                        <h4 class="text-base font-extrabold text-slate-900 leading-snug" x-text="newProduct.name || 'Nombre del modelo en preparación...'"></h4>
+                                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+                                            <span class="text-indigo-700 font-bold" x-text="newProduct.brand || 'Sin Marca'"></span>
+                                            <span class="text-slate-300">•</span>
+                                            <span x-text="getSupplierName(newProduct.supplier_id) || newProduct.provider || 'Sin Proveedor'"></span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Vitrina Web & Slotting de Almacén -->
+                                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div class="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                                            <span class="text-[9px] text-indigo-500 font-bold uppercase block mb-0.5">Vitrina Web</span>
+                                            <span class="font-bold text-indigo-900 truncate block" x-text="getStoreSectionName(newProduct.websiteSection)"></span>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                            <span class="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Ubicación Bodega</span>
+                                            <span class="font-bold text-slate-800 truncate block font-mono" x-text="'Pasillo ' + (newProduct.aisle || 'A') + ' • R' + (newProduct.rack || '01') + ' • G' + (newProduct.bin || 'A')"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fila de Tejido / Modalidad (Solo si es textil se muestra tipo de tela) -->
+                                    <template x-if="newProduct.variantDimension === 'size'">
+                                        <div class="p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-100/70 flex items-center justify-between">
+                                            <span class="text-[10px] text-indigo-900 font-bold uppercase">Tejido / Tela:</span>
+                                            <span class="font-extrabold text-indigo-700 text-xs" x-text="newProduct.fabricType || 'No especificada'"></span>
+                                        </div>
+                                    </template>
+
+                                    <!-- Resumen de Stock por Matriz -->
+                                    <div class="space-y-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Existencias Preparadas</span>
+                                            <span class="font-extrabold text-indigo-700 text-xs" x-text="calculateNewProductTotalStock() + ' piezas'"></span>
+                                        </div>
+                                        
+                                        <!-- Desglose Tallas Textiles -->
+                                        <template x-if="newProduct.variantDimension === 'size'">
+                                            <div class="flex flex-wrap gap-1">
+                                                <template x-for="sz in getCurrentNewProductSizes()" :key="sz.code">
+                                                    <span 
+                                                        class="px-2 py-0.5 rounded text-[10px] font-bold border"
+                                                        :class="(newProduct.sizes[(sz.code || '').toLowerCase()] || 0) > 0 ? 'bg-indigo-100 border-indigo-300 text-indigo-900' : 'bg-white border-slate-200 text-slate-400'"
+                                                    >
+                                                        <span x-text="sz.code + ': '"></span>
+                                                        <span x-text="newProduct.sizes[(sz.code || '').toLowerCase()] || 0"></span>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Desglose Tonos Cosméticos -->
+                                        <template x-if="newProduct.variantDimension === 'shade'">
+                                            <div class="flex flex-wrap gap-1 text-[10px]">
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T01: ' + (newProduct.shades.t01 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T02: ' + (newProduct.shades.t02 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T03: ' + (newProduct.shades.t03 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T04: ' + (newProduct.shades.t04 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T05: ' + (newProduct.shades.t05 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T06: ' + (newProduct.shades.t06 || 0)"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- Desglose Volúmenes -->
+                                        <template x-if="newProduct.variantDimension === 'volume'">
+                                            <div class="flex flex-wrap gap-1 text-[10px]">
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'10ml: ' + (newProduct.volumes.v10 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'50ml: ' + (newProduct.volumes.v50 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'100ml: ' + (newProduct.volumes.v100 || 0)"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- Desglose Pieza Única -->
+                                        <template x-if="newProduct.variantDimension === 'none'">
+                                            <div class="text-[11px] font-bold text-slate-700">
+                                                <span x-text="'Piezas únicas en stock: ' + (newProduct.unitStock || 0)"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Pricing & Margen en Vivo -->
+                                    <div class="p-3 bg-slate-900 text-white rounded-xl space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-[9px] text-slate-400 uppercase block font-semibold">PVP Comercial</span>
+                                                <span class="text-base font-extrabold text-white font-mono" x-text="formatCurrency(newProduct.pvp || 0)"></span>
+                                            </div>
+                                            <div class="text-center">
+                                                <span class="text-[9px] text-slate-400 uppercase block font-semibold">Costo</span>
+                                                <span class="text-xs font-bold text-slate-300 font-mono" x-text="formatCurrency(newProduct.cost || 0)"></span>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[9px] text-slate-400 uppercase block font-semibold">Margen Bruto</span>
+                                                <span 
+                                                    class="text-sm font-extrabold font-mono"
+                                                    :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')"
+                                                    x-text="calculateNewProductMargin() + '%'"
+                                                ></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Copy Persuasivo & Tags SEO -->
+                                    <template x-if="newProduct.description">
+                                        <div class="p-3 bg-indigo-50/40 rounded-xl border border-indigo-100/80">
+                                            <span class="text-[9px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">Copy Persuasivo B2C</span>
+                                            <p class="text-[11px] text-slate-700 italic leading-snug" x-text="newProduct.description"></p>
+                                        </div>
+                                    </template>
+
+                                    <!-- Tags SEO Chips -->
+                                    <template x-if="newProduct.seoTags && newProduct.seoTags.length > 0">
+                                        <div class="space-y-1">
+                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tags de Indexación Frontstore</span>
+                                            <div class="flex flex-wrap gap-1">
+                                                <template x-for="(tag, tIdx) in newProduct.seoTags" :key="tIdx">
+                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200" x-text="'#' + tag"></span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -8444,7 +8788,35 @@
                                     <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingColor ? 'Editar Color: ' + colorForm.name : 'Registrar Nuevo Color o Tornasol'"></h4>
                                     <span x-show="isEditingColor" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+
+                                <!-- Checkbox Opción Multicolor Nativa (Regla de Negocio) -->
+                                <div class="p-3 bg-gradient-to-r from-red-50 via-amber-50 to-indigo-50 rounded-xl border border-indigo-200 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <input 
+                                            type="checkbox" 
+                                            id="settingsColorIsMulticolor" 
+                                            x-model="colorForm.isMulticolor"
+                                            class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                        <label for="settingsColorIsMulticolor" class="text-xs font-bold text-slate-900 cursor-pointer flex items-center gap-1.5">
+                                            <span class="w-3.5 h-3.5 rounded-full inline-block shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                            <span>Opción Multicolor (Arcoíris del Sistema)</span>
+                                        </label>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 font-semibold hidden sm:inline">Color nativo protegido por defecto. No admite eliminación ni duplicación.</span>
+                                </div>
+
+                                <template x-if="colorForm.isMulticolor">
+                                    <div class="p-3 bg-white/80 rounded-xl border border-indigo-200 text-xs text-indigo-900 flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl border border-indigo-300 shadow-sm shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></div>
+                                        <div>
+                                            <div class="font-bold text-slate-900">Color Nativo "Multicolor" Activo</div>
+                                            <div class="text-[11px] text-slate-600">Este checkbox anula la creación manual y confirma la disponibilidad de Multicolor en todo el catálogo y filtros.</div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div x-show="!colorForm.isMulticolor" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
                                     <div class="sm:col-span-4">
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Color</label>
                                         <input type="text" x-model="colorForm.name" placeholder="Ej: Esmeralda Aurora" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
@@ -8498,7 +8870,7 @@
                                 <div class="flex items-center gap-2 pt-1">
                                     <template x-if="!isEditingColor">
                                         <button type="button" @click="addNewColor()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            Agregar a la Paleta
+                                            <span x-text="colorForm.isMulticolor ? 'Confirmar Multicolor en Paleta' : 'Agregar a la Paleta'"></span>
                                         </button>
                                     </template>
                                     <template x-if="isEditingColor">
@@ -8523,20 +8895,32 @@
                                             <div class="flex items-center gap-2.5 min-w-0">
                                                 <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + (col.hex || col.gradient_css || col.hex_code || '#6366f1')"></span>
                                                 <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></div>
-                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' || col.color_type === 'gradient' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></span>
+                                                        <template x-if="col.name && col.name.toLowerCase() === 'multicolor'">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-red-500 via-amber-500 to-indigo-600 text-white shadow-2xs">Arcoíris</span>
+                                                        </template>
+                                                    </div>
+                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.name && col.name.toLowerCase() === 'multicolor' ? 'Sistema / Arcoíris' : ((col.type === 'iridescent' || col.color_type === 'gradient' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')))"></div>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-1 shrink-0">
-                                                <button type="button" @click="editColor(col)" class="p-1 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-200 transition cursor-pointer" title="Editar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                                </button>
-                                                <button type="button" @click="toggleArchiveColor(col)" class="p-1 rounded transition cursor-pointer" :class="col.is_active !== false ? 'text-amber-700 hover:bg-amber-100' : 'text-emerald-700 hover:bg-emerald-100'" :title="col.is_active !== false ? 'Archivar' : 'Restaurar'">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
-                                                </button>
-                                                <button type="button" @click="deleteColor(col.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                </button>
+                                                <template x-if="col.name && col.name.toLowerCase() === 'multicolor' || col.is_system">
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Nativo</span>
+                                                </template>
+                                                <template x-if="!(col.name && col.name.toLowerCase() === 'multicolor' || col.is_system)">
+                                                    <div class="flex items-center gap-1">
+                                                        <button type="button" @click="editColor(col)" class="p-1 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-200 transition cursor-pointer" title="Editar">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                        </button>
+                                                        <button type="button" @click="toggleArchiveColor(col)" class="p-1 rounded transition cursor-pointer" :class="col.is_active !== false ? 'text-amber-700 hover:bg-amber-100' : 'text-emerald-700 hover:bg-emerald-100'" :title="col.is_active !== false ? 'Archivar' : 'Restaurar'">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                                                        </button>
+                                                        <button type="button" @click="deleteColor(col.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </template>
@@ -12554,6 +12938,105 @@
         </div>
 
         <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE VITRINA WEB (Regla Workstation)    -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickStoreSectionModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickStoreSectionModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Nueva Vitrina Web In Situ</h3>
+                            <p class="text-[10px] text-slate-300">Sincronización directa con Ajustes de Vitrina Web</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickStoreSectionModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal de vitrina"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span>Nombre de la Vitrina / Sección Web</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickStoreSectionForm.name" 
+                            @keydown.enter.prevent="saveQuickStoreSection()"
+                            placeholder="Ej: Lo Más Vendido, Novedades Primavera, Liquidación VIP..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                        <input 
+                            type="text" 
+                            x-model="quickStoreSectionForm.slug" 
+                            placeholder="lo-mas-vendido (auto-generado si se omite)" 
+                            class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Descripción / Propósito Comercial (Opcional)</label>
+                        <textarea 
+                            x-model="quickStoreSectionForm.description" 
+                            rows="2" 
+                            placeholder="Ej: Sección destacada en la página principal para artículos con alto volumen de conversión..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Regla: Esta vitrina se creará en el catálogo y quedará sincronizada con los ajustes de vitrina web del módulo, asignándose automáticamente a este producto.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickStoreSectionModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickStoreSection()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Crear y Sincronizar Vitrina</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
         <!-- MODAL RÁPIDO DE ALTA IN SITU DE TIPO DE TELA (Regla 5)              -->
         <!-- ================================================================= -->
         <div 
@@ -12681,28 +13164,61 @@
                 </div>
 
                 <div class="p-5 space-y-3.5 text-xs">
-                    <!-- Toggle Sólido vs Tornasol -->
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Tipo de Acabado</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button 
-                                type="button" 
-                                @click="quickColorForm.type = 'solid'" 
-                                class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
-                                :class="quickColorForm.type === 'solid' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                    <!-- Checkbox de Opción Multicolor Nativa (Regla de Negocio) -->
+                    <div class="p-3 bg-gradient-to-r from-red-50 via-amber-50 to-indigo-50 rounded-xl border border-indigo-200 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <input 
+                                type="checkbox" 
+                                id="quickColorIsMulticolor" 
+                                x-model="quickColorForm.isMulticolor"
+                                class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             >
-                                Color Sólido
-                            </button>
-                            <button 
-                                type="button" 
-                                @click="quickColorForm.type = 'iridescent'" 
-                                class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
-                                :class="quickColorForm.type === 'iridescent' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
-                            >
-                                Tornasol / Degradado
-                            </button>
+                            <label for="quickColorIsMulticolor" class="text-xs font-bold text-slate-900 cursor-pointer flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-full inline-block shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                <span>Opción Multicolor (Arcoíris del Sistema)</span>
+                            </label>
                         </div>
                     </div>
+
+                    <!-- Mensaje y preview reactivo si Multicolor está seleccionado -->
+                    <template x-if="quickColorForm.isMulticolor">
+                        <div class="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl border border-indigo-300 shadow-xs shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></div>
+                                <div>
+                                    <div class="font-bold text-slate-900">Color Multicolor Nativo Seleccionado</div>
+                                    <p class="text-[11px] text-slate-600 leading-tight mt-0.5">
+                                        Anula la creación de un nuevo color y asigna directamente la opción <b>Multicolor</b> arcoíris predeterminada del sistema.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Formulario Manual (Solo si no es multicolor) -->
+                    <div x-show="!quickColorForm.isMulticolor" class="space-y-3.5">
+                        <!-- Toggle Sólido vs Tornasol -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tipo de Acabado</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button 
+                                    type="button" 
+                                    @click="quickColorForm.type = 'solid'" 
+                                    class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
+                                    :class="quickColorForm.type === 'solid' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                                >
+                                    Color Sólido
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="quickColorForm.type = 'iridescent'" 
+                                    class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
+                                    :class="quickColorForm.type === 'iridescent' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                                >
+                                    Tornasol / Degradado
+                                </button>
+                            </div>
+                        </div>
 
                     <!-- Nombre del Color -->
                     <div>
@@ -12766,8 +13282,9 @@
                         Reglas 1 y 3: Se asociará automáticamente a la prenda o a la fotografía activa para la correcta conmutación por filtros en tienda web.
                     </p>
                 </div>
+            </div>
 
-                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+            <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
                     <button 
                         type="button" 
                         @click="quickColorModalOpen = false" 
@@ -12781,7 +13298,7 @@
                         class="px-4 py-1.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
                     >
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Crear y Asignar Color</span>
+                        <span x-text="quickColorForm.isMulticolor ? 'Asignar Multicolor In Situ' : 'Crear y Asignar Color'"></span>
                     </button>
                 </div>
             </div>

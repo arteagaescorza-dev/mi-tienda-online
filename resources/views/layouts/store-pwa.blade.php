@@ -1822,7 +1822,7 @@
   <script>
     window.__INITIAL_STORE_PRODUCTS__ = @json($initialProducts ?? []);
     window.__ACTIVE_UNIVERSE__ = @json($activeUniverse ?? 'marte');
-    window.__UNIVERSE_META__ = @json($universeMeta ?? []);
+    window.__UNIVERSE_META__ = @json($universeMeta ?? [], JSON_UNESCAPED_UNICODE);
     window.__STORE_CSRF_TOKEN__ = "{{ csrf_token() }}";
     window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
   </script>

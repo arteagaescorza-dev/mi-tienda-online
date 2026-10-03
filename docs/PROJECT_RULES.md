@@ -585,6 +585,39 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
 
 ---
 
+
+### Regla 6.68: Tipificación de Producto Liso o Con Diseño en Workstation de Alta de Producto
+* **Selector Taxonómico de Diseño:** El Workstation de Alta de Producto incorpora en el Paso 2 (Taxonomía) un selector obligatorio para definir si la prenda o artículo es de "Color Liso" (`liso`) o cuenta con "Diseño / Estampado" (`con_diseno`).
+* **Reflejo Reactivo en Resumen:** La tipificación se visualiza en tiempo real en la ficha técnica (Columna 2) mediante un badge distintivo (púrpura para "Con Diseño", slate neutro para "Color Liso").
+
+### Regla 6.69: Alta In Situ de Vitrinas Web E-Commerce y Sincronización con Ajustes de Módulo
+* **Botón `+ Vitrina` en Workstation:** La selección de vitrina comercial (`websiteSection`) en el Paso 2 incluye un botón interactivo para dar de alta una nueva vitrina web sin recargar la página (`openQuickStoreSectionModal('newProduct')`).
+* **Sincronización Bidireccional:** El alta in situ crea la sección web vía API (`POST /api/v1/inventory/settings/store-sections`), la inserta en la colección reactiva `storeSections`, la auto-selecciona en el formulario del producto y la sincroniza con los ajustes generales del módulo de inventario y del storefront.
+
+### Regla 6.70: Color Multicolor Nativo de Sistema Inmutable con Degradado Arcoíris
+* **Opción Nativa "Es Multicolor":** En la creación de colores (tanto en el modal de Ajustes como en el alta in situ `+ Color`), se incluye un checkbox interactivo *"Es Multicolor"*. Al activarse, desactiva la paleta hexadecimal y define el color como *"Multicolor"*.
+* **Identidad Visual Arcoíris:** En todas las interfaces (muestrarios, swatches, fichas y tablas), el color Multicolor se representa mediante el degradado arcoíris `linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)`.
+* **Inmutabilidad y Preservación del Sistema:** El color Multicolor es una entidad predeterminada del sistema. No puede ser eliminado ni duplicado, garantizando integridad para prendas estampadas o con patrones multitonos.
+
+### Regla 6.71: Workstation Alta de Producto Paginado por Pasos (Wizard Secuencial en Columna 1)
+* **Paginación Estricta sin Desbordamiento:** El formulario de la Columna 1 abandona el scroll vertical monolítico y se divide en 4 pasos paginados e independientes gobernados por `workstationStep` (1 a 4):
+  1. **Paso 1 (Fotos & Colores):** Carga interactiva drag & drop, recorte estandarizado 4:5 (1080×1350 px), designación de foto de portada y asignación individual de variante de color por fotografía con botón in situ `+ Color`.
+  2. **Paso 2 (Datos & Diseño):** Nombre comercial, análisis de duplicados, proveedor, marca, categoría, subcategoría, conmutador Liso / Con Diseño, modalidad logística (Propio / Dropship) y vitrina web con botón `+ Vitrina`.
+  3. **Paso 3 (Variantes & Slotting):** Dimensión de variante (curvas de tallas, tonos, volúmenes, piezas únicas), selector condicional de tipo de tela (visible exclusivamente si la dimensión es textil/talla) y ubicación en bodega (slotting: Pasillo, Rack, Gaveta).
+  4. **Paso 4 (Copiloto & Pricing):** Copiloto comercial IA con redacción persuasiva B2C, tags SEO de indexación, cálculo de margen comercial bruto en tiempo real y codificación Auto-SKU.
+* **Navegación Ergonómica:** Cuenta con stepper superior interactivo con indicadores de estado e indicadores *"Paso Anterior"* y *"Siguiente Paso"* en la base de cada pantalla.
+
+### Regla 6.72: Desacoplamiento de Color Principal en Paso 3 y Asignación Exclusiva por Fotografía en Paso 1
+* **Erradicación de Redundancia:** En el Paso 3 se elimina por completo la sección *"Color Principal"*, evitando inconsistencias y duplicidad de captura.
+* **Asociación Canónica en Galería:** La relación cromática de la prenda se asigna de manera visual, directa y unívoca en cada fotografía cargada durante el Paso 1, permitiendo asociar múltiples fotos a variantes de color específicas con su respectiva muestra cromática.
+
+### Regla 6.73: División Vertical de Columna 2: Galería Superior (30% con Portada 10% Mayor) y Ficha Técnica Reactiva en Tiempo Real (70%)
+* **Aislamiento en Dos Secciones Verticales:** La Columna 2 de previsualización en vivo se estructura verticalmente sin sobrepasar la altura del viewport modal (`max-h-[82vh]`):
+  1. **Sección Superior (30% de la altura):** Galería horizontal oscura (`bg-slate-950`) que exhibe todas las fotografías cargadas del producto. La imagen designada como portada se muestra destacada, con un tamaño **un 10% mayor** (`scale-110`, anillo índigo y badge "Portada"). Cada miniatura visualiza el chip del color asignado y permite conmutar la portada en un clic.
+  2. **Sección Inferior (70% de la altura con scroll vertical fluido):** Ficha técnica reactiva que se actualiza en tiempo real al tipear en cualquier paso: categoría, subcategoría, badges de diseño y logística, nombre comercial, marca, proveedor, vitrina web, tejido textil (si aplica), matriz de existencias desglosada, ubicación en bodega (slotting), PVP, costo y margen bruto %, copy persuasivo del Copiloto IA y chips de tags SEO.
+
+---
+
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
 
 ### Regla 7.1: Bifurcación Mutuamente Excluyente del Hero (Cero Duplicados)
@@ -726,7 +759,13 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Bandeja Curaduría Real** | 259 Prendas Torzo & Cero Mocks (6.60) | Poblado real en `scraped_pending_items`, búsqueda reactiva y persistencia end-to-end |
 | **Gobernanza Ciclo Scraping** | 5 Fases, Descontinuación & Archivo (6.61) | Mapeo VSC, visto bueno curaduría, frecuencia regulable, modal discrepancias (retirar/archivar/eliminar) y herramienta de archivados |
 | **Integración Google Gemini** | Copiloto Producto & Chat Ejecutivo (6.62) | Servicio GeminiService con fallback, descripciones comerciales en Workstation y chat multi-turno en Dashboard |
-| **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
+| **Tipificación Diseño** | Liso vs Con Diseño en Workstation (6.68) | Selector explícito en Paso 2 y badge reactivo en ficha técnica |
+| **Vitrinas In Situ** | Alta Rápida de Vitrina Web (6.69) | Botón + Vitrina en Paso 2 sincronizado con ajustes de tienda |
+| **Color Multicolor** | Multicolor Arcoíris Nativo (6.70) | Checkbox "Es Multicolor", degradado 6 colores e inmutabilidad de sistema |
+| **Workstation Wizard** | 4 Pasos Paginados en Columna 1 (6.71) | Paginación secuencial por pasos (1-4) erradicando desbordamientos |
+| **Desacople Color Paso 3**| Color Exclusivo por Foto en Paso 1 (6.72) | Eliminado Color Principal de Paso 3; asignación directa en fotos |
+| **Preview 30/70 Col 2** | Galería 30% (Portada +10%) & Datos 70% (6.73) | División vertical ergonómica: fotos 30% y ficha técnica en vivo 70% |
+| **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
 

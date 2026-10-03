@@ -126,10 +126,12 @@ class StorefrontController extends Controller
 
         $announcements = Cache::get('cms_announcements', [
             ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
-            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
-            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+            ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI BBVA', 'active' => true],
+            ['id' => 3, 'text' => 'EMPAQUE 100% DISCRETO', 'active' => true],
+            ['id' => 4, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+            ['id' => 5, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+            ['id' => 6, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+            ['id' => 7, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
         ]);
 
         $sections = CmsSection::active()
@@ -1034,49 +1036,152 @@ class StorefrontController extends Controller
 
         $portalProducts = $dbProducts->map(function (Product $product) {
             $variants = $product->variants;
-            $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
-            $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
-            $availableStock = max(0, $totalStock - $totalReserved);
+            $hasVariants = $variants->isNotEmpty();
 
-            $sizes = [];
-            $committedSizes = [];
-            foreach ($variants as $v) {
-                $rawSize = data_get($v->attributes, 'size', 'u');
-                $sizeKey = strtolower(trim((string) $rawSize));
-                $vQty = (int) $v->inventories->sum('quantity');
-                $vRes = (int) $v->inventories->sum('reserved');
-                $sizes[$sizeKey] = max(0, $vQty - $vRes);
-                $committedSizes[$sizeKey] = $vRes;
+            if ($hasVariants) {
+                $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+                $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+                $availableStock = max(0, $totalStock - $totalReserved);
+
+                $sizes = [];
+                $committedSizes = [];
+                foreach ($variants as $v) {
+                    $rawSize = data_get($v->attributes, 'size', 'u');
+                    $sizeKey = strtolower(trim((string) $rawSize));
+                    $vQty = (int) $v->inventories->sum('quantity');
+                    $vRes = (int) $v->inventories->sum('reserved');
+                    $sizes[$sizeKey] = max(0, $vQty - $vRes);
+                    $committedSizes[$sizeKey] = $vRes;
+                }
+            } else {
+                $rawMetaSizes = data_get($product->meta, 'sizes', []);
+                $sizes = [];
+                if (is_array($rawMetaSizes)) {
+                    foreach ($rawMetaSizes as $k => $v) {
+                        $sizes[strtolower(trim((string) $k))] = (int) $v;
+                    }
+                }
+                $committedSizes = [];
+                $totalReserved = 0;
+                $totalStock = !empty($sizes) ? array_sum($sizes) : (int) data_get($product->meta, 'local_stock', 0);
+                $availableStock = $totalStock;
             }
 
             $sp = $product->supplierProducts->first();
-            $supplierStock = $sp && $sp->availability === 'in_stock' ? 50 : 0;
-            $mainImage = data_get($product->meta, 'image')
-                ?: (data_get($product->meta, 'images.0') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80');
-            $mainImage = str_replace('/./', '/', $mainImage);
+            $supplierStock = $sp && $sp->availability === 'in_stock' ? 50 : (int) data_get($product->meta, 'supplier_stock', 0);
+
+            $rawImg = data_get($product->meta, 'image')
+                ?: (data_get($product->meta, 'images.0') ?: (data_get($product->meta, 'gallery.0.url') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80'));
+            if (is_array($rawImg)) {
+                $rawImg = data_get($rawImg, 'url') ?: (data_get($rawImg, 'src') ?: '');
+            }
+            $mainImage = is_string($rawImg) ? str_replace('/./', '/', $rawImg) : '';
+
+            $rawGallery = data_get($product->meta, 'gallery') ?: data_get($product->meta, 'images', []);
+            $images = [];
+            $imageColorMap = data_get($product->meta, 'images_by_color') ?: data_get($product->meta, 'image_color_map', []);
+            if (is_array($rawGallery)) {
+                foreach ($rawGallery as $gItem) {
+                    if (is_string($gItem) && !empty($gItem)) {
+                        $images[] = $gItem;
+                    } elseif (is_array($gItem) && !empty($gItem['url'])) {
+                        $images[] = $gItem['url'];
+                        if (!empty($gItem['color_name']) && empty($imageColorMap[$gItem['url']])) {
+                            $imageColorMap[$gItem['url']] = $gItem['color_name'];
+                        }
+                    }
+                }
+            }
+            if (empty($images) && !empty($mainImage)) {
+                $images = [$mainImage];
+            }
 
             $cost = (float) ($product->cost ?: ($product->price * 0.5));
             $pvp = (float) $product->price;
-            $supplierName = $sp?->supplier?->name ?? ($product->brand ?: 'Torzo');
+            $regularPrice = (float) (data_get($product->meta, 'regular_price') ?: $pvp);
+            $discountPct = (float) data_get($product->meta, 'discount_pct', 0);
+
+            $supplierName = data_get($product->meta, 'provider') 
+                ?: ($sp?->supplier?->name ?: ($product->brand ?: 'Proveedor'));
+            $supplierId = data_get($product->meta, 'supplier_id') 
+                ?: ($sp?->supplier_id ? 'prov_' . $sp->supplier_id : null);
+            $supplierSku = data_get($product->meta, 'supplier_sku') ?: ($sp?->supplier_sku ?: '');
+            $supplierUrl = data_get($product->meta, 'provider_url')
+                ?: (data_get($product->meta, 'supplier_url')
+                ?: (data_get($product->meta, 'origin_url')
+                ?: (data_get($product->meta, 'source_url')
+                ?: (data_get($product->meta, 'supplierUrl')
+                ?: ($sp?->source_url ?: '')))));
+
+            $colorName = data_get($product->meta, 'color_name') ?: data_get($product->meta, 'colorName', '');
+            $colorHex = data_get($product->meta, 'color_hex') ?: data_get($product->meta, 'colorHex', '#111827');
+            $colorType = data_get($product->meta, 'color_type') ?: data_get($product->meta, 'colorType', 'monocromatico');
+            $fabricType = $product->fabric ?: (data_get($product->meta, 'fabric') ?: data_get($product->meta, 'fabric_type', data_get($product->meta, 'fabricType', '')));
+            $designType = data_get($product->meta, 'design_type') ?: data_get($product->meta, 'designType', 'sin_diseno');
+            $websiteSection = $product->section_name ?: (data_get($product->meta, 'section_name') ?: (data_get($product->meta, 'website_section') ?: data_get($product->meta, 'websiteSection', 'basicos')));
+            $location = data_get($product->meta, 'location', 'Rack A-01 / Nivel 1');
+            $brand = $product->brand ?: data_get($product->meta, 'brand', $supplierName);
+            $category = data_get($product->meta, 'category', 'Ropa Interior');
+            $subcategory = data_get($product->meta, 'subcategory', '');
+
+            $variantDimension = data_get($product->meta, 'variant_dimension', 'size');
+            $selectedSizeCurveId = data_get($product->meta, 'selected_size_curve_id', '');
+            $shades = data_get($product->meta, 'shades', []);
+            $volumes = data_get($product->meta, 'volumes', []);
+
+            $status = $availableStock > 0 ? 'Saludable' : ($supplierStock > 0 ? 'Solo proveedor' : 'Sin stock');
+            if ($availableStock > 0) {
+                $status = $availableStock < 25 ? 'Bajo Stock' : 'En Stock';
+            } elseif ($supplierStock > 0) {
+                $status = 'Sincronizado';
+            } else {
+                $status = 'Agotado';
+            }
 
             return [
                 'id' => $product->id,
+                'dbId' => $product->id,
                 'sku' => $product->sku,
-                'weightedAverageCost' => $cost,
+                'weightedAverageCost' => (float) data_get($product->meta, 'weighted_average_cost', $cost),
                 'name' => $product->title,
-                'brand' => $product->brand ?? $supplierName,
-                'category' => data_get($product->meta, 'category', 'Ropa Interior'),
+                'brand' => $brand,
+                'provider' => $supplierName,
+                'supplier_id' => $supplierId,
+                'supplierId' => $supplierId,
+                'supplierSku' => $supplierSku,
+                'supplierUrl' => $supplierUrl,
+                'providerUrl' => $supplierUrl,
+                'originUrl' => $supplierUrl,
+                'category' => $category,
+                'subcategory' => $subcategory,
                 'type' => $product->type === 'physical' ? 'propio' : ($product->type === 'dropship' ? 'dropship' : 'mixto'),
                 'localStock' => $availableStock,
                 'committedStock' => $totalReserved,
                 'committedSizes' => $committedSizes,
                 'supplierStock' => $supplierStock,
-                'location' => 'Rack A-01 / Nivel 1',
-                'status' => $availableStock > 0 ? 'Saludable' : ($supplierStock > 0 ? 'Solo proveedor' : 'Sin stock'),
+                'location' => $location,
+                'status' => $status,
                 'pvp' => $pvp,
                 'cost' => $cost,
+                'regularPrice' => $regularPrice,
+                'discountPct' => $discountPct,
                 'sizes' => $sizes,
+                'shades' => $shades,
+                'volumes' => $volumes,
+                'variantDimension' => $variantDimension,
+                'selectedSizeCurveId' => $selectedSizeCurveId,
                 'image' => $mainImage,
+                'images' => $images,
+                'gallery' => $rawGallery,
+                'imageColorMap' => $imageColorMap,
+                'colorName' => $colorName,
+                'colorHex' => $colorHex,
+                'colorType' => $colorType,
+                'fabricType' => $fabricType,
+                'designType' => $designType,
+                'websiteSection' => $websiteSection,
+                'description' => $product->description ?: data_get($product->meta, 'description', ''),
+                'isPublished' => (bool) $product->visible,
                 'adjustType' => 'add',
                 'adjustQty' => '',
                 'adjustReason' => '',
@@ -1485,7 +1590,22 @@ class StorefrontController extends Controller
             'portalFragranceVolumes' => $portalFragranceVolumes,
             'portalCategories' => $portalCategories,
             'portalFabrics' => \App\Models\ApparelFabric::orderBy('name')->get(),
-            'portalApparelColors' => \App\Models\ApparelColor::orderBy('name')->get(),
+            'portalApparelColors' => (function() {
+                $colors = \App\Models\ApparelColor::orderBy('name')->get();
+                if (!$colors->contains(fn($c) => strtolower($c->name) === 'multicolor')) {
+                    \App\Models\ApparelColor::firstOrCreate(
+                        ['name' => 'Multicolor'],
+                        [
+                            'color_type' => 'gradient',
+                            'hex_code' => '#ef4444',
+                            'gradient_css' => 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)',
+                            'is_active' => true,
+                        ]
+                    );
+                    $colors = \App\Models\ApparelColor::orderBy('name')->get();
+                }
+                return $colors;
+            })(),
             'portalStoreSections' => \App\Models\CmsSection::orderBy('sort_order')->orderBy('name')->get(),
             'portalMoqSheets' => \App\Models\SupplierMoqSheet::with('supplier')->orderByDesc('is_default')->orderBy('supplier_name')->get(),
             'syncRuns' => $syncRuns,
@@ -2024,6 +2144,15 @@ class StorefrontController extends Controller
                 $totalReserved = (int) $variants->sum(fn ($v) => $v->inventories->sum('reserved'));
                 $availableStock = max(0, $totalStock - $totalReserved);
 
+                if ($variants->isEmpty()) {
+                    $metaSizes = data_get($product->meta, 'sizes', []);
+                    $totalStock = is_array($metaSizes) && !empty($metaSizes) 
+                        ? array_sum($metaSizes) 
+                        : (int) data_get($product->meta, 'local_stock', 0);
+                    $totalReserved = 0;
+                    $availableStock = $totalStock;
+                }
+
                 $brandUpper = strtoupper((string) ($product->brand ?: data_get($product->meta, 'category', '')));
                 $categorySlug = 'jocks';
                 if (str_contains($brandUpper, 'BOXER') || str_contains($brandUpper, 'BRIEF')) {
@@ -2056,7 +2185,15 @@ class StorefrontController extends Controller
                     }
                 }
                 if (empty($sizes)) {
-                    $sizes = ['CH', 'M', 'G', 'XG'];
+                    $metaSizes = data_get($product->meta, 'sizes', []);
+                    if (is_array($metaSizes) && !empty($metaSizes)) {
+                        foreach (array_keys($metaSizes) as $ms) {
+                            $sizes[] = strtoupper(trim((string) $ms));
+                        }
+                    }
+                }
+                if (empty($sizes)) {
+                    $sizes = ['UNI'];
                 }
 
                 $image = data_get($product->meta, 'image') ?: (data_get($product->meta, 'images.0') ?: '/user-avatar.png');
@@ -2067,8 +2204,9 @@ class StorefrontController extends Controller
                 }
                 $colorData = self::resolveProductColorData($product, $image, $allImages);
                 $supplierName = (string) (
-                    $product->supplierProducts->first()?->supplier?->name
+                    data_get($product->meta, 'provider')
                     ?? data_get($product->meta, 'supplier')
+                    ?? $product->supplierProducts->first()?->supplier?->name
                     ?? data_get($product->meta, 'supplier_name')
                     ?? $product->brand
                     ?? ''
@@ -2099,7 +2237,7 @@ class StorefrontController extends Controller
                     'description' => $product->description ?: 'Prenda anatómica confeccionada con textiles transpirables.',
                     'brand' => (string) ($product->brand ?? ''),
                     'garment_type' => (string) data_get($product->meta, 'garment_type', ''),
-                    'fabric_type' => (string) data_get($product->meta, 'fabric_type', ''),
+                    'fabric_type' => (string) ($product->fabric ?: data_get($product->meta, 'fabric', data_get($product->meta, 'fabric_type', ''))),
                     'discount_pct' => (float) data_get($product->meta, 'discount_pct', 0),
                     'category_ids' => $product->categories->pluck('id')->all(),
                     'variants' => $variants->map(fn ($v) => [
@@ -2145,9 +2283,9 @@ class StorefrontController extends Controller
                     'description' => $product->description ?? '',
                     'image' => data_get($product->meta, 'image', 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80'),
                     'brand' => $product->brand ?? '-',
-                    'size' => data_get($attributes, 'size', 'M'),
+                    'size' => data_get($attributes, 'size', (is_array(data_get($product->meta, 'sizes')) && !empty(data_get($product->meta, 'sizes')) ? strtoupper((string) array_key_first(data_get($product->meta, 'sizes'))) : 'M')),
                     'fit' => data_get($attributes, 'fit', 'Regular'),
-                    'color' => data_get($attributes, 'color', 'Negro'),
+                    'color' => data_get($attributes, 'color', data_get($product->meta, 'color_name', 'Negro')),
                     'garment_type' => data_get($product->meta, 'garment_type', 'Prenda'),
                     'category' => $product->categories->first()?->name ?? (data_get($product->meta, 'category', 'Catalogo')),
                     'variant_id' => $variant?->id,

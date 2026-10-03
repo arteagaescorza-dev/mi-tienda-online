@@ -521,6 +521,18 @@ class InventorySettingsApiController extends Controller
     public function getColors(Request $request): JsonResponse
     {
         $colors = ApparelColor::orderBy('name')->get();
+        if (!$colors->contains(fn($c) => strtolower($c->name) === 'multicolor')) {
+            ApparelColor::firstOrCreate(
+                ['name' => 'Multicolor'],
+                [
+                    'color_type' => 'gradient',
+                    'hex_code' => '#ef4444',
+                    'gradient_css' => 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)',
+                    'is_active' => true,
+                ]
+            );
+            $colors = ApparelColor::orderBy('name')->get();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -530,6 +542,13 @@ class InventorySettingsApiController extends Controller
 
     public function storeColor(Request $request): JsonResponse
     {
+        if (strtolower(trim($request->input('name', ''))) === 'multicolor') {
+            return response()->json([
+                'status' => 'error',
+                'message' => "El color 'Multicolor' es una opción predeterminada del sistema y no puede ser creado nuevamente.",
+            ], 422);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:80|unique:apparel_colors,name',
             'hex_code' => 'nullable|string|max:250',
@@ -626,6 +645,12 @@ class InventorySettingsApiController extends Controller
     public function destroyColor(int $id): JsonResponse
     {
         $color = ApparelColor::findOrFail($id);
+        if (strtolower($color->name) === 'multicolor') {
+            return response()->json([
+                'status' => 'error',
+                'message' => "El color base del sistema 'Multicolor' no puede ser eliminado.",
+            ], 422);
+        }
         $name = $color->name;
         $color->delete();
 

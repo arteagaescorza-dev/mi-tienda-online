@@ -119,33 +119,42 @@ function hybridInventoryModule() {
                 { id: 'seda_satin', name: 'Seda / Satín Premium', description: 'Acabado brillante de lujo para lencería de autor', is_active: true }
             ],
 
-        // TASK-INV-08 / TASK-INV-11: Paleta de Colores Sólidos y Tornasoles Iridiscentes
-        apparelColors: (typeof window !== 'undefined' && Array.isArray(window.serverApparelColors) && window.serverApparelColors.length > 0)
-            ? window.serverApparelColors.map(c => ({
-                id: c.id,
-                dbId: c.id,
-                name: c.name,
-                hex: c.hex || c.gradient_css || c.hex_code || '#0f172a',
-                hex_code: c.hex_code || '#0f172a',
-                gradient_css: c.gradient_css || null,
-                type: (c.type === 'iridescent' || c.color_type === 'gradient' || c.color_type === 'iridescent' || String(c.hex || c.gradient_css || '').includes('linear-gradient')) ? 'iridescent' : 'solid',
-                color_type: (c.type === 'iridescent' || c.color_type === 'gradient' || c.color_type === 'iridescent' || String(c.hex || c.gradient_css || '').includes('linear-gradient')) ? 'iridescent' : 'solid',
-                is_active: c.is_active !== false
-            }))
-            : [
-                { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', hex_code: '#0f172a', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', hex_code: '#f8fafc', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', hex_code: '#475569', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', hex_code: '#1e3a8a', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', hex_code: '#881337', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', hex_code: '#365314', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', hex_code: '#d97706', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', hex_code: '#f43f5e', type: 'solid', color_type: 'solid', is_active: true },
-                { id: 'galaxia_holo', name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', gradient_css: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
-                { id: 'esmeralda_aurora', name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', gradient_css: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
-                { id: 'plata_iridiscente', name: 'Plata Iridiscente Prism', hex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', gradient_css: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
-                { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', gradient_css: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true }
-            ],
+        // TASK-INV-08 / TASK-INV-11: Paleta de Colores Sólidos y Tornasoles Iridiscentes + Opción Nativa Multicolor
+        apparelColors: (() => {
+            const rainbowGradient = 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)';
+            let list = (typeof window !== 'undefined' && Array.isArray(window.serverApparelColors) && window.serverApparelColors.length > 0)
+                ? window.serverApparelColors.map(c => ({
+                    id: c.id,
+                    dbId: c.id,
+                    name: c.name,
+                    hex: (c.name && c.name.toLowerCase() === 'multicolor') ? rainbowGradient : (c.hex || c.gradient_css || c.hex_code || '#0f172a'),
+                    hex_code: (c.name && c.name.toLowerCase() === 'multicolor') ? '#ef4444' : (c.hex_code || '#0f172a'),
+                    gradient_css: (c.name && c.name.toLowerCase() === 'multicolor') ? rainbowGradient : (c.gradient_css || null),
+                    type: (c.name && c.name.toLowerCase() === 'multicolor') ? 'iridescent' : ((c.type === 'iridescent' || c.color_type === 'gradient' || c.color_type === 'iridescent' || String(c.hex || c.gradient_css || '').includes('linear-gradient')) ? 'iridescent' : 'solid'),
+                    color_type: (c.name && c.name.toLowerCase() === 'multicolor') ? 'iridescent' : ((c.type === 'iridescent' || c.color_type === 'gradient' || c.color_type === 'iridescent' || String(c.hex || c.gradient_css || '').includes('linear-gradient')) ? 'iridescent' : 'solid'),
+                    is_active: c.is_active !== false,
+                    is_system: (c.name && c.name.toLowerCase() === 'multicolor') || c.id === 'multicolor'
+                }))
+                : [
+                    { id: 'multicolor', name: 'Multicolor', hex: rainbowGradient, gradient_css: rainbowGradient, hex_code: '#ef4444', type: 'iridescent', color_type: 'iridescent', is_active: true, is_system: true },
+                    { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', hex_code: '#0f172a', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', hex_code: '#f8fafc', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', hex_code: '#475569', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', hex_code: '#1e3a8a', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', hex_code: '#881337', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', hex_code: '#365314', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', hex_code: '#d97706', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', hex_code: '#f43f5e', type: 'solid', color_type: 'solid', is_active: true },
+                    { id: 'galaxia_holo', name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', gradient_css: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
+                    { id: 'esmeralda_aurora', name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', gradient_css: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
+                    { id: 'plata_iridiscente', name: 'Plata Iridiscente Prism', hex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', gradient_css: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
+                    { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', gradient_css: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true }
+                ];
+            if (!list.some(c => c.name && c.name.toLowerCase() === 'multicolor')) {
+                list.unshift({ id: 'multicolor', name: 'Multicolor', hex: rainbowGradient, gradient_css: rainbowGradient, hex_code: '#ef4444', type: 'iridescent', color_type: 'iridescent', is_active: true, is_system: true });
+            }
+            return list;
+        })(),
 
         // Regla 7: Secciones Modulares del Sitio Web E-Commerce y Filtros Hub 2
         storeSections: (typeof window !== 'undefined' && Array.isArray(window.serverStoreSections) && window.serverStoreSections.length > 0)
@@ -243,10 +252,10 @@ function hybridInventoryModule() {
         fabricForm: { id: null, name: '', description: '', is_active: true },
         isEditingFabric: false,
         fabricEditState: { isEditing: false, editingId: null, form: { name: '', description: '', is_active: true } },
-        newColorForm: { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b' },
-        colorForm: { id: null, name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true },
+        newColorForm: { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', isMulticolor: false },
+        colorForm: { id: null, name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true, isMulticolor: false },
         isEditingColor: false,
-        colorEditState: { isEditing: false, editingId: null, form: { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true } },
+        colorEditState: { isEditing: false, editingId: null, form: { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true, isMulticolor: false } },
         newSlotForm: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true },
         slotEditState: { isEditing: false, editingCode: null, form: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true } },
         ropSettings: { leadTimeLocal: 3, leadTimeDropship: 5, safetyStockDays: 7, defaultDailySales: 2 },
@@ -310,7 +319,31 @@ function hybridInventoryModule() {
         quickColorModalOpen: false,
         quickColorContext: 'newProduct', // 'newProduct' | 'drawer' | 'curating'
         quickColorTargetImg: null,
-        quickColorForm: { name: '', hex: '#0f172a', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b' },
+        quickColorForm: { name: '', hex: '#0f172a', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', isMulticolor: false },
+
+        // Modal Rápido de Alta In Situ de Vitrinas Web (Regla Workstation)
+        quickStoreSectionModalOpen: false,
+        quickStoreSectionContext: 'newProduct', // 'newProduct' | 'drawer'
+        quickStoreSectionForm: { name: '', slug: '', description: '' },
+
+        // Workstation Alta de Producto Paginado por Pasos (Reglas UX 1 & 2)
+        workstationStep: 1,
+        setWorkstationStep(step) {
+            const s = parseInt(step) || 1;
+            if (s >= 1 && s <= 4) {
+                this.workstationStep = s;
+            }
+        },
+        nextWorkstationStep() {
+            if (this.workstationStep < 4) {
+                this.workstationStep++;
+            }
+        },
+        prevWorkstationStep() {
+            if (this.workstationStep > 1) {
+                this.workstationStep--;
+            }
+        },
 
         // Regla 7: Estado de Edición y Alta de Secciones de Tienda Web
         isEditingStoreSection: false,
@@ -7412,6 +7445,11 @@ function hybridInventoryModule() {
 
         // --- COLORES & TORNASOLES (CRUD COMPLETO CON PERSISTENCIA RESTFUL) ---
         async addNewColor() {
+            if (this.colorForm.isMulticolor || (this.colorForm.name || '').trim().toLowerCase() === 'multicolor') {
+                this.showToast('El color "Multicolor" es nativo de la plataforma y ya forma parte de la paleta por defecto.', 'info');
+                this.cancelEditColor();
+                return;
+            }
             const name = (this.colorForm.name || this.newColorForm.name || '').trim();
             if (!name) {
                 this.showToast('Ingresa el nombre del color o tornasol.', 'info');
@@ -7468,6 +7506,10 @@ function hybridInventoryModule() {
         },
 
         editColor(col) {
+            if (col && (col.name.toLowerCase() === 'multicolor' || col.id === 'multicolor' || col.is_system)) {
+                this.showToast('El color "Multicolor" es un valor nativo del sistema y no es editable.', 'info');
+                return;
+            }
             this.isEditingColor = true;
             this.colorEditState.isEditing = true;
             this.colorEditState.editingId = col.id;
@@ -7604,6 +7646,10 @@ function hybridInventoryModule() {
         },
 
         async toggleArchiveColor(col) {
+            if (col && (col.name.toLowerCase() === 'multicolor' || col.id === 'multicolor' || col.is_system)) {
+                this.showToast('El color "Multicolor" es nativo y debe permanecer siempre activo.', 'info');
+                return;
+            }
             col.is_active = !col.is_active;
             this.apparelColors = [...this.apparelColors];
             const statusLabel = col.is_active ? 'reactivado' : 'archivado';
@@ -7626,6 +7672,10 @@ function hybridInventoryModule() {
         async deleteColor(colId) {
             const col = this.apparelColors.find(c => String(c.id) === String(colId));
             if (!col) return;
+            if (col.name.toLowerCase() === 'multicolor' || col.id === 'multicolor' || col.is_system) {
+                this.showToast('El color base del sistema "Multicolor" no puede ser eliminado.', 'warning');
+                return;
+            }
             const inUseCount = (this.products || []).filter(p => (p.colorName === col.name || p.drawerColorName === col.name)).length;
             if (inUseCount > 0) {
                 this.showToast(`No es posible eliminar "${col.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarlo.`, 'warning');
@@ -7715,12 +7765,66 @@ function hybridInventoryModule() {
                 type: 'solid',
                 gradientColor1: '#6366f1',
                 gradientColor2: '#ec4899',
-                gradientColor3: '#f59e0b'
+                gradientColor3: '#f59e0b',
+                isMulticolor: false
             };
             this.quickColorModalOpen = true;
         },
 
         async saveQuickColor() {
+            // Regla: Opción Multicolor anula creación y asigna el color nativo arcoíris
+            if (this.quickColorForm.isMulticolor || (this.quickColorForm.name || '').trim().toLowerCase() === 'multicolor') {
+                const rainbowGradient = 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)';
+                let mc = this.apparelColors.find(c => c.name.toLowerCase() === 'multicolor');
+                if (!mc) {
+                    mc = {
+                        id: 'multicolor',
+                        name: 'Multicolor',
+                        hex: rainbowGradient,
+                        gradient_css: rainbowGradient,
+                        hex_code: '#ef4444',
+                        type: 'iridescent',
+                        color_type: 'iridescent',
+                        is_active: true,
+                        is_system: true
+                    };
+                    this.apparelColors.unshift(mc);
+                }
+                const name = 'Multicolor';
+                const hexVal = rainbowGradient;
+
+                if (this.quickColorContext === 'newProduct') {
+                    this.newProduct.colorName = name;
+                    this.newProduct.colorHex = hexVal;
+                    this.newProduct.colorType = 'iridescent';
+                    if (this.quickColorTargetImg && Array.isArray(this.newProduct.images)) {
+                        const img = this.newProduct.images.find(im => (im.url === this.quickColorTargetImg || im.preview === this.quickColorTargetImg));
+                        if (img) img.color_name = name;
+                    }
+                    this.updateDynamicSku();
+                } else if (this.quickColorContext === 'drawer') {
+                    this.drawerColorName = name;
+                    this.drawerColorHex = hexVal;
+                    this.drawerColorType = 'iridescent';
+                    if (this.quickColorTargetImg) {
+                        if (!this.drawerImageColorMap) this.drawerImageColorMap = {};
+                        this.drawerImageColorMap[this.quickColorTargetImg] = name;
+                    }
+                } else if (this.quickColorContext === 'curating' && this.curatingItem) {
+                    this.curatingItem.detectedColorName = name;
+                    this.curatingItem.detectedColorHex = hexVal;
+                    this.curatingItem.colorType = 'iridescent';
+                    if (this.quickColorTargetImg) {
+                        if (!this.curatingItem.imageColorMap) this.curatingItem.imageColorMap = {};
+                        this.curatingItem.imageColorMap[this.quickColorTargetImg] = name;
+                    }
+                }
+
+                this.quickColorModalOpen = false;
+                this.showToast('Color "Multicolor" (Arcoíris) asignado exitosamente.', 'success');
+                return;
+            }
+
             const name = (this.quickColorForm.name || '').trim();
             if (!name) {
                 this.showToast('Ingresa el nombre del color.', 'warning');
@@ -7800,6 +7904,87 @@ function hybridInventoryModule() {
             } catch (e) {
                 console.warn('Sync quick color fallback:', e);
             }
+        },
+
+        // =========================================================================
+        // ALTA IN SITU DE VITRINAS WEB (Sincronización con Ajustes del Módulo)
+        // =========================================================================
+        openQuickStoreSectionModal(context = 'newProduct') {
+            this.quickStoreSectionContext = context;
+            this.quickStoreSectionForm = { name: '', slug: '', description: '' };
+            this.quickStoreSectionModalOpen = true;
+        },
+
+        async saveQuickStoreSection() {
+            const name = (this.quickStoreSectionForm.name || '').trim();
+            if (!name) {
+                this.showToast('Ingresa el nombre de la vitrina web.', 'warning');
+                return;
+            }
+            const slug = (this.quickStoreSectionForm.slug || '').trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            const desc = (this.quickStoreSectionForm.description || '').trim();
+
+            let sec = this.storeSections.find(s => s.slug === slug || s.name.toLowerCase() === name.toLowerCase());
+            if (!sec) {
+                sec = {
+                    id: Date.now(),
+                    name: name,
+                    slug: slug,
+                    description: desc,
+                    is_active: true,
+                    status: 'active'
+                };
+                this.storeSections = [...this.storeSections, sec];
+            }
+
+            if (this.quickStoreSectionContext === 'newProduct') {
+                this.newProduct.websiteSection = slug;
+            } else if (this.quickStoreSectionContext === 'drawer' && this.selectedProduct) {
+                this.selectedProduct.websiteSection = slug;
+                this.drawerWebsiteSection = slug;
+            }
+
+            this.quickStoreSectionModalOpen = false;
+            this.showToast(`Vitrina "${name}" creada y sincronizada con éxito.`, 'success');
+
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch('/api/v1/inventory/settings/store-sections', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        slug: slug,
+                        description: desc,
+                        is_active: true
+                    })
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json && json.data && json.data.id) {
+                        sec.id = json.data.id;
+                        this.storeSections = [...this.storeSections];
+                    }
+                }
+            } catch (e) {
+                console.warn('Sync quick store section error:', e);
+            }
+        },
+
+        getStoreSectionName(slug) {
+            if (!slug) return 'Sin vitrina';
+            const sec = (this.storeSections || []).find(s => s.slug === slug || (s.name && s.name.toLowerCase() === String(slug).toLowerCase()));
+            return sec ? sec.name : slug;
+        },
+
+        getSupplierName(id) {
+            if (!id) return '';
+            const prov = (this.providers || []).find(p => String(p.id) === String(id));
+            return prov ? (prov.tradeName || prov.name) : '';
         },
 
         // =========================================================================
@@ -10955,18 +11140,55 @@ function hybridInventoryModule() {
             }
         },
 
+        isDrawerUnitalla() {
+            if (!this.drawerSizes || typeof this.drawerSizes !== 'object') return false;
+            if (this.drawerSizes.uni !== undefined || this.drawerSizes.u !== undefined || this.drawerSizes.unitalla !== undefined) {
+                return true;
+            }
+            if (this.selectedProduct) {
+                if (this.selectedProduct.selectedSizeCurveId === 'curve_unitalla' || this.selectedProduct.variantDimension === 'unique_piece') {
+                    return true;
+                }
+                const sku = (this.selectedProduct.sku || '').toUpperCase();
+                if (sku.endsWith('-UNI') || sku.includes('-UNI-') || sku.includes('UNI')) {
+                    return true;
+                }
+                if (this.selectedProduct.sizes && (this.selectedProduct.sizes.uni !== undefined || this.selectedProduct.sizes.u !== undefined)) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
         openProductDrawer(product) {
             this.selectedProduct = product;
             this.purchaseAddedSuccess = false;
             this.hasAddedPurchaseThisSession = false;
-            this.drawerSizes = {
-                ch: product.sizes?.ch || 0,
-                m: product.sizes?.m || 0,
-                g: product.sizes?.g || 0,
-                xl: product.sizes?.xl || 0,
-                '2xl': product.sizes?.['2xl'] || 0,
-                '3xl': product.sizes?.['3xl'] || 0
-            };
+
+            const isUni = (product.sizes && (product.sizes.uni !== undefined || product.sizes.u !== undefined || product.sizes.unitalla !== undefined)) ||
+                          product.selectedSizeCurveId === 'curve_unitalla' ||
+                          product.variantDimension === 'unique_piece' ||
+                          String(product.sku || '').toUpperCase().includes('-UNI');
+
+            if (isUni) {
+                const uniQty = product.sizes?.uni !== undefined 
+                    ? product.sizes.uni 
+                    : (product.sizes?.u !== undefined ? product.sizes.u : (product.localStock || 0));
+                this.drawerSizes = {
+                    uni: parseInt(uniQty) || 0
+                };
+            } else {
+                this.drawerSizes = {
+                    ch: parseInt(product.sizes?.ch) || 0,
+                    m: parseInt(product.sizes?.m) || 0,
+                    g: parseInt(product.sizes?.g) || 0,
+                    xl: parseInt(product.sizes?.xl) || 0,
+                    '2xl': parseInt(product.sizes?.['2xl']) || 0,
+                    '3xl': parseInt(product.sizes?.['3xl']) || 0,
+                    ...(product.sizes || {})
+                };
+            }
+
             this.drawerShades = product.shades ? { ...product.shades } : {};
             this.drawerLocation = product.location || '';
             this.drawerRegularPrice = parseFloat(product.regularPrice || product.regular_price || product.pvp || 0);
@@ -10978,7 +11200,7 @@ function hybridInventoryModule() {
             this.drawerExpirationDate = product.expirationDate || product.expiration_date || '';
             this.drawerPaoMonths = parseInt(product.paoMonths || product.pao_months) || 12;
             this.drawerRequiresSanitaryControl = !!(product.requiresSanitaryControl || product.requires_sanitary_control);
-            this.drawerFabricType = product.fabricType || product.fabric_type || 'Modal Seamless';
+            this.drawerFabricType = product.fabricType || product.fabric_type || product.fabric || 'Modal Seamless';
             this.drawerColorName = product.colorName || product.color_name || 'Negro Profundo';
             this.drawerColorHex = product.colorHex || product.color_hex || '#0f172a';
             this.drawerColorType = product.colorType || product.color_type || 'solid';
@@ -10986,28 +11208,53 @@ function hybridInventoryModule() {
             this.drawerWebsiteSection = product.websiteSection || product.website_section || 'basicos';
             this.drawerIsPublished = product.isPublished !== undefined ? product.isPublished : (product.is_published !== undefined ? product.is_published : true);
             this.drawerDescription = product.description || '';
-            const prodBrand = product.brand || (product.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX');
+
+            // Regla 6.47: Identificar proveedor y marcas vinculadas fielmente
+            const supId = product.supplier_id || product.supplierId || product.meta?.supplier_id;
+            const supName = product.provider || product.supplierName || product.meta?.provider;
+            const cleanSupId = supId ? String(supId).replace('prov_', '') : null;
+
+            let matchedProv = (this.providers || []).find(p => {
+                if (supId && (String(p.id) === String(supId) || String(p.id) === cleanSupId || (p.dbId && String(p.dbId) === cleanSupId) || `prov_${p.id}` === String(supId))) {
+                    return true;
+                }
+                if (supName && (
+                    (p.tradeName && p.tradeName.toLowerCase() === String(supName).toLowerCase()) ||
+                    (p.name && p.name.toLowerCase() === String(supName).toLowerCase())
+                )) {
+                    return true;
+                }
+                return false;
+            });
+
+            if (!matchedProv && supName) {
+                matchedProv = { id: supId || `prov_${Date.now()}`, name: supName, tradeName: supName, brands: [] };
+            }
+
+            this.drawerSupplierId = matchedProv ? matchedProv.id : (supId || null);
+            this.drawerSupplierName = matchedProv ? (matchedProv.tradeName || matchedProv.name) : (supName || '');
+
+            const prodBrand = product.brand || (matchedProv ? (matchedProv.tradeName || matchedProv.name) : 'Marca');
             this.drawerBrand = prodBrand;
 
-            // Regla 6.47: Identificar proveedor y marcas vinculadas
-            const matchedProv = (this.providers || []).find(p => 
-                (product.supplier_id && (String(p.id) === String(product.supplier_id) || (p.dbId && String(p.dbId) === String(product.supplier_id)))) ||
-                (product.meta?.supplier_id && (String(p.id) === String(product.meta.supplier_id) || (p.dbId && String(p.dbId) === String(product.meta.supplier_id)))) ||
-                (product.meta?.provider && (
-                    (p.tradeName && p.tradeName.toLowerCase() === String(product.meta.provider).toLowerCase()) ||
-                    (p.name && p.name.toLowerCase() === String(product.meta.provider).toLowerCase())
-                )) ||
-                (prodBrand && (
-                    (p.tradeName && p.tradeName.toLowerCase() === prodBrand.toLowerCase()) ||
-                    (p.name && p.name.toLowerCase() === prodBrand.toLowerCase()) ||
-                    (Array.isArray(p.brands) && p.brands.some(b => b.toLowerCase() === prodBrand.toLowerCase()))
-                ))
-            ) || (this.providers && this.providers[0]) || null;
+            // Resolución limpia de imágenes (prevenir [object Object])
+            let rawImg = product.image || (Array.isArray(product.images) && product.images[0]) || '';
+            if (rawImg && typeof rawImg === 'object') {
+                rawImg = rawImg.url || rawImg.src || rawImg.path || '';
+            }
+            if (typeof rawImg === 'string' && rawImg.trim()) {
+                rawImg = this.resolveProductImage ? this.resolveProductImage(rawImg) : rawImg;
+            } else {
+                rawImg = '';
+            }
+            this.drawerImage = rawImg;
 
-            this.drawerSupplierId = matchedProv ? matchedProv.id : null;
-            this.drawerSupplierName = matchedProv ? (matchedProv.tradeName || matchedProv.name) : '';
-            this.drawerImage = product.image || (Array.isArray(product.images) && product.images[0]) || '';
-            this.drawerImages = Array.isArray(product.images) && product.images.length ? [...product.images] : (this.drawerImage ? [this.drawerImage] : []);
+            const baseImages = Array.isArray(product.images) && product.images.length ? product.images : (this.drawerImage ? [this.drawerImage] : []);
+            this.drawerImages = baseImages.map(img => {
+                if (img && typeof img === 'object') img = img.url || img.src || img.path || '';
+                return typeof img === 'string' && img.trim() ? (this.resolveProductImage ? this.resolveProductImage(img) : img) : '';
+            }).filter(Boolean);
+
             this.drawerImageColorMap = product.images_by_color ? { ...product.images_by_color } : (product.imageColorMap ? { ...product.imageColorMap } : {});
             if (Object.keys(this.drawerImageColorMap).length === 0 && this.drawerImages.length > 0) {
                 this.drawerImages.forEach(img => {
@@ -11016,28 +11263,22 @@ function hybridInventoryModule() {
             }
 
             // Sugerir proveedor y cantidades para futura orden
-            if (product.type === 'dropship') {
-                this.purchaseSupplier = 'Torzo B2B';
-                this.purchaseQty = 40;
-            } else if (product.category === 'Boxers') {
-                this.purchaseSupplier = 'ModaIntima Textil MX';
-                this.purchaseQty = 60;
-            } else if (product.category === 'Tangas') {
-                this.purchaseSupplier = 'Seamless Tech Apparel';
-                this.purchaseQty = 50;
-            } else {
-                this.purchaseSupplier = 'Silk & Cotton Iberia SL';
-                this.purchaseQty = 50;
-            }
+            this.purchaseSupplier = this.drawerSupplierName || product.provider || (product.type === 'dropship' ? 'Torzo B2B' : 'Proveedor');
+            this.purchaseQty = 50;
             this.purchasePriority = (product.localStock && product.localStock < 50) ? 'alta' : 'media';
-            this.purchaseSizes = {
-                ch: Math.round(this.purchaseQty * 0.15),
-                m: Math.round(this.purchaseQty * 0.38),
-                g: Math.round(this.purchaseQty * 0.32),
-                xl: Math.round(this.purchaseQty * 0.10),
-                '2xl': (product.sizes && product.sizes['2xl']) ? Math.min(4, Math.round(this.purchaseQty * 0.04)) : 0,
-                '3xl': (product.sizes && product.sizes['3xl']) ? Math.min(2, Math.round(this.purchaseQty * 0.01)) : 0
-            };
+
+            if (isUni) {
+                this.purchaseSizes = { uni: this.purchaseQty };
+            } else {
+                this.purchaseSizes = {
+                    ch: Math.round(this.purchaseQty * 0.15),
+                    m: Math.round(this.purchaseQty * 0.38),
+                    g: Math.round(this.purchaseQty * 0.32),
+                    xl: Math.round(this.purchaseQty * 0.10),
+                    '2xl': (product.sizes && product.sizes['2xl']) ? Math.min(4, Math.round(this.purchaseQty * 0.04)) : 0,
+                    '3xl': (product.sizes && product.sizes['3xl']) ? Math.min(2, Math.round(this.purchaseQty * 0.01)) : 0
+                };
+            }
             this.drawerOpen = true;
 
             // Enriquecer reactivamente con el backend si está disponible
@@ -11072,13 +11313,8 @@ function hybridInventoryModule() {
         },
 
         totalSizesCount() {
-            const ch = parseInt(this.drawerSizes.ch) || 0;
-            const m = parseInt(this.drawerSizes.m) || 0;
-            const g = parseInt(this.drawerSizes.g) || 0;
-            const xl = parseInt(this.drawerSizes.xl) || 0;
-            const xxl = parseInt(this.drawerSizes['2xl']) || 0;
-            const xxxl = parseInt(this.drawerSizes['3xl']) || 0;
-            return ch + m + g + xl + xxl + xxxl;
+            if (!this.drawerSizes || typeof this.drawerSizes !== 'object') return 0;
+            return Object.values(this.drawerSizes).reduce((acc, qty) => acc + (parseInt(qty) || 0), 0);
         },
 
         totalProductStockCount() {
@@ -11089,6 +11325,7 @@ function hybridInventoryModule() {
         },
 
         openCreateProductDrawer() {
+            this.workstationStep = 1;
             const initialSupId = (this.providers && this.providers.length > 0) ? this.providers[0].id : null;
             const availableCurves = this.getAvailableSizeCurves(initialSupId);
             const defaultCurve = availableCurves.find(c => c.is_default) || availableCurves[0];
@@ -11592,9 +11829,7 @@ function hybridInventoryModule() {
                 return 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80';
             }
             url = url.trim();
-            if (url.includes('localhost/storage/')) {
-                url = url.substring(url.indexOf('/storage/'));
-            } else if (url.includes('127.0.0.1/storage/')) {
+            if (url.includes('/storage/')) {
                 url = url.substring(url.indexOf('/storage/'));
             }
             return url;
