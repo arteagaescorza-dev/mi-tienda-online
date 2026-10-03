@@ -167,4 +167,9 @@ class Supplier extends Model
     {
         return $this->hasMany(ApparelSizeCurve::class);
     }
+
+    public function moqSheets()
+    {
+        return $this->hasMany(SupplierMoqSheet::class, 'supplier_id');
+    }
 }

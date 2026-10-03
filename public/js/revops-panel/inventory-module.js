@@ -9112,10 +9112,15 @@ function hybridInventoryModule() {
         loadMoqSheetIntoForm(sheet) {
             if (!sheet) return;
             this.selectedMoqSheetId = sheet.id;
+            let sId = sheet.supplier_id;
+            if (!sId && sheet.supplier_name && Array.isArray(this.providers)) {
+                const found = this.providers.find(p => p.name === sheet.supplier_name || p.tradeName === sheet.supplier_name);
+                if (found) sId = found.dbId || found.id;
+            }
             this.moqSheetForm = {
                 id: sheet.id || null,
-                supplier_id: sheet.supplier_id || null,
-                supplier_name: sheet.supplier_name || 'Torzo B2B',
+                supplier_id: sId || null,
+                supplier_name: sheet.supplier_name || (sheet.supplier ? sheet.supplier.name : 'Torzo B2B'),
                 title: sheet.title || '',
                 validity: sheet.validity || '',
                 currency: sheet.currency || 'MXN',
@@ -9127,18 +9132,53 @@ function hybridInventoryModule() {
             };
         },
 
+        onMoqSupplierSelected(selectedVal) {
+            if (!selectedVal) return;
+            const p = (this.providers || []).find(prov => String(prov.dbId) === String(selectedVal) || String(prov.id) === String(selectedVal));
+            if (p) {
+                this.moqSheetForm.supplier_id = p.dbId || p.id;
+                this.moqSheetForm.supplier_name = p.tradeName || p.name;
+                const year = new Date().getFullYear();
+                if (!this.moqSheetForm.title || this.moqSheetForm.title.includes('Nuevo') || this.moqSheetForm.title.includes('Tabulador Mayoreo') || this.moqSheetForm.title.includes('Precios Mayoreo')) {
+                    this.moqSheetForm.title = `${p.tradeName || p.name} Precios Mayoreo ${year}`;
+                }
+                this.showToast(`Proveedor "${p.tradeName || p.name}" vinculado al tabulador.`, 'info');
+            }
+        },
+
+        getProviderIdByName(name) {
+            if (!name || !Array.isArray(this.providers)) return '';
+            const p = this.providers.find(prov => prov.name === name || prov.tradeName === name);
+            return p ? (p.dbId || p.id) : '';
+        },
+
         createNewMoqSheet() {
+            if (!this.providers || this.providers.length === 0) {
+                this.showToast('Regla: Debes registrar al menos un proveedor antes de dar de alta un tabulador MOQ.', 'warning');
+                this.activeSettingsTab = 'providers';
+                return;
+            }
+            // Elegir primer proveedor disponible que aún no tenga tabulador o el primero existente
+            const availableProv = this.providers.find(p => {
+                const pId = p.dbId || p.id;
+                return !(this.moqSheets || []).some(s => s.supplier_id == pId);
+            }) || this.providers[0];
+
+            const pId = availableProv ? (availableProv.dbId || availableProv.id) : null;
+            const pName = availableProv ? (availableProv.tradeName || availableProv.name) : '';
+            const year = new Date().getFullYear();
+
             this.selectedMoqSheetId = null;
             this.moqSheetForm = {
                 id: null,
-                supplier_id: null,
-                supplier_name: 'Nuevo Proveedor',
-                title: 'Tabulador Mayoreo 2026',
+                supplier_id: pId,
+                supplier_name: pName,
+                title: `${pName} Precios Mayoreo ${year}`,
                 validity: 'Vigencia: ' + new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
                 currency: 'MXN',
                 is_active: true,
                 is_default: false,
-                notes: '',
+                notes: `Tabulador de escalas MOQ asociado directamente al proveedor ${pName}.`,
                 tiers: [
                     { key: 'menudeo', label: 'Menudeo', min_qty: 1, color: '#10b981' },
                     { key: 'moq_50', label: '50 prendas', min_qty: 50, color: '#ef4444' },
@@ -9149,7 +9189,7 @@ function hybridInventoryModule() {
                     { category: 'General', prices: { menudeo: 200, moq_50: 120, moq_100: 110, moq_200: 100 } }
                 ]
             };
-            this.showToast('Nuevo tabulador en blanco listo para editar.', 'info');
+            this.showToast(`Nuevo tabulador para proveedor "${pName}" listo para editar.`, 'info');
         },
 
         duplicateCurrentMoqSheet() {
@@ -9164,10 +9204,31 @@ function hybridInventoryModule() {
 
         async saveCurrentMoqSheet() {
             const form = this.moqSheetForm;
-            if (!form.supplier_name || !form.title) {
-                this.showToast('Por favor ingresa al menos el proveedor y título del tabulador.', 'warning');
+            if (!form.supplier_id && !form.supplier_name) {
+                this.showToast('Regla de negocio: Debes elegir un proveedor preexistente para dar de alta el tabulador MOQ.', 'warning');
                 return;
             }
+            if (!form.title) {
+                this.showToast('Por favor ingresa un título para el tabulador.', 'warning');
+                return;
+            }
+
+            let cleanSupplierId = form.supplier_id;
+            if (typeof cleanSupplierId === 'string' && cleanSupplierId.startsWith('prov_')) {
+                cleanSupplierId = parseInt(cleanSupplierId.replace('prov_', ''), 10);
+            } else if (cleanSupplierId) {
+                cleanSupplierId = parseInt(cleanSupplierId, 10);
+            }
+            if (!cleanSupplierId && form.supplier_name && Array.isArray(this.providers)) {
+                const found = this.providers.find(p => p.name === form.supplier_name || p.tradeName === form.supplier_name);
+                if (found && found.dbId) cleanSupplierId = found.dbId;
+            }
+
+            const payload = {
+                ...form,
+                supplier_id: cleanSupplierId || null
+            };
+
             try {
                 const isUpdate = !!form.id;
                 const url = isUpdate 
@@ -9183,7 +9244,7 @@ function hybridInventoryModule() {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     },
-                    body: JSON.stringify(form)
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (res.ok && data.status === 'success') {
@@ -9196,7 +9257,7 @@ function hybridInventoryModule() {
                         this.moqSheets.unshift(saved);
                     }
                     this.loadMoqSheetIntoForm(saved);
-                    this.showToast('Tabulador de MOQ guardado exitosamente.', 'success');
+                    this.showToast(data.message || 'Tabulador de MOQ guardado exitosamente.', 'success');
                 } else {
                     this.showToast(data.message || 'Error al guardar tabulador de MOQ.', 'error');
                 }

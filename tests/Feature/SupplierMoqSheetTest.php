@@ -37,10 +37,36 @@ class SupplierMoqSheetTest extends TestCase
         ]);
     }
 
-    public function test_can_store_and_update_custom_moq_sheet(): void
+    public function test_can_store_and_update_custom_moq_sheet_associated_with_existing_supplier(): void
     {
+        // 1. Debe rechazar si el proveedor no existe previamente
+        $unassociatedPayload = [
+            'supplier_name' => 'Proveedor Inexistente S.A.',
+            'title' => 'Tabulador Fallido',
+            'tiers' => [
+                ['key' => 'menudeo', 'label' => 'Menudeo', 'min_qty' => 1],
+            ],
+            'rows' => [
+                ['category' => 'General', 'prices' => ['menudeo' => 100]],
+            ],
+        ];
+
+        $failRes = $this->postJson('/api/v1/inventory/settings/moq-sheets', $unassociatedPayload);
+        $failRes->assertStatus(422)
+            ->assertJsonPath('status', 'error');
+
+        // 2. Al crear previamente el proveedor, debe permitir la vinculación directa
+        $supplier = Supplier::create([
+            'name' => 'ModaIntima Textil MX',
+            'contact_name' => 'Elena Vega',
+            'email' => 'ventas@modaintima.com',
+            'phone' => '+52 55 9876 5432',
+            'currency' => 'MXN',
+            'lead_time_days' => 4,
+        ]);
+
         $sheetPayload = [
-            'supplier_name' => 'ModaIntima Textil MX',
+            'supplier_id' => $supplier->id,
             'title' => 'Tabulador Mayoreo Algodón 2026',
             'validity' => 'Julio 2026',
             'currency' => 'MXN',
@@ -60,7 +86,9 @@ class SupplierMoqSheetTest extends TestCase
 
         $res = $this->postJson('/api/v1/inventory/settings/moq-sheets', $sheetPayload);
         $res->assertStatus(201)
-            ->assertJsonPath('status', 'success');
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.supplier_id', $supplier->id)
+            ->assertJsonPath('data.supplier_name', 'ModaIntima Textil MX');
 
         $id = $res->json('data.id');
 
@@ -69,7 +97,8 @@ class SupplierMoqSheetTest extends TestCase
         ]);
 
         $updateRes->assertStatus(200)
-            ->assertJsonPath('data.title', 'Tabulador Mayoreo Algodón Actualizado');
+            ->assertJsonPath('data.title', 'Tabulador Mayoreo Algodón Actualizado')
+            ->assertJsonPath('data.supplier_id', $supplier->id);
     }
 
     public function test_rule_1_product_tracks_multiple_moq_cost_layers_from_different_purchases(): void

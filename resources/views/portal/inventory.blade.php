@@ -10670,15 +10670,34 @@
 
                                     <!-- Datos Generales del Tabulador -->
                                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200">
-                                        <!-- Proveedor -->
+                                        <!-- Proveedor Preexistente (Regla Obligatoria: Vinculación Estricta con Proveedores Creados) -->
                                         <div>
-                                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Proveedor / Fabricante</label>
-                                            <input 
-                                                type="text" 
-                                                x-model="moqSheetForm.supplier_name" 
-                                                placeholder="Ej. Torzo B2B" 
-                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                    Proveedor Preexistente <span class="text-rose-500 font-black">*</span>
+                                                </label>
+                                                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-mono border border-indigo-200">Regla MOQ</span>
+                                            </div>
+                                            <select 
+                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
+                                                :value="moqSheetForm.supplier_id || getProviderIdByName(moqSheetForm.supplier_name)"
+                                                @change="onMoqSupplierSelected($event.target.value)"
                                             >
+                                                <option value="" disabled :selected="!moqSheetForm.supplier_id">-- Selecciona un proveedor registrado --</option>
+                                                <template x-for="p in providers" :key="p.dbId || p.id">
+                                                    <option :value="p.dbId || p.id" :selected="moqSheetForm.supplier_id == (p.dbId || p.id) || moqSheetForm.supplier_name === (p.tradeName || p.name)" x-text="(p.tradeName || p.name) + (p.vendorCode ? ' [' + p.vendorCode + ']' : '')"></option>
+                                                </template>
+                                            </select>
+                                            <div class="flex items-center justify-between mt-1 text-[10px] text-slate-500">
+                                                <span x-text="moqSheetForm.supplier_name ? ('Asociado: ' + moqSheetForm.supplier_name) : 'Requerido para dar de alta'"></span>
+                                                <button 
+                                                    type="button" 
+                                                    @click="activeSettingsTab = 'providers'" 
+                                                    class="text-indigo-600 hover:text-indigo-800 underline font-semibold cursor-pointer"
+                                                >
+                                                    + Gestionar Proveedores
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <!-- Título / Lista -->
