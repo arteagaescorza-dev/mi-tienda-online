@@ -349,6 +349,8 @@ class InventoryApiController extends Controller
             'items.*.unit_cost' => 'nullable|numeric|min:0',
             'items.*.sizes' => 'nullable|array',
             'items.*.priority' => 'nullable|string|max:30',
+            'moq_sheet_id' => 'nullable|integer',
+            'moq_tier_label' => 'nullable|string|max:100',
             'po_snapshot' => 'nullable|array',
         ]);
 
@@ -514,6 +516,8 @@ class InventoryApiController extends Controller
             $po = PurchaseOrder::create([
                 'po_number' => $poNumber,
                 'supplier_id' => $supplier->id,
+                'moq_sheet_id' => $validated['moq_sheet_id'] ?? null,
+                'moq_tier_label' => $validated['moq_tier_label'] ?? null,
                 'credit_agreement_id' => $appliedAgreement?->id,
                 'status' => 'confirmed',
                 'priority' => $poPriority,
@@ -673,9 +677,15 @@ class InventoryApiController extends Controller
             'expiration_date' => 'nullable|string|max:30',
             'pao_months' => 'nullable|integer|min:0|max:120',
             'sanitary_data' => 'nullable|array',
+            'moq_tier_label' => 'nullable|string|max:100',
         ]);
 
         $po = PurchaseOrder::with('items.variant')->findOrFail($id);
+
+        if (!empty($validated['moq_tier_label'])) {
+            $po->moq_tier_label = $validated['moq_tier_label'];
+            $po->save();
+        }
 
         $sanitaryPayload = [
             'batch_number' => $validated['batch_number'] ?? null,

@@ -301,6 +301,48 @@ function hybridInventoryModule() {
         newStoreSectionForm: { name: '', slug: '', description: '', is_active: true },
         storeSectionEditState: { isEditing: false, editingId: null, form: { name: '', slug: '', description: '', is_active: true } },
 
+        // REGLA 1: Tabuladores de Precios MOQ por Proveedor & Trazabilidad de Costos
+        moqSheets: (typeof window !== 'undefined' && Array.isArray(window.serverMoqSheets) && window.serverMoqSheets.length > 0)
+            ? window.serverMoqSheets
+            : [],
+        selectedMoqSheetId: null,
+        isEditingMoqSheet: false,
+        moqSheetForm: {
+            id: null,
+            supplier_id: null,
+            supplier_name: 'Torzo B2B',
+            title: 'Torzo Precios Mayoreo 2026',
+            validity: 'Vigencia: Junio 2026',
+            currency: 'MXN',
+            is_active: true,
+            is_default: true,
+            notes: 'Tabulador oficial de Torzo escalonado por volumen de prendas (Menudeo hasta 400+ prendas).',
+            tiers: [
+                { key: 'menudeo', label: 'Menudeo', min_qty: 1, color: '#10b981' },
+                { key: 'moq_50', label: '50 prendas', min_qty: 50, color: '#ef4444' },
+                { key: 'moq_100', label: '100 prendas', min_qty: 100, color: '#f59e0b' },
+                { key: 'moq_200', label: '200 prendas', min_qty: 200, color: '#38bdf8' },
+                { key: 'moq_300', label: '300 prendas', min_qty: 300, color: '#a855f7' },
+                { key: 'moq_400', label: '400 prendas', min_qty: 400, color: '#ec4899' },
+            ],
+            rows: [
+                { category: 'Tanga', prices: { menudeo: 180, moq_50: 90, moq_100: 85, moq_200: 80, moq_300: 75, moq_400: 70 } },
+                { category: 'Bikinis', prices: { menudeo: 220, moq_50: 110, moq_100: 105, moq_200: 100, moq_300: 95, moq_400: 90 } },
+                { category: 'Jocks', prices: { menudeo: 250, moq_50: 130, moq_100: 125, moq_200: 120, moq_300: 115, moq_400: 110 } },
+                { category: 'Boxers', prices: { menudeo: 280, moq_50: 140, moq_100: 135, moq_200: 130, moq_300: 125, moq_400: 120 } },
+                { category: 'Tanktop', prices: { menudeo: 320, moq_50: 160, moq_100: 155, moq_200: 150, moq_300: 145, moq_400: 140 } },
+                { category: 'T-Shirt', prices: { menudeo: 380, moq_50: 190, moq_100: 185, moq_200: 180, moq_300: 175, moq_400: 170 } },
+                { category: 'Swimwear', prices: { menudeo: 460, moq_50: 230, moq_100: 225, moq_200: 220, moq_300: 215, moq_400: 210 } },
+                { category: 'Combo (camisa + short)', prices: { menudeo: 1180, moq_50: 590, moq_100: 585, moq_200: 580, moq_300: 575, moq_400: 570 } },
+                { category: 'Abanico', prices: { menudeo: 400, moq_50: 210, moq_100: 200, moq_200: 190, moq_300: 185, moq_400: 180 } }
+            ]
+        },
+        addMoqTierModalOpen: false,
+        newMoqTierForm: { label: '', min_qty: 500, color: '#ec4899' },
+        addMoqRowModalOpen: false,
+        newMoqRowForm: { category: '', basePrice: 200 },
+        receivingMoqTierLabel: 'Escala 200 prendas',
+
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
         providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
             ? window.serverSuppliers
@@ -3413,6 +3455,14 @@ function hybridInventoryModule() {
                 this.receivingPaoMonths = 12;
             }
 
+            // Detección de Nivel de Escala MOQ (Regla 1)
+            if (order.moq_tier_label) {
+                this.receivingMoqTierLabel = order.moq_tier_label;
+            } else {
+                const moqData = this.getMoqDataForSupplierCategory(order.supplier, (prod && prod.category) || order.productName, order.qty || 50);
+                this.receivingMoqTierLabel = (moqData && moqData.tier) ? moqData.tier.label : 'Menudeo / Estándar';
+            }
+
             this.receiveOrderModalOpen = true;
         },
 
@@ -3488,6 +3538,23 @@ function hybridInventoryModule() {
                     product.paoMonths = parseInt(this.receivingPaoMonths) || product.paoMonths || 12;
                     product.requiresSanitaryControl = true;
                 }
+
+                // Trazabilidad de Costos MOQ por Lote (Regla 1)
+                const activeMoqTier = this.receivingMoqTierLabel || order.moq_tier_label || 'Escala Estándar';
+                if (!product.meta) product.meta = {};
+                if (!Array.isArray(product.meta.moq_cost_layers)) {
+                    product.meta.moq_cost_layers = [];
+                }
+                product.meta.moq_cost_layers.unshift({
+                    order_id: 'Orden #' + order.id,
+                    moq_tier_label: activeMoqTier,
+                    supplier: order.supplier || 'Torzo B2B',
+                    unit_cost: Math.round(unitCost * 100) / 100,
+                    quantity: totalReceived,
+                    received_at: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+                });
+                product.meta.last_moq_tier = activeMoqTier;
+                product.meta.last_moq_cost = Math.round(unitCost * 100) / 100;
             }
 
             // 3. Liberar Carrito Mixto si aplica
@@ -3517,7 +3584,7 @@ function hybridInventoryModule() {
                 stockAfter: stockAfter,
                 reference: 'Orden #' + order.id + ' (' + (order.carrier.split(' ')[0] || 'Inbound') + ')',
                 user: 'Almacén Central (Recepción Inbound)',
-                note: (order.linkedCartId ? ('Recepción de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'Recepción conforme de mercancía en tránsito. ') + 'Valuación CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
+                note: (order.linkedCartId ? ('Recepción de proveedor que libera Pedido Mixto ' + order.linkedCartId + '. ') : 'Recepción conforme de mercancía en tránsito. ') + 'Valuación CPP: ' + prevCpp.toFixed(2) + ' -> ' + newCpp.toFixed(2) + ' (Lote @ ' + unitCost.toFixed(2) + ')' + ' [Nivel MOQ: ' + (this.receivingMoqTierLabel || 'Estándar') + ']' + ((product && product.requiresSanitaryControl) ? (' | Lote: ' + product.batchNumber + ' | Cad: ' + product.expirationDate + ' | PAO: ' + product.paoMonths + 'M') : '')
             });
 
             // Sincronizar recepción Inbound con backend si la orden tiene persistencia DB
@@ -3534,7 +3601,8 @@ function hybridInventoryModule() {
                         notes: this.receivingNotes,
                         batch_number: this.receivingRequiresSanitary ? (this.receivingBatchNumber || null) : null,
                         expiration_date: this.receivingRequiresSanitary ? (this.receivingExpirationDate || null) : null,
-                        pao_months: this.receivingRequiresSanitary ? (parseInt(this.receivingPaoMonths, 10) || 12) : null
+                        pao_months: this.receivingRequiresSanitary ? (parseInt(this.receivingPaoMonths, 10) || 12) : null,
+                        moq_tier_label: this.receivingMoqTierLabel || null
                     })
                 }).catch(err => console.error('Error sincronizando recepcion Inbound:', err));
             }
@@ -4679,6 +4747,12 @@ function hybridInventoryModule() {
             }
             if (typeof window !== 'undefined' && Array.isArray(window.serverOnDemandRequests) && window.serverOnDemandRequests.length > 0) {
                 this.customerOnDemandRequests = window.serverOnDemandRequests;
+            }
+            if (typeof window !== 'undefined' && Array.isArray(window.serverMoqSheets) && window.serverMoqSheets.length > 0) {
+                this.moqSheets = window.serverMoqSheets;
+            }
+            if (Array.isArray(this.moqSheets) && this.moqSheets.length > 0) {
+                this.loadMoqSheetIntoForm(this.moqSheets[0]);
             }
             if (!this.isTabAllowed(this.activeTab)) {
                 this.activeTab = 'inventory';
@@ -6454,7 +6528,10 @@ function hybridInventoryModule() {
                 if (!map[sup]) {
                     const prov = (this.providers || []).find(p => p.name === sup || p.tradeName === sup);
                     let moqTarget = 50;
-                    if (sup === 'Torzo B2B') moqTarget = 100;
+                    const sheet = (this.moqSheets || []).find(s => s.supplier_name && sup.toLowerCase().includes(s.supplier_name.toLowerCase()));
+                    if (sheet && Array.isArray(sheet.tiers) && sheet.tiers.length > 1) {
+                        moqTarget = sheet.tiers[1].min_qty || 50;
+                    } else if (sup === 'Torzo B2B') moqTarget = 100;
                     else if (sup === 'Silk & Cotton Iberia SL') moqTarget = 100;
                     else if (sup === 'ModaIntima Textil MX') moqTarget = 60;
 
@@ -9011,6 +9088,349 @@ function hybridInventoryModule() {
                 }
             } catch (err) {
                 console.error('Error al recargar arbol de categorias', err);
+            }
+        },
+
+        // =========================================================================
+        // REGLA 1: TABULADORES DE MOQ POR PROVEEDOR, ESCALAS DE COSTO Y TRAZABILIDAD
+        // =========================================================================
+        get activeMoqSheet() {
+            if (this.selectedMoqSheetId && this.moqSheets) {
+                return this.moqSheets.find(s => s.id === this.selectedMoqSheetId) || this.moqSheets[0] || null;
+            }
+            return (this.moqSheets && this.moqSheets.length > 0) ? this.moqSheets[0] : null;
+        },
+
+        onSelectMoqSheetChange(id) {
+            const numId = Number(id);
+            const found = (this.moqSheets || []).find(s => s.id == numId || s.id == id);
+            if (found) {
+                this.loadMoqSheetIntoForm(found);
+            }
+        },
+
+        loadMoqSheetIntoForm(sheet) {
+            if (!sheet) return;
+            this.selectedMoqSheetId = sheet.id;
+            this.moqSheetForm = {
+                id: sheet.id || null,
+                supplier_id: sheet.supplier_id || null,
+                supplier_name: sheet.supplier_name || 'Torzo B2B',
+                title: sheet.title || '',
+                validity: sheet.validity || '',
+                currency: sheet.currency || 'MXN',
+                is_active: sheet.is_active !== undefined ? !!sheet.is_active : true,
+                is_default: sheet.is_default !== undefined ? !!sheet.is_default : false,
+                notes: sheet.notes || '',
+                tiers: Array.isArray(sheet.tiers) ? JSON.parse(JSON.stringify(sheet.tiers)) : [],
+                rows: Array.isArray(sheet.rows) ? JSON.parse(JSON.stringify(sheet.rows)) : []
+            };
+        },
+
+        createNewMoqSheet() {
+            this.selectedMoqSheetId = null;
+            this.moqSheetForm = {
+                id: null,
+                supplier_id: null,
+                supplier_name: 'Nuevo Proveedor',
+                title: 'Tabulador Mayoreo 2026',
+                validity: 'Vigencia: ' + new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
+                currency: 'MXN',
+                is_active: true,
+                is_default: false,
+                notes: '',
+                tiers: [
+                    { key: 'menudeo', label: 'Menudeo', min_qty: 1, color: '#10b981' },
+                    { key: 'moq_50', label: '50 prendas', min_qty: 50, color: '#ef4444' },
+                    { key: 'moq_100', label: '100 prendas', min_qty: 100, color: '#f59e0b' },
+                    { key: 'moq_200', label: '200 prendas', min_qty: 200, color: '#38bdf8' }
+                ],
+                rows: [
+                    { category: 'General', prices: { menudeo: 200, moq_50: 120, moq_100: 110, moq_200: 100 } }
+                ]
+            };
+            this.showToast('Nuevo tabulador en blanco listo para editar.', 'info');
+        },
+
+        duplicateCurrentMoqSheet() {
+            const copy = JSON.parse(JSON.stringify(this.moqSheetForm));
+            copy.id = null;
+            copy.title = (copy.title || 'Tabulador') + ' (Copia)';
+            copy.is_default = false;
+            this.selectedMoqSheetId = null;
+            this.moqSheetForm = copy;
+            this.showToast('Tabulador duplicado en borrador. Presiona "Guardar Tabulador" para persistirlo.', 'info');
+        },
+
+        async saveCurrentMoqSheet() {
+            const form = this.moqSheetForm;
+            if (!form.supplier_name || !form.title) {
+                this.showToast('Por favor ingresa al menos el proveedor y título del tabulador.', 'warning');
+                return;
+            }
+            try {
+                const isUpdate = !!form.id;
+                const url = isUpdate 
+                    ? `/api/v1/inventory/settings/moq-sheets/${form.id}`
+                    : `/api/v1/inventory/settings/moq-sheets`;
+                const method = isUpdate ? 'PUT' : 'POST';
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(form)
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    const saved = data.data;
+                    if (!this.moqSheets) this.moqSheets = [];
+                    const idx = this.moqSheets.findIndex(s => s.id === saved.id);
+                    if (idx >= 0) {
+                        this.moqSheets[idx] = saved;
+                    } else {
+                        this.moqSheets.unshift(saved);
+                    }
+                    this.loadMoqSheetIntoForm(saved);
+                    this.showToast('Tabulador de MOQ guardado exitosamente.', 'success');
+                } else {
+                    this.showToast(data.message || 'Error al guardar tabulador de MOQ.', 'error');
+                }
+            } catch (err) {
+                console.error('Error guardando tabulador MOQ:', err);
+                this.showToast('Ocurrió un error al contactar al servidor.', 'error');
+            }
+        },
+
+        async deleteCurrentMoqSheet() {
+            if (!this.moqSheetForm.id) {
+                this.createNewMoqSheet();
+                return;
+            }
+            if (!confirm(`¿Eliminar el tabulador "${this.moqSheetForm.title}"? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/api/v1/inventory/settings/moq-sheets/${this.moqSheetForm.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.moqSheets = (this.moqSheets || []).filter(s => s.id !== this.moqSheetForm.id);
+                    if (this.moqSheets.length > 0) {
+                        this.loadMoqSheetIntoForm(this.moqSheets[0]);
+                    } else {
+                        this.createNewMoqSheet();
+                    }
+                    this.showToast('Tabulador eliminado correctamente.', 'success');
+                } else {
+                    this.showToast(data.message || 'Error al eliminar tabulador.', 'error');
+                }
+            } catch (err) {
+                console.error('Error al eliminar tabulador MOQ:', err);
+            }
+        },
+
+        openAddMoqTierModal() {
+            const tiers = this.moqSheetForm.tiers || [];
+            const lastQty = tiers.length > 0 ? (tiers[tiers.length - 1].min_qty || 100) : 100;
+            const nextQty = lastQty >= 400 ? lastQty + 100 : (lastQty === 1 ? 50 : lastQty * 2);
+            this.newMoqTierForm = {
+                label: nextQty + ' prendas',
+                min_qty: nextQty,
+                color: '#ec4899'
+            };
+            this.addMoqTierModalOpen = true;
+        },
+
+        confirmAddMoqTier() {
+            const qty = parseInt(this.newMoqTierForm.min_qty, 10);
+            if (!qty || qty <= 0) {
+                this.showToast('Ingresa un volumen mínimo válido en prendas.', 'warning');
+                return;
+            }
+            const key = 'moq_' + qty;
+            if (!this.moqSheetForm.tiers) this.moqSheetForm.tiers = [];
+            if (this.moqSheetForm.tiers.some(t => t.key === key)) {
+                this.showToast('Ya existe una escala para ' + qty + ' prendas.', 'warning');
+                return;
+            }
+            this.moqSheetForm.tiers.push({
+                key: key,
+                label: this.newMoqTierForm.label || (qty + ' prendas'),
+                min_qty: qty,
+                color: this.newMoqTierForm.color || '#ec4899'
+            });
+            this.moqSheetForm.tiers.sort((a, b) => (a.min_qty || 0) - (b.min_qty || 0));
+
+            (this.moqSheetForm.rows || []).forEach(r => {
+                if (!r.prices) r.prices = {};
+                if (r.prices[key] === undefined) {
+                    const menudeo = r.prices.menudeo || 200;
+                    r.prices[key] = Math.max(10, Math.round(menudeo * 0.5));
+                }
+            });
+
+            this.addMoqTierModalOpen = false;
+            this.showToast(`Escala de ${qty} prendas añadida al tabulador.`, 'success');
+        },
+
+        removeMoqTier(tIdx) {
+            if (!this.moqSheetForm.tiers || this.moqSheetForm.tiers.length <= 1) {
+                this.showToast('El tabulador debe conservar al menos 1 escala.', 'warning');
+                return;
+            }
+            const removed = this.moqSheetForm.tiers.splice(tIdx, 1)[0];
+            if (removed && removed.key) {
+                (this.moqSheetForm.rows || []).forEach(r => {
+                    if (r.prices && r.prices[removed.key] !== undefined) {
+                        delete r.prices[removed.key];
+                    }
+                });
+            }
+            this.showToast('Escala eliminada del tabulador.', 'info');
+        },
+
+        openAddMoqRowModal() {
+            this.newMoqRowForm = {
+                category: '',
+                basePrice: 200
+            };
+            this.addMoqRowModalOpen = true;
+        },
+
+        confirmAddMoqRow() {
+            const cat = (this.newMoqRowForm.category || '').trim();
+            if (!cat) {
+                this.showToast('Ingresa el nombre de la prenda o categoría.', 'warning');
+                return;
+            }
+            const base = parseFloat(this.newMoqRowForm.basePrice) || 200;
+            const prices = {};
+            (this.moqSheetForm.tiers || []).forEach((t, i) => {
+                if (t.key === 'menudeo' || i === 0) {
+                    prices[t.key] = base;
+                } else {
+                    const discountRate = 0.5 - (i * 0.02);
+                    prices[t.key] = Math.max(10, Math.round(base * discountRate));
+                }
+            });
+            if (!this.moqSheetForm.rows) this.moqSheetForm.rows = [];
+            this.moqSheetForm.rows.push({
+                category: cat,
+                prices: prices
+            });
+            this.addMoqRowModalOpen = false;
+            this.showToast(`Prenda "${cat}" agregada al tabulador.`, 'success');
+        },
+
+        removeMoqRow(rIdx) {
+            if (!this.moqSheetForm.rows || this.moqSheetForm.rows.length <= 1) {
+                this.showToast('El tabulador debe conservar al menos 1 fila.', 'warning');
+                return;
+            }
+            this.moqSheetForm.rows.splice(rIdx, 1);
+        },
+
+        calculateRowMaxSavings(row) {
+            if (!row || !row.prices) return '0%';
+            const menudeo = parseFloat(row.prices.menudeo) || 0;
+            if (menudeo <= 0) return '0%';
+            let minPrice = menudeo;
+            Object.values(row.prices).forEach(p => {
+                const val = parseFloat(p);
+                if (val > 0 && val < minPrice) minPrice = val;
+            });
+            const savings = ((menudeo - minPrice) / menudeo) * 100;
+            return Math.round(savings) + '%';
+        },
+
+        getMoqDataForSupplierCategory(supplierName, categoryName, qty = 1) {
+            const sheets = this.moqSheets || [];
+            if (!sheets.length) return null;
+            const supLower = String(supplierName || '').toLowerCase();
+            let sheet = sheets.find(s => s.supplier_name && supLower.includes(s.supplier_name.toLowerCase()));
+            if (!sheet) {
+                sheet = sheets.find(s => s.is_default) || sheets[0];
+            }
+            if (!sheet || !sheet.tiers || !sheet.rows) return null;
+
+            const sortedTiers = [...sheet.tiers].sort((a, b) => (b.min_qty || 0) - (a.min_qty || 0));
+            const matchedTier = sortedTiers.find(t => qty >= (t.min_qty || 0)) || sheet.tiers[0];
+
+            const catLower = String(categoryName || '').toLowerCase();
+            let matchedRow = sheet.rows.find(r => r.category && catLower.includes(r.category.toLowerCase()));
+            if (!matchedRow) {
+                matchedRow = sheet.rows.find(r => r.category && r.category.toLowerCase().includes(catLower));
+            }
+            if (!matchedRow && sheet.rows.length > 0) {
+                matchedRow = sheet.rows[0];
+            }
+
+            const unitPrice = (matchedRow && matchedRow.prices && matchedTier) ? matchedRow.prices[matchedTier.key] : null;
+            const menudeoPrice = (matchedRow && matchedRow.prices) ? matchedRow.prices.menudeo : null;
+
+            return {
+                sheet: sheet,
+                tier: matchedTier,
+                row: matchedRow,
+                unitPrice: unitPrice,
+                menudeoPrice: menudeoPrice,
+                savingsPct: (menudeoPrice && unitPrice) ? Math.round(((menudeoPrice - unitPrice) / menudeoPrice) * 100) : 0
+            };
+        },
+
+        getProductMoqCostLayers(product) {
+            if (!product) return [];
+            if (product.meta && Array.isArray(product.meta.moq_cost_layers) && product.meta.moq_cost_layers.length > 0) {
+                return product.meta.moq_cost_layers;
+            }
+            const stock = product.localStock || 0;
+            const cost = product.weightedAverageCost || product.cost || 0;
+            const tier = (product.meta && product.meta.last_moq_tier) 
+                ? product.meta.last_moq_tier 
+                : (stock >= 200 ? '200 prendas' : (stock >= 100 ? '100 prendas' : (stock >= 50 ? '50 prendas' : 'Menudeo')));
+            return [
+                {
+                    order_id: 'Lote Base #' + (product.sku || '001'),
+                    moq_tier_label: tier,
+                    supplier: product.brand || 'Torzo B2B',
+                    unit_cost: cost,
+                    quantity: stock > 0 ? stock : 12,
+                    received_at: 'Activo en Catálogo'
+                }
+            ];
+        },
+
+        getDrawerMoqTierSuggestion(product) {
+            if (!product) return null;
+            const supplier = product.brand || 'Torzo B2B';
+            const cat = product.category || 'Boxers';
+            const qty = this.purchaseQty || 100;
+            const moq = this.getMoqDataForSupplierCategory(supplier, cat, qty);
+            if (!moq || !moq.tier) return null;
+            return {
+                tierLabel: moq.tier.label,
+                unitPrice: moq.unitPrice,
+                savingsPct: moq.savingsPct,
+                supplier: moq.sheet.supplier_name
+            };
+        },
+
+        applyDrawerSuggestedMoqCost(product) {
+            const suggestion = this.getDrawerMoqTierSuggestion(product);
+            if (suggestion && suggestion.unitPrice) {
+                this.purchaseUnitCost = suggestion.unitPrice;
+                this.showToast(`Costo de compra ajustado a $${suggestion.unitPrice} MXN (${suggestion.tierLabel}).`, 'success');
             }
         },
 

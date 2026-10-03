@@ -63,6 +63,7 @@
         window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
         window.serverScrapedPendingItems = @json($portalScrapedPendingItems ?? []);
         window.serverArchivedProducts = @json($portalArchivedProducts ?? []);
+        window.serverMoqSheets = @json($portalMoqSheets ?? []);
     </script>
 
     <!-- ========================================================================= -->
@@ -3729,6 +3730,47 @@
                                 </div>
                             </div>
                         </template>
+
+                        <!-- Trazabilidad de Costos MOQ en Existencias (Regla 1) -->
+                        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-4 rounded-xl border border-indigo-500/30 shadow-sm space-y-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-400/30">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </span>
+                                    <div>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-white">Trazabilidad de Costos MOQ en Existencia</h4>
+                                        <span class="text-[10px] text-indigo-300">Existencias compradas a distintos volúmenes y precios</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-bold">
+                                    CPP: <span x-text="'$' + (drawerCpp ? drawerCpp.toFixed(2) : '0.00')"></span>
+                                </span>
+                            </div>
+
+                            <!-- Tabla de Capas / Lotes de Costo MOQ -->
+                            <div class="space-y-1.5 max-h-48 overflow-y-auto no-scrollbar">
+                                <template x-for="(layer, lIdx) in getProductMoqCostLayers(selectedProduct)" :key="lIdx">
+                                    <div class="flex items-center justify-between p-2 bg-slate-800/80 rounded-lg border border-slate-700/60 text-xs font-mono">
+                                        <div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40" x-text="layer.moq_tier_label || 'Escala Estándar'"></span>
+                                                <span class="text-[11px] text-slate-300 font-sans" x-text="layer.order_id || 'Lote Inicial'"></span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-400 font-sans block" x-text="'Proveedor: ' + (layer.supplier || drawerBrand) + (layer.received_at ? ' • ' + layer.received_at : '')"></span>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs font-bold text-amber-300 block" x-text="'$' + (parseFloat(layer.unit_cost || 0).toFixed(2)) + ' /u'"></span>
+                                            <span class="text-[10px] text-slate-300" x-text="(layer.quantity || 0) + ' prendas'"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <p class="text-[10px] text-slate-400 italic">
+                                * Cada lote recibido conserva su costo unitario según el nivel de MOQ negociado en la orden de compra.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- ========================================================= -->
@@ -3912,6 +3954,27 @@
                                     <span class="font-extrabold text-emerald-700" x-text="formatCurrency(calculatePurchaseTotal())"></span>
                                 </div>
                             </div>
+
+                            <!-- Sugerencia Dinámica de Escala MOQ (Regla 1) -->
+                            <template x-if="getDrawerMoqTierSuggestion(selectedProduct)">
+                                <div class="bg-indigo-950/40 p-2.5 rounded-xl border border-indigo-500/30 text-xs">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">Tabulador MOQ Proveedor</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold" x-text="getDrawerMoqTierSuggestion(selectedProduct)?.tierLabel"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-1 text-[11px]">
+                                        <span class="text-slate-300">Costo Unitario Escala:</span>
+                                        <span class="font-bold text-emerald-400 font-mono" x-text="'$' + (getDrawerMoqTierSuggestion(selectedProduct)?.unitPrice || 0) + ' MXN'"></span>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        @click="applyDrawerSuggestedMoqCost(selectedProduct)"
+                                        class="mt-2 w-full text-center py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-400/30 rounded-lg text-[10px] font-bold transition cursor-pointer"
+                                    >
+                                        Aplicar Costo de Escala MOQ a Reorden ($<span x-text="getDrawerMoqTierSuggestion(selectedProduct)?.unitPrice"></span>)
+                                    </button>
+                                </div>
+                            </template>
 
                             <button 
                                 type="button" 
@@ -6446,6 +6509,32 @@
                         </button>
                     </div>
 
+                    <!-- Escala / Nivel de MOQ Adquirido (Regla 1 Compras e Inventario) -->
+                    <div class="p-3 bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="p-1.5 bg-amber-500/20 text-amber-300 rounded-lg border border-amber-400/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] uppercase font-bold text-amber-300 tracking-wider">Escala MOQ del Lote</span>
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-mono">Regla 1 Trazabilidad</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-slate-300 block">Asocia este costo unitario a las existencias que ingresan</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] font-bold text-slate-300 whitespace-nowrap">Nivel Confirmado:</label>
+                            <input 
+                                type="text" 
+                                x-model="receivingMoqTierLabel" 
+                                placeholder="Ej. 100 prendas"
+                                class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-amber-300 focus:outline-none focus:ring-1 focus:ring-indigo-400 min-w-[150px]"
+                            >
+                        </div>
+                    </div>
+
                     <!-- Matriz de Tallas a Cotejar -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -8003,6 +8092,17 @@
                         <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <span>Inteligencia Artificial (Gemini)</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="aiSettings.status === 'connected' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'" x-text="aiSettings.status === 'connected' ? 'En Línea' : 'Setup'"></span>
+                    </button>
+                    <!-- TAB TABULADORES DE MOQ (REGLA 1 COMPRAS & INVENTARIO) -->
+                    <button 
+                        type="button" 
+                        @click="activeSettingsTab = 'moq'" 
+                        :class="activeSettingsTab === 'moq' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Tabuladores MOQ Proveedores</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'moq' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(moqSheets || []).length"></span>
                     </button>
                 </div>
 
@@ -10484,6 +10584,311 @@
                                                 <span>Guardar Ajustes de IA</span>
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- TAB 13: TABULADORES DE MOQ POR PROVEEDOR (REGLA 1 COMPRAS & INVENTARIO) -->
+                    <template x-if="activeSettingsTab === 'moq'">
+                        <div class="space-y-6">
+                            <!-- Card Principal: Tabuladores de Precios MOQ -->
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                                <!-- Banner Header -->
+                                <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-wrap items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 backdrop-blur-md flex items-center justify-center border border-indigo-400/30 text-indigo-300">
+                                            <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="text-base font-bold text-white leading-tight">Tabuladores de MOQ & Escalas de Costo Mayorista</h3>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-300/30 font-mono">Regla 1 Compras</span>
+                                            </div>
+                                            <p class="text-xs text-indigo-200 mt-0.5">Define los costos escalonados por proveedor y volumen mínimo de compra (MOQ) con trazabilidad por lote en inventario.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Acciones Superiores -->
+                                    <div class="flex items-center gap-2">
+                                        <button 
+                                            type="button" 
+                                            @click="createNewMoqSheet()" 
+                                            class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold border border-white/20 transition flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>Nuevo Tabulador</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="saveCurrentMoqSheet()" 
+                                            class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Guardar Tabulador</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="p-6 space-y-6">
+                                    <!-- Selector de Tabuladores Guardados -->
+                                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">Tabulador Activo:</label>
+                                            <select 
+                                                class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer min-w-[260px]"
+                                                @change="onSelectMoqSheetChange($event.target.value)"
+                                            >
+                                                <template x-for="sheet in moqSheets" :key="sheet.id">
+                                                    <option :value="sheet.id" :selected="activeMoqSheet && activeMoqSheet.id === sheet.id" x-text="(sheet.supplier_name || 'Proveedor') + ' — ' + sheet.title + (sheet.is_default ? ' ★ (Predeterminado)' : '')"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="duplicateCurrentMoqSheet()" 
+                                                class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                                title="Duplicar este tabulador para otro periodo o proveedor"
+                                            >
+                                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                <span>Duplicar</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="deleteCurrentMoqSheet()" 
+                                                class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                                title="Eliminar este tabulador"
+                                            >
+                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>Eliminar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Datos Generales del Tabulador -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200">
+                                        <!-- Proveedor -->
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Proveedor / Fabricante</label>
+                                            <input 
+                                                type="text" 
+                                                x-model="moqSheetForm.supplier_name" 
+                                                placeholder="Ej. Torzo B2B" 
+                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+
+                                        <!-- Título / Lista -->
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre del Tabulador</label>
+                                            <input 
+                                                type="text" 
+                                                x-model="moqSheetForm.title" 
+                                                placeholder="Ej. Torzo Precios Mayoreo 2026" 
+                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+
+                                        <!-- Vigencia -->
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Vigencia / Periodo</label>
+                                            <input 
+                                                type="text" 
+                                                x-model="moqSheetForm.validity" 
+                                                placeholder="Ej. Vigencia: Junio 2026" 
+                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                        </div>
+
+                                        <!-- Moneda & Predeterminado -->
+                                        <div class="flex items-center gap-3 pt-4">
+                                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                                                <input type="checkbox" x-model="moqSheetForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                                <span>Predeterminado</span>
+                                            </label>
+                                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-emerald-700">
+                                                <input type="checkbox" x-model="moqSheetForm.is_active" class="rounded text-emerald-600 focus:ring-emerald-500">
+                                                <span>Activo</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Matriz Spreadsheet de Precios MOQ (Estilo Torzo) -->
+                                    <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 shadow-xl space-y-4">
+                                        <!-- Header de la Matriz -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                                            <div class="flex items-center gap-3">
+                                                <div class="px-2.5 py-1 rounded-md bg-rose-500/20 border border-rose-500/40 text-rose-300 font-black text-xs font-mono">
+                                                    TABULADOR MOQ
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-black text-white uppercase tracking-wider" x-text="moqSheetForm.title || 'Tabulador de Precios Mayoreo'"></h4>
+                                                    <span class="text-xs text-slate-400 font-mono" x-text="moqSheetForm.validity || 'Vigencia oficial'"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-2">
+                                                <button 
+                                                    type="button" 
+                                                    @click="openAddMoqTierModal()" 
+                                                    class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Agregar Escala MOQ</span>
+                                                </button>
+                                                <button 
+                                                    type="button" 
+                                                    @click="openAddMoqRowModal()" 
+                                                    class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Agregar Prenda</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tabla Matriz SpreadSheet -->
+                                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                                            <table class="w-full text-left border-collapse text-xs">
+                                                <thead>
+                                                    <tr class="bg-slate-900 border-b border-slate-800 text-slate-300 text-[11px] uppercase tracking-wider font-extrabold">
+                                                        <th class="py-3 px-4 w-44">Prenda / Categoría</th>
+                                                        <!-- Columnas Dinámicas de Tiers -->
+                                                        <template x-for="(tier, tIdx) in moqSheetForm.tiers" :key="tier.key">
+                                                            <th class="py-3 px-3 text-center border-l border-slate-800">
+                                                                <div class="flex flex-col items-center">
+                                                                    <div class="flex items-center gap-1">
+                                                                        <span class="text-sm font-black" :style="{ color: tier.color || '#fff' }" x-text="tier.min_qty"></span>
+                                                                        <template x-if="tIdx > 0">
+                                                                            <button 
+                                                                                type="button" 
+                                                                                @click="removeMoqTier(tIdx)" 
+                                                                                class="text-slate-600 hover:text-rose-400 font-bold ml-1 cursor-pointer"
+                                                                                title="Eliminar esta escala de MOQ"
+                                                                            >&times;</button>
+                                                                        </template>
+                                                                    </div>
+                                                                    <span class="text-[9px] uppercase tracking-widest text-slate-400 font-semibold" x-text="tier.label"></span>
+                                                                </div>
+                                                            </th>
+                                                        </template>
+                                                        <th class="py-3 px-3 text-center border-l border-slate-800 text-emerald-400">Ahorro Máx.</th>
+                                                        <th class="py-3 px-2 text-center w-12 border-l border-slate-800"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-800/80 font-mono font-bold text-slate-200">
+                                                    <template x-for="(row, rIdx) in moqSheetForm.rows" :key="rIdx">
+                                                        <tr class="hover:bg-slate-900/60 transition">
+                                                            <!-- Categoría / Prenda -->
+                                                            <td class="py-3 px-4 font-sans font-extrabold text-white text-sm">
+                                                                <input 
+                                                                    type="text" 
+                                                                    x-model="row.category" 
+                                                                    class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:bg-slate-900 px-1 py-0.5 rounded text-white font-bold text-xs w-full focus:outline-none"
+                                                                >
+                                                            </td>
+
+                                                            <!-- Precios por Escala MOQ -->
+                                                            <template x-for="tier in moqSheetForm.tiers" :key="tier.key">
+                                                                <td class="py-2.5 px-2 text-center border-l border-slate-800/60">
+                                                                    <div class="inline-flex items-center justify-center relative">
+                                                                        <span class="text-slate-500 text-[10px] mr-0.5">$</span>
+                                                                        <input 
+                                                                            type="number" 
+                                                                            step="0.5" 
+                                                                            min="0"
+                                                                            x-model.number="row.prices[tier.key]" 
+                                                                            :style="{ color: tier.color || '#fff' }"
+                                                                            class="w-16 bg-slate-900/90 border border-slate-700/80 rounded py-1 px-1.5 text-center font-bold text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                                                                        >
+                                                                    </div>
+                                                                </td>
+                                                            </template>
+
+                                                            <!-- Ahorro Máximo % -->
+                                                            <td class="py-2.5 px-3 text-center border-l border-slate-800/60">
+                                                                <span 
+                                                                    class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                                                                    x-text="calculateRowMaxSavings(row)"
+                                                                ></span>
+                                                            </td>
+
+                                                            <!-- Eliminar Fila -->
+                                                            <td class="py-2.5 px-2 text-center border-l border-slate-800/60">
+                                                                <button 
+                                                                    type="button" 
+                                                                    @click="removeMoqRow(rIdx)" 
+                                                                    class="p-1 text-slate-500 hover:text-rose-400 rounded transition cursor-pointer"
+                                                                    title="Eliminar fila"
+                                                                >
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Resumen Explicativo de la Regla -->
+                                        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs text-slate-400 flex items-start gap-2.5">
+                                            <span class="p-1 bg-indigo-500/20 text-indigo-400 rounded shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </span>
+                                            <div>
+                                                <strong class="text-slate-200">Mecanismo de Incidencia en Compras & Trazabilidad Inbound:</strong>
+                                                <p class="text-[11px] leading-relaxed mt-0.5">
+                                                    Cuando se emite o reordena una compra con este proveedor, el sistema detecta la cantidad de piezas y asocia el nivel de MOQ correspondiente. Al confirmar la recepción en rampa, el inventario almacena el lote con su costo de adquisición exacto de MOQ, permitiendo que un mismo producto conserve existencias compradas a distintos precios con trazabilidad contable (CPP) y física por partida.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Agregar Escala MOQ -->
+                            <div x-show="addMoqTierModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="addMoqTierModalOpen = false">
+                                <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 space-y-4" @click.stop>
+                                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                        <h4 class="font-bold text-sm text-slate-900">Nueva Escala MOQ</h4>
+                                        <button type="button" @click="addMoqTierModalOpen = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Nombre / Etiqueta</label>
+                                        <input type="text" x-model="newMoqTierForm.label" placeholder="Ej. 500 prendas" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Volumen Mínimo (Prendas)</label>
+                                        <input type="number" min="1" x-model.number="newMoqTierForm.min_qty" placeholder="500" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                        <button type="button" @click="addMoqTierModalOpen = false" class="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">Cancelar</button>
+                                        <button type="button" @click="confirmAddMoqTier()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer">Agregar Escala</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Agregar Prenda / Categoría -->
+                            <div x-show="addMoqRowModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="addMoqRowModalOpen = false">
+                                <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 space-y-4" @click.stop>
+                                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                        <h4 class="font-bold text-sm text-slate-900">Nueva Prenda o Categoría</h4>
+                                        <button type="button" @click="addMoqRowModalOpen = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Nombre de la Prenda / Categoría</label>
+                                        <input type="text" x-model="newMoqRowForm.category" placeholder="Ej. Harness / Arnés" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Precio Menudeo Base ($)</label>
+                                        <input type="number" min="0" x-model.number="newMoqRowForm.basePrice" placeholder="250" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                        <button type="button" @click="addMoqRowModalOpen = false" class="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">Cancelar</button>
+                                        <button type="button" @click="confirmAddMoqRow()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer">Agregar Fila</button>
                                     </div>
                                 </div>
                             </div>

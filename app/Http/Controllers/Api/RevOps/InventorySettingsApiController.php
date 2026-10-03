@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ApparelColor;
 use App\Models\ApparelFabric;
 use App\Models\CmsSection;
+use App\Models\Supplier;
+use App\Models\SupplierMoqSheet;
 use App\Services\Inventory\VariantDimensionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -801,6 +803,124 @@ class InventorySettingsApiController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => "Sección '{$name}' eliminada permanentemente.",
+        ]);
+    }
+
+    // =========================================================================
+    // TABULADORES DE MOQ POR PROVEEDOR (REGLA COMPRAS & INVENTARIO)
+    // =========================================================================
+
+    public function getMoqSheets(Request $request): JsonResponse
+    {
+        SupplierMoqSheet::ensureTorzoDefault();
+
+        $query = SupplierMoqSheet::with('supplier');
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->input('supplier_id'));
+        }
+
+        if ($request->filled('supplier_name')) {
+            $query->where('supplier_name', 'like', '%' . $request->input('supplier_name') . '%');
+        }
+
+        $sheets = $query->orderByDesc('is_default')->orderBy('supplier_name')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $sheets,
+        ]);
+    }
+
+    public function storeMoqSheet(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'supplier_name' => 'required|string|max:150',
+            'title' => 'required|string|max:200',
+            'validity' => 'nullable|string|max:100',
+            'currency' => 'nullable|string|max:10',
+            'tiers' => 'required|array|min:1',
+            'tiers.*.key' => 'required|string|max:50',
+            'tiers.*.label' => 'required|string|max:100',
+            'tiers.*.min_qty' => 'required|integer|min:1',
+            'tiers.*.color' => 'nullable|string|max:30',
+            'tiers.*.badge_class' => 'nullable|string|max:100',
+            'rows' => 'required|array|min:1',
+            'rows.*.category' => 'required|string|max:150',
+            'rows.*.prices' => 'required|array',
+            'is_active' => 'nullable|boolean',
+            'is_default' => 'nullable|boolean',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        if (!empty($validated['is_default'])) {
+            SupplierMoqSheet::where('supplier_name', $validated['supplier_name'])->update(['is_default' => false]);
+        }
+
+        $sheet = SupplierMoqSheet::create($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tabulador de MOQ '{$sheet->title}' creado exitosamente.",
+            'data' => $sheet->load('supplier'),
+        ], 201);
+    }
+
+    public function updateMoqSheet(Request $request, int $id): JsonResponse
+    {
+        $sheet = SupplierMoqSheet::findOrFail($id);
+
+        $validated = $request->validate([
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'supplier_name' => 'sometimes|required|string|max:150',
+            'title' => 'sometimes|required|string|max:200',
+            'validity' => 'nullable|string|max:100',
+            'currency' => 'nullable|string|max:10',
+            'tiers' => 'sometimes|required|array|min:1',
+            'rows' => 'sometimes|required|array|min:1',
+            'is_active' => 'nullable|boolean',
+            'is_default' => 'nullable|boolean',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            SupplierMoqSheet::where('id', '!=', $sheet->id)
+                ->where('supplier_name', $validated['supplier_name'] ?? $sheet->supplier_name)
+                ->update(['is_default' => false]);
+        }
+
+        $sheet->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tabulador de MOQ '{$sheet->title}' actualizado correctamente.",
+            'data' => $sheet->fresh()->load('supplier'),
+        ]);
+    }
+
+    public function toggleMoqSheetActive(int $id): JsonResponse
+    {
+        $sheet = SupplierMoqSheet::findOrFail($id);
+        $sheet->is_active = !$sheet->is_active;
+        $sheet->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Estado del tabulador '{$sheet->title}' actualizado a " . ($sheet->is_active ? 'Activo' : 'Inactivo') . '.',
+            'data' => $sheet,
+        ]);
+    }
+
+    public function destroyMoqSheet(int $id): JsonResponse
+    {
+        $sheet = SupplierMoqSheet::findOrFail($id);
+        $title = $sheet->title;
+        $sheet->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Tabulador de MOQ '{$title}' eliminado permanentemente.",
         ]);
     }
 }

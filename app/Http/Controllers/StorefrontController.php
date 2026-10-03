@@ -1487,6 +1487,7 @@ class StorefrontController extends Controller
             'portalFabrics' => \App\Models\ApparelFabric::orderBy('name')->get(),
             'portalApparelColors' => \App\Models\ApparelColor::orderBy('name')->get(),
             'portalStoreSections' => \App\Models\CmsSection::orderBy('sort_order')->orderBy('name')->get(),
+            'portalMoqSheets' => \App\Models\SupplierMoqSheet::with('supplier')->orderByDesc('is_default')->orderBy('supplier_name')->get(),
             'syncRuns' => $syncRuns,
             'syncSuppliers' => \App\Models\Supplier::query()->orderBy('name')->get(['id', 'name']),
             'variantMappings' => \App\Models\SupplierVariantMapping::query()

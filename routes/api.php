@@ -152,6 +152,13 @@ Route::prefix('v1')->group(function () {
             Route::post('/brands/{id}/restore', [BrandApiController::class, 'restore']);
             Route::delete('/brands/{id}', [BrandApiController::class, 'destroy']);
             Route::post('/brands/{id}/assign-supplier', [BrandApiController::class, 'assignSupplier']);
+
+            // TABULADORES DE PRECIOS MOQ POR PROVEEDOR (REGLA COMPRAS & INVENTARIO)
+            Route::get('/moq-sheets', [InventorySettingsApiController::class, 'getMoqSheets']);
+            Route::post('/moq-sheets', [InventorySettingsApiController::class, 'storeMoqSheet']);
+            Route::put('/moq-sheets/{id}', [InventorySettingsApiController::class, 'updateMoqSheet']);
+            Route::patch('/moq-sheets/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleMoqSheetActive']);
+            Route::delete('/moq-sheets/{id}', [InventorySettingsApiController::class, 'destroyMoqSheet']);
         });
 
         // RUTA DIRECTA DE MARCAS EN INVENTARIO
