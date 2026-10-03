@@ -149,7 +149,35 @@ function hybridInventoryModule() {
 
         // Regla 7: Secciones Modulares del Sitio Web E-Commerce y Filtros Hub 2
         storeSections: (typeof window !== 'undefined' && Array.isArray(window.serverStoreSections) && window.serverStoreSections.length > 0)
-            ? window.serverStoreSections
+            ? window.serverStoreSections.map(s => {
+                const normName = String(s.name || '').trim();
+                const knownMap = {
+                    'linea basicos esenciales': 'basicos',
+                    'linea disenador & autor': 'disenador',
+                    'linea disenador y autor': 'disenador',
+                    'coleccion temporada / drops': 'temporada',
+                    'catalogo general': 'general',
+                    'hero editorial principal': 'hero-editorial',
+                    'pilares de marca & courier': 'pilares-marca',
+                    'convenios & aliados multiverso': 'convenios-aliados',
+                    'prendas destacadas del catalogo': 'prendas-destacadas',
+                };
+                const cleanKey = normName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const autoSlug = knownMap[cleanKey] || cleanKey.replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                const finalSlug = s.slug || (s.settings && s.settings.slug) || (s.query_rules && s.query_rules.slug) || autoSlug;
+                const finalDesc = s.description || s.subtitle || (s.settings && s.settings.description) || '';
+                const isActive = (s.is_active !== undefined) ? !!s.is_active : (s.status === 'active');
+                const isArchived = (s.is_archived !== undefined) ? !!s.is_archived : (s.status === 'archived');
+                return {
+                    id: s.id,
+                    name: normName,
+                    slug: finalSlug,
+                    description: finalDesc,
+                    is_active: isActive,
+                    is_archived: isArchived,
+                    status: s.status || (isActive ? 'active' : 'draft')
+                };
+            })
             : [
                 { id: 1, name: 'Línea Básicos Esenciales', slug: 'basicos', description: 'Prendas lisas de alta rotación para uso diario continuo', is_active: true, is_archived: false },
                 { id: 2, name: 'Línea Diseñador & Autor', slug: 'disenador', description: 'Prendas con diseño exclusivo, cortes audaces y tornasoles', is_active: true, is_archived: false },
@@ -268,6 +296,8 @@ function hybridInventoryModule() {
         quickColorForm: { name: '', hex: '#0f172a', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b' },
 
         // Regla 7: Estado de Edición y Alta de Secciones de Tienda Web
+        isEditingStoreSection: false,
+        storeSectionForm: { id: null, name: '', slug: '', description: '', is_active: true },
         newStoreSectionForm: { name: '', slug: '', description: '', is_active: true },
         storeSectionEditState: { isEditing: false, editingId: null, form: { name: '', slug: '', description: '', is_active: true } },
 
@@ -7682,47 +7712,52 @@ function hybridInventoryModule() {
         // REGLA 7: SECCIONES WEB E-COMMERCE (CRUD REACTIVO)
         // =========================================================================
         async addNewStoreSection() {
-            const name = (this.newStoreSectionForm.name || '').trim();
+            const name = (this.storeSectionForm.name || this.newStoreSectionForm.name || '').trim();
             if (!name) {
                 this.showToast('Ingresa el nombre de la sección.', 'warning');
                 return;
             }
-            let slug = (this.newStoreSectionForm.slug || '').trim();
+            let slug = (this.storeSectionForm.slug || this.newStoreSectionForm.slug || '').trim();
             if (!slug) {
                 slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
             }
-            const desc = (this.newStoreSectionForm.description || '').trim();
+            const desc = (this.storeSectionForm.description !== undefined ? this.storeSectionForm.description : this.newStoreSectionForm.description || '').trim();
+            const isActive = this.storeSectionForm.is_active !== undefined ? this.storeSectionForm.is_active : (this.newStoreSectionForm.is_active !== false);
+
             const newSec = {
                 id: Date.now(),
                 name: name,
                 slug: slug,
                 description: desc,
-                is_active: this.newStoreSectionForm.is_active !== false,
-                is_archived: false
+                is_active: isActive,
+                is_archived: false,
+                status: isActive ? 'active' : 'draft'
             };
-            this.storeSections.push(newSec);
-            this.newStoreSectionForm = { name: '', slug: '', description: '', is_active: true };
+            this.storeSections = [...this.storeSections, newSec];
+            this.cancelEditStoreSection();
             this.showToast(`Sección "${name}" creada exitosamente.`, 'success');
 
             try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch('/api/v1/inventory/settings/store-sections', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        'X-CSRF-TOKEN': csrf
                     },
                     body: JSON.stringify({
                         name: name,
                         slug: slug,
                         description: desc,
-                        is_active: true
+                        is_active: isActive
                     })
                 });
                 if (res.ok) {
                     const json = await res.json();
                     if (json && json.data && json.data.id) {
                         newSec.id = json.data.id;
+                        this.storeSections = [...this.storeSections];
                     }
                 }
             } catch (e) {
@@ -7731,47 +7766,80 @@ function hybridInventoryModule() {
         },
 
         editStoreSection(sec) {
+            this.isEditingStoreSection = true;
             this.storeSectionEditState.isEditing = true;
             this.storeSectionEditState.editingId = sec.id;
-            this.storeSectionEditState.form = {
-                name: sec.name,
-                slug: sec.slug,
+            this.storeSectionForm = {
+                id: sec.id,
+                name: sec.name || '',
+                slug: sec.slug || '',
                 description: sec.description || '',
                 is_active: sec.is_active !== false
             };
+            this.storeSectionEditState.form = { ...this.storeSectionForm };
         },
 
         cancelEditStoreSection() {
+            this.isEditingStoreSection = false;
             this.storeSectionEditState.isEditing = false;
             this.storeSectionEditState.editingId = null;
-            this.storeSectionEditState.form = { name: '', slug: '', description: '', is_active: true };
+            this.storeSectionForm = { id: null, name: '', slug: '', description: '', is_active: true };
+            this.storeSectionEditState.form = { ...this.storeSectionForm };
+            this.newStoreSectionForm = { ...this.storeSectionForm };
         },
 
         async saveStoreSection() {
-            const name = (this.storeSectionEditState.form.name || '').trim();
+            const name = (this.storeSectionForm.name || this.storeSectionEditState.form.name || '').trim();
             if (!name) {
                 this.showToast('El nombre de la sección no puede estar vacío.', 'warning');
                 return;
             }
-            const sec = this.storeSections.find(s => s.id === this.storeSectionEditState.editingId);
+            const editingId = this.storeSectionForm.id || this.storeSectionEditState.editingId;
+            const sec = this.storeSections.find(s => String(s.id) === String(editingId));
             if (!sec) return;
+
+            const slug = (this.storeSectionForm.slug || this.storeSectionEditState.form.slug || sec.slug || '').trim();
+            const desc = (this.storeSectionForm.description !== undefined ? this.storeSectionForm.description : this.storeSectionEditState.form.description || '').trim();
+            const isActive = this.storeSectionForm.is_active !== undefined ? this.storeSectionForm.is_active : (this.storeSectionEditState.form.is_active !== false);
+
+            const oldSlug = sec.slug;
+            const oldName = sec.name;
+
             sec.name = name;
-            sec.slug = (this.storeSectionEditState.form.slug || sec.slug).trim();
-            sec.description = (this.storeSectionEditState.form.description || '').trim();
-            sec.is_active = this.storeSectionEditState.form.is_active;
+            sec.slug = slug;
+            sec.description = desc;
+            sec.is_active = isActive;
+            sec.status = isActive ? 'active' : 'draft';
+
+            this.storeSections = [...this.storeSections];
+
+            // Si hay productos en memoria usando el slug o nombre anterior, mantener consistencia
+            (this.products || []).forEach(p => {
+                if (p.websiteSection === oldSlug || p.website_section === oldSlug || p.section_name === oldName) {
+                    p.websiteSection = slug;
+                    p.website_section = slug;
+                    p.section_name = name;
+                }
+            });
 
             const secId = sec.id;
-            const payload = { ...this.storeSectionEditState.form };
+            const payload = {
+                name: name,
+                slug: slug,
+                description: desc,
+                is_active: isActive
+            };
             this.cancelEditStoreSection();
             this.showToast(`Sección "${name}" actualizada.`, 'success');
 
             try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 await fetch(`/api/v1/inventory/settings/store-sections/${secId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        'X-CSRF-TOKEN': csrf
                     },
                     body: JSON.stringify(payload)
                 });
@@ -7782,16 +7850,19 @@ function hybridInventoryModule() {
 
         async toggleStoreSectionActive(sec) {
             sec.is_active = !sec.is_active;
+            sec.status = sec.is_active ? 'active' : 'draft';
+            this.storeSections = [...this.storeSections];
             const statusLabel = sec.is_active ? 'activada' : 'pausada';
             this.showToast(`Sección "${sec.name}" ${statusLabel}.`, 'info');
 
             try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 await fetch(`/api/v1/inventory/settings/store-sections/${sec.id}/toggle-active`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        'X-CSRF-TOKEN': csrf
                     }
                 });
             } catch (e) {
@@ -7801,17 +7872,20 @@ function hybridInventoryModule() {
 
         async archiveStoreSection(sec) {
             sec.is_archived = !sec.is_archived;
+            sec.status = sec.is_archived ? 'archived' : (sec.is_active ? 'active' : 'draft');
+            this.storeSections = [...this.storeSections];
             const statusLabel = sec.is_archived ? 'archivada' : 'restaurada';
             this.showToast(`Sección "${sec.name}" ${statusLabel}.`, 'info');
 
             try {
                 const endpoint = sec.is_archived ? 'archive' : 'restore';
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 await fetch(`/api/v1/inventory/settings/store-sections/${sec.id}/${endpoint}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        'X-CSRF-TOKEN': csrf
                     }
                 });
             } catch (e) {
@@ -7820,23 +7894,37 @@ function hybridInventoryModule() {
         },
 
         async deleteStoreSection(secId) {
-            const sec = this.storeSections.find(s => s.id === secId);
+            const sec = this.storeSections.find(s => String(s.id) === String(secId));
             if (!sec) return;
-            const inUseCount = (this.products || []).filter(p => (p.websiteSection === sec.slug || p.website_section === sec.slug || p.section_name === sec.name)).length;
+
+            const secSlug = String(sec.slug || '').trim().toLowerCase();
+            const secName = String(sec.name || '').trim().toLowerCase();
+
+            // Solo contar productos con sección explícita que coincida con el slug o nombre NO vacíos
+            const inUseCount = (this.products || []).filter(p => {
+                const prodSection = String(p.websiteSection || p.website_section || p.section_name || '').trim().toLowerCase();
+                if (!prodSection) return false;
+                return (secSlug && prodSection === secSlug) || (secName && prodSection === secName);
+            }).length;
+
             if (inUseCount > 0) {
-                this.showToast(`No es posible eliminar "${sec.name}" porque tiene ${inUseCount} productos asociados. Se recomienda archivarla.`, 'warning');
+                this.showToast(`No es posible eliminar "${sec.name}" porque tiene ${inUseCount} producto(s) asociado(s). Se recomienda pausarla o archivarla.`, 'warning');
                 return;
             }
-            this.storeSections = this.storeSections.filter(s => s.id !== secId);
+
+            if (!confirm(`¿Eliminar definitivamente la sección "${sec.name}"?`)) return;
+
+            this.storeSections = this.storeSections.filter(s => String(s.id) !== String(secId));
             this.showToast(`Sección "${sec.name}" eliminada.`, 'success');
 
             try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 await fetch(`/api/v1/inventory/settings/store-sections/${secId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        'X-CSRF-TOKEN': csrf
                     }
                 });
             } catch (e) {

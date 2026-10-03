@@ -9602,15 +9602,15 @@
                             <!-- Formulario de Alta / Edición de Sección Web -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="storeSectionEditState.isEditing ? 'Editar Sección: ' + storeSectionEditState.form.name : 'Dar de Alta Nueva Sección de Tienda Web'"></h4>
-                                    <span x-show="storeSectionEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingStoreSection ? 'Editar Sección: ' + storeSectionForm.name : 'Dar de Alta Nueva Sección de Tienda Web'"></h4>
+                                    <span x-show="isEditingStoreSection" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Sección</label>
                                         <input 
                                             type="text" 
-                                            x-model="storeSectionEditState.isEditing ? storeSectionEditState.form.name : newStoreSectionForm.name" 
+                                            x-model="storeSectionForm.name" 
                                             placeholder="Ej: Línea Básicos Esenciales" 
                                             class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold"
                                         >
@@ -9619,7 +9619,7 @@
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Slug / Identificador</label>
                                         <input 
                                             type="text" 
-                                            x-model="storeSectionEditState.isEditing ? storeSectionEditState.form.slug : newStoreSectionForm.slug" 
+                                            x-model="storeSectionForm.slug" 
                                             placeholder="Ej: basicos (autogenerado si vacío)" 
                                             class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
                                         >
@@ -9628,14 +9628,14 @@
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito Comercial</label>
                                         <input 
                                             type="text" 
-                                            x-model="storeSectionEditState.isEditing ? storeSectionEditState.form.description : newStoreSectionForm.description" 
+                                            x-model="storeSectionForm.description" 
                                             placeholder="Ej: Prendas lisas de alta rotación para uso diario continuo" 
                                             class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         >
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <template x-if="!storeSectionEditState.isEditing">
+                                    <template x-if="!isEditingStoreSection">
                                         <button 
                                             type="button" 
                                             @click="addNewStoreSection()" 
@@ -9644,7 +9644,7 @@
                                             + Guardar Sección
                                         </button>
                                     </template>
-                                    <template x-if="storeSectionEditState.isEditing">
+                                    <template x-if="isEditingStoreSection">
                                         <div class="flex items-center gap-2">
                                             <button 
                                                 type="button" 

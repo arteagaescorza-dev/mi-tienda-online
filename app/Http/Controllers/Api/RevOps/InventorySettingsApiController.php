@@ -653,6 +653,8 @@ class InventorySettingsApiController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:120',
+            'slug' => 'nullable|string|max:120',
+            'description' => 'nullable|string|max:500',
             'title' => 'nullable|string|max:200',
             'subtitle' => 'nullable|string|max:500',
             'universe' => 'nullable|string|max:32',
@@ -660,20 +662,32 @@ class InventorySettingsApiController extends Controller
             'badge' => 'nullable|string|max:80',
             'sort_order' => 'nullable|integer',
             'status' => 'nullable|string|in:active,draft,archived',
+            'is_active' => 'nullable|boolean',
         ], [
             'name.required' => 'El nombre de la sección de tienda es obligatorio.',
         ]);
 
+        $status = $validated['status'] ?? ($request->has('is_active') ? ($request->boolean('is_active') ? 'active' : 'draft') : 'active');
+        $subtitle = $validated['subtitle'] ?? ($validated['description'] ?? null);
+        $settings = [];
+        if (!empty($validated['slug'])) {
+            $settings['slug'] = trim($validated['slug']);
+        }
+        if (!empty($validated['description'])) {
+            $settings['description'] = trim($validated['description']);
+        }
+
         $section = CmsSection::create([
             'name' => trim($validated['name']),
             'title' => !empty($validated['title']) ? trim($validated['title']) : strtoupper(trim($validated['name'])),
-            'subtitle' => $validated['subtitle'] ?? null,
+            'subtitle' => $subtitle,
             'universe' => $validated['universe'] ?? 'all',
             'type' => $validated['type'] ?? 'catalog_section',
             'badge' => $validated['badge'] ?? 'E-Commerce',
-            'query_rules' => ['section' => trim($validated['name'])],
+            'query_rules' => ['section' => trim($validated['name']), 'slug' => $validated['slug'] ?? null],
+            'settings' => $settings,
             'sort_order' => $validated['sort_order'] ?? 0,
-            'status' => $validated['status'] ?? 'active',
+            'status' => $status,
         ]);
 
         return response()->json([
@@ -689,6 +703,8 @@ class InventorySettingsApiController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:120',
+            'slug' => 'nullable|string|max:120',
+            'description' => 'nullable|string|max:500',
             'title' => 'nullable|string|max:200',
             'subtitle' => 'nullable|string|max:500',
             'universe' => 'nullable|string|max:32',
@@ -696,11 +712,29 @@ class InventorySettingsApiController extends Controller
             'badge' => 'nullable|string|max:80',
             'sort_order' => 'nullable|integer',
             'status' => 'nullable|string|in:active,draft,archived',
+            'is_active' => 'nullable|boolean',
         ]);
 
         if (!empty($validated['name'])) {
             $section->name = trim($validated['name']);
             $section->query_rules = array_merge($section->query_rules ?? [], ['section' => $section->name]);
+        }
+        if (array_key_exists('slug', $validated)) {
+            $settings = $section->settings ?? [];
+            $settings['slug'] = $validated['slug'];
+            $section->settings = $settings;
+            $qr = $section->query_rules ?? [];
+            $qr['slug'] = $validated['slug'];
+            $section->query_rules = $qr;
+        }
+        if (array_key_exists('description', $validated)) {
+            $section->subtitle = $validated['description'];
+            $settings = $section->settings ?? [];
+            $settings['description'] = $validated['description'];
+            $section->settings = $settings;
+        }
+        if (array_key_exists('is_active', $validated)) {
+            $section->status = $validated['is_active'] ? 'active' : 'draft';
         }
         if (array_key_exists('title', $validated)) $section->title = $validated['title'];
         if (array_key_exists('subtitle', $validated)) $section->subtitle = $validated['subtitle'];
