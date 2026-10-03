@@ -4428,16 +4428,25 @@
 
                                 <!-- Dimensión de Variante -->
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Dimension de Variante</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Dimensión de Variante</label>
+                                        <div class="flex items-center gap-1.5 text-[10px]">
+                                            <button type="button" @click="activeSettingsTab = 'sizes'; moduleSettingsModalOpen = true;" class="text-indigo-600 hover:underline font-semibold cursor-pointer">CRUD Tallas</button>
+                                            <span class="text-slate-300">•</span>
+                                            <button type="button" @click="activeSettingsTab = 'shades'; moduleSettingsModalOpen = true;" class="text-indigo-600 hover:underline font-semibold cursor-pointer">Tonos</button>
+                                            <span class="text-slate-300">•</span>
+                                            <button type="button" @click="activeSettingsTab = 'volumes'; moduleSettingsModalOpen = true;" class="text-indigo-600 hover:underline font-semibold cursor-pointer">Volúmenes</button>
+                                        </div>
+                                    </div>
                                     <select 
                                         x-model="newProduct.variantDimension" 
-                                        @change="onNewProductCategoryChange()"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none"
+                                        @change="onVariantDimensionChange()"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                     >
                                         <option value="size">Tallas Textiles (Curvas de Patronaje)</option>
-                                        <option value="shade">Tonos / Shades (Cosmetica Facial & Corporal)</option>
-                                        <option value="volume">Volumenes (Perfumeria & Fragancias)</option>
-                                        <option value="none">Pieza Unica / Accesorio Fijo</option>
+                                        <option value="shade">Tonos / Shades (Cosmética Facial & Corporal)</option>
+                                        <option value="volume">Volúmenes (Perfumería & Fragancias)</option>
+                                        <option value="none">Pieza Única / Accesorio Fijo</option>
                                     </select>
                                 </div>
 
@@ -4447,8 +4456,8 @@
                                         <!-- Selector de Curva de Tallas Configurable (TASK-INV-14) -->
                                         <div>
                                             <div class="flex items-center justify-between mb-1">
-                                                <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Curva de Tallas Operativa</label>
-                                                <span class="text-[10px] text-slate-400">TASK-INV-14</span>
+                                                <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Curva de Tallas del Proveedor</label>
+                                                <button type="button" @click="activeSettingsTab = 'sizes'; moduleSettingsModalOpen = true;" class="text-[10px] text-indigo-600 hover:underline font-bold cursor-pointer">+ Gestionar Curvas</button>
                                             </div>
                                             <select 
                                                 x-model="newProduct.selectedSizeCurveId" 
@@ -4640,36 +4649,37 @@
                                     </div>
                                 </div>
 
-                                <!-- Galería de Imágenes con Asignación de Color de Prenda (Regla 2) -->
+                                <!-- Galería de Imágenes con Estandarización 4:5 y Asignación de Color -->
                                 <div class="pt-2 border-t border-slate-100 space-y-2">
                                     <div class="flex items-center justify-between">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Fotografías & Variante de Color</label>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Fotografías Estándar 4:5</label>
                                         <span class="text-[10px] font-semibold text-slate-400" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
                                     </div>
                                     
-                                    <!-- Dropzone con conversión automática a WebP (1080x1350) -->
+                                    <!-- Dropzone que dispara el Modal de Recorte 4:5 -->
                                     <div 
                                         @dragover.prevent="isDraggingImages = true"
                                         @dragleave.prevent="isDraggingImages = false"
-                                        @drop.prevent="uploadImageFile($event, 'newProduct')"
-                                        class="border-2 border-dashed rounded-xl p-2.5 text-center transition cursor-pointer"
-                                        :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-slate-200 bg-slate-50 hover:bg-slate-100/60'"
+                                        @drop.prevent="handleWorkstationImageDrop($event)"
+                                        class="border-2 border-dashed rounded-xl p-3 text-center transition cursor-pointer"
+                                        :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/70'"
                                         @click="$refs.newProductFileInput.click()"
                                     >
                                         <input 
                                             type="file" 
                                             x-ref="newProductFileInput" 
-                                            @change="uploadImageFile($event, 'newProduct')"
-                                            multiple 
+                                            @change="handleWorkstationImageSelect($event)"
                                             accept="image/jpeg,image/png,image/webp,image/avif" 
                                             class="hidden"
                                         >
-                                        <div class="flex flex-col items-center justify-center gap-0.5 text-slate-500">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span class="text-[10px] font-semibold text-slate-700">Arrastra fotos o haz clic para subir (Conversión WebP 1080x1350)</span>
-                                            <span class="text-[9px] text-slate-400">Normalización automática a estándar web desktop y móvil</span>
+                                        <div class="flex flex-col items-center justify-center gap-1 text-slate-600">
+                                            <div class="w-8 h-8 rounded-lg bg-white border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-2xs">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-bold text-slate-800">Cargar Foto & Encuadrar 4:5</span>
+                                            <span class="text-[10px] text-slate-500">Abre editor interactivo con recorte a 1080×1350 px</span>
                                         </div>
                                     </div>
 
@@ -4689,7 +4699,7 @@
                                             title="Agregar fotografía manualmente por URL"
                                         >
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>+ Foto Manual</span>
+                                            <span>+ URL</span>
                                         </button>
                                     </div>
 
@@ -4698,8 +4708,8 @@
                                         <div class="space-y-2 mt-2 max-h-56 overflow-y-auto pr-1">
                                             <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
                                                 <div class="flex items-center gap-2 p-1.5 bg-slate-50 rounded-lg border border-slate-200 hover:border-indigo-300 transition">
-                                                    <div class="relative w-12 h-12 rounded overflow-hidden border border-slate-200 bg-white shrink-0">
-                                                        <img :src="img.preview || img.url" class="w-full h-full object-cover">
+                                                    <div class="relative w-12 h-15 rounded overflow-hidden border border-slate-200 bg-white shrink-0">
+                                                        <img :src="resolveProductImage(img)" class="w-full h-full object-cover">
                                                         <span x-show="img.is_primary" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-bold px-1 rounded shadow-xs">Portada</span>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
@@ -4725,7 +4735,7 @@
                                                             </select>
                                                             <button 
                                                                 type="button" 
-                                                                @click.stop="openQuickColorModal('newProduct', img.preview || img.url)" 
+                                                                @click.stop="openQuickColorModal('newProduct', resolveProductImage(img))" 
                                                                 class="px-1 py-0.5 text-[9px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
                                                                 title="Dar de alta color in situ para esta foto"
                                                             >
@@ -4774,13 +4784,17 @@
                                     </button>
                                 </div>
 
-                                <!-- Descripción Persuasiva Comercial -->
+                                <!-- Descripción Persuasiva Comercial (Regla: Máximo 75 caracteres) -->
                                 <div class="relative z-10">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Descripcion Persuasiva (B2C)</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Descripción Persuasiva (B2C)</label>
+                                        <span class="text-[10px] font-semibold" :class="(newProduct.description || '').length > 75 ? 'text-rose-600 font-bold' : 'text-slate-400'" x-text="((newProduct.description || '').length) + ' / 75 car.'"></span>
+                                    </div>
                                     <textarea 
                                         x-model="newProduct.description" 
-                                        rows="4" 
-                                        placeholder="Haz clic en 'Generar con IA' para redactar una descripcion comercial optimizada en base a la composicion textil y marca..."
+                                        maxlength="75"
+                                        rows="2" 
+                                        placeholder="Máximo 75 caracteres. Confort premium, soporte y máxima suavidad..."
                                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 resize-none"
                                     ></textarea>
                                 </div>
@@ -5004,7 +5018,7 @@
                     </button>
                 </div>
 
-                <!-- Comparativa Lado a Lado: Borrador vs Producto Existente -->
+                <!-- Comparativa Lado a Lado: Borrador vs Producto Existente (Regla: Mostrar fotografías de ambos) -->
                 <div class="py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     <!-- Columna Izquierda: Nuevo Borrador -->
@@ -5013,34 +5027,51 @@
                             <span class="text-xs font-bold text-indigo-900 uppercase tracking-wider">Tu Borrador Actual</span>
                             <span class="text-[10px] font-extrabold px-1.5 py-0.5 bg-indigo-200 text-indigo-800 rounded">Nuevo</span>
                         </div>
-                        <div class="space-y-2 text-xs">
+                        
+                        <div class="flex gap-3">
+                            <!-- Miniatura 4:5 Borrador -->
+                            <div class="w-20 h-25 rounded-lg border border-indigo-200 bg-white overflow-hidden shrink-0 flex items-center justify-center relative shadow-2xs">
+                                <template x-if="newProduct.images && newProduct.images.length > 0">
+                                    <img :src="resolveProductImage(newProduct.images[0])" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!newProduct.images || newProduct.images.length === 0">
+                                    <div class="flex flex-col items-center justify-center text-slate-400 p-1 text-center">
+                                        <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span class="text-[9px] mt-0.5 font-medium leading-none">Sin foto</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <!-- Datos del Borrador -->
+                            <div class="flex-1 min-w-0 space-y-1.5 text-xs">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">SKU Propuesto:</span>
+                                    <span class="font-mono font-bold text-slate-800 truncate block" x-text="newProduct.sku || 'Por generar'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Nombre del Modelo:</span>
+                                    <span class="font-bold text-slate-800 line-clamp-1" x-text="newProduct.name"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Marca:</span>
+                                        <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.brand || '-'"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Categoría:</span>
+                                        <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.category"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-100 text-xs">
                             <div>
-                                <span class="text-[10px] text-slate-400 block">SKU Propuesto:</span>
-                                <span class="font-mono font-bold text-slate-800" x-text="newProduct.sku || 'Por generar'"></span>
+                                <span class="text-[10px] text-slate-400 block">PVP:</span>
+                                <span class="font-mono font-bold text-slate-800" x-text="formatCurrency(newProduct.pvp || 0)"></span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-400 block">Nombre del Modelo:</span>
-                                <span class="font-bold text-slate-800" x-text="newProduct.name"></span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Marca:</span>
-                                    <span class="font-semibold text-slate-700" x-text="newProduct.brand || '-'"></span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Categoria:</span>
-                                    <span class="font-semibold text-slate-700" x-text="newProduct.category"></span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-indigo-100">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">PVP:</span>
-                                    <span class="font-mono font-bold text-slate-800" x-text="formatCurrency(newProduct.pvp || 0)"></span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Stock a Ingresar:</span>
-                                    <span class="font-mono font-bold text-indigo-700" x-text="calculateNewProductTotalStock() + ' uds'"></span>
-                                </div>
+                                <span class="text-[10px] text-slate-400 block">Stock a Ingresar:</span>
+                                <span class="font-mono font-bold text-indigo-700" x-text="calculateNewProductTotalStock() + ' uds'"></span>
                             </div>
                         </div>
                     </div>
@@ -5048,30 +5079,48 @@
                     <!-- Columna Derecha: Producto Existente Detectado -->
                     <div class="p-4 rounded-xl border border-rose-200 bg-rose-50/40 space-y-3">
                         <div class="flex items-center justify-between pb-2 border-b border-rose-100">
-                            <span class="text-xs font-bold text-rose-900 uppercase tracking-wider">Producto en Catalogo</span>
+                            <span class="text-xs font-bold text-rose-900 uppercase tracking-wider">Producto en Catálogo</span>
                             <span class="text-[10px] font-extrabold px-1.5 py-0.5 bg-rose-200 text-rose-800 rounded">Existente</span>
                         </div>
                         <template x-if="newProduct.duplicateSelectedMatch">
-                            <div class="space-y-2 text-xs">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">SKU Registrado:</span>
-                                    <span class="font-mono font-bold text-rose-800" x-text="newProduct.duplicateSelectedMatch.sku"></span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Nombre Registrado:</span>
-                                    <span class="font-bold text-slate-800" x-text="newProduct.duplicateSelectedMatch.title"></span>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <span class="text-[10px] text-slate-400 block">Marca:</span>
-                                        <span class="font-semibold text-slate-700" x-text="newProduct.duplicateSelectedMatch.brand || '-'"></span>
+                            <div class="space-y-3">
+                                <div class="flex gap-3">
+                                    <!-- Miniatura 4:5 Existente -->
+                                    <div class="w-20 h-25 rounded-lg border border-rose-200 bg-white overflow-hidden shrink-0 flex items-center justify-center relative shadow-2xs">
+                                        <template x-if="newProduct.duplicateSelectedMatch.image">
+                                            <img :src="resolveProductImage(newProduct.duplicateSelectedMatch.image)" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!newProduct.duplicateSelectedMatch.image">
+                                            <div class="flex flex-col items-center justify-center text-slate-400 p-1 text-center">
+                                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span class="text-[9px] mt-0.5 font-medium leading-none">Sin foto</span>
+                                            </div>
+                                        </template>
                                     </div>
-                                    <div>
-                                        <span class="text-[10px] text-slate-400 block">Categoria:</span>
-                                        <span class="font-semibold text-slate-700" x-text="newProduct.duplicateSelectedMatch.category || 'General'"></span>
+                                    <!-- Datos del Existente -->
+                                    <div class="flex-1 min-w-0 space-y-1.5 text-xs">
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block">SKU Registrado:</span>
+                                            <span class="font-mono font-bold text-rose-800 truncate block" x-text="newProduct.duplicateSelectedMatch.sku"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block">Nombre Registrado:</span>
+                                            <span class="font-bold text-slate-800 line-clamp-1" x-text="newProduct.duplicateSelectedMatch.title"></span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <span class="text-[10px] text-slate-400 block">Marca:</span>
+                                                <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.duplicateSelectedMatch.brand || '-'"></span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-400 block">Categoría:</span>
+                                                <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.duplicateSelectedMatch.category || 'General'"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-rose-100">
+
+                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-rose-100 text-xs">
                                     <div>
                                         <span class="text-[10px] text-slate-400 block">Precio Actual:</span>
                                         <span class="font-mono font-bold text-slate-800" x-text="formatCurrency(newProduct.duplicateSelectedMatch.price || 0)"></span>
@@ -5090,7 +5139,7 @@
                             </div>
                         </template>
                         <template x-if="!newProduct.duplicateSelectedMatch">
-                            <p class="text-xs text-slate-400 italic">No se encontro el producto en memoria.</p>
+                            <p class="text-xs text-slate-400 italic">No se encontró el producto en catálogo.</p>
                         </template>
                     </div>
 
@@ -5129,6 +5178,186 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL DE ENCUADRE Y RECORTE 4:5 ESTÁNDAR (WORKSTATION PRODUCTOS)  -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="imageCropModalOpen" 
+        class="fixed inset-0 z-[90] overflow-y-auto" 
+        style="z-index: 90; display: none;"
+        role="dialog" 
+        aria-modal="true"
+        @keydown.escape.window="closeCropModal()"
+    >
+        <!-- Backdrop oscuro -->
+        <div 
+            x-show="imageCropModalOpen"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity"
+            @click="closeCropModal()"
+        ></div>
+
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div 
+                x-show="imageCropModalOpen"
+                x-transition:enter="ease-out duration-300 transform"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="ease-in duration-200 transform"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="relative bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 overflow-hidden"
+                @click.stop
+            >
+                <!-- Encabezado del Modal -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Encuadre & Recorte 4:5</h3>
+                            <p class="text-[11px] text-slate-500">Acomoda y estandariza la prenda al catálogo (1080 × 1350 px)</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="closeCropModal()" 
+                        class="p-1 rounded-lg text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Visor 4:5 con Enmarcado Interactivo y Guías de Composición -->
+                <div class="py-4 flex flex-col items-center">
+                    <div 
+                        class="relative w-[320px] h-[400px] bg-slate-950 rounded-xl overflow-hidden shadow-inner border-2 border-indigo-500/80 cursor-grab active:cursor-grabbing select-none"
+                        @mousedown="onCropMouseDown($event)"
+                        @mousemove="onCropMouseMove($event)"
+                        @mouseup="onCropMouseUp()"
+                        @mouseleave="onCropMouseUp()"
+                        @touchstart.passive="onCropTouchStart($event)"
+                        @touchmove.prevent="onCropTouchMove($event)"
+                        @touchend="onCropTouchEnd()"
+                    >
+                        <!-- Imagen dentro del visor -->
+                        <template x-if="imageCropSource">
+                            <img 
+                                :src="imageCropSource" 
+                                :style="getImageCropTransformStyle()"
+                                class="absolute pointer-events-none select-none"
+                                draggable="false"
+                            >
+                        </template>
+
+                        <!-- Rejilla de Composición (Regla de Tercios) -->
+                        <div class="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3 border border-white/20">
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-b border-white/15"></div>
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-b border-white/15"></div>
+                            <div class="border-r border-white/15"></div>
+                            <div class="border-r border-white/15"></div>
+                            <div></div>
+                        </div>
+
+                        <!-- Badge Indicador Proporción 4:5 -->
+                        <div class="absolute bottom-2 left-2 pointer-events-none bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <span>4:5 (1080×1350)</span>
+                        </div>
+                    </div>
+
+                    <!-- Controles de Zoom y Ajuste -->
+                    <div class="w-[320px] mt-4 space-y-3">
+                        <div class="flex items-center justify-between text-xs text-slate-600 font-semibold">
+                            <span class="flex items-center gap-1 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                Zoom
+                            </span>
+                            <span class="font-mono text-indigo-700 font-bold text-xs" x-text="Math.round(cropZoom * 100) + '%'"></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button 
+                                type="button" 
+                                @click="cropZoomOut()" 
+                                class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm transition cursor-pointer"
+                                title="Reducir zoom"
+                            >
+                                -
+                            </button>
+                            <input 
+                                type="range" 
+                                min="1" 
+                                max="3" 
+                                step="0.05" 
+                                x-model.number="cropZoom" 
+                                class="flex-1 accent-indigo-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                            >
+                            <button 
+                                type="button" 
+                                @click="cropZoomIn()" 
+                                class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm transition cursor-pointer"
+                                title="Aumentar zoom"
+                            >
+                                +
+                            </button>
+                            <button 
+                                type="button" 
+                                @click="cropReset()" 
+                                class="px-2 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-800 bg-slate-100 rounded-lg transition cursor-pointer"
+                                title="Restablecer posición y zoom"
+                            >
+                                Reset
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-center text-slate-400">
+                            Arrastra la imagen para centrar la prenda dentro del marco.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Footer de Acciones con botón Crop -->
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+                    <button 
+                        type="button" 
+                        @click="closeCropModal()" 
+                        class="px-3.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="applyCrop45()" 
+                        :disabled="isProcessingCrop"
+                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition cursor-pointer disabled:opacity-50"
+                    >
+                        <svg x-show="!isProcessingCrop" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <svg x-show="isProcessingCrop" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span x-text="isProcessingCrop ? 'Recortando y Estandarizando...' : 'Recortar y Aplicar (4:5)'"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -13005,9 +13234,9 @@
                                             <tr class="hover:bg-slate-50/80 transition-colors">
                                                 <td class="px-4 py-3">
                                                     <div class="flex items-center gap-3">
-                                                        <div class="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+                                                        <div class="w-12 h-15 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                                             <img 
-                                                                :src="(Array.isArray(draft.images) && draft.images.length > 0) ? draft.images[0] : (draft.image || 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80')" 
+                                                                :src="resolveProductImage(draft)" 
                                                                 class="w-full h-full object-cover" 
                                                                 :alt="draft.name"
                                                             >

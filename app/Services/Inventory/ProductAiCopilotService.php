@@ -44,8 +44,8 @@ class ProductAiCopilotService
         // Intentar generación inteligente enriquecida mediante Google Gemini AI
         if ($this->gemini && $this->gemini->isConfigured()) {
             $geminiPrompt = "Eres un redactor experto en moda íntima masculina y E-Commerce D2C de alta conversión para 'Mi Tienda Online'.
-Genera contenido comercial y SEO para la siguiente prenda de ropa interior:
-- Nombre base: {$name}
+Genera contenido comercial conciso y SEO para la siguiente prenda de ropa interior:
+- Nombre: {$name}
 - Categoría: {$category}
 - Marca: {$brand}
 - Tipo de Tela / Composición: {$fabric}
@@ -53,10 +53,13 @@ Genera contenido comercial y SEO para la siguiente prenda de ropa interior:
 - Acabado: {$designType}
 - Audiencia: {$audience}" . ($price ? " - Precio: MXN \${$price}" : "") . "
 
+REGLA ESTRICTA: La descripción comercial ('commercial_description') DEBE TENER UN MÁXIMO ABSOLUTO DE 75 CARACTERES (concisa, persuasiva, directa al punto).
+No modifiques el nombre del producto en el título.
+
 Genera un JSON con esta estructura exacta:
 {
-  \"optimized_title\": \"Título limpio y vendedor (ej: {$brand} - {$name})\",
-  \"commercial_description\": \"Descripción persuasiva de dos párrafos redactada con tono moderno y sofisticado, destacando soporte anatómico, elasticidad, frescura termorreguladora y durabilidad.\",
+  \"optimized_title\": \"{$name}\",
+  \"commercial_description\": \"Máximo 75 caracteres destacando confort y soporte.\",
   \"bullet_points\": [\"Punto destacado 1\", \"Punto destacado 2\", \"Punto destacado 3\", \"Punto destacado 4\"],
   \"seo_tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\", \"tag6\"]
 }";
@@ -68,7 +71,10 @@ Genera un JSON con esta estructura exacta:
 
             if (is_array($aiResult) && !empty($aiResult['commercial_description'])) {
                 $optimizedTitle = trim((string) ($aiResult['optimized_title'] ?? $this->buildOptimizedTitle($name, $category, $brand, $fabric)));
-                $commercialDesc = trim((string) $aiResult['commercial_description']);
+                if (stripos($optimizedTitle, $brand) === false) {
+                    $optimizedTitle = "{$brand} - {$optimizedTitle}";
+                }
+                $commercialDesc = mb_substr(trim((string) $aiResult['commercial_description']), 0, 75);
                 $bulletPoints = is_array($aiResult['bullet_points'] ?? null) && count($aiResult['bullet_points']) > 0
                     ? $aiResult['bullet_points']
                     : $this->buildTechnicalBulletPoints($category, $fabric, $color, $designType);
@@ -79,6 +85,7 @@ Genera un JSON con esta estructura exacta:
                 return [
                     'title' => $optimizedTitle,
                     'optimized_title' => $optimizedTitle,
+                    'name' => $name,
                     'description' => $commercialDesc,
                     'commercial_description' => $commercialDesc,
                     'bullet_points' => $bulletPoints,
@@ -102,7 +109,7 @@ Genera un JSON con esta estructura exacta:
         // 1. Titulo optimizado para conversion
         $optimizedTitle = $this->buildOptimizedTitle($name, $category, $brand, $fabric);
 
-        // 2. Descripcion persuasiva en 2 parrafos
+        // 2. Descripcion persuasiva de max 75 caracteres
         $commercialDesc = $this->buildCommercialDescription($name, $category, $brand, $fabric, $color, $designType, $audience);
 
         // 3. Puntos tecnicos destacados
@@ -114,6 +121,7 @@ Genera un JSON con esta estructura exacta:
         return [
             'title' => $optimizedTitle,
             'optimized_title' => $optimizedTitle,
+            'name' => $name,
             'description' => $commercialDesc,
             'commercial_description' => $commercialDesc,
             'bullet_points' => $bulletPoints,
@@ -144,7 +152,7 @@ Genera un JSON con esta estructura exacta:
     }
 
     /**
-     * Redacta una descripcion comercial persuasiva de dos parrafos estructurados.
+     * Redacta una descripcion comercial persuasiva de maximo 75 caracteres.
      */
     protected function buildCommercialDescription(
         string $name,
@@ -155,15 +163,8 @@ Genera un JSON con esta estructura exacta:
         string $designType,
         string $audience
     ): string {
-        $p1 = "Experimenta el maximo confort y soporte anatomico con {$name} de {$brand}. Confeccionado minuciosamente a partir de {$fabric}, este diseno en tonalidad {$color} ofrece una sensacion tactil ultrasuave de segunda piel y una transpirabilidad termoreguladora que se adapta a cada uno de tus movimientos cotidianos sin presiones innecesarias.";
-
-        $designNote = ($designType === 'con_diseno')
-            ? 'Su acabado exclusivo con patrones estampados de autor resalta tu identidad con elegancia vanguardista.'
-            : 'Su silueta limpia y patronaje ergonomico sin costuras visibles garantiza discrecion absoluta bajo cualquier prenda exterior.';
-
-        $p2 = "{$designNote} Incorpora elastico reforzado con memoria que evita enrollamientos indeseados y costuras planas anti-friccion, consolidandose como una pieza imprescindible de alta durabilidad para tu guardarropa intimo.";
-
-        return "{$p1}\n\n{$p2}";
+        $desc = "{$name} en {$fabric} ({$brand}). Confort anatómico y máxima frescura.";
+        return mb_substr($desc, 0, 75);
     }
 
     /**

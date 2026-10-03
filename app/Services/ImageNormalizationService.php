@@ -137,13 +137,15 @@ class ImageNormalizationService
             @copy($targetDiskFile, $publicWebPath);
         }
 
-        $url = Storage::disk($disk)->url($storagePath);
-        $fullUrl = url($url);
+        $relativeUrl = '/storage/' . $storagePath;
+        $url = $relativeUrl;
+        $fullUrl = url($relativeUrl);
 
         return [
             'filename' => $filename,
             'path' => $storagePath,
             'url' => $url,
+            'relative_url' => $relativeUrl,
             'full_url' => $fullUrl,
             'format' => 'webp',
             'width' => self::TARGET_WIDTH,

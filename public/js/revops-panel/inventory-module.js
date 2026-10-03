@@ -285,6 +285,23 @@ function hybridInventoryModule() {
         drawerNewImageUrl: '',
         isUploadingImage: false,
 
+        // 4:5 Image Cropper State (Workstation Alta de Producto)
+        imageCropModalOpen: false,
+        imageCropSource: null,
+        imageCropOriginalName: '',
+        imageCropOriginalFile: null,
+        cropZoom: 1.0,
+        cropOffsetX: 0,
+        cropOffsetY: 0,
+        isCropDragging: false,
+        cropDragStartX: 0,
+        cropDragStartY: 0,
+        cropInitialOffsetX: 0,
+        cropInitialOffsetY: 0,
+        imageCropNaturalWidth: 0,
+        imageCropNaturalHeight: 0,
+        isProcessingCrop: false,
+
         // Reglas 1, 3, 5: Modales Rápidos In Situ para Alta de Telas y Colores
         quickFabricModalOpen: false,
         quickFabricContext: 'newProduct', // 'newProduct' | 'drawer' | 'curating'
@@ -10588,6 +10605,12 @@ function hybridInventoryModule() {
                     }
                 }
             }
+            // Regla: Sincronizar automáticamente la curva de tallas asociada al proveedor
+            const curves = this.getAvailableSizeCurves(supId, this.newProduct.brand);
+            if (curves && curves.length > 0) {
+                this.newProduct.selectedSizeCurveId = curves[0].id;
+            }
+            this.onSizeCurveChange();
         },
 
         onDrawerSupplierChange() {
@@ -11066,7 +11089,8 @@ function hybridInventoryModule() {
         },
 
         openCreateProductDrawer() {
-            const availableCurves = this.getAvailableSizeCurves();
+            const initialSupId = (this.providers && this.providers.length > 0) ? this.providers[0].id : null;
+            const availableCurves = this.getAvailableSizeCurves(initialSupId);
             const defaultCurve = availableCurves.find(c => c.is_default) || availableCurves[0];
             const defaultCurveId = defaultCurve ? defaultCurve.id : null;
 
@@ -11096,7 +11120,7 @@ function hybridInventoryModule() {
                 bulletPoints: [],
                 seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
                 newTagInput: '',
-                supplier_id: (this.providers && this.providers.length > 0) ? this.providers[0].id : null,
+                supplier_id: initialSupId,
                 provider: (this.providers && this.providers.length > 0) ? (this.providers[0].tradeName || this.providers[0].name) : 'ModaIntima Textil MX',
                 brand: (this.providers && this.providers.length > 0) ? ((this.getBrandsForSupplier(this.providers[0].id)[0]?.name) || this.providers[0].tradeName || this.providers[0].name) : 'ModaIntima Textil MX',
                 discountPct: 0,
@@ -11104,7 +11128,7 @@ function hybridInventoryModule() {
                 pvp: 399.00,
                 cost: 135.00,
                 weightedAverageCost: 135.00,
-                sizes: { ch: 0, m: 0, g: 0, xl: 0, '2xl': 0, '3xl': 0 },
+                sizes: {},
                 shades: { t01: 0, t02: 0, t03: 0, t04: 0, t05: 0, t06: 0 },
                 volumes: { v10: 0, v50: 0, v100: 0 },
                 unitStock: 0,
@@ -11124,6 +11148,7 @@ function hybridInventoryModule() {
             };
             this.isDraggingImages = false;
             this.newProductDrawerOpen = true;
+            this.onSizeCurveChange();
             this.generateAutoSku();
         },
 
@@ -11342,8 +11367,11 @@ function hybridInventoryModule() {
                 const json = await res.json();
                 if (json && json.status === 'success' && json.data) {
                     const data = json.data;
-                    const desc = data.description || data.commercial_description || '';
+                    let desc = data.description || data.commercial_description || '';
                     if (desc) {
+                        if (desc.length > 75) {
+                            desc = desc.substring(0, 75).trim();
+                        }
                         if (isCurating) {
                             target.scrapedDescription = desc;
                         } else {
@@ -11358,19 +11386,16 @@ function hybridInventoryModule() {
                     } else if (typeof data.suggested_tags === 'string' && data.suggested_tags.trim()) {
                         target.seoTags = data.suggested_tags.split(',').map(t => t.trim()).filter(Boolean);
                     }
-                    if (!isCurating && (!target.name || target.name === name) && (data.optimized_title || data.title)) {
-                        target.name = data.optimized_title || data.title;
-                    }
-                    this.showToast('Descripción comercial y tags SEO generados exitosamente con Copiloto IA (Gemini).', 'success');
+                    // Regla: El copiloto IA no tiene incidencia en el nombre del producto
+                    this.showToast('Descripción comercial (máx 75 car.) y tags SEO generados con éxito.', 'success');
                 } else {
                     throw new Error(json.message || 'Error en Copiloto IA');
                 }
             } catch (e) {
-                // Fallback local sintetizado
+                // Fallback local sintetizado - Regla: max 75 caracteres y sin alterar el nombre
                 const brand = target.brand || 'Torzo B2B';
                 const fabric = isCurating ? (target.suggestedFabric || 'Algodón & Modal') : (target.fabricType || 'Algodón & Modal');
-                const color = isCurating ? (target.detectedColorName || 'Negro Clásico') : (target.colorName || 'Negro Clásico');
-                const desc = `Experimenta el máximo confort y soporte anatómico con ${name} de ${brand}. Confeccionado minuciosamente con ${fabric} en tono ${color}, ofrece una sensación ultrasuave de segunda piel y transpirabilidad que se adapta a tus movimientos cotidianos.\n\nDiseño de silueta limpia y patronaje ergonómico sin costuras visibles que garantiza discreción y alta durabilidad para tu guardarropa íntimo.`;
+                const desc = `${name} en ${fabric} (${brand}). Confort premium y ajuste anatómico.`.substring(0, 75);
                 const bullets = [
                     `Composición textil premium: ${fabric}`,
                     `Ajuste ergonómico de segunda piel`,
@@ -11381,7 +11406,6 @@ function hybridInventoryModule() {
                     (target.category || 'ropa interior').toLowerCase(),
                     brand.toLowerCase(),
                     fabric.toLowerCase(),
-                    color.toLowerCase(),
                     'confort premium',
                     'soporte ergonomico',
                     'transpirable',
@@ -11398,7 +11422,7 @@ function hybridInventoryModule() {
                     target.bulletPoints = bullets;
                     target.seoTags = Array.from(new Set(fallbackTags));
                 }
-                this.showToast('Contenido comercial y tags SEO generados con Copiloto IA.', 'info');
+                this.showToast('Descripción comercial y tags generados (modo respaldo).', 'info');
             } finally {
                 if (isCurating) {
                     this.isCuratingAiGenerating = false;
@@ -11422,20 +11446,38 @@ function hybridInventoryModule() {
             this.newProduct.seoTags.splice(index, 1);
         },
 
+        onVariantDimensionChange() {
+            const dim = this.newProduct.variantDimension || 'size';
+            if (dim === 'size') {
+                this.newProduct.aisle = (this.newProduct.category === 'Jocks') ? 'B' : 'A';
+                this.onSizeCurveChange();
+            } else if (dim === 'shade' || dim === 'volume') {
+                this.newProduct.aisle = 'C';
+            } else if (dim === 'none') {
+                this.newProduct.aisle = 'D';
+            }
+            this.updateNewProductLocation();
+            this.generateAutoSku();
+        },
+
         getAvailableSizeCurves(supplierId = null, brandId = null) {
             let active = [];
             if (Array.isArray(this.sizeCurves) && this.sizeCurves.length > 0) {
                 active = this.sizeCurves.filter(c => c.is_active !== false && !c.deleted_at);
             }
             if (active.length > 0) {
-                if (supplierId || brandId) {
-                    const cleanSupId = supplierId ? String(supplierId).replace('prov_', '') : null;
-                    const matching = active.filter(c => {
-                        const matchSup = !c.supplier_id || String(c.supplier_id) === String(cleanSupId);
-                        const matchBrand = !c.brand_id || (brandId && (String(c.brand_id) === String(brandId) || (c.brand && c.brand.name === brandId)));
-                        return matchSup && matchBrand;
-                    });
-                    if (matching.length > 0) return matching;
+                if (supplierId) {
+                    const cleanSupId = String(supplierId).replace('prov_', '');
+                    const supplierCurves = active.filter(c => c.supplier_id && String(c.supplier_id) === cleanSupId);
+                    if (supplierCurves.length > 0) {
+                        return supplierCurves;
+                    }
+                }
+                if (brandId) {
+                    const brandCurves = active.filter(c => c.brand_id && (String(c.brand_id) === String(brandId) || (c.brand && c.brand.name === brandId)));
+                    if (brandCurves.length > 0) {
+                        return brandCurves;
+                    }
                 }
                 return active;
             }
@@ -11493,13 +11535,18 @@ function hybridInventoryModule() {
         },
 
         getCurrentNewProductSizeCurve() {
-            const curves = this.getAvailableSizeCurves();
+            const curves = this.getAvailableSizeCurves(this.newProduct?.supplier_id, this.newProduct?.brand);
+            if (!curves || curves.length === 0) return null;
             if (!this.newProduct.selectedSizeCurveId) {
                 const def = curves.find(c => c.is_default) || curves[0];
                 if (def) this.newProduct.selectedSizeCurveId = def.id;
                 return def;
             }
-            return curves.find(c => String(c.id) === String(this.newProduct.selectedSizeCurveId)) || curves[0];
+            const found = curves.find(c => String(c.id) === String(this.newProduct.selectedSizeCurveId));
+            if (found) return found;
+            // Si la curva actual no pertenece al proveedor seleccionado, cambiar a la primera del proveedor
+            this.newProduct.selectedSizeCurveId = curves[0].id;
+            return curves[0];
         },
 
         getCurrentNewProductSizes() {
@@ -11522,15 +11569,282 @@ function hybridInventoryModule() {
             const newSizes = {};
             sizes.forEach(s => {
                 const key = (s.code || '').toLowerCase();
-                newSizes[key] = (this.newProduct.sizes && this.newProduct.sizes[key]) ? this.newProduct.sizes[key] : 0;
+                newSizes[key] = (this.newProduct.sizes && this.newProduct.sizes[key] !== undefined) ? this.newProduct.sizes[key] : 0;
             });
             this.newProduct.sizes = newSizes;
+        },
+
+        resolveProductImage(item) {
+            if (!item) return 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80';
+            let url = '';
+            if (typeof item === 'string') {
+                url = item;
+            } else if (typeof item === 'object') {
+                url = item.preview || item.url || item.path || item.src || '';
+                if (!url && Array.isArray(item.images) && item.images.length > 0) {
+                    return this.resolveProductImage(item.images[0]);
+                }
+                if (!url && item.image) {
+                    return this.resolveProductImage(item.image);
+                }
+            }
+            if (!url || typeof url !== 'string') {
+                return 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80';
+            }
+            url = url.trim();
+            if (url.includes('localhost/storage/')) {
+                url = url.substring(url.indexOf('/storage/'));
+            } else if (url.includes('127.0.0.1/storage/')) {
+                url = url.substring(url.indexOf('/storage/'));
+            }
+            return url;
+        },
+
+        // Métodos para el Recortador de Imagen 4:5
+        openCropModalForFile(file) {
+            if (!file) return;
+            const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
+            const fileName = (file.name || '').toLowerCase();
+            const isValid = allowedExtensions.some(ext => fileName.endsWith(ext)) || (file.type && file.type.startsWith('image/'));
+            if (!isValid) {
+                this.showToast('Formato no admitido. Selecciona un archivo JPG, PNG o WebP.', 'warning');
+                return;
+            }
+            if (file.size && file.size > 15 * 1024 * 1024) {
+                this.showToast('El archivo supera los 15 MB permitidos.', 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                const img = new Image();
+                img.onload = () => {
+                    this.imageCropNaturalWidth = img.naturalWidth;
+                    this.imageCropNaturalHeight = img.naturalHeight;
+                    this.imageCropSource = dataUrl;
+                    this.imageCropOriginalName = file.name || 'producto.jpg';
+                    this.imageCropOriginalFile = file;
+                    this.cropZoom = 1.0;
+                    this.cropOffsetX = 0;
+                    this.cropOffsetY = 0;
+                    this.imageCropModalOpen = true;
+                };
+                img.src = dataUrl;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        closeCropModal() {
+            this.imageCropModalOpen = false;
+            this.imageCropSource = null;
+            this.imageCropOriginalFile = null;
+            this.isProcessingCrop = false;
+        },
+
+        onCropMouseDown(e) {
+            this.isCropDragging = true;
+            this.cropDragStartX = e.clientX;
+            this.cropDragStartY = e.clientY;
+            this.cropInitialOffsetX = this.cropOffsetX;
+            this.cropInitialOffsetY = this.cropOffsetY;
+        },
+
+        onCropMouseMove(e) {
+            if (!this.isCropDragging) return;
+            this.cropOffsetX = this.cropInitialOffsetX + (e.clientX - this.cropDragStartX);
+            this.cropOffsetY = this.cropInitialOffsetY + (e.clientY - this.cropDragStartY);
+        },
+
+        onCropMouseUp() {
+            this.isCropDragging = false;
+        },
+
+        onCropTouchStart(e) {
+            if (!e.touches || !e.touches[0]) return;
+            this.isCropDragging = true;
+            this.cropDragStartX = e.touches[0].clientX;
+            this.cropDragStartY = e.touches[0].clientY;
+            this.cropInitialOffsetX = this.cropOffsetX;
+            this.cropInitialOffsetY = this.cropOffsetY;
+        },
+
+        onCropTouchMove(e) {
+            if (!this.isCropDragging || !e.touches || !e.touches[0]) return;
+            this.cropOffsetX = this.cropInitialOffsetX + (e.touches[0].clientX - this.cropDragStartX);
+            this.cropOffsetY = this.cropInitialOffsetY + (e.touches[0].clientY - this.cropDragStartY);
+        },
+
+        onCropTouchEnd() {
+            this.isCropDragging = false;
+        },
+
+        cropZoomIn() {
+            this.cropZoom = Math.min(3.0, +(this.cropZoom + 0.1).toFixed(2));
+        },
+
+        cropZoomOut() {
+            this.cropZoom = Math.max(1.0, +(this.cropZoom - 0.1).toFixed(2));
+        },
+
+        cropReset() {
+            this.cropZoom = 1.0;
+            this.cropOffsetX = 0;
+            this.cropOffsetY = 0;
+        },
+
+        getImageCropTransformStyle() {
+            const CW = 320;
+            const CH = 400;
+            const targetAspect = CW / CH; // 0.8 (4:5)
+            const nw = this.imageCropNaturalWidth || CW;
+            const nh = this.imageCropNaturalHeight || CH;
+            const imgAspect = nw / nh;
+
+            let baseW, baseH;
+            if (imgAspect > targetAspect) {
+                baseH = CH;
+                baseW = CH * imgAspect;
+            } else {
+                baseW = CW;
+                baseH = CW / imgAspect;
+            }
+
+            const w = Math.round(baseW * this.cropZoom);
+            const h = Math.round(baseH * this.cropZoom);
+            const left = Math.round((CW / 2) + this.cropOffsetX);
+            const top = Math.round((CH / 2) + this.cropOffsetY);
+
+            return `width: ${w}px; height: ${h}px; left: ${left}px; top: ${top}px; transform: translate(-50%, -50%); max-width: none; max-height: none;`;
+        },
+
+        async applyCrop45() {
+            if (!this.imageCropSource || this.isProcessingCrop) return;
+            this.isProcessingCrop = true;
+            try {
+                const img = new Image();
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = this.imageCropSource;
+                });
+
+                const CW = 320;
+                const CH = 400;
+                const targetAspect = CW / CH; // 0.8
+                const nw = img.naturalWidth;
+                const nh = img.naturalHeight;
+                const imgAspect = nw / nh;
+
+                let baseW, baseH;
+                if (imgAspect > targetAspect) {
+                    baseH = CH;
+                    baseW = CH * imgAspect;
+                } else {
+                    baseW = CW;
+                    baseH = CW / imgAspect;
+                }
+
+                // Salida estándar 1080 x 1350 (4:5)
+                const outW = 1080;
+                const outH = 1350;
+                const scale = outW / CW; // 3.375
+
+                const canvas = document.createElement('canvas');
+                canvas.width = outW;
+                canvas.height = outH;
+                const ctx = canvas.getContext('2d');
+
+                // Fondo blanco
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, outW, outH);
+
+                const dw = baseW * this.cropZoom * scale;
+                const dh = baseH * this.cropZoom * scale;
+                const dx = (outW / 2) + (this.cropOffsetX * scale) - (dw / 2);
+                const dy = (outH / 2) + (this.cropOffsetY * scale) - (dh / 2);
+
+                ctx.drawImage(img, dx, dy, dw, dh);
+
+                const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                const tempId = 'img_' + Date.now();
+                const fileNameClean = (this.imageCropOriginalName || 'prenda').replace(/\.[^/.]+$/, "") + '_4x5.webp';
+
+                const newImgItem = {
+                    id: tempId,
+                    name: fileNameClean,
+                    preview: croppedDataUrl,
+                    url: croppedDataUrl,
+                    color_name: this.newProduct.colorName || (this.apparelColors && this.apparelColors[0] ? this.apparelColors[0].name : 'Negro Profundo'),
+                    is_primary: (!this.newProduct.images || this.newProduct.images.length === 0),
+                    sort_order: (this.newProduct.images ? this.newProduct.images.length : 0)
+                };
+
+                if (!Array.isArray(this.newProduct.images)) {
+                    this.newProduct.images = [];
+                }
+                this.newProduct.images.push(newImgItem);
+                this.imageCropModalOpen = false;
+                this.showToast('Fotografía recortada y estandarizada a formato 4:5.', 'success');
+
+                // Persistencia asíncrona en el servidor en segundo plano
+                canvas.toBlob(async (blob) => {
+                    if (!blob) return;
+                    try {
+                        const formData = new FormData();
+                        formData.append('image', blob, fileNameClean);
+                        const res = await fetch('/api/v1/inventory/upload-image', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                            },
+                            body: formData
+                        });
+                        if (res.ok) {
+                            const json = await res.json();
+                            if (json && (json.url || json.path)) {
+                                const found = this.newProduct.images.find(i => i.id === tempId);
+                                if (found) {
+                                    const persistentUrl = this.resolveProductImage(json.url || json.path);
+                                    found.url = persistentUrl;
+                                    found.preview = persistentUrl;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Persistencia en storage:', e);
+                    }
+                }, 'image/webp', 0.90);
+
+            } catch (err) {
+                console.error('Error al recortar imagen:', err);
+                this.showToast('Error al procesar el recorte: ' + err.message, 'warning');
+            } finally {
+                this.isProcessingCrop = false;
+            }
+        },
+
+        handleWorkstationImageSelect(event) {
+            const files = event && event.target ? event.target.files : null;
+            if (!files || !files.length) return;
+            this.openCropModalForFile(files[0]);
+            if (event && event.target) {
+                event.target.value = '';
+            }
+        },
+
+        handleWorkstationImageDrop(event) {
+            this.isDraggingImages = false;
+            const files = event && event.dataTransfer ? event.dataTransfer.files : null;
+            if (!files || !files.length) return;
+            this.openCropModalForFile(files[0]);
         },
 
         handleImageUpload(event) {
             const files = event && event.target ? event.target.files : event;
             if (!files || !files.length) return;
-            this.processImageFiles(Array.from(files));
+            this.openCropModalForFile(files[0]);
             if (event && event.target) {
                 event.target.value = '';
             }
@@ -11540,7 +11854,7 @@ function hybridInventoryModule() {
             this.isDraggingImages = false;
             const files = event && event.dataTransfer ? event.dataTransfer.files : null;
             if (!files || !files.length) return;
-            this.processImageFiles(Array.from(files));
+            this.openCropModalForFile(files[0]);
         },
 
         processImageFiles(fileArray) {
