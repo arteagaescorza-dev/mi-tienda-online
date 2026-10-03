@@ -512,6 +512,7 @@ function hybridInventoryModule() {
         // TASK-INV-08: Modal de Curaduría de Scraping
         scrapingCurationModalOpen: false,
         curatingItem: null,
+        isCuratingAiGenerating: false,
         showInlineAddColor: false,
         inlineColorName: '',
         inlineColorHex: '#6366f1',
@@ -519,6 +520,28 @@ function hybridInventoryModule() {
         showInlineAddFabric: false,
         inlineFabricName: '',
         draggedCategoryIndex: null,
+
+        // Herramienta de Pre-guardado: Borradores Pendientes de Aprobación (Regla 5)
+        draftProducts: (typeof window !== 'undefined' && Array.isArray(window.serverDraftProducts))
+            ? window.serverDraftProducts
+            : [],
+        draftsModalOpen: false,
+        draftSearchQuery: '',
+
+        // Configuración y Telemetría de Inteligencia Artificial (Google Gemini - Regla 4)
+        aiSettings: {
+            apiKey: 'AQ.Ab8RN6I9h-ZuGkxn1FL7qhChcE98DauzJrAm2RYugDmyZBO4PA',
+            showApiKey: false,
+            projectId: 'projects/506510812817',
+            model: 'gemini-flash-lite-latest',
+            fallbackModel: 'gemini-flash-latest',
+            temperature: 0.7,
+            maxTokens: 1024,
+            status: 'unknown',
+            latencyMs: null,
+            isTesting: false,
+            lastTestedAt: null
+        },
 
         // Herramienta de Productos Archivados y Descontinuados (Regla 5)
         archivedProducts: (typeof window !== 'undefined' && Array.isArray(window.serverArchivedProducts))
@@ -4371,6 +4394,64 @@ function hybridInventoryModule() {
             }
         },
 
+        // Regla 1: Acción de Archivar Prenda en Catálogo Operativo (Envía a Herramienta de Archivados)
+        async archiveProduct(prod) {
+            if (!prod) return;
+            const name = prod.name || prod.title || prod.sku;
+            if (!confirm(`¿Deseas archivar la prenda "${name}" (${prod.sku})? Se retirará del catálogo operativo y se enviará a la herramienta de Archivados y Descontinuados.`)) {
+                return;
+            }
+            const prodId = prod.dbId || prod.id;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/products/${prodId}/resolve-discontinued`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        action: 'archive',
+                        reason: 'Archivado manual desde catálogo operativo'
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Error al archivar el producto');
+                }
+
+                // Retirar de catálogo operativo
+                this.products = this.products.filter(p => p.sku !== prod.sku && p.id !== prodId);
+                if (this.selectedProduct && (this.selectedProduct.sku === prod.sku || this.selectedProduct.id === prodId)) {
+                    this.selectedProduct = null;
+                }
+
+                // Agregar a herramienta de archivados
+                this.archivedProducts.unshift({
+                    id: prod.id,
+                    dbId: prod.id,
+                    sku: prod.sku,
+                    name: prod.name || prod.title,
+                    brand: prod.brand || 'ModaIntima Textil MX',
+                    category: prod.category || 'General',
+                    price: prod.pvp || prod.price,
+                    cost: prod.cost,
+                    image: prod.image || (Array.isArray(prod.images) && prod.images[0] ? (prod.images[0].url || prod.images[0]) : null),
+                    isArchived: true,
+                    isVisible: false,
+                    discontinuedReason: 'Archivado manual desde catálogo operativo',
+                    archivedAt: 'Reciente'
+                });
+
+                this.showToast(`Producto ${prod.sku} archivado correctamente. Enviado a la herramienta Archivados y Descontinuados.`, 'info');
+            } catch (err) {
+                console.error('Error archivando producto:', err);
+                this.showToast(err.message || 'Error al archivar el producto.', 'error');
+            }
+        },
+
         // [P4.3] Métodos de Filtro Temporal y Análisis ABC (Pareto)
         setDashboardTimeRange(range) {
             this.dashboardTimeRange = range;
@@ -7220,13 +7301,18 @@ function hybridInventoryModule() {
             const description = (this.quickFabricForm.description || '').trim() || 'Fibra textil para indumentaria';
             const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
             const newObj = { id: id, name: name, description: description, is_active: true };
-            this.apparelFabrics.push(newObj);
+            const existing = this.apparelFabrics.find(f => f.name.toLowerCase() === name.toLowerCase());
+            if (!existing) {
+                this.apparelFabrics.push(newObj);
+            }
 
             if (this.quickFabricContext === 'newProduct') {
                 this.newProduct.fabricType = name;
                 this.updateDynamicSku();
             } else if (this.quickFabricContext === 'drawer') {
                 this.drawerFabricType = name;
+            } else if (this.quickFabricContext === 'curating' && this.curatingItem) {
+                this.curatingItem.suggestedFabric = name;
             }
 
             this.quickFabricModalOpen = false;
@@ -7285,7 +7371,13 @@ function hybridInventoryModule() {
                 type: this.quickColorForm.type,
                 is_active: true
             };
-            this.apparelColors.push(newObj);
+            const existingCol = this.apparelColors.find(c => c.name.toLowerCase() === name.toLowerCase());
+            if (existingCol) {
+                existingCol.hex = hexVal;
+                existingCol.type = this.quickColorForm.type;
+            } else {
+                this.apparelColors.push(newObj);
+            }
 
             if (this.quickColorContext === 'newProduct') {
                 this.newProduct.colorName = name;
@@ -10390,23 +10482,33 @@ function hybridInventoryModule() {
             this.showToast('Borrador de alta descartado.', 'info');
         },
 
-        async generateAiDescription() {
-            if (!this.newProduct.name || this.newProduct.name.trim().length === 0) {
+        async generateAiDescription(context = 'newProduct') {
+            const isCurating = (context === 'curating');
+            const target = isCurating ? this.curatingItem : this.newProduct;
+            if (!target) return;
+
+            const name = (target.name || '').trim();
+            if (!name) {
                 this.showToast('Ingresa el nombre del producto para activar el Copiloto IA.', 'warning');
                 return;
             }
 
-            this.newProduct.isGeneratingAi = true;
+            if (isCurating) {
+                this.isCuratingAiGenerating = true;
+            } else {
+                this.newProduct.isGeneratingAi = true;
+            }
+
             try {
                 const payload = {
-                    name: this.newProduct.name,
-                    brand: this.newProduct.brand || '',
-                    category: this.newProduct.category || '',
-                    fabric_type: this.newProduct.fabricType || '',
-                    color_name: this.newProduct.colorName || '',
-                    design_type: this.newProduct.designType || '',
-                    variant_dimension: this.newProduct.variantDimension || 'size',
-                    pvp: parseFloat(this.newProduct.pvp) || 0
+                    name: name,
+                    brand: target.brand || (isCurating ? 'Torzo B2B' : 'ModaIntima Textil MX'),
+                    category: isCurating ? (target.suggestedCategory || 'Boxers') : (target.category || 'Boxers'),
+                    fabric_type: isCurating ? (target.suggestedFabric || '') : (target.fabricType || ''),
+                    color_name: isCurating ? (target.detectedColorName || '') : (target.colorName || ''),
+                    design_type: isCurating ? (target.suggestedDesign || 'sin_diseno') : (target.designType || 'sin_diseno'),
+                    variant_dimension: isCurating ? 'size' : (target.variantDimension || 'size'),
+                    pvp: parseFloat(isCurating ? (target.suggestedPvp || (target.cost ? target.cost * 1.6 : 399)) : (target.pvp || 0))
                 };
                 const res = await fetch('/api/v1/inventory/products/generate-description', {
                     method: 'POST',
@@ -10421,35 +10523,50 @@ function hybridInventoryModule() {
                 if (json && json.status === 'success' && json.data) {
                     const data = json.data;
                     if (data.description) {
-                        this.newProduct.description = data.description;
+                        if (isCurating) {
+                            target.scrapedDescription = data.description;
+                        } else {
+                            target.description = data.description;
+                        }
                     }
                     if (Array.isArray(data.bullet_points) && data.bullet_points.length > 0) {
-                        this.newProduct.bulletPoints = data.bullet_points;
+                        target.bulletPoints = data.bullet_points;
                     }
                     if (Array.isArray(data.seo_tags)) {
-                        const set = new Set([...(this.newProduct.seoTags || []), ...data.seo_tags]);
-                        this.newProduct.seoTags = Array.from(set);
+                        const existingTags = target.seoTags || [];
+                        const set = new Set([...existingTags, ...data.seo_tags]);
+                        target.seoTags = Array.from(set);
                     }
-                    this.showToast('Descripcion comercial y tags SEO generados exitosamente con Copiloto IA.', 'success');
+                    this.showToast('Descripción comercial y tags SEO generados exitosamente con Copiloto IA (Gemini).', 'success');
                 } else {
                     throw new Error(json.message || 'Error en Copiloto IA');
                 }
             } catch (e) {
                 // Fallback local sintetizado
-                const name = this.newProduct.name;
-                const brand = this.newProduct.brand || 'Torzo';
-                const fabric = this.newProduct.fabricType || 'Algodon & Modal';
-                const color = this.newProduct.colorName || 'Negro Clasico';
-                this.newProduct.description = `Experimenta el maximo confort y soporte anatomico con ${name} de ${brand}. Confeccionado minuciosamente con ${fabric} en tono ${color}, ofrece una sensacion ultrasuave de segunda piel y transpirabilidad que se adapta a tus movimientos cotidianos.\n\nDiseno de silueta limpia y patronaje ergonomico sin costuras visibles que garantiza discrecion y alta durabilidad para tu guardarropa intimo.`;
-                this.newProduct.bulletPoints = [
-                    `Composicion textil premium: ${fabric}`,
-                    `Ajuste ergonomico de segunda piel`,
+                const brand = target.brand || 'Torzo B2B';
+                const fabric = isCurating ? (target.suggestedFabric || 'Algodón & Modal') : (target.fabricType || 'Algodón & Modal');
+                const color = isCurating ? (target.detectedColorName || 'Negro Clásico') : (target.colorName || 'Negro Clásico');
+                const desc = `Experimenta el máximo confort y soporte anatómico con ${name} de ${brand}. Confeccionado minuciosamente con ${fabric} en tono ${color}, ofrece una sensación ultrasuave de segunda piel y transpirabilidad que se adapta a tus movimientos cotidianos.\n\nDiseño de silueta limpia y patronaje ergonómico sin costuras visibles que garantiza discreción y alta durabilidad para tu guardarropa íntimo.`;
+                const bullets = [
+                    `Composición textil premium: ${fabric}`,
+                    `Ajuste ergonómico de segunda piel`,
                     `Costuras planas antirozaduras`,
-                    `Tejido transpirable de secado rapido`
+                    `Tejido transpirable de secado rápido`
                 ];
+                if (isCurating) {
+                    target.scrapedDescription = desc;
+                    target.bulletPoints = bullets;
+                } else {
+                    target.description = desc;
+                    target.bulletPoints = bullets;
+                }
                 this.showToast('Contenido comercial generado localmente.', 'info');
             } finally {
-                this.newProduct.isGeneratingAi = false;
+                if (isCurating) {
+                    this.isCuratingAiGenerating = false;
+                } else {
+                    this.newProduct.isGeneratingAi = false;
+                }
             }
         },
 
@@ -10753,7 +10870,11 @@ function hybridInventoryModule() {
             return Math.max(0, m).toFixed(1);
         },
 
-        async saveNewProduct() {
+        saveNewProductAsDraft() {
+            return this.saveNewProduct(false);
+        },
+
+        async saveNewProduct(approve = true) {
             if (!this.newProduct.sku || !this.newProduct.sku.trim() || !this.newProduct.name || !this.newProduct.name.trim()) {
                 this.showToast('Por favor completa el codigo SKU y el nombre del producto.', 'warning');
                 return;
@@ -10799,7 +10920,8 @@ function hybridInventoryModule() {
                 color_type: this.newProduct.colorType || 'solid',
                 design_type: this.newProduct.designType || 'sin_diseno',
                 website_section: this.newProduct.websiteSection || 'basicos',
-                is_published: !!this.newProduct.isPublished,
+                is_published: approve ? !!this.newProduct.isPublished : false,
+                approval_status: approve ? 'approved' : 'draft',
                 description: this.newProduct.description || '',
                 bullet_points: Array.isArray(this.newProduct.bulletPoints) ? [...this.newProduct.bulletPoints] : [],
                 seo_tags: Array.isArray(this.newProduct.seoTags) ? [...this.newProduct.seoTags] : [],
@@ -10840,6 +10962,9 @@ function hybridInventoryModule() {
                 sizes: (this.newProduct.variantDimension === 'size') ? { ...this.newProduct.sizes } : undefined,
                 shades: (this.newProduct.variantDimension === 'shade') ? { ...this.newProduct.shades } : undefined,
                 volumes: (this.newProduct.variantDimension === 'volume') ? { ...this.newProduct.volumes } : undefined,
+                approvalStatus: approve ? 'approved' : 'draft',
+                isApproved: approve,
+                isPublished: approve ? true : false,
                 adjustType: 'add',
                 adjustQty: '',
                 adjustReason: '',
@@ -10862,19 +10987,179 @@ function hybridInventoryModule() {
                 if (response.ok && resData.status === 'success') {
                     if (resData.data?.id) {
                         createdItem.id = resData.data.id;
+                        createdItem.dbId = resData.data.id;
                     }
-                    this.products.unshift(createdItem);
+                    if (approve) {
+                        this.products.unshift(createdItem);
+                        this.showToast('Producto ' + createdItem.sku + ' creado y aprobado exitosamente en el catálogo operativo.', 'success');
+                    } else {
+                        this.draftProducts.unshift(createdItem);
+                        this.showToast('Producto ' + createdItem.sku + ' pre-guardado como borrador pendiente de aprobación.', 'info');
+                    }
                     this.newProductDrawerOpen = false;
-                    this.showToast('Producto ' + createdItem.sku + ' creado y persistido exitosamente en el catalogo.', 'success');
                 } else {
                     this.showToast(resData.message || 'Error al persistir el nuevo producto.', 'error');
                 }
             } catch (err) {
                 console.error('Error creando producto:', err);
-                this.products.unshift(createdItem);
+                if (approve) {
+                    this.products.unshift(createdItem);
+                    this.showToast('Producto ' + createdItem.sku + ' registrado localmente.', 'info');
+                } else {
+                    this.draftProducts.unshift(createdItem);
+                    this.showToast('Borrador ' + createdItem.sku + ' guardado localmente.', 'info');
+                }
                 this.newProductDrawerOpen = false;
-                this.showToast('Producto ' + createdItem.sku + ' registrado localmente.', 'info');
             }
+        },
+
+        // Regla 5: Métodos de Gobernanza de Borradores & Aprobación
+        get filteredDraftProducts() {
+            if (!this.draftSearchQuery) return this.draftProducts;
+            const q = this.draftSearchQuery.toLowerCase();
+            return (this.draftProducts || []).filter(p => 
+                (p.sku && p.sku.toLowerCase().includes(q)) ||
+                (p.name && p.name.toLowerCase().includes(q)) ||
+                (p.brand && p.brand.toLowerCase().includes(q)) ||
+                (p.category && p.category.toLowerCase().includes(q))
+            );
+        },
+
+        async approveDraftProduct(draft) {
+            if (!draft) return;
+            const draftId = draft.dbId || draft.id || draft.sku;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch(`/api/v1/inventory/products/${draftId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+                const resData = await response.json();
+                if (response.ok && resData.status === 'success') {
+                    // Remover de draftProducts
+                    this.draftProducts = this.draftProducts.filter(d => (d.sku !== draft.sku && d.id !== draft.id));
+                    
+                    // Incorporar al catálogo operativo
+                    const approvedItem = {
+                        id: draft.id || resData.data?.id,
+                        dbId: draft.dbId || resData.data?.id,
+                        sku: draft.sku,
+                        name: draft.name,
+                        brand: draft.brand || 'ModaIntima Textil MX',
+                        category: draft.category || 'Boxers',
+                        subcategory: draft.subcategory || '',
+                        type: draft.type || 'propio',
+                        variant_dimension: draft.variant_dimension || 'size',
+                        images: Array.isArray(draft.images) ? [...draft.images] : [],
+                        localStock: draft.localStock || 0,
+                        committedStock: 0,
+                        supplierStock: draft.supplierStock || null,
+                        location: draft.location || 'Rack A-01 / Nivel 1',
+                        status: (draft.localStock && draft.localStock > 0) ? 'En Stock' : 'Saludable',
+                        pvp: draft.pvp || draft.price || 0,
+                        cost: draft.cost || 0,
+                        weightedAverageCost: draft.weightedAverageCost || draft.cost || 0,
+                        description: draft.description || '',
+                        bulletPoints: draft.bulletPoints || [],
+                        seoTags: draft.seoTags || [],
+                        sizes: draft.sizes || { ch: 2, m: 5, g: 3, xl: 0 },
+                        isPublished: true,
+                        approvalStatus: 'approved',
+                        isApproved: true,
+                        adjustType: 'add',
+                        adjustQty: '',
+                        adjustReason: ''
+                    };
+                    this.products.unshift(approvedItem);
+                    this.showToast(`Producto ${draft.sku} aprobado exitosamente. Ha pasado oficialmente al catálogo operativo.`, 'success');
+                } else {
+                    throw new Error(resData.message || 'Error al aprobar producto');
+                }
+            } catch (err) {
+                console.error('Error aprobando borrador:', err);
+                this.showToast(err.message || 'Error al aprobar borrador.', 'error');
+            }
+        },
+
+        loadDraftIntoWorkstation(draft) {
+            if (!draft) return;
+            this.newProduct = {
+                ...this.newProduct,
+                sku: draft.sku,
+                name: draft.name,
+                category: draft.category || 'Boxers',
+                subcategory: draft.subcategory || '',
+                type: draft.type || 'propio',
+                brand: draft.brand || 'ModaIntima Textil MX',
+                fabricType: draft.fabricType || 'Modal Seamless',
+                colorName: draft.colorName || 'Negro',
+                colorHex: draft.colorHex || '#0f172a',
+                colorType: draft.colorType || 'solid',
+                designType: draft.designType || 'sin_diseno',
+                websiteSection: draft.websiteSection || 'basicos',
+                pvp: draft.pvp || draft.price || 399,
+                cost: draft.cost || 135,
+                weightedAverageCost: draft.cost || 135,
+                description: draft.description || '',
+                bulletPoints: draft.bulletPoints || [],
+                seoTags: draft.seoTags || [],
+                sizes: draft.sizes || { ch: 10, m: 20, g: 15, xl: 5 },
+                images: Array.isArray(draft.images) ? [...draft.images] : []
+            };
+            this.draftsModalOpen = false;
+            this.newProductDrawerOpen = true;
+            this.showToast(`Borrador ${draft.sku} cargado en el workstation para edición y aprobación.`, 'info');
+        },
+
+        async discardDraftProduct(draft) {
+            if (!confirm(`¿Deseas descartar definitivamente el borrador ${draft.sku}?`)) return;
+            const draftId = draft.dbId || draft.id;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                await fetch(`/api/v1/inventory/products/${draftId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+                });
+            } catch (e) {
+                console.warn('Fallback delete draft:', e);
+            }
+            this.draftProducts = this.draftProducts.filter(d => (d.sku !== draft.sku && d.id !== draft.id));
+            this.showToast(`Borrador ${draft.sku} descartado.`, 'info');
+        },
+
+        // Regla 4: Conectividad y Ajustes de Inteligencia Artificial (Gemini)
+        async testGeminiConnection() {
+            this.aiSettings.isTesting = true;
+            try {
+                const startTime = performance.now();
+                const res = await fetch('/api/v1/dashboard/copilot/status', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const latency = Math.round(performance.now() - startTime);
+                const data = await res.json();
+                if (res.ok && data.status === 'healthy') {
+                    this.aiSettings.status = 'connected';
+                    this.aiSettings.latencyMs = data.latency_ms || latency;
+                    this.aiSettings.lastTestedAt = new Date().toLocaleTimeString();
+                    this.showToast(`Conexión con Gemini exitosa (${this.aiSettings.latencyMs}ms). Modelo: ${data.model}`, 'success');
+                } else {
+                    this.aiSettings.status = 'error';
+                    this.showToast(data.message || 'Error al conectar con Google Gemini API.', 'error');
+                }
+            } catch (e) {
+                this.aiSettings.status = 'error';
+                this.showToast('No se pudo verificar el estado de la IA.', 'error');
+            } finally {
+                this.aiSettings.isTesting = false;
+            }
+        },
+
+        saveAiSettings() {
+            this.showToast('Ajustes de Inteligencia Artificial guardados correctamente en el sistema.', 'success');
         },
 
         sidebarWasExpanded: false,

@@ -45,6 +45,7 @@
     {{-- Inyección de Datos Reales de Inventario desde Laravel (259 SKUs, 1,283 variantes) --}}
     <script>
         window.serverInventoryProducts = @json($portalProducts);
+        window.serverDraftProducts = @json($portalDraftProducts ?? []);
         window.serverSuppliers = @json($portalProviders);
         window.serverPurchaseOrders = @json($portalPurchaseOrders);
         window.serverFuturePurchaseOrders = @json($portalFuturePurchaseOrders);
@@ -339,6 +340,21 @@
                     <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900" x-text="archivedProducts.length"></span>
                 </button>
 
+                <!-- Botón Pre-guardados / Borradores Pendientes de Aprobación (Regla 5) -->
+                <button 
+                    type="button"
+                    @click.stop="draftsModalOpen = true" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 hover:text-sky-900 rounded-lg text-xs font-bold transition border border-sky-200 cursor-pointer"
+                    style="min-height: unset;"
+                    title="Prendas pre-guardadas en borrador pendientes de aprobación oficial"
+                >
+                    <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Borradores</span>
+                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-200 text-sky-900" x-text="(draftProducts || []).length"></span>
+                </button>
+
                 <!-- Menú Desplegable "Herramientas de Stock" (TASK-INV-10) -->
                 <div class="relative inline-block text-left" @click.outside="toolsDropdownOpen = false">
                     <button 
@@ -467,6 +483,27 @@
                                 </div>
                             </div>
                             <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" x-text="archivedProducts.length"></span>
+                        </button>
+
+                        <!-- Opción 5: Borradores Pendientes de Aprobación (Regla 5) -->
+                        <button 
+                            type="button" 
+                            @click="toolsDropdownOpen = false; draftsModalOpen = true;" 
+                            class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
+                            style="min-height: unset;"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="p-1 rounded-md bg-sky-50 text-sky-600 border border-sky-100 group-hover:bg-sky-100 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-800">Borradores Pre-guardados</div>
+                                    <div class="text-[10px] text-slate-400">Aprobar o continuar edición</div>
+                                </div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-200" x-text="(draftProducts || []).length"></span>
                         </button>
                     </div>
                 </div>
@@ -1238,6 +1275,15 @@
                                             class="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors border border-indigo-200 cursor-pointer shadow-3xs flex items-center justify-center"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        </button>
+                                        <!-- Regla 1: Acción de Archivar Prenda en Catálogo Operativo -->
+                                        <button 
+                                            type="button"
+                                            @click.stop="archiveProduct(item)"
+                                            title="Archivar prenda (Enviar a la herramienta de Archivados y Descontinuados)"
+                                            class="p-1.5 text-amber-700 bg-amber-50 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-200 cursor-pointer shadow-3xs flex items-center justify-center"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                                         </button>
                                     </div>
                                 </td>
@@ -4206,7 +4252,7 @@
                                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Categoría</label>
                                             <button 
                                                 type="button" 
-                                                @click="openQuickCategoryModal('category', 'newProduct')" 
+                                                @click.stop="openQuickCategoryModal('category', 'newProduct')" 
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                                 title="Dar de alta categoría in situ sin salir de la ficha"
                                             >
@@ -4237,7 +4283,7 @@
                                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Subcategoría</label>
                                             <button 
                                                 type="button" 
-                                                @click="openQuickCategoryModal('subcategory', 'newProduct')" 
+                                                @click.stop="openQuickCategoryModal('subcategory', 'newProduct')" 
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                                 title="Dar de alta subcategoría para esta categoría in situ"
                                             >
@@ -4458,7 +4504,7 @@
                                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Tipo de Tela</label>
                                             <button 
                                                 type="button" 
-                                                @click="openQuickFabricModal('newProduct')" 
+                                                @click.stop="openQuickFabricModal('newProduct')" 
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                                 title="Dar de alta tipo de tela in situ si no existe"
                                             >
@@ -4481,7 +4527,7 @@
                                             <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Color / Swatch</label>
                                             <button 
                                                 type="button" 
-                                                @click="openQuickColorModal('newProduct')" 
+                                                @click.stop="openQuickColorModal('newProduct')" 
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                                 title="Dar de alta nuevo color in situ sin salir del workstation"
                                             >
@@ -4616,7 +4662,7 @@
                                                             </select>
                                                             <button 
                                                                 type="button" 
-                                                                @click="openQuickColorModal('newProduct', img.preview || img.url)" 
+                                                                @click.stop="openQuickColorModal('newProduct', img.preview || img.url)" 
                                                                 class="px-1 py-0.5 text-[9px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
                                                                 title="Dar de alta color in situ para esta foto"
                                                             >
@@ -4793,23 +4839,37 @@
                     <div class="text-xs text-slate-500">
                         <span class="font-bold text-slate-700" x-text="calculateNewProductTotalStock() + ' unidades'"></span> preparadas para ingresar al inventario.
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         <button 
                             type="button"
                             @click="closeCreateProductDrawer()" 
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
+                            class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                         >
                             Cancelar
                         </button>
+                        <!-- Regla 5: Pre-guardar como borrador para aprobar después -->
+                        <button 
+                            type="button" 
+                            @click="saveNewProductAsDraft()" 
+                            class="px-4 py-2 text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                            title="Pre-guardar el producto como borrador para revisarlo y aprobarlo después"
+                        >
+                            <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Pre-guardar Borrador</span>
+                        </button>
+                        <!-- Regla 5: Aprobar oficialmente y publicar en catálogo operativo -->
                         <button 
                             type="button"
-                            @click="saveNewProduct()" 
+                            @click="saveNewProduct(true)" 
                             class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                            title="Aprobar y dar de alta oficialmente en el catálogo operativo"
                         >
                             <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span>Guardar Producto en Catalogo</span>
+                            <span>Aprobar y Publicar en Catálogo</span>
                         </button>
                     </div>
                 </div>
@@ -7933,6 +7993,17 @@
                         <span>Recetas BOM & Combos</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'bundles' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="productBundles.filter(b => b.isActive !== false).length"></span>
                     </button>
+                    <!-- TAB IA (REGLA 4) -->
+                    <button 
+                        type="button" 
+                        @click="activeSettingsTab = 'ai'" 
+                        :class="activeSettingsTab === 'ai' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Inteligencia Artificial (Gemini)</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="aiSettings.status === 'connected' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'" x-text="aiSettings.status === 'connected' ? 'En Línea' : 'Setup'"></span>
+                    </button>
                 </div>
 
         <!-- Full-Screen Scrollable Content Area -->
@@ -10233,6 +10304,179 @@
                         </div>
                     </template>
 
+                    <!-- TAB IA: INTELIGENCIA ARTIFICIAL & GOOGLE GEMINI (REGLA 4) -->
+                    <template x-if="activeSettingsTab === 'ai'">
+                        <div class="space-y-6">
+                            <!-- Card Principal: Google Gemini Copilot Settings -->
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                                <div class="px-6 py-4 bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white flex flex-wrap items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                            <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-white leading-tight">Configuración de Inteligencia Artificial (Google Gemini)</h3>
+                                            <p class="text-xs text-indigo-200">Regla 4: Copiloto Comercial B2C y Curaduría Inteligente de Scraping con Gemini API.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                                              :class="{
+                                                  'bg-emerald-500/20 text-emerald-200 border border-emerald-400/30': aiSettings.status === 'connected',
+                                                  'bg-rose-500/20 text-rose-200 border border-rose-400/30': aiSettings.status === 'error',
+                                                  'bg-amber-500/20 text-amber-200 border border-amber-400/30': aiSettings.status === 'unknown'
+                                              }">
+                                            <span class="w-2 h-2 rounded-full"
+                                                  :class="{
+                                                      'bg-emerald-400 animate-pulse': aiSettings.status === 'connected',
+                                                      'bg-rose-400': aiSettings.status === 'error',
+                                                      'bg-amber-400': aiSettings.status === 'unknown'
+                                                  }"></span>
+                                            <span x-text="aiSettings.status === 'connected' ? 'Servicio Conectado' : (aiSettings.status === 'error' ? 'Error de Conexión' : 'Sin Verificar')"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="p-6 space-y-6">
+                                    <!-- Formulario de Configuración -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- API Key -->
+                                        <div class="space-y-1.5 md:col-span-2">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Gemini API Key
+                                            </label>
+                                            <div class="relative">
+                                                <input 
+                                                    :type="aiSettings.showApiKey ? 'text' : 'password'" 
+                                                    x-model="aiSettings.apiKey" 
+                                                    placeholder="AQ.Ab8RN6I9h-ZuGkxn1FL7qhChcE98DauzJrAm2RYugDmyZBO4PA" 
+                                                    class="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 pr-24"
+                                                >
+                                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 gap-1">
+                                                    <button 
+                                                        type="button" 
+                                                        @click="aiSettings.showApiKey = !aiSettings.showApiKey" 
+                                                        class="px-2 py-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-lg shadow-2xs hover:bg-slate-50 cursor-pointer"
+                                                    >
+                                                        <span x-text="aiSettings.showApiKey ? 'Ocultar' : 'Mostrar'"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p class="text-[11px] text-slate-500">Clave de autenticación para Google Generative Language API (v1beta / REST).</p>
+                                        </div>
+
+                                        <!-- Project ID / Number -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Proyecto de Google Cloud
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                x-model="aiSettings.projectId" 
+                                                placeholder="projects/506510812817" 
+                                                class="w-full px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                            >
+                                            <p class="text-[11px] text-slate-500">Identificador del proyecto GCP asociado a la cuota.</p>
+                                        </div>
+
+                                        <!-- Modelo Principal -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Modelo Principal
+                                            </label>
+                                            <select 
+                                                x-model="aiSettings.model" 
+                                                class="w-full px-3 py-2 text-xs font-medium bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                            >
+                                                <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Recomendado: Ultrarrápido y Económico)</option>
+                                                <option value="gemini-flash-latest">gemini-flash-latest (Balance rendimiento y creatividad)</option>
+                                                <option value="gemini-pro-latest">gemini-pro-latest (Máxima profundidad analítica)</option>
+                                            </select>
+                                            <p class="text-[11px] text-slate-500">Motor de generación ejecutado en Curaduría y Copiloto Comercial.</p>
+                                        </div>
+
+                                        <!-- Modelo de Respaldo (Fallback) -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Modelo de Respaldo (Failover)
+                                            </label>
+                                            <select 
+                                                x-model="aiSettings.fallbackModel" 
+                                                class="w-full px-3 py-2 text-xs font-medium bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                            >
+                                                <option value="gemini-flash-latest">gemini-flash-latest</option>
+                                                <option value="gemini-flash-lite-latest">gemini-flash-lite-latest</option>
+                                            </select>
+                                            <p class="text-[11px] text-slate-500">Activado automáticamente ante rate limit 429 o indisponibilidad temporal.</p>
+                                        </div>
+
+                                        <!-- Temperatura Creativa -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center justify-between">
+                                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                    Temperatura de Generación
+                                                </label>
+                                                <span class="text-xs font-mono font-bold text-indigo-600" x-text="aiSettings.temperature"></span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0.1" 
+                                                max="1.0" 
+                                                step="0.05" 
+                                                x-model.number="aiSettings.temperature" 
+                                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                            >
+                                            <div class="flex justify-between text-[10px] text-slate-400">
+                                                <span>0.1 (Preciso / Fáctico)</span>
+                                                <span>0.7 (Recomendado)</span>
+                                                <span>1.0 (Muy Persuasivo)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Panel de Telemetría y Test -->
+                                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center gap-4">
+                                            <div>
+                                                <span class="text-[11px] text-slate-400 block">Latencia de Respuesta</span>
+                                                <span class="text-sm font-bold text-slate-800" x-text="aiSettings.latencyMs ? aiSettings.latencyMs + ' ms' : '--'"></span>
+                                            </div>
+                                            <div class="h-8 w-px bg-slate-200"></div>
+                                            <div>
+                                                <span class="text-[11px] text-slate-400 block">Última Verificación</span>
+                                                <span class="text-sm font-bold text-slate-800" x-text="aiSettings.lastTestedAt || 'Nunca'"></span>
+                                            </div>
+                                            <div class="h-8 w-px bg-slate-200"></div>
+                                            <div>
+                                                <span class="text-[11px] text-slate-400 block">Features Activas</span>
+                                                <span class="text-xs font-semibold text-indigo-700">Copiloto Comercial, Curaduría Scraping, SEO Tags</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="testGeminiConnection()" 
+                                                :disabled="aiSettings.isTesting" 
+                                                class="px-4 py-2 bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                            >
+                                                <svg class="w-4 h-4 text-indigo-600" :class="aiSettings.isTesting ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                <span x-text="aiSettings.isTesting ? 'Verificando con Gemini...' : 'Probar Conexión con Gemini'"></span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="saveAiSettings()" 
+                                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                <span>Guardar Ajustes de IA</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
             </div>
         </div>
 
@@ -10456,130 +10700,125 @@
                             </div>
                         </div>
 
-                        <!-- 1. Validación / Edición de la Descripción Scrapeada -->
-                        <div>
-                            <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Descripción del Producto (Validación Humana)</label>
-                            <textarea 
-                                x-model="curatingItem.scrapedDescription" 
-                                rows="3" 
-                                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                placeholder="Verifica que la descripción técnica y comercial sea correcta..."
-                            ></textarea>
+                        <!-- Copiloto Comercial IA: Redacción Persuasiva B2C (Reglas 2 y 3) -->
+                        <div class="bg-white p-4 rounded-xl border border-indigo-200/90 shadow-2xs space-y-3 relative overflow-hidden">
+                            <div class="flex items-center justify-between pb-2 border-b border-indigo-100">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs">IA</div>
+                                    <h4 class="font-bold text-slate-800 text-xs">Copiloto Comercial IA (Redacción Persuasiva)</h4>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    @click="generateAiDescription('curating')" 
+                                    :disabled="isCuratingAiGenerating || !curatingItem.name || curatingItem.name.trim().length === 0"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
+                                    title="Generar descripción persuasiva comercial con Google Gemini"
+                                >
+                                    <svg x-show="!isCuratingAiGenerating" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    <svg x-show="isCuratingAiGenerating" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                    <span x-text="isCuratingAiGenerating ? 'Redactando...' : 'Generar con IA'"></span>
+                                </button>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Descripción Persuasiva (B2C) &amp; Validación Humana</label>
+                                <textarea 
+                                    x-model="curatingItem.scrapedDescription" 
+                                    rows="3" 
+                                    class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                                    placeholder="Haz clic en 'Generar con IA' para redactar una descripción comercial optimizada para venta en storefront..."
+                                ></textarea>
+                            </div>
+                            <!-- Viñetas Técnicas del Copiloto IA -->
+                            <template x-if="curatingItem.bulletPoints && curatingItem.bulletPoints.length > 0">
+                                <div class="p-2.5 bg-indigo-50/60 rounded-lg border border-indigo-100">
+                                    <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">Especificaciones Técnicas</span>
+                                    <ul class="space-y-0.5 text-[11px] text-slate-700">
+                                        <template x-for="(bp, bIdx) in curatingItem.bulletPoints" :key="bIdx">
+                                            <li class="flex items-start gap-1.5">
+                                                <span class="text-indigo-600 font-bold shrink-0">&bull;</span>
+                                                <span x-text="bp"></span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
                         </div>
 
-                        <!-- 2. Selección de Color / Tornasol & Tipo de Tela -->
+                        <!-- 2. Selección de Color / Tornasol & Tipo de Tela (Con Modales In Situ - Regla 2) -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Selector de Color / Tornasol -->
+                            <!-- Selector de Color / Tornasol In Situ -->
                             <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Tornasol Exacto</label>
+                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Swatch Exacto</label>
                                     <button 
                                         type="button" 
-                                        @click="toggleInlineAddColor()" 
-                                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer"
-                                        x-text="showInlineAddColor ? 'Cancelar' : '+ Dar de alta color'"
-                                    ></button>
+                                        @click.stop="openQuickColorModal('curating')" 
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                        title="Dar de alta color in situ sin salir de la curaduría"
+                                    >
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ Color</span>
+                                    </button>
                                 </div>
 
-                                <!-- Formulario inline para dar de alta nuevo color -->
-                                <template x-if="showInlineAddColor">
-                                    <div class="p-2.5 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
-                                        <div>
-                                            <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Nombre del Color</label>
-                                            <input type="text" x-model="inlineColorName" placeholder="Ej: Rojo Óxido" class="w-full px-2 py-1 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Tipo</label>
-                                                <select x-model="inlineColorType" class="w-full p-1 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700">
-                                                    <option value="solid">Sólido</option>
-                                                    <option value="iridescent">Tornasol</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Muestra Color</label>
-                                                <input type="color" x-model="inlineColorHex" class="w-full h-7 p-0.5 bg-white border border-slate-300 rounded cursor-pointer">
-                                            </div>
-                                        </div>
-                                        <button type="button" @click="saveInlineColor()" class="w-full py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer">
-                                            Guardar y Asignar Color
-                                        </button>
-                                    </div>
-                                </template>
+                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
+                                    <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0 shadow-2xs" :style="'background: ' + curatingItem.detectedColorHex"></span>
+                                    <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
+                                    <span class="text-[10px] px-1.5 py-0.2 rounded font-mono ml-auto font-semibold" :class="curatingItem.colorType === 'iridescent' ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600 border border-slate-200'" x-text="curatingItem.colorType === 'iridescent' ? 'Tornasol' : 'Sólido'"></span>
+                                </div>
 
-                                <!-- Dropdown existente y preview de color -->
-                                <template x-if="!showInlineAddColor">
-                                    <div>
-                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
-                                            <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0 shadow-2xs" :style="'background: ' + curatingItem.detectedColorHex"></span>
-                                            <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
-                                            <span class="text-[10px] px-1.5 py-0.2 rounded font-mono ml-auto font-semibold" :class="curatingItem.colorType === 'iridescent' ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600 border border-slate-200'" x-text="curatingItem.colorType === 'iridescent' ? 'Tornasol' : 'Sólido'"></span>
-                                        </div>
-                                        <select 
-                                            @change="
-                                                const c = apparelColors.find(x => x.name === $event.target.value);
-                                                if (c) {
-                                                    curatingItem.detectedColorName = c.name;
-                                                    curatingItem.detectedColorHex = c.hex;
-                                                    curatingItem.colorType = c.type;
-                                                }
-                                            "
-                                            class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                            <template x-for="col in apparelColors" :key="col.id">
-                                                <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                                </template>
+                                <div class="flex items-center gap-2">
+                                    <input 
+                                        type="color" 
+                                        x-model="curatingItem.detectedColorHex" 
+                                        class="w-7 h-7 p-0 border border-slate-300 rounded cursor-pointer shrink-0"
+                                    >
+                                    <select 
+                                        x-model="curatingItem.detectedColorName" 
+                                        @change="
+                                            const c = apparelColors.find(x => x.name === curatingItem.detectedColorName);
+                                            if (c) {
+                                                curatingItem.detectedColorHex = c.hex;
+                                                curatingItem.colorType = c.type;
+                                            }
+                                        "
+                                        class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <template x-for="col in apparelColors" :key="col.id">
+                                            <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
+                                        </template>
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Selector de Tela -->
+                            <!-- Selector de Tela In Situ -->
                             <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela</label>
+                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela / Composición</label>
                                     <button 
                                         type="button" 
-                                        @click="toggleInlineAddFabric()" 
-                                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer"
-                                        x-text="showInlineAddFabric ? 'Cancelar' : '+ Dar de alta tela'"
-                                    ></button>
+                                        @click.stop="openQuickFabricModal('curating')" 
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                        title="Dar de alta tipo de tela in situ"
+                                    >
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ Tipo de Tela</span>
+                                    </button>
                                 </div>
 
-                                <!-- Formulario inline para dar de alta nueva tela -->
-                                <template x-if="showInlineAddFabric">
-                                    <div class="p-2.5 bg-indigo-50/50 rounded-lg border border-indigo-200 space-y-2">
-                                        <div>
-                                            <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Nombre de la Tela</label>
-                                            <input type="text" x-model="inlineFabricName" placeholder="Ej: Lino & Seda Natural" class="w-full px-2 py-1 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                        </div>
-                                        <div>
-                                            <label class="text-[10px] font-bold text-slate-600 block mb-0.5">Descripción de la Composición</label>
-                                            <input type="text" x-model="inlineFabricDesc" placeholder="Ej: Tejido transpirable de alta suavidad" class="w-full px-2 py-1 text-xs bg-white border border-slate-300 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                        </div>
-                                        <button type="button" @click="saveInlineFabric()" class="w-full py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer">
-                                            Guardar y Asignar Tela
-                                        </button>
-                                    </div>
-                                </template>
+                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
+                                    <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                                    <span class="text-xs font-bold text-slate-900 truncate" x-text="curatingItem.suggestedFabric"></span>
+                                </div>
 
-                                <!-- Dropdown existente de telas -->
-                                <template x-if="!showInlineAddFabric">
-                                    <div>
-                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
-                                            <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
-                                            <span class="text-xs font-bold text-slate-900 truncate" x-text="curatingItem.suggestedFabric"></span>
-                                        </div>
-                                        <select 
-                                            x-model="curatingItem.suggestedFabric" 
-                                            class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        >
-                                            <template x-for="fab in apparelFabrics" :key="fab.id">
-                                                <option :value="fab.name" x-text="fab.name"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                                </template>
+                                <select 
+                                    x-model="curatingItem.suggestedFabric" 
+                                    class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                >
+                                    <template x-for="fab in apparelFabrics" :key="fab.id">
+                                        <option :value="fab.name" :selected="curatingItem.suggestedFabric === fab.name" x-text="fab.name"></option>
+                                    </template>
+                                </select>
                             </div>
                         </div>
 
@@ -10630,15 +10869,25 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                            <select 
-                                                :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
-                                                @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
-                                                class="w-full p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                                <template x-for="col in apparelColors" :key="col.id">
-                                                    <option :value="col.name" :selected="col.name === (curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName)" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                                </template>
-                                            </select>
+                                            <div class="flex items-center gap-1">
+                                                <select 
+                                                    :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
+                                                    @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
+                                                    class="w-full p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                >
+                                                    <template x-for="col in apparelColors" :key="col.id">
+                                                        <option :value="col.name" :selected="col.name === (curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName)" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
+                                                    </template>
+                                                </select>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickColorModal('curating', scrapedImg)" 
+                                                    class="px-1 py-0.5 text-[9px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                    title="Dar de alta color in situ para esta foto"
+                                                >
+                                                    + Color
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
@@ -11555,8 +11804,8 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[140] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="z-index: 140 !important; display: none;"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
         >
             <div 
                 @click.outside="quickCategoryModalOpen = false"
@@ -11635,6 +11884,9 @@
                         <span>Guardar y Asignar In Situ</span>
                     </button>
                 </div>
+            </div>
+        </div>
+
         <!-- ================================================================= -->
         <!-- MODAL RÁPIDO DE ALTA IN SITU DE TIPO DE TELA (Regla 5)              -->
         <!-- ================================================================= -->
@@ -11646,8 +11898,8 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[140] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="z-index: 140 !important; display: none;"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
         >
             <div 
                 @click.outside="quickFabricModalOpen = false"
@@ -11735,8 +11987,8 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[140] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="z-index: 140 !important; display: none;"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
         >
             <div 
                 @click.outside="quickColorModalOpen = false"
@@ -12193,6 +12445,223 @@
                         <button 
                             type="button" 
                             @click="archivedProductsModalOpen = false" 
+                            class="px-4 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition cursor-pointer"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL / HERRAMIENTA: BORRADORES PRE-GUARDADOS (REGLA 5)                   -->
+        <!-- ========================================================================= -->
+        <div 
+            x-show="draftsModalOpen" 
+            class="fixed inset-0 z-[130] overflow-y-auto" 
+            style="display: none;"
+            @keydown.escape.window="draftsModalOpen = false"
+        >
+            <div 
+                x-show="draftsModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+                @click="draftsModalOpen = false"
+            ></div>
+
+            <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+                <div 
+                    x-show="draftsModalOpen"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="relative bg-white rounded-2xl max-w-5xl w-full text-left shadow-2xl overflow-hidden border border-slate-200 z-10 my-8 flex flex-col max-h-[88vh]"
+                    @click.stop
+                >
+                    <!-- Header -->
+                    <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-xl border border-sky-500/30">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white leading-tight">Borradores y Prendas Pre-guardadas</h3>
+                                <p class="text-xs text-slate-300 mt-0.5">Regla 5: Las prendas aquí pre-guardadas NO están en el catálogo operativo. Solo tras ser aprobadas pasan oficialmente a la venta.</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="draftsModalOpen = false" 
+                            class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Toolbar de búsqueda y filtros -->
+                    <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                        <div class="relative flex-1 min-w-[240px] max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </span>
+                            <input 
+                                type="text" 
+                                x-model="draftSearchQuery" 
+                                placeholder="Buscar borrador por SKU, título, marca o categoría..." 
+                                class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-medium text-slate-800 bg-white"
+                            >
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-500">Pendientes de Aprobación:</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200" x-text="filteredDraftProducts.length + ' borradores'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Listado de Borradores -->
+                    <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                        <!-- Empty State: Sin borradores en general -->
+                        <template x-if="!draftProducts || draftProducts.length === 0">
+                            <div class="py-12 text-center">
+                                <div class="w-16 h-16 bg-sky-50 text-sky-500 border border-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-800">No hay borradores pendientes</h4>
+                                <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">Todos los productos dados de alta han sido aprobados oficialmente y están activos en el catálogo operativo. Puedes usar el botón "Pre-guardar Borrador" en el Workstation para guardar prendas en revisión.</p>
+                            </div>
+                        </template>
+
+                        <!-- Empty State: Búsqueda sin coincidencias -->
+                        <template x-if="draftProducts && draftProducts.length > 0 && filteredDraftProducts.length === 0">
+                            <div class="py-8 text-center text-slate-500 text-xs">
+                                No se encontraron borradores que coincidan con "<span class="font-bold text-slate-700" x-text="draftSearchQuery"></span>".
+                            </div>
+                        </template>
+
+                        <!-- Tabla de Borradores -->
+                        <template x-if="filteredDraftProducts && filteredDraftProducts.length > 0">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3">Prenda</th>
+                                            <th class="px-4 py-3">Categoría & Sección</th>
+                                            <th class="px-4 py-3">Tela & Color</th>
+                                            <th class="px-4 py-3 text-right">PVP / Stock</th>
+                                            <th class="px-4 py-3 text-right">Acciones de Aprobación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <template x-for="draft in filteredDraftProducts" :key="draft.id || draft.sku">
+                                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+                                                            <img 
+                                                                :src="(Array.isArray(draft.images) && draft.images.length > 0) ? draft.images[0] : (draft.image || 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80')" 
+                                                                class="w-full h-full object-cover" 
+                                                                :alt="draft.name"
+                                                            >
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-mono font-bold text-[11px] text-sky-800" x-text="draft.sku"></div>
+                                                            <div class="font-semibold text-slate-800 text-xs line-clamp-1" x-text="draft.name"></div>
+                                                            <div class="text-[10px] text-slate-400 mt-0.5">
+                                                                <span class="font-medium text-slate-600" x-text="draft.brand || 'ModaIntima Textil MX'"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex flex-col gap-0.5">
+                                                        <span class="font-semibold text-slate-700" x-text="draft.category || 'General'"></span>
+                                                        <span class="text-[10px] text-slate-400 uppercase tracking-wider" x-text="draft.websiteSection || 'Básicos'"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex flex-col gap-1">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 w-fit" x-text="draft.fabricType || 'Algodón Peinado'"></span>
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span class="w-3 h-3 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (draft.colorHex || '#0f172a')"></span>
+                                                            <span class="text-[11px] text-slate-600" x-text="draft.colorName || 'Negro'"></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="font-bold text-slate-900" x-text="formatCurrency(draft.pvp || draft.price || 0)"></div>
+                                                    <div class="text-[10px] text-slate-500 mt-0.5">
+                                                        <span class="font-semibold" x-text="draft.sizes ? Object.values(draft.sizes).reduce((acc, v) => acc + Number(v || 0), 0) : (draft.localStock || draft.stock || 0)"></span> un. pre-asignadas
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <!-- Botón Aprobar y Publicar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="approveDraftProduct(draft)" 
+                                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-2xs transition cursor-pointer"
+                                                            title="Aprobar oficialmente y enviar al catálogo operativo"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <span>Aprobar & Publicar</span>
+                                                        </button>
+
+                                                        <!-- Botón Cargar en Workstation -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="loadDraftIntoWorkstation(draft)" 
+                                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer"
+                                                            title="Cargar en el workstation para editar y revisar"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                            </svg>
+                                                            <span>Editar</span>
+                                                        </button>
+
+                                                        <!-- Botón Descartar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="discardDraftProduct(draft)" 
+                                                            class="inline-flex items-center p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition cursor-pointer"
+                                                            title="Descartar borrador"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                        <div class="text-[11px] text-slate-500">
+                            Los productos aprobados entran de inmediato al catálogo operativo, inventario activo y vitrina comercial.
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="draftsModalOpen = false" 
                             class="px-4 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition cursor-pointer"
                         >
                             Cerrar

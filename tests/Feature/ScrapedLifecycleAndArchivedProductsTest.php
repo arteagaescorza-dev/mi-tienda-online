@@ -279,4 +279,127 @@ class ScrapedLifecycleAndArchivedProductsTest extends TestCase
             'id' => $archivedProduct->id,
         ]);
     }
+
+    /**
+     * Regla 1: El catálogo operativo contiene la acción de archivar producto y lo envía a la herramienta Archivados y descontinuados.
+     */
+    public function test_operational_catalog_archive_action_sends_product_to_archived_tool()
+    {
+        $product = Product::create([
+            'sku' => 'OP-ARCH-001',
+            'title' => 'Prenda Operativa Para Archivar',
+            'slug' => 'prenda-operativa-para-archivar',
+            'brand' => 'ModaIntima',
+            'price' => 350.00,
+            'visible' => 1,
+            'is_archived' => 0,
+        ]);
+
+        $response = $this->actingAs($this->adminUser)
+            ->postJson("/api/v1/inventory/products/{$product->id}/resolve-discontinued", [
+                'action' => 'archive',
+                'reason' => 'Archivado manualmente desde el Catálogo Operativo (Regla 1)',
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'archive',
+        ]);
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_archived' => 1,
+            'visible' => 0,
+            'discontinued_reason' => 'Archivado manualmente desde el Catálogo Operativo (Regla 1)',
+        ]);
+    }
+
+    /**
+     * Regla 5: El workstation de alta permite pre-guardar en borrador; no aparece en el catálogo operativo hasta que es aprobado.
+     */
+    public function test_workstation_pre_save_draft_and_approval_flow()
+    {
+        // 1. Pre-guardar producto como borrador (approval_status = 'draft')
+        $draftPayload = [
+            'sku' => 'DFT-TEST-001',
+            'name' => 'Bóxer Modal Pre-guardado Borrador',
+            'category' => 'Boxers',
+            'subcategory' => 'Trunk',
+            'brand' => 'ModaIntima Textil MX',
+            'fabric_type' => 'Modal Seamless',
+            'color_name' => 'Negro Profundo',
+            'color_hex' => '#0f172a',
+            'color_type' => 'solid',
+            'pvp' => 380.00,
+            'cost' => 140.00,
+            'approval_status' => 'draft',
+            'sizes' => ['ch' => 5, 'm' => 10, 'g' => 5],
+        ];
+
+        $createResponse = $this->actingAs($this->adminUser)
+            ->postJson('/api/v1/inventory/products', $draftPayload);
+
+        $createResponse->assertStatus(201);
+        $createResponse->assertJson([
+            'status' => 'success',
+            'data' => [
+                'approval_status' => 'draft',
+            ],
+        ]);
+
+        $createdId = $createResponse->json('data.id');
+        $this->assertNotNull($createdId);
+
+        // El borrador debe estar en la BD con visible = false y approval_status = draft
+        $this->assertDatabaseHas('products', [
+            'id' => $createdId,
+            'sku' => 'DFT-TEST-001',
+            'visible' => 0,
+        ]);
+
+        // 2. Verificar que en la vista del portal /admin/inventario-catalogo está en portalDraftProducts y NO en portalProducts
+        $portalResponse = $this->actingAs($this->adminUser)
+            ->get('/admin/inventario-catalogo');
+
+        $portalResponse->assertStatus(200);
+        $portalResponse->assertViewHas('portalDraftProducts', function ($drafts) use ($createdId) {
+            return collect($drafts)->contains('id', $createdId);
+        });
+        $portalResponse->assertViewHas('portalProducts', function ($products) use ($createdId) {
+            return !collect($products)->contains('id', $createdId);
+        });
+
+        // 3. Aprobar oficialmente el producto borrador (Regla 5)
+        $approveResponse = $this->actingAs($this->adminUser)
+            ->postJson("/api/v1/inventory/products/{$createdId}/approve");
+
+        $approveResponse->assertStatus(200);
+        $approveResponse->assertJson([
+            'status' => 'success',
+            'data' => [
+                'approval_status' => 'approved',
+                'visible' => true,
+            ],
+        ]);
+
+        // Ahora el producto debe tener visible = 1
+        $this->assertDatabaseHas('products', [
+            'id' => $createdId,
+            'sku' => 'DFT-TEST-001',
+            'visible' => 1,
+        ]);
+
+        // 4. Verificar que ahora SÍ aparece en portalProducts y NO en portalDraftProducts
+        $portalAfterResponse = $this->actingAs($this->adminUser)
+            ->get('/admin/inventario-catalogo');
+
+        $portalAfterResponse->assertStatus(200);
+        $portalAfterResponse->assertViewHas('portalProducts', function ($products) use ($createdId) {
+            return collect($products)->contains('id', $createdId);
+        });
+        $portalAfterResponse->assertViewHas('portalDraftProducts', function ($drafts) use ($createdId) {
+            return !collect($drafts)->contains('id', $createdId);
+        });
+    }
 }

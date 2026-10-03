@@ -947,7 +947,51 @@ class StorefrontController extends Controller
             ])
             ->where('is_archived', false)
             ->where('visible', true)
+            ->where(function ($q) {
+                $q->whereNull('meta->approval_status')
+                  ->orWhere('meta->approval_status', 'approved');
+            })
             ->orderBy('id');
+
+        $draftProductsQuery = Product::query()
+            ->with([
+                'variants.inventories',
+                'supplierProducts.supplier',
+            ])
+            ->where('is_archived', false)
+            ->where('meta->approval_status', 'draft')
+            ->orderByDesc('id');
+
+        $portalDraftProducts = $draftProductsQuery->get()->map(function (Product $product) {
+            $mainImage = data_get($product->meta, 'image')
+                ?: (data_get($product->meta, 'images.0') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80');
+            $variants = $product->variants;
+            $totalStock = (int) $variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+            return [
+                'id' => $product->id,
+                'dbId' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->title,
+                'brand' => $product->brand ?: 'ModaIntima Textil MX',
+                'category' => data_get($product->meta, 'category', 'Boxers'),
+                'subcategory' => data_get($product->meta, 'subcategory', ''),
+                'fabricType' => data_get($product->meta, 'fabric_type', $product->fabric),
+                'colorName' => data_get($product->meta, 'color_name', 'Negro'),
+                'colorHex' => data_get($product->meta, 'color_hex', '#0f172a'),
+                'colorType' => data_get($product->meta, 'color_type', 'solid'),
+                'designType' => data_get($product->meta, 'design_type', 'sin_diseno'),
+                'websiteSection' => data_get($product->meta, 'website_section', 'basicos'),
+                'description' => $product->description,
+                'pvp' => (float)$product->price,
+                'cost' => (float)$product->cost,
+                'image' => $mainImage,
+                'images' => data_get($product->meta, 'gallery', []),
+                'localStock' => $totalStock,
+                'approvalStatus' => 'draft',
+                'isApproved' => false,
+                'createdAt' => $product->created_at ? $product->created_at->format('d/m/Y H:i') : 'Reciente',
+            ];
+        })->values();
 
         $archivedProductsQuery = Product::query()
             ->with([
@@ -956,7 +1000,13 @@ class StorefrontController extends Controller
             ])
             ->where(function ($q) {
                 $q->where('is_archived', true)
-                  ->orWhere('visible', false);
+                  ->orWhere(function ($sq) {
+                      $sq->where('visible', false)
+                         ->where(function ($ssq) {
+                             $ssq->whereNull('meta->approval_status')
+                                ->orWhere('meta->approval_status', '!=', 'draft');
+                         });
+                  });
             })
             ->orderByDesc('id');
 
@@ -1419,6 +1469,7 @@ class StorefrontController extends Controller
                 'last_scrape' => (string) $lastScrape,
             ],
             'portalProducts' => $portalProducts,
+            'portalDraftProducts' => $portalDraftProducts,
             'portalArchivedProducts' => $portalArchivedProducts,
             'portalScrapedPendingItems' => $portalScrapedPendingItems,
             'portalProviders' => $portalProviders,

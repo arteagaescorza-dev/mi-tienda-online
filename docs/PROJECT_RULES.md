@@ -550,6 +550,39 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. **Chat Estratégico del Dashboard Ejecutivo (`DashboardApiController@copilotChat`):** Procesa consultas en lenguaje natural sobre márgenes EBITDA, cortes de paquetería DHL a las 14:00 hrs, quiebres de inventario ROP y recuperación de carritos abandonados con gatillos de WhatsApp y chips de acción interactivos.
   3. **Monitor y Endpoint de Telemetría (`GET /api/v1/dashboard/copilot/status`):** Expone el estado en vivo de la conexión con Google Gemini, latencia en milisegundos y resumen de módulos potenciados por IA.
 
+### Regla 6.63: Acción de Archivo Directo en Catálogo Operativo hacia la Herramienta de Archivados y Descontinuados (Regla 1)
+* **Acción de Archivo en Cada Fila del Catálogo:** La tabla principal del catálogo operativo incorpora en cada fila de producto un botón dedicado para archivar (`archiveProduct(prod)`).
+* **Persistencia y Traslado Transaccional:** La acción ejecuta `POST /api/v1/inventory/products/{id}/resolve-discontinued` con `action: 'archive'`. El backend actualiza `is_archived = true` y `visible = false`, registrando fecha y motivo.
+* **Segregación Inmediata en Memoria:** El producto se retira inmediatamente del listado reactivo `products` y se añade a `archivedProducts`, quedando disponible en la herramienta de *Archivados y Descontinuados* para reactivación o eliminación permanente.
+
+### Regla 6.64: Paridad Estructural y Taxonómica en Curaduría de Scraping con Modales In Situ y Copiloto IA (Regla 2)
+* **Homologación con Workstation de Alta:** La bandeja de curaduría de scraping (`curateItemModalOpen`) replica de forma idéntica los campos de captura del Workstation de Alta de Producto:
+  1. Categorías y subcategorías con botón in situ para crear nuevas taxonomías sin perder contexto (`openQuickCategoryModal`).
+  2. Tipos de tela y composición con botón in situ (`openQuickFabricModal`).
+  3. Paleta de colores con muestras hexadecimales y botón in situ (`openQuickColorModal`).
+  4. Asignación de color individual por fotografía scrapeada con botón `+ Color` in situ.
+  5. Selectores de vitrina comercial (`websiteSection`), marca (`brand`), precios, costos e inventario.
+  6. Tarjeta y gatillo del Copiloto Comercial IA para redacción persuasiva.
+
+### Regla 6.65: Generación Persuasiva de Contenido y Metadatos con Copiloto IA en Workstation de Alta y Curaduría (Regla 3)
+* **Redacción Persuasiva B2C:** El Copiloto Comercial IA genera textos persuasivos de alta conversión orientados a moda íntima masculina y confort, integrando título optimizado, dos párrafos descriptivos (beneficios sensoriales, ajuste anatómico y durabilidad), viñetas técnicas (bullets) y etiquetas de posicionamiento SEO.
+* **Invocación Unificada:** La función `generateAiDescription(context)` soporta tanto `context === 'newProduct'` como `context === 'curating'`, conectándose al endpoint `/api/v1/inventory/products/generate-description` respaldado por Google Gemini.
+
+### Regla 6.66: Centralización de Ajustes, Telemetría y Pruebas de Inteligencia Artificial en Ajustes del Sistema (Regla 4)
+* **Pestaña Dedicada en Ajustes:** El modal de configuración del sistema (`moduleSettingsModalOpen`) contiene la pestaña permanente *Inteligencia Artificial (Gemini)* (`activeSettingsTab === 'ai'`).
+* **Parámetros Gobernables:** Permite inspeccionar y administrar la API Key de Google Gemini (con conmutador de visibilidad segura), ID de proyecto GCP, selector de modelo principal (`gemini-flash-lite-latest`), modelo fallback (`gemini-flash-latest`), slider de temperatura creativa (0.1 a 1.0) y tokens máximos.
+* **Diagnóstico en Tiempo Real:** Incluye tarjeta de telemetría con indicador visual de estado (Conectado / Error / Sin Verificar), latencia en milisegundos y botón para realizar prueba de conexión en vivo (`testGeminiConnection`).
+
+### Regla 6.67: Ciclo de Gobernanza: Pre-guardado en Borrador y Aprobación Oficial para Ingreso al Catálogo Operativo (Regla 5)
+* **Bifurcación de Guardado en Workstation:** El pie del Workstation de Alta de Producto dispone de dos acciones claramente diferenciadas:
+  1. **Pre-guardar Borrador (`saveNewProductAsDraft`):** Persiste el producto en la base de datos con `approval_status = 'draft'` y `visible = false`.
+  2. **Aprobar y Publicar en Catálogo (`saveNewProduct(true)`):** Persiste y aprueba inmediatamente el producto (`approval_status = 'approved'`, `visible = true`).
+* **Aislamiento Total del Catálogo Operativo:** Los productos en estado de borrador (`draft`) se alojan en la colección segregada `draftProducts` (`portalDraftProducts`). Jamás se muestran a clientes en vitrinas comerciales ni en el listado del catálogo operativo hasta que reciben aprobación oficial.
+* **Herramienta y Modal de Borradores Pendientes:** Accesible desde la barra de herramientas superior y desde el menú de herramientas de stock (`draftsModalOpen`). Permite filtrar borradores por SKU o nombre, y ejecutar tres acciones:
+  - **Aprobar & Publicar (`approveDraftProduct`):** Invoca `POST /api/v1/inventory/products/{id}/approve`, transfiere la prenda al catálogo operativo activo y la publica en tienda.
+  - **Editar en Workstation (`loadDraftIntoWorkstation`):** Carga todos los campos del borrador en el workstation para continuar su edición.
+  - **Descartar (`discardDraftProduct`):** Elimina el borrador de forma controlada.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)

@@ -83,6 +83,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/products/{sku}/detail', [ProductSkuAndDuplicateApiController::class, 'getSkuDetail']);
         Route::put('/products/{sku}/update-complete', [ProductSkuAndDuplicateApiController::class, 'updateComplete']);
 
+        // APROBACION DE PRODUCTOS EN BORRADOR (REGLA 5)
+        Route::post('/products/{id}/approve', [ProductSkuAndDuplicateApiController::class, 'approveProduct']);
+
         // GESTOR DE AJUSTES DE INVENTARIO: TALLAS, VOLUMENES Y CATEGORIAS (TASK-INV-14)
         Route::prefix('settings')->group(function () {
             Route::get('/size-curves', [InventorySettingsApiController::class, 'getSizeCurves']);

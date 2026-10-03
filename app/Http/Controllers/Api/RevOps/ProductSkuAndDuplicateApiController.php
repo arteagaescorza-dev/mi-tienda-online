@@ -260,6 +260,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'pao_months' => 'nullable|integer|min:0',
             'provider' => 'nullable|string|max:100',
             'provider_url' => 'nullable|string|max:255',
+            'approval_status' => 'nullable|string|in:draft,approved',
             'images' => 'nullable|array',
             'images.*.url' => 'nullable|string|max:1000',
             'images.*.color_name' => 'nullable|string|max:100',
@@ -268,6 +269,8 @@ class ProductSkuAndDuplicateApiController extends Controller
 
         $cleanSku = trim(strtoupper($validated['sku']));
         $title = $validated['title'] ?? ($validated['name'] ?? 'Nuevo Producto');
+        $approvalStatus = $validated['approval_status'] ?? $request->input('approval_status', 'approved');
+        $isDraft = ($approvalStatus === 'draft');
         $rawType = $validated['type'] ?? 'physical';
         $dbType = ($rawType === 'propio') ? 'physical' : $rawType;
 
@@ -375,9 +378,11 @@ class ProductSkuAndDuplicateApiController extends Controller
             'images_by_color' => $imageColorMap ?: array_column($formattedGallery, 'color_name', 'url'),
             'image_color_map' => $imageColorMap ?: array_column($formattedGallery, 'color_name', 'url'),
             'image' => $primaryImageUrl,
+            'approval_status' => $approvalStatus,
+            'is_approved' => !$isDraft,
         ];
 
-        return DB::transaction(function () use ($cleanSku, $title, $validated, $pvp, $cost, $dbType, $meta, $effectivePrice, $localStock, $marginPct, $sizes, $fabricName, $fabricId, $sectionName) {
+        return DB::transaction(function () use ($cleanSku, $title, $validated, $pvp, $cost, $dbType, $meta, $effectivePrice, $localStock, $marginPct, $sizes, $fabricName, $fabricId, $sectionName, $isDraft, $approvalStatus) {
             $product = Product::create([
                 'sku' => $cleanSku,
                 'title' => $title,
@@ -389,7 +394,7 @@ class ProductSkuAndDuplicateApiController extends Controller
                 'price' => $pvp,
                 'cost' => $cost,
                 'type' => $dbType,
-                'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : true,
+                'visible' => $isDraft ? false : (isset($validated['is_published']) ? (bool) $validated['is_published'] : true),
                 'description' => $validated['description'] ?? '',
                 'meta' => $meta,
             ]);
@@ -458,9 +463,13 @@ class ProductSkuAndDuplicateApiController extends Controller
                 ]);
             }
 
+            $successMsg = $isDraft 
+                ? "Producto {$cleanSku} pre-guardado como borrador (pendiente de aprobación)."
+                : "Producto {$cleanSku} creado y aprobado exitosamente en el catálogo operativo.";
+
             return response()->json([
                 'status' => 'success',
-                'message' => "Producto {$cleanSku} creado exitosamente en el catalogo.",
+                'message' => $successMsg,
                 'data' => [
                     'id' => $product->id,
                     'sku' => $product->sku,
@@ -468,10 +477,51 @@ class ProductSkuAndDuplicateApiController extends Controller
                     'effective_price' => $effectivePrice,
                     'local_stock' => $localStock,
                     'margin_pct' => $marginPct,
+                    'visible' => $product->visible,
+                    'approval_status' => $approvalStatus,
+                    'is_approved' => !$isDraft,
                     'created_at' => $product->created_at->toIso8601String(),
                 ],
             ], 201);
         });
+    }
+
+    /**
+     * Regla 5: Aprueba oficialmente un producto en estado de borrador para ingresarlo al catálogo operativo.
+     */
+    public function approveProduct(Request $request, int|string $id): JsonResponse
+    {
+        $product = is_numeric($id) ? Product::find((int) $id) : Product::where('sku', strtoupper(trim($id)))->first();
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Producto no encontrado para aprobación.'
+            ], 404);
+        }
+
+        $meta = $product->meta ?? [];
+        $meta['approval_status'] = 'approved';
+        $meta['is_approved'] = true;
+        $meta['approved_at'] = now()->toIso8601String();
+        $meta['approved_by'] = auth()->id() ?? 'admin';
+
+        $product->update([
+            'visible' => true,
+            'meta' => $meta,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Producto {$product->sku} aprobado y publicado oficialmente en el catálogo operativo.",
+            'data' => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'title' => $product->title,
+                'visible' => $product->visible,
+                'approval_status' => 'approved',
+                'is_approved' => true,
+            ]
+        ]);
     }
 
     /**
