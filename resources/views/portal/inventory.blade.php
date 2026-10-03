@@ -8016,26 +8016,26 @@
                             <!-- Formulario de Alta / Edición de Tela -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="fabricEditState.isEditing ? 'Editar Tipo de Tela: ' + fabricEditState.form.name : 'Dar de Alta Nuevo Tipo de Tela'"></h4>
-                                    <span x-show="fabricEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingFabric ? 'Editar Tipo de Tela: ' + fabricForm.name : 'Dar de Alta Nuevo Tipo de Tela'"></h4>
+                                    <span x-show="isEditingFabric" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Tela</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.name : newFabricForm.name" placeholder="Ej: Modal Peinado Premium" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="fabricForm.name" placeholder="Ej: Modal Peinado Premium" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propiedad Textil</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.description : newFabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rápido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="fabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rápido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <template x-if="!fabricEditState.isEditing">
+                                    <template x-if="!isEditingFabric">
                                         <button type="button" @click="addNewFabric()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                             Guardar Tipo de Tela
                                         </button>
                                     </template>
-                                    <template x-if="fabricEditState.isEditing">
+                                    <template x-if="isEditingFabric">
                                         <div class="flex items-center gap-2">
                                             <button type="button" @click="saveFabric()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Actualizar Tela
@@ -8112,54 +8112,67 @@
                             <!-- Formulario Alta / Edición Color -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 space-y-3">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="colorEditState.isEditing ? 'Editar Color: ' + colorEditState.form.name : 'Registrar Nuevo Color o Tornasol'"></h4>
-                                    <span x-show="colorEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingColor ? 'Editar Color: ' + colorForm.name : 'Registrar Nuevo Color o Tornasol'"></h4>
+                                    <span x-show="isEditingColor" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
+                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                                    <div class="sm:col-span-4">
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Color</label>
-                                        <input type="text" x-model="colorEditState.isEditing ? colorEditState.form.name : newColorForm.name" placeholder="Ej: Esmeralda Aurora" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="colorForm.name" placeholder="Ej: Esmeralda Aurora" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
-                                    <div>
+                                    <div class="sm:col-span-3">
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Tipo de Color</label>
-                                        <select x-model="colorEditState.isEditing ? colorEditState.form.type : newColorForm.type" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <select x-model="colorForm.type" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <option value="solid">Sólido (Un solo tono HEX)</option>
                                             <option value="iridescent">Tornasol Iridiscente (Degradado)</option>
                                         </select>
                                     </div>
-                                    <div>
-                                        <template x-if="(colorEditState.isEditing ? colorEditState.form.type : newColorForm.type) === 'solid'">
+                                    <div class="sm:col-span-3">
+                                        <template x-if="colorForm.type === 'solid'">
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código HEX</label>
-                                                <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.hex : newColorForm.hex" class="w-full h-8 px-1 py-0.5 bg-white border border-slate-300 rounded-lg cursor-pointer">
+                                                <div class="flex items-center gap-2">
+                                                    <input type="color" x-model="colorForm.hex" class="w-10 h-8 px-1 py-0.5 bg-white border border-slate-300 rounded-lg cursor-pointer shrink-0">
+                                                    <input type="text" x-model="colorForm.hex" class="w-full px-2 py-1 text-xs uppercase font-mono bg-white border border-slate-300 rounded-lg focus:outline-none">
+                                                </div>
                                             </div>
                                         </template>
-                                        <template x-if="(colorEditState.isEditing ? colorEditState.form.type : newColorForm.type) === 'iridescent'">
-                                            <div class="flex items-center gap-1">
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 1</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor1 : newColorForm.gradientColor1" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 2</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor2 : newColorForm.gradientColor2" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 3</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor3 : newColorForm.gradientColor3" class="w-10 h-8 border rounded cursor-pointer">
+                                        <template x-if="colorForm.type === 'iridescent'">
+                                            <div>
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Gradiente (3 Tonos)</label>
+                                                <div class="flex items-center gap-1.5">
+                                                    <div class="flex-1">
+                                                        <label class="text-[9px] text-slate-500 block">Tono 1</label>
+                                                        <input type="color" x-model="colorForm.gradientColor1" class="w-full h-8 border rounded cursor-pointer">
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <label class="text-[9px] text-slate-500 block">Tono 2</label>
+                                                        <input type="color" x-model="colorForm.gradientColor2" class="w-full h-8 border rounded cursor-pointer">
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <label class="text-[9px] text-slate-500 block">Tono 3</label>
+                                                        <input type="color" x-model="colorForm.gradientColor3" class="w-full h-8 border rounded cursor-pointer">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </template>
                                     </div>
+                                    <!-- Live Preview Widget -->
+                                    <div class="sm:col-span-2 flex flex-col items-center justify-center p-2 bg-white rounded-lg border border-slate-200">
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Vista Previa</span>
+                                        <div class="w-10 h-10 rounded-xl border border-slate-300 shadow-inner"
+                                             :style="'background: ' + (colorForm.type === 'iridescent' ? `linear-gradient(135deg, ${colorForm.gradientColor1} 0%, ${colorForm.gradientColor2} 50%, ${colorForm.gradientColor3} 100%)` : colorForm.hex)">
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center gap-2">
-                                    <template x-if="!colorEditState.isEditing">
+                                <div class="flex items-center gap-2 pt-1">
+                                    <template x-if="!isEditingColor">
                                         <button type="button" @click="addNewColor()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                             Agregar a la Paleta
                                         </button>
                                     </template>
-                                    <template x-if="colorEditState.isEditing">
+                                    <template x-if="isEditingColor">
                                         <div class="flex items-center gap-2">
                                             <button type="button" @click="saveColor()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Actualizar Color
@@ -8179,10 +8192,10 @@
                                     <template x-for="col in apparelColors" :key="col.id">
                                         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2.5" :class="col.is_active === false ? 'opacity-60' : ''">
                                             <div class="flex items-center gap-2.5 min-w-0">
-                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + col.hex"></span>
+                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + (col.hex || col.gradient_css || col.hex_code || '#6366f1')"></span>
                                                 <div class="min-w-0">
                                                     <div class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></div>
-                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
+                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' || col.color_type === 'gradient' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-1 shrink-0">

@@ -121,20 +121,30 @@ function hybridInventoryModule() {
 
         // TASK-INV-08 / TASK-INV-11: Paleta de Colores Sólidos y Tornasoles Iridiscentes
         apparelColors: (typeof window !== 'undefined' && Array.isArray(window.serverApparelColors) && window.serverApparelColors.length > 0)
-            ? window.serverApparelColors
+            ? window.serverApparelColors.map(c => ({
+                id: c.id,
+                dbId: c.id,
+                name: c.name,
+                hex: c.hex || c.gradient_css || c.hex_code || '#0f172a',
+                hex_code: c.hex_code || '#0f172a',
+                gradient_css: c.gradient_css || null,
+                type: (c.type === 'iridescent' || c.color_type === 'gradient' || c.color_type === 'iridescent' || String(c.hex || c.gradient_css || '').includes('linear-gradient')) ? 'iridescent' : 'solid',
+                color_type: (c.type === 'iridescent' || c.color_type === 'gradient' || c.color_type === 'iridescent' || String(c.hex || c.gradient_css || '').includes('linear-gradient')) ? 'iridescent' : 'solid',
+                is_active: c.is_active !== false
+            }))
             : [
-                { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', type: 'solid', is_active: true },
-                { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', type: 'solid', is_active: true },
-                { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', type: 'solid', is_active: true },
-                { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', type: 'solid', is_active: true },
-                { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', type: 'solid', is_active: true },
-                { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', type: 'solid', is_active: true },
-                { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', type: 'solid', is_active: true },
-                { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', type: 'solid', is_active: true },
-                { id: 'galaxia_holo', name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent', is_active: true },
-                { id: 'esmeralda_aurora', name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent', is_active: true },
-                { id: 'plata_iridiscente', name: 'Plata Iridiscente Prism', hex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', type: 'iridescent', is_active: true },
-                { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', is_active: true }
+                { id: 'negro', name: 'Negro Profundo', hex: '#0f172a', hex_code: '#0f172a', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'blanco', name: 'Blanco Ópalo', hex: '#f8fafc', hex_code: '#f8fafc', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'gris_oxford', name: 'Gris Oxford', hex: '#475569', hex_code: '#475569', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'azul_marino', name: 'Azul Marino Navy', hex: '#1e3a8a', hex_code: '#1e3a8a', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'rojo_borgona', name: 'Rojo Borgoña', hex: '#881337', hex_code: '#881337', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'verde_militar', name: 'Verde Militar Oliva', hex: '#365314', hex_code: '#365314', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'nude', name: 'Nude / Canela Piel', hex: '#d97706', hex_code: '#d97706', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'palo_rosa', name: 'Palo de Rosa Blush', hex: '#f43f5e', hex_code: '#f43f5e', type: 'solid', color_type: 'solid', is_active: true },
+                { id: 'galaxia_holo', name: 'Galaxia Tornasol Holo', hex: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', gradient_css: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
+                { id: 'esmeralda_aurora', name: 'Aurora Tornasol Boreal', hex: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', gradient_css: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
+                { id: 'plata_iridiscente', name: 'Plata Iridiscente Prism', hex: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', gradient_css: 'linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true },
+                { id: 'sunset_oro', name: 'Sunset Oro Tornasol', hex: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', gradient_css: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%)', type: 'iridescent', color_type: 'iridescent', is_active: true }
             ],
 
         // Regla 7: Secciones Modulares del Sitio Web E-Commerce y Filtros Hub 2
@@ -202,8 +212,12 @@ function hybridInventoryModule() {
             }
         },
         newFabricForm: { name: '', description: '' },
+        fabricForm: { id: null, name: '', description: '', is_active: true },
+        isEditingFabric: false,
         fabricEditState: { isEditing: false, editingId: null, form: { name: '', description: '', is_active: true } },
         newColorForm: { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b' },
+        colorForm: { id: null, name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true },
+        isEditingColor: false,
         colorEditState: { isEditing: false, editingId: null, form: { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true } },
         newSlotForm: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true },
         slotEditState: { isEditing: false, editingCode: null, form: { aisle: 'A', rack: '01', bin: 'A', zone: 'Ropa Interior', name: '', capacity: 100, status: 'active', is_active: true } },
@@ -7128,158 +7142,387 @@ function hybridInventoryModule() {
         // TASK-INV-11: GESTIÓN INTEGRAL DE TELAS, COLORES, SLOTTING Y REGLAS ROP
         // =========================================================================
 
-        // --- TELAS & FIBRAS ---
-        addNewFabric() {
-            if (!this.newFabricForm.name || !this.newFabricForm.name.trim()) {
+        // --- TELAS & FIBRAS (CRUD COMPLETO CON PERSISTENCIA RESTFUL) ---
+        async addNewFabric() {
+            const name = (this.fabricForm.name || this.newFabricForm.name || '').trim();
+            if (!name) {
                 this.showToast('Ingresa el nombre del tipo de tela.', 'info');
                 return;
             }
-            const id = this.newFabricForm.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            this.apparelFabrics.push({
-                id: id,
-                name: this.newFabricForm.name.trim(),
-                description: this.newFabricForm.description.trim() || 'Fibra textil para indumentaria',
+            const desc = (this.fabricForm.description || this.newFabricForm.description || '').trim() || 'Fibra textil para indumentaria';
+            const tempId = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newFabricItem = {
+                id: tempId,
+                name: name,
+                description: desc,
                 is_active: true
-            });
-            this.showToast(`Tela "${this.newFabricForm.name.trim()}" registrada con éxito.`, 'success');
-            this.newFabricForm = { name: '', description: '' };
+            };
+
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch('/api/v1/inventory/settings/fabrics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify({ name: name, description: desc })
+                });
+                const resData = await res.json();
+                if (res.ok && resData.data) {
+                    newFabricItem.id = resData.data.id;
+                    newFabricItem.dbId = resData.data.id;
+                }
+            } catch (err) {
+                console.warn('Persistencia local para tela:', err);
+            }
+
+            this.apparelFabrics = [...this.apparelFabrics, newFabricItem];
+            this.showToast(`Tela "${name}" registrada con éxito.`, 'success');
+            this.cancelEditFabric();
         },
 
         editFabric(fab) {
+            this.isEditingFabric = true;
             this.fabricEditState.isEditing = true;
             this.fabricEditState.editingId = fab.id;
-            this.fabricEditState.form = {
+            this.fabricForm = {
+                id: fab.id,
                 name: fab.name,
                 description: fab.description || '',
                 is_active: fab.is_active !== false
             };
+            this.fabricEditState.form = { ...this.fabricForm };
         },
 
         cancelEditFabric() {
+            this.isEditingFabric = false;
             this.fabricEditState.isEditing = false;
             this.fabricEditState.editingId = null;
-            this.fabricEditState.form = { name: '', description: '', is_active: true };
+            this.fabricForm = { id: null, name: '', description: '', is_active: true };
+            this.fabricEditState.form = { ...this.fabricForm };
+            this.newFabricForm = { name: '', description: '' };
         },
 
-        saveFabric() {
-            if (!this.fabricEditState.form.name || !this.fabricEditState.form.name.trim()) {
+        async saveFabric() {
+            const name = (this.fabricForm.name || this.fabricEditState.form.name || '').trim();
+            if (!name) {
                 this.showToast('El nombre de la tela no puede estar vacío.', 'warning');
                 return;
             }
-            const idx = this.apparelFabrics.findIndex(f => f.id === this.fabricEditState.editingId);
+            const desc = (this.fabricForm.description !== undefined ? this.fabricForm.description : this.fabricEditState.form.description || '').trim();
+            const editingId = this.fabricForm.id || this.fabricEditState.editingId;
+            const idx = this.apparelFabrics.findIndex(f => String(f.id) === String(editingId) || f.name.toLowerCase() === name.toLowerCase());
+
             if (idx !== -1) {
-                this.apparelFabrics[idx].name = this.fabricEditState.form.name.trim();
-                this.apparelFabrics[idx].description = this.fabricEditState.form.description.trim();
-                this.apparelFabrics[idx].is_active = this.fabricEditState.form.is_active;
-                this.showToast(`Tela "${this.apparelFabrics[idx].name}" actualizada con éxito.`, 'success');
+                this.apparelFabrics[idx] = {
+                    ...this.apparelFabrics[idx],
+                    name: name,
+                    description: desc,
+                    is_active: this.fabricForm.is_active !== false
+                };
+                this.apparelFabrics = [...this.apparelFabrics];
+
+                const targetId = this.apparelFabrics[idx].id;
+                if (targetId && !isNaN(Number(targetId))) {
+                    try {
+                        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        await fetch(`/api/v1/inventory/settings/fabrics/${targetId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                            body: JSON.stringify({ name: name, description: desc, is_active: this.fabricForm.is_active !== false })
+                        });
+                    } catch (err) {
+                        console.warn('Persistencia local al actualizar tela:', err);
+                    }
+                }
+
+                this.showToast(`Tela "${name}" actualizada con éxito.`, 'success');
             }
             this.cancelEditFabric();
         },
 
-        toggleArchiveFabric(fab) {
+        async toggleArchiveFabric(fab) {
             fab.is_active = !fab.is_active;
+            this.apparelFabrics = [...this.apparelFabrics];
             const statusLabel = fab.is_active ? 'reactivada' : 'archivada';
+
+            if (fab.id && !isNaN(Number(fab.id))) {
+                try {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                    await fetch(`/api/v1/inventory/settings/fabrics/${fab.id}/toggle-active`, {
+                        method: 'PATCH',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    });
+                } catch (err) {
+                    console.warn('Fallback toggle fabric:', err);
+                }
+            }
+
             this.showToast(`Tela "${fab.name}" ${statusLabel} correctamente.`, 'info');
         },
 
-        deleteFabric(fabId) {
-            const fab = this.apparelFabrics.find(f => f.id === fabId);
+        async deleteFabric(fabId) {
+            const fab = this.apparelFabrics.find(f => String(f.id) === String(fabId));
             if (!fab) return;
             const inUseCount = (this.products || []).filter(p => (p.fabric === fab.name || p.drawerFabricType === fab.name)).length;
             if (inUseCount > 0) {
                 this.showToast(`No es posible eliminar "${fab.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarla.`, 'warning');
                 return;
             }
-            this.apparelFabrics = this.apparelFabrics.filter(f => f.id !== fabId);
+
+            if (!confirm(`¿Eliminar definitivamente la tela "${fab.name}"?`)) return;
+
+            if (fabId && !isNaN(Number(fabId))) {
+                try {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                    await fetch(`/api/v1/inventory/settings/fabrics/${fabId}`, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    });
+                } catch (err) {
+                    console.warn('Fallback delete fabric:', err);
+                }
+            }
+
+            this.apparelFabrics = this.apparelFabrics.filter(f => String(f.id) !== String(fabId));
             this.showToast(`Tela "${fab.name}" eliminada de la base de datos.`, 'success');
         },
 
-        // --- COLORES & TORNASOLES ---
-        addNewColor() {
-            if (!this.newColorForm.name || !this.newColorForm.name.trim()) {
+        // --- COLORES & TORNASOLES (CRUD COMPLETO CON PERSISTENCIA RESTFUL) ---
+        async addNewColor() {
+            const name = (this.colorForm.name || this.newColorForm.name || '').trim();
+            if (!name) {
                 this.showToast('Ingresa el nombre del color o tornasol.', 'info');
                 return;
             }
-            const id = this.newColorForm.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            let hexVal = this.newColorForm.hex;
-            if (this.newColorForm.type === 'iridescent') {
-                hexVal = `linear-gradient(135deg, ${this.newColorForm.gradientColor1} 0%, ${this.newColorForm.gradientColor2} 50%, ${this.newColorForm.gradientColor3} 100%)`;
+            const type = this.colorForm.type || this.newColorForm.type || 'solid';
+            let hexVal = this.colorForm.hex || this.newColorForm.hex || '#6366f1';
+            let g1 = this.colorForm.gradientColor1 || this.newColorForm.gradientColor1 || '#6366f1';
+            let g2 = this.colorForm.gradientColor2 || this.newColorForm.gradientColor2 || '#ec4899';
+            let g3 = this.colorForm.gradientColor3 || this.newColorForm.gradientColor3 || '#f59e0b';
+
+            if (type === 'iridescent') {
+                hexVal = `linear-gradient(135deg, ${g1} 0%, ${g2} 50%, ${g3} 100%)`;
             }
-            this.apparelColors.push({
-                id: id,
-                name: this.newColorForm.name.trim(),
+
+            const tempId = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newColorItem = {
+                id: tempId,
+                name: name,
                 hex: hexVal,
-                type: this.newColorForm.type,
+                hex_code: type === 'solid' ? hexVal : '#6366f1',
+                gradient_css: type === 'iridescent' ? hexVal : null,
+                type: type,
+                color_type: type,
                 is_active: true
-            });
-            this.showToast(`Color "${this.newColorForm.name.trim()}" agregado a la paleta.`, 'success');
-            this.newColorForm = { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b' };
+            };
+
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch('/api/v1/inventory/settings/colors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify({
+                        name: name,
+                        hex: hexVal,
+                        hex_code: type === 'solid' ? hexVal : '#6366f1',
+                        color_type: type,
+                        type: type,
+                        gradient_css: type === 'iridescent' ? hexVal : null
+                    })
+                });
+                const resData = await res.json();
+                if (res.ok && resData.data) {
+                    newColorItem.id = resData.data.id;
+                    newColorItem.dbId = resData.data.id;
+                }
+            } catch (err) {
+                console.warn('Persistencia local para nuevo color:', err);
+            }
+
+            this.apparelColors = [...this.apparelColors, newColorItem];
+            this.showToast(`Color "${name}" agregado a la paleta con éxito.`, 'success');
+            this.cancelEditColor();
         },
 
         editColor(col) {
+            this.isEditingColor = true;
             this.colorEditState.isEditing = true;
             this.colorEditState.editingId = col.id;
+
+            const isIridescent = (col.type === 'iridescent' || col.color_type === 'gradient' || col.color_type === 'iridescent' || String(col.hex || col.gradient_css || '').includes('linear-gradient'));
+            
             let grad1 = '#6366f1', grad2 = '#ec4899', grad3 = '#f59e0b';
-            if (col.type === 'iridescent' && typeof col.hex === 'string' && col.hex.includes('linear-gradient')) {
-                const hexMatches = col.hex.match(/#[0-9a-fA-F]{6}/g);
+            const cssGrad = col.gradient_css || col.hex || '';
+            if (isIridescent && typeof cssGrad === 'string' && cssGrad.includes('gradient')) {
+                const hexMatches = cssGrad.match(/#[0-9a-fA-F]{6}/g);
                 if (hexMatches && hexMatches.length >= 3) {
                     grad1 = hexMatches[0];
                     grad2 = hexMatches[1];
                     grad3 = hexMatches[2];
+                } else if (hexMatches && hexMatches.length === 2) {
+                    grad1 = hexMatches[0];
+                    grad2 = hexMatches[1];
+                    grad3 = hexMatches[1];
+                } else if (hexMatches && hexMatches.length === 1) {
+                    grad1 = hexMatches[0];
+                    grad2 = hexMatches[0];
+                    grad3 = hexMatches[0];
                 }
             }
-            this.colorEditState.form = {
+
+            this.colorForm = {
+                id: col.id,
                 name: col.name,
-                hex: col.type === 'solid' ? col.hex : '#6366f1',
-                type: col.type || 'solid',
+                hex: (!isIridescent && col.hex && !col.hex.includes('gradient')) ? col.hex : (col.hex_code || '#6366f1'),
+                type: isIridescent ? 'iridescent' : 'solid',
                 gradientColor1: grad1,
                 gradientColor2: grad2,
                 gradientColor3: grad3,
                 is_active: col.is_active !== false
             };
+            this.colorEditState.form = { ...this.colorForm };
         },
 
         cancelEditColor() {
+            this.isEditingColor = false;
             this.colorEditState.isEditing = false;
             this.colorEditState.editingId = null;
-            this.colorEditState.form = { name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true };
+            this.colorForm = { id: null, name: '', hex: '#6366f1', type: 'solid', gradientColor1: '#6366f1', gradientColor2: '#ec4899', gradientColor3: '#f59e0b', is_active: true };
+            this.colorEditState.form = { ...this.colorForm };
+            this.newColorForm = { ...this.colorForm };
         },
 
-        saveColor() {
-            if (!this.colorEditState.form.name || !this.colorEditState.form.name.trim()) {
+        async saveColor() {
+            const name = (this.colorForm.name || this.colorEditState.form.name || '').trim();
+            if (!name) {
                 this.showToast('El nombre del color no puede estar vacío.', 'warning');
                 return;
             }
-            const idx = this.apparelColors.findIndex(c => c.id === this.colorEditState.editingId);
-            if (idx !== -1) {
-                let hexVal = this.colorEditState.form.hex;
-                if (this.colorEditState.form.type === 'iridescent') {
-                    hexVal = `linear-gradient(135deg, ${this.colorEditState.form.gradientColor1} 0%, ${this.colorEditState.form.gradientColor2} 50%, ${this.colorEditState.form.gradientColor3} 100%)`;
-                }
-                this.apparelColors[idx].name = this.colorEditState.form.name.trim();
-                this.apparelColors[idx].hex = hexVal;
-                this.apparelColors[idx].type = this.colorEditState.form.type;
-                this.apparelColors[idx].is_active = this.colorEditState.form.is_active;
-                this.showToast(`Color "${this.apparelColors[idx].name}" actualizado con éxito.`, 'success');
+
+            const editingId = this.colorForm.id || this.colorEditState.editingId;
+            const idx = this.apparelColors.findIndex(c => String(c.id) === String(editingId) || c.name.toLowerCase() === name.toLowerCase());
+
+            const type = this.colorForm.type || this.colorEditState.form.type || 'solid';
+            let hexVal = this.colorForm.hex || this.colorEditState.form.hex || '#6366f1';
+            let g1 = this.colorForm.gradientColor1 || this.colorEditState.form.gradientColor1 || '#6366f1';
+            let g2 = this.colorForm.gradientColor2 || this.colorEditState.form.gradientColor2 || '#ec4899';
+            let g3 = this.colorForm.gradientColor3 || this.colorEditState.form.gradientColor3 || '#f59e0b';
+
+            if (type === 'iridescent') {
+                hexVal = `linear-gradient(135deg, ${g1} 0%, ${g2} 50%, ${g3} 100%)`;
             }
+
+            const isActive = (this.colorForm.is_active !== undefined) ? this.colorForm.is_active : (this.colorEditState.form.is_active !== false);
+
+            if (idx !== -1) {
+                const oldName = this.apparelColors[idx].name;
+                this.apparelColors[idx] = {
+                    ...this.apparelColors[idx],
+                    name: name,
+                    hex: hexVal,
+                    hex_code: type === 'solid' ? hexVal : '#6366f1',
+                    gradient_css: type === 'iridescent' ? hexVal : null,
+                    type: type,
+                    color_type: type,
+                    is_active: isActive
+                };
+                // Reasignación para forzar reactividad inmediata en Alpine
+                this.apparelColors = [...this.apparelColors];
+
+                // Sincronizar en Workstation o Curaduría si estaba seleccionado
+                if (this.newProduct && this.newProduct.colorName === oldName) {
+                    this.newProduct.colorName = name;
+                    this.newProduct.colorHex = hexVal;
+                    this.newProduct.colorType = type;
+                }
+                if (this.curatingItem && this.curatingItem.detectedColorName === oldName) {
+                    this.curatingItem.detectedColorName = name;
+                    this.curatingItem.detectedColorHex = hexVal;
+                    this.curatingItem.detectedColorType = type;
+                }
+
+                // Persistir en backend si tiene ID numérico
+                const targetId = this.apparelColors[idx].id;
+                if (targetId && !isNaN(Number(targetId))) {
+                    try {
+                        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        const res = await fetch(`/api/v1/inventory/settings/colors/${targetId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                            body: JSON.stringify({
+                                name: name,
+                                hex: hexVal,
+                                hex_code: type === 'solid' ? hexVal : '#6366f1',
+                                color_type: type,
+                                type: type,
+                                gradient_css: type === 'iridescent' ? hexVal : null,
+                                is_active: isActive
+                            })
+                        });
+                        const resData = await res.json();
+                        if (res.ok && resData.data) {
+                            this.apparelColors[idx] = {
+                                ...this.apparelColors[idx],
+                                ...resData.data,
+                                hex: resData.data.hex || hexVal,
+                                type: resData.data.type || type
+                            };
+                            this.apparelColors = [...this.apparelColors];
+                        }
+                    } catch (err) {
+                        console.warn('Persistencia local al actualizar color:', err);
+                    }
+                }
+
+                this.showToast(`Color "${name}" actualizado con éxito.`, 'success');
+            }
+
             this.cancelEditColor();
         },
 
-        toggleArchiveColor(col) {
+        async toggleArchiveColor(col) {
             col.is_active = !col.is_active;
+            this.apparelColors = [...this.apparelColors];
             const statusLabel = col.is_active ? 'reactivado' : 'archivado';
+
+            if (col.id && !isNaN(Number(col.id))) {
+                try {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                    await fetch(`/api/v1/inventory/settings/colors/${col.id}/toggle-active`, {
+                        method: 'PATCH',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    });
+                } catch (err) {
+                    console.warn('Fallback toggle color:', err);
+                }
+            }
+
             this.showToast(`Color "${col.name}" ${statusLabel} correctamente.`, 'info');
         },
 
-        deleteColor(colId) {
-            const col = this.apparelColors.find(c => c.id === colId);
+        async deleteColor(colId) {
+            const col = this.apparelColors.find(c => String(c.id) === String(colId));
             if (!col) return;
             const inUseCount = (this.products || []).filter(p => (p.colorName === col.name || p.drawerColorName === col.name)).length;
             if (inUseCount > 0) {
                 this.showToast(`No es posible eliminar "${col.name}" porque está en uso en ${inUseCount} productos. Se recomienda archivarlo.`, 'warning');
                 return;
             }
-            this.apparelColors = this.apparelColors.filter(c => c.id !== colId);
+
+            if (!confirm(`¿Eliminar definitivamente el color "${col.name}" de la paleta?`)) return;
+
+            if (colId && !isNaN(Number(colId))) {
+                try {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                    await fetch(`/api/v1/inventory/settings/colors/${colId}`, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    });
+                } catch (err) {
+                    console.warn('Fallback delete color:', err);
+                }
+            }
+
+            this.apparelColors = this.apparelColors.filter(c => String(c.id) !== String(colId));
             this.showToast(`Color "${col.name}" eliminado de la paleta.`, 'success');
         },
 
