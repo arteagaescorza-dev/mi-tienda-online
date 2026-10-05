@@ -630,6 +630,15 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   3. Al completar la última foto de la cola, el modal se cierra con confirmación toast global. Si el usuario cancela, se descartan los archivos pendientes restantes respetando las fotos ya curadas.
 * **Sobriedad Visual en Tarjeta de Pricing:** La tarjeta de margen comercial y fijación de precios en el Paso 4 debe mantener una armonía visual sobria e integrada con el panel de administración (fondos claros, tipografía de alto contraste legible `text-slate-900`, inputs blancos con sombra sutil y badges de margen destacados con contraste accesible WCAG AA).
 
+### Regla 6.76: Login RevOps Aislado & Erradicación Total de Chrome del Storefront (TASK-AUTH-01)
+* **Aislamiento Total de la Pantalla de Ingreso:** La pantalla de autenticación del panel administrativo y RevOps (`/login`, `/ingreso/usuario`) debe ser una vista dedicada, autónoma y completamente desvinculada de cualquier layout o componente periférico de la tienda pública (storefront).
+* **Erradicación de Navegación y Filtros de Tienda:** Queda terminantemente prohibido renderizar el encabezado público (menús "Inicio", "Ofertas", "Novedades", "Marcas", "Catálogo", "Guía de tallas", "Carrito", "WhatsApp", buscador de productos), el cajón de navegación móvil, barras de anuncios y las barras laterales de filtrado rápido ("Filtro rápido / Categorías, tallas y más") dentro de la interfaz de login administrativo.
+* **Exclusividad de la Sección de Ingreso:** La interfaz debe presentar exclusivamente la tarjeta de autenticación centrada en pantalla completa (`min-h-screen flex items-center justify-center`):
+  1. **Identidad Visual RevOps:** Logotipo corporativo, indicador de estado operativo del sistema y tarjeta con estética sobria y moderna (Plus Jakarta Sans, paleta oscura refinada y soporte para altos contrastes).
+  2. **Campos Requeridos:** Correo corporativo (`email`), contraseña (`password`) con botón interactivo SVG para alternar visibilidad (mostrar/ocultar) y checkbox opcional de persistencia de sesión ("Mantener sesión activa").
+  3. **Seguridad y Auditoría:** Alerta clara de errores de validación (`$errors->first()`), token CSRF obligatorio y nota de pie indicando entorno seguro cifrado TLS y registro en bitácora de auditoría.
+  4. **Iconografía Profesional:** Cero emojis informales; uso exclusivo de iconos vectoriales SVG.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -781,6 +790,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Preview 30/70 Col 2** | Galería 30% (Portada +10%) & Datos 70% (6.73) | División vertical ergonómica: fotos 30% y ficha técnica en vivo 70% |
 | **Fidelidad Taxonómica**| Telas y Atributos Curados en IA & Resumen (6.74) | Cero invenciones de fibras ("modal"); sincronización real con BD y prompt estricto |
 | **Curaduría Multi-Foto**| Carga Múltiple & Recorte Secuencial 1 a 1 (6.75) | Cola de fotos en dropzone; recorte interactivo una por una y pricing pulido |
+| **Login RevOps Aislado** | Pantalla de Ingreso Exclusiva & Cero Chrome Storefront (6.76) | Vista dedicada centrada; erradicación total de navbar, carrito, búsqueda y filtros de tienda |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 

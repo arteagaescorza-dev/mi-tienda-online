@@ -178,7 +178,11 @@ class PortalAuthorizationTest extends TestCase
             ->assertOk()
             ->assertSee('action="' . route('login') . '"', false)
             ->assertSee('name="email"', false)
-            ->assertSee('name="password"', false);
+            ->assertSee('name="password"', false)
+            ->assertSee('Acceso al Panel', false)
+            ->assertDontSee('Filtro rápido', false)
+            ->assertDontSee('Guia de tallas', false)
+            ->assertDontSee('data-store-search', false);
     }
 
     public function test_portal_user_can_login_via_web_form_and_redirects_to_dashboard(): void

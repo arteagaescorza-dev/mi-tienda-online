@@ -58,6 +58,7 @@
 | `TASK-INV-20` | Rediseño Workstation Alta de Producto: Tipificación Liso/Diseño, Vitrina In Situ, Multicolor Nativo, Wizard Paginado 4 Pasos, Eliminación Color Principal Paso 3 y Preview 30/70 (Reglas UX 1-4 & Sistema) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Wizard 4 Pasos, Multicolor, Live Preview 30/70 |
 | `TASK-INV-21` | Fidelidad Taxonómica Estricta en Workstation y Copiloto IA (Sincronización Dinámica de Telas, Eliminación de 'Modal Seamless' Fijo y Prompt Estricto Gemini) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, `ProductAiCopilotService`, `inventory-module.js`, Regla 6.74 |
 | `TASK-INV-22` | Carga Múltiple de Fotografías, Curaduría Secuencial 1 a 1 en Recorte 4:5 y Armonización Visual de Pricing | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, Dropzone `multiple`, `inventory-module.js`, Regla 6.75 |
+| `TASK-AUTH-01` | Rediseño Minimalista Aislado de Login para el Panel RevOps & Erradicación Total de Chrome del Storefront | **Transversal (Autenticación)** | **Alta** | **Completada (Fullstack End-to-End)** | `user-login.blade.php`, `PortalAuthorizationTest.php`, Regla 6.76 |
 | `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
 | `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
 | `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Navbar, Stripe Keys, Skydropx, Tag v1.5 |
@@ -2248,6 +2249,34 @@ graph TD
 * **Verificación de Calidad:**
   - **Suite específica `GeminiAiIntegrationTest.php`: 6/6 tests pasando contra Google Gemini API real (100% verde, 30 aserciones).**
   - **Pruebas de no-regresión: `ScrapedLifecycleAndArchivedProductsTest.php` y `ScrapedPendingItemsCurationTest.php` (9/9 tests pasando, 39 aserciones).**
+
+---
+
+### `TASK-AUTH-01`: Rediseño Minimalista Aislado de Login para el Panel RevOps & Erradicación de Chrome del Storefront
+* **Estado:** **Completada (Fullstack UI/UX End-to-End)**
+* **Módulo / Hub:** **Transversal (Autenticación Administrativa / Panel RevOps)**
+* **Prioridad:** **Alta (Seguridad y Experiencia Administrativa)**
+* **Solicitud del Usuario:**
+  > "Rediseña toda la pantalla de login para el panel. Elimina todo lo que no es necesario. solo sección de ingreso."
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Desacoplamiento Estructural Total:*
+     - Eliminada la herencia de `@extends('layouts.app')` en `resources/views/auth/user-login.blade.php`.
+     - Erradicados al 100% todos los elementos de la tienda pública (storefront navbar con Inicio, Ofertas, Novedades, Marcas, Catálogo, Guía de tallas, Carrito, WhatsApp, drawer móvil, buscador de productos y barra lateral de "Filtro rápido / Categorías, tallas y más").
+  2. *Diseño Dedicado y Ergonómico:*
+     - Vista HTML5 autónoma, centrada en viewport completo (`min-h-screen flex items-center justify-center`).
+     - Fondo deep slate/obsidian sobrio con sutiles auras indigo/sky y patrón de cuadrícula técnica.
+     - Tarjeta ejecutiva RevOps con monograma "M", badge de versión de sistema operativo, tipografía Plus Jakarta Sans y acentos limpios.
+     - Campo de correo corporativo (`name="email"`) con icono SVG de correo.
+     - Campo de contraseña (`name="password"`) con icono SVG y botón toggle para mostrar/ocultar contraseña (ojo/ojo tachado SVG).
+     - Checkbox "Mantener sesión activa" (`name="remember"`) y badge de cifrado TLS.
+     - Botón de submit "Entrar al panel" de alto contraste con flecha SVG.
+     - Alertas accesibles de error (`$errors->first()`) y estatus de sesión sin emojis informales.
+  3. *Regla UX/UI & Tríptico Documental:*
+     - Registrada formalmente la **Regla 6.76** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y `docs/PROJECT_RULES.pdf`.
+  4. *Pruebas Automatizadas:*
+     - Actualizada suite `PortalAuthorizationTest.php` con aserciones explícitas de presencia del formulario de login y aserciones estrictas `assertDontSee` para "Filtro rápido", "Guia de tallas" y "data-store-search".
+     - Suite 20/20 tests pasando (100% verde).
+
 
 
 
