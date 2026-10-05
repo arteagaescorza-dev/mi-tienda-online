@@ -56,6 +56,7 @@
 | `TASK-INV-15` | Drawer de Producto Full-Width con Auto-SKU, Asistente IA de Descripción y Detección de Duplicados | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta Producto, Auto-SKU, Copiloto IA, Duplicados, Tag v1.6 |
 | `TASK-INV-19` | Gobernanza de Catálogo Operativo: Archivo Directo, Curaduría Scraping Homologada, Copiloto Comercial Gemini, Ajustes de IA y Pre-guardado en Borrador (Reglas 1-5) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Curaduría Scraping, Gemini AI, Borradores, Archivados |
 | `TASK-INV-20` | Rediseño Workstation Alta de Producto: Tipificación Liso/Diseño, Vitrina In Situ, Multicolor Nativo, Wizard Paginado 4 Pasos, Eliminación Color Principal Paso 3 y Preview 30/70 (Reglas UX 1-4 & Sistema) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Wizard 4 Pasos, Multicolor, Live Preview 30/70 |
+| `TASK-INV-21` | Fidelidad Taxonómica Estricta en Workstation y Copiloto IA (Sincronización Dinámica de Telas, Eliminación de 'Modal Seamless' Fijo y Prompt Estricto Gemini) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, `ProductAiCopilotService`, `inventory-module.js`, Regla 6.74 |
 | `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
 | `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
 | `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Navbar, Stripe Keys, Skydropx, Tag v1.5 |
@@ -525,7 +526,37 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
     - El backend (`ProductSkuAndDuplicateApiController@storeProduct`) almacena `approval_status` (`draft` o `approved`). Los borradores se guardan con `visible = false` y se excluyen del catálogo operativo (`StorefrontController@portalInventory`).
     - Modal de Borradores (`draftsModalOpen`): Accesible desde la barra superior y el menú de herramientas con buscador reactivo, tabla de borradores y acciones para Aprobar (`approveDraftProduct` $\rightarrow$ `POST /api/v1/inventory/products/{id}/approve`), Editar en Workstation (`loadDraftIntoWorkstation`) o Descartar (`discardDraftProduct`).
 * **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Reglas 6.63 a 6.67) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/laragon/www/mi-tienda-online/docs/BACKEND_INTEGRATION_SPEC.md).
-* **Impacto en Backend:** Endpoint `POST /api/v1/inventory/products/{id}/approve`, soporte `approval_status` en `ProductSkuAndDuplicateApiController`, segregación de `portalDraftProducts` en `StorefrontController`, y suite de pruebas en `ScrapedLifecycleAndArchivedProductsTest.php` (100% pasando).
+### `TASK-INV-20`: Rediseño Workstation Alta de Producto: Tipificación Liso/Diseño, Vitrina In Situ, Multicolor Nativo, Wizard Paginado 4 Pasos, Eliminación Color Principal Paso 3 y Preview 30/70 (Reglas UX 1-4 & Sistema)
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - El modal de alta de producto desbordaba verticalmente (`max-h-screen`) acumulando fotos, taxonomías, tallas, bodega, pricing e IA en un solo bloque con scroll difícil de operar.
+  - La Columna 2 de previsualización no separaba adecuadamente las fotografías cargadas de los datos en tiempo real, careciendo de visualización destacada para la portada.
+  - Se requería tipificar si la prenda era Lisa o con Diseño, crear vitrinas web in situ sin recargar, y admitir color Multicolor oficial con degradado arcoíris.
+* **Solución de UI/UX & Backend Implementada:**
+  - **Wizard Paginado en Columna 1 (Regla 6.71):** Cuatro pasos estructurados (`workstationStep` 1 a 4) con stepper superior y navegación *Paso Anterior* / *Siguiente Paso*.
+  - **Eliminación de Color Principal en Paso 3 (Regla 6.72):** Asignación cromática descentralizada directamente en cada fotografía en el Paso 1.
+  - **División Vertical 30/70 en Columna 2 (Regla 6.73):** Galería horizontal superior (30% de altura) con la imagen de portada destacada al 110% (`scale-110`), y sección inferior (70% de altura) con ficha técnica completa reactiva en tiempo real.
+  - **Tipificación Liso / Con Diseño & Vitrina In Situ (Reglas 6.68 y 6.69):** Selector en Paso 2 y modal emergente `+ Vitrina` con persistencia en API.
+  - **Multicolor Arcoíris Inmutable (Regla 6.70):** Opción nativa que activa degradado 6 colores `linear-gradient(135deg, ...)`.
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Reglas 6.68 a 6.73).
+
+### `TASK-INV-21`: Fidelidad Taxonómica Estricta en Workstation y Copiloto IA
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - En el Workstation de Alta de Producto, la Columna 2 mostraba "Modal Seamless" como tela fija incluso cuando el usuario tenía seleccionada una composición distinta (ej. "Poliéster 95%, Elastano 5%").
+  - El Copiloto IA de Gemini inventaba copy alusivo a "modal seamless" sin que el usuario hubiera seleccionado dicha tela.
+* **Causa Raíz Diagnosticada:**
+  1. En `inventory-module.js`, `openCreateProductDrawer()` inicializaba `fabricType: 'Modal Seamless'`, valor que ni siquiera existía en la tabla `apparel_fabrics`.
+  2. En `inventory.blade.php`, el `<select>` de telas contenía `:selected="newProduct.fabricType === fab.name"`, lo que provocaba que el navegador mostrara la primera opción visualmente pero Alpine no disparara el evento `change`, manteniendo el valor en memoria.
+  3. Al generar la descripción con IA, se transmitía el `fabric_type` residual y el prompt de Gemini carecía de restricción explícita de inventar telas o fibras no especificadas.
+* **Solución Fullstack Implementada:**
+  1. **Inicialización Dinámica en JS (`inventory-module.js`):** `fabricType` se inicializa dinámicamente al primer elemento de `this.apparelFabrics` si existe, o al valor por defecto correspondiente de base de datos.
+  2. **Limpieza del Select en Blade (`inventory.blade.php`):** Eliminación de directivas fijas `:selected` incompatibles con el binding reactivo bidireccional `x-model="newProduct.fabricType"`.
+  3. **Regla de Fidelidad Taxonómica en Gemini (`ProductAiCopilotService.php`):** Incorporación de la regla estricta en el prompt del sistema:
+     `REGLA CRÍTICA DE FIDELIDAD TAXONÓMICA: La descripción comercial ('commercial_description') y viñetas DEBEN basarse ESTRICTAMENTE en el Tipo de Tela / Composición provisto ('{$fabric}') y en el acabado ('{$designType}'). Queda TERMINANTEMENTE PROHIBIDO inventar o mencionar telas o fibras no provistas (como modal, seda o algodón) si no forman parte explícita de '{$fabric}'.`
+  4. **Fallback Heurístico Sincronizado:** Interpolación dinámica de `$fabric` y `$designType` en `buildCommercialDescription()`.
+  5. **Pruebas Automatizadas:** 100% verde en `ProductAiCopilotEndpointTest` y `InventoryHub4ModuleTest`.
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.74).
 
 ### `TASK-MOB-01`: Modo Móvil / Escáner de Bodega para Conteo y Verificación con Códigos de Alto Contraste
 * **Prioridad:** **Alta** | **Estado:** **Pendiente**

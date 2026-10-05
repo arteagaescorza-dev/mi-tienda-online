@@ -7720,7 +7720,7 @@ function hybridInventoryModule() {
             const newObj = { id: id, name: name, description: description, is_active: true };
             const existing = this.apparelFabrics.find(f => f.name.toLowerCase() === name.toLowerCase());
             if (!existing) {
-                this.apparelFabrics.push(newObj);
+                this.apparelFabrics = [...this.apparelFabrics, newObj];
             }
 
             if (this.quickFabricContext === 'newProduct') {
@@ -11330,6 +11330,8 @@ function hybridInventoryModule() {
             const availableCurves = this.getAvailableSizeCurves(initialSupId);
             const defaultCurve = availableCurves.find(c => c.is_default) || availableCurves[0];
             const defaultCurveId = defaultCurve ? defaultCurve.id : null;
+            const defaultFabric = (this.apparelFabrics && this.apparelFabrics.length > 0) ? this.apparelFabrics[0].name : 'Poliester 95%, Elastano 5%';
+            const defaultColor = (this.apparelColors && this.apparelColors.length > 0) ? this.apparelColors[0] : null;
 
             this.newProduct = {
                 sku: '',
@@ -11346,16 +11348,16 @@ function hybridInventoryModule() {
                 // TASK-INV-02 / TASK-INV-14: Variantes y Curvas
                 variantDimension: 'size',
                 selectedSizeCurveId: defaultCurveId,
-                fabricType: 'Modal Seamless',
-                colorName: 'Negro Profundo',
-                colorHex: '#0f172a',
-                colorType: 'solid',
-                designType: 'sin_diseno',
-                websiteSection: 'basicos',
+                fabricType: defaultFabric,
+                colorName: defaultColor ? defaultColor.name : 'Rojo',
+                colorHex: defaultColor ? (defaultColor.hex_code || defaultColor.hex || '#ef4444') : '#ef4444',
+                colorType: defaultColor ? (defaultColor.color_type || defaultColor.type || 'solid') : 'solid',
+                designType: 'liso',
+                websiteSection: (this.storeSections && this.storeSections.length > 0) ? this.storeSections[0].slug : 'basicos',
                 isPublished: true,
                 description: '',
                 bulletPoints: [],
-                seoTags: ['boxer modal', 'ropa interior transpirable', 'sin costuras'],
+                seoTags: [],
                 newTagInput: '',
                 supplier_id: initialSupId,
                 provider: (this.providers && this.providers.length > 0) ? (this.providers[0].tradeName || this.providers[0].name) : 'ModaIntima Textil MX',
@@ -11581,13 +11583,19 @@ function hybridInventoryModule() {
 
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const currentFabric = (target.fabricType || (this.apparelFabrics && this.apparelFabrics[0] ? this.apparelFabrics[0].name : 'Textil')).trim();
+                const primaryImg = (target.images && target.images.find(i => i.is_primary)) || (target.images && target.images[0]);
+                const currentColor = (primaryImg && primaryImg.color_name) ? primaryImg.color_name : (target.colorName || 'Color Neutro');
+                const currentDesign = target.designType || 'liso';
+
                 const payload = {
                     name: name,
                     brand: target.brand || (isCurating ? 'Torzo B2B' : 'ModaIntima Textil MX'),
                     category: isCurating ? (target.suggestedCategory || 'Boxers') : (target.category || 'Boxers'),
-                    fabric_type: isCurating ? (target.suggestedFabric || '') : (target.fabricType || ''),
-                    color_name: isCurating ? (target.detectedColorName || '') : (target.colorName || ''),
-                    design_type: isCurating ? (target.suggestedDesign || 'sin_diseno') : (target.designType || 'sin_diseno'),
+                    subcategory: target.subcategory || '',
+                    fabric_type: isCurating ? (target.suggestedFabric || currentFabric) : currentFabric,
+                    color_name: isCurating ? (target.detectedColorName || currentColor) : currentColor,
+                    design_type: isCurating ? (target.suggestedDesign || currentDesign) : currentDesign,
                     variant_dimension: isCurating ? 'size' : (target.variantDimension || 'size'),
                     pvp: parseFloat(isCurating ? (target.suggestedPvp || (target.cost ? target.cost * 1.6 : 399)) : (target.pvp || 0))
                 };
@@ -11629,13 +11637,15 @@ function hybridInventoryModule() {
                     throw new Error(json.message || 'Error en Copiloto IA');
                 }
             } catch (e) {
-                // Fallback local sintetizado - Regla: max 75 caracteres y sin alterar el nombre
+                // Fallback local sintetizado - Regla: max 75 caracteres y acorde a las características curadas
                 const brand = target.brand || 'Torzo B2B';
-                const fabric = isCurating ? (target.suggestedFabric || 'Algodón & Modal') : (target.fabricType || 'Algodón & Modal');
-                const desc = `${name} en ${fabric} (${brand}). Confort premium y ajuste anatómico.`.substring(0, 75);
+                const currentFabric = (target.fabricType || (this.apparelFabrics && this.apparelFabrics[0] ? this.apparelFabrics[0].name : 'Textil')).trim();
+                const fabric = isCurating ? (target.suggestedFabric || currentFabric) : currentFabric;
+                const design = (target.designType === 'con_diseno') ? 'con diseño exclusivo' : 'en tono liso';
+                const desc = `${name} en ${fabric} ${design} (${brand}). Confort y soporte ergonómico.`.substring(0, 75);
                 const bullets = [
-                    `Composición textil premium: ${fabric}`,
-                    `Ajuste ergonómico de segunda piel`,
+                    `Composición textil seleccionada: ${fabric}`,
+                    `Acabado anatómico ${design}`,
                     `Costuras planas antirozaduras`,
                     `Tejido transpirable de secado rápido`
                 ];

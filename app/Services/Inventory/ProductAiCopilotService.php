@@ -35,15 +35,15 @@ class ProductAiCopilotService
         $name = trim((string) ($attributes['name'] ?? ($attributes['title'] ?? 'Prenda de Ropa Interior')));
         $category = trim((string) ($attributes['category'] ?? 'Ropa Interior'));
         $brand = trim((string) ($attributes['brand'] ?? 'Torzo'));
-        $fabric = trim((string) ($attributes['fabric_type'] ?? 'Algodon Pima & Modal'));
-        $color = trim((string) ($attributes['color_name'] ?? 'Negro Clasico'));
-        $designType = trim((string) ($attributes['design_type'] ?? 'sin_diseno'));
+        $fabric = trim((string) ($attributes['fabric_type'] ?? ($attributes['fabric'] ?? 'Textil Anatómico')));
+        $color = trim((string) ($attributes['color_name'] ?? 'Negro Clásico'));
+        $designType = trim((string) ($attributes['design_type'] ?? 'liso'));
         $audience = trim((string) ($attributes['target_audience'] ?? 'Marte'));
         $price = isset($attributes['pvp']) && is_numeric($attributes['pvp']) ? (float) $attributes['pvp'] : null;
 
         // Intentar generación inteligente enriquecida mediante Google Gemini AI
         if ($this->gemini && $this->gemini->isConfigured()) {
-            $geminiPrompt = "Eres un redactor experto en moda íntima masculina y E-Commerce D2C de alta conversión para 'Mi Tienda Online'.
+            $geminiPrompt = "Eres un redactor experto en moda íntima y E-Commerce D2C de alta conversión para 'Mi Tienda Online'.
 Genera contenido comercial conciso y SEO para la siguiente prenda de ropa interior:
 - Nombre: {$name}
 - Categoría: {$category}
@@ -53,13 +53,17 @@ Genera contenido comercial conciso y SEO para la siguiente prenda de ropa interi
 - Acabado: {$designType}
 - Audiencia: {$audience}" . ($price ? " - Precio: MXN \${$price}" : "") . "
 
-REGLA ESTRICTA: La descripción comercial ('commercial_description') DEBE TENER UN MÁXIMO ABSOLUTO DE 75 CARACTERES (concisa, persuasiva, directa al punto).
+REGLA CRÍTICA DE FIDELIDAD TAXONÓMICA:
+La descripción comercial ('commercial_description') y viñetas DEBEN basarse ESTRICTAMENTE en el Tipo de Tela / Composición provisto ('{$fabric}') y en el acabado ('{$designType}').
+Queda TERMINANTEMENTE PROHIBIDO inventar o mencionar telas o fibras no provistas (como modal, seda o algodón) si no forman parte explícita de '{$fabric}'.
+
+REGLA DE LONGITUD: La descripción comercial ('commercial_description') DEBE TENER UN MÁXIMO ABSOLUTO DE 75 CARACTERES (concisa, persuasiva, directa al punto).
 No modifiques el nombre del producto en el título.
 
 Genera un JSON con esta estructura exacta:
 {
   \"optimized_title\": \"{$name}\",
-  \"commercial_description\": \"Máximo 75 caracteres destacando confort y soporte.\",
+  \"commercial_description\": \"Máximo 75 caracteres destacando confort y soporte en {$fabric}.\",
   \"bullet_points\": [\"Punto destacado 1\", \"Punto destacado 2\", \"Punto destacado 3\", \"Punto destacado 4\"],
   \"seo_tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\", \"tag6\"]
 }";
@@ -163,7 +167,8 @@ Genera un JSON con esta estructura exacta:
         string $designType,
         string $audience
     ): string {
-        $desc = "{$name} en {$fabric} ({$brand}). Confort anatómico y máxima frescura.";
+        $design = ($designType === 'con_diseno') ? 'con diseño exclusivo' : 'en tono liso';
+        $desc = "{$name} en {$fabric} {$design} ({$brand}). Confort y soporte ergonómico.";
         return mb_substr($desc, 0, 75);
     }
 

@@ -616,6 +616,12 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   1. **Sección Superior (30% de la altura):** Galería horizontal oscura (`bg-slate-950`) que exhibe todas las fotografías cargadas del producto. La imagen designada como portada se muestra destacada, con un tamaño **un 10% mayor** (`scale-110`, anillo índigo y badge "Portada"). Cada miniatura visualiza el chip del color asignado y permite conmutar la portada en un clic.
   2. **Sección Inferior (70% de la altura con scroll vertical fluido):** Ficha técnica reactiva que se actualiza en tiempo real al tipear en cualquier paso: categoría, subcategoría, badges de diseño y logística, nombre comercial, marca, proveedor, vitrina web, tejido textil (si aplica), matriz de existencias desglosada, ubicación en bodega (slotting), PVP, costo y margen bruto %, copy persuasivo del Copiloto IA y chips de tags SEO.
 
+### Regla 6.74: Fidelidad Taxonómica Estricta en Workstation y Copiloto IA
+* **Correspondencia Exacta de Atributos Curados:** El resumen generado por producto en la ficha técnica (Columna 2) del Workstation de Alta de Producto, así como las descripciones comerciales y bullets redactados por el Copiloto IA (Gemini / Heurístico), deben basarse **estricta y exclusivamente en las características configuradas y curadas por el usuario** en el mismo workstation:
+  1. **Tipo de Tela / Composición:** Debe sincronizarse dinámicamente con los registros de la base de datos (`apparel_fabrics`) sin forzar valores arbitrarios ("Modal Seamless") por omisión. Si el usuario selecciona "Poliéster 95%, Elastano 5%", tanto la ficha previa como el SKU y el prompt de la IA deben recibir y reflejar con fidelidad dicha tela.
+  2. **Prohibición de Invención Taxonómica en IA:** El prompt enviado al Copiloto IA debe prohibir taxativamente inventar fibras o acabados (como modal, seda o algodón) si no forman parte explícita de los atributos provistos en la sesión.
+  3. **Reactividad Bidireccional Limpia:** Los selectores de atributos en el formulario no deben contener directivas Blade fijas (`:selected`) que bloqueen la vinculación de datos en tiempo real de Alpine.js / JavaScript.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -765,6 +771,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Workstation Wizard** | 4 Pasos Paginados en Columna 1 (6.71) | Paginación secuencial por pasos (1-4) erradicando desbordamientos |
 | **Desacople Color Paso 3**| Color Exclusivo por Foto en Paso 1 (6.72) | Eliminado Color Principal de Paso 3; asignación directa en fotos |
 | **Preview 30/70 Col 2** | Galería 30% (Portada +10%) & Datos 70% (6.73) | División vertical ergonómica: fotos 30% y ficha técnica en vivo 70% |
+| **Fidelidad Taxonómica**| Telas y Atributos Curados en IA & Resumen (6.74) | Cero invenciones de fibras ("modal"); sincronización real con BD y prompt estricto |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
