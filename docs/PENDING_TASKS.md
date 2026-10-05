@@ -57,6 +57,7 @@
 | `TASK-INV-19` | Gobernanza de Catálogo Operativo: Archivo Directo, Curaduría Scraping Homologada, Copiloto Comercial Gemini, Ajustes de IA y Pre-guardado en Borrador (Reglas 1-5) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Curaduría Scraping, Gemini AI, Borradores, Archivados |
 | `TASK-INV-20` | Rediseño Workstation Alta de Producto: Tipificación Liso/Diseño, Vitrina In Situ, Multicolor Nativo, Wizard Paginado 4 Pasos, Eliminación Color Principal Paso 3 y Preview 30/70 (Reglas UX 1-4 & Sistema) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Wizard 4 Pasos, Multicolor, Live Preview 30/70 |
 | `TASK-INV-21` | Fidelidad Taxonómica Estricta en Workstation y Copiloto IA (Sincronización Dinámica de Telas, Eliminación de 'Modal Seamless' Fijo y Prompt Estricto Gemini) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, `ProductAiCopilotService`, `inventory-module.js`, Regla 6.74 |
+| `TASK-INV-22` | Carga Múltiple de Fotografías, Curaduría Secuencial 1 a 1 en Recorte 4:5 y Armonización Visual de Pricing | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, Dropzone `multiple`, `inventory-module.js`, Regla 6.75 |
 | `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
 | `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
 | `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Navbar, Stripe Keys, Skydropx, Tag v1.5 |
@@ -557,6 +558,19 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
   4. **Fallback Heurístico Sincronizado:** Interpolación dinámica de `$fabric` y `$designType` en `buildCommercialDescription()`.
   5. **Pruebas Automatizadas:** 100% verde en `ProductAiCopilotEndpointTest` y `InventoryHub4ModuleTest`.
 * **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.74).
+
+### `TASK-INV-22`: Carga Múltiple de Fotografías, Curaduría Secuencial 1 a 1 en Recorte 4:5 y Armonización Visual de Pricing
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - El cargador de fotos interactivo solo permitía subir 1 foto por interacción en el input de archivo, impidiendo subir varias fotos a la vez.
+  - Al cargar varias imágenes, se requería una experiencia de curaduría donde el usuario pueda acomodar y recortar a formato 4:5 (1080×1350 px) una por una hasta curar todas las imágenes seleccionadas.
+  - La tarjeta de Margen Comercial & Pricing presentaba un estilo visual oscuro discordante, con botones y textos difíciles de leer y baja jerarquía.
+* **Solución de UI/UX & Frontend Implementada:**
+  - **Soporte Multi-Archivo Nativo:** Se habilitó el atributo `multiple` en el input de archivo de Step 1 del Workstation de Alta de Producto.
+  - **Cola Secuencial de Curaduría 4:5 (`startCropQueue`):** Función en `inventory-module.js` que recibe el lote de archivos seleccionados, valida formatos (JPG, PNG, WebP, AVIF) y peso (&le;15 MB), encola hasta el cupo disponible (máx. 10 fotos) y despacha la primera imagen al modal de encuadre.
+  - **Encuadre y Recorte Secuencial 1 a 1 (`applyCrop45`):** Al recortar la imagen en curso, se persiste en la galería del producto y automáticamente se extrae la siguiente foto en cola (`imageCropQueue.shift()`) actualizando el badge indicador (*"Foto X de Y"*) y el botón de acción (*"Guardar y Continuar (X/Y)"*), hasta completar la totalidad de fotos cargadas con confirmación global.
+  - **Rediseño Armónico de Margen Comercial & Pricing:** Transformación de la tarjeta a un diseño limpio en tarjeta índigo suave (`bg-indigo-50/50`, borde perimetral nítido, inputs con fondo blanco puro y tipografía oscura `text-slate-900` de alta legibilidad, etiquetas accesibles y badges de margen con contraste WCAG AA).
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.75).
 
 ### `TASK-MOB-01`: Modo Móvil / Escáner de Bodega para Conteo y Verificación con Códigos de Alto Contraste
 * **Prioridad:** **Alta** | **Estado:** **Pendiente**

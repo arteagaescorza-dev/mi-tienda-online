@@ -310,6 +310,9 @@ function hybridInventoryModule() {
         imageCropNaturalWidth: 0,
         imageCropNaturalHeight: 0,
         isProcessingCrop: false,
+        imageCropQueue: [],
+        imageCropCurrentIndex: 1,
+        imageCropTotalCount: 1,
 
         // Reglas 1, 3, 5: Modales Rápidos In Situ para Alta de Telas y Colores
         quickFabricModalOpen: false,
@@ -11845,7 +11848,61 @@ function hybridInventoryModule() {
             return url;
         },
 
-        // Métodos para el Recortador de Imagen 4:5
+        // Métodos para el Recortador de Imagen 4:5 con Cola Secuencial Multi-Foto
+        startCropQueue(filesList) {
+            if (!filesList || !filesList.length) return;
+            const currentImgCount = Array.isArray(this.newProduct.images) ? this.newProduct.images.length : 0;
+            const availableSlots = 10 - currentImgCount;
+
+            if (availableSlots <= 0) {
+                this.showToast('Límite alcanzado: Ya tienes el máximo de 10 imágenes para este producto.', 'warning');
+                return;
+            }
+
+            const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
+            const validFiles = [];
+            let skippedInvalid = 0;
+            let skippedOversize = 0;
+
+            for (let i = 0; i < filesList.length; i++) {
+                const file = filesList[i];
+                if (!file) continue;
+                const fileName = (file.name || '').toLowerCase();
+                const isValid = allowedExtensions.some(ext => fileName.endsWith(ext)) || (file.type && file.type.startsWith('image/'));
+                if (!isValid) {
+                    skippedInvalid++;
+                    continue;
+                }
+                if (file.size && file.size > 15 * 1024 * 1024) {
+                    skippedOversize++;
+                    continue;
+                }
+                validFiles.push(file);
+            }
+
+            if (skippedInvalid > 0) {
+                this.showToast(skippedInvalid + ' archivo(s) omitido(s): formato no admitido (solo JPG, PNG, WebP o AVIF).', 'warning');
+            }
+            if (skippedOversize > 0) {
+                this.showToast(skippedOversize + ' archivo(s) omitido(s) por superar 15 MB.', 'warning');
+            }
+
+            if (validFiles.length === 0) return;
+
+            // Limitar a los slots disponibles
+            const queue = validFiles.slice(0, availableSlots);
+            if (validFiles.length > availableSlots) {
+                this.showToast('Se procesarán las primeras ' + availableSlots + ' fotos para no exceder el máximo de 10.', 'info');
+            }
+
+            this.imageCropQueue = queue;
+            this.imageCropTotalCount = queue.length;
+            this.imageCropCurrentIndex = 1;
+
+            const firstFile = this.imageCropQueue.shift();
+            this.openCropModalForFile(firstFile);
+        },
+
         openCropModalForFile(file) {
             if (!file) return;
             const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
@@ -11885,6 +11942,10 @@ function hybridInventoryModule() {
             this.imageCropSource = null;
             this.imageCropOriginalFile = null;
             this.isProcessingCrop = false;
+            if (this.imageCropQueue && this.imageCropQueue.length > 0) {
+                this.imageCropQueue = [];
+                this.showToast('Cola de recorte cancelada.', 'info');
+            }
         },
 
         onCropMouseDown(e) {
@@ -12029,9 +12090,6 @@ function hybridInventoryModule() {
                     this.newProduct.images = [];
                 }
                 this.newProduct.images.push(newImgItem);
-                this.imageCropModalOpen = false;
-                this.showToast('Fotografía recortada y estandarizada a formato 4:5.', 'success');
-
                 // Persistencia asíncrona en el servidor en segundo plano
                 canvas.toBlob(async (blob) => {
                     if (!blob) return;
@@ -12062,6 +12120,20 @@ function hybridInventoryModule() {
                     }
                 }, 'image/webp', 0.90);
 
+                // Verificar si hay más imágenes pendientes en la cola secuencial (Regla de curación una por una)
+                if (this.imageCropQueue && this.imageCropQueue.length > 0) {
+                    const nextFile = this.imageCropQueue.shift();
+                    this.imageCropCurrentIndex++;
+                    this.showToast('Foto (' + (this.imageCropCurrentIndex - 1) + '/' + this.imageCropTotalCount + ') curada. Cargando siguiente...', 'success');
+                    this.openCropModalForFile(nextFile);
+                } else {
+                    this.imageCropModalOpen = false;
+                    this.imageCropSource = null;
+                    this.imageCropOriginalFile = null;
+                    this.imageCropQueue = [];
+                    this.showToast('Todas las fotografías (' + this.imageCropTotalCount + ') han sido curadas y estandarizadas a 4:5.', 'success');
+                }
+
             } catch (err) {
                 console.error('Error al recortar imagen:', err);
                 this.showToast('Error al procesar el recorte: ' + err.message, 'warning');
@@ -12073,7 +12145,7 @@ function hybridInventoryModule() {
         handleWorkstationImageSelect(event) {
             const files = event && event.target ? event.target.files : null;
             if (!files || !files.length) return;
-            this.openCropModalForFile(files[0]);
+            this.startCropQueue(Array.from(files));
             if (event && event.target) {
                 event.target.value = '';
             }
@@ -12083,13 +12155,13 @@ function hybridInventoryModule() {
             this.isDraggingImages = false;
             const files = event && event.dataTransfer ? event.dataTransfer.files : null;
             if (!files || !files.length) return;
-            this.openCropModalForFile(files[0]);
+            this.startCropQueue(Array.from(files));
         },
 
         handleImageUpload(event) {
             const files = event && event.target ? event.target.files : event;
             if (!files || !files.length) return;
-            this.openCropModalForFile(files[0]);
+            this.startCropQueue(Array.from(files));
             if (event && event.target) {
                 event.target.value = '';
             }
@@ -12099,7 +12171,7 @@ function hybridInventoryModule() {
             this.isDraggingImages = false;
             const files = event && event.dataTransfer ? event.dataTransfer.files : null;
             if (!files || !files.length) return;
-            this.openCropModalForFile(files[0]);
+            this.startCropQueue(Array.from(files));
         },
 
         processImageFiles(fileArray) {

@@ -4232,6 +4232,7 @@
                                         x-ref="newProductFileInput" 
                                         @change="handleWorkstationImageSelect($event)" 
                                         accept="image/jpeg,image/png,image/webp,image/avif" 
+                                        multiple 
                                         class="hidden"
                                     >
                                     <div class="flex flex-col items-center justify-center gap-1.5 text-slate-600">
@@ -4240,8 +4241,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
                                         </div>
-                                        <span class="text-xs font-bold text-slate-800">Cargar Foto & Encuadrar 4:5</span>
-                                        <span class="text-[11px] text-slate-500">Abre editor interactivo con recorte estandarizado a 1080×1350 px</span>
+                                        <span class="text-xs font-bold text-slate-800">Cargar Fotografías & Encuadrar 4:5</span>
+                                        <span class="text-[11px] text-slate-500">Admite múltiples fotos; se curan y encuadran una por una (1080×1350 px)</span>
                                     </div>
                                 </div>
 
@@ -4903,55 +4904,58 @@
                                 </div>
 
                                 <!-- Margen Comercial & Pricing -->
-                                <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-4.5 rounded-2xl border border-slate-800 space-y-3.5 shadow-sm">
-                                    <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-                                        <h4 class="font-bold text-xs text-white uppercase tracking-wider">Margen Comercial & Pricing</h4>
-                                        <span class="text-[10px] text-indigo-300 font-semibold">Cálculo Reactivo</span>
+                                <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 space-y-3.5 shadow-2xs">
+                                    <div class="flex items-center justify-between pb-2 border-b border-indigo-100/80">
+                                        <div class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <h4 class="font-bold text-xs text-indigo-950 uppercase tracking-wider">Margen Comercial & Pricing</h4>
+                                        </div>
+                                        <span class="text-[10px] text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-200 font-semibold shadow-2xs">Cálculo Reactivo</span>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label class="text-[10px] text-slate-300 block mb-1">Precio Venta (PVP)</label>
+                                            <label class="text-[11px] font-bold text-slate-700 block mb-1">Precio Venta (PVP) <span class="text-rose-500">*</span></label>
                                             <div class="relative">
                                                 <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
                                                 <input 
                                                     type="number" 
                                                     step="0.5" 
                                                     x-model.number="newProduct.pvp" 
-                                                    class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
                                                 >
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="text-[10px] text-slate-300 block mb-1">Costo Unitario</label>
+                                            <label class="text-[11px] font-bold text-slate-700 block mb-1">Costo Unitario <span class="text-rose-500">*</span></label>
                                             <div class="relative">
                                                 <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
                                                 <input 
                                                     type="number" 
                                                     step="0.5" 
                                                     x-model.number="newProduct.cost" 
-                                                    class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
                                                 >
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
+                                    <div class="pt-2.5 border-t border-indigo-100 flex items-center justify-between text-xs bg-white/70 p-2.5 rounded-lg border border-indigo-100/70">
                                         <div>
-                                            <span class="text-[10px] text-slate-400 block">Utilidad por Pieza:</span>
-                                            <strong class="text-emerald-400 text-sm font-mono" x-text="formatCurrency(calculateNewProductProfit())"></strong>
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Utilidad por Pieza:</span>
+                                            <strong class="text-emerald-600 text-sm font-mono font-extrabold" x-text="formatCurrency(calculateNewProductProfit())"></strong>
                                         </div>
                                         <div class="text-right">
-                                            <span class="text-[10px] text-slate-400 block">Margen Bruto:</span>
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Margen Bruto:</span>
                                             <div class="flex items-center gap-1.5 justify-end">
                                                 <span 
                                                     class="text-sm font-extrabold font-mono" 
-                                                    :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
+                                                    :class="calculateNewProductMargin() >= 50 ? 'text-emerald-700' : (calculateNewProductMargin() >= 30 ? 'text-amber-700' : 'text-rose-700')" 
                                                     x-text="calculateNewProductMargin() + '%'"
                                                 ></span>
                                                 <span 
-                                                    class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" 
-                                                    :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateNewProductMargin() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')" 
+                                                    class="text-[9px] px-2 py-0.5 rounded font-extrabold uppercase tracking-wider border" 
+                                                    :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (calculateNewProductMargin() >= 30 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200')" 
                                                     x-text="calculateNewProductMargin() >= 50 ? 'Saludable' : (calculateNewProductMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
                                                 ></span>
                                             </div>
@@ -4960,13 +4964,13 @@
 
                                     <!-- Proveedor URL si es dropshipping -->
                                     <template x-if="newProduct.type === 'dropship'">
-                                        <div class="pt-2 border-t border-slate-800">
-                                            <label class="text-[10px] text-slate-400 block mb-1">Enlace / SKU Proveedor Mayorista</label>
+                                        <div class="pt-2 border-t border-indigo-100">
+                                            <label class="text-[10px] font-bold text-slate-600 block mb-1 uppercase tracking-wider">Enlace / SKU Proveedor Mayorista</label>
                                             <input 
                                                 type="text" 
                                                 x-model="newProduct.providerUrl" 
                                                 placeholder="https://torzo.com/items/..." 
-                                                class="w-full px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 focus:outline-none"
+                                                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                             >
                                         </div>
                                     </template>
@@ -5562,7 +5566,7 @@
                 class="relative bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 overflow-hidden"
                 @click.stop
             >
-                <!-- Encabezado del Modal -->
+                <!-- Encabezado del Modal con Indicador de Cola Multi-Foto -->
                 <div class="flex items-center justify-between pb-3 border-b border-slate-200">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
@@ -5571,7 +5575,12 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-slate-900">Encuadre & Recorte 4:5</h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-bold text-slate-900">Encuadre & Recorte 4:5</h3>
+                                <template x-if="imageCropQueue && imageCropQueue.length > 0">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow-2xs animate-pulse" x-text="'Foto ' + imageCropCurrentIndex + ' de ' + imageCropTotalCount"></span>
+                                </template>
+                            </div>
                             <p class="text-[11px] text-slate-500">Acomoda y estandariza la prenda al catálogo (1080 × 1350 px)</p>
                         </div>
                     </div>
@@ -5579,6 +5588,7 @@
                         type="button" 
                         @click="closeCropModal()" 
                         class="p-1 rounded-lg text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                        title="Cancelar y cerrar recorte"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -5684,7 +5694,7 @@
                         @click="closeCropModal()" 
                         class="px-3.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition cursor-pointer"
                     >
-                        Cancelar
+                        <span x-text="imageCropQueue && imageCropQueue.length > 0 ? 'Cancelar Restantes' : 'Cancelar'"></span>
                     </button>
                     <button 
                         type="button" 
@@ -5699,7 +5709,11 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                         </svg>
-                        <span x-text="isProcessingCrop ? 'Recortando y Estandarizando...' : 'Recortar y Aplicar (4:5)'"></span>
+                        <span x-text="isProcessingCrop 
+                            ? 'Recortando y Estandarizando...' 
+                            : (imageCropQueue && imageCropQueue.length > 0 
+                                ? ('Guardar y Continuar (' + (imageCropCurrentIndex) + '/' + imageCropTotalCount + ')') 
+                                : 'Recortar y Aplicar (4:5)')"></span>
                     </button>
                 </div>
             </div>

@@ -622,6 +622,14 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   2. **Prohibición de Invención Taxonómica en IA:** El prompt enviado al Copiloto IA debe prohibir taxativamente inventar fibras o acabados (como modal, seda o algodón) si no forman parte explícita de los atributos provistos en la sesión.
   3. **Reactividad Bidireccional Limpia:** Los selectores de atributos en el formulario no deben contener directivas Blade fijas (`:selected`) que bloqueen la vinculación de datos en tiempo real de Alpine.js / JavaScript.
 
+### Regla 6.75: Carga Múltiple de Fotografías y Curaduría Secuencial 4:5
+* **Soporte Multi-Foto en Carga:** El selector y zona de dropzone de imágenes en el Paso 1 del Workstation admite la selección simultánea de múltiples fotografías (`multiple`, límite global de 10 imágenes por producto).
+* **Cola Secuencial de Encuadre y Recorte:** Al cargar múltiples fotos, el sistema encola los archivos válidos y activa un flujo secuencial donde el usuario cura, acomoda y recorta las imágenes **una por una** de manera interactiva:
+  1. El modal de recorte (`#imageCropModalOpen`) visualiza un indicador de avance en el encabezado (*"Foto X de Y"*).
+  2. Al confirmar el recorte de la imagen actual (`applyCrop45`), se persiste en la galería y automáticamente se monta la siguiente foto en cola sin cerrar el flujo de trabajo.
+  3. Al completar la última foto de la cola, el modal se cierra con confirmación toast global. Si el usuario cancela, se descartan los archivos pendientes restantes respetando las fotos ya curadas.
+* **Sobriedad Visual en Tarjeta de Pricing:** La tarjeta de margen comercial y fijación de precios en el Paso 4 debe mantener una armonía visual sobria e integrada con el panel de administración (fondos claros, tipografía de alto contraste legible `text-slate-900`, inputs blancos con sombra sutil y badges de margen destacados con contraste accesible WCAG AA).
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
@@ -772,6 +780,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Desacople Color Paso 3**| Color Exclusivo por Foto en Paso 1 (6.72) | Eliminado Color Principal de Paso 3; asignación directa en fotos |
 | **Preview 30/70 Col 2** | Galería 30% (Portada +10%) & Datos 70% (6.73) | División vertical ergonómica: fotos 30% y ficha técnica en vivo 70% |
 | **Fidelidad Taxonómica**| Telas y Atributos Curados en IA & Resumen (6.74) | Cero invenciones de fibras ("modal"); sincronización real con BD y prompt estricto |
+| **Curaduría Multi-Foto**| Carga Múltiple & Recorte Secuencial 1 a 1 (6.75) | Cola de fotos en dropzone; recorte interactivo una por una y pricing pulido |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
