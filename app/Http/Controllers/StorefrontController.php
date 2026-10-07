@@ -1032,9 +1032,69 @@ class StorefrontController extends Controller
             ];
         })->values();
 
+        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->with(['users', 'supplierProducts.product'])->orderBy('name')->get();
+        $brandToSupplierMap = [];
+        foreach ($dbSuppliers as $s) {
+            $brandToSupplierMap[mb_strtolower(trim($s->name))] = $s;
+            if (is_array($s->brands)) {
+                foreach ($s->brands as $b) {
+                    $brandToSupplierMap[mb_strtolower(trim($b))] = $s;
+                }
+            }
+        }
+
+        $portalProviders = $dbSuppliers->map(function ($s) {
+            $hasExtranet = $s->users->where('role', 'supplier')->isNotEmpty();
+            return [
+                'id' => 'prov_' . $s->id,
+                'dbId' => $s->id,
+                'vendorCode' => $s->vendor_code ?: ('VND-' . strtoupper(Str::slug($s->name)) . '-001'),
+                'name' => $s->name,
+                'tradeName' => $s->name,
+                'legalName' => $s->legal_name ?: $s->name,
+                'taxId' => $s->tax_id ?: '',
+                'fiscalRegime' => $s->fiscal_regime ?: '',
+                'fiscalAddress' => $s->fiscal_address ?: '',
+                'fiscalZip' => $s->fiscal_zip ?: '',
+                'invoiceEmail' => $s->invoice_email ?: '',
+                'website' => $s->website ?: '',
+                'origin' => $s->origin ?: ($s->type === 'dropship_scrape' ? 'scraping' : 'manual'),
+                'isManual' => ($s->origin === 'manual' || $s->type !== 'dropship_scrape'),
+                'brands' => is_array($s->brands) ? $s->brands : [],
+                'brandsTree' => $s->getBrandsTree(),
+                'type' => $s->type,
+                'typeLabel' => match ($s->type) {
+                    'dropship_scrape' => 'Fabricante Mayorista & Scraping B2B',
+                    'dropship_api' => 'Proveedor API B2B Integrado',
+                    'local' => 'Taller Local & Stock Propio',
+                    default => 'Distribuidor Mayorista',
+                },
+                'city' => $s->city ?: 'CDMX',
+                'contactName' => $s->contact_name ?: 'Atencion a Clientes',
+                'phone' => $s->phone ?: '+52 55 0000 0000',
+                'email' => $s->contact_email ?: ('b2b@' . Str::slug($s->name) . '.com'),
+                'extractionMethod' => $s->extraction_method ?: 'Headless Scraper (Puppeteer)',
+                'scrape_frequency' => $s->scrape_frequency ?: 'every_6_hours',
+                'frequency' => $s->scrape_frequency ?: 'every_6_hours',
+                'lastScrapeTime' => 'Hace 18 min',
+                'syncedItemsCount' => (int) $s->supplier_products_count,
+                'status' => $s->status ?: 'connected',
+                'leadTimeDays' => (int) ($s->lead_time_days ?: 3),
+                'paymentTerms' => $s->payment_terms ?: 'contado',
+                'slaOnTimePct' => (float) ($s->sla_on_time_pct ?: 97.5),
+                'slaFillRatePct' => (float) ($s->sla_fill_rate_pct ?: 98.0),
+                'totalOrders' => 12,
+                'completedOrders' => 11,
+                'avgDelayDays' => (float) ($s->avg_delay_days ?: 0.3),
+                'isSyncing' => false,
+                'notes' => $s->notes ?: 'Proveedor oficial sincronizado.',
+                'hasExtranetAccess' => $hasExtranet,
+            ];
+        })->values();
+
         $dbProducts = $productsQuery->get();
 
-        $portalProducts = $dbProducts->map(function (Product $product) {
+        $portalProducts = $dbProducts->map(function (Product $product) use ($brandToSupplierMap) {
             $variants = $product->variants;
             $hasVariants = $variants->isNotEmpty();
 
@@ -1101,10 +1161,18 @@ class StorefrontController extends Controller
             $regularPrice = (float) (data_get($product->meta, 'regular_price') ?: $pvp);
             $discountPct = (float) data_get($product->meta, 'discount_pct', 0);
 
-            $supplierName = data_get($product->meta, 'provider') 
-                ?: ($sp?->supplier?->name ?: ($product->brand ?: 'Proveedor'));
-            $supplierId = data_get($product->meta, 'supplier_id') 
-                ?: ($sp?->supplier_id ? 'prov_' . $sp->supplier_id : null);
+            $rawBrand = $product->brand ?: data_get($product->meta, 'brand', '');
+            $matchedSupplier = null;
+            if ($sp?->supplier) {
+                $matchedSupplier = $sp->supplier;
+            } elseif ($rawBrand && isset($brandToSupplierMap[mb_strtolower(trim($rawBrand))])) {
+                $matchedSupplier = $brandToSupplierMap[mb_strtolower(trim($rawBrand))];
+            } elseif (data_get($product->meta, 'provider') && isset($brandToSupplierMap[mb_strtolower(trim((string) data_get($product->meta, 'provider')))])) {
+                $matchedSupplier = $brandToSupplierMap[mb_strtolower(trim((string) data_get($product->meta, 'provider')))];
+            }
+
+            $supplierName = $matchedSupplier?->name ?: (data_get($product->meta, 'provider') ?: ($rawBrand ?: 'Torzo'));
+            $supplierId = $matchedSupplier ? $matchedSupplier->id : (data_get($product->meta, 'supplier_id') ?: ($sp?->supplier_id ?: 4));
             $supplierSku = data_get($product->meta, 'supplier_sku') ?: ($sp?->supplier_sku ?: '');
             $supplierUrl = data_get($product->meta, 'provider_url')
                 ?: (data_get($product->meta, 'supplier_url')
@@ -1154,7 +1222,7 @@ class StorefrontController extends Controller
             $designType = data_get($product->meta, 'design_type') ?: data_get($product->meta, 'designType', 'sin_diseno');
             $websiteSection = $product->section_name ?: (data_get($product->meta, 'section_name') ?: (data_get($product->meta, 'website_section') ?: data_get($product->meta, 'websiteSection', 'basicos')));
             $location = data_get($product->meta, 'location', 'Rack A-01 / Nivel 1');
-            $brand = $product->brand ?: data_get($product->meta, 'brand', $supplierName);
+            $brand = $rawBrand ?: ($product->brand ?: data_get($product->meta, 'brand', $supplierName));
             $category = data_get($product->meta, 'category', 'Ropa Interior');
             $subcategory = data_get($product->meta, 'subcategory', '');
 
@@ -1237,55 +1305,6 @@ class StorefrontController extends Controller
             ? now()->parse(SupplierProduct::max('last_checked_at'))->format('d/m/Y H:i')
             : 'Hace 14 min';
 
-        $dbSuppliers = Supplier::query()->withCount('supplierProducts')->with(['users', 'supplierProducts.product'])->orderBy('name')->get();
-        $portalProviders = $dbSuppliers->map(function ($s) {
-            $hasExtranet = $s->users->where('role', 'supplier')->isNotEmpty();
-            return [
-                'id' => 'prov_' . $s->id,
-                'dbId' => $s->id,
-                'vendorCode' => $s->vendor_code ?: ('VND-' . strtoupper(Str::slug($s->name)) . '-001'),
-                'name' => $s->name,
-                'tradeName' => $s->name,
-                'legalName' => $s->legal_name ?: $s->name,
-                'taxId' => $s->tax_id ?: '',
-                'fiscalRegime' => $s->fiscal_regime ?: '',
-                'fiscalAddress' => $s->fiscal_address ?: '',
-                'fiscalZip' => $s->fiscal_zip ?: '',
-                'invoiceEmail' => $s->invoice_email ?: '',
-                'website' => $s->website ?: '',
-                'origin' => $s->origin ?: ($s->type === 'dropship_scrape' ? 'scraping' : 'manual'),
-                'isManual' => ($s->origin === 'manual' || $s->type !== 'dropship_scrape'),
-                'brands' => is_array($s->brands) ? $s->brands : [],
-                'brandsTree' => $s->getBrandsTree(),
-                'type' => $s->type,
-                'typeLabel' => match ($s->type) {
-                    'dropship_scrape' => 'Fabricante Mayorista & Scraping B2B',
-                    'dropship_api' => 'Proveedor API B2B Integrado',
-                    'local' => 'Taller Local & Stock Propio',
-                    default => 'Distribuidor Mayorista',
-                },
-                'city' => $s->city ?: 'CDMX',
-                'contactName' => $s->contact_name ?: 'Atencion a Clientes',
-                'phone' => $s->phone ?: '+52 55 0000 0000',
-                'email' => $s->contact_email ?: ('b2b@' . Str::slug($s->name) . '.com'),
-                'extractionMethod' => $s->extraction_method ?: 'Headless Scraper (Puppeteer)',
-                'scrape_frequency' => $s->scrape_frequency ?: 'every_6_hours',
-                'frequency' => $s->scrape_frequency ?: 'every_6_hours',
-                'lastScrapeTime' => 'Hace 18 min',
-                'syncedItemsCount' => (int) $s->supplier_products_count,
-                'status' => $s->status ?: 'connected',
-                'leadTimeDays' => (int) ($s->lead_time_days ?: 3),
-                'paymentTerms' => $s->payment_terms ?: 'contado',
-                'slaOnTimePct' => (float) ($s->sla_on_time_pct ?: 97.5),
-                'slaFillRatePct' => (float) ($s->sla_fill_rate_pct ?: 98.0),
-                'totalOrders' => 12,
-                'completedOrders' => 11,
-                'avgDelayDays' => (float) ($s->avg_delay_days ?: 0.3),
-                'isSyncing' => false,
-                'notes' => $s->notes ?: 'Proveedor oficial sincronizado.',
-                'hasExtranetAccess' => $hasExtranet,
-            ];
-        })->values();
 
         $dbPurchaseOrders = PurchaseOrder::query()->with(['supplier', 'items.product', 'items.variant'])->latest()->get();
         $portalPurchaseOrders = $dbPurchaseOrders->map(function ($po) {
@@ -1346,8 +1365,7 @@ class StorefrontController extends Controller
             ];
         })->values();
 
-        $topProductsToPlan = $portalProducts->sortBy('localStock')->take(3)->values();
-        $portalFuturePurchaseOrders = $topProductsToPlan->map(function ($p, $idx) {
+        $portalFuturePurchaseOrders = $portalProducts->map(function ($p, $idx) {
             $needed = max(24, 60 - (int) $p['localStock']);
             $cost = (float) $p['cost'];
             $ch = (int) round($needed * 0.15);
@@ -1358,16 +1376,19 @@ class StorefrontController extends Controller
 
             return [
                 'id' => 'FP-2026-0' . ($idx + 1),
+                'productId' => $p['id'],
                 'sku' => $p['sku'],
                 'productName' => $p['name'],
-                'supplier' => $p['brand'] ?: 'Torzo',
+                'supplier' => $p['provider'] ?: 'Torzo',
+                'supplier_id' => $p['supplier_id'] ?: 4,
+                'brand' => $p['brand'] ?: ($p['provider'] ?: 'Torzo'),
                 'qty' => $needed,
                 'sizes' => ['ch' => $ch, 'm' => $m, 'g' => $g, 'xl' => $xl, '2xl' => $xxl, '3xl' => 0],
                 'costUnit' => $cost,
                 'totalCost' => round($needed * $cost, 2),
                 'priority' => $p['localStock'] <= 0 ? 'alta' : 'media',
                 'status' => 'Planificada',
-                'date' => now()->subDays(2 - $idx)->format('d M, Y'),
+                'date' => now()->subDays(2 - ($idx % 5))->format('d M, Y'),
                 '_editingSizes' => false,
             ];
         })->values();

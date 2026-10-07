@@ -388,192 +388,9 @@ function hybridInventoryModule() {
         receivingMoqTierLabel: 'Escala 200 prendas',
 
         // TASK-INV-13: Gestor Integral de Proveedores, SLA y Control de Estados
-        providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0)
+        providers: (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers))
             ? window.serverSuppliers
-            : [
-            {
-                id: 'prov_torzo',
-                vendorCode: 'VND-TORZO-001',
-                name: 'Torzo Official B2B',
-                tradeName: 'Torzo B2B',
-                type: 'scraper',
-                typeLabel: 'Fabricante Deportivo & Ropa Interior',
-                city: 'CDMX',
-                contactName: 'Carlos Mendoza',
-                phone: '+52 55 4182 9901',
-                email: 'b2b@torzo.com',
-                extractionMethod: 'Headless Scraper (Puppeteer)',
-                frequency: 'Automatico (Cada 6 hrs)',
-                lastScrapeTime: 'Hace 18 min',
-                syncedItemsCount: 42,
-                status: 'connected',
-                leadTimeDays: 5,
-                paymentTerms: 'contado',
-                slaOnTimePct: 96.8,
-                slaFillRatePct: 98.2,
-                totalOrders: 28,
-                completedOrders: 27,
-                avgDelayDays: 0.4,
-                isSyncing: false,
-                notes: 'Conexion automatizada via cluster Torzo Bot en Node.js/Puppeteer.'
-            },
-            {
-                id: 'prov_modaintima',
-                vendorCode: 'VND-MODA-002',
-                name: 'ModaIntima Textil MX',
-                tradeName: 'ModaIntima MX',
-                type: 'workshop',
-                typeLabel: 'Fabricante Nacional de Algodon y Boxers',
-                city: 'Puebla',
-                contactName: 'Lucia Morales',
-                phone: '+52 222 389 1102',
-                email: 'ventas@modaintima.mx',
-                extractionMethod: 'REST API / SAP ERP (Webhook)',
-                frequency: 'Diaria (06:00 AM)',
-                lastScrapeTime: 'Hace 42 min',
-                syncedItemsCount: 68,
-                status: 'connected',
-                leadTimeDays: 3,
-                paymentTerms: 'credito_30',
-                slaOnTimePct: 94.5,
-                slaFillRatePct: 97.0,
-                totalOrders: 35,
-                completedOrders: 33,
-                avgDelayDays: 0.8,
-                isSyncing: false,
-                notes: 'Taller principal de maquila de algodon pima y modal.'
-            },
-            {
-                id: 'prov_silk_cotton',
-                vendorCode: 'VND-SILK-003',
-                name: 'Silk & Cotton Iberia SL',
-                tradeName: 'Silk & Cotton Iberia',
-                type: 'distributor',
-                typeLabel: 'Hilados Premium Modal Organico',
-                city: 'Barcelona',
-                contactName: 'Jordi Puig',
-                phone: '+34 932 108 440',
-                email: 'pedidos@silkcotton.es',
-                extractionMethod: 'SFTP / CSV Automatizado',
-                frequency: 'Cada 12 hrs',
-                lastScrapeTime: 'Hace 3 hrs',
-                syncedItemsCount: 24,
-                status: 'connected',
-                leadTimeDays: 14,
-                paymentTerms: 'credito_60',
-                slaOnTimePct: 91.2,
-                slaFillRatePct: 95.8,
-                totalOrders: 12,
-                completedOrders: 11,
-                avgDelayDays: 1.5,
-                isSyncing: false,
-                notes: 'Insumos importados de Europa bajo embarque maritimo y aereo.'
-            },
-            {
-                id: 'prov_lingerie_drop',
-                vendorCode: 'VND-LING-004',
-                name: 'Lingerie Drop Global',
-                tradeName: 'Lingerie Drop Miami',
-                type: 'scraper',
-                typeLabel: 'Dropship Especializado Jocks & Bikinis',
-                city: 'Miami',
-                contactName: 'Steven Vance',
-                phone: '+1 305 555 0199',
-                email: 'ops@lingeriedrop.us',
-                extractionMethod: 'Shopify App Private Webhook',
-                frequency: 'Tiempo Real (Webhooks)',
-                lastScrapeTime: 'Hace 5 min',
-                syncedItemsCount: 95,
-                status: 'connected',
-                leadTimeDays: 7,
-                paymentTerms: 'contado',
-                slaOnTimePct: 98.4,
-                slaFillRatePct: 99.1,
-                totalOrders: 40,
-                completedOrders: 40,
-                avgDelayDays: 0.1,
-                isSyncing: false,
-                notes: 'Dropship cross-border directo con fulfillment en Florida.'
-            },
-            {
-                id: 'prov_seamless_tech',
-                vendorCode: 'VND-SEAM-005',
-                name: 'Seamless Tech Apparel',
-                tradeName: 'Seamless Tech',
-                type: 'workshop',
-                typeLabel: 'Prendas Sin Costuras y Corte Laser',
-                city: 'Medellin',
-                contactName: 'Valeria Restrepo',
-                phone: '+57 4 444 8921',
-                email: 'comercial@seamlesstech.co',
-                extractionMethod: 'GraphQL API Endpoint',
-                frequency: 'Cada 8 hrs',
-                lastScrapeTime: 'Hace 1 hr',
-                syncedItemsCount: 31,
-                status: 'connected',
-                leadTimeDays: 8,
-                paymentTerms: 'credito_15',
-                slaOnTimePct: 93.0,
-                slaFillRatePct: 96.5,
-                totalOrders: 18,
-                completedOrders: 17,
-                avgDelayDays: 1.1,
-                isSyncing: false,
-                notes: 'Maquila especializada en cortes termosellados sin rozaduras.'
-            },
-            {
-                id: 'prov_aura_wholesale',
-                vendorCode: 'VND-AURA-006',
-                name: 'Aura Underwear Wholesale',
-                tradeName: 'Aura Wholesale',
-                type: 'distributor',
-                typeLabel: 'Coleccion Diseno y Moda Intima',
-                city: 'Guadalajara',
-                contactName: 'Fernando Orozco',
-                phone: '+52 33 3612 7780',
-                email: 'distribucion@auraunderwear.com',
-                extractionMethod: 'Headless Scraper (Cluster)',
-                frequency: 'Cada 24 hrs',
-                lastScrapeTime: 'Ayer 22:15',
-                syncedItemsCount: 16,
-                status: 'maintenance',
-                leadTimeDays: 6,
-                paymentTerms: 'credito_30',
-                slaOnTimePct: 86.4,
-                slaFillRatePct: 91.0,
-                totalOrders: 15,
-                completedOrders: 13,
-                avgDelayDays: 2.8,
-                isSyncing: false,
-                notes: 'Cluster en mantenimiento por actualizacion de portal mayorista.'
-            },
-            {
-                id: 'prov_intimates_co',
-                vendorCode: 'VND-INTI-007',
-                name: 'Intimates Co. Logistics',
-                tradeName: 'Intimates Co.',
-                type: 'commercial',
-                typeLabel: 'Distribuidor Multimarca Tradicional',
-                city: 'Monterrey',
-                contactName: 'Guillermo Garza',
-                phone: '+52 81 8345 6620',
-                email: 'cuentas@intimatesco.mx',
-                extractionMethod: 'REST API Webhook',
-                frequency: 'Manual / On-demand',
-                lastScrapeTime: 'Hace 4 dias',
-                syncedItemsCount: 0,
-                status: 'paused',
-                leadTimeDays: 5,
-                paymentTerms: 'contado',
-                slaOnTimePct: 88.0,
-                slaFillRatePct: 89.5,
-                totalOrders: 8,
-                completedOrders: 7,
-                avgDelayDays: 3.0,
-                isSyncing: false,
-                notes: 'Canal pausado temporalmente por revision de acuerdos comerciales.'
-            }
-        ],
+            : [],
         providerSearch: '',
         providerStatusFilter: 'all',
         providerTypeFilter: 'all',
@@ -4752,19 +4569,19 @@ function hybridInventoryModule() {
             if (typeof window !== 'undefined' && Array.isArray(window.serverInventoryProducts) && window.serverInventoryProducts.length > 0) {
                 this.products = window.serverInventoryProducts;
             }
-            if (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers) && window.serverSuppliers.length > 0) {
+            if (typeof window !== 'undefined' && Array.isArray(window.serverSuppliers)) {
                 this.providers = window.serverSuppliers;
             }
-            if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseOrders) && window.serverPurchaseOrders.length > 0) {
+            if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseOrders)) {
                 this.activePurchaseOrders = window.serverPurchaseOrders;
             }
-            if (typeof window !== 'undefined' && Array.isArray(window.serverFuturePurchaseOrders) && window.serverFuturePurchaseOrders.length > 0) {
+            if (typeof window !== 'undefined' && Array.isArray(window.serverFuturePurchaseOrders)) {
                 this.futurePurchaseOrders = window.serverFuturePurchaseOrders;
             }
-            if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseKardex) && window.serverPurchaseKardex.length > 0) {
+            if (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseKardex)) {
                 this.purchaseKardexLog = window.serverPurchaseKardex;
             }
-            if (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0) {
+            if (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements)) {
                 this.pendingCreditAgreements = window.serverCreditAgreements;
             }
             if (typeof window !== 'undefined' && Array.isArray(window.serverProductBundles) && window.serverProductBundles.length > 0) {
@@ -5485,50 +5302,9 @@ function hybridInventoryModule() {
         purchaseQty: 50,
         purchasePriority: 'alta',
         purchaseSizes: { ch: 10, m: 20, g: 15, xl: 5 },
-        futurePurchaseOrders: [
-            {
-                id: 'FP-2026-01',
-                sku: 'BX-MOD-001',
-                productName: 'Boxer Trunks Modal Seamless',
-                supplier: 'Silk & Cotton Iberia SL',
-                qty: 120,
-                sizes: { ch: 18, m: 50, g: 40, xl: 12 },
-                costUnit: 145.00,
-                totalCost: 17400.00,
-                priority: 'alta',
-                status: 'Planificada',
-                date: '05 Sept, 2026',
-                _editingSizes: false
-            },
-            {
-                id: 'FP-2026-02',
-                sku: 'JK-ATH-002',
-                productName: 'Jockstrap Athletic Carbon Edition',
-                supplier: 'Torzo B2B',
-                qty: 60,
-                sizes: { ch: 10, m: 25, g: 18, xl: 7 },
-                costUnit: 115.00,
-                totalCost: 6900.00,
-                priority: 'media',
-                status: 'Planificada',
-                date: '04 Sept, 2026',
-                _editingSizes: false
-            },
-            {
-                id: 'FP-2026-03',
-                sku: 'TOR-DRP-003',
-                productName: 'Torzo Mesh Breathable Trunk',
-                supplier: 'Torzo B2B',
-                qty: 48,
-                sizes: { ch: 8, m: 20, g: 15, xl: 5 },
-                costUnit: 210.00,
-                totalCost: 10080.00,
-                priority: 'alta',
-                status: 'Planificada',
-                date: '05 Sept, 2026',
-                _editingSizes: false
-            }
-        ],
+        futurePurchaseOrders: (typeof window !== 'undefined' && Array.isArray(window.serverFuturePurchaseOrders))
+            ? window.serverFuturePurchaseOrders
+            : [],
 
         // [TASK-INV-16] Variables reactivas de la bandeja de Compras, PO y Kardex
         inventoryCurrentScreen: 'main', // 'main' | 'settings' (REGLA: Todos los ajustes se muestran como pantalla completa)
@@ -5564,174 +5340,19 @@ function hybridInventoryModule() {
         onDemandRejectReason: 'Agotado en taller sin fecha de resurtido',
         sizeEditModalOpen: false,
         selectedOrderForSizes: null,
-        pendingCreditAgreements: (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements) && window.serverCreditAgreements.length > 0)
+        pendingCreditAgreements: (typeof window !== 'undefined' && Array.isArray(window.serverCreditAgreements))
             ? window.serverCreditAgreements
-            : [
-            {
-                supplier: 'Silk & Cotton Iberia SL',
-                ref: 'NC-SILK-2026-03',
-                amount: 1160.00,
-                reason: 'Merma textil por costuras defectuosas en 8 prendas del lote previo FP-2026-01',
-                date: '18 Sept, 2026',
-                status: 'Pendiente de Aplicar'
-            },
-            {
-                supplier: 'Silk & Cotton Iberia SL',
-                ref: 'NC-SILK-2026-01',
-                amount: 540.00,
-                reason: 'Penalización acordada por demora de 4 días hábiles en recolección de transporte',
-                date: '02 Sept, 2026',
-                status: 'Pendiente de Aplicar'
-            },
-            {
-                supplier: 'Torzo B2B',
-                ref: 'NC-TORZO-2026-012',
-                amount: 850.00,
-                reason: 'Faltante en muelle rampa Inbound 02 verificado contra remisión #TRZ-889',
-                date: '14 Sept, 2026',
-                status: 'Pendiente de Aplicar'
-            },
-            {
-                supplier: 'Torzo B2B',
-                ref: 'NC-TORZO-2026-007',
-                amount: 1420.00,
-                reason: 'Bonificación por volumen trimestral y compensación por merma de tintura en lote anterior',
-                date: '28 Ago, 2026',
-                status: 'Pendiente de Aplicar'
-            },
-            {
-                supplier: 'ModaIntima Textil MX',
-                ref: 'NC-MODA-2026-001',
-                amount: 600.00,
-                reason: 'Bonificación comercial acordada por retraso de transporte fletero',
-                date: '10 Sept, 2026',
-                status: 'Pendiente de Aplicar'
-            },
-            {
-                supplier: 'ModaIntima Textil MX',
-                ref: 'NC-MODA-2026-002',
-                amount: 380.00,
-                reason: 'Discrepancia en curva de tallas (faltante de 3 piezas XL en entrega previa)',
-                date: '05 Sept, 2026',
-                status: 'Pendiente de Aplicar'
-            }
-        ],
+            : [],
         carrierTrackingModalOpen: false,
         selectedTrackingOrder: null,
-        purchaseKardexLog: [
-            {
-                id: 'KDX-PUR-2026-001',
-                timestamp: '05 Sept, 2026 12:45',
-                type: 'PO_EMITIDA',
-                typeLabel: 'Emisión de PO',
-                badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                poNumber: 'PO-2026-0041',
-                supplier: 'Torzo B2B',
-                sku: 'TOR-DRP-003',
-                productName: 'Torzo Mesh Breathable Trunk',
-                deltaQty: '+48 uds',
-                totalAmount: 10080.00,
-                user: 'Elena Compras',
-                notes: 'Generación formal de PO enviada a taller con entrega programada en Rampa Central CDMX.'
-            },
-            {
-                id: 'KDX-PUR-2026-002',
-                timestamp: '05 Sept, 2026 11:30',
-                type: 'ON_DEMAND_CONVERTIDO',
-                typeLabel: 'On-Demand a PO',
-                badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                poNumber: 'REQ-2026-083',
-                supplier: 'Silk & Cotton Iberia SL',
-                sku: 'BX-MOD-001',
-                productName: 'Boxer Trunks Modal Seamless',
-                deltaQty: '+3 uds',
-                totalAmount: 435.00,
-                user: 'Elena Compras',
-                notes: 'Solicitud On-Demand de Roberto Garza confirmada y sumada a compras planificadas.'
-            },
-            {
-                id: 'KDX-PUR-2026-003',
-                timestamp: '04 Sept, 2026 17:15',
-                type: 'AJUSTE_CANTIDAD',
-                typeLabel: 'Ajuste de Unidades',
-                badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
-                poNumber: 'FP-2026-02',
-                supplier: 'Torzo B2B',
-                sku: 'JK-ATH-002',
-                productName: 'Jockstrap Athletic Carbon Edition',
-                deltaQty: '40 -> 60 uds (+20)',
-                totalAmount: 6900.00,
-                user: 'Elena Compras',
-                notes: 'Incremento de lote para cumplir MOQ de 60 piezas con flete bonificado.'
-            },
-            {
-                id: 'KDX-PUR-2026-004',
-                timestamp: '04 Sept, 2026 14:00',
-                type: 'RECEPCION_RAMPA',
-                typeLabel: 'Recepción en Rampa',
-                badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
-                poNumber: 'PO-2026-0038',
-                supplier: 'Torzo B2B',
-                sku: 'JK-ATH-002',
-                productName: 'Jockstrap Athletic Carbon Edition',
-                deltaQty: '+28 uds ingresadas',
-                totalAmount: 3245.00,
-                user: 'Carlos Almacén',
-                notes: 'Ingreso físico a rack A-02 conforme conteo ciego validado.'
-            }
-        ],
+        purchaseKardexLog: (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseKardex))
+            ? window.serverPurchaseKardex
+            : [],
 
         // [P2.1] Colección reactiva de Órdenes de Compra Activas (En Tránsito y Almacén)
-        activePurchaseOrders: [
-            {
-                id: 'OC-2026-085',
-                supplier: 'Torzo B2B',
-                carrier: 'FedEx Express (Guía #FX-882910-MX)',
-                eta: 'Hoy / En Reparto',
-                sku: 'JK-ATH-002',
-                productName: 'Jockstrap Athletic Carbon Edition',
-                qty: 28,
-                sizes: { ch: 4, m: 12, g: 10, xl: 2, '2xl': 0, '3xl': 0 },
-                unitCost: 115.89,
-                totalCost: 3245.00,
-                date: '03 Sept, 2026',
-                status: 'En Camino',
-                linkedCartId: null,
-                linkedCustomer: null
-            },
-            {
-                id: 'OC-2026-088',
-                supplier: 'Torzo B2B',
-                carrier: 'DHL Express (Guía #DHL-994012-MX)',
-                eta: 'Arribo en Sucursal',
-                sku: 'TOR-DRP-003',
-                productName: 'Torzo Mesh Breathable Trunk',
-                qty: 15,
-                sizes: { ch: 2, m: 6, g: 5, xl: 2, '2xl': 0, '3xl': 0 },
-                unitCost: 210.00,
-                totalCost: 3150.00,
-                date: '04 Sept, 2026',
-                status: 'En Camino',
-                linkedCartId: '#ORD-4491',
-                linkedCustomer: 'Sofía Albarrán'
-            },
-            {
-                id: 'OC-2026-089',
-                supplier: 'Torzo B2B',
-                carrier: 'Estafeta Terrestre (Guía #EST-440192-MX)',
-                eta: '3 - 5 días hábiles',
-                sku: 'TOR-DRP-006',
-                productName: 'Boxer Mesh Breathable UltraVent',
-                qty: 45,
-                sizes: { ch: 6, m: 18, g: 15, xl: 4, '2xl': 2, '3xl': 0 },
-                unitCost: 115.00,
-                totalCost: 5175.00,
-                date: '05 Sept, 2026',
-                status: 'Pendiente Confirmación',
-                linkedCartId: null,
-                linkedCustomer: null
-            }
-        ],
+        activePurchaseOrders: (typeof window !== 'undefined' && Array.isArray(window.serverPurchaseOrders))
+            ? window.serverPurchaseOrders
+            : [],
 
         // [P2.1] Estado para Modal de Recepción Inbound
         receiveOrderModalOpen: false,
@@ -6587,18 +6208,82 @@ function hybridInventoryModule() {
             }
         },
 
+        resolveSupplierForOrder(order) {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const providers = (target.providers || this.providers || []);
+            if (!order) return { name: 'Proveedor General', provider: null };
+
+            // 1. Check order.supplier_id or order.supplierId
+            const sId = order.supplier_id || order.supplierId;
+            if (sId) {
+                const cleanId = String(sId).replace(/\D/g, '');
+                const found = providers.find(p => String(p.dbId || p.id).replace(/\D/g, '') === cleanId);
+                if (found) return { name: found.tradeName || found.name, provider: found };
+            }
+
+            // 2. Check supplier or brand against providers and their brands
+            const sup = (order.supplier || '').toLowerCase().trim();
+            const brand = (order.brand || '').toLowerCase().trim();
+
+            for (const p of providers) {
+                const pName = (p.name || '').toLowerCase().trim();
+                const pTrade = (p.tradeName || '').toLowerCase().trim();
+                const pCode = (p.vendorCode || '').toLowerCase().trim();
+                if (sup && (pName === sup || pTrade === sup || (pCode && sup.includes(pCode)))) {
+                    return { name: p.tradeName || p.name, provider: p };
+                }
+                if (brand && (pName === brand || pTrade === brand)) {
+                    return { name: p.tradeName || p.name, provider: p };
+                }
+                if (Array.isArray(p.brands)) {
+                    for (const b of p.brands) {
+                        const bLower = (typeof b === 'string' ? b : (b.name || '')).toLowerCase().trim();
+                        if (bLower && (bLower === sup || bLower === brand)) {
+                            return { name: p.tradeName || p.name, provider: p };
+                        }
+                    }
+                }
+            }
+
+            return { name: order.supplier || 'Proveedor General', provider: null };
+        },
+
+        resolveSupplierForNameOrBrand(nameOrBrand) {
+            if (!nameOrBrand) return null;
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const providers = (target.providers || this.providers || []);
+            const term = String(nameOrBrand).toLowerCase().trim();
+
+            for (const p of providers) {
+                const pName = (p.name || '').toLowerCase().trim();
+                const pTrade = (p.tradeName || '').toLowerCase().trim();
+                const pCode = (p.vendorCode || '').toLowerCase().trim();
+                if (pName === term || pTrade === term || (pCode && term.includes(pCode))) {
+                    return p;
+                }
+                if (Array.isArray(p.brands)) {
+                    for (const b of p.brands) {
+                        const bLower = (typeof b === 'string' ? b : (b.name || '')).toLowerCase().trim();
+                        if (bLower && bLower === term) {
+                            return p;
+                        }
+                    }
+                }
+            }
+            return null;
+        },
+
         getPlannedOrdersBySupplier() {
             const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
             const orders = (target.futurePurchaseOrders || this.futurePurchaseOrders || []);
             const map = {};
 
             orders.forEach(order => {
-                const sup = order.supplier || 'Proveedor General';
+                const resolved = this.resolveSupplierForOrder(order);
+                const sup = resolved.name;
+                const prov = resolved.provider;
+
                 if (!map[sup]) {
-                    const prov = (target.providers || this.providers || []).find(p => 
-                        p.name === sup || p.tradeName === sup || (p.vendorCode && sup.includes(p.vendorCode))
-                    );
-                    
                     const sheetsList = target.moqSheets || this.moqSheets || [];
                     const supLower = sup.toLowerCase();
                     // Regla de negocio: Tabulador MOQ exclusivo e independiente por proveedor
@@ -6620,8 +6305,16 @@ function hybridInventoryModule() {
                         moqTarget = wholesaleTier ? parseInt(wholesaleTier.min_qty) : (tiers[0].min_qty || 50);
                     }
 
+                    // Marcas asociadas al proveedor para cabecera del arbol
+                    let brandsList = [];
+                    if (prov && Array.isArray(prov.brands) && prov.brands.length > 0) {
+                        brandsList = prov.brands.map(b => typeof b === 'string' ? b : (b.name || b.title || '')).filter(Boolean);
+                    }
+
                     map[sup] = {
                         supplier: sup,
+                        supplierId: prov ? (prov.dbId || prov.id) : null,
+                        brands: brandsList,
                         providerData: prov || null,
                         leadTime: prov ? (prov.leadTimeDays + ' días') : '4.2 días',
                         contact: prov ? (prov.contactName + (prov.phone ? ' (' + prov.phone + ')' : '')) : 'Vía Portal B2B',
@@ -6635,6 +6328,11 @@ function hybridInventoryModule() {
                         items: []
                     };
                 }
+
+                if (order.brand && !map[sup].brands.includes(order.brand)) {
+                    map[sup].brands.push(order.brand);
+                }
+
                 map[sup].items.push(order);
                 map[sup].totalQty += (parseInt(order.qty) || 0);
             });
@@ -7047,7 +6745,27 @@ function hybridInventoryModule() {
             const po = target.currentPoData || this.currentPoData;
             if (!po) return [];
             const list = target.pendingCreditAgreements || this.pendingCreditAgreements || [];
-            return list.filter(a => (po.supplier === 'Consolidado Multimarca' || a.supplier === po.supplier) && a.status === 'Pendiente de Aplicar');
+            return list.filter(a => {
+                const st = (a.status || '').toLowerCase();
+                const rawSt = (a.raw_status || '').toLowerCase();
+                const isPending = st.includes('pendiente') || rawSt === 'pending';
+                if (!isPending) return false;
+                if (po.supplier === 'Consolidado Multimarca') return true;
+
+                // 1. Coincidencia por ID de proveedor en BD
+                if (po.supplierId && a.supplier_id && String(po.supplierId).replace(/\D/g, '') === String(a.supplier_id).replace(/\D/g, '')) {
+                    return true;
+                }
+
+                // 2. Coincidencia por resolución de proveedor o marcas asociadas
+                const provA = this.resolveSupplierForNameOrBrand(a.supplier);
+                const provPo = this.resolveSupplierForNameOrBrand(po.supplier);
+                if (provA && provPo && (String(provA.dbId || provA.id) === String(provPo.dbId || provPo.id))) {
+                    return true;
+                }
+
+                return (a.supplier || '').toLowerCase() === (po.supplier || '').toLowerCase();
+            });
         },
 
         togglePoCreditDeduction() {
@@ -7192,7 +6910,10 @@ function hybridInventoryModule() {
                 items = [...futureOrders];
                 targetSupplier = 'Consolidado Multimarca';
             } else {
-                items = futureOrders.filter(o => o.supplier === supplier);
+                items = futureOrders.filter(o => {
+                    const resolved = this.resolveSupplierForOrder(o);
+                    return resolved.name === supplier || o.supplier === supplier;
+                });
             }
 
             if (items.length === 0) {
@@ -7200,21 +6921,18 @@ function hybridInventoryModule() {
                 return;
             }
 
-            const providersList = target.providers || this.providers || [];
-            const prov = providersList.find(p => p.name === targetSupplier || p.tradeName === targetSupplier);
+            const prov = this.resolveSupplierForNameOrBrand(targetSupplier);
             const subtotal = items.reduce((sum, i) => sum + (Number(i.totalCost) || 0), 0);
             const iva = Math.round(subtotal * 0.16 * 100) / 100;
             const total = Math.round((subtotal + iva) * 100) / 100;
             const poNumber = 'PO-2026-' + String(Math.floor(1000 + Math.random() * 9000));
-
-            // Detección automática de acuerdo de nota de crédito pendiente para el proveedor
-            const pendingList = (target.pendingCreditAgreements || this.pendingCreditAgreements || []);
-            const autoAgreement = pendingList.find(a => (targetSupplier === 'Consolidado Multimarca' || a.supplier === targetSupplier) && a.status === 'Pendiente de Aplicar');
+            const supplierId = prov ? (prov.dbId || prov.id) : (items[0]?.supplier_id || items[0]?.supplierId || null);
 
             const poData = {
                 poNumber: poNumber,
                 date: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }),
                 supplier: targetSupplier,
+                supplierId: supplierId,
                 vendorCode: prov ? prov.vendorCode : 'VND-B2B-01',
                 contactName: prov ? prov.contactName : 'Ejecutivo de Cuenta B2B',
                 contactPhone: prov ? prov.phone : '+52 55 5555 0100',
@@ -7227,6 +6945,7 @@ function hybridInventoryModule() {
                     sku: it.sku,
                     productName: it.productName,
                     supplier: it.supplier,
+                    brand: it.brand || null,
                     qty: Number(it.qty) || 0,
                     sizes: it.sizes ? { ...it.sizes } : { ch: 0, m: 0, g: 0, xl: 0 },
                     costUnit: Number(it.costUnit) || 0,
@@ -7235,9 +6954,10 @@ function hybridInventoryModule() {
                 })),
                 totalPieces: items.reduce((sum, i) => sum + (Number(i.qty) || 0), 0),
                 hasCreditDeduction: false,
-                creditNoteRef: autoAgreement ? autoAgreement.ref : '',
-                creditNoteAmount: autoAgreement ? autoAgreement.amount : 0,
-                creditNoteReason: autoAgreement ? autoAgreement.reason : 'Merma textil y rotura de costura en entrega previa',
+                creditAgreementId: null,
+                creditNoteRef: '',
+                creditNoteAmount: 0,
+                creditNoteReason: '',
                 grossSubtotal: subtotal,
                 deductionAmount: 0,
                 subtotal: subtotal,
@@ -7249,8 +6969,18 @@ function hybridInventoryModule() {
             };
 
             target.currentPoData = poData;
-            target.poGeneratorModalOpen = true;
             this.currentPoData = poData;
+
+            // Pre-cargar datos del primer acuerdo pendiente si existe
+            const pendingList = this.getPendingAgreementsForCurrentPo();
+            if (pendingList.length > 0) {
+                poData.creditNoteRef = pendingList[0].ref;
+                poData.creditNoteAmount = pendingList[0].amount;
+                poData.creditNoteReason = pendingList[0].reason;
+                poData.creditAgreementId = pendingList[0].id || null;
+            }
+
+            target.poGeneratorModalOpen = true;
             this.poGeneratorModalOpen = true;
         },
 

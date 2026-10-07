@@ -2572,8 +2572,14 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                 </div>
                                 <div>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex flex-wrap items-center gap-2">
                                         <h4 class="text-sm font-bold text-slate-900" x-text="group.supplier"></h4>
+                                        <template x-if="group.brands && group.brands.length > 0">
+                                            <span class="text-[10px] font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                <span class="text-slate-400 font-normal">Marcas:</span>
+                                                <span class="font-bold text-slate-800" x-text="group.brands.join(', ')"></span>
+                                            </span>
+                                        </template>
                                         <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold" x-text="group.providerData ? group.providerData.vendorCode : 'VND-EXT'"></span>
                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="'Lead Time: ' + group.leadTime"></span>
                                     </div>
@@ -2653,7 +2659,12 @@
                                         <tr class="hover:bg-slate-50/80 transition">
                                             <td class="py-2.5 px-4 font-mono font-bold text-indigo-600 text-xs" x-text="order.id"></td>
                                             <td class="py-2.5 px-4">
-                                                <span class="font-bold text-slate-900 block" x-text="order.productName"></span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="font-bold text-slate-900" x-text="order.productName"></span>
+                                                    <template x-if="order.brand">
+                                                        <span class="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200" x-text="order.brand"></span>
+                                                    </template>
+                                                </div>
                                                 <span class="text-slate-400 font-mono text-[10px]" x-text="'SKU: ' + order.sku"></span>
                                             </td>
                                             <!-- Edición Directa de Cantidad -->
