@@ -791,15 +791,19 @@ class InventoryApiController extends Controller
             if (!empty($fabricName)) {
                 $fabricModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', \Illuminate\Support\Str::slug($fabricName))->first();
                 if (!$fabricModel) {
-                    $fabricModel = \App\Models\ApparelFabric::create([
-                        'name' => $fabricName,
-                        'slug' => \Illuminate\Support\Str::slug($fabricName),
-                        'description' => 'Fibra textil para indumentaria',
-                        'is_active' => true,
-                    ]);
+                    $fabricModel = \App\Models\ApparelFabric::where('name', 'like', '%' . explode(' ', $fabricName)[0] . '%')->first()
+                        ?: \App\Models\ApparelFabric::where('is_active', true)->first();
                 }
-                $fabricId = $fabricModel->id;
-                $fabricName = $fabricModel->name;
+                if ($fabricModel) {
+                    $fabricId = $fabricModel->id;
+                    $fabricName = $fabricModel->name;
+                }
+            } else {
+                $defaultFabric = \App\Models\ApparelFabric::where('is_active', true)->first();
+                if ($defaultFabric) {
+                    $fabricId = $defaultFabric->id;
+                    $fabricName = $defaultFabric->name;
+                }
             }
 
             if ($fabricId && !\App\Models\ApparelFabric::where('id', $fabricId)->exists()) {
@@ -808,21 +812,20 @@ class InventoryApiController extends Controller
 
             $sectionName = $item->curated_website_section ?: 'basicos';
 
-            // Resolver Color y Hex Cromático (Regla 1)
-            $colorName = $item->curated_color ?: 'Negro Profundo';
-            $colorHex = $item->detected_color_hex ?: null;
-            $colorType = $item->color_type ?: 'solid';
+            // Resolver Color y Hex Cromático vinculados estrictamente a la Paleta Maestra (Regla 1)
+            $colorName = $item->curated_color ?: 'Rojo';
+            $matchedColor = \App\Models\ApparelColor::where('name', $colorName)->first()
+                ?: \App\Models\ApparelColor::where('name', 'like', '%' . explode(' ', $colorName)[0] . '%')->first()
+                ?: \App\Models\ApparelColor::where('is_active', true)->first();
 
-            if (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
-                $foundColor = \App\Models\ApparelColor::where('name', $colorName)
-                    ->orWhere('name', 'like', '%' . explode(' ', $colorName)[0] . '%')
-                    ->first();
-                if ($foundColor && $foundColor->hex_code) {
-                    $colorHex = $foundColor->hex_code;
-                    $colorType = $foundColor->color_type ?: $colorType;
-                }
+            if ($matchedColor) {
+                $colorName = $matchedColor->name;
+                $colorHex = $matchedColor->hex;
+                $colorType = $matchedColor->type;
+            } else {
+                $colorHex = '#dc2626';
+                $colorType = 'solid';
             }
-            $colorHex = $colorHex ?: '#0f172a';
 
             $productMeta = [
                 'category' => $validated['curated_category'] ?? ($item->suggested_category ?? 'General'),
