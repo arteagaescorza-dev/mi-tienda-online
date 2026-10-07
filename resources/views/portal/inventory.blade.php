@@ -2326,6 +2326,19 @@
                 </button>
                 <button 
                     type="button"
+                    @click="purchasesSubTab = 'agreements'"
+                    :class="purchasesSubTab === 'agreements' 
+                        ? 'bg-rose-600 text-white font-bold shadow-xs' 
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
+                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
+                    style="min-height: unset;"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m0 0l-3-3m3 3l3 3M3 21h18M5 10v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                    <span>Acuerdos & Notas de Crédito</span>
+                    <span :class="purchasesSubTab === 'agreements' ? 'bg-rose-700 text-white' : 'bg-rose-100 text-rose-800'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="(pendingCreditAgreements || []).length"></span>
+                </button>
+                <button 
+                    type="button"
                     @click="purchasesSubTab = 'kardex'"
                     :class="purchasesSubTab === 'kardex' 
                         ? 'bg-slate-900 text-white font-bold shadow-xs' 
@@ -2568,6 +2581,12 @@
                                         <span>Contacto: <strong class="text-slate-700" x-text="group.contact"></strong></span>
                                         <span>•</span>
                                         <span>Términos: <strong class="text-slate-700" x-text="group.paymentTerms"></strong></span>
+                                        <template x-if="group.activeTier">
+                                            <span class="text-indigo-700 font-semibold flex items-center gap-1">
+                                                <span>• Escala MOQ:</span>
+                                                <strong class="px-1.5 py-0.2 rounded bg-indigo-50 border border-indigo-200 text-indigo-800 font-mono text-[11px]" x-text="group.activeTier.label"></strong>
+                                            </span>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -8741,7 +8760,184 @@
         </div>
     </div>
 
-    <!-- MODAL GENERADOR DE ORDEN DE COMPRA FORMAL PARA WHATSAPP           -->
+        <!-- ================================================================= -->
+    <!-- MODAL ALTA / EDICIÓN DE ACUERDO POR DISCREPANCIA (TASK-PUR-02)    -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="creditAgreementModalOpen" 
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        style="display: none;"
+    >
+        <div 
+            @click.away="closeCreditAgreementModal()" 
+            class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden my-8"
+        >
+            <!-- Header Modal -->
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-600 flex items-center justify-center text-white font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m0 0l-3-3m3 3l3 3M3 21h18M5 10v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white" x-text="editingCreditAgreement ? 'Modificar Acuerdo por Discrepancia' : 'Levantar Acuerdo / Nota de Crédito'"></h3>
+                        <p class="text-[11px] text-slate-300">Auditoría inmutable de saldos a favor devengados en compras</p>
+                    </div>
+                </div>
+                <button type="button" @click="closeCreditAgreementModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Body Formulario -->
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Proveedor -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Proveedor Preexistente *</label>
+                        <select 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                            :value="creditAgreementForm.supplier_id"
+                            @change="onAgreementFormSupplierChange($event.target.value)"
+                        >
+                            <template x-for="p in providers" :key="p.dbId || p.id">
+                                <option :value="p.dbId || p.id" :selected="creditAgreementForm.supplier_id == (p.dbId || p.id)" x-text="(p.tradeName || p.name) + (p.vendorCode ? ' [' + p.vendorCode + ']' : '')"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Folio de Referencia -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Folio del Acuerdo / NC *</label>
+                        <input 
+                            type="text" 
+                            x-model="creditAgreementForm.reference_folio" 
+                            placeholder="Ej. NC-TORZO-2026-001" 
+                            class="w-full px-3 py-2 font-mono font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                </div>
+
+                <!-- Tipo de Discrepancia -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Causa Mercantil / Tipo de Discrepancia</label>
+                    <select 
+                        x-model="creditAgreementForm.discrepancy_type" 
+                        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                    >
+                        <option value="missing_units">Faltante Físico en Rampa Inbound</option>
+                        <option value="damaged_units">Merma Textil / Costuras Defectuosas</option>
+                        <option value="logistics_delay">Penalización Acordada por Demora de Transporte</option>
+                        <option value="commercial_bonus">Bonificación Comercial por Volumen Trimestral</option>
+                        <option value="price_discrepancy">Diferencia de Precio Pactado vs Facturado</option>
+                    </select>
+                </div>
+
+                <!-- Desglose de Unidades y Costo Unitario -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Uds Faltantes</label>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            x-model="creditAgreementForm.missing_units_count" 
+                            @input="recalculateAgreementFormAmount()" 
+                            class="w-full px-2.5 py-1.5 text-xs text-center font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Uds Dañadas</label>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            x-model="creditAgreementForm.damaged_units_count" 
+                            @input="recalculateAgreementFormAmount()" 
+                            class="w-full px-2.5 py-1.5 text-xs text-center font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Costo Unitario Ref ($)</label>
+                        <input 
+                            type="number" 
+                            step="0.50" 
+                            min="0" 
+                            x-model="creditAgreementForm.unit_cost_applied" 
+                            @input="recalculateAgreementFormAmount()" 
+                            class="w-full px-2.5 py-1.5 text-xs text-right font-bold font-mono bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                </div>
+
+                <!-- Monto Compensatorio Líquido -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Importe Compensatorio Total a Favor ($ MXN) *</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400 font-bold text-xs">$</span>
+                        <input 
+                            type="number" 
+                            step="0.50" 
+                            min="0" 
+                            x-model="creditAgreementForm.amount" 
+                            class="w-full pl-7 pr-12 py-2 font-mono font-black text-sm bg-rose-50/50 border border-rose-300 rounded-lg text-rose-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                            placeholder="0.00"
+                        >
+                        <span class="absolute right-3 top-2.5 text-slate-400 font-bold text-xs">MXN</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">Este importe se descontará automáticamente de la liquidación de la próxima Orden de Compra.</p>
+                </div>
+
+                <!-- Representante que Autoriza -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Autorizado por Representante de Taller / Proveedor</label>
+                    <input 
+                        type="text" 
+                        x-model="creditAgreementForm.authorized_by_vendor_contact" 
+                        placeholder="Ej. Ing. Carlos Mendoza (Gerente de Maquila)" 
+                        class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    >
+                </div>
+
+                <!-- Minuta / Notas de Resolución -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Minuta Detallada &amp; Observaciones de Resolución *</label>
+                    <textarea 
+                        x-model="creditAgreementForm.resolution_notes" 
+                        rows="3" 
+                        placeholder="Describe la causa, lote anterior de origen, evidencias de recepción y términos del acuerdo pactado con el taller..." 
+                        class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 leading-relaxed"
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <!-- Footer Acciones -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                <button 
+                    type="button" 
+                    @click="closeCreditAgreementModal()" 
+                    class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="button" 
+                    @click="saveCreditAgreement()" 
+                    class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span x-text="editingCreditAgreement ? 'Actualizar Acuerdo & Kardex' : 'Guardar y Vincular Acuerdo'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!-- MODAL GENERADOR DE ORDEN DE COMPRA FORMAL PARA WHATSAPP           -->
     <!-- ================================================================= -->
     <div 
         x-show="orderExportModalOpen" 

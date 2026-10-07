@@ -42,10 +42,10 @@ class InventoryApiController extends Controller
             $query->where('supplier_id', $request->integer('supplier_id'));
         }
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->string('status')->toString() !== 'all') {
             $query->where('status', $request->string('status')->toString());
-        } else {
-            $query->where('status', 'pending');
+        } elseif (!$request->has('status')) {
+            // Si no se especifica, por defecto devolver todos para la bitácora administrativa
         }
 
         $agreements = $query->latest()->get()->map(fn ($ca) => [
@@ -197,6 +197,121 @@ class InventoryApiController extends Controller
         return response()->json([
             'success' => true,
             'agreement' => $agreement,
+        ]);
+    }
+
+    /**
+     * Modifica los datos de un Acuerdo / Nota de Crédito pendiente y audita en Kardex (TASK-PUR-02).
+     */
+    public function updateCreditAgreement(Request $request, int $id): JsonResponse
+    {
+        $agreement = SupplierCreditAgreement::with('supplier')->findOrFail($id);
+
+        if ($agreement->status === 'applied') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No es posible modificar un acuerdo que ya fue aplicado y compensado en una orden de compra.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'reference_folio' => 'nullable|string|max:50',
+            'agreement_type' => 'nullable|string|max:40',
+            'discrepancy_type' => 'nullable|string|max:50',
+            'missing_units_count' => 'nullable|integer|min:0',
+            'damaged_units_count' => 'nullable|integer|min:0',
+            'unit_cost_applied' => 'nullable|numeric|min:0',
+            'amount' => 'nullable|numeric|min:0',
+            'status' => 'nullable|string|in:pending,applied,void',
+            'authorized_by_vendor_contact' => 'nullable|string|max:150',
+            'discrepancy_minutes' => 'nullable|string|max:2000',
+            'resolution_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $oldAmount = (float) $agreement->amount;
+
+        if (isset($validated['supplier_id'])) {
+            $agreement->supplier_id = $validated['supplier_id'];
+        }
+        if (isset($validated['reference_folio'])) {
+            $agreement->reference_folio = $validated['reference_folio'];
+        }
+        if (isset($validated['agreement_type'])) {
+            $agreement->agreement_type = $validated['agreement_type'];
+        }
+        if (isset($validated['discrepancy_type'])) {
+            $agreement->discrepancy_type = $validated['discrepancy_type'];
+        }
+        if (isset($validated['missing_units_count'])) {
+            $agreement->missing_units_count = (int) $validated['missing_units_count'];
+        }
+        if (isset($validated['damaged_units_count'])) {
+            $agreement->damaged_units_count = (int) $validated['damaged_units_count'];
+        }
+        if (isset($validated['unit_cost_applied'])) {
+            $agreement->unit_cost_applied = (float) $validated['unit_cost_applied'];
+        }
+        if (isset($validated['amount'])) {
+            $agreement->amount = (float) $validated['amount'];
+        } elseif (($agreement->missing_units_count + $agreement->damaged_units_count) > 0 && $agreement->unit_cost_applied > 0) {
+            $agreement->amount = round(($agreement->missing_units_count + $agreement->damaged_units_count) * $agreement->unit_cost_applied, 2);
+        }
+        if (isset($validated['authorized_by_vendor_contact'])) {
+            $agreement->authorized_by_vendor_contact = $validated['authorized_by_vendor_contact'];
+        }
+        if (isset($validated['discrepancy_minutes'])) {
+            $agreement->discrepancy_minutes = $validated['discrepancy_minutes'];
+        }
+        if (isset($validated['resolution_notes'])) {
+            $agreement->resolution_notes = $validated['resolution_notes'];
+        }
+        if (isset($validated['status'])) {
+            $agreement->status = $validated['status'];
+        }
+
+        $agreement->save();
+        $agreement->refresh();
+
+        // Trazabilidad inmutable en PurchaseKardex
+        PurchaseKardex::create([
+            'purchase_order_id' => $agreement->purchase_order_id,
+            'supplier_id' => $agreement->supplier_id,
+            'movement_type' => 'DISCREPANCY_UPDATED',
+            'description' => sprintf(
+                'Actualización de Minuta de Discrepancia %s: Monto anterior $%.2f MXN -> Nuevo monto $%.2f MXN (%s)',
+                $agreement->reference_folio,
+                $oldAmount,
+                $agreement->amount,
+                $agreement->resolution_notes ?: 'Modificación de parámetros mercantiles'
+            ),
+            'total_amount' => $agreement->amount,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Acuerdo compensatorio actualizado exitosamente con trazabilidad en Kardex.',
+            'agreement' => [
+                'id' => $agreement->id,
+                'supplier_id' => $agreement->supplier_id,
+                'supplier' => $agreement->supplier?->name ?? 'Proveedor',
+                'ref' => $agreement->reference_folio,
+                'amount' => (float) $agreement->amount,
+                'status' => match ($agreement->status) {
+                    'pending' => 'Pendiente de Aplicar',
+                    'applied' => 'Aplicada',
+                    'void', 'cancelled' => 'Anulada',
+                    default => ucfirst($agreement->status),
+                },
+                'discrepancy_type' => $agreement->discrepancy_type,
+                'missing_units' => $agreement->missing_units_count,
+                'damaged_units' => $agreement->damaged_units_count,
+                'unit_cost' => (float) $agreement->unit_cost_applied,
+                'authorized_by' => $agreement->authorized_by_vendor_contact,
+                'minutes' => $agreement->discrepancy_minutes,
+                'reason' => $agreement->resolution_notes,
+                'date' => $agreement->created_at ? $agreement->created_at->format('d/m/Y') : now()->format('d/m/Y'),
+            ],
         ]);
     }
 

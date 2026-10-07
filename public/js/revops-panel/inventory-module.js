@@ -5558,6 +5558,25 @@ function hybridInventoryModule() {
         // [TASK-INV-16] Variables reactivas de la bandeja de Compras, PO y Kardex
         inventoryCurrentScreen: 'main', // 'main' | 'settings' (REGLA: Todos los ajustes se muestran como pantalla completa)
         purchasesViewMode: 'tree', // 'tree' | 'flat'
+        agreementsSearch: '',
+        agreementsSupplierFilter: 'all',
+        agreementsStatusFilter: 'all',
+        creditAgreementModalOpen: false,
+        editingCreditAgreement: null,
+        creditAgreementForm: {
+            id: null,
+            supplier_id: '',
+            supplier: '',
+            reference_folio: '',
+            discrepancy_type: 'missing_units',
+            missing_units_count: 0,
+            damaged_units_count: 0,
+            unit_cost_applied: 90.00,
+            amount: 0.00,
+            authorized_by_vendor_contact: '',
+            resolution_notes: '',
+            discrepancy_minutes: ''
+        },
         onDemandStatusFilter: 'todas', // 'todas' | 'pendientes' | 'en_compra' | 'agotadas'
         poGeneratorModalOpen: false,
         currentPoData: null,
@@ -6594,35 +6613,95 @@ function hybridInventoryModule() {
         },
 
         getPlannedOrdersBySupplier() {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const orders = (target.futurePurchaseOrders || this.futurePurchaseOrders || []);
             const map = {};
-            this.futurePurchaseOrders.forEach(order => {
+
+            orders.forEach(order => {
                 const sup = order.supplier || 'Proveedor General';
                 if (!map[sup]) {
-                    const prov = (this.providers || []).find(p => p.name === sup || p.tradeName === sup);
+                    const prov = (target.providers || this.providers || []).find(p => 
+                        p.name === sup || p.tradeName === sup || (p.vendorCode && sup.includes(p.vendorCode))
+                    );
+                    
+                    const sheetsList = target.moqSheets || this.moqSheets || [];
+                    const supLower = sup.toLowerCase();
+                    const sheet = sheetsList.find(s => 
+                        s.is_active !== false && (
+                            (s.supplier_name && (supLower.includes(s.supplier_name.toLowerCase()) || s.supplier_name.toLowerCase().includes(supLower))) ||
+                            (prov && (s.supplier_id == (prov.dbId || prov.id))) ||
+                            (s.is_default && (supLower.includes('torzo') || supLower.includes('general')))
+                        )
+                    );
+
+                    let tiers = [];
                     let moqTarget = 50;
-                    const sheet = (this.moqSheets || []).find(s => s.supplier_name && sup.toLowerCase().includes(s.supplier_name.toLowerCase()));
-                    if (sheet && Array.isArray(sheet.tiers) && sheet.tiers.length > 1) {
-                        moqTarget = sheet.tiers[1].min_qty || 50;
-                    } else if (sup === 'Torzo B2B') moqTarget = 100;
-                    else if (sup === 'Silk & Cotton Iberia SL') moqTarget = 100;
-                    else if (sup === 'ModaIntima Textil MX') moqTarget = 60;
+
+                    if (sheet && Array.isArray(sheet.tiers) && sheet.tiers.length > 0) {
+                        tiers = [...sheet.tiers].sort((a, b) => (parseInt(b.min_qty) || 0) - (parseInt(a.min_qty) || 0));
+                        const wholesaleTier = [...sheet.tiers]
+                            .sort((a, b) => (parseInt(a.min_qty) || 0) - (parseInt(b.min_qty) || 0))
+                            .find(t => (parseInt(t.min_qty) || 0) > 1);
+                        moqTarget = wholesaleTier ? parseInt(wholesaleTier.min_qty) : (tiers[0].min_qty || 50);
+                    } else if (supLower.includes('torzo')) moqTarget = 50;
+                    else if (supLower.includes('silk')) moqTarget = 100;
+                    else if (supLower.includes('modaintima')) moqTarget = 60;
 
                     map[sup] = {
                         supplier: sup,
                         providerData: prov || null,
                         leadTime: prov ? (prov.leadTimeDays + ' días') : '4.2 días',
-                        contact: prov ? (prov.contactName + ' (' + prov.phone + ')') : 'Vía Portal B2B',
+                        contact: prov ? (prov.contactName + (prov.phone ? ' (' + prov.phone + ')' : '')) : 'Vía Portal B2B',
                         paymentTerms: prov ? (prov.paymentTerms === 'credito_60' ? 'Crédito 60 días' : (prov.paymentTerms === 'credito_30' ? 'Crédito 30 días' : 'Crédito 15 días')) : 'Crédito 30 días',
                         moqTarget: moqTarget,
+                        moqSheet: sheet || null,
+                        tiers: tiers,
+                        activeTier: null,
                         totalQty: 0,
                         totalCost: 0,
                         items: []
                     };
                 }
                 map[sup].items.push(order);
-                map[sup].totalQty += order.qty;
-                map[sup].totalCost += order.totalCost;
+                map[sup].totalQty += (parseInt(order.qty) || 0);
             });
+
+            // Tabulación de costos con Tabuladores de MOQ de Ajustes (Regla 2 Compras)
+            Object.values(map).forEach(group => {
+                const sheet = group.moqSheet;
+                let activeTier = null;
+                if (group.tiers && group.tiers.length > 0) {
+                    activeTier = group.tiers.find(t => group.totalQty >= (parseInt(t.min_qty) || 0)) || group.tiers[group.tiers.length - 1];
+                }
+                group.activeTier = activeTier;
+
+                let groupCost = 0;
+                group.items.forEach(order => {
+                    const qty = parseInt(order.qty) || 0;
+                    if (sheet && activeTier && Array.isArray(sheet.rows) && !order._customCostLocked) {
+                        const prodName = (order.productName || order.sku || '').toLowerCase();
+                        const matchedRow = sheet.rows.find(r => {
+                            const cat = (r.category || '').toLowerCase();
+                            return cat && (prodName.includes(cat) || cat.includes(prodName.split(' ')[0]));
+                        });
+
+                        if (matchedRow && matchedRow.prices) {
+                            const tabulatedPrice = parseFloat(matchedRow.prices[activeTier.key]) 
+                                || parseFloat(matchedRow.prices[activeTier.label])
+                                || parseFloat(matchedRow.prices['menudeo'])
+                                || null;
+                            if (tabulatedPrice !== null && !isNaN(tabulatedPrice) && tabulatedPrice > 0) {
+                                order.costUnit = tabulatedPrice;
+                                order.tabulatedTier = activeTier.label;
+                            }
+                        }
+                    }
+                    order.totalCost = Math.round(qty * (parseFloat(order.costUnit) || 0) * 100) / 100;
+                    groupCost += order.totalCost;
+                });
+                group.totalCost = Math.round(groupCost * 100) / 100;
+            });
+
             return Object.values(map);
         },
 
@@ -6655,6 +6734,322 @@ function hybridInventoryModule() {
             target.moduleSettingsModalOpen = false;
             this.inventoryCurrentScreen = 'main';
             this.moduleSettingsModalOpen = false;
+        },
+
+        getFilteredCreditAgreements() {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const list = target.pendingCreditAgreements || this.pendingCreditAgreements || [];
+            const search = (this.agreementsSearch || '').toLowerCase().trim();
+            const supFilter = this.agreementsSupplierFilter || 'all';
+            const statusFilter = this.agreementsStatusFilter || 'all';
+
+            return list.filter(item => {
+                if (supFilter !== 'all' && item.supplier !== supFilter) return false;
+                
+                if (statusFilter !== 'all') {
+                    const st = (item.status || '').toLowerCase();
+                    const rawSt = (item.raw_status || '').toLowerCase();
+                    if (statusFilter === 'pending' && !st.includes('pendiente') && rawSt !== 'pending') return false;
+                    if (statusFilter === 'applied' && !st.includes('aplicada') && !st.includes('compens') && rawSt !== 'applied') return false;
+                    if (statusFilter === 'void' && !st.includes('anulada') && !st.includes('cancel') && rawSt !== 'void') return false;
+                }
+
+                if (search) {
+                    const ref = (item.ref || item.reference_folio || '').toLowerCase();
+                    const sup = (item.supplier || '').toLowerCase();
+                    const reason = (item.reason || item.resolution_notes || '').toLowerCase();
+                    if (!ref.includes(search) && !sup.includes(search) && !reason.includes(search)) return false;
+                }
+
+                return true;
+            });
+        },
+
+        getCreditAgreementsSummary() {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const list = target.pendingCreditAgreements || this.pendingCreditAgreements || [];
+            
+            let totalAvailable = 0;
+            let totalCompensated = 0;
+            let pendingCount = 0;
+            let totalUnits = 0;
+
+            list.forEach(a => {
+                const amt = parseFloat(a.amount) || 0;
+                const st = (a.status || '').toLowerCase();
+                const rawSt = (a.raw_status || '').toLowerCase();
+                const isPend = st.includes('pendiente') || rawSt === 'pending';
+                const isAppl = st.includes('aplicada') || st.includes('compens') || rawSt === 'applied';
+
+                if (isPend) {
+                    totalAvailable += amt;
+                    pendingCount++;
+                } else if (isAppl) {
+                    totalCompensated += amt;
+                }
+
+                totalUnits += (parseInt(a.missing_units || a.missing_units_count) || 0) + (parseInt(a.damaged_units || a.damaged_units_count) || 0);
+            });
+
+            return {
+                totalAvailable,
+                totalCompensated,
+                pendingCount,
+                totalUnits
+            };
+        },
+
+        openNewCreditAgreementModal() {
+            const prov = (this.providers && this.providers.length > 0) ? this.providers[0] : null;
+            const supId = prov ? (prov.dbId || prov.id) : 1;
+            const supName = prov ? (prov.tradeName || prov.name) : 'Torzo B2B';
+            const year = new Date().getFullYear();
+            const count = (this.pendingCreditAgreements || []).length + 1;
+            const autoFolio = 'NC-TORZO-' + year + '-' + String(count).padStart(3, '0');
+
+            this.editingCreditAgreement = null;
+            this.creditAgreementForm = {
+                id: null,
+                supplier_id: supId,
+                supplier: supName,
+                reference_folio: autoFolio,
+                discrepancy_type: 'missing_units',
+                missing_units_count: 0,
+                damaged_units_count: 0,
+                unit_cost_applied: 90.00,
+                amount: 0.00,
+                authorized_by_vendor_contact: 'Gerencia de Producción Taller',
+                resolution_notes: '',
+                discrepancy_minutes: ''
+            };
+            this.creditAgreementModalOpen = true;
+        },
+
+        openEditCreditAgreementModal(agreement) {
+            if (!agreement) return;
+            const st = (agreement.status || '').toLowerCase();
+            const rawSt = (agreement.raw_status || '').toLowerCase();
+            if (st.includes('aplicada') || rawSt === 'applied') {
+                this.showToast('No es posible editar un acuerdo que ya fue aplicado en una orden de compra.', 'warning');
+                return;
+            }
+
+            this.editingCreditAgreement = agreement;
+            this.creditAgreementForm = {
+                id: agreement.id,
+                supplier_id: agreement.supplier_id || (this.providers?.find(p => p.name === agreement.supplier || p.tradeName === agreement.supplier)?.id || 1),
+                supplier: agreement.supplier || 'Proveedor',
+                reference_folio: agreement.ref || agreement.reference_folio,
+                discrepancy_type: agreement.discrepancy_type || 'missing_units',
+                missing_units_count: agreement.missing_units || agreement.missing_units_count || 0,
+                damaged_units_count: agreement.damaged_units || agreement.damaged_units_count || 0,
+                unit_cost_applied: agreement.unit_cost || agreement.unit_cost_applied || 0,
+                amount: agreement.amount || 0,
+                authorized_by_vendor_contact: agreement.authorized_by || agreement.authorized_by_vendor_contact || '',
+                resolution_notes: agreement.reason || agreement.resolution_notes || '',
+                discrepancy_minutes: agreement.minutes || agreement.discrepancy_minutes || ''
+            };
+            this.creditAgreementModalOpen = true;
+        },
+
+        closeCreditAgreementModal() {
+            this.creditAgreementModalOpen = false;
+            this.editingCreditAgreement = null;
+        },
+
+        onAgreementFormSupplierChange(selectedId) {
+            const prov = (this.providers || []).find(p => (p.dbId || p.id) == selectedId);
+            if (prov) {
+                this.creditAgreementForm.supplier_id = prov.dbId || prov.id;
+                this.creditAgreementForm.supplier = prov.tradeName || prov.name;
+                const prefix = prov.name.substring(0, 4).toUpperCase();
+                this.creditAgreementForm.reference_folio = 'NC-' + prefix + '-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900) + 100);
+            }
+        },
+
+        recalculateAgreementFormAmount() {
+            const f = this.creditAgreementForm;
+            const missing = parseInt(f.missing_units_count) || 0;
+            const damaged = parseInt(f.damaged_units_count) || 0;
+            const cost = parseFloat(f.unit_cost_applied) || 0;
+            if ((missing + damaged) > 0 && cost > 0) {
+                f.amount = Math.round((missing + damaged) * cost * 100) / 100;
+            }
+        },
+
+        saveCreditAgreement() {
+            const f = this.creditAgreementForm;
+            if (!f.supplier_id && !f.supplier) {
+                this.showToast('Selecciona un proveedor para el acuerdo.', 'warning');
+                return;
+            }
+            if (!f.amount || parseFloat(f.amount) <= 0) {
+                this.recalculateAgreementFormAmount();
+                if (parseFloat(f.amount) <= 0) {
+                    this.showToast('Ingresa un importe compensatorio válido.', 'warning');
+                    return;
+                }
+            }
+            if (!f.resolution_notes || f.resolution_notes.trim() === '') {
+                f.resolution_notes = 'Acuerdo por ' + (f.discrepancy_type === 'missing_units' ? 'faltantes en rampa' : (f.discrepancy_type === 'damaged_units' ? 'merma textil' : 'incidencia inbound'));
+            }
+
+            const csrfToken = (typeof document !== 'undefined' && document.querySelector('meta[name="csrf-token"]'))
+                ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                : '';
+
+            const isEdit = !!(this.editingCreditAgreement && f.id);
+            const url = isEdit 
+                ? `/api/v1/inventory/purchases/credit-agreements/${f.id}`
+                : `/api/v1/inventory/purchases/credit-agreements`;
+            const method = isEdit ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(f)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    const savedAg = data.agreement || {
+                        id: f.id || Date.now(),
+                        supplier_id: f.supplier_id,
+                        supplier: f.supplier,
+                        ref: f.reference_folio,
+                        amount: parseFloat(f.amount),
+                        reason: f.resolution_notes,
+                        discrepancy_type: f.discrepancy_type,
+                        missing_units: f.missing_units_count,
+                        damaged_units: f.damaged_units_count,
+                        unit_cost: f.unit_cost_applied,
+                        authorized_by: f.authorized_by_vendor_contact,
+                        status: 'Pendiente de Aplicar',
+                        date: new Date().toLocaleDateString('es-MX')
+                    };
+
+                    if (isEdit) {
+                        const idx = this.pendingCreditAgreements.findIndex(a => a.id == f.id || a.ref == f.reference_folio);
+                        if (idx !== -1) {
+                            this.pendingCreditAgreements[idx] = Object.assign({}, this.pendingCreditAgreements[idx], savedAg);
+                        }
+                        this.logPurchaseKardex({
+                            type: 'DISCREPANCY_UPDATED',
+                            typeLabel: 'Acuerdo Modificado',
+                            badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+                            poNumber: f.reference_folio,
+                            supplier: f.supplier,
+                            totalAmount: f.amount,
+                            user: 'Elena Compras',
+                            notes: 'Modificación de acuerdo: ' + f.resolution_notes
+                        });
+                        this.showToast('Acuerdo ' + f.reference_folio + ' actualizado con trazabilidad en Kardex.', 'success');
+                    } else {
+                        this.pendingCreditAgreements.unshift(savedAg);
+                        this.logPurchaseKardex({
+                            type: 'DISCREPANCY_REGISTERED',
+                            typeLabel: 'Acuerdo Levantado',
+                            badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+                            poNumber: savedAg.ref || f.reference_folio,
+                            supplier: f.supplier,
+                            totalAmount: f.amount,
+                            user: 'Elena Compras',
+                            notes: 'Minuta de discrepancia registrada: ' + f.resolution_notes
+                        });
+                        this.showToast('Acuerdo ' + (savedAg.ref || f.reference_folio) + ' registrado exitosamente.', 'success');
+                    }
+                    this.closeCreditAgreementModal();
+                } else {
+                    this.showToast(data.message || 'Error al procesar el acuerdo.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error al guardar acuerdo:', err);
+                const savedAg = {
+                    id: f.id || Date.now(),
+                    supplier_id: f.supplier_id,
+                    supplier: f.supplier,
+                    ref: f.reference_folio,
+                    amount: parseFloat(f.amount),
+                    reason: f.resolution_notes,
+                    discrepancy_type: f.discrepancy_type,
+                    missing_units: f.missing_units_count,
+                    damaged_units: f.damaged_units_count,
+                    unit_cost: f.unit_cost_applied,
+                    authorized_by: f.authorized_by_vendor_contact,
+                    status: 'Pendiente de Aplicar',
+                    date: new Date().toLocaleDateString('es-MX')
+                };
+                if (isEdit) {
+                    const idx = this.pendingCreditAgreements.findIndex(a => a.id == f.id || a.ref == f.reference_folio);
+                    if (idx !== -1) this.pendingCreditAgreements[idx] = Object.assign({}, this.pendingCreditAgreements[idx], savedAg);
+                } else {
+                    this.pendingCreditAgreements.unshift(savedAg);
+                }
+                this.showToast('Acuerdo registrado localmente con éxito.', 'success');
+                this.closeCreditAgreementModal();
+            });
+        },
+
+        voidCreditAgreementAction(agreement) {
+            if (!agreement) return;
+            const st = (agreement.status || '').toLowerCase();
+            const rawSt = (agreement.raw_status || '').toLowerCase();
+            if (st.includes('aplicada') || rawSt === 'applied') {
+                this.showToast('No es posible anular un acuerdo que ya fue aplicado en una orden de compra.', 'warning');
+                return;
+            }
+
+            const promptReason = prompt('Indica el motivo de anulación del acuerdo ' + agreement.ref + ' (ej. Subsanado físicamente por el taller):', 'Prendas repuestas en entrega complementaria');
+            if (promptReason === null) return;
+
+            const csrfToken = (typeof document !== 'undefined' && document.querySelector('meta[name="csrf-token"]'))
+                ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                : '';
+
+            fetch(`/api/v1/inventory/purchases/credit-agreements/${agreement.id}/void`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ void_reason: promptReason })
+            })
+            .then(res => res.json())
+            .then(data => {
+                agreement.status = 'Anulada';
+                agreement.raw_status = 'void';
+                this.logPurchaseKardex({
+                    type: 'CREDIT_VOIDED',
+                    typeLabel: 'Anulación de Acuerdo',
+                    badgeClass: 'bg-slate-100 text-slate-700 border-slate-300',
+                    poNumber: agreement.ref,
+                    supplier: agreement.supplier,
+                    totalAmount: agreement.amount,
+                    user: 'Elena Compras',
+                    notes: 'Acuerdo anulado: ' + promptReason
+                });
+                this.showToast('Acuerdo ' + agreement.ref + ' anulado exitosamente.', 'info');
+            })
+            .catch(err => {
+                agreement.status = 'Anulada';
+                this.showToast('Acuerdo anulado en interfaz.', 'info');
+            });
+        },
+
+        resetToTabulatedCost(orderId) {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const orders = (target.futurePurchaseOrders || this.futurePurchaseOrders || []);
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            order._customCostLocked = false;
+            this.getPlannedOrdersBySupplier();
+            this.showToast('Costo de ' + order.id + ' restaurado a escala MOQ oficial.', 'success');
         },
 
         getPendingAgreementsForCurrentPo() {

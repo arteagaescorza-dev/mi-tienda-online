@@ -1398,8 +1398,7 @@ class StorefrontController extends Controller
             ])->values();
 
         $portalCreditAgreements = \App\Models\SupplierCreditAgreement::query()
-            ->with('supplier')
-            ->where('status', 'pending')
+            ->with(['supplier', 'purchaseOrder', 'appliedToPurchaseOrder'])
             ->latest()
             ->get()
             ->map(fn ($ca) => [
@@ -1416,7 +1415,14 @@ class StorefrontController extends Controller
                 'unit_cost' => (float) $ca->unit_cost_applied,
                 'authorized_by' => $ca->authorized_by_vendor_contact,
                 'minutes' => $ca->discrepancy_minutes,
-                'status' => 'Pendiente de Aplicar',
+                'status' => match ($ca->status) {
+                    'pending' => 'Pendiente de Aplicar',
+                    'applied' => 'Aplicada',
+                    'void', 'cancelled' => 'Anulada',
+                    default => ucfirst($ca->status),
+                },
+                'raw_status' => $ca->status,
+                'applied_to_po_id' => $ca->applied_to_po_id,
                 'date' => $ca->created_at ? $ca->created_at->format('d/m/Y') : now()->format('d/m/Y'),
             ])->values();
 
