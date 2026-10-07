@@ -13050,7 +13050,16 @@ function hybridInventoryModule() {
                 else if (this.selectedProduct.localStock < 25) this.selectedProduct.status = 'Bajo Stock';
                 else this.selectedProduct.status = 'En Stock';
             }
-            this.showToast(`Cambios de ${sku} guardados correctamente.`, 'success');
+
+            // Si hay una única imagen o la imagen principal no tiene asignación específica, sincronizar con el color elegido
+            if (this.drawerImages.length === 1 && this.drawerImages[0]) {
+                if (!this.drawerImageColorMap) this.drawerImageColorMap = {};
+                this.drawerImageColorMap[this.drawerImages[0]] = this.drawerColorName;
+                if (this.selectedProduct.imageColorMap) {
+                    this.selectedProduct.imageColorMap[this.drawerImages[0]] = this.drawerColorName;
+                }
+            }
+
             this.drawerOpen = false;
 
             try {
@@ -13101,9 +13110,15 @@ function hybridInventoryModule() {
                         this.selectedProduct.pvp = data.financials.effective_price;
                         this.selectedProduct.weightedAverageCost = data.financials.cpp;
                     }
+                    this.showToast(`Cambios de ${sku} guardados correctamente.`, 'success');
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    console.error('Error al persistir cambios del producto:', errData);
+                    this.showToast(errData.message || `Error al guardar cambios de ${sku} en el servidor.`, 'error');
                 }
             } catch (err) {
                 console.warn('Persistencia remota en segundo plano no disponible (fallback local aplicado):', err);
+                this.showToast(`Cambios de ${sku} aplicados localmente.`, 'info');
             }
         },
 

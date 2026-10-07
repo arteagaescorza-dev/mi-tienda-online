@@ -1114,9 +1114,40 @@ class StorefrontController extends Controller
                 ?: ($sp?->source_url ?: '')))));
 
             $colorName = data_get($product->meta, 'color_name') ?: data_get($product->meta, 'colorName', '');
-            $colorHex = data_get($product->meta, 'color_hex') ?: data_get($product->meta, 'colorHex', '#111827');
-            $colorType = data_get($product->meta, 'color_type') ?: data_get($product->meta, 'colorType', 'monocromatico');
+            $colorHex = data_get($product->meta, 'color_hex') ?: data_get($product->meta, 'colorHex', '');
+            $colorType = data_get($product->meta, 'color_type') ?: data_get($product->meta, 'colorType', 'solid');
             $fabricType = $product->fabric ?: (data_get($product->meta, 'fabric') ?: data_get($product->meta, 'fabric_type', data_get($product->meta, 'fabricType', '')));
+
+            // Sincronización fidedigna con curaduría de scraping aprobada si existe desfase
+            if ($product->sku) {
+                $scrapedItem = \App\Models\ScrapedPendingItem::where('external_sku', $product->sku)->where('curation_status', 'approved')->first();
+                if ($scrapedItem) {
+                    if (($colorName === '' || $colorName === 'Negro Profundo') && $scrapedItem->curated_color && $scrapedItem->curated_color !== 'Negro Profundo') {
+                        $colorName = $scrapedItem->curated_color;
+                        if ($scrapedItem->detected_color_hex) {
+                            $colorHex = $scrapedItem->detected_color_hex;
+                        }
+                    }
+                    if (($fabricType === '' || $fabricType === 'Modal Seamless') && $scrapedItem->curated_fabric && $scrapedItem->curated_fabric !== 'Modal Seamless') {
+                        $fabricType = $scrapedItem->curated_fabric;
+                    }
+                }
+            }
+
+            // Resolver Hex Cromático a través del catálogo maestro ApparelColor si está ausente o es genérico oscuro
+            if (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
+                if (!empty($colorName)) {
+                    $matchedCol = \App\Models\ApparelColor::where('name', $colorName)
+                        ->orWhere('name', 'like', '%' . explode(' ', $colorName)[0] . '%')
+                        ->first();
+                    if ($matchedCol && $matchedCol->hex_code) {
+                        $colorHex = $matchedCol->hex_code;
+                        $colorType = $matchedCol->color_type ?: $colorType;
+                    }
+                }
+                $colorHex = $colorHex ?: '#0f172a';
+            }
+
             $designType = data_get($product->meta, 'design_type') ?: data_get($product->meta, 'designType', 'sin_diseno');
             $websiteSection = $product->section_name ?: (data_get($product->meta, 'section_name') ?: (data_get($product->meta, 'website_section') ?: data_get($product->meta, 'websiteSection', 'basicos')));
             $location = data_get($product->meta, 'location', 'Rack A-01 / Nivel 1');

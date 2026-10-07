@@ -787,9 +787,42 @@ class InventoryApiController extends Controller
 
             // Resolver Fabric (Reglas 6.57 y 6.58) y Sección (Regla 6.59)
             $fabricName = $item->curated_fabric;
-            $fabricModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', \Illuminate\Support\Str::slug($fabricName))->first();
-            $fabricId = $fabricModel?->id;
+            $fabricId = null;
+            if (!empty($fabricName)) {
+                $fabricModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', \Illuminate\Support\Str::slug($fabricName))->first();
+                if (!$fabricModel) {
+                    $fabricModel = \App\Models\ApparelFabric::create([
+                        'name' => $fabricName,
+                        'slug' => \Illuminate\Support\Str::slug($fabricName),
+                        'description' => 'Fibra textil para indumentaria',
+                        'is_active' => true,
+                    ]);
+                }
+                $fabricId = $fabricModel->id;
+                $fabricName = $fabricModel->name;
+            }
+
+            if ($fabricId && !\App\Models\ApparelFabric::where('id', $fabricId)->exists()) {
+                $fabricId = null;
+            }
+
             $sectionName = $item->curated_website_section ?: 'basicos';
+
+            // Resolver Color y Hex Cromático (Regla 1)
+            $colorName = $item->curated_color ?: 'Negro Profundo';
+            $colorHex = $item->detected_color_hex ?: null;
+            $colorType = $item->color_type ?: 'solid';
+
+            if (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
+                $foundColor = \App\Models\ApparelColor::where('name', $colorName)
+                    ->orWhere('name', 'like', '%' . explode(' ', $colorName)[0] . '%')
+                    ->first();
+                if ($foundColor && $foundColor->hex_code) {
+                    $colorHex = $foundColor->hex_code;
+                    $colorType = $foundColor->color_type ?: $colorType;
+                }
+            }
+            $colorHex = $colorHex ?: '#0f172a';
 
             $productMeta = [
                 'category' => $validated['curated_category'] ?? ($item->suggested_category ?? 'General'),
@@ -797,7 +830,9 @@ class InventoryApiController extends Controller
                 'fabric_type' => $fabricName,
                 'fabric' => $fabricName,
                 'fabric_id' => $fabricId,
-                'color_name' => $item->curated_color,
+                'color_name' => $colorName,
+                'color_hex' => $colorHex,
+                'color_type' => $colorType,
                 'design_type' => $item->curated_design_type,
                 'website_section' => $sectionName,
                 'section_name' => $sectionName,

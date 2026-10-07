@@ -591,22 +591,54 @@ class ProductSkuAndDuplicateApiController extends Controller
         $existingMeta = $product && is_array($product->meta) ? $product->meta : [];
 
         // Resolver Fabric (Telas - Reglas 5 y 6)
-        $fabricName = $validated['fabric'] ?? ($validated['fabric_type'] ?? ($existingMeta['fabric'] ?? ($existingMeta['fabric_type'] ?? null)));
-        $fabricId = $validated['fabric_id'] ?? ($existingMeta['fabric_id'] ?? null);
-        if (!empty($fabricName) && empty($fabricId)) {
+        $fabricName = $validated['fabric'] ?? ($validated['fabric_type'] ?? null);
+        if (empty($fabricName)) {
+            $fabricName = $existingMeta['fabric'] ?? ($existingMeta['fabric_type'] ?? null);
+        }
+
+        $fabricId = null;
+        if (!empty($fabricName)) {
             $fabModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', Str::slug($fabricName))->first();
+            if (!$fabModel) {
+                $fabModel = \App\Models\ApparelFabric::create([
+                    'name' => $fabricName,
+                    'slug' => Str::slug($fabricName),
+                    'description' => 'Fibra textil para indumentaria',
+                    'is_active' => true,
+                ]);
+            }
+            $fabricId = $fabModel->id;
+            $fabricName = $fabModel->name;
+        } elseif (!empty($validated['fabric_id'])) {
+            $fabModel = \App\Models\ApparelFabric::find($validated['fabric_id']);
             if ($fabModel) {
                 $fabricId = $fabModel->id;
                 $fabricName = $fabModel->name;
             }
-        } elseif (!empty($fabricId) && empty($fabricName)) {
-            $fabModel = \App\Models\ApparelFabric::find($fabricId);
-            if ($fabModel) {
-                $fabricName = $fabModel->name;
-            }
+        }
+
+        // Validación final de existencia de clave foránea
+        if ($fabricId && !\App\Models\ApparelFabric::where('id', $fabricId)->exists()) {
+            $fabricId = null;
         }
 
         $sectionName = $validated['section_name'] ?? ($validated['website_section'] ?? ($existingMeta['section_name'] ?? ($existingMeta['website_section'] ?? 'Línea Básicos Esenciales')));
+
+        // Resolver Color y Hex Cromático (Regla 1)
+        $colorName = $validated['color_name'] ?? ($existingMeta['color_name'] ?? 'Negro Clásico');
+        $colorHex = $validated['color_hex'] ?? ($existingMeta['color_hex'] ?? null);
+        $colorType = $validated['color_type'] ?? ($existingMeta['color_type'] ?? 'solid');
+
+        if (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
+            $foundColor = \App\Models\ApparelColor::where('name', $colorName)
+                ->orWhere('name', 'like', '%' . explode(' ', $colorName)[0] . '%')
+                ->first();
+            if ($foundColor && $foundColor->hex_code) {
+                $colorHex = $foundColor->hex_code;
+                $colorType = $foundColor->color_type ?: $colorType;
+            }
+        }
+        $colorHex = $colorHex ?: '#0f172a';
 
         // Procesar Imágenes con Variante de Color (Regla 1)
         $rawImages = $request->input('images', $existingMeta['gallery'] ?? ($existingMeta['images'] ?? []));
@@ -617,7 +649,7 @@ class ProductSkuAndDuplicateApiController extends Controller
         if (is_array($rawImages)) {
             foreach ($rawImages as $img) {
                 if (is_string($img) && !empty($img)) {
-                    $cName = $imageColorMap[$img] ?? ($validated['color_name'] ?? ($existingMeta['color_name'] ?? null));
+                    $cName = $imageColorMap[$img] ?? ($colorName ?? ($existingMeta['color_name'] ?? null));
                     $isPrim = ($img === $primaryImageUrl) || empty($formattedGallery);
                     $formattedGallery[] = [
                         'url' => $img,
@@ -627,7 +659,7 @@ class ProductSkuAndDuplicateApiController extends Controller
                     if ($isPrim && empty($primaryImageUrl)) $primaryImageUrl = $img;
                 } elseif (is_array($img) && !empty($img['url'])) {
                     $url = $img['url'];
-                    $cName = $img['color_name'] ?? ($imageColorMap[$url] ?? ($validated['color_name'] ?? ($existingMeta['color_name'] ?? null)));
+                    $cName = $img['color_name'] ?? ($imageColorMap[$url] ?? ($colorName ?? ($existingMeta['color_name'] ?? null)));
                     $isPrim = !empty($img['is_primary']) || ($url === $primaryImageUrl);
                     $formattedGallery[] = [
                         'url' => $url,
@@ -658,9 +690,9 @@ class ProductSkuAndDuplicateApiController extends Controller
             'fabric_type' => $fabricName ?? ($existingMeta['fabric_type'] ?? 'Algodon & Modal'),
             'fabric' => $fabricName ?? '',
             'fabric_id' => $fabricId,
-            'color_name' => $validated['color_name'] ?? ($existingMeta['color_name'] ?? 'Negro Clasico'),
-            'color_hex' => $validated['color_hex'] ?? ($existingMeta['color_hex'] ?? '#0f172a'),
-            'color_type' => $validated['color_type'] ?? ($existingMeta['color_type'] ?? 'solid'),
+            'color_name' => $colorName,
+            'color_hex' => $colorHex,
+            'color_type' => $colorType,
             'design_type' => $validated['design_type'] ?? ($existingMeta['design_type'] ?? 'sin_diseno'),
             'website_section' => $sectionName,
             'section_name' => $sectionName,

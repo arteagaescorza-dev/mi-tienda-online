@@ -3493,7 +3493,7 @@
                                 <template x-for="c in apparelColors" :key="c.id">
                                     <button 
                                         type="button" 
-                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
+                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type; if (drawerImages && drawerImages.length === 1 && drawerImages[0]) { if (!drawerImageColorMap) drawerImageColorMap = {}; drawerImageColorMap[drawerImages[0]] = c.name; }"
                                         class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
                                         :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
                                         :title="c.name"
@@ -14375,5 +14375,5 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v2"></script>
+    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v3"></script>
 @endpush

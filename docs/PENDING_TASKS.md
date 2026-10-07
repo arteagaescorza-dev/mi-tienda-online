@@ -59,6 +59,7 @@
 | `TASK-INV-21` | Fidelidad Taxonómica Estricta en Workstation y Copiloto IA (Sincronización Dinámica de Telas, Eliminación de 'Modal Seamless' Fijo y Prompt Estricto Gemini) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, `ProductAiCopilotService`, `inventory-module.js`, Regla 6.74 |
 | `TASK-INV-22` | Carga Múltiple de Fotografías, Curaduría Secuencial 1 a 1 en Recorte 4:5 y Armonización Visual de Pricing | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, Dropzone `multiple`, `inventory-module.js`, Regla 6.75 |
 | `TASK-INV-23` | Paridad Estructural y Taxonómica en Curaduría de Scraping con Modales In Situ, Vitrina Web, Logística, Stock, Precios y Copiloto IA | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Curaduría Scraping, Workstation Alta, Modales In Situ, Copiloto IA, Regla 6.64 |
+| `TASK-INV-24` | Sincronización Fidedigna de Atributos Cromáticos y Textiles en Catálogo y Persistencia sin Fricción de Claves Foráneas | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Catálogo Operativo, Drawer Producto, Swatches Cromáticos, Fabric FK, Reglas 1, 6.57, 6.64 |
 | `TASK-AUTH-01` | Rediseño Minimalista Aislado de Login para el Panel RevOps & Erradicación Total de Chrome del Storefront | **Transversal (Autenticación)** | **Alta** | **Completada (Fullstack End-to-End)** | `user-login.blade.php`, `PortalAuthorizationTest.php`, Regla 6.76 |
 | `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
 | `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
@@ -604,6 +605,29 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
          - **Bottom 70%:** Ficha técnica reactiva completa con pills de taxonomía, título, marca/proveedor, vitrina, tela, swatches de colores, card oscuro de pricing con margen porcentual, descripción persuasiva y chips de tags SEO.
     2. **Header y Footer Armónicos:** Header con badge `REVOPS CATALOGO`, botón `Auto-SKU` y cierre; Footer con contador de unidades preparadas, botón `Descartar Prenda`, `Cancelar` y `Aprobar y Publicar en Catálogo` (`bg-indigo-600`).
 * **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.64).
+
+### `TASK-INV-24`: Sincronización Fidedigna de Atributos Cromáticos y Textiles en Catálogo y Persistencia sin Fricción de Claves Foráneas (Reglas 1, 6.57 y 6.64)
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Causa Raíz Identificada:**
+  - Los productos en la tabla principal de inventario (por ejemplo, Tanga Licra Roja) no reflejaban su color real (mostrando *"Negro Profundo"* en vez de *"Rojo Pasión"* con swatch negro) ni su tipo de tela curada.
+  - Al intentar editar los atributos desde el Drawer lateral y hacer clic en *"Guardar Cambios"*, la petición `PUT /api/v1/inventory/products/{sku}/update-complete` fallaba silenciosamente con error 500 (`SQLSTATE[23000] Integrity constraint violation` en `products_fabric_id_foreign`) debido a que la tela no resolvía su ID o heredaba un `fabric_id` huérfano de metadatos anteriores, el cual violaba la integridad referencial en `apparel_fabrics`.
+  - En la curaduría de scraping (`curatePendingItem`), no se persistía el `color_hex` ni `color_type` en los metadatos del producto, provocando que la tabla recurriera al fallback genérico `#0f172a` (punto negro).
+* **Solución Fullstack Implementada:**
+  - **Backend (`ProductSkuAndDuplicateApiController.php`):**
+    1. Resolución dinámica segura de `fabric_id` y `fabricName`: si el tipo de tela no existe en `apparel_fabrics`, se crea automáticamente de forma transparente (`ApparelFabric::create`). Si no es válida o está huérfana, se establece en `null` para cumplir con `ON DELETE SET NULL` sin bloquear transacciones.
+    2. Sincronización cromática integral: resolución de `color_hex` y `color_type` consultando `ApparelColor` si no vienen especificados o son genéricos oscuros.
+    3. Mapeo estricto de color en la galería de imágenes del producto al actualizarse.
+  - **Backend (`InventoryApiController.php`):**
+    1. Inclusión de `color_hex` y `color_type` en `$productMeta` dentro de `curatePendingItem`.
+    2. Resolución y creación automática de `ApparelFabric` para evitar IDs nulos o inconsistentes al aprobar scraping.
+  - **Backend (`StorefrontController.php`):**
+    1. Sincronización de fallback en `portalProducts` para enlazar el color y tela de la prenda curada si el producto en base de datos quedó con el valor por defecto (`Negro Profundo` o `Modal Seamless`).
+    2. Resolución dinámica de `colorHex` con el catálogo maestro `ApparelColor` si el hex del producto estaba ausente o en `#0f172a` teniendo un nombre de color explícito como *Rojo Pasión* o *Azul Rey*.
+  - **Frontend (`inventory-module.js` & `inventory.blade.php`):**
+    1. Sincronización reactiva del mapa de color de la imagen (`drawerImageColorMap`) al cambiar la paleta en el drawer para productos de imagen única.
+    2. Manejo y reporte claro de errores del servidor en `saveDrawerChanges` en lugar de enmascararlos silenciosamente.
+    3. Bump de versión de scripts a `?v=20261007_v3`.
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Reglas 1, 6.57 y 6.64).
 
 ### `TASK-MOB-01`: Modo Móvil / Escáner de Bodega para Conteo y Verificación con Códigos de Alto Contraste
 * **Prioridad:** **Alta** | **Estado:** **Pendiente**
