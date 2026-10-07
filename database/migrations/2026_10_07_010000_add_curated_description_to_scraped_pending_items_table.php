@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('scraped_pending_items', function (Blueprint $table) {
+            if (!Schema::hasColumn('scraped_pending_items', 'curated_description')) {
+                $table->text('curated_description')->nullable()->after('curated_price');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('scraped_pending_items', function (Blueprint $table) {
+            if (Schema::hasColumn('scraped_pending_items', 'curated_description')) {
+                $table->dropColumn('curated_description');
+            }
+        });
+    }
+};

@@ -563,6 +563,12 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   4. Asignación de color individual por fotografía scrapeada con botón `+ Color` in situ.
   5. Selectores de vitrina comercial (`websiteSection`), marca (`brand`), precios, costos e inventario.
   6. Tarjeta y gatillo del Copiloto Comercial IA para redacción persuasiva.
+* **Paridad de Diseño Visual (Mismo Diseño que el Workstation):** La curaduría de scraping no solo replica los campos, sino que debe tener **el mismo diseño visual** que el Workstation de Alta de Producto. Queda prohibido mantener estilos divergentes entre ambas pantallas:
+  1. **Misma estructura y jerarquía:** Mismo orden de secciones, agrupación en tarjetas (`bg-white rounded-2xl border border-slate-200 shadow-2xs`), encabezados de sección con numeración/ícono SVG y subtítulos descriptivos equivalentes.
+  2. **Mismos componentes:** Etiquetas (`text-[11px] font-bold text-slate-700 uppercase tracking-wider`), inputs y selects (`bg-slate-50 border-slate-200 rounded-lg text-xs font-semibold`, foco `ring-indigo-500/20`), botones in situ (`+ Categoría`, `+ Tela`, `+ Color`, `+ Vitrina`) con idéntico tamaño, color e ícono.
+  3. **Mismas tarjetas especializadas:** La tarjeta de Margen Comercial & Pricing usa el mismo diseño claro índigo del Workstation (Regla 6.75: `bg-indigo-50/50`, inputs blancos, tipografía `text-slate-900`, Utilidad por Pieza y Margen Bruto con badges *Saludable / Aceptable / Riesgo*); los selectores de Acabado/Diseño y Modalidad Logística usan los mismos toggles con indicador circular; la galería de fotos usa la misma grilla 4:5 con selector de color por foto.
+  4. **Misma paleta y tipografía:** Sin fondos oscuros, gradientes o variantes de color propias de la curaduría que no existan en el Workstation. Cero emojis (solo íconos SVG).
+  5. **Fuente única de verdad:** Cualquier cambio de diseño aplicado al Workstation de Alta de Producto debe replicarse en la curaduría de scraping en el mismo commit (y viceversa), preferentemente reutilizando parciales Blade / componentes compartidos para evitar divergencias futuras.
 
 ### Regla 6.65: Generación Persuasiva de Contenido y Metadatos con Copiloto IA en Workstation de Alta y Curaduría (Regla 3)
 * **Redacción Persuasiva B2C:** El Copiloto Comercial IA genera textos persuasivos de alta conversión orientados a moda íntima masculina y confort, integrando título optimizado, dos párrafos descriptivos (beneficios sensoriales, ajuste anatómico y durabilidad), viñetas técnicas (bullets) y etiquetas de posicionamiento SEO.

@@ -1946,7 +1946,7 @@ function renderCopilotPromptChips() {
   `).join('');
 }
 
-function sendCopilotChatMessage(query) {
+async function sendCopilotChatMessage(query) {
   if (!query || !query.trim()) return;
   const roleKey = (currentRole.id === 'warehouse') ? 'warehouse' : ((currentRole.id === 'sales') ? 'sales' : ((currentRole.id === 'finance') ? 'finance' : 'admin'));
 

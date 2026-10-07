@@ -348,6 +348,25 @@ function hybridInventoryModule() {
             }
         },
 
+        // Curaduría de Scraping Paginada por Pasos (Regla 6.64 - Paridad con Workstation)
+        curatingStep: 1,
+        setCuratingStep(step) {
+            const s = parseInt(step) || 1;
+            if (s >= 1 && s <= 4) {
+                this.curatingStep = s;
+            }
+        },
+        nextCuratingStep() {
+            if (this.curatingStep < 4) {
+                this.curatingStep++;
+            }
+        },
+        prevCuratingStep() {
+            if (this.curatingStep > 1) {
+                this.curatingStep--;
+            }
+        },
+
         // Regla 7: Estado de Edición y Alta de Secciones de Tienda Web
         isEditingStoreSection: false,
         storeSectionForm: { id: null, name: '', slug: '', description: '', is_active: true },
@@ -7945,6 +7964,8 @@ function hybridInventoryModule() {
             } else if (this.quickStoreSectionContext === 'drawer' && this.selectedProduct) {
                 this.selectedProduct.websiteSection = slug;
                 this.drawerWebsiteSection = slug;
+            } else if (this.quickStoreSectionContext === 'curating' && this.curatingItem) {
+                this.curatingItem.suggestedSection = slug;
             }
 
             this.quickStoreSectionModalOpen = false;
@@ -10831,6 +10852,15 @@ function hybridInventoryModule() {
             }
         },
 
+        calculateCuratingMargin() {
+            if (!this.curatingItem) return '0.0';
+            const pvp = parseFloat(this.curatingItem.suggestedPvp) || 0;
+            const cost = parseFloat(this.curatingItem.cost) || 0;
+            if (pvp <= 0) return '0.0';
+            const m = ((pvp - cost) / pvp) * 100;
+            return Math.max(0, m).toFixed(1);
+        },
+
         openScrapingCuration(pendingItem) {
             this.curatingItem = JSON.parse(JSON.stringify(pendingItem));
             if (!this.curatingItem.images) {
@@ -10863,11 +10893,91 @@ function hybridInventoryModule() {
                 }
             }
 
+            // Regla 6.64: Paridad de inventario, logística, vitrina y costos
+            this.curatingItem.type = this.curatingItem.type || this.curatingItem.logisticsType || 'dropship';
+            this.curatingItem.stock = (this.curatingItem.stock !== undefined && this.curatingItem.stock !== null) 
+                ? this.curatingItem.stock 
+                : (this.curatingItem.supplierStock || 50);
+            this.curatingItem.cost = (this.curatingItem.cost !== undefined && this.curatingItem.cost !== null)
+                ? this.curatingItem.cost
+                : (this.curatingItem.scrapedCost || (this.curatingItem.external_price ? this.curatingItem.external_price * 0.5 : 150));
+            this.curatingItem.suggestedSection = this.curatingItem.suggestedSection || 'basicos';
+            this.curatingItem.suggestedDesign = this.curatingItem.suggestedDesign || 'sin_diseno';
+            this.curatingItem.bulletPoints = Array.isArray(this.curatingItem.bulletPoints) ? this.curatingItem.bulletPoints : [];
+            this.curatingItem.seoTags = Array.isArray(this.curatingItem.seoTags) ? this.curatingItem.seoTags : [];
+            this.curatingNewTagInput = '';
+
+            this.curatingStep = 1;
+            this.curatingItem.isGeneratingSku = false;
             this.showInlineAddColor = false;
             this.showInlineAddFabric = false;
             this.inlineColorName = '';
             this.inlineFabricName = '';
             this.scrapingCurationModalOpen = true;
+        },
+
+        async generateCuratingAutoSku() {
+            if (!this.curatingItem) return;
+            this.curatingItem.isGeneratingSku = true;
+            try {
+                const payload = {
+                    category: this.curatingItem.suggestedCategory || 'Boxers',
+                    brand: this.curatingItem.brand || 'Torzo',
+                    variant_code: null
+                };
+                const res = await fetch('/api/v1/inventory/products/generate-sku', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.sku) {
+                        this.curatingItem.suggestedSku = data.sku;
+                        this.showToast('SKU estructurado generado: ' + data.sku, 'success');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (this.curatingItem) this.curatingItem.isGeneratingSku = false;
+            }
+        },
+
+        handleCuratingImageDrop(event) {
+            this.isDraggingImages = false;
+            const files = event && event.dataTransfer ? event.dataTransfer.files : null;
+            if (!files || !files.length) return;
+            this.handleCuratingFiles(Array.from(files));
+        },
+
+        handleCuratingImageSelect(event) {
+            const files = event && event.target ? event.target.files : null;
+            if (!files || !files.length) return;
+            this.handleCuratingFiles(Array.from(files));
+        },
+
+        handleCuratingFiles(files) {
+            if (!this.curatingItem) return;
+            if (!Array.isArray(this.curatingItem.images)) this.curatingItem.images = [];
+            files.forEach(file => {
+                if (file.type && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const url = e.target.result;
+                        if (!this.curatingItem.images.includes(url)) {
+                            this.curatingItem.images.push(url);
+                            if (!this.curatingItem.imageColorMap) this.curatingItem.imageColorMap = {};
+                            this.curatingItem.imageColorMap[url] = this.curatingItem.detectedColorName || 'Negro Profundo';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            this.showToast('Fotografía(s) agregada(s) a la curaduría.', 'success');
         },
 
         toggleInlineAddColor() {
@@ -11020,6 +11130,22 @@ function hybridInventoryModule() {
             this.showToast('Fotografía agregada a la galería del producto.', 'success');
         },
 
+        addCuratingSeoTag() {
+            if (!this.curatingItem) return;
+            const val = (this.curatingNewTagInput || '').trim();
+            if (!val) return;
+            if (!Array.isArray(this.curatingItem.seoTags)) this.curatingItem.seoTags = [];
+            if (!this.curatingItem.seoTags.includes(val)) {
+                this.curatingItem.seoTags.push(val);
+            }
+            this.curatingNewTagInput = '';
+        },
+
+        removeCuratingSeoTag(index) {
+            if (!this.curatingItem || !Array.isArray(this.curatingItem.seoTags)) return;
+            this.curatingItem.seoTags.splice(index, 1);
+        },
+
         async approveScrapedItem() {
             if (!this.curatingItem) return;
             const item = this.curatingItem;
@@ -11039,6 +11165,12 @@ function hybridInventoryModule() {
                 curated_design_type: item.suggestedDesign || 'sin_diseno',
                 curated_website_section: item.suggestedSection || 'basicos',
                 curated_price: parseFloat(item.suggestedPvp) || 390,
+                curated_cost: parseFloat(item.cost) || 150,
+                curated_stock: parseInt(item.stock || item.supplierStock || 50),
+                curated_type: item.type || item.logisticsType || 'dropship',
+                curated_description: item.scrapedDescription || '',
+                bullet_points: Array.isArray(item.bulletPoints) ? item.bulletPoints : [],
+                seo_tags: Array.isArray(item.seoTags) ? item.seoTags : [],
                 curated_images: item.images && item.images.length ? item.images : [item.image],
                 image_color_map: item.imageColorMap || {}
             };
@@ -11065,9 +11197,9 @@ function hybridInventoryModule() {
                     sku: finalSku,
                     name: item.name,
                     category: item.suggestedCategory || 'Boxers',
-                    type: 'dropship',
+                    type: item.type || item.logisticsType || 'dropship',
                     is_scraped: true,
-                    stockLabel: 'Drop Bajo Pedido',
+                    stockLabel: (item.type === 'propio') ? 'Stock Físico Propio' : 'Drop Bajo Pedido',
                     image: (item.images && item.images[0]) || item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60',
                     images: item.images && item.images.length ? [...item.images] : [(item.image || 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=60')],
                     images_by_color: item.imageColorMap ? { ...item.imageColorMap } : {},
@@ -11080,12 +11212,14 @@ function hybridInventoryModule() {
                     designType: item.suggestedDesign || 'sin_diseno',
                     websiteSection: item.suggestedSection || 'basicos',
                     description: item.scrapedDescription || '',
+                    bulletPoints: Array.isArray(item.bulletPoints) ? [...item.bulletPoints] : [],
+                    seoTags: Array.isArray(item.seoTags) ? [...item.seoTags] : [],
                     isPublished: true,
-                    localStock: 0,
+                    localStock: (item.type === 'propio') ? parseInt(item.stock || 0) : 0,
                     committedStock: 0,
                     committedSizes: { ch: 0, m: 0, g: 0, xl: 0 },
-                    supplierStock: item.supplierStock || 50,
-                    location: 'Almacén Proveedor (Torzo B2B)',
+                    supplierStock: (item.type !== 'propio') ? parseInt(item.stock || item.supplierStock || 50) : 0,
+                    location: (item.type === 'propio') ? 'Bodega Local (Rampa)' : 'Almacén Proveedor (Torzo B2B)',
                     status: 'Sincronizado',
                     providerUrl: item.originUrl || 'https://torzo.example.com',
                     isScraping: false,
@@ -11104,7 +11238,7 @@ function hybridInventoryModule() {
                 this.scrapedPendingItems = this.scrapedPendingItems.filter(p => p.id !== item.id && p.dbId !== itemId);
                 this.scrapingCurationModalOpen = false;
                 this.curatingItem = null;
-                this.showToast(`Prenda ${finalSku} curada con badge "Drop Bajo Pedido" y publicada en el catálogo.`, 'success');
+                this.showToast(`Prenda ${finalSku} curada con badge "${newProductObj.stockLabel}" y publicada en el catálogo.`, 'success');
             } catch (err) {
                 console.error('Error aprobando prenda scrapeada:', err);
                 this.showToast(err.message || 'Error al persistir la curación en el servidor.', 'error');

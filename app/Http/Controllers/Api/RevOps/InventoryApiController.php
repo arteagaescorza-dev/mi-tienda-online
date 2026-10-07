@@ -722,6 +722,12 @@ class InventoryApiController extends Controller
             'curated_design_type' => 'nullable|string|in:sin_diseno,con_diseno',
             'curated_website_section' => 'nullable|string|max:120',
             'curated_price' => 'required_if:action,approve|numeric|min:0',
+            'curated_cost' => 'nullable|numeric|min:0',
+            'curated_stock' => 'nullable|integer|min:0',
+            'curated_type' => 'nullable|string|in:propio,dropship',
+            'curated_description' => 'nullable|string',
+            'bullet_points' => 'nullable|array',
+            'seo_tags' => 'nullable|array',
             'curated_images' => 'nullable|array',
             'image_color_map' => 'nullable|array',
             'rejection_reason' => 'required_if:action,reject|string|max:500',
@@ -737,6 +743,16 @@ class InventoryApiController extends Controller
             $item->curated_design_type = $validated['curated_design_type'] ?? 'sin_diseno';
             $item->curated_website_section = $validated['curated_website_section'] ?? 'basicos';
             $item->curated_price = $validated['curated_price'];
+            if (!empty($validated['curated_cost'])) {
+                $item->scraped_cost = $validated['curated_cost'];
+            }
+            if (!empty($validated['curated_stock'])) {
+                $item->supplier_stock = (int)$validated['curated_stock'];
+            }
+            if (!empty($validated['curated_description'])) {
+                $item->curated_description = $validated['curated_description'];
+                $item->scraped_description = $validated['curated_description'];
+            }
             $item->curation_status = 'approved';
             $item->save();
 
@@ -791,7 +807,15 @@ class InventoryApiController extends Controller
                 'images_by_color' => $colorMap ?: array_column($gallery, 'color_name', 'url'),
                 'image_color_map' => $colorMap ?: array_column($gallery, 'color_name', 'url'),
                 'image' => $primaryImg,
+                'description' => $validated['curated_description'] ?? ($item->curated_description ?? ($item->scraped_description ?? '')),
+                'bullet_points' => $validated['bullet_points'] ?? [],
+                'seo_tags' => $validated['seo_tags'] ?? [],
+                'stock' => isset($validated['curated_stock']) ? (int)$validated['curated_stock'] : (int)($item->supplier_stock ?: 50),
             ];
+
+            $productCost = isset($validated['curated_cost']) ? (float)$validated['curated_cost'] : (float)($item->scraped_cost ?: $item->external_price);
+            $productType = $validated['curated_type'] ?? 'dropship';
+            $productDesc = $validated['curated_description'] ?? ($item->curated_description ?? ($item->scraped_description ?? null));
 
             // Insertar o sincronizar en catálogo de productos
             $product = Product::firstOrCreate(
@@ -799,13 +823,14 @@ class InventoryApiController extends Controller
                 [
                     'title' => $item->curated_title,
                     'slug' => \Illuminate\Support\Str::slug($item->curated_title),
+                    'description' => $productDesc,
                     'brand' => $item->curated_brand,
                     'fabric' => $fabricName,
                     'fabric_id' => $fabricId,
                     'section_name' => $sectionName,
-                    'type' => 'dropship',
+                    'type' => $productType,
                     'price' => $item->curated_price,
-                    'cost' => $item->external_price,
+                    'cost' => $productCost,
                     'visible' => true,
                     'meta' => $productMeta,
                 ]
@@ -815,10 +840,13 @@ class InventoryApiController extends Controller
             if (!$product->wasRecentlyCreated) {
                 $product->update([
                     'title' => $item->curated_title,
+                    'description' => $productDesc,
                     'brand' => $item->curated_brand,
                     'fabric' => $fabricName,
                     'fabric_id' => $fabricId,
                     'section_name' => $sectionName,
+                    'type' => $productType,
+                    'cost' => $productCost,
                     'price' => $item->curated_price,
                     'visible' => true,
                     'meta' => array_merge((array)$product->meta, $productMeta),

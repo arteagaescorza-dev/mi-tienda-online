@@ -11597,447 +11597,949 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                class="inline-block w-full max-w-3xl bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
+                class="inline-block w-full max-w-6xl bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
                 @click.stop
             >
-                <!-- Curation Header -->
-                <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-500/20 text-indigo-300 rounded-xl border border-indigo-500/30">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-white" id="curation-modal-title">Validación & Curaduría de Prenda Scrapeada</h3>
-                            <p class="text-xs text-indigo-200">Revisa la descripción y asigna color exacto, tela y sección antes de publicar</p>
+                <!-- Header de Curaduría (Regla 6.64: mismo diseño que el Workstation de Alta de Producto) -->
+                <div class="p-5 border-b border-slate-200 bg-white shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200/80 inline-flex items-center justify-center shadow-2xs">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-lg font-bold text-slate-900" id="curation-modal-title">Curaduría de Prenda Scrapeada</h2>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 tracking-wide uppercase">RevOps Catalogo</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">Codificación inteligente SKU, matriz multidimensional y generación con Copiloto IA</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button 
+                                type="button"
+                                @click="generateCuratingAutoSku()" 
+                                :disabled="curatingItem.isGeneratingSku"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold transition cursor-pointer"
+                                title="Generar código SKU automático estructurado"
+                            >
+                                <svg x-show="!curatingItem.isGeneratingSku" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <svg x-show="curatingItem.isGeneratingSku" class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                </svg>
+                                <span>Auto-SKU</span>
+                            </button>
+                            <button 
+                                type="button"
+                                @click="scrapingCurationModalOpen = false" 
+                                class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                aria-label="Cerrar curaduría"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
                         </div>
                     </div>
-                    <button @click="scrapingCurationModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
                 </div>
 
-                <!-- Curation Body -->
+                <!-- Cuerpo de Curaduría: 2 Columnas (Col 1: Formulario Secuencial por Pasos, Col 2: Resumen Ficha Técnica en Vivo) -->
                 <template x-if="curatingItem">
-                    <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm">
-                        <!-- Top Banner de la prenda -->
-                        <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                            <div>
-                                <span class="text-xs font-mono font-bold text-indigo-600" x-text="curatingItem.suggestedSku"></span>
-                                <h4 class="font-bold text-slate-900 text-base mt-0.5" x-text="curatingItem.name"></h4>
-                                <span class="text-xs text-slate-500" x-text="'Prenda Scrapeada • ' + curatingItem.suggestedCategory"></span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Costo Mayorista</span>
-                                <span class="text-lg font-extrabold text-emerald-600 font-mono" x-text="'$' + curatingItem.cost.toFixed(2)"></span>
-                            </div>
-                        </div>
+                    <div class="p-6 max-h-[72vh] overflow-y-auto bg-slate-50/50">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                        <!-- Proveedor & Marca Comercial con Botones de Alta Instantánea (Regla 6.47) -->
-                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                    <span>Asignación de Proveedor & Marca Comercial</span>
-                                </label>
-                                <span class="text-[10px] text-slate-400 font-mono">Regla 6.47</span>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <!-- Selector Proveedor -->
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
-                                            <span>Proveedor / Fabricante</span>
-                                            <span class="text-rose-500">*</span>
-                                        </label>
-                                        <button 
-                                            type="button" 
-                                            @click="openCreateProviderModal()" 
-                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                            title="Dar de alta proveedor si no existe"
-                                        >
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>+ Proveedor</span>
-                                        </button>
-                                    </div>
-                                    <select 
-                                        x-model="curatingItem.supplier_id" 
-                                        @change="onCuratingSupplierChange()"
-                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                    >
-                                        <option value="">-- Seleccionar Proveedor --</option>
-                                        <template x-for="p in providers" :key="p.id">
-                                            <option :value="p.id" :selected="String(curatingItem.supplier_id) === String(p.id)" x-text="p.tradeName || p.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
+                            <!-- ========================================================= -->
+                            <!-- COLUMNA 1: FORMULARIO SECUENCIAL POR PASOS (7 COLS)       -->
+                            <!-- ========================================================= -->
+                            <div class="lg:col-span-7 space-y-6">
 
-                                <!-- Selector Marca -->
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
-                                            <span>Marca Comercial</span>
-                                            <span class="text-rose-500">*</span>
-                                        </label>
-                                        <button 
-                                            type="button" 
-                                            @click="openCreateBrandModal(curatingItem.supplier_id)" 
-                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                            title="Dar de alta marca para este proveedor"
-                                        >
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>+ Marca</span>
-                                        </button>
-                                    </div>
-                                    <select 
-                                        x-model="curatingItem.brand" 
-                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                    >
-                                        <option value="">-- Seleccionar Marca --</option>
-                                        <template x-for="b in getBrandsForSupplier(curatingItem.supplier_id)" :key="b.name">
-                                            <option :value="b.name" :selected="curatingItem.brand === b.name" x-text="b.name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Categoría & Subcategoría del Producto con Alta Instantánea (Regla 3) -->
-                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                    <span>Categoría & Subcategoría del Catálogo</span>
-                                </label>
-                                <span class="text-[10px] text-slate-400 font-mono">Regla 3: In situ</span>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Categoría</label>
-                                        <button 
-                                            type="button" 
-                                            @click="openQuickCategoryModal('category', 'curating')" 
-                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                            title="Dar de alta categoría in situ sin salir de la curaduría"
-                                        >
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>+ Categoría</span>
-                                        </button>
-                                    </div>
-                                    <select 
-                                        x-model="curatingItem.suggestedCategory" 
-                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                    >
-                                        <template x-for="cat in categoriesTree" :key="cat.id">
-                                            <option :value="cat.name" :selected="curatingItem.suggestedCategory === cat.name" x-text="cat.name"></option>
-                                        </template>
-                                        <option value="Boxers">Boxers</option>
-                                        <option value="Jocks">Jocks</option>
-                                        <option value="Tangas">Tangas</option>
-                                        <option value="Bikinis">Bikinis</option>
-                                        <option value="Camisillas">Camisillas</option>
-                                        <option value="Cosmetica / Skincare">Cosmetica / Skincare</option>
-                                        <option value="Perfumeria / Fragancias">Perfumeria / Fragancias</option>
-                                        <option value="Accesorios & Cuidado">Accesorios & Cuidado</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Subcategoría</label>
-                                        <button 
-                                            type="button" 
-                                            @click="openQuickCategoryModal('subcategory', 'curating')" 
-                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                            title="Dar de alta subcategoría in situ"
-                                        >
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>+ Subcategoría</span>
-                                        </button>
-                                    </div>
-                                    <input 
-                                        type="text" 
-                                        x-model="curatingItem.suggestedSubcategory" 
-                                        placeholder="Ej: Trunks / Briefs / Deportivo" 
-                                        class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Copiloto Comercial IA: Redacción Persuasiva B2C (Reglas 2 y 3) -->
-                        <div class="bg-white p-4 rounded-xl border border-indigo-200/90 shadow-2xs space-y-3 relative overflow-hidden">
-                            <div class="flex items-center justify-between pb-2 border-b border-indigo-100">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs">IA</div>
-                                    <h4 class="font-bold text-slate-800 text-xs">Copiloto Comercial IA (Redacción Persuasiva)</h4>
-                                </div>
-                                <button 
-                                    type="button" 
-                                    @click="generateAiDescription('curating')" 
-                                    :disabled="isCuratingAiGenerating"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
-                                    title="Generar descripción persuasiva comercial con Google Gemini"
-                                >
-                                    <svg x-show="!isCuratingAiGenerating" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    <svg x-show="isCuratingAiGenerating" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                                    <span x-text="isCuratingAiGenerating ? 'Redactando...' : 'Generar con IA'"></span>
-                                </button>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Descripción Persuasiva (B2C) &amp; Validación Humana</label>
-                                <textarea 
-                                    x-model="curatingItem.scrapedDescription" 
-                                    rows="3" 
-                                    class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
-                                    placeholder="Haz clic en 'Generar con IA' para redactar una descripción comercial optimizada para venta en storefront..."
-                                ></textarea>
-                            </div>
-                            <!-- Viñetas Técnicas del Copiloto IA -->
-                            <template x-if="curatingItem.bulletPoints && curatingItem.bulletPoints.length > 0">
-                                <div class="p-2.5 bg-indigo-50/60 rounded-lg border border-indigo-100">
-                                    <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">Especificaciones Técnicas</span>
-                                    <ul class="space-y-0.5 text-[11px] text-slate-700">
-                                        <template x-for="(bp, bIdx) in curatingItem.bulletPoints" :key="bIdx">
-                                            <li class="flex items-start gap-1.5">
-                                                <span class="text-indigo-600 font-bold shrink-0">&bull;</span>
-                                                <span x-text="bp"></span>
-                                            </li>
-                                        </template>
-                                    </ul>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- 2. Selección de Color / Tornasol & Tipo de Tela (Con Modales In Situ - Regla 2) -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Selector de Color / Tornasol In Situ -->
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Swatch Exacto</label>
+                                <!-- Mini Stepper de Navegación Rápida Interactiva (Regla UX 1) -->
+                                <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs grid grid-cols-4 gap-1.5 text-[11px] font-bold">
                                     <button 
                                         type="button" 
-                                        @click.stop="openQuickColorModal('curating')" 
-                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                        title="Dar de alta color in situ sin salir de la curaduría"
+                                        @click="setCuratingStep(1)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 1 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
                                     >
-                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                        <span>+ Color</span>
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 1 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">1</span>
+                                        <span class="truncate">Fotos & Colores</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setCuratingStep(2)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 2 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                    >
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 2 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">2</span>
+                                        <span class="truncate">Datos & Diseño</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setCuratingStep(3)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 3 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                    >
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 3 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">3</span>
+                                        <span class="truncate">Tela & Stock</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setCuratingStep(4)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 4 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                    >
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 4 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">4</span>
+                                        <span class="truncate">Copiloto & Pricing</span>
                                     </button>
                                 </div>
 
-                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
-                                    <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0 shadow-2xs" :style="'background: ' + curatingItem.detectedColorHex"></span>
-                                    <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
-                                    <span class="text-[10px] px-1.5 py-0.2 rounded font-mono ml-auto font-semibold" :class="curatingItem.colorType === 'iridescent' ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600 border border-slate-200'" x-text="curatingItem.colorType === 'iridescent' ? 'Tornasol' : 'Sólido'"></span>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <input 
-                                        type="color" 
-                                        x-model="curatingItem.detectedColorHex" 
-                                        class="w-7 h-7 p-0 border border-slate-300 rounded cursor-pointer shrink-0"
-                                    >
-                                    <select 
-                                        x-model="curatingItem.detectedColorName" 
-                                        @change="
-                                            const c = apparelColors.find(x => x.name === curatingItem.detectedColorName);
-                                            if (c) {
-                                                curatingItem.detectedColorHex = c.hex;
-                                                curatingItem.colorType = c.type;
-                                            }
-                                        "
-                                        class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    >
-                                        <template x-for="col in apparelColors" :key="col.id">
-                                            <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Selector de Tela In Situ -->
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela / Composición</label>
-                                    <button 
-                                        type="button" 
-                                        @click.stop="openQuickFabricModal('curating')" 
-                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
-                                        title="Dar de alta tipo de tela in situ"
-                                    >
-                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                        <span>+ Tipo de Tela</span>
-                                    </button>
-                                </div>
-
-                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 mb-2">
-                                    <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
-                                    <span class="text-xs font-bold text-slate-900 truncate" x-text="curatingItem.suggestedFabric"></span>
-                                </div>
-
-                                <select 
-                                    x-model="curatingItem.suggestedFabric" 
-                                    class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" :selected="curatingItem.suggestedFabric === fab.name" x-text="fab.name"></option>
-                                    </template>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 2.1 Curaduría de Fotografías & Variante de Color (Reglas 2 y 10) -->
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">
-                                    Curaduría de Fotografías & Variante de Color
-                                </label>
-                                <span class="text-[10px] text-slate-500 font-mono" x-text="(curatingItem.images?.length || 0) + ' fotografía(s)'"></span>
-                            </div>
-                            <p class="text-[11px] text-slate-500">Añade más fotos manualmente si se requiere y asigna la variante de color correspondiente a cada imagen para conmutar las fotografías fielmente en el catálogo y storefront.</p>
-
-                            <!-- Entrada de Foto Manual por URL (Regla 2) -->
-                            <div class="flex items-center gap-1.5">
-                                <input 
-                                    type="url" 
-                                    x-model="curatingNewImageUrl" 
-                                    @keydown.enter.prevent="addManualImageToCuratingItem()" 
-                                    placeholder="Pegar URL de fotografía adicional (https://...)" 
-                                    class="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
-                                >
-                                <button 
-                                    type="button" 
-                                    @click="addManualImageToCuratingItem()" 
-                                    class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
-                                    title="Añadir fotografía manualmente a esta prenda"
-                                >
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                    <span>+ Foto Manual</span>
-                                </button>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                <template x-for="(scrapedImg, imgIdx) in (curatingItem.images || [])" :key="imgIdx">
-                                    <div class="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition">
-                                        <div class="relative w-12 h-12 rounded overflow-hidden border border-slate-200 shrink-0">
-                                            <img :src="scrapedImg" alt="Foto Prenda" class="w-full h-full object-cover">
-                                            <span x-show="imgIdx === 0" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-bold px-1 rounded shadow-xs">Portada</span>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center justify-between mb-0.5">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block truncate" x-text="'Foto ' + (imgIdx + 1)"></label>
-                                                <div class="flex items-center gap-1">
-                                                    <button type="button" @click="setPrimaryCuratingImage(imgIdx)" class="px-1 py-0.2 rounded text-[9px] font-bold bg-slate-50 hover:bg-indigo-50 text-indigo-700 border border-slate-200 transition" title="Hacer Portada Principal">Portada</button>
-                                                    <button type="button" @click="removeImageFromCuratingItem(imgIdx)" class="p-0.5 rounded text-rose-500 hover:bg-rose-50 transition" title="Quitar foto">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                    </button>
-                                                </div>
+                                <!-- PASO 1: FOTOGRAFÍAS, CROP 4:5, PORTADA & VARIANTES DE COLOR -->
+                                <div id="curating-step-1-photos" x-show="curatingStep === 1" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">1</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Curaduría de Fotografías & Variante de Color</h3>
+                                                <p class="text-[11px] text-slate-500">Carga interactiva, encuadre 4:5, selección de portada y asociación de color</p>
                                             </div>
-                                            <div class="flex items-center gap-1">
-                                                <select 
-                                                    :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
-                                                    @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
-                                                    class="w-full p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        </div>
+                                        <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200" x-text="(curatingItem.images ? curatingItem.images.length : 0) + ' / 10 fotos'"></span>
+                                    </div>
+
+                                    <!-- Dropzone interactivo con encuadre 4:5 -->
+                                    <div 
+                                        @dragover.prevent="isDraggingImages = true"
+                                        @dragleave.prevent="isDraggingImages = false"
+                                        @drop.prevent="handleCuratingImageDrop($event)"
+                                        class="border-2 border-dashed rounded-xl p-4 text-center transition cursor-pointer"
+                                        :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/70'"
+                                        @click="$refs.curatingFileInput.click()"
+                                    >
+                                        <input 
+                                            type="file" 
+                                            x-ref="curatingFileInput" 
+                                            @change="handleCuratingImageSelect($event)" 
+                                            accept="image/jpeg,image/png,image/webp,image/avif" 
+                                            multiple 
+                                            class="hidden"
+                                        >
+                                        <div class="flex flex-col items-center justify-center gap-1.5 text-slate-600">
+                                            <div class="w-10 h-10 rounded-xl bg-white border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-2xs">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-bold text-slate-800">Cargar Fotografías & Encuadrar 4:5</span>
+                                            <span class="text-[11px] text-slate-500">Admite múltiples fotos; se curan y encuadran una por una (1080×1350 px)</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Entrada de Foto Manual por URL -->
+                                    <div class="flex items-center gap-1.5">
+                                        <input 
+                                            type="url" 
+                                            x-model="curatingNewImageUrl" 
+                                            @keydown.enter.prevent="addManualImageToCuratingItem()" 
+                                            placeholder="Pegar URL de foto adicional (https://...)" 
+                                            class="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white"
+                                        >
+                                        <button 
+                                            type="button" 
+                                            @click="addManualImageToCuratingItem()" 
+                                            class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ URL</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Galería de Miniaturas con Portada & Variantes de Color -->
+                                    <template x-if="curatingItem.images && curatingItem.images.length > 0">
+                                        <div class="space-y-2 pt-2 border-t border-slate-100 max-h-64 overflow-y-auto pr-1">
+                                            <template x-for="(scrapedImg, imgIdx) in (curatingItem.images || [])" :key="imgIdx">
+                                                <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 transition">
+                                                    <div class="relative w-14 h-17 rounded-lg overflow-hidden border border-slate-200 bg-white shrink-0 shadow-2xs">
+                                                        <img :src="scrapedImg" alt="Foto Prenda" class="w-full h-full object-cover">
+                                                        <span x-show="imgIdx === 0" class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-xs">Portada</span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0 space-y-1.5">
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-xs font-bold text-slate-800 truncate" x-text="'Foto ' + (imgIdx + 1)"></span>
+                                                            <div class="flex items-center gap-1.5">
+                                                                <button 
+                                                                    type="button" 
+                                                                    @click.stop="setPrimaryCuratingImage(imgIdx)" 
+                                                                    class="px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer"
+                                                                    :class="imgIdx === 0 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-indigo-50 text-indigo-700 border-slate-200'"
+                                                                >
+                                                                    <span x-text="imgIdx === 0 ? 'Es Portada' : 'Hacer Portada'"></span>
+                                                                </button>
+                                                                <button 
+                                                                    type="button" 
+                                                                    @click.stop="removeImageFromCuratingItem(imgIdx)" 
+                                                                    class="p-1 rounded text-rose-500 hover:bg-rose-50 transition cursor-pointer" 
+                                                                    title="Eliminar foto"
+                                                                >
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Selector de Color de Prenda para esta Foto + Botón In Situ + Color -->
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider shrink-0">Color Variante:</span>
+                                                            <select 
+                                                                :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
+                                                                @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
+                                                                class="flex-1 px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                            >
+                                                                <template x-for="col in apparelColors" :key="col.id">
+                                                                    <option :value="col.name" :selected="col.name === (curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName)" x-text="col.name"></option>
+                                                                </template>
+                                                            </select>
+                                                            <button 
+                                                                type="button" 
+                                                                @click.stop="openQuickColorModal('curating', scrapedImg)" 
+                                                                class="px-2 py-1 text-[10px] font-bold rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                                title="Dar de alta color in situ para esta foto"
+                                                            >
+                                                                + Color
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Color Principal de la Prenda (Swatch Exacto) -->
+                                    <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Color Principal / Swatch Exacto</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickColorModal('curating')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta color in situ sin salir de la curaduría"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Color</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <template x-if="curatingItem.detectedColorName === 'Multicolor'">
+                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                            </template>
+                                            <template x-if="curatingItem.detectedColorName !== 'Multicolor'">
+                                                <input 
+                                                    type="color" 
+                                                    x-model="curatingItem.detectedColorHex" 
+                                                    class="w-8 h-8 p-0 border border-slate-300 rounded-lg cursor-pointer shrink-0"
                                                 >
-                                                    <template x-for="col in apparelColors" :key="col.id">
-                                                        <option :value="col.name" :selected="col.name === (curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName)" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                                    </template>
-                                                </select>
+                                            </template>
+                                            <select 
+                                                x-model="curatingItem.detectedColorName" 
+                                                @change="
+                                                    const c = apparelColors.find(x => x.name === curatingItem.detectedColorName);
+                                                    if (c) {
+                                                        curatingItem.detectedColorHex = c.hex;
+                                                        curatingItem.colorType = c.type;
+                                                    }
+                                                "
+                                                class="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                            >
+                                                <template x-for="col in apparelColors" :key="col.id">
+                                                    <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
+                                                </template>
+                                            </select>
+                                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 border" :class="curatingItem.colorType === 'iridescent' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-white text-slate-600 border-slate-200'" x-text="curatingItem.colorType === 'iridescent' ? 'Tornasol' : 'Sólido'"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 1 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(2)" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>Continuar a Datos & Diseño</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PASO 2: PROVEEDOR, MARCA, CATEGORÍA, SUBCATEGORÍA, LISO O CON DISEÑO, MODALIDAD LOGÍSTICA -->
+                                <div id="curating-step-2-taxonomy" x-show="curatingStep === 2" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">2</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Proveedor, Marca, Categoría & Modalidad</h3>
+                                                <p class="text-[11px] text-slate-500">Identidad comercial, clasificación, tipificación de diseño y logística</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Taxonomía</span>
+                                    </div>
+
+                                    <!-- Nombre Comercial del Modelo -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre Comercial del Modelo <span class="text-rose-500">*</span></label>
+                                        <input 
+                                            type="text" 
+                                            x-model="curatingItem.name" 
+                                            placeholder="Ej: Boxer Trunk Modal Eco Air" 
+                                            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                        >
+                                    </div>
+
+                                    <!-- Proveedor / Fabricante & Marca Comercial (Grid 2 cols) -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                    <span>Proveedor / Fabricante</span>
+                                                    <span class="text-rose-500">*</span>
+                                                </label>
                                                 <button 
                                                     type="button" 
-                                                    @click.stop="openQuickColorModal('curating', scrapedImg)" 
-                                                    class="px-1 py-0.5 text-[9px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
-                                                    title="Dar de alta color in situ para esta foto"
+                                                    @click="openCreateProviderModal()" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
                                                 >
-                                                    + Color
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Proveedor</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.supplier_id" 
+                                                @change="onCuratingSupplierChange()"
+                                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                            >
+                                                <option value="">-- Seleccionar Proveedor --</option>
+                                                <template x-for="p in providers" :key="p.id">
+                                                    <option :value="p.id" :selected="String(curatingItem.supplier_id) === String(p.id)" x-text="(p.tradeName || p.name) + (p.origin === 'scraping' ? ' [Scraping]' : ' [Directo]')"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                    <span>Marca Comercial</span>
+                                                    <span class="text-rose-500">*</span>
+                                                </label>
+                                                <button 
+                                                    type="button" 
+                                                    @click="openCreateBrandModal(curatingItem.supplier_id)" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Marca</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.brand" 
+                                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                            >
+                                                <option value="">-- Seleccionar Marca --</option>
+                                                <template x-for="b in getBrandsForSupplier(curatingItem.supplier_id)" :key="b.name">
+                                                    <option :value="b.name" :selected="curatingItem.brand === b.name" x-text="b.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Categoría & Subcategoría (Grid 2 cols) -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Categoría</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickCategoryModal('category', 'curating')" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Categoría</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.suggestedCategory" 
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                                <template x-for="cat in categoriesTree" :key="cat.id">
+                                                    <option :value="cat.name" :selected="curatingItem.suggestedCategory === cat.name" x-text="cat.name"></option>
+                                                </template>
+                                                <option value="Boxers">Boxers</option>
+                                                <option value="Jocks">Jocks</option>
+                                                <option value="Tangas">Tangas</option>
+                                                <option value="Bikinis">Bikinis</option>
+                                                <option value="Camisillas">Camisillas</option>
+                                                <option value="Cosmetica / Skincare">Cosmetica / Skincare</option>
+                                                <option value="Perfumeria / Fragancias">Perfumeria / Fragancias</option>
+                                                <option value="Accesorios & Cuidado">Accesorios & Cuidado</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Subcategoría</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickCategoryModal('subcategory', 'curating')" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Subcategoría</span>
+                                                </button>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                x-model="curatingItem.suggestedSubcategory" 
+                                                placeholder="Ej: Trunks / Briefs / Deportivo" 
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- Acabado / Diseño del Producto -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Acabado / Diseño del Producto</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="curatingItem.suggestedDesign = 'sin_diseno'" 
+                                                class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                                :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-900 shadow-2xs ring-1 ring-indigo-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
+                                            >
+                                                <span class="w-2.5 h-2.5 rounded-full" :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                                <span>Color Liso (Sólido)</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="curatingItem.suggestedDesign = 'con_diseno'" 
+                                                class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                                :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-900 shadow-2xs ring-1 ring-purple-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
+                                            >
+                                                <span class="w-2.5 h-2.5 rounded-full" :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-600' : 'bg-slate-300'"></span>
+                                                <span>Con Diseño (Estampado / Pattern)</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modalidad Logística & Sección Vitrina -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-slate-100">
+                                        <div>
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Modalidad Logística</label>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <label 
+                                                    class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                    :class="curatingItem.type === 'propio' ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                                >
+                                                    <input type="radio" value="propio" x-model="curatingItem.type" class="sr-only">
+                                                    <span class="w-2 h-2 rounded-full" :class="curatingItem.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                                    <span>Propio</span>
+                                                </label>
+                                                <label 
+                                                    class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                    :class="curatingItem.type === 'dropship' ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                                >
+                                                    <input type="radio" value="dropship" x-model="curatingItem.type" class="sr-only">
+                                                    <span class="w-2 h-2 rounded-full" :class="curatingItem.type === 'dropship' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                                                    <span>Dropship</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Sección Vitrina</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickStoreSectionModal('curating')" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                    title="Dar de alta una nueva vitrina web in situ"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Vitrina</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.suggestedSection" 
+                                                class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                                <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                    <option :value="sec.slug" :selected="curatingItem.suggestedSection === sec.slug" x-text="sec.name"></option>
+                                                </template>
+                                                <template x-if="!storeSections || storeSections.length === 0">
+                                                    <option value="basicos">Línea Básicos Esenciales</option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 2 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(1)" 
+                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            <span>Paso 1: Fotos & Colores</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(3)" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>Continuar a Tela & Stock</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PASO 3: TELA & INVENTARIO -->
+                                <div id="curating-step-3-matrix" x-show="curatingStep === 3" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">3</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Composición Textil & Inventario</h3>
+                                                <p class="text-[11px] text-slate-500">Tipo de tela, fibras y unidades disponibles para venta</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Inventario</span>
+                                    </div>
+
+                                    <!-- Tipo de Tela & Fibras Textiles -->
+                                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tipo de Tela & Fibras Textiles</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickFabricModal('curating')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
+                                                title="Dar de alta tipo de tela in situ si no existe"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Tipo de Tela</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="curatingItem.suggestedFabric" 
+                                            class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                            <template x-for="fab in apparelFabrics" :key="fab.id || fab.name">
+                                                <option :value="fab.name" :selected="curatingItem.suggestedFabric === fab.name" x-text="fab.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Stock / Inventario Disponible -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Inventario / Stock Disponible</label>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="curatingItem.stock" 
+                                            placeholder="50" 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                        <p class="text-[10px] text-slate-400 mt-1" x-text="curatingItem.type === 'dropship' ? 'Dropship: stock reportado por el proveedor (bajo pedido).' : 'Propio: unidades físicas disponibles en bodega local.'"></p>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 3 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(2)" 
+                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            <span>Paso 2: Datos & Diseño</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(4)" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>Continuar a Copiloto & Pricing</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PASO 4: COPILOTO IA & PRICING COMERCIAL -->
+                                <div id="curating-step-4-pricing" x-show="curatingStep === 4" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">4</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Copiloto IA & Pricing Comercial</h3>
+                                                <p class="text-[11px] text-slate-500">Copy persuasivo B2C, tags SEO y cálculo de margen</p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            @click="generateAiDescription('curating')" 
+                                            :disabled="isCuratingAiGenerating"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Generar descripción persuasiva comercial con Google Gemini"
+                                        >
+                                            <svg x-show="!isCuratingAiGenerating" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                            <svg x-show="isCuratingAiGenerating" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isCuratingAiGenerating ? 'Redactando...' : 'Generar con IA'"></span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Descripción Persuasiva Comercial -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Descripción Persuasiva (B2C)</label>
+                                        <textarea 
+                                            x-model="curatingItem.scrapedDescription" 
+                                            rows="3" 
+                                            placeholder="Haz clic en 'Generar con IA' para redactar una descripción comercial optimizada..." 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                    <!-- Viñetas / Puntos Clave Técnicos -->
+                                    <template x-if="curatingItem.bulletPoints && curatingItem.bulletPoints.length > 0">
+                                        <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                            <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1.5">Especificaciones Técnicas</span>
+                                            <ul class="space-y-1 text-[11px] text-slate-700">
+                                                <template x-for="(bp, bIdx) in curatingItem.bulletPoints" :key="bIdx">
+                                                    <li class="flex items-start gap-1.5">
+                                                        <span class="text-indigo-600 font-bold shrink-0">&bull;</span>
+                                                        <span x-text="bp"></span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </template>
+
+                                    <!-- Tags SEO & Búsqueda Storefront -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Tags SEO & Búsqueda Frontstore</label>
+                                        <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[44px]">
+                                            <template x-for="(tag, tIdx) in (curatingItem.seoTags || [])" :key="tIdx">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200 shadow-2xs">
+                                                    <span x-text="tag"></span>
+                                                    <button type="button" @click="removeCuratingSeoTag(tIdx)" class="text-slate-400 hover:text-rose-600 font-extrabold cursor-pointer">&times;</button>
+                                                </span>
+                                            </template>
+                                            <input 
+                                                type="text" 
+                                                x-model="curatingNewTagInput" 
+                                                @keydown.enter.prevent="addCuratingSeoTag()" 
+                                                placeholder="+ tag..." 
+                                                class="text-[11px] bg-transparent outline-none flex-1 min-w-[70px] text-slate-700"
+                                            >
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 mt-1">Escribe una palabra clave y presiona Enter para agregarla.</p>
+                                    </div>
+
+                                    <!-- Margen Comercial & Pricing (mismo diseño claro índigo del Workstation, Regla 6.75) -->
+                                    <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 space-y-3.5 shadow-2xs">
+                                        <div class="flex items-center justify-between pb-2 border-b border-indigo-100/80">
+                                            <div class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <h4 class="font-bold text-xs text-indigo-950 uppercase tracking-wider">Margen Comercial & Pricing</h4>
+                                            </div>
+                                            <span class="text-[10px] text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-200 font-semibold shadow-2xs">Cálculo Reactivo</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-700 block mb-1">Precio Venta (PVP) <span class="text-rose-500">*</span></label>
+                                                <div class="relative">
+                                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.5" 
+                                                        x-model.number="curatingItem.suggestedPvp" 
+                                                        class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
+                                                    >
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-700 block mb-1">Costo Unitario <span class="text-rose-500">*</span></label>
+                                                <div class="relative">
+                                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.5" 
+                                                        x-model.number="curatingItem.cost" 
+                                                        class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-2.5 border-t border-indigo-100 flex items-center justify-between text-xs bg-white/70 p-2.5 rounded-lg border border-indigo-100/70">
+                                            <div>
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Utilidad por Pieza:</span>
+                                                <strong class="text-emerald-600 text-sm font-mono font-extrabold" x-text="formatCurrency((Number(curatingItem.suggestedPvp) || 0) - (Number(curatingItem.cost) || 0))"></strong>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Margen Bruto:</span>
+                                                <div class="flex items-center gap-1.5 justify-end">
+                                                    <span 
+                                                        class="text-sm font-extrabold font-mono" 
+                                                        :class="calculateCuratingMargin() >= 50 ? 'text-emerald-700' : (calculateCuratingMargin() >= 30 ? 'text-amber-700' : 'text-rose-700')" 
+                                                        x-text="calculateCuratingMargin() + '%'"
+                                                    ></span>
+                                                    <span 
+                                                        class="text-[9px] px-2 py-0.5 rounded font-extrabold uppercase tracking-wider border" 
+                                                        :class="calculateCuratingMargin() >= 50 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (calculateCuratingMargin() >= 30 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200')" 
+                                                        x-text="calculateCuratingMargin() >= 50 ? 'Saludable' : (calculateCuratingMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Código SKU Oficial con Botón Auto-SKU -->
+                                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Código SKU Oficial</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click="generateCuratingAutoSku()" 
+                                                    :disabled="curatingItem.isGeneratingSku" 
+                                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition cursor-pointer shadow-2xs"
+                                                    title="Generar SKU automático"
+                                                >
+                                                    <svg x-show="!curatingItem.isGeneratingSku" class="w-3 h-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                    <svg x-show="curatingItem.isGeneratingSku" class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                    <span>Auto-SKU</span>
                                                 </button>
                                             </div>
                                         </div>
+                                        <input 
+                                            type="text" 
+                                            x-model="curatingItem.suggestedSku" 
+                                            placeholder="TXT-DAJ-0001-UNI" 
+                                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                        <p class="text-[10px] text-slate-400">Formato: [PREFIJO]-[MARCA]-[CORRELATIVO 4D]-[VARIANTE]</p>
                                     </div>
-                                </template>
-                            </div>
-                        </div>
 
-                        <!-- 3. Diseño & Sección Web -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Variante Diseño -->
-                            <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Variante de Diseño</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button 
-                                        type="button" 
-                                        @click="curatingItem.suggestedDesign = 'sin_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
-                                    >
-                                        Sin Diseño (Liso)
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        @click="curatingItem.suggestedDesign = 'con_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
-                                    >
-                                        Con Diseño (Pattern)
-                                    </button>
+                                    <!-- Pie de Navegación del Paso 4 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(3)" 
+                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            <span>Paso 3: Tela & Stock</span>
+                                        </button>
+                                        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Listo para Publicar en el Footer</span>
+                                        </span>
+                                    </div>
                                 </div>
+
                             </div>
 
-                            <!-- Sección Web -->
-                            <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Sección Web de Publicación</label>
-                                <select 
-                                    x-model="curatingItem.suggestedSection" 
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <option value="basicos">Línea Básicos Esenciales</option>
-                                    <option value="disenador">Línea Diseñador & Autor</option>
-                                    <option value="temporada">Colección Temporada</option>
-                                    <option value="general">Catálogo General</option>
-                                </select>
-                            </div>
-                        </div>
+                            <!-- ========================================================= -->
+                            <!-- COLUMNA 2: RESUMEN DE FICHA DE PRODUCTO EN VIVO (5 COLS)  -->
+                            <!-- ========================================================= -->
+                            <div class="lg:col-span-5 sticky top-0">
+                                <div class="bg-white rounded-3xl border border-slate-200/90 shadow-lg overflow-hidden flex flex-col h-[650px] max-h-[82vh]">
+                                    
+                                    <!-- ========================================================= -->
+                                    <!-- SECCIÓN SUPERIOR (30% DE LA ALTURA): GALERÍA DE RESUMEN  -->
+                                    <!-- ========================================================= -->
+                                    <div class="h-[30%] min-h-[170px] max-h-[210px] bg-slate-950 p-3 relative flex flex-col justify-between shrink-0 border-b border-slate-800">
+                                        <!-- Header de la Galería -->
+                                        <div class="flex items-center justify-between pb-1 z-10">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-300">Galería de Ficha</span>
+                                                <span class="text-[9px] font-bold text-slate-400" x-text="'(' + (curatingItem.images ? curatingItem.images.length : 0) + ')'"></span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 tracking-wide uppercase">Live Preview</span>
+                                            </div>
+                                        </div>
 
-                        <!-- 4. PVP Sugerido & Margen Calculado -->
-                        <div class="p-3.5 bg-slate-900 text-white rounded-xl border border-slate-800 flex items-center justify-between">
-                            <div>
-                                <label class="text-[11px] text-slate-400 block">PVP Venta al Público</label>
-                                <div class="flex items-center gap-1 mt-0.5">
-                                    <span class="text-slate-400 text-sm">$</span>
-                                    <input type="number" x-model.number="curatingItem.suggestedPvp" class="w-24 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm font-bold text-white font-mono">
+                                        <!-- Render de todas las imágenes cargadas del producto -->
+                                        <div class="flex-1 flex items-center justify-center overflow-hidden py-1">
+                                            <template x-if="curatingItem.images && curatingItem.images.length > 0">
+                                                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-full px-1">
+                                                    <template x-for="(imgUrl, iIdx) in curatingItem.images" :key="iIdx">
+                                                        <div 
+                                                            class="relative rounded-lg overflow-hidden border shrink-0 transition"
+                                                            :class="iIdx === 0 ? 'w-16 h-20 border-indigo-400 shadow-md ring-2 ring-indigo-500/50' : 'w-12 h-16 border-slate-700 opacity-70 hover:opacity-100'"
+                                                        >
+                                                            <img :src="imgUrl" class="w-full h-full object-cover">
+                                                            <span x-show="iIdx === 0" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-extrabold px-1 rounded">P1</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="!curatingItem.images || curatingItem.images.length === 0">
+                                                <div class="flex flex-col items-center justify-center text-slate-500 p-2 text-center">
+                                                    <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-1">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    </div>
+                                                    <span class="text-[11px] font-bold text-slate-400">Sin Fotografías Cargadas</span>
+                                                    <span class="text-[9px] text-slate-600">Sube fotos en el Paso 1</span>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Badges flotantes en la barra inferior de galería -->
+                                        <div class="flex items-center justify-between text-[9px] pt-1 border-t border-slate-800/80 text-slate-400">
+                                            <span class="font-mono font-bold text-slate-300" x-text="curatingItem.suggestedSku || 'SKU PENDIENTE'"></span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span 
+                                                    class="px-1.5 py-0.5 rounded font-bold uppercase text-[8px]"
+                                                    :class="curatingItem.type === 'dropship' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-indigo-950 text-indigo-300 border border-indigo-800'"
+                                                    x-text="curatingItem.type === 'dropship' ? 'Dropship' : 'Propio'"
+                                                ></span>
+                                                <span 
+                                                    class="px-1.5 py-0.5 rounded font-extrabold uppercase text-[8px] bg-emerald-900/60 text-emerald-300 border border-emerald-700/60"
+                                                >
+                                                    Público
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ========================================================= -->
+                                    <!-- SECCIÓN INFERIOR (70% DE LA ALTURA): INFORMACIÓN EN VIVO  -->
+                                    <!-- ========================================================= -->
+                                    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs bg-white">
+                                        <!-- Nombre & Clasificación & Tipificación -->
+                                        <div class="space-y-1 pb-3 border-b border-slate-100">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="curatingItem.suggestedCategory || 'Categoría'"></span>
+                                                <template x-if="curatingItem.suggestedSubcategory">
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" x-text="curatingItem.suggestedSubcategory"></span>
+                                                </template>
+                                                <span 
+                                                    class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                                    :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-slate-100 text-slate-700 border border-slate-200'"
+                                                    x-text="curatingItem.suggestedDesign === 'con_diseno' ? 'Con Diseño' : 'Color Liso'"
+                                                ></span>
+                                            </div>
+                                            <h4 class="text-base font-extrabold text-slate-900 leading-snug" x-text="curatingItem.name || 'Nombre del modelo en preparación...'"></h4>
+                                            <p class="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+                                                <span class="text-indigo-700 font-bold" x-text="curatingItem.brand || 'Sin Marca'"></span>
+                                                <span class="text-slate-300">•</span>
+                                                <span x-text="getSupplierName(curatingItem.supplier_id) || 'Torzo'"></span>
+                                            </p>
+                                        </div>
+
+                                        <!-- Vitrina Web & Slotting / Ubicación Bodega -->
+                                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                            <div class="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                                                <span class="text-[9px] text-indigo-500 font-bold uppercase block mb-0.5">Vitrina Web</span>
+                                                <span class="font-bold text-indigo-900 truncate block" x-text="getStoreSectionName(curatingItem.suggestedSection)"></span>
+                                            </div>
+                                            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <span class="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Modalidad & Stock</span>
+                                                <span class="font-bold text-slate-800 truncate block font-mono" x-text="(curatingItem.type === 'dropship' ? 'Drop Bajo Pedido' : 'Stock Local Propio') + ' • ' + (curatingItem.stock || 50) + ' u.'"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fila de Tejido / Tela -->
+                                        <div class="p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-100/70 flex items-center justify-between">
+                                            <span class="text-[10px] text-indigo-900 font-bold uppercase">Tejido / Tela:</span>
+                                            <span class="font-extrabold text-indigo-700 text-xs" x-text="curatingItem.suggestedFabric || 'No especificada'"></span>
+                                        </div>
+
+                                        <!-- Color de la Prenda -->
+                                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase">Color Principal:</span>
+                                            <div class="flex items-center gap-2">
+                                                <template x-if="curatingItem.detectedColorName === 'Multicolor'">
+                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                </template>
+                                                <template x-if="curatingItem.detectedColorName !== 'Multicolor'">
+                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + curatingItem.detectedColorHex"></span>
+                                                </template>
+                                                <span class="font-bold text-slate-800 text-xs" x-text="curatingItem.detectedColorName"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pricing & Margen en Vivo (Dark card matching Workstation!) -->
+                                        <div class="p-3 bg-slate-900 text-white rounded-xl space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <span class="text-[9px] text-slate-400 uppercase block font-semibold">PVP Comercial</span>
+                                                    <span class="text-base font-extrabold text-white font-mono" x-text="formatCurrency(curatingItem.suggestedPvp || 0)"></span>
+                                                </div>
+                                                <div class="text-center">
+                                                    <span class="text-[9px] text-slate-400 uppercase block font-semibold">Costo</span>
+                                                    <span class="text-xs font-bold text-slate-300 font-mono" x-text="formatCurrency(curatingItem.cost || 0)"></span>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span class="text-[9px] text-slate-400 uppercase block font-semibold">Margen Bruto</span>
+                                                    <span 
+                                                        class="text-sm font-extrabold font-mono"
+                                                        :class="calculateCuratingMargin() >= 50 ? 'text-emerald-400' : (calculateCuratingMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')"
+                                                        x-text="calculateCuratingMargin() + '%'"
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Copy Persuasivo & Tags SEO -->
+                                        <template x-if="curatingItem.scrapedDescription">
+                                            <div class="p-3 bg-indigo-50/40 rounded-xl border border-indigo-100/80">
+                                                <span class="text-[9px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">Copy Persuasivo B2C</span>
+                                                <p class="text-[11px] text-slate-700 italic leading-snug" x-text="curatingItem.scrapedDescription"></p>
+                                            </div>
+                                        </template>
+
+                                        <!-- Tags SEO Chips -->
+                                        <template x-if="curatingItem.seoTags && curatingItem.seoTags.length > 0">
+                                            <div class="space-y-1">
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tags de Indexación Frontstore</span>
+                                                <div class="flex flex-wrap gap-1">
+                                                    <template x-for="(tag, tIdx) in curatingItem.seoTags" :key="tIdx">
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200" x-text="'#' + tag"></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[11px] text-slate-400 block">Margen Comercial Estimado</span>
-                                <span class="text-base font-extrabold text-emerald-400 font-mono" x-text="(((curatingItem.suggestedPvp - curatingItem.cost) / curatingItem.suggestedPvp) * 100).toFixed(1) + '%'"></span>
                             </div>
                         </div>
                     </div>
                 </template>
 
-                <!-- Curation Footer -->
-                <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <button 
-                        type="button" 
-                        @click="discardScrapedItem(curatingItem.id)" 
-                        class="px-4 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition cursor-pointer"
-                    >
-                        Descartar Prenda
-                    </button>
+                <!-- Footer de Curaduría (mismo diseño que el Workstation) -->
+                <div class="p-4 border-t border-slate-200 bg-white flex items-center justify-between">
+                    <div class="text-xs text-slate-500">
+                        <span class="font-bold text-slate-700" x-text="(curatingItem ? (curatingItem.stock || 50) : 50) + ' unidades'"></span> preparadas para ingresar al inventario.
+                    </div>
                     <div class="flex items-center gap-2">
                         <button 
                             type="button" 
+                            @click="discardScrapedItem(curatingItem.id)" 
+                            class="px-3.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        >
+                            Descartar Prenda
+                        </button>
+                        <button 
+                            type="button" 
                             @click="scrapingCurationModalOpen = false" 
-                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold transition cursor-pointer"
+                            class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                         >
                             Cancelar
                         </button>
                         <button 
                             type="button" 
                             @click="approveScrapedItem()" 
-                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
+                            class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span>Aprobar y Publicar en Catálogo</span>
                         </button>
                     </div>
@@ -13873,5 +14375,5 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20260927"></script>
+    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v2"></script>
 @endpush
