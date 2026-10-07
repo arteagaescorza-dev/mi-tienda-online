@@ -374,6 +374,7 @@ function hybridInventoryModule() {
         storeSectionEditState: { isEditing: false, editingId: null, form: { name: '', slug: '', description: '', is_active: true } },
 
         // REGLA 1: Tabuladores de Precios MOQ por Proveedor & Trazabilidad de Costos
+        moqRevision: 0,
         moqSheets: (typeof window !== 'undefined' && Array.isArray(window.serverMoqSheets) && window.serverMoqSheets.length > 0)
             ? window.serverMoqSheets
             : [],
@@ -6274,8 +6275,10 @@ function hybridInventoryModule() {
         },
 
         getPlannedOrdersBySupplier() {
+            // Dependencia reactiva explícita para Alpine.js
+            const _rev = (this.moqRevision || 0);
             const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
-            const orders = (target.futurePurchaseOrders || this.futurePurchaseOrders || []);
+            const orders = (this.futurePurchaseOrders || target.futurePurchaseOrders || []);
             const map = {};
 
             orders.forEach(order => {
@@ -6284,15 +6287,32 @@ function hybridInventoryModule() {
                 const prov = resolved.provider;
 
                 if (!map[sup]) {
-                    const sheetsList = target.moqSheets || this.moqSheets || [];
-                    const supLower = sup.toLowerCase();
+                    // Siempre evaluar desde this y sincronizar con target
+                    const sheetsList = (this.moqSheets && this.moqSheets.length > 0) ? this.moqSheets : (target.moqSheets || []);
+                    const supLower = (sup || '').toLowerCase().trim();
+                    const provCleanId = prov ? String(prov.dbId || prov.id || '').replace(/\D/g, '') : null;
+                    const provName = prov ? (prov.name || '').toLowerCase().trim() : '';
+                    const provTrade = prov ? (prov.tradeName || '').toLowerCase().trim() : '';
+
                     // Regla de negocio: Tabulador MOQ exclusivo e independiente por proveedor
-                    const sheet = sheetsList.find(s => 
-                        s.is_active !== false && (
-                            (prov && (s.supplier_id == (prov.dbId || prov.id))) ||
-                            (s.supplier_name && (s.supplier_name.toLowerCase() === supLower))
-                        )
-                    );
+                    const sheet = sheetsList.find(s => {
+                        if (s.is_active === false) return false;
+                        const sSupId = s.supplier_id ? String(s.supplier_id).replace(/\D/g, '') : null;
+                        if (sSupId && provCleanId && sSupId === provCleanId) return true;
+
+                        const sName = (s.supplier_name || '').toLowerCase().trim();
+                        if (sName && (sName === supLower || supLower.includes(sName) || sName.includes(supLower))) return true;
+                        if (sName && prov && (sName === provName || sName === provTrade)) return true;
+
+                        if (prov && Array.isArray(prov.brands)) {
+                            const matchBrand = prov.brands.some(b => {
+                                const bStr = (typeof b === 'string' ? b : (b.name || b.title || '')).toLowerCase().trim();
+                                return bStr && (bStr === sName || sName.includes(bStr));
+                            });
+                            if (matchBrand) return true;
+                        }
+                        return false;
+                    });
 
                     let tiers = [];
                     let moqTarget = 0;
@@ -6349,12 +6369,17 @@ function hybridInventoryModule() {
                 let groupCost = 0;
                 group.items.forEach(order => {
                     const qty = parseInt(order.qty) || 0;
-                    if (sheet && activeTier && Array.isArray(sheet.rows) && !order._customCostLocked) {
+                    if (sheet && activeTier && Array.isArray(sheet.rows) && sheet.rows.length > 0 && !order._customCostLocked) {
                         const prodName = (order.productName || order.sku || '').toLowerCase();
-                        const matchedRow = sheet.rows.find(r => {
-                            const cat = (r.category || '').toLowerCase();
-                            return cat && (prodName.includes(cat) || cat.includes(prodName.split(' ')[0]));
+                        let matchedRow = sheet.rows.find(r => {
+                            const cat = (r.category || '').toLowerCase().trim();
+                            return cat && cat !== 'general' && (prodName.includes(cat) || cat.includes(prodName.split(' ')[0]));
                         });
+
+                        // Fallback: Si el tabulador tiene fila "General" o solo tiene 1 fila configurada
+                        if (!matchedRow) {
+                            matchedRow = sheet.rows.find(r => (r.category || '').toLowerCase().trim() === 'general') || (sheet.rows.length === 1 ? sheet.rows[0] : null);
+                        }
 
                         if (matchedRow && matchedRow.prices) {
                             const tabulatedPrice = parseFloat(matchedRow.prices[activeTier.key]) 
@@ -9441,10 +9466,20 @@ function hybridInventoryModule() {
             const prov = (this.providers || []).find(p => String(p.dbId || p.id) === String(numOrStr));
             
             // Buscar si ya existe tabulador para este proveedor registrado
+            const targetCleanId = numOrStr ? String(numOrStr).replace(/\D/g, '') : null;
+            const provCleanId = prov ? String(prov.dbId || prov.id || '').replace(/\D/g, '') : null;
+
             const sheet = (this.moqSheets || []).find(s => {
-                if (prov && (s.supplier_id == (prov.dbId || prov.id))) return true;
-                if (s.supplier_id == numOrStr) return true;
-                if (prov && s.supplier_name && (s.supplier_name === prov.name || s.supplier_name === prov.tradeName)) return true;
+                const sSupId = s.supplier_id ? String(s.supplier_id).replace(/\D/g, '') : null;
+                if (sSupId && targetCleanId && sSupId === targetCleanId) return true;
+                if (sSupId && provCleanId && sSupId === provCleanId) return true;
+
+                if (prov && s.supplier_name) {
+                    const sName = s.supplier_name.toLowerCase().trim();
+                    const pName = (prov.name || '').toLowerCase().trim();
+                    const pTrade = (prov.tradeName || '').toLowerCase().trim();
+                    if (sName === pName || sName === pTrade) return true;
+                }
                 return false;
             });
 
@@ -9457,11 +9492,23 @@ function hybridInventoryModule() {
         },
 
         hasMoqSheet(supplierId) {
+            const _rev = (this.moqRevision || 0);
             const prov = (this.providers || []).find(p => String(p.dbId || p.id) === String(supplierId));
+            const targetCleanId = supplierId ? String(supplierId).replace(/\D/g, '') : null;
+            const provCleanId = prov ? String(prov.dbId || prov.id || '').replace(/\D/g, '') : null;
+
             return (this.moqSheets || []).some(s => {
-                if (prov && (s.supplier_id == (prov.dbId || prov.id))) return true;
-                if (s.supplier_id == supplierId) return true;
-                if (prov && s.supplier_name && (s.supplier_name === prov.name || s.supplier_name === prov.tradeName)) return true;
+                if (s.is_active === false) return false;
+                const sSupId = s.supplier_id ? String(s.supplier_id).replace(/\D/g, '') : null;
+                if (sSupId && targetCleanId && sSupId === targetCleanId) return true;
+                if (sSupId && provCleanId && sSupId === provCleanId) return true;
+
+                if (prov && s.supplier_name) {
+                    const sName = s.supplier_name.toLowerCase().trim();
+                    const pName = (prov.name || '').toLowerCase().trim();
+                    const pTrade = (prov.tradeName || '').toLowerCase().trim();
+                    if (sName === pName || sName === pTrade) return true;
+                }
                 return false;
             });
         },
@@ -9542,7 +9589,7 @@ function hybridInventoryModule() {
         async saveCurrentMoqSheet() {
             const form = this.moqSheetForm;
             if (!form) return;
-            if (!form.supplier_id && !form.supplier_name) {
+            if (!form.supplier_id && !form.supplier_name && !this.moqSelectedSupplierId) {
                 this.showToast('Regla de negocio: El tabulador debe estar vinculado a un proveedor registrado.', 'warning');
                 return;
             }
@@ -9551,7 +9598,7 @@ function hybridInventoryModule() {
                 return;
             }
 
-            let cleanSupplierId = form.supplier_id;
+            let cleanSupplierId = form.supplier_id || this.moqSelectedSupplierId;
             if (typeof cleanSupplierId === 'string' && cleanSupplierId.startsWith('prov_')) {
                 cleanSupplierId = parseInt(cleanSupplierId.replace('prov_', ''), 10);
             } else if (cleanSupplierId) {
@@ -9562,9 +9609,16 @@ function hybridInventoryModule() {
                 if (found && found.dbId) cleanSupplierId = found.dbId;
             }
 
+            let cleanSupplierName = form.supplier_name;
+            if (!cleanSupplierName && cleanSupplierId && Array.isArray(this.providers)) {
+                const found = this.providers.find(p => String(p.dbId || p.id).replace(/\D/g, '') === String(cleanSupplierId));
+                if (found) cleanSupplierName = found.tradeName || found.name;
+            }
+
             const payload = {
                 ...form,
-                supplier_id: cleanSupplierId || null
+                supplier_id: cleanSupplierId || null,
+                supplier_name: cleanSupplierName || form.supplier_name
             };
 
             try {
@@ -9587,14 +9641,23 @@ function hybridInventoryModule() {
                 const data = await res.json();
                 if (res.ok && data.status === 'success') {
                     const saved = data.data;
-                    if (!this.moqSheets) this.moqSheets = [];
-                    const idx = this.moqSheets.findIndex(s => s.id === saved.id);
-                    if (idx >= 0) {
-                        this.moqSheets[idx] = saved;
-                    } else {
-                        this.moqSheets.unshift(saved);
+                    const cleanList = (this.moqSheets || []).filter(s => s.id !== saved.id);
+                    cleanList.unshift(saved);
+                    this.moqSheets = [...cleanList];
+
+                    if (typeof window !== 'undefined' && window.inventoryAppInstance) {
+                        window.inventoryAppInstance.moqSheets = [...cleanList];
+                        window.inventoryAppInstance.moqRevision = (window.inventoryAppInstance.moqRevision || 0) + 1;
                     }
+                    this.moqRevision = (this.moqRevision || 0) + 1;
+
                     this.loadMoqSheetIntoForm(saved);
+                    this.getPlannedOrdersBySupplier();
+
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('moq-sheets-updated', { detail: { sheet: saved } }));
+                    }
+
                     this.showToast(data.message || 'Tabulador de MOQ guardado exitosamente.', 'success');
                 } else {
                     this.showToast(data.message || 'Error al guardar tabulador de MOQ.', 'error');
@@ -9625,9 +9688,23 @@ function hybridInventoryModule() {
                 });
                 const data = await res.json();
                 if (res.ok && data.status === 'success') {
-                    this.moqSheets = (this.moqSheets || []).filter(s => s.id !== this.moqSheetForm.id);
+                    const cleanList = (this.moqSheets || []).filter(s => s.id !== this.moqSheetForm.id);
+                    this.moqSheets = [...cleanList];
+
+                    if (typeof window !== 'undefined' && window.inventoryAppInstance) {
+                        window.inventoryAppInstance.moqSheets = [...cleanList];
+                        window.inventoryAppInstance.moqRevision = (window.inventoryAppInstance.moqRevision || 0) + 1;
+                    }
+                    this.moqRevision = (this.moqRevision || 0) + 1;
+
                     this.moqSheetForm = null;
                     this.selectedMoqSheetId = null;
+                    this.getPlannedOrdersBySupplier();
+
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('moq-sheets-updated', { detail: { deletedId: this.selectedMoqSheetId } }));
+                    }
+
                     this.showToast('Tabulador eliminado correctamente.', 'success');
                 } else {
                     this.showToast(data.message || 'Error al eliminar tabulador.', 'error');

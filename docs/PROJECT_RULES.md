@@ -726,7 +726,119 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
   - `fix(modulo): descripción clara (TASK-ID)` para correcciones de bugs o errores de renderizado.
   - `docs(modulo): descripción clara` para actualización de especificaciones y manuales.
   - `refactor(modulo): descripción clara` para mejoras estructurales sin alteración funcional.
-* Queda prohibido realizar commits genéricos como *"cambios"*, *"avances"* o *"fix"*. Todo commit debe declarar el alcance de la modificación y el ID de tarea asociado.
+* Queda prohibido realizar commits genéricos como *"cambios"*, *"avances"* o *"fix"*. Todo commit debe declarar el alcance de la modificación y el ID de tarea asociado.---
+
+## 12. Reglas del Módulo de Inventario & Compras (Hub 4) Seccionadas por Ciclos Operativos
+
+> **Principio de Gobernanza por Ciclos Operativos (Canon Regla 10):**  
+> Para garantizar que ningún proceso del negocio quede desregulado o sujeto a interpretaciones ambiguas, las directrices operativas del Módulo de Inventario, Catálogo y Compras (Hub 4) se estructuran formalmente por **Ciclos Operativos**. Esta organización permite identificar de manera inmediata qué etapas de la cadena de valor están plenamente normadas y qué fases subsecuentes presentan brechas operativas pendientes de regulación formal.
+
+### Matriz de Cobertura y Diagnóstico de Ciclos Operativos
+
+| Ciclo Operativo | Módulo / Submódulo | Estado de Regulación | Reglas Formales | Brechas / Pendientes por Reglar |
+| :--- | :--- | :--- | :--- | :--- |
+| **Ciclo 1: Catálogo, Ingesta & Curaduría de Producto** | Hub 4 (Inventario / Workstation / Curaduría) | **100% Reglado y Operativo** | 12.1.1 a 12.1.6 | Ninguna. Flujo de captura, fotos 4:5, taxonomías in situ, fidelidad IA y borradores blindados. |
+| **Ciclo 2: Gobernanza de Proveedores & Marcas** | Hub 4 (Ajustes / Proveedores & Marcas) | **100% Reglado y Operativo** | 12.2.1 a 12.2.2 | Pendiente reglamentar evaluación automatizada periódica de SLA / Scorecard por mora de entrega. |
+| **Ciclo 3: Planeación de Compras y Tabuladores MOQ** | Hub 4 (Compras / Bandeja MOQ) | **100% Reglado y Operativo** | 12.3.1 a 12.3.5 | Pendiente reglamentar cálculo de pronóstico estacional y sugerido automático por velocidad de venta (DOH). |
+| **Ciclo 4: Discrepancias, Acuerdos Mercantiles y Notas de Crédito** | Hub 4 (Compras / Acuerdos Mercantiles) | **100% Reglado y Operativo** | 12.4.1 a 12.4.3 | Pendiente reglamentar conciliación automatizada con CFDI de egreso (SAT) emitido por el proveedor. |
+| **Ciclo 5: Emisión de PO, Despacho y Kardex de Auditoría** | Hub 4 (Compras / Expediente PO) | **100% Reglado y Operativo** | 12.5.1 a 12.5.3 | Pendiente reglamentar portal extranet B2B para confirmación de fecha de embarque por el proveedor. |
+| **Ciclo 6: Recepción Física Inbound en Muelle / Rampa** | Hub 4 (Almacén / Recepción Rampa) | *En Proceso (UI Diseñada)* | Pendiente formalizar | Requiere reglamentar lectura de código de barras 1D/2D en muelle y generación de acta circunstanciada. |
+| **Ciclo 7: Liquidación Contable y Cuentas por Pagar (AP)** | Hub 5 (Finanzas / SAT) | *En Proceso (Integración Cross-Hub)* | Pendiente formalizar | Requiere reglamentar cotejo de 3 vías (PO vs Remisión Rampa vs Factura XML CFDI 4.0). |
+
+---
+
+### 12.1 Ciclo Operativo 1: Catálogo, Ingesta & Curaduría de Producto
+
+#### Regla 12.1.1: Fidelidad Taxonómica Estricta en Catálogo & Copiloto IA (Cero Invención de Fibras)
+* **Sincronización Mandatoria con Base de Datos:** Los atributos textiles (tipo de tela, composición, acabados) deben sincronizarse dinámicamente con los registros persistidos en la tabla `apparel_fabrics`. Queda prohibido forzar valores por defecto genéricos ("Modal Seamless") en productos cuya ficha o curaduría contenga composiciones distintas.
+* **Prohibición de Invención de Fibras en IA:** El prompt enviado a Google Gemini / Copiloto Comercial prohíbe taxativamente inventar fibras o adjetivos técnicos inexistentes en los datos curados. Si la prenda es "Poliéster 95%, Elastano 5%", la IA y la ficha previa deben ceñirse con exactitud fáctica a dicha composición.
+* **Reactividad Bidireccional Limpia:** Los selectores taxonómicos no deben contener directivas Blade fijas (`:selected`) que impidan la reactividad bidireccional de Alpine.js al cambiar de producto o variante.
+
+#### Regla 12.1.2: Curaduría Multi-Foto Secuencial 1 a 1 (Lienzo 4:5 y WebP Universal)
+* **Carga Simultánea en Cola:** El dropzone admite la selección múltiple de hasta 10 imágenes por producto. El sistema las procesa en una cola secuencial interactiva donde el usuario encuadra y recorta las imágenes una por una.
+* **Formato Universal 4:5 y WebP:** Toda imagen aprobada se normaliza a 1080×1350 px (proporción vertical 4:5) sobre lienzo neutral y se persiste en formato `.webp`, optimizando la velocidad de carga en móvil y desktop.
+
+#### Regla 12.1.3: Asignación Cromática Foto-Color en Galería y Portada Destacada (+10%)
+* **Erradicación de Redundancia de Color en Variantes:** Se elimina la asignación manual aislada de "Color Principal" en el paso de variantes. La variante cromática se asocia de forma visual, directa y unívoca a cada fotografía de la galería.
+* **Portada Destacada:** La fotografía designada como portada oficial se resalta visualmente en la galería de ficha con un tamaño un 10% mayor (`scale-110`, anillo índigo y badge "Portada ★").
+* **Conmutación Dinámica en PDP:** Al hacer clic en un swatch de color en la vitrina pública (PDP), las imágenes conmutan instantáneamente al set de fotografías vinculadas a dicho color.
+
+#### Regla 12.1.4: Taxonomías In Situ sin Abandono de Flujo de Captura
+* **Creación al Vuelo:** Durante la captura en el Workstation o en la Curaduría de Scraping, el usuario dispone de botones in situ (`+ Categoría`, `+ Tela`, `+ Color`, `+ Vitrina`) que despliegan modales livianos sin recargar la página ni perder los datos ya introducidos.
+* **Persistencia y Selección Automática:** Al guardar la nueva entidad vía API, esta se inserta en la memoria reactiva local y se auto-selecciona en el formulario en curso.
+
+#### Regla 12.1.5: Wizard Secuencial de 4 Pasos & Previsualización Vertical 30/70
+* **Paginación Ergonómica:** El formulario de captura se distribuye en 4 pasos secuenciales (1. Fotos & Colores, 2. Datos & Diseño, 3. Variantes & Slotting, 4. Copiloto & Pricing), eliminando scrolls verticales interminables.
+* **Live Preview Vertical 30/70:** La columna lateral divide su espacio en 30% para la galería visual con chip de color y 70% para la ficha técnica reactiva que recalcula márgenes, SKU y atributos en vivo.
+
+#### Regla 12.1.6: Aislamiento y Gobernanza de Borradores (Publicación Condicionada)
+* **Segregación Estricta de Borradores:** Todo producto guardado como borrador (`draft`) se persiste con `visible = false` y se aísla en la colección segregada de borradores. Jamás se exhibe en catálogo operativo ni en vitrinas públicas hasta que recibe visto bueno formal mediante el flujo de aprobación.
+
+---
+
+### 12.2 Ciclo Operativo 2: Gobernanza de Proveedores & Marcas
+
+#### Regla 12.2.1: Estructura Jerárquica de Árbol Proveedor-Marcas (Cero Marcas Huérfanas)
+* **Entidad Matriz Proveedor:** El proveedor representa la razón social, persona moral o fabricante directo con quien se pactan condiciones comerciales, plazos de crédito (ej. 30, 60 días), datos fiscales (RFC, régimen) y canales de comunicación.
+* **Marcas como Entidades Hijas:** Las marcas comerciales (ej. *Torzo Sexywear*, *Mazho*, *Dajo Underwear*) son submarcas que pertenecen obligatoriamente a un proveedor padre registrado (`supplier_id`).
+* **Prohibición de Marcas Huérfanas:** Queda terminantemente prohibido registrar o mantener marcas comerciales desvinculadas de un proveedor matriz en la base de datos o en la interfaz.
+
+#### Regla 12.2.2: Tabuladores MOQ Exclusivos e Independientes por Proveedor (Sin Predefinidos)
+* **Independencia Total de Escalas:** Cada proveedor registrado cuenta con su propio tabulador de Cantidad Mínima de Pedido (MOQ) y escalas de precios escalonadas por volumen.
+* **Requisito de Alta Previa de Proveedor:** No existen tabuladores genéricos globales predeterminados. Para crear un tabulador MOQ, es mandatorio que el proveedor esté registrado previamente en el catálogo de fabricantes.
+* **Estructura Paramétrica:** El tabulador define vigencia, moneda, escalas de volumen (ej. Menudeo, 50, 100, 200, 400 prendas) y filas de costo unitario por categoría o prenda.
+
+---
+
+### 12.3 Ciclo Operativo 3: Planeación de Compras y Tabuladores MOQ
+
+#### Regla 12.3.1: Árbol Único Consolidado de Proveedor y Marcas en Bandeja MOQ (PO Única)
+* **Consolidación de Marcas Bajo el Fabricante Padre:** En la Bandeja MOQ de Compras, todos los requerimientos de reabastecimiento generados para las marcas filiales de un mismo proveedor (ej. prendas de *Torzo Sexywear* y prendas de *Mazho*) deben consolidarse dentro de **un único árbol de pedido bajo el proveedor matriz (*Torzo*)**.
+* **Generación de PO Unificada:** Queda prohibido dividir a las marcas de un mismo fabricante en órdenes de compra independientes. El volumen acumulado de todas sus marcas suma conjuntamente para alcanzar el umbral MOQ del fabricante y genera una **única Orden de Compra formal (PO)**.
+
+#### Regla 12.3.2: Reactividad Instantánea y Auto-Recálculo ante Modificación de Tabuladores MOQ
+* **Sincronización Inmediata sin Recarga:** La Bandeja MOQ debe actualizarse de forma instantánea y reactiva siempre que se cree, modifique, active o elimine un tabulador MOQ en los Ajustes del sistema.
+* **Preservación del Estado en Interfaz:** El recálculo de escalas, porcentajes de progreso y costos unitarios se produce en caliente mediante mutación inmutable de arrays y contadores reactivos (`moqRevision`), sin recargar el navegador ni perder filtros o selecciones activas.
+
+#### Regla 12.3.3: Tabulación Dinámica de Costos por Escalas de Volumen y Salto de MOQ
+* **Salto de Escala en Tiempo Real:** Al sumar unidades planificadas en el árbol del proveedor y sobrepasar el umbral de una escala superior (ej. saltar de 50 a 100 piezas), el sistema actualiza automáticamente el costo unitario de todas las partidas del fabricante según el precio correspondiente en el tabulador.
+* **Actualización en Cascada de Subtotales:** Los subtotales por partida, el subtotal neto del fabricante y la inversión estimada se recalculan en tiempo real, reflejando el ahorro por volumen alcanzado.
+
+#### Regla 12.3.4: Jerarquía de Fallback en Matriz MOQ (Categoría Específica -> General -> Fila Única)
+* **Resolución de Costos por Prenda:** Para asignar el costo tabulado a un ítem, el sistema busca en la matriz del proveedor la categoría coincidente con el producto (ej. "Tanga", "Bikini", "Boxer").
+* **Fallback Tolerante:** Si la categoría específica no está tipificada, pero el tabulador cuenta con una fila "General" o con una **única fila configurada**, todas las prendas del fabricante adoptarán dicha escala de costos en lugar de quedar sin tabular.
+
+#### Regla 12.3.5: Erradicación Absoluta de Datos Mock en Submódulo de Compras (Datos Reales de BD)
+* **Datos 100% Reales y Auditables:** El submódulo de compras, sus árboles de planeación, el expediente PO y el historial de transacciones operan exclusivamente con información real persistida en la base de datos (proveedores reales como Torzo y Dajo B2B, productos reales del catálogo y acuerdos de crédito existentes). Queda erradicado cualquier arreglo mock ficticio en código.
+
+---
+
+### 12.4 Ciclo Operativo 4: Discrepancias en Recepción, Acuerdos Mercantiles y Notas de Crédito
+
+#### Regla 12.4.1: Pestaña Permanente de Acuerdos Mercantiles y Notas de Crédito en Compras
+* **Sub-Pestaña Dedicada en UI:** El módulo de Compras incorpora una pestaña permanente (*"Notas de Crédito y Acuerdos Mercantiles"*) donde residen, se auditan y se gestionan la totalidad de los convenios compensatorios generados con proveedores por incidencias en muelle o rampa.
+
+#### Regla 12.4.2: Trazabilidad, Edición y Referenciación Inmutable de Discrepancias
+* **Expediente Completo del Acuerdo:** Cada acuerdo mercantil cuenta con folio único (`ACU-YYYY-XXXX`), folio de factura/remisión afectada, tipificación de discrepancia (unidades faltantes, piezas dañadas o penalización de entrega), desglose de piezas, costo unitario aplicado, importe económico a favor, contacto autorizador del fabricante y notas de minuta.
+* **Capacidad de Edición y Trazabilidad:** Los acuerdos pueden consultarse y editarse desde la interfaz mediante modal interactivo, manteniendo la trazabilidad histórica de su estado (`pendiente`, `aplicado`, `cancelado`).
+
+#### Regla 12.4.3: Selector de Acuerdos Mercantiles Pendientes y Compensación Contable en Emisión de PO
+* **Selector Dinámico por Proveedor:** En el modal de emisión del Expediente PO, la lista desplegable de compensación de créditos recupera exclusivamente los acuerdos mercantiles en estado `pendiente` correspondientes al proveedor de la orden.
+* **Deducción Aritmética Automática:** Al seleccionar un acuerdo, el sistema deduce su monto del total a pagar (`Total = Subtotal + IVA - Compensación de Acuerdo`), imprime la Cláusula 4 con la referencia legal en el PDF de la orden y actualiza el estado del acuerdo en la base de datos al emitirse la PO.
+
+---
+
+### 12.5 Ciclo Operativo 5: Emisión de Orden de Compra (PO), Despacho y Kardex de Auditoría
+
+#### Regla 12.5.1: Snapshot Inmutable y Expediente PO en PDF
+* **Membrete Formal y Términos:** La orden emitida cuenta con folio oficial (`PO-YYYY-XXXX`), membrete corporativo, datos fiscales del fabricante, condiciones de entrega, desglose de partidas por curva de tallas y cláusulas de compensación.
+* **Persistencia Snapshot:** El documento se almacena íntegro en la base de datos (`po_snapshot`) garantizando que reimpresiones posteriores conserven con exactitud fáctica los precios, acuerdos y partidas pactadas en la fecha de emisión original.
+
+#### Regla 12.5.2: Despacho Electrónico B2B con Token de Acuse de Recibo
+* **Notificación al Fabricante:** El modal de despacho permite enviar la orden formal vía correo electrónico al ejecutivo de cuenta del fabricante, adjuntando el PDF estructurado y registrando el evento en el feed de auditoría.
+
+#### Regla 12.5.3: Trazabilidad Transaccional ACID en Kardex de Compras (`purchase_kardex`)
+* **Bitácora Inmutable de Compras:** Toda acción relevante del ciclo de abastecimiento (`PO_EMITIDA`, `ON_DEMAND_CONVERTIDO`, `DISCREPANCIA_REGISTRADA`, `ACUERDO_APLICADO`, `INBOUND_RECEPCION`) se asienta cronológicamente en la tabla `purchase_kardex` con folio, operador responsable, monto económico y variación de unidades, garantizando auditoría integral.
 
 ---
 
@@ -797,7 +909,25 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Fidelidad Taxonómica**| Telas y Atributos Curados en IA & Resumen (6.74) | Cero invenciones de fibras ("modal"); sincronización real con BD y prompt estricto |
 | **Curaduría Multi-Foto**| Carga Múltiple & Recorte Secuencial 1 a 1 (6.75) | Cola de fotos en dropzone; recorte interactivo una por una y pricing pulido |
 | **Login RevOps Aislado** | Pantalla de Ingreso Exclusiva & Cero Chrome Storefront (6.76) | Vista dedicada centrada; erradicación total de navbar, carrito, búsqueda y filtros de tienda |
-| **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless | Markdown + HTML estilizado + PDF vía Chrome headless |
+| **Gobernanza Ciclos Operativos** | Estructuración por Ciclos de Valor (12.0) | Mapeo de ciclos operativos, auditoría de cobertura e identificación explícita de brechas |
+| **Fidelidad Taxonómica Catálogo**| Correspondencia Textil Estricta (12.1.1) | Cero invenciones de fibras; telas sincronizadas con `apparel_fabrics` y prompt veraz |
+| **Curaduría 4:5 WebP** | Estandarización Universal (12.1.2) | Carga en cola, recorte interactivo 1 a 1 y conversión mandatoria a `.webp` |
+| **Foto-Color & Portada 10%** | Conmutación Visual & Portada Mayor (12.1.3) | Color por foto en Paso 1, portada +10% en ficha y conmutación automática en PDP |
+| **Taxonomías In Situ** | Alta al Vuelo sin Salir de Captura (12.1.4) | Botones + Categoría, + Tela, + Color, + Vitrina con modales livianos e inserción reactiva |
+| **Árbol Proveedor-Marcas** | Jerarquía Matriz & Cero Marcas Huérfanas (12.2.1) | Marcas hijas con `supplier_id` mandatorio consolidando volumen del fabricante padre |
+| **Tabuladores MOQ Independientes**| Escalas Exclusivas por Proveedor (12.2.2) | Tabuladores individuales sin predeterminados; requiere proveedor registrado previo |
+| **Bandeja MOQ Consolidada** | Pedido Único por Fabricante y Marcas (12.3.1) | Consolidación de marcas bajo el proveedor padre en un solo árbol generando 1 sola PO |
+| **Reactividad MOQ Instantánea**| Recálculo Dinámico en Caliente (12.3.2) | Actualización automática de la Bandeja MOQ al crear, editar o borrar tabuladores |
+| **Salto de Escala de Costo** | Tabulación Automática por Volumen (12.3.3) | Actualización en tiempo real del costo de partidas al superar umbrales de escala MOQ |
+| **Fallback en Matriz MOQ** | Tolerancia Categórica Jerárquica (12.3.4) | Categoría específica &rarr; General &rarr; Fila única para evitar partidas sin costo |
+| **Cero Mocks en Compras** | Datos 100% Reales y Auditables (12.3.5) | Erradicación total de mocks; persistencia en BD de proveedores, lotes y acuerdos |
+| **Acuerdos y Notas de Crédito** | Pestaña Dedicada de Acuerdos Mercantiles (12.4.1)| Submódulo permanente en Compras para auditar convenios por incidencias en rampa |
+| **Trazabilidad Discrepancias** | Edición y Expediente de Acuerdo (12.4.2) | Folio, remisión, piezas, costo, importe, contacto y estados `pendiente`/`aplicado` |
+| **Compensación Contable en PO**| Deducción Automática en Emisión de PO (12.4.3) | Selector de acuerdos pendientes que descuenta el saldo del total a pagar en la PO |
+| **Expediente PO en PDF** | Snapshot Fidedigno e Inmutable (12.5.1) | Persistencia íntegra de la PO emitida (`po_snapshot`) para reimpresión histórica idéntica |
+| **Despacho B2B por Correo** | Notificación con Token de Acuse (12.5.2) | Envío formal por email al ejecutivo del taller con PDF y registro en auditoría |
+| **Kardex Compras ACID** | Bitácora Transaccional Inmutable (12.5.3) | Registro cronológico en `purchase_kardex` de cada hito económico y logístico |
+| **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
 

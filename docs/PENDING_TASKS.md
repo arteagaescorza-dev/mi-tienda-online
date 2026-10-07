@@ -71,6 +71,7 @@
 | `TASK-PUR-02` | Reasignación de Modales Físicos (Rampa y Surtido Interno) a Almacén y Segregación de Compras | **Hub 1 $\leftrightarrow$ Hub 4 (Compras / Almacén)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Rampa Almacén, Modal Surtido Carlos, Exclusión Purchases, Tag v1.7 |
 | `TASK-PUR-03` | Depuración y Especialización del Catálogo para Compras (Existencias, DOH, Costos y Botón PO) | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (Fullstack End-to-End)** | DOH, Alertas ROP, Costos CPP, Ocultar Auditoría Ciegas, Tag v1.7 |
 | `TASK-PUR-04` | Generador de PO con Impresión PDF Multi-Página, Compensación de Notas de Crédito & Edición de Costo/Prioridad | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (Fullstack End-to-End)** | Motor @media print Letter, Panel Compensación Discrepancias, Recálculo ROP, Tag v1.7 |
+| `TASK-PUR-05` | Gobernanza de Compras por Ciclos Operativos: Árbol Consolidado Proveedor-Marcas, Reactividad MOQ y Acuerdos de Crédito | **Hub 4 (Inventario / Compras / Ajustes)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Árbol Consolidado, Reactividad MOQ en Caliente, Fallback Matriz, DB Real, Regla 10 & 12 |
 | `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Analítica RevOps, LLM API, Chat UI, Tag v1.3 |
 | `TASK-HUB-VND` | Portal Extranet de Proveedores y Fabricantes (B2B Inbound & Órdenes) | **Hub 7 / B2B (Proveedores)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 4 Compras, Recepción Inbound, Tag v1.7 |
 | `TASK-SUB-DUN` | Motor de Dunning y Recuperación de Cobros Fallidos en Suscripciones (MRR) | **Transversal (H5 $\leftrightarrow$ H3)** | **Media** | **Completada (UI)** | MRR, Stripe Webhooks, WhatsApp |
@@ -1876,6 +1877,25 @@ graph TD
   - **5. Edición en Línea de Costo Unitario y Prioridad ROP:**
     * Celdas editables en Tree View y Flat View con recálculo dinámico de subtotales, totales de proveedor y prioridad reactiva según quiebre de stock.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [INVENTORY_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/INVENTORY_ROADMAP.md) (Item 18) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md) (Sección 3.4 y 3.4c).
+
+---
+
+### `TASK-PUR-05`: Gobernanza de Compras por Ciclos Operativos: Árbol Consolidado Proveedor-Marcas, Reactividad MOQ en Caliente y Matriz de Acuerdos Mercantiles por Discrepancias
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 4 (Inventario & Cadena de Suministro) - Submódulos *Compras*, *Ajustes de Tabuladores MOQ* y *Acuerdos Mercantiles*
+* **Reglas Formales del Canon:** Regla 10 (Gobernanza y Tríptico Documental), Regla 12 (Reglas por Ciclos Operativos 12.1 a 12.5).
+* **Diagnóstico & Puntos Críticos Reportados:**
+  1. **Dispersión de Marcas en Órdenes Distintas:** En la Bandeja MOQ se separaban las marcas filiales (ej. *Torzo Sexywear* y *Mazho*) como si fueran proveedores distintos, generando órdenes fragmentadas en lugar de consolidar el volumen del fabricante matriz.
+  2. **Falla de Reactividad al Guardar Tabuladores MOQ:** Al dar de alta o guardar un tabulador de escalas MOQ (ej. Dajo B2B), la Bandeja MOQ no recalculaba las escalas ni los subtotales, mostrando *"Sin Tabulador MOQ configurado para este proveedor"*, debido a mutación directa por índice en arrays de Alpine (`this.moqSheets[idx] = saved`) y desalineación con la instancia global `window.inventoryAppInstance`.
+  3. **Ausencia de Ubicación en UI para Acuerdos y Notas de Crédito:** No existía una pantalla donde residieran, se consultaran o se modificaran los acuerdos compensatorios generados por discrepancias en muelle.
+  4. **Pérdida de Tabulación por Incompatibilidad Categórica:** Si el tabulador MOQ del proveedor tenía una categoría ("Bikini") y los ítems planificados tenían otra ("Tanga"), el ítem quedaba sin tabular perdiendo la escala de costos del proveedor.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - **1. Árbol Único Consolidado por Fabricante y Marcas (Regla 12.3.1):** Las marcas filiales se agrupan dentro del árbol del proveedor padre. El badge de marcas en la cabecera enumera las submarcas (`Marcas: Torzo Sexywear, Mazho` o `Dajo B2B, Dajo Underwear`), acumulando conjuntamente el progreso hacia el MOQ y emitiendo una sola PO unificada.
+  - **2. Reactividad Instantánea con Contador de Revisión (`moqRevision`) (Regla 12.3.2):** Se introdujo `moqRevision` como dependencia reactiva explícita en `getPlannedOrdersBySupplier()`. Al guardar, editar o eliminar tabuladores en `saveCurrentMoqSheet()` y `deleteCurrentMoqSheet()`, se reasignan arrays inmutables (`[...cleanList]`), se sincroniza `window.inventoryAppInstance.moqSheets` y se dispara `this.getPlannedOrdersBySupplier()`, recalculando inmediatamente los porcentajes de avance y costos.
+  - **3. Fallback Jerárquico en Matriz MOQ (Regla 12.3.4):** Si la categoría específica no coincide, el sistema aplica fallback hacia la fila "General" o hacia la fila única configurada en el tabulador, garantizando que todas las prendas del fabricante reciban el costo tabulado.
+  - **4. Pestaña de Acuerdos Mercantiles y Notas de Crédito en UI (Regla 12.4.1):** Sub-pestaña permanente en Compras con tabla auditable, búsqueda reactiva, modal interactivo de creación/edición, cálculo automático de importes y trazabilidad de estados (`pendiente`, `aplicado`, `cancelado`).
+  - **5. Erradicación Total de Mocks y Datos Reales de Base de Datos (Regla 12.3.5):** Purga de proveedores y órdenes ficticias, reemplazados con datos persistidos en MySQL (`suppliers`, `products`, `supplier_credit_agreements`, `supplier_moq_sheets`).
+  - **6. Formalización en Tríptico Documental por Ciclos Operativos (Regla 10):** Documentado íntegramente en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html`, `docs/PROJECT_RULES.pdf` y `docs/PLAN_IMPLEMENTACION_COMPRAS_HUB4.md`.
 
 ---
 

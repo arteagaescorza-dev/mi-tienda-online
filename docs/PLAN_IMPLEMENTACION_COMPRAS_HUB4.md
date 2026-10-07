@@ -138,3 +138,28 @@ Reactivar, unificar e integrar completamente la suite de **Compras** dentro de *
 5. **Fase 5: Pruebas y Validación:**
    - Ejecución de la suite completa de pruebas con PHPUnit para garantizar 100% de aserciones en verde y cero regresiones.
 
+---
+
+## 5. Gobernanza y Reglas de Negocio por Ciclos Operativos (Canon Regla 10 & Regla 12)
+
+### 5.1. Matriz de Cobertura de Ciclos Operativos en Compras & Abastecimiento
+
+| Ciclo Operativo | Alcance del Proceso | Estado | Reglas Formalizadas | Brechas Identificadas / Por Reglar |
+| :--- | :--- | :--- | :--- | :--- |
+| **Ciclo 1: Catálogo e Ingesta de Producto** | Curaduría 4:5 WebP, fidelidad textil con BD, taxonomías in situ y borradores | **Completado** | 12.1.1 &ndash; 12.1.6 | Ninguna. |
+| **Ciclo 2: Gobernanza de Proveedores & Marcas** | Árbol Proveedor &rarr; Marcas hijas y tabuladores MOQ exclusivos independientes | **Completado** | 12.2.1 &ndash; 12.2.2 | Pendiente cálculo periódico de SLA por incumplimiento de entrega. |
+| **Ciclo 3: Planeación de Compras & MOQ** | Árbol consolidado de compras, reactividad en caliente a tabuladores y fallback | **Completado** | 12.3.1 &ndash; 12.3.5 | Pendiente algoritmo de previsión estacional por DOH de inventario. |
+| **Ciclo 4: Discrepancias & Acuerdos Mercantiles**| Pestaña de acuerdos, trazabilidad de mermas/faltantes y compensación en PO | **Completado** | 12.4.1 &ndash; 12.4.3 | Pendiente conciliación automatizada con CFDI de egreso SAT del taller. |
+| **Ciclo 5: Expedición de PO & Kardex** | Snapshot inmutable en PDF, despacho electrónico por email y Kardex ACID | **Completado** | 12.5.1 &ndash; 12.5.3 | Pendiente portal extranet para acuse de fecha de recolección en taller. |
+| **Ciclo 6: Recepción Física en Rampa / Muelle** | Inspección ciega, cotejo de bultos y generación de actas de discrepancia | *En Proceso* | En diseño normativo | Requiere reglamentar lectura de código de barras y acta de hechos. |
+| **Ciclo 7: Liquidación Contable (AP / SAT)** | Cotejo de 3 vías (PO &harr; Remisión &harr; Factura XML 4.0) | *En Proceso* | En diseño normativo | Requiere formalizar circuito con Hub 5 (Finanzas y SAT). |
+
+### 5.2. Reglas Clave Implementadas
+1. **Árbol Consolidado Proveedor-Marcas (Regla 12.3.1):** En la Bandeja MOQ, todas las marcas filiales de un proveedor (ej. Torzo con Torzo Sexywear y Mazho; Dajo B2B con Dajo Underwear) se unifican en un único árbol de pedido, consolidando el volumen para alcanzar el MOQ del fabricante y emitiendo una sola Orden de Compra (PO).
+2. **Reactividad Instantánea a Tabuladores MOQ (Regla 12.3.2):** La Bandeja MOQ actualiza en caliente los porcentajes de avance, escalas activas y costos unitarios siempre que se dé de alta, edite o elimine un tabulador en Ajustes, sin recargar el navegador.
+3. **Tabulación Dinámica por Salto de Escala (Regla 12.3.3):** Al sobrepasar el umbral de una escala de volumen superior, el costo unitario de todas las partidas del fabricante se recalcula reactivamente según la matriz MOQ.
+4. **Fallback Categórico Tolerante (Regla 12.3.4):** Si la prenda no coincide con una subcategoría específica, adopta la fila "General" o la fila única del tabulador del fabricante para garantizar costo tabulado continuo.
+5. **Pestaña Permanente de Acuerdos Mercantiles y Notas de Crédito (Regla 12.4.1):** Sub-pestaña dedicada en Compras para auditar, consultar y editar convenios originados por incidencias físicas en rampa.
+6. **Compensación Contable en PO (Regla 12.4.3):** Selector de acuerdos pendientes en la emisión de PO que deduce automáticamente el saldo a favor del total facturado e imprime la Cláusula 4 legal en el documento PDF.
+7. **Erradicación Total de Datos Falsos (Regla 12.3.5):** El submódulo de Compras opera al 100% con datos reales persistidos en MySQL, erradicando arreglos mock de pruebas.
+

@@ -1221,6 +1221,184 @@
   </div>
 </div>
 
+<!-- CAPÍTULO 12 -->
+<h2 class="chapter-title">
+  <span>12. GOBERNANZA POR CICLOS OPERATIVOS (INVENTARIO, CATÁLOGO, PROVEEDORES & COMPRAS)</span>
+  <span class="rule-badge">Norma 12.0</span>
+</h2>
+
+<p style="font-size: 8pt; color: #475569; margin-bottom: 12px; background: #f8fafc; border-left: 3px solid #6366f1; padding: 6px 10px; border-radius: 4px;">
+  <strong>Canon de Regla 10:</strong> Las normas operativas se estructuran de forma indisoluble por <em>Ciclos Operativos</em> para auditar qué procesos de la cadena de valor están 100% blindados y detectar con claridad brechas pendientes de reglamentación.
+</p>
+
+<!-- Subsección 12.1 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 10px 0 6px; letter-spacing: 0.04em;">
+  12.1 Ciclo Operativo 1: Catálogo, Ingesta & Curaduría de Producto
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.1: Fidelidad Taxonómica Estricta en Catálogo & Copiloto IA</strong>
+      Sincronización mandatoria con <code>apparel_fabrics</code> en base de datos. Cero invenciones de fibras ("modal"); prompt estricto y exactitud fáctica en descripciones y ficha técnica.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.2: Curaduría Multi-Foto Secuencial 1 a 1 (Lienzo 4:5 y WebP Universal)</strong>
+      Carga simultánea de hasta 10 fotos con cola interactiva de recorte una por una a 1080&times;1350 px (4:5) sobre lienzo neutral y compresión obligatoria a <code>.webp</code>.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.3: Asignación Cromática Foto-Color en Galería y Portada Destacada (+10%)</strong>
+      Eliminación de color en variantes; variante cromática directa por fotografía en Paso 1, portada un 10% mayor y conmutación dinámica de fotos en PDP según el swatch seleccionado.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.4: Taxonomías In Situ sin Abandono de Flujo de Captura</strong>
+      Alta al vuelo de categorías, subcategorías, telas, colores y vitrinas con modales livianos e inserción reactiva inmediata en el formulario en curso.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">5</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.5: Wizard Secuencial de 4 Pasos & Previsualización Vertical 30/70</strong>
+      Formulario distribuido en 4 pasos sin desbordamientos de pantalla, acompañado de Live Preview 30% galería y 70% ficha técnica reactiva.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">6</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.6: Aislamiento y Gobernanza de Borradores (Publicación Condicionada)</strong>
+      Prendas en borrador (<code>draft</code>) permanecen invisibles y aisladas de vitrinas y catálogo operativo hasta recibir visto bueno en la bandeja de aprobación.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.2 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.2 Ciclo Operativo 2: Gobernanza de Proveedores & Marcas
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">7</div>
+    <div class="rule-content">
+      <strong>Regla 12.2.1: Estructura Jerárquica de Árbol Proveedor-Marcas</strong>
+      El proveedor es la entidad comercial matriz (fabricante/distribuidor). Las marcas comerciales son entidades hijas vinculadas obligatoriamente a un proveedor padre registrado (cero marcas huérfanas).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">8</div>
+    <div class="rule-content">
+      <strong>Regla 12.2.2: Tabuladores MOQ Exclusivos e Independientes por Proveedor</strong>
+      Las escalas de Pedido Mínimo (MOQ) y precios por volumen son exclusivas por proveedor. Prohibidos tabuladores predeterminados; se requiere registrar previamente al proveedor para crear su tabulador.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.3 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.3 Ciclo Operativo 3: Planeación de Compras y Tabuladores MOQ
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">9</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.1: Árbol Único Consolidado de Proveedor y Marcas en Bandeja MOQ</strong>
+      Las marcas pertenecientes a un mismo fabricante (ej. Torzo y Mazho) se agrupan en un único árbol de pedido, consolidando el volumen hacia el MOQ del fabricante y generando una sola Orden de Compra (PO).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">10</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.2: Reactividad Instantánea y Auto-Recálculo ante Modificación de Tabuladores</strong>
+      La Bandeja MOQ se actualiza y recalcula de inmediato ante altas, ediciones o eliminaciones de tabuladores en Ajustes, sin recargar el navegador ni perder el estado de la vista.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">11</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.3: Tabulación Dinámica de Costos por Escalas de Volumen y Salto de MOQ</strong>
+      Al acumular unidades planificadas y superar un umbral de escala superior (ej. de 50 a 100 piezas), el costo unitario de todas las partidas del fabricante se recalcula reactivamente según la matriz MOQ.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">12</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.4: Jerarquía de Fallback en Matriz MOQ</strong>
+      Resolución jerárquica: Categoría específica &rarr; General &rarr; Fila única. Si un tabulador tiene una sola fila configurada, todas las prendas del fabricante adoptan dicha escala.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">13</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.5: Erradicación Absoluta de Datos Mock en Submódulo de Compras</strong>
+      El flujo de compras, bandeja MOQ y expediente operan exclusivamente con datos reales persistidos en base de datos (Torzo, Dajo B2B, productos de catálogo y acuerdos de crédito reales).
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.4 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.4 Ciclo Operativo 4: Discrepancias, Acuerdos Mercantiles y Notas de Crédito
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">14</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.1: Pestaña Permanente de Acuerdos Mercantiles y Notas de Crédito</strong>
+      Submódulo dedicado en Compras para auditar convenios compensatorios generados con proveedores por incidencias físicas en rampa (faltantes, defectos o mermas).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">15</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.2: Trazabilidad, Edición y Referenciación Inmutable de Discrepancias</strong>
+      Expediente auditable por acuerdo con folio único, remisión afectada, desglose de piezas, costo aplicado, importe a favor, contacto autorizador y estados <code>pendiente</code> / <code>aplicado</code>.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">16</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.3: Selector de Acuerdos Mercantiles Pendientes y Compensación en PO</strong>
+      Selector dinámico en el generador de PO que recupera acuerdos pendientes del proveedor, deduce el monto automáticamente del total a pagar e incorpora la Cláusula 4 legal en el PDF.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.5 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.5 Ciclo Operativo 5: Emisión de Orden de Compra (PO), Despacho y Kardex de Auditoría
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">17</div>
+    <div class="rule-content">
+      <strong>Regla 12.5.1: Snapshot Inmutable y Expediente PO en PDF</strong>
+      Persistencia completa de la PO emitida (<code>po_snapshot</code>) garantizando que reimpresiones históricas preserven fidedignamente precios, deducciones y partidas originales.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">18</div>
+    <div class="rule-content">
+      <strong>Regla 12.5.2: Despacho Electrónico B2B con Token de Acuse de Recibo</strong>
+      Envío estructurado por email al ejecutivo de cuenta del fabricante con PDF adjunto y registro transaccional en la bitácora operativa.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">19</div>
+    <div class="rule-content">
+      <strong>Regla 12.5.3: Trazabilidad Transaccional ACID en Kardex de Compras</strong>
+      Registro cronológico inmutable en <code>purchase_kardex</code> de cada movimiento (emisión, conversión on-demand, acuerdos aplicados y recepciones inbound).
+    </div>
+  </div>
+</div>
+
 <div class="page-break"></div>
 
 <!-- RESUMEN DE CUMPLIMIENTO -->
@@ -1457,6 +1635,96 @@
       <td><strong>Login RevOps Aislado</strong></td>
       <td>Pantalla de Ingreso Exclusiva & Cero Chrome Storefront (6.76)</td>
       <td>Vista dedicada centrada; erradicación total de navbar, carrito, búsqueda y filtros de tienda.</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Ciclos</strong></td>
+      <td>Estructuración por Ciclos de Valor (12.0)</td>
+      <td>Mapeo de ciclos operativos, auditoría de cobertura e identificación explícita de brechas.</td>
+    </tr>
+    <tr>
+      <td><strong>Fidelidad Taxonómica</strong></td>
+      <td>Correspondencia Textil Estricta (12.1.1)</td>
+      <td>Cero invenciones de fibras; telas sincronizadas con <code>apparel_fabrics</code> y prompt veraz.</td>
+    </tr>
+    <tr>
+      <td><strong>Curaduría 4:5 WebP</strong></td>
+      <td>Estandarización Universal (12.1.2)</td>
+      <td>Carga en cola, recorte interactivo 1 a 1 y conversión mandatoria a <code>.webp</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Foto-Color & Portada 10%</strong></td>
+      <td>Conmutación Visual & Portada Mayor (12.1.3)</td>
+      <td>Color por foto en Paso 1, portada +10% en ficha y conmutación automática en PDP.</td>
+    </tr>
+    <tr>
+      <td><strong>Taxonomías In Situ</strong></td>
+      <td>Alta al Vuelo sin Salir de Captura (12.1.4)</td>
+      <td>Botones + Categoría, + Tela, + Color, + Vitrina con modales livianos e inserción reactiva.</td>
+    </tr>
+    <tr>
+      <td><strong>Árbol Proveedor-Marcas</strong></td>
+      <td>Jerarquía Matriz & Cero Huérfanas (12.2.1)</td>
+      <td>Marcas hijas con <code>supplier_id</code> mandatorio consolidando volumen del fabricante padre.</td>
+    </tr>
+    <tr>
+      <td><strong>Tabuladores MOQ</strong></td>
+      <td>Escalas Exclusivas por Proveedor (12.2.2)</td>
+      <td>Tabuladores individuales sin predeterminados; requiere proveedor registrado previo.</td>
+    </tr>
+    <tr>
+      <td><strong>Bandeja MOQ Consolidada</strong></td>
+      <td>Pedido Único por Fabricante y Marcas (12.3.1)</td>
+      <td>Consolidación de marcas bajo el proveedor padre en un solo árbol generando 1 sola PO.</td>
+    </tr>
+    <tr>
+      <td><strong>Reactividad MOQ Instantánea</strong></td>
+      <td>Recálculo Dinámico en Caliente (12.3.2)</td>
+      <td>Actualización automática de la Bandeja MOQ al crear, editar o borrar tabuladores.</td>
+    </tr>
+    <tr>
+      <td><strong>Salto de Escala de Costo</strong></td>
+      <td>Tabulación Automática por Volumen (12.3.3)</td>
+      <td>Actualización en tiempo real del costo de partidas al superar umbrales de escala MOQ.</td>
+    </tr>
+    <tr>
+      <td><strong>Fallback Matriz MOQ</strong></td>
+      <td>Tolerancia Categórica Jerárquica (12.3.4)</td>
+      <td>Categoría específica &rarr; General &rarr; Fila única para evitar partidas sin costo.</td>
+    </tr>
+    <tr>
+      <td><strong>Cero Mocks en Compras</strong></td>
+      <td>Datos 100% Reales y Auditables (12.3.5)</td>
+      <td>Erradicación total de mocks; persistencia en BD de proveedores, lotes y acuerdos.</td>
+    </tr>
+    <tr>
+      <td><strong>Acuerdos y Notas Crédito</strong></td>
+      <td>Pestaña Dedicada de Acuerdos Mercantiles (12.4.1)</td>
+      <td>Submódulo permanente en Compras para auditar convenios por incidencias en rampa.</td>
+    </tr>
+    <tr>
+      <td><strong>Trazabilidad Discrepancias</strong></td>
+      <td>Edición y Expediente de Acuerdo (12.4.2)</td>
+      <td>Folio, remisión, piezas, costo, importe, contacto y estados <code>pendiente</code> / <code>aplicado</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Compensación Contable PO</strong></td>
+      <td>Deducción Automática en Emisión de PO (12.4.3)</td>
+      <td>Selector de acuerdos pendientes que descuenta el saldo del total a pagar en la PO.</td>
+    </tr>
+    <tr>
+      <td><strong>Expediente PO en PDF</strong></td>
+      <td>Snapshot Fidedigno e Inmutable (12.5.1)</td>
+      <td>Persistencia íntegra de la PO emitida (<code>po_snapshot</code>) para reimpresión histórica idéntica.</td>
+    </tr>
+    <tr>
+      <td><strong>Despacho B2B Correo</strong></td>
+      <td>Notificación con Token de Acuse (12.5.2)</td>
+      <td>Envío formal por email al ejecutivo del taller con PDF y registro en auditoría.</td>
+    </tr>
+    <tr>
+      <td><strong>Kardex Compras ACID</strong></td>
+      <td>Bitácora Transaccional Inmutable (12.5.3)</td>
+      <td>Registro cronológico en <code>purchase_kardex</code> de cada hito económico y logístico.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>
