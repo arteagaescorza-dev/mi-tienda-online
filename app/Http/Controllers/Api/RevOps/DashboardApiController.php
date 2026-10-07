@@ -923,9 +923,9 @@ Responde siempre en español, con un tono ejecutivo, analítico, conciso y altam
      */
     public function ensureDefaultOperationalTasksExist(): void
     {
-        if (OperationalTask::count() === 0) {
-            $today = today();
+        $today = today();
 
+        if (OperationalTask::where('assigned_role', 'warehouse')->count() === 0) {
             OperationalTask::create([
                 'title' => 'Empaque: Pedido #MIX-1048',
                 'reference_code' => '#MIX-1048',
@@ -1027,6 +1027,97 @@ Responde siempre en español, con un tono ejecutivo, analítico, conciso y altam
                         ['label' => 'Impresión de 2 tantos de manifiesto con firma autógrafa', 'checked' => false],
                         ['label' => 'Entrega física de bultos a unidad de recolección DHL', 'checked' => false],
                     ],
+                ],
+            ]);
+        }
+
+        if (OperationalTask::where('assigned_role', 'purchases')->count() === 0) {
+            OperationalTask::create([
+                'title' => 'Validar Cumplimiento de Entrega: Torzo B2B #OC-2026-003',
+                'reference_code' => '#OC-2026-003',
+                'category' => 'inbound',
+                'priority' => 'critical',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Recepción física concluida en rampa con reporte de discrepancia. Validar cumplimiento y formalizar acta mercantil.',
+                'due_at' => $today->copy()->setTime(15, 0),
+                'sla_minutes_limit' => 60,
+                'action_payload' => [
+                    'po_number' => 'OC-2026-003',
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                    'contact' => 'Carlos Mendoza (Torzo)',
+                    'phone' => '+52 55 4192 8820',
+                    'discrepancy' => 'Diferencia de 10 piezas en talla M. Requiere emisión de Nota de Crédito.',
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Reabastecimiento ROP: Playera Oversize Blanca (Lote +60 pzs)',
+                'reference_code' => 'SKU: TEE-OVS-WHT',
+                'category' => 'compras',
+                'priority' => 'high',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Stock disponible (12 pzs) cayó por debajo del punto de reorden (25 pzs). Lead time del taller: 5 días hábiles.',
+                'due_at' => $today->copy()->setTime(16, 0),
+                'sla_minutes_limit' => 120,
+                'action_payload' => [
+                    'sku' => 'TEE-OVS-WHT',
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                    'current_stock' => 12,
+                    'rop_threshold' => 25,
+                    'suggested_batch' => 60,
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Bandeja MOQ: Torzo B2B al 85% de cobertura de lote',
+                'reference_code' => 'MOQ-TORZO-01',
+                'category' => 'compras',
+                'priority' => 'medium',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Faltan 15 prendas para saltar a escala de 100 pzs y obtener ahorro del 12% ($75.00/u en lugar de $85.00/u).',
+                'due_at' => $today->copy()->setTime(17, 0),
+                'sla_minutes_limit' => 180,
+                'action_payload' => [
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                    'current_units' => 85,
+                    'target_moq' => 100,
+                    'potential_savings' => 1000.00,
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Conciliar Acuerdo NC-TORZO-2026-001 ($950.00 MXN)',
+                'reference_code' => 'NC-TORZO-2026-001',
+                'category' => 'compras',
+                'priority' => 'medium',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Acuerdo compensatorio por faltante en rampa. Seleccionar y aplicar como deducción en la próxima orden de compra.',
+                'due_at' => $today->copy()->setTime(18, 0),
+                'sla_minutes_limit' => 240,
+                'action_payload' => [
+                    'ref' => 'NC-TORZO-2026-001',
+                    'amount' => 950.00,
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Pedidos On-Demand: 4 solicitudes D2C listas para compra',
+                'reference_code' => 'ON-DEMAND-04',
+                'category' => 'procurement',
+                'priority' => 'high',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => '4 pedidos de clientes especiales pagados en espera de colocación de orden a taller de confección.',
+                'due_at' => $today->copy()->setTime(16, 30),
+                'sla_minutes_limit' => 90,
+                'action_payload' => [
+                    'requests_count' => 4,
+                    'suppliers' => ['Torzo B2B', 'Silk & Cotton Iberia SL'],
                 ],
             ]);
         }

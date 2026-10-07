@@ -1341,6 +1341,13 @@
       El flujo de compras, bandeja MOQ y expediente operan exclusivamente con datos reales persistidos en base de datos (Torzo, Dajo B2B, productos de catálogo y acuerdos de crédito reales).
     </div>
   </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">14</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.6: Visibilidad de Ahorro Real ($ y %) y Nivel de Tabulación Activo en Bandeja MOQ</strong>
+      Cada árbol de proveedor en la Bandeja MOQ expone reactivamente el nivel de tabulación alcanzado según las prendas planificadas, computando el dinero real ahorrado en pesos (<code>-$X.XX MXN</code>) y el porcentaje de descuento efectivo frente al costo unitario base.
+    </div>
+  </div>
 </div>
 
 <!-- Subsección 12.4 -->
@@ -1349,24 +1356,31 @@
 </h3>
 <div class="rule-list">
   <div class="rule-item avoid-break">
-    <div class="rule-number">14</div>
+    <div class="rule-number">15</div>
     <div class="rule-content">
       <strong>Regla 12.4.1: Pestaña Permanente de Acuerdos Mercantiles y Notas de Crédito</strong>
       Submódulo dedicado en Compras para auditar convenios compensatorios generados con proveedores por incidencias físicas en rampa (faltantes, defectos o mermas).
     </div>
   </div>
   <div class="rule-item avoid-break">
-    <div class="rule-number">15</div>
+    <div class="rule-number">16</div>
     <div class="rule-content">
       <strong>Regla 12.4.2: Trazabilidad, Edición y Referenciación Inmutable de Discrepancias</strong>
       Expediente auditable por acuerdo con folio único, remisión afectada, desglose de piezas, costo aplicado, importe a favor, contacto autorizador y estados <code>pendiente</code> / <code>aplicado</code>.
     </div>
   </div>
   <div class="rule-item avoid-break">
-    <div class="rule-number">16</div>
+    <div class="rule-number">17</div>
     <div class="rule-content">
       <strong>Regla 12.4.3: Selector de Acuerdos Mercantiles Pendientes y Compensación en PO</strong>
       Selector dinámico en el generador de PO que recupera acuerdos pendientes del proveedor, deduce el monto automáticamente del total a pagar e incorpora la Cláusula 4 legal en el PDF.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">18</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.4: Estricto Aislamiento de Acuerdos por Proveedor y Multi-Selección en Emisión de PO</strong>
+      Filtrado estricto e inviolable de notas de crédito pertenecientes exclusivamente al proveedor de la orden, permitiendo seleccionar uno o más acuerdos simultáneamente con acumulación matemática de importes a favor.
     </div>
   </div>
 </div>
@@ -1377,24 +1391,59 @@
 </h3>
 <div class="rule-list">
   <div class="rule-item avoid-break">
-    <div class="rule-number">17</div>
+    <div class="rule-number">19</div>
     <div class="rule-content">
       <strong>Regla 12.5.1: Snapshot Inmutable y Expediente PO en PDF</strong>
       Persistencia completa de la PO emitida (<code>po_snapshot</code>) garantizando que reimpresiones históricas preserven fidedignamente precios, deducciones y partidas originales.
     </div>
   </div>
   <div class="rule-item avoid-break">
-    <div class="rule-number">18</div>
+    <div class="rule-number">20</div>
     <div class="rule-content">
       <strong>Regla 12.5.2: Despacho Electrónico B2B con Token de Acuse de Recibo</strong>
       Envío estructurado por email al ejecutivo de cuenta del fabricante con PDF adjunto y registro transaccional en la bitácora operativa.
     </div>
   </div>
   <div class="rule-item avoid-break">
-    <div class="rule-number">19</div>
+    <div class="rule-number">21</div>
     <div class="rule-content">
       <strong>Regla 12.5.3: Trazabilidad Transaccional ACID en Kardex de Compras</strong>
       Registro cronológico inmutable en <code>purchase_kardex</code> de cada movimiento (emisión, conversión on-demand, acuerdos aplicados y recepciones inbound).
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.6 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.6 Ciclo Operativo 6: Segregación de Roles RBAC en Hub 1 (Almacén vs Compras)
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">22</div>
+    <div class="rule-content">
+      <strong>Regla 12.6.1: Segregación Operativa de Tareas en Hub 1 por Rol RBAC</strong>
+      Bandeja operativa de Hub 1 conmutativamente segregada entre Almacén & Empaque Físico (Carlos Almacén: corte DHL 14:00, rampa ciega, cero finanzas) y Compras & Abastecimiento B2B (Elena Compras: discrepancias, MOQs, acuerdos, órdenes ROP), con pastillas de conmutación fluida.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.7 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.7 Ciclo Operativo 7: Gobernanza de Hubs y Extranet de Proveedores (Hub 5 y Hub 7)
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">23</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.1: Preservación de Enlaces de Navegación en Sidebar y Gobernanza de Hub 5 (Finanzas)</strong>
+      Los hipervínculos del sidebar no deben ser destruidos del DOM al alternar perfiles. La capa de permisos RBAC gestiona accesos sin mutilar la arquitectura de navegación de los 8 Hubs.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">24</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.2: Unificación del Portal Extranet de Proveedores en Hub 7</strong>
+      Centralización de toda extranet de terceros en Hub 7, con conmutador de 3 modos: Administración RevOps, Portal de Aliados Comerciales y Extranet B2B de Proveedores y Fabricantes.
     </div>
   </div>
 </div>
@@ -1725,6 +1774,31 @@
       <td><strong>Kardex Compras ACID</strong></td>
       <td>Bitácora Transaccional Inmutable (12.5.3)</td>
       <td>Registro cronológico en <code>purchase_kardex</code> de cada hito económico y logístico.</td>
+    </tr>
+    <tr>
+      <td><strong>Ahorro Real en MOQ</strong></td>
+      <td>Nivel Activo y Ahorro $ / % (12.3.6)</td>
+      <td>Visibilidad reactiva de nivel de tabulación, dinero real ahorrado ($) y porcentaje de descuento (%).</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Acuerdos en PO</strong></td>
+      <td>Estricto Aislamiento y Multi-Selección (12.4.4)</td>
+      <td>Selector filtrado por proveedor con selección de múltiples notas de crédito y suma acumulada.</td>
+    </tr>
+    <tr>
+      <td><strong>Segregación Hub 1 RBAC</strong></td>
+      <td>Almacén vs Compras (12.6.1)</td>
+      <td>Sub-área Carlos Almacén (DHL 14:00, rampa ciega) vs Elena Compras (discrepancias, MOQs, acuerdos).</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Sidebar</strong></td>
+      <td>Preservación de Hub 5 Finanzas (12.7.1)</td>
+      <td>Navegación estable en el DOM sin mutilación de enlaces; control por capa de permisos RBAC.</td>
+    </tr>
+    <tr>
+      <td><strong>Extranet Proveedores</strong></td>
+      <td>Portal Unificado en Hub 7 (12.7.2)</td>
+      <td>Residencia de Extranet B2B de Proveedores en Hub 7 conmutando con Aliados y RevOps Admin.</td>
     </tr>
     <tr>
       <td><strong>Documentación</strong></td>

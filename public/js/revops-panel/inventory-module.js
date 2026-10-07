@@ -6367,9 +6367,13 @@ function hybridInventoryModule() {
                 group.activeTier = activeTier;
 
                 let groupCost = 0;
+                let baseCostSubtotal = 0;
+
                 group.items.forEach(order => {
                     const qty = parseInt(order.qty) || 0;
-                    if (sheet && activeTier && Array.isArray(sheet.rows) && sheet.rows.length > 0 && !order._customCostLocked) {
+                    let initialCost = parseFloat(order.baseCost || order.costUnit || 0);
+
+                    if (sheet && Array.isArray(sheet.rows) && sheet.rows.length > 0 && !order._customCostLocked) {
                         const prodName = (order.productName || order.sku || '').toLowerCase();
                         let matchedRow = sheet.rows.find(r => {
                             const cat = (r.category || '').toLowerCase().trim();
@@ -6382,13 +6386,25 @@ function hybridInventoryModule() {
                         }
 
                         if (matchedRow && matchedRow.prices) {
-                            const tabulatedPrice = parseFloat(matchedRow.prices[activeTier.key]) 
-                                || parseFloat(matchedRow.prices[activeTier.label])
-                                || parseFloat(matchedRow.prices['menudeo'])
-                                || null;
-                            if (tabulatedPrice !== null && !isNaN(tabulatedPrice) && tabulatedPrice > 0) {
-                                order.costUnit = tabulatedPrice;
-                                order.tabulatedTier = activeTier.label;
+                            // Encontrar precio base de menudeo (menor volumen o key 'menudeo')
+                            const lowestTier = group.tiers && group.tiers.length > 0 ? group.tiers[group.tiers.length - 1] : null;
+                            const menudeoPrice = parseFloat(matchedRow.prices['menudeo'])
+                                || (lowestTier ? parseFloat(matchedRow.prices[lowestTier.key] || matchedRow.prices[lowestTier.label]) : null)
+                                || initialCost;
+
+                            if (menudeoPrice && !isNaN(menudeoPrice) && menudeoPrice > 0) {
+                                initialCost = menudeoPrice;
+                            }
+
+                            if (activeTier) {
+                                const tabulatedPrice = parseFloat(matchedRow.prices[activeTier.key]) 
+                                    || parseFloat(matchedRow.prices[activeTier.label])
+                                    || parseFloat(matchedRow.prices['menudeo'])
+                                    || null;
+                                if (tabulatedPrice !== null && !isNaN(tabulatedPrice) && tabulatedPrice > 0) {
+                                    order.costUnit = tabulatedPrice;
+                                    order.tabulatedTier = activeTier.label;
+                                }
                             }
                         }
                     } else if (!sheet) {
@@ -6396,8 +6412,15 @@ function hybridInventoryModule() {
                     }
                     order.totalCost = Math.round(qty * (parseFloat(order.costUnit) || 0) * 100) / 100;
                     groupCost += order.totalCost;
+                    baseCostSubtotal += Math.round(qty * initialCost * 100) / 100;
                 });
+
                 group.totalCost = Math.round(groupCost * 100) / 100;
+                group.baseCost = Math.round(baseCostSubtotal * 100) / 100;
+                group.savingsAmount = Math.max(0, Math.round((group.baseCost - group.totalCost) * 100) / 100);
+                group.savingsPercent = (group.baseCost > 0 && group.savingsAmount > 0) 
+                    ? Math.round((group.savingsAmount / group.baseCost) * 100) 
+                    : 0;
             });
 
             return Object.values(map);
@@ -6770,6 +6793,11 @@ function hybridInventoryModule() {
             const po = target.currentPoData || this.currentPoData;
             if (!po) return [];
             const list = target.pendingCreditAgreements || this.pendingCreditAgreements || [];
+            
+            const poSupplierName = (po.supplier || '').toLowerCase().trim();
+            const poProv = this.resolveSupplierForNameOrBrand(po.supplier);
+            const poCleanIdStr = po.supplierId ? String(po.supplierId).replace(/\D/g, '') : (poProv ? String(poProv.dbId || poProv.id).replace(/\D/g, '') : null);
+
             return list.filter(a => {
                 const st = (a.status || '').toLowerCase();
                 const rawSt = (a.raw_status || '').toLowerCase();
@@ -6777,20 +6805,105 @@ function hybridInventoryModule() {
                 if (!isPending) return false;
                 if (po.supplier === 'Consolidado Multimarca') return true;
 
-                // 1. Coincidencia por ID de proveedor en BD
-                if (po.supplierId && a.supplier_id && String(po.supplierId).replace(/\D/g, '') === String(a.supplier_id).replace(/\D/g, '')) {
+                // 1. Coincidencia por ID numérico de proveedor en BD
+                const aCleanIdStr = a.supplier_id ? String(a.supplier_id).replace(/\D/g, '') : null;
+                if (poCleanIdStr && aCleanIdStr && poCleanIdStr === aCleanIdStr) {
                     return true;
                 }
 
                 // 2. Coincidencia por resolución de proveedor o marcas asociadas
                 const provA = this.resolveSupplierForNameOrBrand(a.supplier);
-                const provPo = this.resolveSupplierForNameOrBrand(po.supplier);
-                if (provA && provPo && (String(provA.dbId || provA.id) === String(provPo.dbId || provPo.id))) {
+                if (provA && poProv && (String(provA.dbId || provA.id) === String(poProv.dbId || poProv.id))) {
                     return true;
                 }
 
-                return (a.supplier || '').toLowerCase() === (po.supplier || '').toLowerCase();
+                const aSupName = (a.supplier || '').toLowerCase().trim();
+                if (aSupName && (aSupName === poSupplierName || poSupplierName.includes(aSupName) || aSupName.includes(poSupplierName))) {
+                    return true;
+                }
+
+                // Verificar si a.supplier es marca del proveedor de la orden de compra
+                if (poProv && Array.isArray(poProv.brands)) {
+                    const matchBrand = poProv.brands.some(b => {
+                        const bStr = (typeof b === 'string' ? b : (b.name || b.title || '')).toLowerCase().trim();
+                        return bStr && (bStr === aSupName || aSupName.includes(bStr));
+                    });
+                    if (matchBrand) return true;
+                }
+
+                return false;
             });
+        },
+
+        toggleCreditAgreementSelection(agreement) {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const po = target.currentPoData || this.currentPoData;
+            if (!po || !agreement) return;
+
+            if (!Array.isArray(po.selectedAgreementRefs)) {
+                po.selectedAgreementRefs = po.creditNoteRef ? po.creditNoteRef.split(',').map(s => s.trim()).filter(Boolean) : [];
+            }
+
+            const ref = agreement.ref;
+            const idx = po.selectedAgreementRefs.indexOf(ref);
+            if (idx > -1) {
+                po.selectedAgreementRefs.splice(idx, 1);
+            } else {
+                po.selectedAgreementRefs.push(ref);
+            }
+
+            this.syncSelectedAgreementsToPo();
+        },
+
+        isCreditAgreementSelected(ref) {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const po = target.currentPoData || this.currentPoData;
+            if (!po || !Array.isArray(po.selectedAgreementRefs)) return false;
+            return po.selectedAgreementRefs.includes(ref);
+        },
+
+        selectAllPendingAgreements() {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const po = target.currentPoData || this.currentPoData;
+            if (!po) return;
+
+            const pending = this.getPendingAgreementsForCurrentPo();
+            po.selectedAgreementRefs = pending.map(a => a.ref);
+            this.syncSelectedAgreementsToPo();
+        },
+
+        clearSelectedAgreements() {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const po = target.currentPoData || this.currentPoData;
+            if (!po) return;
+
+            po.selectedAgreementRefs = [];
+            this.syncSelectedAgreementsToPo();
+        },
+
+        syncSelectedAgreementsToPo() {
+            const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
+            const po = target.currentPoData || this.currentPoData;
+            if (!po) return;
+
+            const pendingList = this.getPendingAgreementsForCurrentPo();
+            const selected = pendingList.filter(a => (po.selectedAgreementRefs || []).includes(a.ref));
+
+            if (selected.length > 0) {
+                po.hasCreditDeduction = true;
+                po.creditNoteRef = selected.map(a => a.ref).join(', ');
+                po.creditNoteAmount = Math.round(selected.reduce((sum, a) => sum + (Number(a.amount) || 0), 0) * 100) / 100;
+                po.creditNoteReason = selected.map(a => `${a.ref}: ${a.reason || a.discrepancy_type || 'Compensación'}`).join(' | ');
+                po.creditAgreementIds = selected.map(a => a.id).filter(Boolean);
+            } else if (!po.isManualCreditAgreement) {
+                po.hasCreditDeduction = false;
+                po.creditNoteRef = '';
+                po.creditNoteAmount = 0;
+                po.creditNoteReason = '';
+                po.creditAgreementIds = [];
+            }
+
+            this.recalculatePoTotals();
         },
 
         togglePoCreditDeduction() {
@@ -6798,19 +6911,26 @@ function hybridInventoryModule() {
             const po = target.currentPoData || this.currentPoData;
             if (!po) return;
             po.hasCreditDeduction = !po.hasCreditDeduction;
-            if (po.hasCreditDeduction && !po.creditNoteRef) {
-                const pending = this.getPendingAgreementsForCurrentPo();
-                if (pending.length > 0) {
-                    po.creditNoteRef = pending[0].ref;
-                    po.creditNoteAmount = pending[0].amount;
-                    po.creditNoteReason = pending[0].reason;
-                } else {
-                    po.creditNoteRef = 'NC-' + new Date().getFullYear() + '-001';
-                    po.creditNoteAmount = 500.00;
-                    po.creditNoteReason = 'Merma textil y rotura de costura en entrega previa';
+            if (po.hasCreditDeduction) {
+                if (!Array.isArray(po.selectedAgreementRefs) || po.selectedAgreementRefs.length === 0) {
+                    const pending = this.getPendingAgreementsForCurrentPo();
+                    if (pending.length > 0) {
+                        po.selectedAgreementRefs = [pending[0].ref];
+                        this.syncSelectedAgreementsToPo();
+                    } else {
+                        po.creditNoteRef = 'NC-' + new Date().getFullYear() + '-001';
+                        po.creditNoteAmount = 500.00;
+                        po.creditNoteReason = 'Merma textil y rotura de costura en entrega previa';
+                        this.recalculatePoTotals();
+                    }
                 }
+            } else {
+                po.selectedAgreementRefs = [];
+                po.creditNoteRef = '';
+                po.creditNoteAmount = 0;
+                po.deductionAmount = 0;
+                this.recalculatePoTotals();
             }
-            this.recalculatePoTotals();
             if (po.hasCreditDeduction) {
                 this.showToast('Compensación por nota de crédito activada.', 'info');
             } else {
@@ -6822,11 +6942,8 @@ function hybridInventoryModule() {
             const target = (typeof window !== 'undefined' && window.inventoryAppInstance) ? window.inventoryAppInstance : this;
             const po = target.currentPoData || this.currentPoData;
             if (!po || !agreement) return;
-            po.hasCreditDeduction = true;
-            po.creditNoteRef = agreement.ref;
-            po.creditNoteAmount = agreement.amount;
-            po.creditNoteReason = agreement.reason;
-            this.recalculatePoTotals();
+            po.selectedAgreementRefs = [agreement.ref];
+            this.syncSelectedAgreementsToPo();
             this.showToast('Acuerdo ' + agreement.ref + ' aplicado (' + this.formatCurrency(agreement.amount) + ').', 'success');
         },
 
@@ -6836,16 +6953,16 @@ function hybridInventoryModule() {
             if (!po) return;
 
             if (!selectedRef || selectedRef === '') {
-                // Deseleccionó compensación
-                po.hasCreditDeduction = false;
-                po.deductionAmount = 0;
-                this.recalculatePoTotals();
+                po.selectedAgreementRefs = [];
+                this.syncSelectedAgreementsToPo();
                 this.showToast('Compensación por acuerdo desactivada.', 'info');
                 return;
             }
 
             if (selectedRef === 'manual') {
+                po.isManualCreditAgreement = true;
                 po.hasCreditDeduction = true;
+                po.selectedAgreementRefs = [];
                 if (!po.creditNoteRef || po.creditNoteRef === '') po.creditNoteRef = 'NC-' + new Date().getFullYear() + '-001';
                 if (!po.creditNoteAmount || po.creditNoteAmount === 0) po.creditNoteAmount = 500.00;
                 if (!po.creditNoteReason) po.creditNoteReason = 'Ajuste comercial por discrepancia previa en muelle';
@@ -6854,15 +6971,12 @@ function hybridInventoryModule() {
                 return;
             }
 
+            po.isManualCreditAgreement = false;
             const pendingList = this.getPendingAgreementsForCurrentPo();
             const found = pendingList.find(a => a.ref === selectedRef);
             if (found) {
-                po.hasCreditDeduction = true;
-                po.creditAgreementId = found.id || null;
-                po.creditNoteRef = found.ref;
-                po.creditNoteAmount = found.amount;
-                po.creditNoteReason = found.reason;
-                this.recalculatePoTotals();
+                po.selectedAgreementRefs = [found.ref];
+                this.syncSelectedAgreementsToPo();
                 this.showToast('Acuerdo ' + found.ref + ' seleccionado (' + this.formatCurrency(found.amount) + ').', 'success');
             }
         },
@@ -6979,6 +7093,7 @@ function hybridInventoryModule() {
                 })),
                 totalPieces: items.reduce((sum, i) => sum + (Number(i.qty) || 0), 0),
                 hasCreditDeduction: false,
+                selectedAgreementRefs: [],
                 creditAgreementId: null,
                 creditNoteRef: '',
                 creditNoteAmount: 0,
@@ -6996,13 +7111,11 @@ function hybridInventoryModule() {
             target.currentPoData = poData;
             this.currentPoData = poData;
 
-            // Pre-cargar datos del primer acuerdo pendiente si existe
+            // Pre-cargar datos del primer acuerdo pendiente del proveedor si existe
             const pendingList = this.getPendingAgreementsForCurrentPo();
             if (pendingList.length > 0) {
-                poData.creditNoteRef = pendingList[0].ref;
-                poData.creditNoteAmount = pendingList[0].amount;
-                poData.creditNoteReason = pendingList[0].reason;
-                poData.creditAgreementId = pendingList[0].id || null;
+                poData.selectedAgreementRefs = [pendingList[0].ref];
+                this.syncSelectedAgreementsToPo();
             }
 
             target.poGeneratorModalOpen = true;
@@ -7154,13 +7267,19 @@ function hybridInventoryModule() {
                 console.warn('Nota: Persistencia de PO completada en modo offline/cache:', err);
             });
 
-            // 3. Si se aplicó una nota de crédito, marcar el acuerdo como aplicado
+            // 3. Si se aplicó una nota de crédito, marcar todos los acuerdos seleccionados como aplicados
             if (po.hasCreditDeduction && po.creditNoteRef) {
                 const agreements = (target.pendingCreditAgreements || this.pendingCreditAgreements || []);
-                const appliedAgr = agreements.find(a => a.ref === po.creditNoteRef);
-                if (appliedAgr) {
-                    appliedAgr.status = 'Aplicada en ' + po.poNumber;
-                }
+                const appliedRefs = Array.isArray(po.selectedAgreementRefs) && po.selectedAgreementRefs.length > 0
+                    ? po.selectedAgreementRefs
+                    : po.creditNoteRef.split(',').map(s => s.trim());
+                agreements.forEach(a => {
+                    if (appliedRefs.includes(a.ref)) {
+                        a.status = 'Aplicada en ' + po.poNumber;
+                        a.raw_status = 'applied';
+                        a.applied_to_po_id = po.poNumber;
+                    }
+                });
             }
 
             // 4. Descontar los ítems planificados convertidos

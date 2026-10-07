@@ -72,6 +72,7 @@
 | `TASK-PUR-03` | Depuración y Especialización del Catálogo para Compras (Existencias, DOH, Costos y Botón PO) | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (Fullstack End-to-End)** | DOH, Alertas ROP, Costos CPP, Ocultar Auditoría Ciegas, Tag v1.7 |
 | `TASK-PUR-04` | Generador de PO con Impresión PDF Multi-Página, Compensación de Notas de Crédito & Edición de Costo/Prioridad | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (Fullstack End-to-End)** | Motor @media print Letter, Panel Compensación Discrepancias, Recálculo ROP, Tag v1.7 |
 | `TASK-PUR-05` | Gobernanza de Compras por Ciclos Operativos: Árbol Consolidado Proveedor-Marcas, Reactividad MOQ y Acuerdos de Crédito | **Hub 4 (Inventario / Compras / Ajustes)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Árbol Consolidado, Reactividad MOQ en Caliente, Fallback Matriz, DB Real, Regla 10 & 12 |
+| `TASK-PUR-06` | Ahorro Real en MOQ, Multi-Selección de Acuerdos por Proveedor en PO y Segregación RBAC en Hub 1 (Almacén vs Compras) | **Hub 4 / Hub 1 / Hub 5 / Hub 7** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Ahorro Real MOQ, Multi-Acuerdos PO, Segregación Hub 1, Hub 5/7, Reglas 12.3.6, 12.4.4, 12.6.1, 12.7 |
 | `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Analítica RevOps, LLM API, Chat UI, Tag v1.3 |
 | `TASK-HUB-VND` | Portal Extranet de Proveedores y Fabricantes (B2B Inbound & Órdenes) | **Hub 7 / B2B (Proveedores)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 4 Compras, Recepción Inbound, Tag v1.7 |
 | `TASK-SUB-DUN` | Motor de Dunning y Recuperación de Cobros Fallidos en Suscripciones (MRR) | **Transversal (H5 $\leftrightarrow$ H3)** | **Media** | **Completada (UI)** | MRR, Stripe Webhooks, WhatsApp |
@@ -2357,3 +2358,34 @@ graph TD
 
 
 
+
+---
+
+### `TASK-PUR-06`: Visualización de Ahorro Real en MOQ, Multi-Selección de Acuerdos por Proveedor en PO y Segregación RBAC en Hub 1 (Almacén vs Compras)
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Hub 4 (Inventario & Compras) $\leftrightarrow$ Hub 1 (Dashboard Operativo) $\leftrightarrow$ Hub 5 (Finanzas) $\leftrightarrow$ Hub 7 (Extranet B2B)**
+* **Prioridad:** **Alta (Prioridad Inmediata)**
+* **Solicitudes del Usuario:**
+  > "Error: acabo de guardar un tabulador y no se actualiza su nivel de MOQs. Regla: la bandeja moqs, debe actualizarse simpre que se de alta nuevos tabuladores MOQs. has estado formalizando estas nuevas reglas? Actualizalas! Regla: cada nueva regla debe formalizarse en los documentos correspondientes conforme a la regla 10. Regla: estas reglas estan seccionadas conforme a modulo y ciclo al que correspondan, (un ciclo de alta de producto, un ciclo de compras, etc) la finalidad es identificar que no se ha reglado con respecto a los ciclos operativos."  
+  > "Regla: Esta sección, dentro de la bandeja de MOQs, debe mostrar el porcentaje y el dinero real ahorrado cada vez que se salta a un nuevo tabulador dentro de la orden de compra, así como el nivel de tabulación en el que se encuentra. Regla: esta lista desplegable, debe conmutar solamente a los acuerdos que corresponden al proveedor al que refiere la orden de compra, e incluso se pueden seleccionar uno o más acuerdos que se tengan pendientes por consiliar. el hub 1 todavia no esta dividida correspondientemente con las reglas de RBAC, debemos a empezar a ver las tareas del area de compras y del area de inventario/almacén. si hay dudas consultar la info de la carpeta import, sobre el tipo de notificaciones, que recibe cada rol. ya no se observa el hub 5 de finanzas. en el hub 7 no se muestra el portal extranet de proveedor, anteriormente ya habiamos acordado que ahi residiría todo lo que tenga que ver con extranet."
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Bandeja MOQ - Ahorro Real ($ y %) y Nivel de Tabulación Activo (Regla 12.3.6):*
+     - En `inventory-module.js` (`getPlannedOrdersBySupplier()`), se calcula el subtotal de costo base minorista/unitario (`baseCostSubtotal`), el costo tabulado según la matriz activa (`totalCost`), la diferencia en pesos (`savingsAmount = baseCost - totalCost`) y el porcentaje de ahorro conseguido (`savingsPercent`).
+     - En `inventory.blade.php`, se renderiza en la cabecera del árbol del fabricante el badge del nivel de tabulación activo (`Nivel Tabulación Activo: 100 prendas ($75.00/u)`), junto con el badge de ahorro real `-$1,000.00 MXN (12% de ahorro)` y el desglose de subtotal base vs costo tabulado.
+  2. *Selector de Acuerdos por Discrepancias en Modal de PO (Regla 12.4.4):*
+     - Filtro estricto en `getPendingAgreementsForCurrentPo()` por ID de proveedor, nombre de proveedor y marcas vinculadas, erradicando filtraciones entre proveedores distintos.
+     - Multi-selección mediante casillas de verificación (checkboxes) con funciones `toggleCreditAgreementSelection()`, `selectAllPendingAgreements()` y `clearSelectedAgreements()`.
+     - Deducción acumulada de todos los acuerdos seleccionados en el total a pagar y concatenación de folios en la Cláusula 4 del PDF formal y en la base de datos al timbrar la PO.
+  3. *Segregación RBAC en Hub 1: Almacén vs Compras & Abastecimiento B2B (Regla 12.6.1):*
+     - Selector conmutativo en la parte superior de la bandeja operativa (`operativeArea: 'almacen' | 'compras'`).
+     - Sector Almacén & Empaque Físico (Carlos Almacén): corte DHL 14:00 hrs, empaque, recepción en rampa 2, surtido de racks y manifiesto de transporte. Cero visibilidad financiera.
+     - Sector Compras & Abastecimiento B2B (Elena Compras): semáforo de lead times y cumplimiento, tareas operativas filtrables por categoría (Discrepancias Rampa, Reorden ROP, Bandeja MOQ, Acuerdos NC, Quiebre On-Demand), directorio de proveedores clave y accesos directos a Hub 4 y Hub 7.
+     - Modal dedicado de Compras (`purchases_task`) con expediente del proveedor, reporte de discrepancia emitido desde muelle de almacén, protocolo de validación y notas para la bitácora inmutable.
+  4. *Preservación de Enlace a Hub 5 Finanzas en Sidebar (Regla 12.7.1):*
+     - En `resources/views/layouts/portal-panel.blade.php`, se removió la directiva Blade `@canViewFinancials` que extirpaba el elemento `<a>` del DOM, permitiendo que la capa de control RBAC gobierne la visibilidad y accesos sin alterar la estructura de navegación.
+  5. *Unificación de Extranet de Proveedores en Hub 7 (Regla 12.7.2):*
+     - En `resources/views/portal/allies.blade.php` y `resources/views/portal/hub7-vendor-extranet.blade.php`, se implementó la barra conmutadora de 3 modalidades: Administración RevOps, Portal de Aliados Comerciales y Pantalla Extranet de Proveedores B2B (`route('portal.vendor.extranet')`).
+  6. *Gobernanza & Tríptico Documental:*
+     - Formalizadas las **Reglas 12.3.6, 12.4.4, 12.6.1, 12.7.1 y 12.7.2** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf` mediante Chrome Headless.
+* **Verificación Automatizada:**
+  - **421/421 pruebas pasando al 100% (2,772 aserciones, 0 fallos).**

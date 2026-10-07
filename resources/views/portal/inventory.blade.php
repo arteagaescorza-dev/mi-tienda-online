@@ -2588,9 +2588,15 @@
                                         <span>•</span>
                                         <span>Términos: <strong class="text-slate-700" x-text="group.paymentTerms"></strong></span>
                                         <template x-if="group.activeTier">
-                                            <span class="text-indigo-700 font-semibold flex items-center gap-1">
-                                                <span>• Escala MOQ:</span>
-                                                <strong class="px-1.5 py-0.2 rounded bg-indigo-50 border border-indigo-200 text-indigo-800 font-mono text-[11px]" x-text="group.activeTier.label"></strong>
+                                            <span class="text-indigo-700 font-semibold flex items-center gap-1.5 flex-wrap">
+                                                <span>• Nivel Tabulación Activo:</span>
+                                                <strong class="px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-900 font-mono text-[11px]" x-text="group.activeTier.label"></strong>
+                                                <template x-if="group.savingsAmount > 0">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 border border-emerald-300 text-emerald-800 shadow-3xs" title="Dinero y porcentaje real ahorrado por escala MOQ frente a precio base de menudeo">
+                                                        <svg class="w-3.5 h-3.5 text-emerald-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                                        <span x-text="'-' + formatCurrency(group.savingsAmount) + ' (' + group.savingsPercent + '% de ahorro)'"></span>
+                                                    </span>
+                                                </template>
                                             </span>
                                         </template>
                                     </div>
@@ -2623,7 +2629,12 @@
                                 <div class="text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-2 sm:pt-0 sm:pl-4">
                                     <div class="text-[11px] text-slate-500">Subtotal del Fabricante</div>
                                     <div class="text-sm font-extrabold text-slate-900" x-text="formatCurrency(group.totalCost)"></div>
-                                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded" x-text="group.totalQty + ' piezas'"></span>
+                                    <div class="flex items-center justify-end gap-1.5 mt-0.5">
+                                        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded" x-text="group.totalQty + ' piezas'"></span>
+                                        <template x-if="group.savingsAmount > 0">
+                                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded" x-text="'-' + formatCurrency(group.savingsAmount) + ' (' + group.savingsPercent + '%)'"></span>
+                                        </template>
+                                    </div>
                                 </div>
 
                                 <!-- Acción Rápida: Emitir PO para este Proveedor -->
@@ -8418,30 +8429,73 @@
                             </div>
                         </div>
 
-                        <!-- LISTA DESPLEGABLE DE ACUERDOS PENDIENTES POR CONCILIAR (Adaptable a cada acuerdo) -->
+                        <!-- SELECTOR MULTI-ACUERDO DE COMPENSACIÓN MERCANTIL POR PROVEEDOR -->
                         <div class="mt-3 pt-3 border-t border-amber-200/60">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
-                                <label class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span>Lista Desplegable de Acuerdos Pendientes por Conciliar:</span>
-                                </label>
-                                <span class="text-[10px] text-amber-800 font-semibold" x-text="getPendingAgreementsForCurrentPo().length + ' acuerdo(s) registrados para ' + currentPoData.supplier"></span>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                                <div>
+                                    <label class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span>Acuerdos de Compensación & Notas de Crédito Pendientes:</span>
+                                    </label>
+                                    <p class="text-[11px] text-amber-800">Selecciona uno o más acuerdos registrados exclusivamente para este proveedor para deducirlos de esta orden.</p>
+                                </div>
+                                <template x-if="getPendingAgreementsForCurrentPo().length > 0">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" @click="selectAllPendingAgreements()" class="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 bg-white border border-indigo-200 px-2 py-0.5 rounded cursor-pointer transition">Seleccionar Todos</button>
+                                        <button type="button" @click="clearSelectedAgreements()" class="text-[10px] font-bold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 px-2 py-0.5 rounded cursor-pointer transition">Limpiar</button>
+                                    </div>
+                                </template>
                             </div>
 
-                            <select 
-                                class="w-full bg-white border-2 border-amber-300 hover:border-amber-400 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none transition shadow-2xs cursor-pointer"
-                                @change="handleCreditAgreementSelect($event.target.value)"
-                            >
-                                <option value="" :selected="!currentPoData.hasCreditDeduction">-- Sin compensación / No aplicar acuerdo en esta orden --</option>
-                                <template x-for="agr in getPendingAgreementsForCurrentPo()" :key="agr.ref">
-                                    <option 
-                                        :value="agr.ref" 
-                                        :selected="currentPoData.hasCreditDeduction && currentPoData.creditNoteRef === agr.ref"
-                                        x-text="agr.ref + ' • ' + formatCurrency(agr.amount) + ' • ' + agr.reason"
-                                    ></option>
-                                </template>
-                                <option value="manual" :selected="currentPoData.hasCreditDeduction && !getPendingAgreementsForCurrentPo().some(a => a.ref === currentPoData.creditNoteRef)">-- Captura Manual Personalizada (Otro Acuerdo) --</option>
-                            </select>
+                            <!-- Lista de Acuerdos del Proveedor (Multi-Selección con Checkboxes) -->
+                            <template x-if="getPendingAgreementsForCurrentPo().length > 0">
+                                <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                    <template x-for="agr in getPendingAgreementsForCurrentPo()" :key="agr.ref">
+                                        <label 
+                                            class="p-2.5 rounded-xl border transition flex items-start justify-between gap-3 cursor-pointer select-none"
+                                            :class="isCreditAgreementSelected(agr.ref) ? 'bg-amber-100/90 border-amber-400 shadow-2xs ring-1 ring-amber-400' : 'bg-white hover:bg-amber-50/50 border-amber-200/80'"
+                                        >
+                                            <div class="flex items-start gap-2.5 min-w-0">
+                                                <input 
+                                                    type="checkbox" 
+                                                    :checked="isCreditAgreementSelected(agr.ref)" 
+                                                    @change="toggleCreditAgreementSelection(agr)"
+                                                    class="mt-1 rounded text-amber-600 focus:ring-amber-500 cursor-pointer shrink-0"
+                                                >
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <span class="font-mono font-bold text-xs text-slate-900" x-text="agr.ref"></span>
+                                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-200 text-amber-900">Pendiente de Conciliar</span>
+                                                        <span class="text-[10px] text-slate-500 font-medium" x-text="agr.supplier"></span>
+                                                    </div>
+                                                    <p class="text-xs text-slate-700 mt-0.5" x-text="agr.reason"></p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <span class="font-mono font-black text-sm text-amber-950 block" x-text="formatCurrency(agr.amount)"></span>
+                                                <span class="text-[10px] text-amber-800 font-medium block">a deducir</span>
+                                            </div>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="getPendingAgreementsForCurrentPo().length === 0">
+                                <div class="p-3 bg-white/70 border border-amber-200 rounded-xl text-center">
+                                    <span class="text-xs font-medium text-amber-800">No hay acuerdos mercantiles pendientes registrados específicamente para <strong x-text="currentPoData.supplier"></strong>.</span>
+                                </div>
+                            </template>
+
+                            <!-- Resumen Dinámico de Deducción Acumulada -->
+                            <template x-if="currentPoData.hasCreditDeduction && currentPoData.deductionAmount > 0">
+                                <div class="mt-2.5 p-2 bg-amber-200/60 rounded-xl border border-amber-300 flex items-center justify-between text-xs text-amber-950">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span><strong>Deducción total acumulada:</strong> <span class="font-mono font-bold" x-text="currentPoData.creditNoteRef"></span></span>
+                                    </div>
+                                    <span class="font-mono font-black text-sm text-amber-900" x-text="'-' + formatCurrency(currentPoData.deductionAmount)"></span>
+                                </div>
+                            </template>
                         </div>
 
                         <!-- Campos editables si la deducción está activa -->
@@ -16186,5 +16240,5 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v10"></script>
+    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v11"></script>
 @endpush

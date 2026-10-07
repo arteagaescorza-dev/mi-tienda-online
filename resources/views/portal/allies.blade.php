@@ -39,6 +39,10 @@
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
                 <span>Pantalla Extranet del Aliado (Partner Portal)</span>
             </button>
+            <a href="{{ route('portal.vendor.extranet') }}" class="allies-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-indigo-700 hover:bg-slate-200" title="Acceso al portal B2B de proveedores y confeccionistas">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <span>Pantalla Extranet del Proveedor (B2B Supplier)</span>
+            </a>
         </div>
         <div class="flex items-center gap-2">
             <span class="text-xs text-slate-500 font-medium">Modo activo:</span>
@@ -91,6 +95,12 @@
                 <span>5. Previsualizar Partner Portal</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Partner Portal" data-help-title="Partner Portal" data-help-desc="Extranet segura tokenizada para aliados con validador de taquilla y exportación CSV.">?</button>
             </button>
+
+            <!-- TAB 6: EXTRANET PROVEEDORES B2B -->
+            <a href="{{ route('portal.vendor.extranet') }}" class="allies-subnav-btn flex items-center gap-2 text-indigo-700 hover:text-indigo-900 transition" title="Ir a la Extranet B2B de Proveedores & Fabricantes">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <span>6. Extranet Proveedores B2B</span>
+            </a>
         </nav>
     </div>
 

@@ -847,7 +847,7 @@ class StorefrontController extends Controller
         ];
 
         $initialTab = match ($userRole) {
-            'warehouse', 'packer' => 'operative',
+            'warehouse', 'packer', 'purchases' => 'operative',
             'sales' => 'sales',
             default => 'executive',
         };

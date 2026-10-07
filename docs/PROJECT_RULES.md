@@ -811,6 +811,10 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 #### Regla 12.3.5: Erradicación Absoluta de Datos Mock en Submódulo de Compras (Datos Reales de BD)
 * **Datos 100% Reales y Auditables:** El submódulo de compras, sus árboles de planeación, el expediente PO y el historial de transacciones operan exclusivamente con información real persistida en la base de datos (proveedores reales como Torzo y Dajo B2B, productos reales del catálogo y acuerdos de crédito existentes). Queda erradicado cualquier arreglo mock ficticio en código.
 
+#### Regla 12.3.6: Visibilidad de Ahorro Real ($ y %) y Nivel de Tabulación Activo en Bandeja MOQ
+* **Nivel de Tabulación Activo Visible:** Cada árbol de proveedor en la Bandeja MOQ debe mostrar en su encabezado el tabulador de volumen actualmente desbloqueado con base en la suma de prendas planificadas (ej. `Nivel Tabulación Activo: 100 prendas ($75.00/u)`).
+* **Cálculo Reactivo de Ahorro Real:** Cada vez que el volumen de compra alcanza una nueva escala de precio preferencial, la interfaz calcula y expone inmediatamente el ahorro económico real conseguido en moneda nacional (`-$X.XX MXN`) y el porcentaje de descuento efectivo (`Y% de ahorro`) frente al costo base o precio inicial, incentivando saltos eficientes de lote.
+
 ---
 
 ### 12.4 Ciclo Operativo 4: Discrepancias en Recepción, Acuerdos Mercantiles y Notas de Crédito
@@ -826,6 +830,10 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 * **Selector Dinámico por Proveedor:** En el modal de emisión del Expediente PO, la lista desplegable de compensación de créditos recupera exclusivamente los acuerdos mercantiles en estado `pendiente` correspondientes al proveedor de la orden.
 * **Deducción Aritmética Automática:** Al seleccionar un acuerdo, el sistema deduce su monto del total a pagar (`Total = Subtotal + IVA - Compensación de Acuerdo`), imprime la Cláusula 4 con la referencia legal en el PDF de la orden y actualiza el estado del acuerdo en la base de datos al emitirse la PO.
 
+#### Regla 12.4.4: Estricto Aislamiento de Acuerdos por Proveedor y Multi-Selección en Emisión de PO
+* **Conmutación Estricta al Proveedor de la Orden:** El listado de acuerdos mercantiles y notas de crédito en el modal de emisión de orden de compra debe filtrar estricta e inviolablemente los acuerdos del proveedor seleccionado (o marcas pertenecientes a dicho fabricante matriz), imposibilitando la contaminación cruzada entre proveedores distintos.
+* **Multi-Selección de Acuerdos Pendientes:** El comprador puede seleccionar uno o múltiples acuerdos pendientes simultáneamente mediante casillas de verificación (checkboxes). El sistema suma acumulativamente sus saldos a favor, los deduce del total de la orden y concatena todos los folios de referencia en la Cláusula 4 del contrato formal y en la base de datos al timbrar la PO.
+
 ---
 
 ### 12.5 Ciclo Operativo 5: Emisión de Orden de Compra (PO), Despacho y Kardex de Auditoría
@@ -839,6 +847,29 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 
 #### Regla 12.5.3: Trazabilidad Transaccional ACID en Kardex de Compras (`purchase_kardex`)
 * **Bitácora Inmutable de Compras:** Toda acción relevante del ciclo de abastecimiento (`PO_EMITIDA`, `ON_DEMAND_CONVERTIDO`, `DISCREPANCIA_REGISTRADA`, `ACUERDO_APLICADO`, `INBOUND_RECEPCION`) se asienta cronológicamente en la tabla `purchase_kardex` con folio, operador responsable, monto económico y variación de unidades, garantizando auditoría integral.
+
+---
+
+### 12.6 Ciclo Operativo 6: Segregación de Roles RBAC en Hub 1 (Almacén vs Compras)
+
+#### Regla 12.6.1: Segregación Operativa de Tareas en Hub 1 por Rol RBAC
+* **División Clara de Sub-Áreas:** La bandeja operativa del Hub 1 (Bandeja de Entrada Operativa) debe estar formalmente segregada entre:
+  1. **Área de Almacén & Empaque Físico (Carlos Almacén):** Centrada exclusivamente en el corte diario DHL de las 14:00 hrs, mesa de empaque físico, recepción ciega en rampa 2, surtido de racks y manifiesto de transporte. Cero visibilidad de márgenes financieros o costos comerciales.
+  2. **Área de Compras & Abastecimiento B2B (Elena Compras):** Enfocada en validación de cumplimiento de entregas en muelle/rampa, resolución de discrepancias por faltantes o mermas, disparador de órdenes de reabastecimiento ROP, consolidación de bandejas MOQ y conciliación de acuerdos/notas de crédito con proveedores.
+* **Navegación Fluida y Filtros RBAC:** Los usuarios con rol `warehouse` o `packer` acceden por defecto al sub-área de Almacén; los usuarios con rol `purchases` acceden al sub-área de Compras. Los Super Administradores disponen de conmutadores tipo pastilla (*pills*) para alternar fluidamente entre ambas disciplinas operativas sin recarga.
+
+---
+
+### 12.7 Ciclo Operativo 7: Gobernanza de Hubs y Extranet de Proveedores (Hub 5 y Hub 7)
+
+#### Regla 12.7.1: Preservación de Enlaces de Navegación en Sidebar y Gobernanza de Hub 5 (Finanzas)
+* **Arquitectura de Navegación Estable:** Los hipervínculos del menú lateral (sidebar) no deben eliminarse destructivamente del DOM mediante directivas Blade de sesión cuando cambian los perfiles de prueba. La capa de permisos RBAC del cliente gestiona la visibilidad y el acceso sin alterar la integridad estructural de los 8 Hubs del panel.
+
+#### Regla 12.7.2: Unificación del Portal Extranet de Proveedores en Hub 7
+* **Residencia Centralizada de Extranets:** Toda interfaz destinada a interacción con aliados, socios o proveedores externos debe residir en Hub 7 (*"Ecosistema B2B, Aliados & Proveedores"*). Hub 7 provee un conmutador de tres modalidades:
+  1. *Vista de Administración RevOps (Aliados & Convenios)*
+  2. *Pantalla Extranet del Aliado (Partner Portal)*
+  3. *Pantalla Extranet del Proveedor / Fabricante (B2B Supplier Extranet Portal)* accesible vía `route('portal.vendor.extranet')`.
 
 ---
 
@@ -927,6 +958,11 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Expediente PO en PDF** | Snapshot Fidedigno e Inmutable (12.5.1) | Persistencia íntegra de la PO emitida (`po_snapshot`) para reimpresión histórica idéntica |
 | **Despacho B2B por Correo** | Notificación con Token de Acuse (12.5.2) | Envío formal por email al ejecutivo del taller con PDF y registro en auditoría |
 | **Kardex Compras ACID** | Bitácora Transaccional Inmutable (12.5.3) | Registro cronológico en `purchase_kardex` de cada hito económico y logístico |
+| **Ahorro Real en MOQ** | Nivel Activo y Ahorro $ / % (12.3.6) | Visibilidad reactiva de nivel de tabulación, dinero real ahorrado ($) y porcentaje de descuento (%) |
+| **Multi-Acuerdos en PO**| Estricto Aislamiento y Multi-Selección (12.4.4) | Selector filtrado por proveedor con selección de múltiples notas de crédito y suma acumulada |
+| **Segregación Hub 1 RBAC**| Almacén vs Compras (12.6.1) | Sub-área Carlos Almacén (DHL 14:00, rampa ciega) vs Elena Compras (discrepancias, MOQs, acuerdos) |
+| **Gobernanza Sidebar** | Preservación de Hub 5 Finanzas (12.7.1) | Navegación estable en el DOM sin mutilación de enlaces; control por capa de permisos RBAC |
+| **Extranet Proveedores** | Portal Unificado en Hub 7 (12.7.2) | Residencia de Extranet B2B de Proveedores en Hub 7 conmutando con Aliados y RevOps Admin |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 

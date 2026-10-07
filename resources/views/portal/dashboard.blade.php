@@ -817,202 +817,464 @@
     {{-- SUBMODULO 2: BANDEJA OPERATIVA (ALMACEN & EMPAQUE - CERO DINERO)          --}}
     {{-- ------------------------------------------------------------------------- --}}
     <div x-show="activeTab === 'operative'" class="space-y-6">
-        <!-- Banner de Modo Almacen & Empaque -->
-        <div class="p-3.5 bg-indigo-50/80 border border-indigo-200/80 rounded-xl flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2.5">
-                <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                <span class="text-xs font-bold text-indigo-950 uppercase tracking-wider">Modo Almacén & Empaque Físico (Carlos Almacén)</span>
-                <button class="section-help-btn" type="button" aria-label="Ayuda de Modo Almacen" data-help-title="Bandeja Operativa" data-help-desc="Vista especializada para personal de bodega y empaque. Enfoque exclusivo en recoleccion DHL de las 14:00 hrs y recepcion en rampa. Cero visibilidad de finanzas.">?</button>
+        <!-- SELECTOR DE SUB-ÁREA OPERATIVA: ALMACÉN VS COMPRAS & ABASTECIMIENTO -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Área Operativa:</span>
+                <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200 text-xs font-semibold">
+                    <button 
+                        type="button" 
+                        @click="switchOperativeArea('almacen')"
+                        class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition cursor-pointer"
+                        :class="operativeArea === 'almacen' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
+                    >
+                        <span>📦 Almacén & Empaque Físico</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono" :class="operativeArea === 'almacen' ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-700'" x-text="warehousePendingCount"></span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="switchOperativeArea('compras')"
+                        class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition cursor-pointer"
+                        :class="operativeArea === 'compras' ? 'bg-violet-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
+                    >
+                        <span>🛍️ Compras & Abastecimiento B2B</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono" :class="operativeArea === 'compras' ? 'bg-violet-700 text-white' : 'bg-slate-200 text-slate-700'" x-text="purchasesPendingCount"></span>
+                    </button>
+                </div>
             </div>
-            <span class="text-[11px] text-indigo-800 font-medium">Prioridad de surtido por pasillo y recepciones en rampa</span>
+            <div class="text-xs text-slate-500 pr-2 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full" :class="operativeArea === 'almacen' ? 'bg-indigo-500' : 'bg-violet-500'"></span>
+                <span x-text="operativeArea === 'almacen' ? 'Perfil activo: Carlos Almacén (Operación en Bodega & DHL)' : 'Perfil activo: Elena Compras (Abastecimiento, MOQs & Proveedores)'"></span>
+            </div>
         </div>
 
-        <!-- BANNER SUPERIOR DE CORTE DIARIO DHL (14:00 HRS) CON SEMAFORO SLA -->
-        <div class="p-4 rounded-2xl border shadow-xs transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-             :class="{
-                'bg-emerald-50/80 border-emerald-200 text-emerald-950': dhlStatusColor === 'emerald',
-                'bg-amber-50/80 border-amber-200 text-amber-950': dhlStatusColor === 'amber',
-                'bg-rose-50/80 border-rose-200 text-rose-950': dhlStatusColor === 'rose'
-             }">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                     :class="{
-                        'bg-emerald-100 text-emerald-700': dhlStatusColor === 'emerald',
-                        'bg-amber-100 text-amber-700': dhlStatusColor === 'amber',
-                        'bg-rose-100 text-rose-700': dhlStatusColor === 'rose'
-                     }">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        {{-- ========================================================================= --}}
+        {{-- SECTOR A: ÁREA DE ALMACÉN & EMPAQUE FÍSICO (CARLOS ALMACÉN)              --}}
+        {{-- ========================================================================= --}}
+        <div x-show="operativeArea === 'almacen'" class="space-y-6">
+            <!-- Banner de Modo Almacen & Empaque -->
+            <div class="p-3.5 bg-indigo-50/80 border border-indigo-200/80 rounded-xl flex items-center justify-between shadow-xs">
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                    <span class="text-xs font-bold text-indigo-950 uppercase tracking-wider">Modo Almacén & Empaque Físico (Carlos Almacén)</span>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda de Modo Almacen" data-help-title="Bandeja Operativa Almacén" data-help-desc="Vista especializada para personal de bodega y empaque. Enfoque exclusivo en recoleccion DHL de las 14:00 hrs y recepcion en rampa. Cero visibilidad de finanzas.">?</button>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-black uppercase tracking-wider">Corte Diario DHL Express (14:00 hrs)</span>
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
-                              :class="{
-                                 'bg-emerald-100 text-emerald-800': dhlStatusColor === 'emerald',
-                                 'bg-amber-100 text-amber-800': dhlStatusColor === 'amber',
-                                 'bg-rose-100 text-rose-800 animate-pulse': dhlStatusColor === 'rose'
-                              }">
-                            <span class="w-1.5 h-1.5 rounded-full"
+                <span class="text-[11px] text-indigo-800 font-medium">Prioridad de surtido por pasillo y recepciones en rampa</span>
+            </div>
+
+            <!-- BANNER SUPERIOR DE CORTE DIARIO DHL (14:00 HRS) CON SEMAFORO SLA -->
+            <div class="p-4 rounded-2xl border shadow-xs transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                 :class="{
+                    'bg-emerald-50/80 border-emerald-200 text-emerald-950': dhlStatusColor === 'emerald',
+                    'bg-amber-50/80 border-amber-200 text-amber-950': dhlStatusColor === 'amber',
+                    'bg-rose-50/80 border-rose-200 text-rose-950': dhlStatusColor === 'rose'
+                 }">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                         :class="{
+                            'bg-emerald-100 text-emerald-700': dhlStatusColor === 'emerald',
+                            'bg-amber-100 text-amber-700': dhlStatusColor === 'amber',
+                            'bg-rose-100 text-rose-700': dhlStatusColor === 'rose'
+                         }">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider">Corte Diario DHL Express (14:00 hrs)</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
                                   :class="{
-                                     'bg-emerald-500': dhlStatusColor === 'emerald',
-                                     'bg-amber-500': dhlStatusColor === 'amber',
-                                     'bg-rose-500': dhlStatusColor === 'rose'
-                                  }"></span>
-                            <span x-text="dhlStatusColor === 'emerald' ? 'A Tiempo (> 3h)' : (dhlStatusColor === 'amber' ? 'Atención (1-2.5h)' : 'Urgente (< 1h)')"></span>
-                        </span>
+                                     'bg-emerald-100 text-emerald-800': dhlStatusColor === 'emerald',
+                                     'bg-amber-100 text-amber-800': dhlStatusColor === 'amber',
+                                     'bg-rose-100 text-rose-800 animate-pulse': dhlStatusColor === 'rose'
+                                  }">
+                                <span class="w-1.5 h-1.5 rounded-full"
+                                      :class="{
+                                         'bg-emerald-500': dhlStatusColor === 'emerald',
+                                         'bg-amber-500': dhlStatusColor === 'amber',
+                                         'bg-rose-500': dhlStatusColor === 'rose'
+                                      }"></span>
+                                <span x-text="dhlStatusColor === 'emerald' ? 'A Tiempo (> 3h)' : (dhlStatusColor === 'amber' ? 'Atención (1-2.5h)' : 'Urgente (< 1h)')"></span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-0.5">Empaque prioritario de órdenes salientes antes del arribo de la unidad de recolección.</p>
                     </div>
-                    <p class="text-xs text-slate-600 mt-0.5">Empaque prioritario de órdenes salientes antes del arribo de la unidad de recolección.</p>
+                </div>
+                <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold uppercase tracking-wider block text-slate-500">Tiempo Restante</span>
+                        <span class="text-lg font-mono font-black" :class="dhlStatusColor === 'rose' ? 'text-rose-700' : 'text-slate-900'" x-text="dhlCountdown"></span>
+                    </div>
+                    <button type="button" @click="activeModal = 'shipping'; selectedTask = warehouseTasks.find(t => t.category === 'expedicion') || operationalTasks[3]" class="px-3.5 py-2 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-800 transition shadow-xs cursor-pointer">
+                        Ver Manifiesto DHL
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                <div class="text-right">
-                    <span class="text-[10px] font-bold uppercase tracking-wider block text-slate-500">Tiempo Restante</span>
-                    <span class="text-lg font-mono font-black" :class="dhlStatusColor === 'rose' ? 'text-rose-700' : 'text-slate-900'" x-text="dhlCountdown"></span>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Cola de Tareas de Almacen (2 COLS) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900">Tareas Físicas de Bodega & Picking</h3>
+                                    <p class="text-xs text-slate-500">Ordenadas por urgencia de SLA y ruta de pasillo</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-indigo-600 font-mono bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100" x-text="warehousePendingCount + ' Tareas'"></span>
+                        </div>
+
+                        <!-- Filtros por Categoría Almacén -->
+                        <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                            <button type="button" @click="taskFilter = 'all'" :class="taskFilter === 'all' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Todas (<span x-text="warehouseTasks.filter(t => t.status !== 'completed').length"></span>)
+                            </button>
+                            <button type="button" @click="taskFilter = 'empaque'" :class="taskFilter === 'empaque' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Empaque (<span x-text="warehouseTasks.filter(t => t.status !== 'completed' && t.category === 'empaque').length"></span>)
+                            </button>
+                            <button type="button" @click="taskFilter = 'recepcion'" :class="taskFilter === 'recepcion' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Recepción (<span x-text="warehouseTasks.filter(t => t.status !== 'completed' && t.category === 'recepcion').length"></span>)
+                            </button>
+                            <button type="button" @click="taskFilter = 'surtido'" :class="taskFilter === 'surtido' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Surtido (<span x-text="warehouseTasks.filter(t => t.status !== 'completed' && t.category === 'surtido').length"></span>)
+                            </button>
+                            <button type="button" @click="taskFilter = 'expedicion'" :class="taskFilter === 'expedicion' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Expedición (<span x-text="warehouseTasks.filter(t => t.status !== 'completed' && t.category === 'expedicion').length"></span>)
+                            </button>
+                        </div>
+
+                        <!-- Lista Reactiva de Tareas Operativas Almacén -->
+                        <div class="space-y-3">
+                            <template x-for="task in filteredWarehouseTasks" :key="'wh-task-' + task.id">
+                                <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0"
+                                             :class="{
+                                                'bg-rose-500 animate-pulse': task.sla_status === 'critical' || task.priority === 'critical',
+                                                'bg-amber-500': task.sla_status === 'warning' || task.priority === 'high',
+                                                'bg-emerald-500': task.sla_status === 'ontime' || task.priority === 'medium'
+                                             }"></div>
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span class="text-xs font-bold text-slate-900" x-text="task.title"></span>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                                      :class="{
+                                                         'bg-rose-100 text-rose-800': task.priority === 'critical',
+                                                         'bg-emerald-100 text-emerald-800': task.priority === 'high' && task.category === 'recepcion',
+                                                         'bg-amber-100 text-amber-800': task.priority === 'medium',
+                                                         'bg-indigo-100 text-indigo-800': task.category === 'expedicion'
+                                                      }"
+                                                      x-text="task.category === 'empaque' ? 'Corte DHL Inminente' : (task.category === 'recepcion' ? 'Camión en Rampa' : (task.category === 'surtido' ? 'Reabastecer Rack' : 'Corte 14:00'))"></span>
+                                                <span class="text-[11px] font-mono font-semibold text-slate-500" x-text="'Límite: ' + (task.due_time_formatted || '14:00 hrs')"></span>
+                                            </div>
+                                            <p class="text-xs text-slate-600 mt-0.5" x-text="task.description"></p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        @click="openTaskModal(task)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer shrink-0"
+                                    >
+                                        <span x-text="task.category === 'empaque' ? 'Iniciar Empaque &rarr;' : (task.category === 'recepcion' ? 'Recibir en Rampa' : (task.category === 'surtido' ? 'Confirmar Surtido' : 'Ver Manifiesto'))"></span>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <template x-if="filteredWarehouseTasks.length === 0">
+                                <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                                    <p class="text-xs font-bold text-slate-600">No hay tareas pendientes de almacén en esta categoría.</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">El flujo operativo del turno de bodega se encuentra al corriente.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Bitácora del Turno (Shift Log) -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <h3 class="text-sm font-bold text-slate-900">Bitácora Inmutable del Turno (Shift Log)</h3>
+                            </div>
+                            <span class="text-xs text-slate-400 font-mono">Actualizado en vivo</span>
+                        </div>
+
+                        <ul class="divide-y divide-slate-100 text-xs text-slate-700">
+                            <template x-for="log in shiftLogs" :key="'log-' + log.id">
+                                <li class="py-2.5 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                              :class="{
+                                                 'bg-emerald-500': log.event_type === 'task_completed' || log.event_type === 'reception',
+                                                 'bg-indigo-500': log.event_type === 'manifest',
+                                                 'bg-slate-400': log.event_type === 'system_check'
+                                              }"></span>
+                                        <span x-text="log.message"></span>
+                                    </div>
+                                    <span class="text-slate-400 font-mono shrink-0" x-text="(log.time || '10:00 AM') + ' • ' + (log.operator_name || 'Carlos A.')"></span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
                 </div>
-                <button type="button" @click="activeModal = 'shipping'; selectedTask = operationalTasks.find(t => t.category === 'expedicion') || operationalTasks[3]" class="px-3.5 py-2 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-800 transition shadow-xs cursor-pointer">
-                    Ver Manifiesto DHL
-                </button>
+
+                <!-- Panel Lateral de Bodega (1 COL) -->
+                <div class="space-y-6">
+                    <!-- Horario de Recolección DHL -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Corte DHL Express</h4>
+                        </div>
+                        <div class="text-center py-4 bg-rose-50 border border-rose-100 rounded-xl">
+                            <span class="text-3xl font-black font-mono text-rose-700">14:00 hrs</span>
+                            <span class="text-[11px] font-bold text-rose-800 block mt-1" x-text="dhlCountdown"></span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+                            Los pedidos empacados después de este horario saldrán en la ruta del día hábil siguiente.
+                        </p>
+                    </div>
+
+                    <!-- Resumen de Almacén -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-3">Accesos Directos Almacén</h4>
+                        <div class="space-y-2">
+                            <a href="{{ route('portal.inventory') }}" class="block p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
+                                &rarr; Ver Catálogo Físico e Inventario
+                            </a>
+                            <a href="{{ route('portal.logistics') }}" class="block p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
+                                &rarr; Mesa de Expedición & Guías DHL
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Cola de Tareas de Almacen (2 COLS) -->
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-900">Tareas Físicas de Bodega & Picking</h3>
-                                <p class="text-xs text-slate-500">Ordenadas por urgencia de SLA y ruta de pasillo</p>
-                            </div>
-                        </div>
-                        <span class="text-xs font-bold text-indigo-600 font-mono bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100" x-text="pendingCount + ' Tareas'">4 Tareas</span>
+        {{-- ========================================================================= --}}
+        {{-- SECTOR B: ÁREA DE COMPRAS & ABASTECIMIENTO B2B (ELENA COMPRAS)            --}}
+        {{-- ========================================================================= --}}
+        <div x-show="operativeArea === 'compras'" class="space-y-6">
+            <!-- Banner de Modo Compras & Abastecimiento -->
+            <div class="p-3.5 bg-violet-50/80 border border-violet-200/80 rounded-xl flex items-center justify-between shadow-xs">
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-violet-600 animate-pulse"></span>
+                    <span class="text-xs font-bold text-violet-950 uppercase tracking-wider">Modo Compras & Abastecimiento B2B (Elena Compras)</span>
+                    <button class="section-help-btn" type="button" aria-label="Ayuda de Compras" data-help-title="Área de Compras & Abastecimiento" data-help-desc="Gestión de órdenes de compra, control de discrepancias reportadas por rampa de almacén, optimización de tabuladores MOQ y conciliación de acuerdos de crédito con proveedores.">?</button>
+                </div>
+                <span class="text-[11px] text-violet-800 font-medium">Control de discrepancias en rampa, bandejas MOQ y acuerdos mercantiles</span>
+            </div>
+
+            <!-- SEMÁFORO DE ABASTECIMIENTO Y LEAD TIMES DE PROVEEDORES -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
-
-                    <!-- Filtros por Categoría -->
-                    <div class="flex flex-wrap items-center gap-1.5 mb-4">
-                        <button type="button" @click="taskFilter = 'all'" :class="taskFilter === 'all' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
-                            Todas (<span x-text="operationalTasks.filter(t => t.status !== 'completed').length"></span>)
-                        </button>
-                        <button type="button" @click="taskFilter = 'empaque'" :class="taskFilter === 'empaque' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
-                            Empaque (<span x-text="operationalTasks.filter(t => t.status !== 'completed' && t.category === 'empaque').length"></span>)
-                        </button>
-                        <button type="button" @click="taskFilter = 'recepcion'" :class="taskFilter === 'recepcion' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
-                            Recepción (<span x-text="operationalTasks.filter(t => t.status !== 'completed' && t.category === 'recepcion').length"></span>)
-                        </button>
-                        <button type="button" @click="taskFilter = 'surtido'" :class="taskFilter === 'surtido' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
-                            Surtido (<span x-text="operationalTasks.filter(t => t.status !== 'completed' && t.category === 'surtido').length"></span>)
-                        </button>
-                        <button type="button" @click="taskFilter = 'expedicion'" :class="taskFilter === 'expedicion' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
-                            Expedición (<span x-text="operationalTasks.filter(t => t.status !== 'completed' && t.category === 'expedicion').length"></span>)
-                        </button>
-                    </div>
-
-                    <!-- Lista Reactiva de Tareas Operativas -->
-                    <div class="space-y-3">
-                        <template x-for="task in filteredTasks" :key="'task-' + task.id">
-                            <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0"
-                                         :class="{
-                                            'bg-rose-500 animate-pulse': task.sla_status === 'critical' || task.priority === 'critical',
-                                            'bg-amber-500': task.sla_status === 'warning' || task.priority === 'high',
-                                            'bg-emerald-500': task.sla_status === 'ontime' || task.priority === 'medium'
-                                         }"></div>
-                                    <div>
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <span class="text-xs font-bold text-slate-900" x-text="task.title"></span>
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold"
-                                                  :class="{
-                                                     'bg-rose-100 text-rose-800': task.priority === 'critical',
-                                                     'bg-emerald-100 text-emerald-800': task.priority === 'high' && task.category === 'recepcion',
-                                                     'bg-amber-100 text-amber-800': task.priority === 'medium',
-                                                     'bg-indigo-100 text-indigo-800': task.category === 'expedicion'
-                                                  }"
-                                                  x-text="task.category === 'empaque' ? 'Corte DHL Inminente' : (task.category === 'recepcion' ? 'Camión en Rampa' : (task.category === 'surtido' ? 'Reabastecer Rack' : 'Corte 14:00'))"></span>
-                                            <span class="text-[11px] font-mono font-semibold text-slate-500" x-text="'Límite: ' + (task.due_time_formatted || '14:00 hrs')"></span>
-                                        </div>
-                                        <p class="text-xs text-slate-600 mt-0.5" x-text="task.description"></p>
-                                    </div>
-                                </div>
-                                <button 
-                                    type="button" 
-                                    @click="openTaskModal(task)" 
-                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer shrink-0"
-                                >
-                                    <span x-text="task.category === 'empaque' ? 'Iniciar Empaque &rarr;' : (task.category === 'recepcion' ? 'Recibir en Rampa' : (task.category === 'surtido' ? 'Confirmar Surtido' : 'Ver Manifiesto'))"></span>
-                                </button>
-                            </div>
-                        </template>
-
-                        <template x-if="filteredTasks.length === 0">
-                            <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
-                                <p class="text-xs font-bold text-slate-600">No hay tareas pendientes en esta categoría.</p>
-                                <p class="text-[11px] text-slate-400 mt-1">El flujo operativo del turno se encuentra al corriente.</p>
-                            </div>
-                        </template>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Lead Time Promedio</span>
+                        <span class="text-base font-black text-slate-900 font-mono">3.8 días hábiles</span>
+                        <span class="text-[11px] text-emerald-600 font-semibold block">Cumplimiento SLA: 96.2%</span>
                     </div>
                 </div>
 
-                <!-- Bitácora del Turno (Shift Log) -->
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <h3 class="text-sm font-bold text-slate-900">Bitácora Inmutable del Turno (Shift Log)</h3>
+                <div class="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Discrepancias en Rampa</span>
+                        <span class="text-base font-black text-slate-900 font-mono" x-text="purchasesTasks.filter(t => t.status !== 'completed' && (t.title.includes('Discrepancia') || t.title.includes('Cumplimiento'))).length + ' caso(s)'"></span>
+                        <span class="text-[11px] text-amber-700 font-semibold block">Acción requerida: Nota de Crédito</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Ahorro en Bandeja MOQ</span>
+                        <span class="text-base font-black text-emerald-600 font-mono">-$1,000.00 MXN</span>
+                        <span class="text-[11px] text-slate-500 font-semibold block">Tabulador Torzo: 100 prendas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Cola de Tareas de Compras (2 COLS) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900">Tareas de Abastecimiento & Proveedores</h3>
+                                    <p class="text-xs text-slate-500">Alertas de recepción, consolidación de POs y conciliación de acuerdos</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-violet-600 font-mono bg-violet-50 px-2.5 py-1 rounded-full border border-violet-100" x-text="purchasesPendingCount + ' Tareas'"></span>
                         </div>
-                        <span class="text-xs text-slate-400 font-mono">Actualizado en vivo</span>
+
+                        <!-- Filtros por Categoría Compras -->
+                        <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                            <button type="button" @click="purchasesTaskFilter = 'all'" :class="purchasesTaskFilter === 'all' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Todas (<span x-text="purchasesTasks.filter(t => t.status !== 'completed').length"></span>)
+                            </button>
+                            <button type="button" @click="purchasesTaskFilter = 'recepcion'" :class="purchasesTaskFilter === 'recepcion' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Discrepancias Rampa (<span x-text="purchasesTasks.filter(t => t.status !== 'completed' && t.category === 'recepcion').length"></span>)
+                            </button>
+                            <button type="button" @click="purchasesTaskFilter = 'procurement'" :class="purchasesTaskFilter === 'procurement' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Reorden ROP (<span x-text="purchasesTasks.filter(t => t.status !== 'completed' && t.category === 'procurement').length"></span>)
+                            </button>
+                            <button type="button" @click="purchasesTaskFilter = 'moq'" :class="purchasesTaskFilter === 'moq' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Bandeja MOQ (<span x-text="purchasesTasks.filter(t => t.status !== 'completed' && t.category === 'moq').length"></span>)
+                            </button>
+                            <button type="button" @click="purchasesTaskFilter = 'acuerdos'" :class="purchasesTaskFilter === 'acuerdos' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                Acuerdos NC (<span x-text="purchasesTasks.filter(t => t.status !== 'completed' && t.category === 'acuerdos').length"></span>)
+                            </button>
+                            <button type="button" @click="purchasesTaskFilter = 'on_demand'" :class="purchasesTaskFilter === 'on_demand' ? 'bg-violet-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                                On-Demand (<span x-text="purchasesTasks.filter(t => t.status !== 'completed' && t.category === 'on_demand').length"></span>)
+                            </button>
+                        </div>
+
+                        <!-- Lista Reactiva de Tareas de Compras -->
+                        <div class="space-y-3">
+                            <template x-for="task in filteredPurchasesTasks" :key="'pur-task-' + task.id">
+                                <div class="p-4 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0"
+                                             :class="{
+                                                'bg-rose-500 animate-pulse': task.priority === 'critical',
+                                                'bg-amber-500': task.priority === 'high',
+                                                'bg-violet-500': task.priority === 'medium',
+                                                'bg-emerald-500': task.priority === 'low'
+                                             }"></div>
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span class="text-xs font-bold text-slate-900" x-text="task.title"></span>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                                      :class="{
+                                                         'bg-rose-100 text-rose-800': task.category === 'recepcion' || task.priority === 'critical',
+                                                         'bg-amber-100 text-amber-800': task.category === 'procurement',
+                                                         'bg-violet-100 text-violet-800': task.category === 'moq',
+                                                         'bg-emerald-100 text-emerald-800': task.category === 'acuerdos',
+                                                         'bg-blue-100 text-blue-800': task.category === 'on_demand'
+                                                      }"
+                                                      x-text="task.category === 'recepcion' ? 'Discrepancia Rampa' : (task.category === 'procurement' ? 'Reorden ROP' : (task.category === 'moq' ? 'Tabulador MOQ' : (task.category === 'acuerdos' ? 'Acuerdo Saldo Favor' : 'Quiebre On-Demand')))"></span>
+                                                <span class="text-[11px] font-mono font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-100" x-text="task.metadata?.supplier_name || 'Proveedor B2B'"></span>
+                                                <span class="text-[11px] font-mono font-semibold text-slate-500" x-text="'Ref: ' + (task.reference_code || 'N/A')"></span>
+                                            </div>
+                                            <p class="text-xs text-slate-600 mt-1" x-text="task.description"></p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        @click="openTaskModal(task)" 
+                                        class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer shrink-0"
+                                    >
+                                        <span x-text="task.category === 'recepcion' ? 'Gestionar Discrepancia &rarr;' : (task.category === 'moq' ? 'Ver Tabulador MOQ' : (task.category === 'acuerdos' ? 'Conciliar Acuerdo' : 'Emitir Orden Compra'))"></span>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <template x-if="filteredPurchasesTasks.length === 0">
+                                <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                                    <p class="text-xs font-bold text-slate-600">No hay tareas pendientes de compras en esta categoría.</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">Todos los pedidos y acuerdos con proveedores se encuentran al día.</p>
+                                </div>
+                            </template>
+                        </div>
                     </div>
 
-                    <ul class="divide-y divide-slate-100 text-xs text-slate-700">
-                        <template x-for="log in shiftLogs" :key="'log-' + log.id">
+                    <!-- Bitácora de Compras & Acuerdos -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <h3 class="text-sm font-bold text-slate-900">Bitácora de Abastecimiento & Negociaciones</h3>
+                            </div>
+                            <span class="text-xs text-slate-400 font-mono">Registro Elena Compras</span>
+                        </div>
+
+                        <ul class="divide-y divide-slate-100 text-xs text-slate-700">
                             <li class="py-2.5 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-1.5 h-1.5 rounded-full shrink-0"
-                                          :class="{
-                                             'bg-emerald-500': log.event_type === 'task_completed' || log.event_type === 'reception',
-                                             'bg-indigo-500': log.event_type === 'manifest',
-                                             'bg-slate-400': log.event_type === 'system_check'
-                                          }"></span>
-                                    <span x-text="log.message"></span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                    <span>Acuerdo de compensación aplicado en PO #OC-2026-003 (-$1,250.00 MXN Torzo Textil)</span>
                                 </div>
-                                <span class="text-slate-400 font-mono shrink-0" x-text="(log.time || '10:00 AM') + ' • ' + (log.operator_name || 'Carlos A.')"></span>
+                                <span class="text-slate-400 font-mono shrink-0">Hoy 11:45 AM • Elena C.</span>
                             </li>
-                        </template>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Panel Lateral de Bodega (1 COL) -->
-            <div class="space-y-6">
-                <!-- Horario de Recolección DHL -->
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
-                    <div class="flex items-center gap-2 mb-3">
-                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Corte DHL Express</h4>
+                            <li class="py-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
+                                    <span>Salto a nivel de tabulador MOQ 100 pzs alcanzado ($65.00/u)</span>
+                                </div>
+                                <span class="text-slate-400 font-mono shrink-0">Hoy 10:15 AM • Elena C.</span>
+                            </li>
+                            <li class="py-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                    <span>Reporte de discrepancia recibido de Rampa 2: Torzo Textil remisión incompleta</span>
+                                </div>
+                                <span class="text-slate-400 font-mono shrink-0">Hoy 09:30 AM • Carlos A.</span>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="text-center py-4 bg-rose-50 border border-rose-100 rounded-xl">
-                        <span class="text-3xl font-black font-mono text-rose-700">14:00 hrs</span>
-                        <span class="text-[11px] font-bold text-rose-800 block mt-1" x-text="dhlCountdown"></span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-3 leading-relaxed">
-                        Los pedidos empacados después de este horario saldrán en la ruta del día hábil siguiente.
-                    </p>
                 </div>
 
-                <!-- Resumen de Almacén -->
-                <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-3">Accesos Directos Almacén</h4>
-                    <div class="space-y-2">
-                        <a href="{{ route('portal.inventory') }}" class="block p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
-                            &rarr; Ver Catálogo Físico e Inventario
-                        </a>
-                        <a href="{{ route('portal.logistics') }}" class="block p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
-                            &rarr; Mesa de Expedición & Guías DHL
-                        </a>
+                <!-- Panel Lateral de Compras (1 COL) -->
+                <div class="space-y-6">
+                    <!-- Directorio de Proveedores Clave -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Proveedores & SLA</h4>
+                        </div>
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/60">
+                                <div class="flex justify-between items-center font-bold text-slate-900">
+                                    <span>Torzo Textil B2B</span>
+                                    <span class="text-emerald-700 font-mono">Lead Time: 3 días</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">MOQ Base: 50 u &bull; Tabulador Activo: 100 u ($65/u)</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/60">
+                                <div class="flex justify-between items-center font-bold text-slate-900">
+                                    <span>Confecciones del Centro</span>
+                                    <span class="text-emerald-700 font-mono">Lead Time: 4 días</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Polos & Piqué &bull; ROP anaquel: 20 u</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/60">
+                                <div class="flex justify-between items-center font-bold text-slate-900">
+                                    <span>Maquilas & Bordados Bajío</span>
+                                    <span class="text-amber-700 font-mono">Lead Time: 5 días</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Hoodies & Sudaderas &bull; On-Demand</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accesos Directos Compras -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-3">Herramientas de Abastecimiento</h4>
+                        <div class="space-y-2">
+                            <a href="{{ route('portal.inventory') }}" class="block p-3 rounded-xl bg-violet-50 hover:bg-violet-100 border border-violet-200 text-xs font-bold text-violet-900 transition" style="text-decoration:none;">
+                                &rarr; Bandeja de MOQs & Generador de PO (Hub 4)
+                            </a>
+                            <a href="{{ route('portal.inventory') }}#suppliers" class="block p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
+                                &rarr; Catálogo de Proveedores & Tabuladores
+                            </a>
+                            <a href="{{ route('portal.vendor.extranet') }}" class="block p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
+                                &rarr; Extranet de Proveedores B2B (Hub 7)
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1602,6 +1864,119 @@
                             >
                                 <svg class="w-4 h-4" :class="isSubmittingTask ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 <span x-text="isSubmittingTask ? 'Liberando...' : 'Liberar Manifiesto & Despachar Unidad DHL'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- 4.5. MODAL GESTIÓN DE COMPRAS & ABASTECIMIENTO (ELENA COMPRAS) -->
+            <template x-if="activeModal === 'purchases_task'">
+                <div>
+                    <div class="px-6 py-4 bg-violet-50/70 border-b border-violet-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-violet-600 animate-pulse"></span>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+                                    <span x-text="selectedTask ? selectedTask.title : 'Gestión de Tarea de Abastecimiento'"></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-800" x-text="selectedTask ? (selectedTask.reference_code || 'COMPRAS-B2B') : ''"></span>
+                                </h3>
+                                <p class="text-xs text-slate-500">Resolución operativa de suministros, notas de crédito y bandejas de compra</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="closeModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6" x-show="selectedTask">
+                        <!-- Columna 1: Expediente del Proveedor y Asunto -->
+                        <div class="space-y-4">
+                            <div class="bg-violet-50/50 border border-violet-100 rounded-xl p-4">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-violet-900 block mb-1">Proveedor / Fabricante Involucrado</span>
+                                <div class="text-sm font-black text-slate-900" x-text="selectedTask?.metadata?.supplier_name || 'Proveedor B2B Asignado'"></div>
+                                <div class="text-xs text-slate-600 mt-1" x-text="'Código de Referencia: ' + (selectedTask?.reference_code || 'N/A')"></div>
+                                <div class="text-xs text-violet-800 font-semibold mt-2" x-text="'Prioridad de Abastecimiento: ' + (selectedTask?.priority?.toUpperCase() || 'ALTA')"></div>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-700">
+                                <div class="font-bold text-slate-800 mb-1">Detalle Operativo del Caso:</div>
+                                <p class="text-xs text-slate-600 leading-relaxed" x-text="selectedTask?.description"></p>
+                                
+                                <template x-if="selectedTask?.metadata?.discrepancy_details">
+                                    <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
+                                        <strong class="block text-[11px] font-bold uppercase tracking-wider mb-0.5">Discrepancia Notificada por Rampa:</strong>
+                                        <span x-text="selectedTask.metadata.discrepancy_details"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Accesos Rápidos de Resolución</span>
+                                <div class="flex flex-col gap-2">
+                                    <a href="{{ route('portal.inventory') }}" target="_blank" class="flex items-center justify-between p-2.5 bg-white hover:bg-violet-50 border border-slate-200 rounded-lg text-xs font-bold text-violet-900 transition" style="text-decoration:none;">
+                                        <span>&rarr; Ir a Bandeja de MOQs & PO (Hub 4)</span>
+                                        <span class="text-[10px] bg-violet-100 text-violet-800 px-2 py-0.5 rounded font-normal">Reorden</span>
+                                    </a>
+                                    <a href="{{ route('portal.vendor.extranet') }}" target="_blank" class="flex items-center justify-between p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 transition" style="text-decoration:none;">
+                                        <span>&rarr; Extranet del Proveedor (Hub 7)</span>
+                                        <span class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-normal">Portal B2B</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna 2: Protocolo de Compras & Checklist -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-900">Protocolo de Validación B2B</h4>
+
+                            <div class="space-y-2.5">
+                                <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
+                                    <input type="checkbox" x-model="purchasesChecklist.notified" class="mt-1 rounded text-violet-600 focus:ring-violet-500">
+                                    <div class="text-xs">
+                                        <div class="font-bold text-slate-900">Notificación al Proveedor / Extranet Registrada</div>
+                                        <div class="text-slate-500 mt-0.5">Se comunicó la discrepancia o necesidad de reposición al contacto comercial.</div>
+                                    </div>
+                                </label>
+
+                                <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
+                                    <input type="checkbox" x-model="purchasesChecklist.agreementApplied" class="mt-1 rounded text-violet-600 focus:ring-violet-500">
+                                    <div class="text-xs">
+                                        <div class="font-bold text-slate-900">Nota de Crédito o Tabulador MOQ Aplicado</div>
+                                        <div class="text-slate-500 mt-0.5">Deducción pactada o ajuste de volumen consolidado para ahorro real en PO.</div>
+                                    </div>
+                                </label>
+
+                                <label class="p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl flex items-start gap-3 cursor-pointer transition">
+                                    <input type="checkbox" x-model="purchasesChecklist.supplierConfirmed" class="mt-1 rounded text-violet-600 focus:ring-violet-500">
+                                    <div class="text-xs">
+                                        <div class="font-bold text-slate-900">Compromiso de Despacho y SLA Confirmado</div>
+                                        <div class="text-slate-500 mt-0.5">Tiempo de entrega acordado en calendario de recepciones en rampa.</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="space-y-1 pt-1">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600 block">Notas de Resolución para Bitácora Inmutable</label>
+                                <textarea x-model="purchasesResolutionNotes" rows="3" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-violet-500 focus:border-violet-500" placeholder="Ej: Se acordó deducción en PO #OC-2026-003 por faltante de 10 prendas..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <span class="text-xs text-slate-500">Gestora: <strong>Elena Compras (Abastecimiento B2B)</strong></span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                                Cerrar
+                            </button>
+                            <button 
+                                type="button" 
+                                @click="completeCurrentTask()" 
+                                :disabled="isSubmittingTask"
+                                class="px-5 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" :class="isSubmittingTask ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span x-text="isSubmittingTask ? 'Procesando...' : 'Confirmar Resolución de Abastecimiento'"></span>
                             </button>
                         </div>
                     </div>
@@ -2214,6 +2589,9 @@ function dashboardModule() {
         salesIncidents: [],
         shiftLogs: [],
         taskFilter: 'all',
+        purchasesTaskFilter: 'all',
+        operativeArea: 'almacen',
+        purchasesResolutionNotes: '',
         salesFilter: 'all',
         activeModal: null,
         selectedTask: null,
@@ -2255,6 +2633,11 @@ function dashboardModule() {
             manifestSigned: true,
             driverHandover: true,
             driverBadge: 'DHL-OP-8821',
+        },
+        purchasesChecklist: {
+            notified: true,
+            agreementApplied: true,
+            supplierConfirmed: true,
         },
 
         rescueForm: {
@@ -2306,9 +2689,20 @@ function dashboardModule() {
                 this.activeTab = 'operative';
             }
 
+            const role = (this.userRole || '').toLowerCase();
+            if (role === 'purchases' || role === 'compras') {
+                this.operativeArea = 'compras';
+            } else {
+                this.operativeArea = 'almacen';
+            }
+
             this.updateDhlCountdown();
             setInterval(() => this.updateDhlCountdown(), 60000);
             this.updateRescueMessage();
+        },
+
+        switchOperativeArea(area) {
+            this.operativeArea = area;
         },
 
         updateDhlCountdown() {
@@ -2337,15 +2731,40 @@ function dashboardModule() {
             }
         },
 
+        get warehouseTasks() {
+            return this.operationalTasks.filter(t => !t.assigned_role || t.assigned_role === 'warehouse' || ['empaque', 'recepcion', 'surtido', 'expedicion'].includes(t.category));
+        },
+
+        get purchasesTasks() {
+            return this.operationalTasks.filter(t => t.assigned_role === 'purchases' || ['compras', 'procurement', 'moq', 'acuerdos', 'on_demand'].includes(t.category) || (t.metadata && t.metadata.supplier_name));
+        },
+
+        get filteredWarehouseTasks() {
+            const list = this.warehouseTasks.filter(t => t.status !== 'completed');
+            if (this.taskFilter === 'all') return list;
+            return list.filter(t => t.category === this.taskFilter);
+        },
+
+        get filteredPurchasesTasks() {
+            const list = this.purchasesTasks.filter(t => t.status !== 'completed');
+            if (this.purchasesTaskFilter === 'all') return list;
+            return list.filter(t => t.category === this.purchasesTaskFilter);
+        },
+
+        get warehousePendingCount() {
+            return this.warehouseTasks.filter(t => t.status !== 'completed').length;
+        },
+
+        get purchasesPendingCount() {
+            return this.purchasesTasks.filter(t => t.status !== 'completed').length;
+        },
+
         get filteredTasks() {
-            if (this.taskFilter === 'all') {
-                return this.operationalTasks.filter(t => t.status !== 'completed');
-            }
-            return this.operationalTasks.filter(t => t.status !== 'completed' && t.category === this.taskFilter);
+            return this.filteredWarehouseTasks;
         },
 
         get pendingCount() {
-            return this.operationalTasks.filter(t => t.status !== 'completed').length;
+            return this.warehousePendingCount;
         },
 
         get filteredSalesIncidents() {
@@ -2379,14 +2798,22 @@ function dashboardModule() {
             this.selectedTask = task;
             const category = task.category || '';
             const ref = ((task.reference_code || '') + ' ' + (task.title || '')).toLowerCase();
+            const isPurchasesTask = task.assigned_role === 'purchases' || 
+                ['compras', 'procurement', 'moq', 'acuerdos', 'on_demand'].includes(category) || 
+                Boolean(task.metadata && task.metadata.supplier_name) ||
+                ref.includes('discrepancia') || ref.includes('moq') || ref.includes('acuerdo') || ref.includes('rop-polo') || ref.includes('od-');
 
             // Reset checklist state
             this.packChecklist = { item1: true, item2: true, item3: true, sealed: true };
             this.inboundChecklist = { sealValid: true, boxesOk: true, countMatch: true };
             this.restockChecklist = { rackExtracted: true, barcodeScanned: true, binPlaced: true };
             this.shippingChecklist = { packagesStaged: true, manifestSigned: true, driverHandover: true, driverBadge: 'DHL-OP-8821' };
+            this.purchasesChecklist = { notified: true, agreementApplied: true, supplierConfirmed: true };
+            this.purchasesResolutionNotes = '';
 
-            if (category === 'empaque' || ref.includes('mix') || ref.includes('1048')) {
+            if (isPurchasesTask && this.operativeArea === 'compras') {
+                this.activeModal = 'purchases_task';
+            } else if (category === 'empaque' || ref.includes('mix') || ref.includes('1048')) {
                 this.activeModal = 'pack';
             } else if (category === 'recepcion' || ref.includes('oc') || ref.includes('2026-003')) {
                 this.activeModal = 'inbound';
@@ -2394,6 +2821,8 @@ function dashboardModule() {
                 this.activeModal = 'restock';
             } else if (category === 'expedicion' || ref.includes('manifiesto') || ref.includes('dhl')) {
                 this.activeModal = 'shipping';
+            } else if (isPurchasesTask) {
+                this.activeModal = 'purchases_task';
             } else {
                 this.activeModal = 'pack';
             }
@@ -2608,6 +3037,12 @@ function dashboardModule() {
             if (!this.selectedTask) return;
             this.isSubmittingTask = true;
             const taskId = this.selectedTask.id;
+            const operator = (this.activeModal === 'purchases_task' || this.operativeArea === 'compras')
+                ? 'Elena Compras'
+                : (this.isWarehouse ? 'Carlos Almacén' : 'Super Admin');
+            const notes = (this.activeModal === 'purchases_task' && this.purchasesResolutionNotes)
+                ? this.purchasesResolutionNotes
+                : 'Resolución y validación operativa completada con éxito.';
 
             try {
                 const response = await fetch(`/api/v1/dashboard/tasks/${taskId}/complete`, {
@@ -2617,8 +3052,8 @@ function dashboardModule() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     },
                     body: JSON.stringify({
-                        operator_name: this.isWarehouse ? 'Carlos Almacén' : 'Super Admin',
-                        notes: 'Resolución y checklist física validada con éxito.',
+                        operator_name: operator,
+                        notes: notes,
                     }),
                 });
 
@@ -2651,7 +3086,7 @@ function dashboardModule() {
                     id: Date.now(),
                     event_type: 'task_completed',
                     message: `Tarea completada: ${this.selectedTask.title}`,
-                    operator_name: this.isWarehouse ? 'Carlos Almacén' : 'Super Admin',
+                    operator_name: operator,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 });
                 if (typeof showToast === 'function') {
