@@ -932,7 +932,12 @@
                                             <!-- Swatch Color & Tornasol -->
                                             <template x-if="item.colorName">
                                                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200" :title="'Color: ' + item.colorName">
-                                                    <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
+                                                    <template x-if="item.colorName?.toLowerCase() === 'multicolor' || (item.colorHex && item.colorHex.includes('gradient'))">
+                                                        <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0 shadow-3xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                    </template>
+                                                    <template x-if="item.colorName?.toLowerCase() !== 'multicolor' && (!item.colorHex || !item.colorHex.includes('gradient'))">
+                                                        <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0 shadow-3xs" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
+                                                    </template>
                                                     <span x-text="item.colorName"></span>
                                                 </span>
                                             </template>
@@ -1561,7 +1566,12 @@
                                     <span class="px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]" x-text="'Cat: ' + item.suggestedCategory"></span>
                                     <span class="px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]" x-text="'Tela: ' + item.suggestedFabric"></span>
                                     <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]">
-                                        <span class="w-2.5 h-2.5 rounded-full border border-white/20" :style="'background-color: ' + item.detectedColorHex"></span>
+                                        <template x-if="item.detectedColorName?.toLowerCase() === 'multicolor' || (item.detectedColorHex && item.detectedColorHex.includes('gradient'))">
+                                            <span class="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0 shadow-3xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                        </template>
+                                        <template x-if="item.detectedColorName?.toLowerCase() !== 'multicolor' && (!item.detectedColorHex || !item.detectedColorHex.includes('gradient'))">
+                                            <span class="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0 shadow-3xs" :style="'background: ' + (item.detectedColorHex || '#0f172a')"></span>
+                                        </template>
                                         <span x-text="item.detectedColorName"></span>
                                     </span>
                                     <span class="px-2 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800 text-[11px]" x-text="'Tallas: ' + (Array.isArray(item.availableSizes) ? item.availableSizes.join(', ') : 'CH, M, G, XL')"></span>
@@ -3481,7 +3491,12 @@
                             </div>
                             
                             <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
+                                <template x-if="drawerColorName?.toLowerCase() === 'multicolor' || (drawerColorHex && drawerColorHex.includes('gradient'))">
+                                    <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                </template>
+                                <template x-if="drawerColorName?.toLowerCase() !== 'multicolor' && (!drawerColorHex || !drawerColorHex.includes('gradient'))">
+                                    <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + (drawerColorHex || '#0f172a')"></span>
+                                </template>
                                 <div class="flex-1 min-w-0">
                                     <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
                                     <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
@@ -11827,10 +11842,10 @@
                                             </button>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <template x-if="curatingItem.detectedColorName === 'Multicolor'">
+                                            <template x-if="curatingItem.detectedColorName?.toLowerCase() === 'multicolor'">
                                                 <span class="w-8 h-8 rounded-lg border border-slate-300 shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
                                             </template>
-                                            <template x-if="curatingItem.detectedColorName !== 'Multicolor'">
+                                            <template x-if="curatingItem.detectedColorName?.toLowerCase() !== 'multicolor'">
                                                 <input 
                                                     type="color" 
                                                     x-model="curatingItem.detectedColorHex" 
@@ -12456,11 +12471,11 @@
                                         <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
                                             <span class="text-[10px] text-slate-500 font-bold uppercase">Color Principal:</span>
                                             <div class="flex items-center gap-2">
-                                                <template x-if="curatingItem.detectedColorName === 'Multicolor'">
-                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                <template x-if="curatingItem.detectedColorName?.toLowerCase() === 'multicolor' || (curatingItem.detectedColorHex && curatingItem.detectedColorHex.includes('gradient'))">
+                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
                                                 </template>
-                                                <template x-if="curatingItem.detectedColorName !== 'Multicolor'">
-                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + curatingItem.detectedColorHex"></span>
+                                                <template x-if="curatingItem.detectedColorName?.toLowerCase() !== 'multicolor' && (!curatingItem.detectedColorHex || !curatingItem.detectedColorHex.includes('gradient'))">
+                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (curatingItem.detectedColorHex || '#0f172a')"></span>
                                                 </template>
                                                 <span class="font-bold text-slate-800 text-xs" x-text="curatingItem.detectedColorName"></span>
                                             </div>
@@ -14293,7 +14308,12 @@
                                                     <div class="flex flex-col gap-1">
                                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 w-fit" x-text="draft.fabricType || 'Algodón Peinado'"></span>
                                                         <div class="flex items-center gap-1.5">
-                                                            <span class="w-3 h-3 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (draft.colorHex || '#0f172a')"></span>
+                                                            <template x-if="draft.colorName?.toLowerCase() === 'multicolor' || (draft.colorHex && draft.colorHex.includes('gradient'))">
+                                                                <span class="w-3 h-3 rounded-full border border-slate-300 shrink-0 shadow-3xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                            </template>
+                                                            <template x-if="draft.colorName?.toLowerCase() !== 'multicolor' && (!draft.colorHex || !draft.colorHex.includes('gradient'))">
+                                                                <span class="w-3 h-3 rounded-full border border-slate-300 shrink-0 shadow-3xs" :style="'background: ' + (draft.colorHex || '#0f172a')"></span>
+                                                            </template>
                                                             <span class="text-[11px] text-slate-600" x-text="draft.colorName || 'Negro'"></span>
                                                         </div>
                                                     </div>

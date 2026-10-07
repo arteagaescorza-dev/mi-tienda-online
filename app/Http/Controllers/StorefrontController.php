@@ -1135,14 +1135,17 @@ class StorefrontController extends Controller
             }
 
             // Resolver Hex Cromático a través del catálogo maestro ApparelColor si está ausente o es genérico oscuro
-            if (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
+            if (strtolower(trim((string)$colorName)) === 'multicolor') {
+                $colorHex = 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)';
+                $colorType = 'iridescent';
+            } elseif (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
                 if (!empty($colorName)) {
                     $matchedCol = \App\Models\ApparelColor::where('name', $colorName)
                         ->orWhere('name', 'like', '%' . explode(' ', $colorName)[0] . '%')
                         ->first();
-                    if ($matchedCol && $matchedCol->hex_code) {
-                        $colorHex = $matchedCol->hex_code;
-                        $colorType = $matchedCol->color_type ?: $colorType;
+                    if ($matchedCol) {
+                        $colorHex = $matchedCol->hex;
+                        $colorType = $matchedCol->type;
                     }
                 }
                 $colorHex = $colorHex ?: '#0f172a';
