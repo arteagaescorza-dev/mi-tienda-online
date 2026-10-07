@@ -97,3 +97,4 @@ El módulo de compras en Hub 4 se rige bajo dos nuevas reglas operativas formali
 3. **Control de Calidad:**
    - Zero errores de sintaxis en Blade y JS.
    - Versionado de script a `inventory-module.js?v=20261007_v5`.
+

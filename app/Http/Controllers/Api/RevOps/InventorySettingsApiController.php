@@ -837,7 +837,9 @@ class InventorySettingsApiController extends Controller
 
     public function getMoqSheets(Request $request): JsonResponse
     {
-        SupplierMoqSheet::ensureTorzoDefault();
+        if (SupplierMoqSheet::count() === 0) {
+            SupplierMoqSheet::ensureTorzoDefault();
+        }
 
         $query = SupplierMoqSheet::with('supplier');
 
@@ -849,7 +851,7 @@ class InventorySettingsApiController extends Controller
             $query->where('supplier_name', 'like', '%' . $request->input('supplier_name') . '%');
         }
 
-        $sheets = $query->orderByDesc('is_default')->orderBy('supplier_name')->get();
+        $sheets = $query->orderBy('supplier_name')->get();
 
         return response()->json([
             'status' => 'success',
@@ -875,11 +877,10 @@ class InventorySettingsApiController extends Controller
             'rows.*.category' => 'required|string|max:150',
             'rows.*.prices' => 'required|array',
             'is_active' => 'nullable|boolean',
-            'is_default' => 'nullable|boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        // Regla: Los tabuladores MOQ se asocian directamente con proveedores creados previamente
+        // Regla: Los tabuladores MOQ son independientes y se asocian obligatoriamente a un proveedor registrado
         $supplier = null;
         if (!empty($validated['supplier_id'])) {
             $supplier = Supplier::find($validated['supplier_id']);
@@ -896,16 +897,19 @@ class InventorySettingsApiController extends Controller
 
         $validated['supplier_id'] = $supplier->id;
         $validated['supplier_name'] = $supplier->name;
+        $validated['is_default'] = false;
 
-        if (!empty($validated['is_default'])) {
-            SupplierMoqSheet::where('supplier_id', $supplier->id)->update(['is_default' => false]);
+        $existing = SupplierMoqSheet::where('supplier_id', $supplier->id)->first();
+        if ($existing) {
+            $existing->update($validated);
+            $sheet = $existing;
+        } else {
+            $sheet = SupplierMoqSheet::create($validated);
         }
-
-        $sheet = SupplierMoqSheet::create($validated);
 
         return response()->json([
             'status' => 'success',
-            'message' => "Tabulador de MOQ '{$sheet->title}' asociado exitosamente al proveedor '{$supplier->name}'.",
+            'message' => "Tabulador de MOQ '{$sheet->title}' guardado exitosamente para el proveedor '{$supplier->name}'.",
             'data' => $sheet->load('supplier'),
         ], 201);
     }
@@ -923,7 +927,6 @@ class InventorySettingsApiController extends Controller
             'tiers' => 'sometimes|required|array|min:1',
             'rows' => 'sometimes|required|array|min:1',
             'is_active' => 'nullable|boolean',
-            'is_default' => 'nullable|boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -939,13 +942,7 @@ class InventorySettingsApiController extends Controller
             }
         }
 
-        if (!empty($validated['is_default']) && $validated['is_default']) {
-            $supId = $validated['supplier_id'] ?? $sheet->supplier_id;
-            SupplierMoqSheet::where('id', '!=', $sheet->id)
-                ->where('supplier_id', $supId)
-                ->update(['is_default' => false]);
-        }
-
+        $validated['is_default'] = false;
         $sheet->update($validated);
 
         return response()->json([

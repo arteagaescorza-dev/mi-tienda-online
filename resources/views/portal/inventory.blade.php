@@ -3557,6 +3557,217 @@
                 </div>
             </div>
         </div> <!-- Fin de SUB-VISTA 3 (purchasesSubTab === 'kardex') -->
+
+        <!-- ================================================================= -->
+        <!-- SUB-VISTA 5: ACUERDOS POR DISCREPANCIAS & NOTAS DE CRÉDITO        -->
+        <!-- ================================================================= -->
+        <div x-show="purchasesSubTab === 'agreements'" class="space-y-6" style="display: none;">
+            
+            <!-- Cabecera de la Sub-Vista con Botón Principal -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">Regla 1 Compras</span>
+                        <h3 class="text-base font-bold text-slate-900">Acuerdos Mercantiles &amp; Notas de Crédito por Discrepancias</h3>
+                    </div>
+                    <p class="text-xs text-slate-500">Gestión formal, trazable y auditable de saldos a favor devengados por incidencias en rampa, mermas textiles o penalizaciones logísticas.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button 
+                        type="button" 
+                        @click="openNewCreditAgreementModal()" 
+                        class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-2 cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>+ Levantar Acuerdo / Nota de Crédito</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjetas KPI Resumen Superior -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Saldo a Favor Disponible</div>
+                    <div class="text-xl font-black text-rose-600 font-mono" x-text="formatCurrency(getCreditAgreementsSummary().totalAvailable)"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Deducible en próximas OCs</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Acuerdos Pendientes</div>
+                    <div class="text-xl font-black text-amber-600 font-mono" x-text="getCreditAgreementsSummary().pendingCount"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Esperando liquidación</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Total Compensado</div>
+                    <div class="text-xl font-black text-emerald-600 font-mono" x-text="formatCurrency(getCreditAgreementsSummary().totalCompensated)"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Aplicado en OCs emitidas</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Prendas con Discrepancia</div>
+                    <div class="text-xl font-black text-slate-800 font-mono" x-text="getCreditAgreementsSummary().totalUnits + ' uds'"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Faltantes y mermas históricas</div>
+                </div>
+            </div>
+
+            <!-- Filtros & Buscador -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2 flex-1 max-w-md">
+                    <div class="relative w-full">
+                        <input 
+                            type="text" 
+                            x-model="agreementsSearch" 
+                            placeholder="Buscar por folio (NC-...), proveedor o motivo..." 
+                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-1.5 text-xs">
+                        <span class="text-slate-500 text-[11px] font-semibold">Proveedor:</span>
+                        <select 
+                            x-model="agreementsSupplierFilter" 
+                            class="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none"
+                        >
+                            <option value="all">Todos los proveedores</option>
+                            <template x-for="p in providers" :key="p.dbId || p.id">
+                                <option :value="p.tradeName || p.name" x-text="p.tradeName || p.name"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs">
+                        <span class="text-slate-500 text-[11px] font-semibold">Estatus:</span>
+                        <select 
+                            x-model="agreementsStatusFilter" 
+                            class="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none"
+                        >
+                            <option value="all">Todos los estatus</option>
+                            <option value="pending">Pendientes de Aplicar</option>
+                            <option value="applied">Compensadas en PO</option>
+                            <option value="void">Anuladas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Acuerdos y Notas de Crédito -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[10px] uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="py-3 px-4">Folio Minuta / NC</th>
+                                <th class="py-3 px-4">Proveedor</th>
+                                <th class="py-3 px-4">Tipo &amp; Motivo</th>
+                                <th class="py-3 px-4 text-center">Unidades Afectadas</th>
+                                <th class="py-3 px-4 text-right">Compensación</th>
+                                <th class="py-3 px-4 text-center">Estatus</th>
+                                <th class="py-3 px-4">Aplicado En</th>
+                                <th class="py-3 px-4">Fecha</th>
+                                <th class="py-3 px-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <template x-for="ag in getFilteredCreditAgreements()" :key="ag.id || ag.ref">
+                                <tr class="hover:bg-slate-50/70 transition">
+                                    <!-- Folio -->
+                                    <td class="py-3 px-4">
+                                        <span class="font-mono font-bold text-rose-700 block text-xs" x-text="ag.ref || ag.reference_folio"></span>
+                                        <span class="text-[9px] text-slate-400 font-mono" x-text="ag.authorized_by ? ('Auth: ' + ag.authorized_by) : ''"></span>
+                                    </td>
+                                    <!-- Proveedor -->
+                                    <td class="py-3 px-4">
+                                        <strong class="text-slate-900 block" x-text="ag.supplier"></strong>
+                                        <span class="text-[10px] text-slate-400" x-text="ag.discrepancy_type === 'missing_units' ? 'Faltante en Rampa' : (ag.discrepancy_type === 'damaged_units' ? 'Merma / Defecto' : 'Ajuste Inbound')"></span>
+                                    </td>
+                                    <!-- Motivo / Resolución -->
+                                    <td class="py-3 px-4 max-w-xs">
+                                        <p class="text-xs text-slate-700 line-clamp-2" x-text="ag.reason || ag.resolution_notes"></p>
+                                    </td>
+                                    <!-- Unidades -->
+                                    <td class="py-3 px-4 text-center">
+                                        <div class="inline-flex items-center gap-1 text-[10px] font-bold">
+                                            <template x-if="(ag.missing_units || ag.missing_units_count) > 0">
+                                                <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded" x-text="'Faltan: ' + (ag.missing_units || ag.missing_units_count)"></span>
+                                            </template>
+                                            <template x-if="(ag.damaged_units || ag.damaged_units_count) > 0">
+                                                <span class="px-1.5 py-0.5 bg-rose-50 text-rose-800 border border-rose-200 rounded" x-text="'Mermas: ' + (ag.damaged_units || ag.damaged_units_count)"></span>
+                                            </template>
+                                            <template x-if="!(ag.missing_units || ag.missing_units_count) && !(ag.damaged_units || ag.damaged_units_count)">
+                                                <span class="text-slate-400">—</span>
+                                            </template>
+                                        </div>
+                                    </td>
+                                    <!-- Monto Compensatorio -->
+                                    <td class="py-3 px-4 text-right">
+                                        <span class="font-mono font-black text-rose-600 text-sm" x-text="'-' + formatCurrency(ag.amount)"></span>
+                                    </td>
+                                    <!-- Estatus -->
+                                    <td class="py-3 px-4 text-center">
+                                        <span 
+                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                            :class="{
+                                                'bg-amber-100 text-amber-800 border border-amber-200': (ag.status || '').toLowerCase().includes('pendiente') || ag.raw_status === 'pending',
+                                                'bg-emerald-100 text-emerald-800 border border-emerald-200': (ag.status || '').toLowerCase().includes('aplicada') || (ag.status || '').toLowerCase().includes('compens') || ag.raw_status === 'applied',
+                                                'bg-slate-100 text-slate-600 border border-slate-200': (ag.status || '').toLowerCase().includes('anulada') || ag.raw_status === 'void'
+                                            }"
+                                            x-text="ag.status"
+                                        ></span>
+                                    </td>
+                                    <!-- Aplicado en -->
+                                    <td class="py-3 px-4">
+                                        <template x-if="ag.applied_to_po_id">
+                                            <span class="font-mono text-xs font-bold text-indigo-600" x-text="'PO-2026-' + String(ag.applied_to_po_id).padStart(4, '0')"></span>
+                                        </template>
+                                        <template x-if="!ag.applied_to_po_id">
+                                            <span class="text-slate-400 text-[11px] italic">Sin aplicar</span>
+                                        </template>
+                                    </td>
+                                    <!-- Fecha -->
+                                    <td class="py-3 px-4 text-slate-500 font-mono text-[11px]" x-text="ag.date || ag.created_at"></td>
+                                    <!-- Acciones -->
+                                    <td class="py-3 px-4 text-right">
+                                        <div class="inline-flex items-center gap-1">
+                                            <!-- Botón Editar (si no está aplicada) -->
+                                            <template x-if="!(ag.status || '').toLowerCase().includes('aplicada') && ag.raw_status !== 'applied'">
+                                                <button 
+                                                    type="button" 
+                                                    @click="openEditCreditAgreementModal(ag)" 
+                                                    class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                                                    title="Modificar términos de este acuerdo"
+                                                >
+                                                    <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                    <span>Editar</span>
+                                                </button>
+                                            </template>
+                                            <!-- Botón Anular (si no está aplicada ni anulada) -->
+                                            <template x-if="!(ag.status || '').toLowerCase().includes('aplicada') && !(ag.status || '').toLowerCase().includes('anulada') && ag.raw_status !== 'applied' && ag.raw_status !== 'void'">
+                                                <button 
+                                                    type="button" 
+                                                    @click="voidCreditAgreementAction(ag)" 
+                                                    class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
+                                                    title="Anular acuerdo por reposición física de mercancía"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                            <!-- Empty State -->
+                            <tr x-show="getFilteredCreditAgreements().length === 0">
+                                <td colspan="9" class="py-12 text-center text-slate-400">
+                                    <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <p class="font-bold text-slate-600 text-xs">No se encontraron acuerdos con los filtros seleccionados.</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Puedes registrar un nuevo acuerdo o limpiar los filtros.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div> <!-- Fin de SUB-VISTA 5 (purchasesSubTab === 'agreements') -->
     </div>
 
     <!-- ================================================================= -->
@@ -12833,14 +13044,7 @@
                                     <div class="flex items-center gap-2">
                                         <button 
                                             type="button" 
-                                            @click="createNewMoqSheet()" 
-                                            class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold border border-white/20 transition flex items-center gap-1.5 cursor-pointer"
-                                        >
-                                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                            <span>Nuevo Tabulador</span>
-                                        </button>
-                                        <button 
-                                            type="button" 
+                                            x-show="moqSheetForm"
                                             @click="saveCurrentMoqSheet()" 
                                             class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                                         >
@@ -12851,110 +13055,107 @@
                                 </div>
 
                                 <div class="p-6 space-y-6">
-                                    <!-- Selector de Tabuladores Guardados -->
+                                    <!-- Selector de Proveedor a Configurar (Regla: Proveedor Primero e Independiente) -->
                                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div class="flex items-center gap-3">
-                                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">Tabulador Activo:</label>
+                                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">Proveedor a Configurar:</label>
                                             <select 
-                                                class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer min-w-[260px]"
-                                                @change="onSelectMoqSheetChange($event.target.value)"
+                                                class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer min-w-[280px]"
+                                                :value="moqSelectedSupplierId"
+                                                @change="selectMoqSupplier($event.target.value)"
                                             >
-                                                <template x-for="sheet in moqSheets" :key="sheet.id">
-                                                    <option :value="sheet.id" :selected="activeMoqSheet && activeMoqSheet.id === sheet.id" x-text="(sheet.supplier_name || 'Proveedor') + ' — ' + sheet.title + (sheet.is_default ? ' ★ (Predeterminado)' : '')"></option>
+                                                <option value="" disabled :selected="!moqSelectedSupplierId">-- Selecciona un proveedor --</option>
+                                                <template x-for="p in providers" :key="p.dbId || p.id">
+                                                    <option 
+                                                        :value="p.dbId || p.id" 
+                                                        :selected="moqSelectedSupplierId == (p.dbId || p.id)" 
+                                                        x-text="(p.tradeName || p.name) + (hasMoqSheet(p.dbId || p.id) ? ' (✓ Configurado)' : ' (Sin Tabulador)')"
+                                                    ></option>
                                                 </template>
                                             </select>
                                         </div>
 
                                         <div class="flex items-center gap-2">
+                                            <template x-if="moqSheetForm && moqSheetForm.id">
+                                                <button 
+                                                    type="button" 
+                                                    @click="deleteCurrentMoqSheet()" 
+                                                    class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                                    title="Eliminar tabulador de este proveedor"
+                                                >
+                                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    <span>Eliminar Tabulador</span>
+                                                </button>
+                                            </template>
                                             <button 
                                                 type="button" 
-                                                @click="duplicateCurrentMoqSheet()" 
+                                                @click="activeSettingsTab = 'providers'" 
                                                 class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer flex items-center gap-1"
-                                                title="Duplicar este tabulador para otro periodo o proveedor"
                                             >
-                                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                                <span>Duplicar</span>
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                @click="deleteCurrentMoqSheet()" 
-                                                class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1"
-                                                title="Eliminar este tabulador"
-                                            >
-                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                <span>Eliminar</span>
+                                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                                <span>Gestionar Proveedores</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <!-- Datos Generales del Tabulador -->
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200">
-                                        <!-- Proveedor Preexistente (Regla Obligatoria: Vinculación Estricta con Proveedores Creados) -->
-                                        <div>
-                                            <div class="flex items-center justify-between mb-1">
-                                                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                                                    Proveedor Preexistente <span class="text-rose-500 font-black">*</span>
-                                                </label>
-                                                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-mono border border-indigo-200">Regla MOQ</span>
+                                    <!-- Estado 1: Proveedor seleccionado NO tiene tabulador registrado -->
+                                    <template x-if="!moqSheetForm && moqSelectedSupplierId">
+                                        <div class="bg-white p-8 rounded-2xl border border-dashed border-slate-300 text-center space-y-4">
+                                            <div class="w-12 h-12 mx-auto rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                             </div>
-                                            <select 
-                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
-                                                :value="moqSheetForm.supplier_id || getProviderIdByName(moqSheetForm.supplier_name)"
-                                                @change="onMoqSupplierSelected($event.target.value)"
-                                            >
-                                                <option value="" disabled :selected="!moqSheetForm.supplier_id">-- Selecciona un proveedor registrado --</option>
-                                                <template x-for="p in providers" :key="p.dbId || p.id">
-                                                    <option :value="p.dbId || p.id" :selected="moqSheetForm.supplier_id == (p.dbId || p.id) || moqSheetForm.supplier_name === (p.tradeName || p.name)" x-text="(p.tradeName || p.name) + (p.vendorCode ? ' [' + p.vendorCode + ']' : '')"></option>
-                                                </template>
-                                            </select>
-                                            <div class="flex items-center justify-between mt-1 text-[10px] text-slate-500">
-                                                <span x-text="moqSheetForm.supplier_name ? ('Asociado: ' + moqSheetForm.supplier_name) : 'Requerido para dar de alta'"></span>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-slate-800" x-text="'El proveedor ' + getSelectedSupplierName() + ' no tiene un tabulador MOQ registrado'"></h4>
+                                                <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">Los tabuladores MOQ son independientes para cada fabricante. Da de alta sus escalas de volumen y costos para que las órdenes se tabulen automáticamente.</p>
+                                            </div>
+                                            <div>
                                                 <button 
                                                     type="button" 
-                                                    @click="activeSettingsTab = 'providers'" 
-                                                    class="text-indigo-600 hover:text-indigo-800 underline font-semibold cursor-pointer"
+                                                    @click="createMoqSheetForSupplier(moqSelectedSupplierId)" 
+                                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
                                                 >
-                                                    + Gestionar Proveedores
+                                                    <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    <span x-text="'+ Crear Tabulador MOQ para ' + getSelectedSupplierName()"></span>
                                                 </button>
                                             </div>
                                         </div>
+                                    </template>
 
-                                        <!-- Título / Lista -->
-                                        <div>
-                                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre del Tabulador</label>
-                                            <input 
-                                                type="text" 
-                                                x-model="moqSheetForm.title" 
-                                                placeholder="Ej. Torzo Precios Mayoreo 2026" 
-                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
+                                    <!-- Estado 2: Editor de Tabulador Activo para el Proveedor -->
+                                    <template x-if="moqSheetForm">
+                                        <div class="space-y-6">
+                                            <!-- Datos Generales del Tabulador -->
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-slate-200">
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre del Tabulador</label>
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="moqSheetForm.title" 
+                                                        placeholder="Ej. Torzo Precios Mayoreo 2026" 
+                                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
 
-                                        <!-- Vigencia -->
-                                        <div>
-                                            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Vigencia / Periodo</label>
-                                            <input 
-                                                type="text" 
-                                                x-model="moqSheetForm.validity" 
-                                                placeholder="Ej. Vigencia: Junio 2026" 
-                                                class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                        </div>
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Vigencia / Periodo</label>
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="moqSheetForm.validity" 
+                                                        placeholder="Ej. Vigencia: Junio 2026" 
+                                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
 
-                                        <!-- Moneda & Predeterminado -->
-                                        <div class="flex items-center gap-3 pt-4">
-                                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-                                                <input type="checkbox" x-model="moqSheetForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
-                                                <span>Predeterminado</span>
-                                            </label>
-                                            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-emerald-700">
-                                                <input type="checkbox" x-model="moqSheetForm.is_active" class="rounded text-emerald-600 focus:ring-emerald-500">
-                                                <span>Activo</span>
-                                            </label>
-                                        </div>
-                                    </div>
+                                                <div class="flex items-center justify-between sm:justify-end gap-4 pt-4">
+                                                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-emerald-700">
+                                                        <input type="checkbox" x-model="moqSheetForm.is_active" class="rounded text-emerald-600 focus:ring-emerald-500">
+                                                        <span>Tabulador Activo</span>
+                                                    </label>
+                                                    <span class="text-[11px] text-slate-400 font-mono" x-text="'Moneda: ' + (moqSheetForm.currency || 'MXN')"></span>
+                                                </div>
+                                            </div>
 
-                                    <!-- Matriz Spreadsheet de Precios MOQ (Estilo Torzo) -->
+                                            <!-- Matriz Spreadsheet de Precios MOQ (Estilo Torzo) -->
                                     <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 shadow-xl space-y-4">
                                         <!-- Header de la Matriz -->
                                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
@@ -13085,7 +13286,9 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
+                        </div>
+                    </div>
 
                             <!-- Modal Agregar Escala MOQ -->
                             <div x-show="addMoqTierModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="addMoqTierModalOpen = false">
