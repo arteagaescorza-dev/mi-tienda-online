@@ -14,6 +14,9 @@
         .tab-panel:not(.hidden) {
             display: block !important;
         }
+        textarea {
+            resize: vertical !important;
+        }
         .store-subnav-grid {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
