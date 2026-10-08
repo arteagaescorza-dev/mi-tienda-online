@@ -3464,6 +3464,14 @@
       </tbody>
     </table>
 
+    
+    <h4 style="font-size:8.5pt; font-weight:700; color:#475569; margin-top:8px; margin-bottom:2px;">Funci&oacute;n C5: Gesti&oacute;n de Permisos y Ciberseguridad (RBAC)</h4>
+    <ul style="margin-top:2px; margin-bottom:6px; padding-left:14px;">
+      <li style="margin-bottom:2px;"><strong>Objetivo Operativo:</strong> Garantizar que &uacute;nicamente los roles autorizados puedan alterar el Storefront y el CMS, protegiendo la identidad de la tienda de manipulaciones accidentales o maliciosas por parte de roles log&iacute;sticos o de almac&eacute;n.</li>
+      <li style="margin-bottom:2px;"><strong>Secciones del Sistema:</strong> Arquitectura Interna (Controllers) - Todos los m&eacute;todos p&uacute;blicos dentro de PortalStoreController est&aacute;n restringidos r&iacute;gidamente.</li>
+      <li style="margin-bottom:2px;"><strong>Mecanismo de Seguridad:</strong> Se implementa el Gate de Laravel Gate::authorize('manage-cms'), el cual valida que la sesi&oacute;n autenticada pertenezca estrictamente al rol cms_editor, store_manager, admin, o all_roles.</li>
+    </ul>
+
     <h2 style="font-size:10pt; font-weight:800; color:#1e293b; margin-top:12px; margin-bottom:4px;">Checklist de Certificacion para Nuevos Colaboradores</h2>
     <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:8px; font-size:7.5pt;">
       <div style="margin-bottom:3px;">[ ] Domina la localizacion de prendas por nomenclatura Pasillo-Rack-Nivel (Slotting) en Hub 4.</div>

@@ -86,3 +86,8 @@ erDiagram
 - **CMS Form Validations**: Enforced UX rules, updating all `<textarea>` inputs in `store.blade.php` to include `resize: vertical !important;` styling.
 - **UX/UI Compliance**: Verified that CMS Modals are immediate children of `#storeAppRoot` (depth = 2) to prevent z-index and overflow side-effects.
 - **Sanitization**: Storefront endpoints properly sanitize input using FormRequests.
+
+## 6. Seguridad y Arquitectura (Security by Design)
+- **RBAC & Control de Acceso:** Todos los endpoints de gestión de CMS en `PortalStoreController` están blindados con `Gate::authorize('manage-cms')`, garantizando que sólo roles autorizados (como `cms_editor` o `store_manager`) puedan realizar modificaciones.
+- **Validación por FormRequests:** Se eliminaron las validaciones en línea ("Fat Controllers"). Se han implementado Request Forms dedicados (ej. `CheckoutStoreRequest`, `UpdateStorefrontRequest`, `StoreSectionRequest`, etc.) para sanear y validar rígidamente los datos de entrada.
+- **Purga de God Object:** Se erradicaron métodos "zombie" de Hubs B2B/Finanzas (Hub 4/Hub 5) que residían incorrectamente en `StorefrontController`, separando estrictamente la lógica D2C de las operaciones de back-office.

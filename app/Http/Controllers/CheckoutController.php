@@ -18,25 +18,9 @@ use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(\App\Http\Requests\Storefront\CheckoutStoreRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'street' => ['required', 'string', 'max:255'],
-            'exterior_number' => ['required', 'string', 'max:30'],
-            'interior_number' => ['nullable', 'string', 'max:30'],
-            'neighborhood' => ['required', 'string', 'max:255'],
-            'postal_code' => ['required', 'digits:5'],
-            'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', 'max:255'],
-            'delivery_references' => ['nullable', 'string', 'max:1000'],
-            'email' => ['required', 'email', 'max:255'],
-            'mobile' => ['required', 'string', 'max:30'],
-            'birth_date' => ['required', 'date', 'before:today'],
-            'delivery_method' => ['required', 'in:paqueteria,personal'],
-            'coupon_code' => ['nullable', 'string', 'max:50'],
-            'universe' => ['nullable', 'string', 'in:terra,marte,venus,tiresias'],
-        ]);
+        $validated = $request->validated();
 
         $order = DB::transaction(function () use ($request, $validated): Order {
             $cart = Cart::query()

@@ -822,3 +822,9 @@ flowchart TD
 
 ## 5. Mantenimiento y Evolución de la Especificación
 Este documento es normativo y debe actualizarse ante cualquier cambio en los workflows operativos, adición de sub-módulos o reconfiguración de permisos RBAC en el backend Laravel.
+
+#### Función C5: Gestión de Permisos y Ciberseguridad (RBAC)
+- **Objetivo Operativo:** Garantizar que únicamente los roles autorizados puedan alterar el Storefront y el CMS, protegiendo la identidad de la tienda de manipulaciones accidentales o maliciosas por parte de roles logísticos o de almacén.
+- **Secciones del Sistema:**
+  - *Arquitectura Interna (Controllers):* Todos los métodos públicos dentro de `PortalStoreController` están restringidos rígidamente.
+- **Mecanismo de Seguridad:** Se implementa el Gate de Laravel `Gate::authorize('manage-cms')`, el cual valida que la sesión autenticada pertenezca estrictamente al rol `cms_editor`, `store_manager`, `admin`, o `all_roles`.Cualquier intento de acceso por roles no autorizados resulta en un bloqueo automático 403 (Unauthorized).

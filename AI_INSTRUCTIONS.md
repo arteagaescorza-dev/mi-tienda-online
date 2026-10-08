@@ -60,3 +60,6 @@ Para dar la tarea por terminada, debes verificar este checklist internamente:
 [ ] Bucle de Documentación Continua ejecutado (Archivos de `modules/`, `standards/`, etc., actualizados)[cite: 7].
 [ ] **Tríptico Documental Ejecutado:** Archivos `.md` y `.html` de los 5 manuales maestros actualizados y sincronizados en `legacy-specs/`[cite: 7].
 [ ] **Control de Versiones (Git):** El ciclo de revisión y desarrollo DEBE cerrarse formalmente ejecutando un commit en el repositorio (ej. `git add .` y `git commit -m "..."`) resumiendo los cambios técnicos y documentales realizados.
+
+### 8. CONTROL DE VERSIONES ESTRICTO
+**Regla inquebrantable:** Cada vez que finalices un ciclo de revisión, auditoría, refactorización o desarrollo, estás OBLIGADO a cerrar el ciclo con un commit. Ejecuta `git add .` seguido de `git commit -m "..."` detallando en el mensaje los cambios de código, refactorizaciones y actualizaciones documentales aplicadas. Ningún ciclo se considera terminado sin su commit.

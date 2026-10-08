@@ -12,6 +12,7 @@ use App\Models\CmsStorefrontConfig;
 use App\Models\CmsTrackingSetting;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -22,6 +23,7 @@ class PortalStoreController extends Controller
      */
     public function index(Request $request)
     {
+        Gate::authorize('manage-cms');
         // 1. Live Catalog Queries per Universe (Single Inventory Pool decoupling)
         $marteProducts = Product::where('visible', true)
             ->whereIn('brand', ['JOCKSTRAPS', 'BRIEF/BOXERS', 'TANGA'])
@@ -338,15 +340,10 @@ class PortalStoreController extends Controller
     /**
      * Update shipping rules and free shipping threshold (TASK-INT-18).
      */
-    public function updateShippingRule(Request $request)
+    public function updateShippingRule(\App\Http\Requests\Portal\Store\UpdateShippingRuleRequest $request)
     {
-        $validated = $request->validate([
-            'freeShippingThreshold' => 'nullable|numeric|min:0',
-            'flatRate' => 'nullable|numeric|min:0',
-            'localPickupEnabled' => 'nullable|boolean',
-            'localPickupLocation' => 'nullable|string|max:255',
-            'localPickupSchedule' => 'nullable|string|max:255',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         $current = Cache::get('cms_shipping_rule', [
             'freeShippingThreshold' => 999.00,
@@ -387,6 +384,7 @@ class PortalStoreController extends Controller
      */
     public function toggleBanner(Request $request, $bannerId)
     {
+        Gate::authorize('manage-cms');
         $defaultBanners = [
             ['id' => 1, 'title' => 'Colección Verano Circuit 2026', 'subtitle' => 'Jocks y boxers de secado ultra-rápido en colores neón y tornasol', 'badge' => 'Marte Masculino', 'universe' => 'marte', 'placement' => 'hero_carousel', 'imageUrl' => 'marte_summer_circuit.webp', 'linkUrl' => '/catalogo?universo=marte&col=verano', 'sortOrder' => 1, 'active' => true],
             ['id' => 2, 'title' => 'Lencería de Autor en Seda y Bambú', 'subtitle' => 'Piezas diseñadas para acariciar tu piel con soporte natural sin varillas', 'badge' => 'Venus Femenino', 'universe' => 'venus', 'placement' => 'hero_carousel', 'imageUrl' => 'venus_silk_bamboo.webp', 'linkUrl' => '/catalogo?universo=venus&col=seda', 'sortOrder' => 2, 'active' => true],
@@ -423,6 +421,7 @@ class PortalStoreController extends Controller
      */
     public function toggleAnnouncement(Request $request)
     {
+        Gate::authorize('manage-cms');
         $current = Cache::get('cms_announcement_active', true);
         $newStatus = !$current;
         Cache::forever('cms_announcement_active', $newStatus);
@@ -437,48 +436,10 @@ class PortalStoreController extends Controller
     /**
      * Update visual configuration of a multiverse vitrina.
      */
-    public function updateStorefront(Request $request, $universe)
+    public function updateStorefront(\App\Http\Requests\Portal\Store\UpdateStorefrontRequest $request, $universe)
     {
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:120',
-            'brandName' => 'nullable|string|max:120',
-            'brand_name' => 'nullable|string|max:120',
-            'kicker' => 'nullable|string|max:200',
-            'logo_url' => 'nullable|string|max:255',
-            'logoUrl' => 'nullable|string|max:255',
-            'logo_mobile_url' => 'nullable|string|max:255',
-            'logoMobileUrl' => 'nullable|string|max:255',
-            'favicon_url' => 'nullable|string|max:255',
-            'faviconUrl' => 'nullable|string|max:255',
-            'primaryColor' => 'nullable|string|max:20',
-            'primary_color' => 'nullable|string|max:20',
-            'secondaryColor' => 'nullable|string|max:20',
-            'secondary_color' => 'nullable|string|max:20',
-            'accentColor' => 'nullable|string|max:20',
-            'accent_color' => 'nullable|string|max:20',
-            'backgroundColor' => 'nullable|string|max:20',
-            'background_color' => 'nullable|string|max:20',
-            'surfaceColor' => 'nullable|string|max:20',
-            'surface_color' => 'nullable|string|max:20',
-            'textColor' => 'nullable|string|max:20',
-            'text_color' => 'nullable|string|max:20',
-            'mutedTextColor' => 'nullable|string|max:20',
-            'muted_text_color' => 'nullable|string|max:20',
-            'borderColor' => 'nullable|string|max:20',
-            'border_color' => 'nullable|string|max:20',
-            'heroTitle' => 'nullable|string|max:200',
-            'hero_title' => 'nullable|string|max:200',
-            'heroSubtitle' => 'nullable|string|max:500',
-            'hero_subtitle' => 'nullable|string|max:500',
-            'heroCtaText' => 'nullable|string|max:80',
-            'hero_cta_text' => 'nullable|string|max:80',
-            'heroCtaUrl' => 'nullable|string|max:255',
-            'hero_cta_url' => 'nullable|string|max:255',
-            'customCss' => 'nullable|string',
-            'custom_css' => 'nullable|string',
-            'customJs' => 'nullable|string',
-            'custom_js' => 'nullable|string',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         $config = CmsStorefrontConfig::forUniverse($universe);
 
@@ -612,23 +573,10 @@ class PortalStoreController extends Controller
     /**
      * Create a new modular storefront section.
      */
-    public function storeSection(Request $request)
+    public function storeSection(\App\Http\Requests\Portal\Store\StoreSectionRequest $request)
     {
-        $validated = $request->validate([
-            'universe' => 'required|string|in:all,marte,venus,tiresias,terra',
-            'name' => 'required|string|max:120',
-            'type' => 'required|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner,promo_modal',
-            'title' => 'nullable|string|max:200',
-            'subtitle' => 'nullable|string|max:500',
-            'badge' => 'nullable|string|max:80',
-            'query_rules' => 'nullable|array',
-            'custom_html' => 'nullable|string',
-            'custom_css' => 'nullable|string',
-            'custom_js' => 'nullable|string',
-            'settings' => 'nullable|array',
-            'status' => 'nullable|string|in:active,draft,archived',
-            'background_image_file' => 'nullable|image|max:5120',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         $settings = $request->input('settings', []);
 
@@ -669,25 +617,12 @@ class PortalStoreController extends Controller
     /**
      * Update an existing modular section.
      */
-    public function updateSection(Request $request, $id)
+    public function updateSection(\App\Http\Requests\Portal\Store\UpdateSectionRequest $request, $id)
     {
+        Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
 
-        $validated = $request->validate([
-            'universe' => 'required|string|in:all,marte,venus,tiresias,terra',
-            'name' => 'required|string|max:120',
-            'type' => 'nullable|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner,promo_modal',
-            'status' => 'required|string|in:active,draft,archived',
-            'title' => 'nullable|string|max:200',
-            'subtitle' => 'nullable|string|max:500',
-            'badge' => 'nullable|string|max:80',
-            'query_rules' => 'nullable|array',
-            'custom_html' => 'nullable|string',
-            'custom_css' => 'nullable|string',
-            'custom_js' => 'nullable|string',
-            'settings' => 'nullable|array',
-            'background_image_file' => 'nullable|image|max:5120',
-        ]);
+        $validated = $request->validated();
 
         if (empty($validated['type'])) {
             $validated['type'] = $section->type;
@@ -730,6 +665,7 @@ class PortalStoreController extends Controller
      */
     public function archiveSection(Request $request, $id)
     {
+        Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
         $section->status = 'archived';
         $section->save();
@@ -746,10 +682,8 @@ class PortalStoreController extends Controller
      */
     public function reorderSections(Request $request)
     {
-        $validated = $request->validate([
-            'order' => 'required|array',
-            'order.*' => 'required|integer',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated) {
             foreach ($validated['order'] as $index => $id) {
@@ -765,6 +699,7 @@ class PortalStoreController extends Controller
      */
     public function toggleSection(Request $request, $id)
     {
+        Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
         $section->status = $section->status === 'active' ? 'draft' : 'active';
         $section->save();
@@ -781,6 +716,7 @@ class PortalStoreController extends Controller
      */
     public function destroySection(Request $request, $id)
     {
+        Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
         $name = $section->name;
         $section->delete();
@@ -795,8 +731,9 @@ class PortalStoreController extends Controller
     /**
      * Update an official document payload (Guía Torzo, Cuidados, PROFECO).
      */
-    public function updateDocument(Request $request, $code)
+    public function updateDocument(\App\Http\Requests\Portal\Store\UpdateDocumentRequest $request, $code)
     {
+        Gate::authorize('manage-cms');
         $doc = CmsOfficialDocument::where('code', $code)->firstOrFail();
         $payload = $request->input('payload');
 
@@ -823,8 +760,9 @@ class PortalStoreController extends Controller
     /**
      * Crear una página CMS.
      */
-    public function storePage(Request $request)
+    public function storePage(\App\Http\Requests\Portal\Store\StorePageRequest $request)
     {
+        Gate::authorize('manage-cms');
         if ($request->filled('content') && ! $request->filled('content_html')) {
             $request->merge(['content_html' => $request->input('content')]);
         }
@@ -832,35 +770,7 @@ class PortalStoreController extends Controller
             $request->merge(['slug' => \Illuminate\Support\Str::slug($request->input('title'))]);
         }
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:cms_pages,slug',
-            'icon' => 'nullable|string|max:50',
-            'image_url' => 'nullable|string|max:500',
-            'overlay_gradient' => 'nullable|string|max:255',
-            'text_color' => 'nullable|string|max:30',
-            'image_source_mode' => 'nullable|string|in:custom,catalog',
-            'overlay_color_start' => 'nullable|string|max:30',
-            'overlay_color_end' => 'nullable|string|max:30',
-            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
-            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
-            'gallery_images_urls' => 'nullable|string',
-            'filter_universe' => 'nullable|string|max:40',
-            'filter_category' => 'nullable|string|max:80',
-            'filter_tags' => 'nullable|string|max:255',
-            'filter_supplier' => 'nullable|string|max:100',
-            'content_html' => 'required|string',
-            'show_in_navbar' => 'nullable|boolean',
-            'show_in_mobile' => 'nullable|boolean',
-            'navbar_order' => 'nullable|integer',
-            'show_in_footer' => 'nullable|boolean',
-            'footer_order' => 'nullable|integer',
-            'seo_title' => 'nullable|string|max:255',
-            'seo_description' => 'nullable|string',
-            'status' => 'nullable|in:active,paused,draft,archived',
-            'image_file' => 'nullable|image|max:5120',
-            'gallery_files.*' => 'nullable|image|max:5120',
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
@@ -918,41 +828,14 @@ class PortalStoreController extends Controller
     /**
      * Actualizar una página CMS.
      */
-    public function updatePage(Request $request, CmsPage $page)
+    public function updatePage(\App\Http\Requests\Portal\Store\UpdatePageRequest $request, CmsPage $page)
     {
+        Gate::authorize('manage-cms');
         if ($request->filled('content') && ! $request->filled('content_html')) {
             $request->merge(['content_html' => $request->input('content')]);
         }
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:cms_pages,slug,' . $page->id,
-            'icon' => 'nullable|string|max:50',
-            'image_url' => 'nullable|string|max:500',
-            'overlay_gradient' => 'nullable|string|max:255',
-            'text_color' => 'nullable|string|max:30',
-            'image_source_mode' => 'nullable|string|in:custom,catalog',
-            'overlay_color_start' => 'nullable|string|max:30',
-            'overlay_color_end' => 'nullable|string|max:30',
-            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
-            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
-            'gallery_images_urls' => 'nullable|string',
-            'filter_universe' => 'nullable|string|max:40',
-            'filter_category' => 'nullable|string|max:80',
-            'filter_tags' => 'nullable|string|max:255',
-            'filter_supplier' => 'nullable|string|max:100',
-            'content_html' => 'required|string',
-            'show_in_navbar' => 'nullable|boolean',
-            'show_in_mobile' => 'nullable|boolean',
-            'navbar_order' => 'nullable|integer',
-            'show_in_footer' => 'nullable|boolean',
-            'footer_order' => 'nullable|integer',
-            'seo_title' => 'nullable|string|max:255',
-            'seo_description' => 'nullable|string',
-            'status' => 'nullable|in:active,paused,draft,archived',
-            'image_file' => 'nullable|image|max:5120',
-            'gallery_files.*' => 'nullable|image|max:5120',
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
@@ -1018,10 +901,8 @@ class PortalStoreController extends Controller
      */
     public function reorderPages(Request $request)
     {
-        $validated = $request->validate([
-            'order' => 'required|array',
-            'order.*' => 'required|integer',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated) {
             foreach ($validated['order'] as $index => $id) {
@@ -1037,6 +918,7 @@ class PortalStoreController extends Controller
      */
     public function togglePageStatus(CmsPage $page)
     {
+        Gate::authorize('manage-cms');
         $newStatus = $page->status === 'active' ? 'paused' : 'active';
         $page->update(['status' => $newStatus]);
 
@@ -1052,6 +934,7 @@ class PortalStoreController extends Controller
      */
     public function archivePage(CmsPage $page)
     {
+        Gate::authorize('manage-cms');
         $page->update(['status' => 'archived']);
 
         if (request()->wantsJson()) {
@@ -1066,6 +949,7 @@ class PortalStoreController extends Controller
      */
     public function destroyPage(CmsPage $page)
     {
+        Gate::authorize('manage-cms');
         $page->delete();
 
         if (request()->wantsJson()) {
@@ -1080,6 +964,7 @@ class PortalStoreController extends Controller
      */
     public function updateAnnouncements(Request $request)
     {
+        Gate::authorize('manage-cms');
         $rawAnnouncements = $request->input('announcements', []);
         $announcementsList = [];
 
@@ -1123,17 +1008,8 @@ class PortalStoreController extends Controller
      */
     public function storeBlogPost(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:cms_blog_posts,slug',
-            'category_name' => 'required|string|max:100',
-            'tags' => 'nullable',
-            'author_name' => 'nullable|string|max:100',
-            'reading_time_minutes' => 'nullable|integer|min:1',
-            'excerpt' => 'required|string',
-            'body' => 'required|string',
-            'status' => 'nullable|in:published,draft',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         if (is_string($request->input('tags'))) {
             $validated['tags'] = array_filter(array_map('trim', explode(',', $request->input('tags'))));
@@ -1157,17 +1033,8 @@ class PortalStoreController extends Controller
      */
     public function updateBlogPost(Request $request, CmsBlogPost $post)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:cms_blog_posts,slug,' . $post->id,
-            'category_name' => 'required|string|max:100',
-            'tags' => 'nullable',
-            'author_name' => 'nullable|string|max:100',
-            'reading_time_minutes' => 'nullable|integer|min:1',
-            'excerpt' => 'required|string',
-            'body' => 'required|string',
-            'status' => 'nullable|in:published,draft',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         if (is_string($request->input('tags'))) {
             $validated['tags'] = array_filter(array_map('trim', explode(',', $request->input('tags'))));
@@ -1187,6 +1054,7 @@ class PortalStoreController extends Controller
      */
     public function destroyBlogPost(CmsBlogPost $post)
     {
+        Gate::authorize('manage-cms');
         $post->delete();
 
         if (request()->wantsJson()) {
@@ -1201,14 +1069,8 @@ class PortalStoreController extends Controller
      */
     public function updateTracking(Request $request)
     {
-        $validated = $request->validate([
-            'gtm_id' => 'nullable|string|max:50',
-            'ga4_measurement_id' => 'nullable|string|max:50',
-            'facebook_pixel_id' => 'nullable|string|max:50',
-            'facebook_capi_token' => 'nullable|string',
-            'facebook_test_event_code' => 'nullable|string|max:50',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-cms');
+        $validated = $request->validated();
 
         $tracking = CmsTrackingSetting::current();
         $validated['is_active'] = $request->boolean('is_active');
@@ -1226,6 +1088,7 @@ class PortalStoreController extends Controller
      */
     public function updateFilters(Request $request)
     {
+        Gate::authorize('manage-cms');
         $filtersData = $request->input('filters', []);
 
         foreach ($filtersData as $id => $data) {
