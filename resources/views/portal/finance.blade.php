@@ -1,3 +1,8 @@
+@push('styles')
+<style>
+textarea { resize: vertical !important; }
+</style>
+@endpush
 @extends('layouts.portal-panel')
 
 @section('title', 'Finanzas & Conciliación')

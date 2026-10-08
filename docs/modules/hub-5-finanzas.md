@@ -76,7 +76,14 @@ erDiagram
 
 ---
 
-## 4. [TODO: Definir regla exacta]
+## 4. Seguridad y Arquitectura (Security by Design)
+
+- **RBAC & Control de Acceso:** Todo endpoint en `FinanceApiController` requiere estrictamente `Gate::authorize('manage-finance')`. Sólo los roles `admin` y `finance` pueden autorizar SPEI o visualizar márgenes.
+- **Validación Estricta:** Uso exclusivo de `FormRequests` dedicados (`UploadShippingReconciliationRequest`, `VerifyThreeWayMatchingRequest`, etc.) para proteger contra Mass Assignment y ataques de validación. Las validaciones "inline" en el controlador están prohibidas.
+
+---
+
+## 5. [TODO: Definir regla exacta]
 
 1. `[TODO: Definir regla exacta]` **Tratamiento de contracargos bancarios (chargebacks) en el cálculo de margen histórico.**  
    *Nota actual:* El contracargo se registra como egreso del mes en que ocurre. Se debe definir si reclasifica negativamente la orden original del mes previo.

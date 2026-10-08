@@ -620,6 +620,11 @@ flowchart TD
 
 ---
 
+
+#### Función D4: Control de Acceso (RBAC) Financiero
+- **Gate Asignado:** Gate::authorize('manage-finance')
+- **Descripción:** Este rol es el único autorizado para interactuar con los endpoints del FinanceApiController, abarcando emisión de notas de débito, reintentos de dunning, cotejo de 3 vías de proveedores, y autorización de liberación de saldo SPEI para cuentas por pagar.
+
 ### 3.6. Rol: Operador Integral / Administrador Multirrol (`all_roles`)
 
 #### Función M1: Orquestación Secuencial de la Jornada mediante Time-Boxing Estricto

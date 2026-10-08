@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Api\RevOps;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\RevOps\FileShippingDiscrepancyClaimRequest;
+use App\Http\Requests\Api\RevOps\IssueDebitNoteRequest;
+use App\Http\Requests\Api\RevOps\UploadShippingReconciliationRequest;
+use App\Http\Requests\Api\RevOps\VerifyThreeWayMatchingRequest;
 use App\Models\CustomerSubscription;
 use App\Models\OrderFinancialMargin;
 use App\Models\ShippingReconciliation;
@@ -13,6 +17,7 @@ use App\Services\Finance\TaxCalculationEngineService;
 use App\Services\Finance\ThreeWayMatchingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class FinanceApiController extends Controller
 {
@@ -34,6 +39,8 @@ class FinanceApiController extends Controller
      */
     public function retryDunningCharge(Request $request, int $subscriptionId): JsonResponse
     {
+        Gate::authorize('manage-finance');
+
         $sub = CustomerSubscription::findOrFail($subscriptionId);
         $log = $this->dunningService->handlePaymentDecline($sub, 'card_declined_retry', 'Reintento forzado desde consola RevOps');
 
@@ -51,6 +58,8 @@ class FinanceApiController extends Controller
      */
     public function markDunningRecovered(Request $request, int $subscriptionId): JsonResponse
     {
+        Gate::authorize('manage-finance');
+
         $sub = CustomerSubscription::findOrFail($subscriptionId);
         $amount = (float) $request->input('amount_recovered', $sub->monthly_amount);
         $log = $this->dunningService->markAsRecovered($sub, $amount);
@@ -68,6 +77,8 @@ class FinanceApiController extends Controller
      */
     public function getOrderMarginBreakdown(Request $request, int $orderId): JsonResponse
     {
+        Gate::authorize('manage-finance');
+
         $margin = OrderFinancialMargin::where('order_id', $orderId)->first();
 
         if (!$margin) {
@@ -91,21 +102,11 @@ class FinanceApiController extends Controller
     /**
      * Ingesta y cruce algoritmico de reporte de facturacion de paqueteria CSV / JSON (TASK-INT-08, Subseccion OO).
      */
-    public function uploadShippingReconciliationReport(Request $request): JsonResponse
+    public function uploadShippingReconciliationReport(UploadShippingReconciliationRequest $request): JsonResponse
     {
-        if ($request->has('carrier') && !$request->has('carrier_id')) {
-            $request->merge(['carrier_id' => $request->input('carrier')]);
-        }
+        Gate::authorize('manage-finance');
 
-        $validated = $request->validate([
-            'carrier_id' => 'required|string|in:dhl,dhl_express,skydropx,estafeta,fedex,99minutos,paquetexpress',
-            'invoice_folio' => 'required|string|max:100',
-            'report_file' => 'nullable|file',
-            'invoice_rows' => 'nullable|array',
-            'raw_csv' => 'nullable|string',
-            'audited_by' => 'nullable|string|max:100',
-        ]);
-
+        $validated = $request->validated();
         $rows = [];
         $fileName = null;
 
@@ -163,7 +164,7 @@ class FinanceApiController extends Controller
     /**
      * Endpoint directo de reconciliacion para integracion de datasets (TASK-INT-08).
      */
-    public function reconcileShippingAudit(Request $request): JsonResponse
+    public function reconcileShippingAudit(UploadShippingReconciliationRequest $request): JsonResponse
     {
         return $this->uploadShippingReconciliationReport($request);
     }
@@ -171,17 +172,11 @@ class FinanceApiController extends Controller
     /**
      * Emision de expediente formal de reclamacion ante transportista (TASK-INT-08, Subseccion OO).
      */
-    public function fileShippingDiscrepancyClaim(Request $request, int $id): JsonResponse
+    public function fileShippingDiscrepancyClaim(FileShippingDiscrepancyClaimRequest $request, int $id): JsonResponse
     {
-        if ($request->has('notes') && !$request->has('claim_notes')) {
-            $request->merge(['claim_notes' => $request->input('notes')]);
-        }
+        Gate::authorize('manage-finance');
 
-        $validated = $request->validate([
-            'item_ids' => 'required|array|min:1',
-            'item_ids.*' => 'integer',
-            'claim_notes' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $claim = $this->shippingAuditorService->fileCarrierClaimDossier(
             $id,
@@ -212,6 +207,8 @@ class FinanceApiController extends Controller
      */
     public function getInboundMatchings(Request $request): JsonResponse
     {
+        Gate::authorize('manage-finance');
+
         $matchings = ThreeWayMatching::latest()->get();
         $discrepancyCount = $matchings->where('match_status', 'discrepancy_held')->count();
         $matchedCount = $matchings->where('match_status', 'matched')->count();
@@ -248,21 +245,11 @@ class FinanceApiController extends Controller
     /**
      * Ejecuta y asienta la evaluacion de cotejo de 3 vias (TASK-INT-07).
      */
-    public function verifyThreeWayMatching(Request $request): JsonResponse
+    public function verifyThreeWayMatching(VerifyThreeWayMatchingRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'po_code' => 'required|string|max:50',
-            'supplier_id' => 'required|string|max:50',
-            'supplier_name' => 'required|string|max:150',
-            'po_qty' => 'required|integer|min:1',
-            'po_total_amount' => 'required|numeric|min:0',
-            'warehouse_received_qty' => 'required|integer|min:0',
-            'warehouse_damaged_qty' => 'nullable|integer|min:0',
-            'invoice_number' => 'required|string|max:80',
-            'invoice_qty' => 'required|integer|min:1',
-            'invoice_gross_amount' => 'required|numeric|min:0',
-            'inspected_by' => 'nullable|string|max:100',
-        ]);
+        Gate::authorize('manage-finance');
+
+        $validated = $request->validated();
 
         $matching = $this->threeWayMatchingService->evaluateInboundMatch(
             poCode: $validated['po_code'],
@@ -290,12 +277,11 @@ class FinanceApiController extends Controller
     /**
      * Emite nota de debito para compensar faltantes o mermas y liberar saldo neto en SPEI.
      */
-    public function issueDebitNote(Request $request, int $id): JsonResponse
+    public function issueDebitNote(IssueDebitNoteRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'debit_note_number' => 'required|string|max:80',
-            'debit_amount' => 'nullable|numeric|min:0',
-        ]);
+        Gate::authorize('manage-finance');
+
+        $validated = $request->validated();
 
         $matching = $this->threeWayMatchingService->issueDebitNote(
             matchingId: $id,
@@ -315,6 +301,8 @@ class FinanceApiController extends Controller
      */
     public function authorizeSpeiPayout(Request $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-finance');
+
         $paymentRef = $request->input('payment_reference');
         try {
             $matching = $this->threeWayMatchingService->authorizeSpeiPayout($id, $paymentRef);
@@ -337,6 +325,8 @@ class FinanceApiController extends Controller
      */
     public function getTaxSummary(Request $request): JsonResponse
     {
+        Gate::authorize('manage-finance');
+
         $period = $request->input('period', date('Y-m'));
         $summary = $this->taxEngineService->getPeriodTaxSummary($period);
 
