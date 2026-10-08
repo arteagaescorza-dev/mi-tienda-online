@@ -27,3 +27,4 @@ class FileShippingDiscrepancyClaimRequest extends FormRequest
         }
     }
 }
+

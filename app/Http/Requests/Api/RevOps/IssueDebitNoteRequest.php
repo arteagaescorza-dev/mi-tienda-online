@@ -19,3 +19,4 @@ class IssueDebitNoteRequest extends FormRequest
         ];
     }
 }
+
