@@ -257,6 +257,20 @@ class PortalStoreController extends Controller
             'discreet_shipping' => 'Envíos en empaque 100% neutro y discreto.',
         ];
 
+        // 7.1. Footer Configuration (Hub 2 - Submódulo 2 - Sección 4)
+        $defaultFooterConfig = [
+            'brand_summary' => 'Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.',
+            'whatsapp_contact' => '+52 55 7510 2015',
+            'support_email' => 'hola@mitienda.online',
+            'shipping_badge_text' => 'Paqueteria nacional express ($149 / Gratis +$999)',
+            'packaging_badge_text' => 'Entrega personal discreta y segura en empaque 100% neutro',
+            'payments_badge_text' => 'Pagos 100% seguros con Tarjeta, SPEI y OXXO Pay',
+            'copyright_text' => '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.',
+            'show_revops_link' => true,
+            'show_zero_emojis_badge' => true,
+        ];
+        $footerConfig = $officialDocs['STORE_FOOTER_CONFIG']->payload ?? $defaultFooterConfig;
+
         // 8. Secciones dinámicas y taxonomías de catálogo de Hub 4
         $sections = CmsSection::orderBy('sort_order')->get();
         $categories = Category::whereNull('parent_id')->select('id', 'name', 'slug')->get();
@@ -317,6 +331,7 @@ class PortalStoreController extends Controller
             'blogPosts' => $blogPosts,
             'tracking' => $tracking,
             'catalogFilters' => $catalogFilters,
+            'footerConfig' => $footerConfig,
         ]);
     }
 

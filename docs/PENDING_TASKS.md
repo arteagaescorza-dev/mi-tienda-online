@@ -136,6 +136,7 @@
 | `TASK-H2-21` | Corrección Crítica de Renderizado Móvil (< 769px) en Storefront PWA y Control de Caché | **Tienda Pública (Storefront D2C)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Breakpoints PWA, Cache Busting, Hero Contrast |
 | `TASK-H2-22` | Conmutador Global de Vitrinas, Reestructuración a 6 Pestañas y Acordeón de Contenidos & Reglas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Universe Selector Bar, Subnav 6 Tabs, Accordion |
 | `TASK-H2-23` | Aislamiento Estructural de Paneles y Desbloqueo Definitivo del Modal Crear Nueva Sección | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Balance de Divs Blade, CDP Headless Verification, Modales Globales |
+| `TASK-H2-24` | Sección 4 Acordeón Submódulo 2 Hub 2: Editor Oficial de Pie de Página (Footer & Contacto) | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | CmsOfficialDocument `STORE_FOOTER_CONFIG`, View Composer, Storefront PWA |
 | `TASK-BRD-06` | Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | `newProductPanoramicModal`, `skuPanoramicModal`, `inventory-module.js` |
 | `TASK-BRD-08` | Asociación Mandatoria de Marcas a Proveedores, Fotos con Color y Taxonomías In Situ | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | Árbol Proveedores, Galería Fotos, QuickTaxonomies, Tag v1.6 |
 | `TASK-BRD-09` | Gobernanza Textil Integral: Asignación de Color por Foto, WebP 1080x1350, SKU Dinámico, Telas & Secciones E-Commerce | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Reglas de Oro)** | **Completada (Fullstack End-to-End)** | Catálogo, Ajustes Telas/Secciones, SkuGenerator, ImageNormalization, Tag v1.6 |
@@ -2113,6 +2114,38 @@ graph TD
       - `modalParentChain[0]: div#storeAppRoot`
     - Cierre comprobado mediante `[data-action="close-modal"]`: `computedDisplay: "none"`, `offsetHeight: 0`.
   - **Pruebas de Regresión:** 27 pruebas pasando al 100% (134 aserciones) en `Hub2AdminStoreControllerTest`.
+
+---
+
+### `TASK-H2-24`: Sección 4 Acordeón Submódulo 2 Hub 2: Editor Oficial de Pie de Página (Footer & Contacto)
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 2 (CMS & Contenidos) $\leftrightarrow$ Storefront PWA (`layouts.store-pwa.blade.php`) $\leftrightarrow$ `CmsOfficialDocument`
+* **Requerimiento Solicitado:**
+  - El submódulo de contenido y reglas del Hub 2 ("2. Contenido & Reglas") debe contener una sección extra (4º módulo del acordeón) que permita editar el footer de la tienda.
+  - Actualizar el contador de la subnavegación de `3 Módulos` a `4 Módulos`.
+  - Conectar los campos editables del footer (narrativa de marca, WhatsApp concierge, email de soporte, badges de paquetería/empaque/pasarelas, copyright y toggles de acceso RevOps y política cero emojis) con el modelo persistente `CmsOfficialDocument` bajo el código `STORE_FOOTER_CONFIG`.
+  - Asegurar reactividad y sincronización con el layout de la tienda online (`store-pwa.blade.php`).
+* **Implementación Realizada:**
+  1. *Subnavegación Hub 2 (`resources/views/portal/store.blade.php`):*
+     - Actualizado badge a `<span class="store-subnav-count">4 Módulos</span>`.
+     - Actualizado tooltip descriptivo: "Panel unificado con 4 módulos expandibles: Banners & Marquesinas, Reglas de Flete, Guía Oficial de Tallas y Editor de Pie de Página (Footer)."
+  2. *Sección 4 de Acordeón (`accordionSecFooter`):*
+     - Encabezado con icono SVG, badge `Storefront PWA` y toggle con chevron interactivo.
+     - Formulario directo con action `route('portal.store.documents.update', 'STORE_FOOTER_CONFIG')`:
+       - Textarea de narrativa de marca (`payload[brand_summary]`).
+       - Inputs para WhatsApp de concierge (`payload[whatsapp_contact]`), email de soporte (`payload[support_email]`) y texto de copyright (`payload[copyright_text]`).
+       - Badges de seguridad/políticas: paquetería express (`payload[shipping_badge_text]`), empaque neutro (`payload[packaging_badge_text]`) y pagos SSL (`payload[payments_badge_text]`).
+       - Switches de configuración opcional para visibilidad de tarjeta Consola RevOps (`payload[show_revops_link]`) y badge de política estricta cero emojis (`payload[show_zero_emojis_badge]`).
+  3. *Controladores & View Composers:*
+     - `PortalStoreController.php`: Carga y pasa `$footerConfig` a la vista `portal.store` extrayéndolo de `$officialDocs['STORE_FOOTER_CONFIG']->payload`.
+     - `AppServiceProvider.php`: Inyección mediante `View::composer('layouts.store-pwa', ...)` garantizando que el Storefront y cualquier vista hija disponga de `$footerConfig` con fallbacks seguros.
+     - `resources/views/layouts/store-pwa.blade.php`: Vinculación dinámica de todos los elementos del `<footer class="store-footer">` con `$footerConfig` preservando retrocompatibilidad total.
+  4. *JavaScript de Acordeón:*
+     - Actualizado `subSectionMap['footer'] = { tab: 'content_rules', accordionId: 'accordionSecFooter' }`.
+     - Incluido `'accordionSecFooter'` en `toggleAllStoreAccordions()`.
+  5. *Política Estricta Cero Emojis & Validación:*
+     - Verificación automatizada sin emojis (PASS).
+     - 424 pruebas de la suite completa pasando al 100% (2,789 aserciones, 0 fallos).
 
 ---
 

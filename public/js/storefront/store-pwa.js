@@ -516,10 +516,14 @@
                 <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
               </div>
               ${Array.isArray(prod.colors) && prod.colors.length > 0 ? `
-                <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 6px; align-items: center;">
-                  ${prod.colors.map(c => `
-                    <span class="product-card-color-dot" title="${c.name}" style="width: 12px; height: 12px; border-radius: 50%; background: ${c.hex}; border: 1px solid rgba(0,0,0,0.2); display: inline-block;"></span>
-                  `).join('')}
+                <div class="product-card-colors">
+                  ${prod.colors.map(c => {
+                    const isMulti = (c.name || '').toLowerCase().includes('multicolor');
+                    const dotBg = isMulti
+                      ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                      : (c.hex || '#0f172a');
+                    return `<span class="product-card-color-dot ${isMulti ? 'color-dot-multicolor' : ''}" data-color-name="${c.name}" title="${c.name}" style="background: ${dotBg};"></span>`;
+                  }).join('')}
                   <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">${prod.colors.length} ${prod.colors.length === 1 ? 'color' : 'colores'}</span>
                 </div>
               ` : ''}
@@ -630,6 +634,11 @@
     const homeView = document.getElementById('viewHome');
     const exploreView = document.getElementById('viewExplore');
     const catalogView = document.getElementById('viewCatalog');
+
+    if (!homeView && !exploreView && !catalogView) {
+      window.location.href = '/?tab=' + encodeURIComponent(tabId);
+      return;
+    }
 
     if (tabId === 'home') {
       if (homeView) homeView.style.display = 'block';
@@ -762,22 +771,34 @@
       }
     }
 
-    storeState.cart = data.items.map(bi => ({
-      backendId: bi.id,
-      productId: bi.product_id ? String(bi.product_id) : bi.sku,
-      variantId: bi.variant_id,
-      sku: bi.sku,
-      name: bi.product_name,
-      categoryName: 'Prenda',
-      price: bi.price,
-      size: bi.size,
-      stockType: bi.line_type === 'line_b' ? 'on_demand' : 'ready',
-      stockLabel: bi.stock_badge,
-      lineType: bi.line_type,
-      lineLabel: bi.line_label,
-      quantity: bi.quantity,
-      hasActiveLock: bi.has_active_lock
-    }));
+    storeState.cart = data.items.map(bi => {
+      const localProd = Array.isArray(STORE_PRODUCTS) ? STORE_PRODUCTS.find(p => String(p.id) === String(bi.product_id) || p.sku === bi.sku) : null;
+      let itemImg = bi.image;
+      if (!itemImg || itemImg === '/user-avatar.png') {
+        itemImg = localProd ? localProd.image : null;
+      }
+      const itemSlug = bi.product_slug || (localProd ? (localProd.slug || localProd.id) : (bi.product_id || bi.sku));
+
+      return {
+        backendId: bi.id,
+        productId: bi.product_id ? String(bi.product_id) : bi.sku,
+        variantId: bi.variant_id,
+        sku: bi.sku,
+        name: bi.product_name,
+        slug: itemSlug,
+        image: itemImg,
+        categoryName: bi.category_name || (localProd ? localProd.categoryName : 'Prenda'),
+        price: bi.price,
+        size: bi.size,
+        color: bi.color || (localProd && Array.isArray(localProd.colors) ? localProd.colors[0]?.name : 'Único'),
+        stockType: bi.line_type === 'line_b' ? 'on_demand' : 'ready',
+        stockLabel: bi.stock_badge,
+        lineType: bi.line_type,
+        lineLabel: bi.line_label,
+        quantity: bi.quantity,
+        hasActiveLock: bi.has_active_lock
+      };
+    });
 
     saveCart();
     updateCartBadges();
@@ -1301,40 +1322,61 @@
     let mixedNoticeHtml = '';
     if (isMixedCart) {
       mixedNoticeHtml = `
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.72rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+        <div style="background: var(--bg-tertiary, #f8fafc); border: 1px solid var(--border-subtle, #e2e8f0); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.72rem; color: var(--text-secondary, #475569); display: flex; align-items: center; gap: 6px;">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <div><strong style="color: #0f172a;">Pedido Mixto:</strong> Incluye prendas de bodega inmediata y confeccion en taller.</div>
+          <div><strong style="color: var(--text-primary, #0f172a);">Pedido Mixto:</strong> Incluye prendas de bodega inmediata y confeccion en taller.</div>
         </div>
       `;
     }
 
     const renderItemHtml = ({ item, idx }) => {
       const outOfStock = isItemOutOfStock(item);
+      const productSlug = item.slug || item.product_slug || item.productId || '';
+      const productUrl = productSlug ? `/productos/${productSlug}` : '#';
+      let itemImg = item.image;
+      if (!itemImg || itemImg === '/user-avatar.png') {
+        const localProd = Array.isArray(STORE_PRODUCTS) ? STORE_PRODUCTS.find(p => String(p.id) === String(item.productId) || p.sku === item.sku) : null;
+        if (localProd && localProd.image && localProd.image !== '/user-avatar.png') {
+          itemImg = localProd.image;
+        }
+      }
+
       return `
-      <div style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); align-items: center; ${outOfStock ? 'background: #fff5f5; border-radius: var(--radius-sm); padding: 10px;' : ''}">
-        <div style="width: 50px; height: 50px; background: #f4f4f5; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
-          ${item.image && item.image !== '/user-avatar.png' ? `<img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `<svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
-        </div>
+      <div class="cart-item-row" style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); align-items: center; ${outOfStock ? 'background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-sm); padding: 10px;' : ''}">
+        <a href="${productUrl}" style="width: 52px; height: 52px; background: var(--bg-tertiary, #f4f4f5); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; text-decoration: none; border: 1px solid var(--border-subtle, transparent);" title="Ver prenda">
+          ${itemImg ? `<img src="${itemImg}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+          <div style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%; background: #18181b; color: white;">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>
+          </div>` : `<svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="3" fill="#18181b"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2"/></svg>`}
+        </a>
         
-        <div style="flex-grow: 1;">
-          <div style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; line-height: 1.2;">${item.name}</div>
+        <div style="flex-grow: 1; min-width: 0;">
+          <a href="${productUrl}" style="text-decoration: none; color: inherit; display: block;" title="Ver prenda">
+            <div style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);">${item.name}</div>
+          </a>
           <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
             <span style="font-size: 0.7rem; color: var(--text-muted);">Talla: <strong style="color: var(--text-primary);">${item.size}</strong></span>
             <span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; ${((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'background: #fffbeb; color: #b45309;' : 'background: #ecfdf5; color: #047857;'}">${item.stockLabel || (((item.lineType || item.stockType) === 'line_b' || (item.lineType || item.stockType) === 'on_demand') ? 'Bajo Pedido' : 'Stock Fisico')}</span>
           </div>
           ${outOfStock ? `
-            <div class="cart-item-out-of-stock-notice" style="color: #dc2626; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+            <div class="cart-item-out-of-stock-notice" style="color: #ef4444; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span>Ya no hay existencias</span>
             </div>
           ` : ''}
-          <div style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 800; color: #050505; margin-top: 4px;">MXN $${(item.price * item.quantity).toFixed(2)}</div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <div style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 800; color: var(--text-primary);">MXN $${(item.price * item.quantity).toFixed(2)}</div>
+            <a href="${productUrl}" class="btn-cart-view-pdp" style="font-size: 0.68rem; color: var(--text-muted); text-decoration: underline; display: inline-flex; align-items: center; gap: 3px; font-weight: 600;" title="Ver prenda sin sacarla del carrito">
+              <span>Ver prenda</span>
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
         </div>
 
         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <button type="button" class="btn-qty-control" data-action="decrease-qty" data-index="${idx}">-</button>
-            <span style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 800; min-width: 18px; text-align: center;">${item.quantity}</span>
+            <span style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 800; min-width: 18px; text-align: center; color: var(--text-primary);">${item.quantity}</span>
             <button type="button" class="btn-qty-control" data-action="increase-qty" data-index="${idx}">+</button>
             <button type="button" class="btn-remove-item" data-action="remove-item" data-index="${idx}" title="Eliminar">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1353,14 +1395,14 @@
     if (isMixedCart) {
       itemsHtml += `
         <div style="margin-top: 10px;">
-          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
             <span>Linea A - Bodega Local (Entrega 24-48h)</span>
             <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
           </div>
           ${lineAEntries.map(renderItemHtml).join('')}
         </div>
         <div style="margin-top: 16px;">
-          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
             <span>Linea B - Taller On-Demand (Entrega 3-5 dias)</span>
             <span style="color: #d97706; font-size: 0.65rem;">Confeccion Artesanal</span>
           </div>
@@ -1370,7 +1412,7 @@
     } else if (lineAEntries.length > 0) {
       itemsHtml += `
         <div style="margin-top: 10px;">
-          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
             <span>Linea A - Bodega Local (Entrega Express 24-48h)</span>
             <span style="color: #059669; font-size: 0.65rem;">Stock Apartado</span>
           </div>
@@ -1380,7 +1422,7 @@
     } else {
       itemsHtml += `
         <div style="margin-top: 10px;">
-          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
             <span>Linea B - Taller On-Demand (Entrega 3-5 dias)</span>
             <span style="color: #d97706; font-size: 0.65rem;">Confeccion Artesanal</span>
           </div>
@@ -3011,11 +3053,21 @@
 
   // ============================================================================
   const accountState = {
-    activeTab: 'orders', // 'orders' | 'anatomy' | 'address' | 'subscription' | 'settings'
+    activeTab: 'orders', // 'orders' | 'account' | 'discounts' | 'subscription' | 'settings'
     searchedFolio: null,
-    editingAddress: false,
+    editingAddressId: null,
+    selectedAddressType: 'casa',
+    selectedOrderFolio: null,
     pushEnabled: false
   };
+
+  const PARTNER_DISCOUNTS = [
+    { code: 'PARADISO15', title: '15% OFF en Colecciones Night & Festival', ally: 'Club Paradiso Nightlife', minOrder: 800, discountPercent: 15, redeemed: false, savedAmount: 0 },
+    { code: 'CIRCUIT20', title: '20% OFF en Trajes de Baño & Ropa Interior', ally: 'Circuit Festival World', minOrder: 1200, discountPercent: 20, redeemed: false, savedAmount: 0 },
+    { code: 'BIENVENIDO10', title: '10% OFF en Tu Primera Orden', ally: 'Torzo Welcome Gift', minOrder: 500, discountPercent: 10, redeemed: true, savedAmount: 130 },
+    { code: 'PRIDE2026', title: 'Envío Express Courier Bonificado (100% OFF)', ally: 'Alianza Orgullo México', minOrder: 699, discountPercent: 0, freeShipping: true, redeemed: false, savedAmount: 0 },
+    { code: 'MULTIVERSE50', title: '$50.00 MXN Bono de Recompensa MRR', ally: 'Programa Lealtad Multiverso', minOrder: 450, discountFixed: 50, redeemed: true, savedAmount: 320 }
+  ];
 
   function switchAccountTab(tabKey) {
     accountState.activeTab = tabKey;
@@ -3047,22 +3099,65 @@
 
     if (authCard) {
       if (session && session.name) {
+        const initials = session.name.split(' ').filter(Boolean).map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase() || 'M';
+        const isGoogle = session.provider === 'google' || !!session.google_linked;
+        const walletBalance = (typeof session.walletBalance === 'number') ? session.walletBalance : 280;
         authCard.innerHTML = `
           <div class="auth-logged-card">
-            <div class="auth-avatar-circle">${session.name.charAt(0).toUpperCase()}</div>
-            <div class="auth-user-info">
-              <div class="auth-user-name">${session.name}</div>
-              <div class="auth-user-email">${session.email || 'Sin correo registrado'}</div>
-              <div class="auth-user-provider">${session.provider === 'google' ? 'Cuenta Google Verificada' : 'Comprador Registrado'}</div>
+            <div class="auth-logged-main">
+              <div class="auth-avatar-wrapper">
+                <div class="auth-avatar-circle">
+                  <span>${initials}</span>
+                </div>
+                <span class="auth-status-indicator" title="Sesion activa"></span>
+              </div>
+              <div class="auth-user-info">
+                <div class="auth-user-name">${session.name}</div>
+                <div class="auth-user-email">${session.email || 'Sin correo registrado'}</div>
+                <div class="auth-user-tags-row">
+                  ${isGoogle ? `
+                    <span class="auth-badge-pill auth-badge-google">
+                      <svg viewBox="0 0 24 24" width="11" height="11"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                      <span>Google Vinculado</span>
+                    </span>
+                  ` : `
+                    <span class="auth-badge-pill auth-badge-verified">
+                      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      <span>Comprador Verificado</span>
+                    </span>
+                  `}
+                  ${session.discretePackaging !== false ? `
+                    <span class="auth-badge-pill auth-badge-discrete" title="Empaque 100% discreto activo">
+                      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span>Empaque Discreto</span>
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+              <button type="button" class="btn-logout-buyer" data-action="buyer-logout" title="Cerrar Sesion">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Salir</span>
+              </button>
             </div>
-            <button type="button" class="btn-logout-buyer" data-action="buyer-logout">Cerrar Sesión</button>
+
+            <div class="auth-logged-footer">
+              <div class="auth-stat-item">
+                <span class="auth-stat-label">Multiverse Wallet:</span>
+                <strong class="auth-stat-value font-mono">MXN $${walletBalance.toFixed(2)}</strong>
+              </div>
+              <div class="auth-stat-sep">·</div>
+              <div class="auth-stat-item">
+                <span class="auth-stat-label">Recompensa:</span>
+                <span class="auth-stat-accent">5% Cashback</span>
+              </div>
+            </div>
           </div>
         `;
       } else {
         authCard.innerHTML = `
           <div class="auth-guest-card">
-            <div style="font-size: 0.82rem; font-weight: 700; color: #050505; margin-bottom: 4px;">Acceso Rápido de Comprador</div>
-            <p style="font-size: 0.74rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.35;">Inicia sesión con Google para rastrear tus pedidos, guardar tu perfil anatómico y gestionar tus envíos.</p>
+            <div class="account-subheading">Acceso de Comprador</div>
+            <p class="account-subheading-desc" style="margin-bottom: 10px;">Inicia sesión con Google para rastrear tus pedidos, guardar tus direcciones y perfil anatómico.</p>
             <button type="button" class="btn-google-auth" data-action="google-login" data-source="account">
               <svg viewBox="0 0 24 24" width="18" height="18" class="google-icon">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -3089,12 +3184,16 @@
     // 3. Renderizar Contenido según Pestaña Activa
     if (accountState.activeTab === 'orders') {
       renderAccountOrders(orders);
-    } else if (accountState.activeTab === 'anatomy') {
+      renderAccountWishlistIntegrated();
+    } else if (accountState.activeTab === 'account') {
+      renderAccountPersonalAndAddresses(session);
       renderAccountAnatomy(session);
-    } else if (accountState.activeTab === 'address') {
-      renderAccountAddress(session);
+    } else if (accountState.activeTab === 'discounts') {
+      renderAccountDiscounts();
     } else if (accountState.activeTab === 'subscription') {
       renderAccountSubscription();
+    } else if (accountState.activeTab === 'settings') {
+      renderAccountSettingsView(session);
     }
   }
 
@@ -3122,21 +3221,29 @@
         const badgeEl = document.getElementById('accountOrdersBadge');
         if (badgeEl) badgeEl.textContent = combined.length;
 
+        window.__latestOrders = combined;
         renderOrdersListHtml(listEl, combined);
+        if (accountState.selectedOrderFolio) {
+          showOrderDetail(accountState.selectedOrderFolio);
+        }
       })
       .catch(() => {
+        window.__latestOrders = orders || [];
         renderOrdersListHtml(listEl, orders || []);
+        if (accountState.selectedOrderFolio) {
+          showOrderDetail(accountState.selectedOrderFolio);
+        }
       });
   }
 
   function renderOrdersListHtml(listEl, orders) {
     if (!orders || orders.length === 0) {
       listEl.innerHTML = `
-        <div class="account-empty-state">
-          <div style="font-weight: 700; font-size: 0.85rem; color: #050505; margin-bottom: 4px;">Sin pedidos registrados</div>
-          <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 12px;">Aun no has realizado compras con esta cuenta.</p>
+        <div class="account-empty-state" style="padding: 16px 12px; text-align: center;">
+          <div class="account-subheading" style="margin-bottom: 4px;">Sin pedidos registrados</div>
+          <p class="account-subheading-desc" style="margin-bottom: 12px;">Aún no has realizado compras con esta cuenta.</p>
           <button type="button" class="btn-account-primary" data-action="switch-dock-tab" data-dock-tab="catalog">
-            Explorar Catalogo
+            Explorar Catálogo
           </button>
         </div>
       `;
@@ -3149,13 +3256,11 @@
       const dateFormatted = order.created_at_formatted || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Reciente');
       const totalNum = typeof order.total === 'number' ? order.total : parseFloat(order.total || 0);
       const isApproved = (order.status === 'completed' || order.status === 'approved' || order.payment_status === 'paid');
-      const readyItems = order.ready_items || order.readyItems || [];
-      const onDemandItems = order.on_demand_items || order.onDemandItems || [];
       const items = order.items || [];
       const trackingNumber = order.tracking_number || (order.shipment ? order.shipment.tracking_number : null);
 
       return `
-        <div class="order-history-card">
+        <div class="order-history-card" data-action="view-order-detail" data-folio="${folio}" style="cursor: pointer;" title="Toca para ver resumen completo del pedido">
           <div class="order-history-header">
             <div>
               <div class="order-history-folio">${folio}</div>
@@ -3163,53 +3268,236 @@
             </div>
             <div style="text-align: right;">
               <span class="order-status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
-                ${isApproved ? 'PAGO APROBADO' : 'PENDIENTE DE PAGO'}
+                ${isApproved ? 'PAGO APROBADO' : 'PENDIENTE'}
               </span>
               <div class="order-history-total">MXN $${totalNum.toFixed(2)}</div>
             </div>
           </div>
 
           ${isMixed ? `
-            <div class="order-mixed-dual-badge">
-              <span class="badge-branch-ready">[LINEA A] Bodega Salida 24-48h</span>
-              <span class="badge-branch-demand">[LINEA B] Taller Confeccion 3-5d</span>
-            </div>
-            <div class="order-tracking-timeline">
-              <div class="timeline-row">
-                <span class="timeline-dot dot-ready"></span>
-                <div class="timeline-info">
-                  <strong>Linea A (Stock Fisico):</strong> Apartado en bodega central. ${readyItems.length} prenda(s).
-                </div>
-              </div>
-              <div class="timeline-row">
-                <span class="timeline-dot dot-demand"></span>
-                <div class="timeline-info">
-                  <strong>Linea B (On-Demand):</strong> En cola de patronaje y corte. ${onDemandItems.length} prenda(s).
-                </div>
-              </div>
+            <div class="order-mixed-dual-badge" style="margin: 8px 0;">
+              <span class="badge-branch-ready">[LÍNEA A] Bodega 24-48h</span>
+              <span class="badge-branch-demand">[LÍNEA B] Taller 3-5d</span>
             </div>
           ` : `
             <div style="font-size: 0.72rem; color: var(--text-secondary); margin: 6px 0;">
-              Tipo de despacho: <strong>${order.order_type === 'on_demand' ? 'Confeccion Bajo Pedido' : 'Stock Fisico Inmediato'}</strong>
+              Despacho: <strong>${order.order_type === 'on_demand' ? 'Confección Bajo Pedido' : 'Stock Inmediato'}</strong>
             </div>
           `}
 
-          <div class="order-history-items">
-            ${items.map(it => `
+          <div class="order-history-items" style="margin: 8px 0;">
+            ${items.slice(0, 2).map(it => `
               <div class="order-history-item-line">
                 <span>${it.quantity}x ${it.name || it.product_name} ${it.size ? '(' + it.size + ')' : ''}</span>
                 <span>MXN $${((it.price || it.unit_price || 0) * it.quantity).toFixed(2)}</span>
               </div>
             `).join('')}
+            ${items.length > 2 ? `<div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">+ ${items.length - 2} prenda(s) más</div>` : ''}
           </div>
 
-          <div class="order-history-footer">
-            <span class="order-carrier-tag">${order.carrier || 'DHL Express Nacional'}${trackingNumber ? ' (' + trackingNumber + ')' : ''}</span>
-            <button type="button" class="btn-account-action" style="padding: 2px 8px; font-size: 0.68rem;" onclick="lookupOrderByFolio('${folio}')">Rastrear Guia</button>
+          <div class="order-history-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); gap: 6px; flex-wrap: wrap;">
+            <span class="order-carrier-tag">${order.carrier || 'DHL Express'}${trackingNumber ? ' (' + trackingNumber + ')' : ''}</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button type="button" class="btn-reorder-1tap" data-action="reorder-order-items" data-folio="${folio}" title="Agregar todas las prendas de este pedido a tu carrito">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                <span>Reordenar</span>
+              </button>
+              <button type="button" class="btn-account-action" style="padding: 4px 10px; font-size: 0.7rem;" data-action="view-order-detail" data-folio="${folio}">
+                Ver Resumen
+              </button>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+  }
+
+  function showOrderDetail(folio) {
+    accountState.selectedOrderFolio = folio;
+    const detailContainer = document.getElementById('orderDetailViewContainer');
+    const listContainer = document.getElementById('orderListViewContainer');
+    if (!detailContainer || !listContainer) return;
+
+    listContainer.style.display = 'none';
+    detailContainer.style.display = 'block';
+
+    detailContainer.innerHTML = `
+      <div style="padding: 20px 0; text-align: center; color: var(--text-muted); font-size: 0.75rem;">
+        Cargando resumen de ${folio}...
+      </div>
+    `;
+
+    let foundOrder = null;
+    const list = window.__latestOrders || [];
+    foundOrder = list.find(o => (o.folio === folio || o.order_number === folio));
+
+    if (!foundOrder) {
+      try {
+        const local = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]');
+        foundOrder = local.find(o => (o.folio === folio || o.order_number === folio));
+      } catch (e) {}
+    }
+
+    fetch(`/api/v1/store/account/tracking/${encodeURIComponent(folio)}`)
+      .then(res => res.json())
+      .then(data => {
+        const trackingData = (data && data.success && data.tracking) ? data.tracking : null;
+        renderOrderDetailView(detailContainer, foundOrder, trackingData, folio);
+      })
+      .catch(() => {
+        renderOrderDetailView(detailContainer, foundOrder, null, folio);
+      });
+  }
+
+  function renderOrderDetailView(container, order, tracking, folio) {
+    const isApproved = order ? (order.status === 'completed' || order.status === 'approved' || order.payment_status === 'paid') : true;
+    const totalNum = order ? (typeof order.total === 'number' ? order.total : parseFloat(order.total || 0)) : (tracking ? parseFloat(tracking.total || 0) : 0);
+    const dateFormatted = order?.created_at_formatted || (order?.createdAt ? new Date(order.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Reciente');
+    const isMixed = order ? (order.order_type === 'mixed' || order.orderType === 'mixed' || order.is_mixed) : (tracking?.is_mixed || false);
+    const readyItems = order?.ready_items || order?.readyItems || [];
+    const onDemandItems = order?.on_demand_items || order?.onDemandItems || [];
+    const items = order?.items || [];
+    const carrier = order?.carrier || tracking?.carrier || 'DHL Express Nacional';
+    const trackingNumber = order?.tracking_number || tracking?.tracking_number || 'MXN-TRK-' + Math.floor(100000 + Math.random() * 900000);
+    const shipping = order?.shipping || checkoutState.shipping || {};
+
+    const defaultTimeline = [
+      { step: 1, title: 'Pago Aprobado y Conciliado', desc: 'Transacción confirmada por pasarela segura.', completed: true, timestamp: dateFormatted },
+      { step: 2, title: isMixed ? 'Preparación Dual (Bodega + Confección)' : 'Preparación en Centro de Logística', desc: isMixed ? 'Stock físico apartado; orden de patronaje enviada a taller.' : 'Prendas inspeccionadas y empacadas discretamente.', completed: true, timestamp: 'En proceso' },
+      { step: 3, title: 'Despacho con Guía Courier', desc: `Entregado al mensajero (${carrier}) con guía ${trackingNumber}.`, completed: isApproved, timestamp: 'Programado' },
+      { step: 4, title: 'Entrega en Domicilio', desc: 'Recepción garantizada en dirección registrada.', completed: false, timestamp: 'Pendiente' }
+    ];
+
+    const timeline = (tracking && tracking.timeline && tracking.timeline.length > 0) ? tracking.timeline : defaultTimeline;
+
+    container.innerHTML = `
+      <div class="order-detail-header-bar">
+        <button type="button" class="btn-account-back" data-action="back-to-orders-list">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Volver a Mis Pedidos</span>
+        </button>
+        <span class="order-folio-badge">${folio}</span>
+      </div>
+
+      <div class="order-detail-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div>
+            <div class="account-subheading" style="margin: 0 0 2px;">Resumen del Pedido</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">Realizado el ${dateFormatted}</div>
+          </div>
+          <span class="order-status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
+            ${isApproved ? 'PAGO APROBADO' : 'PENDIENTE'}
+          </span>
+        </div>
+
+        <div style="background: var(--bg-tertiary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.74rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: var(--text-secondary);">Mensajería / Courier:</span>
+            <strong>${carrier}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: var(--text-secondary);">Guía de Rastreo:</span>
+            <strong class="font-mono" style="color: var(--brand-accent, #4f46e5);">${trackingNumber}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-secondary);">Método de Pago:</span>
+            <span>${order?.paymentMethod || order?.payment_method || 'Tarjeta Bancaria / SPEI'}</span>
+          </div>
+        </div>
+
+        ${isMixed ? `
+          <div style="background: rgba(79, 70, 229, 0.08); border: 1px solid rgba(79, 70, 229, 0.25); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+            <strong style="font-size: 0.76rem; color: var(--brand-accent, #4f46e5); display: block; margin-bottom: 4px;">Rastreo Dual de Carrito Mixto</strong>
+            <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.4;">
+              <div>• <strong>Línea A (Stock Físico):</strong> Despacho express 24-48h (${readyItems.length} prenda(s))</div>
+              <div>• <strong>Línea B (Taller On-Demand):</strong> Confección artesanal 3-5 días hábiles (${onDemandItems.length} prenda(s))</div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 14px 0 8px;">Estado y Telemetría de Entrega</div>
+        <div class="order-tracking-timeline" style="margin: 0 0 16px;">
+          ${timeline.map(st => `
+            <div class="timeline-row" style="opacity: ${st.completed ? '1' : '0.45'};">
+              <span class="timeline-dot ${st.completed ? 'dot-ready' : ''}"></span>
+              <div class="timeline-info">
+                <strong>${st.title}</strong>
+                <div>${st.desc}</div>
+                ${st.timestamp ? `<small style="color: var(--text-muted);">${st.timestamp}</small>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 14px 0 8px;">Prendas en esta Orden (${items.length})</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+          ${items.map(it => {
+            const matchedProd = STORE_PRODUCTS.find(p => p.id === it.id || p.name === it.name);
+            const imgUrl = it.image || matchedProd?.image || 'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=200&auto=format&fit=crop&q=80';
+            const priceUnit = it.price || it.unit_price || 0;
+            const lineTotal = priceUnit * (it.quantity || 1);
+
+            return `
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px;">
+                <img src="${imgUrl}" alt="${it.name}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: var(--bg-tertiary); flex-shrink: 0;">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${it.name || it.product_name}</div>
+                  <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">
+                    ${it.size ? 'Talla: <strong>' + it.size + '</strong> · ' : ''} Cantidad: ${it.quantity}
+                  </div>
+                </div>
+                <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-align: right; white-space: nowrap;">
+                  MXN $${lineTotal.toFixed(2)}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        ${shipping.street ? `
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 14px 0 8px;">Dirección de Envío</div>
+          <div style="font-size: 0.72rem; color: var(--text-secondary); background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 10px; margin-bottom: 14px; line-height: 1.4;">
+            <strong>${shipping.recipientName || order?.customer_name || 'Comprador'}</strong><br>
+            ${shipping.street}<br>
+            Col. ${shipping.colony || ''}, ${shipping.city || ''}, ${shipping.state || ''} CP ${shipping.postalCode || ''}<br>
+            ${shipping.references ? `<small style="color: var(--text-muted);">Ref: ${shipping.references}</small>` : ''}
+          </div>
+        ` : ''}
+
+        <div style="padding-top: 10px; border-top: 1px dashed var(--border-medium); font-size: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-secondary);">
+            <span>Subtotal:</span>
+            <span>MXN $${totalNum.toFixed(2)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text-secondary);">
+            <span>Envío Express:</span>
+            <span style="color: #16a34a; font-weight: 700;">BONIFICADO</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 0.95rem; font-weight: 800; color: var(--text-primary); padding-top: 6px; border-top: 1px solid var(--border-subtle);">
+            <span>Total Pagado:</span>
+            <span style="color: var(--brand-accent, #4f46e5);">MXN $${totalNum.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 14px;">
+          <button type="button" class="btn-account-primary" style="flex: 1; padding: 8px; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; gap: 6px;" data-action="reorder-order-items" data-folio="${folio}">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            <span>Volver a Comprar (1-Tap)</span>
+          </button>
+          <button type="button" class="btn-account-secondary" style="flex: 1; padding: 8px; font-size: 0.72rem;" onclick="showToastNotification('Comprobante descargado en formato digital.')">
+            Descargar Recibo
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function backToOrdersList() {
+    accountState.selectedOrderFolio = null;
+    const detailContainer = document.getElementById('orderDetailViewContainer');
+    const listContainer = document.getElementById('orderListViewContainer');
+    if (detailContainer) detailContainer.style.display = 'none';
+    if (listContainer) listContainer.style.display = 'block';
   }
 
   function lookupOrderByFolio(folioQuery) {
@@ -3222,107 +3510,60 @@
       return;
     }
 
-    resultBox.style.display = 'block';
-    resultBox.innerHTML = `
-      <div style="padding: 10px; font-size: 0.74rem; color: var(--text-secondary);">
-        Consultando telemetria en vivo para ${clean}...
-      </div>
-    `;
-
-    fetch(`/api/v1/store/account/tracking/${encodeURIComponent(clean)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.tracking) {
-          const t = data.tracking;
-          resultBox.innerHTML = `
-            <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <strong style="color: #166534; font-size: 0.82rem;">Folio: ${t.order_number}</strong>
-                <span class="order-status-badge status-approved">
-                  ${(t.status || 'APROBADO').toUpperCase()}
-                </span>
-              </div>
-              <div style="font-size: 0.74rem; color: #166534; margin-bottom: 8px;">
-                Total: <strong>MXN $${(t.total || 0).toFixed(2)}</strong> | Carrier: <strong>${t.carrier}</strong> | Guia: <strong>${t.tracking_number}</strong>
-              </div>
-              ${t.is_mixed ? `
-                <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; font-size: 0.7rem; color: #166534; margin-bottom: 8px;">
-                  <strong>Rastreo Dual de Carrito Mixto:</strong>
-                  <div>- Linea A (Bodega): Despacho express 24-48h</div>
-                  <div>- Linea B (Taller): Confeccion artesanal 3-5 dias habiles</div>
-                </div>
-              ` : ''}
-              <div class="order-tracking-timeline" style="margin-top: 8px;">
-                ${(t.timeline || []).map(st => `
-                  <div class="timeline-row" style="opacity: ${st.completed ? '1' : '0.45'};">
-                    <span class="timeline-dot ${st.completed ? 'dot-ready' : ''}"></span>
-                    <div class="timeline-info">
-                      <strong>Paso ${st.step}: ${st.title}</strong>
-                      <div>${st.desc}</div>
-                      ${st.timestamp ? `<small style="color: var(--text-muted);">${st.timestamp}</small>` : ''}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        } else {
-          let orders = [];
-          try { orders = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]'); } catch (e) {}
-          const found = orders.find(o => (o.folio && o.folio.toUpperCase().includes(clean)) || (o.order_number && o.order_number.toUpperCase().includes(clean)));
-
-          if (found) {
-            renderLocalTrackingResult(resultBox, found);
-          } else {
-            resultBox.innerHTML = `
-              <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.74rem; color: #991b1b;">
-                No se encontro ningun pedido registrado con el folio "<strong>${clean}</strong>".
-              </div>
-            `;
-          }
-        }
-      })
-      .catch(() => {
-        let orders = [];
-        try { orders = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]'); } catch (e) {}
-        const found = orders.find(o => (o.folio && o.folio.toUpperCase().includes(clean)) || (o.order_number && o.order_number.toUpperCase().includes(clean)));
-
-        if (found) {
-          renderLocalTrackingResult(resultBox, found);
-        } else {
-          resultBox.innerHTML = `
-            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; font-size: 0.74rem; color: #991b1b;">
-              Error al consultar servidor de tracking. Folio no hallado: "<strong>${clean}</strong>".
-            </div>
-          `;
-        }
-      });
+    showOrderDetail(clean);
   }
 
-  function renderLocalTrackingResult(resultBox, found) {
-    const isMixed = (found.orderType === 'mixed' || found.is_mixed);
-    resultBox.innerHTML = `
-      <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <strong style="color: #166534; font-size: 0.82rem;">Folio: ${found.folio || found.order_number}</strong>
-          <span class="order-status-badge ${found.status === 'approved' || found.status === 'completed' ? 'status-approved' : 'status-pending'}">
-            ${(found.status || 'PENDIENTE').toUpperCase()}
-          </span>
+  function renderAccountWishlistIntegrated() {
+    const container = document.getElementById('accountWishlistItemsList');
+    const badge = document.getElementById('accountWishlistCountBadge');
+    if (!container) return;
+
+    const count = (storeState.wishlist || []).length;
+    if (badge) badge.textContent = `${count} prenda${count === 1 ? '' : 's'}`;
+
+    if (count === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 16px 10px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.72rem;">
+          No tienes prendas en tu lista de deseos todavía. Toca el corazón en cualquier modelo del catálogo.
         </div>
-        <div style="font-size: 0.74rem; color: #166534; margin-bottom: 6px;">
-          Total: <strong>MXN $${(found.total || 0).toFixed(2)}</strong> | Metodo: ${found.paymentMethod || found.payment_method || 'Tarjeta'}
-        </div>
-        ${isMixed ? `
-          <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px; font-size: 0.7rem; color: #166534;">
-            <strong>Rastreo Dual de Carrito Mixto:</strong>
-            <div>- Linea A (Bodega): Despacho express 24-48h</div>
-            <div>- Linea B (Taller): Confeccion artesanal 3-5 dias habiles</div>
+      `;
+      return;
+    }
+
+    container.innerHTML = storeState.wishlist.map(productId => {
+      const prod = STORE_PRODUCTS.find(p => p.id === productId);
+      if (!prod) return '';
+      const selectedSize = storeState.selectedSizes[prod.id] || 'M';
+      const imgUrl = prod.image || 'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=200&auto=format&fit=crop&q=80';
+
+      return `
+        <div class="account-wishlist-card">
+          <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="flex-shrink: 0;">
+            <img src="${imgUrl}" alt="${prod.name}" class="account-wishlist-thumb">
+          </a>
+          <div style="flex: 1; min-width: 0;">
+            <a href="/productos/${encodeURIComponent(prod.slug || prod.id)}" style="font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; color: var(--text-primary); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${prod.name}
+            </a>
+            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">
+              Talla: <strong style="color: var(--text-primary);">${selectedSize}</strong> · <span style="color: #047857; font-weight: 600;">${prod.stockLabel}</span>
+            </div>
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+              MXN $${prod.price.toFixed(2)}
+            </div>
           </div>
-        ` : ''}
-      </div>
-    `;
+          <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
+            <button type="button" class="btn-account-primary" data-action="move-wishlist-to-cart" data-product-id="${prod.id}" style="padding: 4px 8px; font-size: 0.68rem;">
+              Al Carrito
+            </button>
+            <button type="button" data-action="toggle-wishlist" data-product-id="${prod.id}" style="background: none; border: none; font-size: 0.65rem; color: var(--text-muted); cursor: pointer;">
+              Quitar
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
-
   function renderAccountAnatomy(session) {
     const slider = document.getElementById('anatomyWaistSlider');
     const valDisplay = document.getElementById('anatomyWaistValueDisplay');
@@ -3336,7 +3577,7 @@
     if (slider) slider.value = currentWaist;
     if (valDisplay) valDisplay.textContent = `${currentWaist} cm`;
 
-    const calc = calculateTorzoSize(currentWaist);
+    const calc = typeof calculateTorzoSize === 'function' ? calculateTorzoSize(currentWaist) : null;
     if (calcCard && calc) {
       calcCard.innerHTML = `
         <div class="calc-top-row">
@@ -3351,22 +3592,22 @@
     if (session && session.anatomicalProfile && session.anatomicalProfile.silhouettes) {
       const s = session.anatomicalProfile.silhouettes;
       const jock = document.getElementById('prefSilJocks');
-      if (jock) jock.checked = !!s.jocks;
+      if (jock) jock.checked = Array.isArray(s) ? s.includes('jocks') : !!s.jocks;
       const boxer = document.getElementById('prefSilBoxers');
-      if (boxer) boxer.checked = !!s.boxers;
+      if (boxer) boxer.checked = Array.isArray(s) ? s.includes('boxers') : !!s.boxers;
       const tanga = document.getElementById('prefSilTangas');
-      if (tanga) tanga.checked = !!s.tangas;
+      if (tanga) tanga.checked = Array.isArray(s) ? s.includes('tangas') : !!s.tangas;
       const bikini = document.getElementById('prefSilBikinis');
-      if (bikini) bikini.checked = !!s.bikinis;
+      if (bikini) bikini.checked = Array.isArray(s) ? s.includes('bikinis') : !!s.bikinis;
       const tank = document.getElementById('prefSilTanktops');
-      if (tank) tank.checked = !!s.tanktops;
+      if (tank) tank.checked = Array.isArray(s) ? s.includes('tanktops') : !!s.tanktops;
     }
   }
 
   function saveAnatomicalProfile() {
     const slider = document.getElementById('anatomyWaistSlider');
     const waistCm = slider ? parseInt(slider.value, 10) : 82;
-    const calc = calculateTorzoSize(waistCm);
+    const calc = typeof calculateTorzoSize === 'function' ? calculateTorzoSize(waistCm) : null;
 
     const silhouettes = {
       jocks: document.getElementById('prefSilJocks')?.checked ?? true,
@@ -3404,111 +3645,498 @@
         preferred_cut: calc ? calc.size : 'M',
         silhouettes: silhouettes
       })
-    }).catch(e => console.warn('Error sincronizando perfil anatomico con backend:', e));
+    }).catch(e => console.warn('Error sincronizando perfil anatómico:', e));
 
-    showToastNotification('Perfil Anatomico guardado exitosamente.');
+    showToastNotification('Perfil Anatómico guardado exitosamente.');
   }
 
-  function renderAccountAddress(session) {
-    const summaryEl = document.getElementById('accountAddressSummary');
-    if (!summaryEl) return;
+  function renderAccountPersonalAndAddresses(session) {
+    // 1. Datos Personales
+    const nameInput = document.getElementById('accProfileName');
+    const emailInput = document.getElementById('accProfileEmail');
+    const phoneInput = document.getElementById('accProfilePhone');
+    if (nameInput) nameInput.value = session?.name || '';
+    if (emailInput) emailInput.value = session?.email || '';
+    if (phoneInput) phoneInput.value = session?.phone || '';
 
-    const shipping = (session && session.shipping) ? session.shipping : checkoutState.shipping;
-    const hasAddress = shipping && shipping.street && shipping.city;
-
-    if (accountState.editingAddress || !hasAddress) {
-      summaryEl.innerHTML = `
-        <div class="address-edit-form">
-          <div class="acc-form-group">
-            <label class="acc-label">Calle y Numero *</label>
-            <input type="text" id="accInputStreet" class="account-input" value="${shipping?.street || ''}" placeholder="Ej: Av. Juarez 14, Depto 402">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <div class="acc-form-group">
-              <label class="acc-label">Codigo Postal *</label>
-              <div style="display: flex; gap: 4px;">
-                <input type="text" id="accInputZip" class="account-input" maxlength="5" value="${shipping?.postalCode || ''}" placeholder="06000">
-                <button type="button" class="btn-account-action" data-action="acc-lookup-postal-code" style="padding: 4px 8px; font-size: 0.7rem;">CP</button>
+    // 2. Vinculación Google
+    const googleCard = document.getElementById('accGoogleLinkCard');
+    if (googleCard) {
+      const isGoogleLinked = (session && (session.provider === 'google' || session.google_linked));
+      if (isGoogleLinked) {
+        googleCard.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" width="18" height="18" class="google-icon">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <div>
+                <strong style="font-size: 0.75rem; color: var(--text-primary); display: block;">Cuenta Google Vinculada</strong>
+                <span style="font-size: 0.68rem; color: var(--text-muted);">${session.google_email || session.email || 'Conectada'}</span>
               </div>
             </div>
-            <div class="acc-form-group">
-              <label class="acc-label">Colonia *</label>
-              <input type="text" id="accInputColony" class="account-input" value="${shipping?.colony || ''}" placeholder="Centro">
-            </div>
+            <span style="font-size: 0.65rem; font-weight: 800; color: #16a34a; background: rgba(34, 197, 94, 0.12); padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(34, 197, 94, 0.25);">ACTIVA</span>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <div class="acc-form-group">
-              <label class="acc-label">Alcaldia / Municipio *</label>
-              <input type="text" id="accInputCity" class="account-input" value="${shipping?.city || ''}" placeholder="Cuauhtemoc">
+        `;
+      } else {
+        googleCard.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <strong style="font-size: 0.75rem; color: var(--text-primary); display: block;">Vincular Cuenta de Google</strong>
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Sincroniza tus accesos de forma instantánea.</span>
             </div>
-            <div class="acc-form-group">
-              <label class="acc-label">Estado *</label>
-              <input type="text" id="accInputState" class="account-input" value="${shipping?.state || ''}" placeholder="Ciudad de Mexico">
-            </div>
-          </div>
-          <div class="acc-form-group">
-            <label class="acc-label">Referencias del Domicilio</label>
-            <input type="text" id="accInputRefs" class="account-input" value="${shipping?.references || ''}" placeholder="Entre calles, color de fachada...">
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 10px;">
-            <button type="button" class="btn-account-primary" data-action="save-acc-address" style="flex: 1;">
-              GUARDAR DIRECCION
+            <button type="button" class="btn-account-action" data-action="link-google-account" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 0.7rem;">
+              <svg viewBox="0 0 24 24" width="14" height="14" class="google-icon">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Vincular</span>
             </button>
-            ${hasAddress ? `
-              <button type="button" class="btn-account-secondary" data-action="cancel-acc-address" style="padding: 8px 12px; font-size: 0.72rem;">
-                Cancelar
-              </button>
-            ` : ''}
           </div>
-        </div>
-      `;
-    } else {
-      summaryEl.innerHTML = `
-        <div class="address-display-box">
-          <div style="font-weight: 700; font-size: 0.82rem; color: #050505; margin-bottom: 4px;">Direccion Predeterminada de Entrega</div>
-          <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; margin: 0 0 10px;">
-            ${shipping.street}<br>
-            Col. ${shipping.colony}, ${shipping.city}, ${shipping.state}<br>
-            CP ${shipping.postalCode}
-            ${shipping.references ? `<br><small style="color: var(--text-muted);">Ref: ${shipping.references}</small>` : ''}
-          </p>
-          <button type="button" class="btn-account-action" data-action="edit-acc-address">
-            Editar Direccion
-          </button>
+        `;
+      }
+    }
+
+    // 2.5 Preferencia de Empaque Discreto
+    const discreteContainer = document.getElementById('accDiscretePackagingContainer');
+    if (discreteContainer) {
+      const isDiscrete = (session?.discretePackaging !== false);
+      discreteContainer.innerHTML = `
+        <div class="discrete-packaging-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div class="discrete-icon-box">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div>
+                <h4 class="account-subheading" style="margin: 0 0 2px;">Preferencia de Empaque Discreto</h4>
+                <p class="account-subheading-desc" style="margin: 0; line-height: 1.35;">
+                  Tus paquetes se despachan en empaques 100% anonimos, sin marcas exteriores ni leyendas de prendas intimas para garantizar total confidencialidad.
+                </p>
+              </div>
+            </div>
+            <label class="toggle-switch-wrapper" title="Activar o desactivar empaque discreto">
+              <input type="checkbox" id="accDiscretePackagingToggle" data-action="toggle-discrete-packaging" ${isDiscrete ? 'checked' : ''}>
+              <span class="toggle-switch-slider"></span>
+            </label>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.7rem; color: ${isDiscrete ? '#16a34a' : '#64748b'}; font-weight: 700;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="discretePackagingStatusText">${isDiscrete ? 'EMPAQUE 100% ANONIMO ACTIVO EN TODOS TUS ENVIOS' : 'EMPAQUE ESTANDAR CON LOGOTIPO COMERCIAL'}</span>
+          </div>
         </div>
       `;
     }
+
+    // 3. Libreta de Direcciones (Casa / Trabajo)
+    renderAddressList(session);
+  }
+
+  function renderAddressList(session) {
+    const listEl = document.getElementById('accountAddressList');
+    if (!listEl) return;
+
+    let addresses = session?.addresses || [];
+    if (addresses.length === 0 && session?.shipping && session.shipping.street) {
+      addresses = [{
+        id: 'addr_' + Date.now(),
+        type: 'casa',
+        street: session.shipping.street,
+        postalCode: session.shipping.postalCode || '06600',
+        colony: session.shipping.colony || 'Juárez',
+        city: session.shipping.city || 'Cuauhtémoc',
+        state: session.shipping.state || 'Ciudad de México',
+        references: session.shipping.references || '',
+        isDefault: true
+      }];
+      if (session) {
+        session.addresses = addresses;
+        try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch(e){}
+      }
+    } else if (addresses.length === 0) {
+      addresses = [{
+        id: 'addr_default_1',
+        type: 'casa',
+        street: 'Calle Génova 42, Depto 301',
+        postalCode: '06600',
+        colony: 'Juárez',
+        city: 'Cuauhtémoc',
+        state: 'Ciudad de México',
+        references: 'Portón café, interfono 301',
+        isDefault: true
+      }];
+    }
+
+    listEl.innerHTML = addresses.map(addr => {
+      const isCasa = addr.type === 'casa';
+      return `
+        <div class="account-address-item" data-address-id="${addr.id}">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="${isCasa ? 'address-badge-casa' : 'address-badge-trabajo'}">
+                ${isCasa ? `
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                  CASA
+                ` : `
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                  TRABAJO
+                `}
+              </span>
+              ${addr.isDefault ? `<span style="font-size: 0.65rem; color: #16a34a; font-weight: 800; background: rgba(22, 163, 74, 0.1); padding: 1px 6px; border-radius: 4px;">PREDETERMINADA</span>` : ''}
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn-account-action" data-action="edit-acc-address" data-id="${addr.id}" style="padding: 2px 8px; font-size: 0.68rem;">Editar</button>
+              ${!addr.isDefault ? `<button type="button" class="btn-account-secondary" data-action="set-default-address" data-id="${addr.id}" style="padding: 2px 6px; font-size: 0.68rem;">Hacer Principal</button>` : ''}
+              ${addresses.length > 1 ? `<button type="button" data-action="delete-acc-address" data-id="${addr.id}" style="background: none; border: none; color: #ef4444; font-size: 0.68rem; cursor: pointer; padding: 2px 4px;">Eliminar</button>` : ''}
+            </div>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-secondary); line-height: 1.4;">
+            <strong>${addr.street}</strong><br>
+            Col. ${addr.colony}, ${addr.city}, ${addr.state} · CP ${addr.postalCode}
+            ${addr.references ? `<br><small style="color: var(--text-muted);">Ref: ${addr.references}</small>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function showAddAddressForm(addrToEdit = null) {
+    const form = document.getElementById('accountAddressEditForm');
+    const title = document.getElementById('accAddressFormTitle');
+    const idInput = document.getElementById('accAddressEditId');
+    if (!form) return;
+
+    form.style.display = 'block';
+    if (addrToEdit) {
+      if (title) title.textContent = 'Editar Dirección de Entrega';
+      if (idInput) idInput.value = addrToEdit.id;
+      const st = document.getElementById('accShippingStreet'); if (st) st.value = addrToEdit.street || '';
+      const zp = document.getElementById('accShippingZip'); if (zp) zp.value = addrToEdit.postalCode || '';
+      const col = document.getElementById('accShippingColony'); if (col) col.value = addrToEdit.colony || '';
+      const cit = document.getElementById('accShippingCity'); if (cit) cit.value = addrToEdit.city || '';
+      const sta = document.getElementById('accShippingState'); if (sta) sta.value = addrToEdit.state || '';
+      const ref = document.getElementById('accShippingRefs'); if (ref) ref.value = addrToEdit.references || '';
+      setAddressType(addrToEdit.type || 'casa');
+    } else {
+      if (title) title.textContent = 'Añadir Nueva Dirección de Entrega';
+      if (idInput) idInput.value = '';
+      const st = document.getElementById('accShippingStreet'); if (st) st.value = '';
+      const zp = document.getElementById('accShippingZip'); if (zp) zp.value = '';
+      const col = document.getElementById('accShippingColony'); if (col) col.value = '';
+      const cit = document.getElementById('accShippingCity'); if (cit) cit.value = '';
+      const sta = document.getElementById('accShippingState'); if (sta) sta.value = '';
+      const ref = document.getElementById('accShippingRefs'); if (ref) ref.value = '';
+      setAddressType('casa');
+    }
+  }
+
+  function setAddressType(type) {
+    accountState.selectedAddressType = type;
+    const casaBtn = document.getElementById('addrTypeCasaBtn');
+    const trabajoBtn = document.getElementById('addrTypeTrabajoBtn');
+    if (casaBtn) casaBtn.classList.toggle('active', type === 'casa');
+    if (trabajoBtn) trabajoBtn.classList.toggle('active', type === 'trabajo');
   }
 
   function saveCustomerAddress() {
-    const street = (document.getElementById('accInputStreet')?.value || '').trim();
-    const postalCode = (document.getElementById('accInputZip')?.value || '').replace(/\D/g, '');
-    const colony = (document.getElementById('accInputColony')?.value || '').trim();
-    const city = (document.getElementById('accInputCity')?.value || '').trim();
-    const state = (document.getElementById('accInputState')?.value || '').trim();
-    const references = (document.getElementById('accInputRefs')?.value || '').trim();
+    const editId = document.getElementById('accAddressEditId')?.value || '';
+    const street = (document.getElementById('accShippingStreet')?.value || '').trim();
+    const postalCode = (document.getElementById('accShippingZip')?.value || '').replace(/\D/g, '');
+    const colony = (document.getElementById('accShippingColony')?.value || '').trim();
+    const city = (document.getElementById('accShippingCity')?.value || '').trim();
+    const state = (document.getElementById('accShippingState')?.value || '').trim();
+    const references = (document.getElementById('accShippingRefs')?.value || '').trim();
+    const type = accountState.selectedAddressType || 'casa';
 
     if (!street || postalCode.length !== 5 || !colony || !city || !state) {
-      showToastNotification('Por favor completa todos los campos requeridos de la direccion.');
+      showToastNotification('Por favor completa todos los campos requeridos de la dirección.');
       return;
     }
-
-    const shipping = { street, postalCode, colony, city, state, references };
-    checkoutState.shipping = { ...shipping };
 
     let session = {};
     try {
       session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}');
     } catch (e) {}
 
-    session.shipping = shipping;
+    let addresses = session.addresses || [];
+
+    if (editId) {
+      const idx = addresses.findIndex(a => a.id === editId);
+      if (idx !== -1) {
+        addresses[idx] = { ...addresses[idx], street, postalCode, colony, city, state, references, type };
+      }
+    } else {
+      const newAddr = {
+        id: 'addr_' + Date.now(),
+        type,
+        street,
+        postalCode,
+        colony,
+        city,
+        state,
+        references,
+        isDefault: addresses.length === 0
+      };
+      addresses.push(newAddr);
+    }
+
+    session.addresses = addresses;
+    const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
+    if (defaultAddr) {
+      session.shipping = {
+        street: defaultAddr.street,
+        postalCode: defaultAddr.postalCode,
+        colony: defaultAddr.colony,
+        city: defaultAddr.city,
+        state: defaultAddr.state,
+        references: defaultAddr.references
+      };
+      checkoutState.shipping = { ...session.shipping };
+    }
+
     try {
       localStorage.setItem('multiverse_customer_session', JSON.stringify(session));
     } catch (e) {}
 
-    accountState.editingAddress = false;
-    renderAccountAddress(session);
-    showToastNotification('Direccion guardada correctamente.');
+    const form = document.getElementById('accountAddressEditForm');
+    if (form) form.style.display = 'none';
+    renderAddressList(session);
+    showToastNotification('Dirección guardada exitosamente.');
+  }
+
+  function setDefaultAddress(addrId) {
+    let session = {};
+    try {
+      session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}');
+    } catch (e) {}
+
+    let addresses = session.addresses || [];
+    addresses.forEach(a => { a.isDefault = (a.id === addrId); });
+    session.addresses = addresses;
+
+    const def = addresses.find(a => a.id === addrId);
+    if (def) {
+      session.shipping = { street: def.street, postalCode: def.postalCode, colony: def.colony, city: def.city, state: def.state, references: def.references };
+      checkoutState.shipping = { ...session.shipping };
+    }
+
+    try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch(e){}
+    renderAddressList(session);
+    showToastNotification('Dirección predeterminada actualizada.');
+  }
+
+  function deleteAddress(addrId) {
+    let session = {};
+    try { session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+    let addresses = (session.addresses || []).filter(a => a.id !== addrId);
+    if (addresses.length > 0 && !addresses.some(a => a.isDefault)) {
+      addresses[0].isDefault = true;
+    }
+    session.addresses = addresses;
+    try { localStorage.setItem('multiverse_customer_session', JSON.stringify(session)); } catch(e){}
+    renderAddressList(session);
+    showToastNotification('Dirección eliminada.');
+  }
+
+  function renderAccountDiscounts() {
+    const listEl = document.getElementById('accountDiscountsList');
+    const kpiSavedEl = document.getElementById('kpiTotalDiscountsSaved');
+    const kpiCountEl = document.getElementById('kpiActiveDiscountsCount');
+    const walletContainer = document.getElementById('accWalletCardContainer');
+    const referralContainer = document.getElementById('accReferralCardContainer');
+    if (!listEl) return;
+
+    let session = {};
+    try { session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+    const walletBalance = (typeof session.walletBalance === 'number') ? session.walletBalance : 280;
+
+    // 1. Render Wallet Cashback Card (Item 8)
+    if (walletContainer) {
+      walletContainer.innerHTML = `
+        <div class="wallet-cashback-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="wallet-icon-box">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M16 12h.01"/><path d="M2 10h20"/></svg>
+              </div>
+              <div>
+                <div class="account-subheading" style="margin: 0;">Multiverse Wallet</div>
+                <span class="account-subheading-desc" style="margin: 0;">Monedero Digital y Cashback</span>
+              </div>
+            </div>
+            <span class="wallet-tier-pill">Tier Plata (5%)</span>
+          </div>
+          <div class="wallet-balance-row">
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Saldo Acumulado Disponible</span>
+              <strong class="wallet-balance-amount font-mono">MXN $${walletBalance.toFixed(2)}</strong>
+            </div>
+            <button type="button" class="btn-wallet-redeem" data-action="redeem-wallet-to-cart">
+              Canjear en Carrito
+            </button>
+          </div>
+          <div style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 8px; line-height: 1.35;">
+            Recibes 5% de reembolso directo en cada compra entregada. Puedes descontar tu saldo en el checkout.
+          </div>
+        </div>
+      `;
+    }
+
+    // 2. Render Referral Program Card (Item 7)
+    if (referralContainer) {
+      referralContainer.innerHTML = `
+        <div class="referral-program-card">
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+            <div class="referral-icon-box">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div style="flex: 1;">
+              <strong style="font-size: 0.85rem; color: var(--text-primary); display: block;">Invita a un Amigo: Regala $150 MXN</strong>
+              <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 3px 0 0; line-height: 1.35;">
+                Comparte tu enlace exclusivo. Tu amigo recibe $150 MXN en su primera compra y tu recibes $150 MXN en tu Monedero tras su primer pedido.
+              </p>
+            </div>
+          </div>
+          <div class="referral-actions-row">
+            <div class="referral-link-display">
+              <span class="font-mono">TORZO-REF-7492</span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn-referral-copy" data-action="copy-referral-link" title="Copiar Enlace">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copiar</span>
+              </button>
+              <button type="button" class="btn-referral-wa" data-action="share-referral-whatsapp" title="Compartir en WhatsApp">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 6.46 17.5 2 12.04 2M12.05 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.69 12.05 3.69C16.6 3.69 20.28 7.37 20.28 11.92C20.28 16.46 16.6 20.15 12.05 20.15Z"/></svg>
+                <span>WhatsApp</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let totalSaved = 0;
+    let activeCount = 0;
+    let redeemedCount = 0;
+
+    PARTNER_DISCOUNTS.forEach(d => {
+      if (d.redeemed) {
+        totalSaved += (d.savedAmount || 0);
+        redeemedCount++;
+      } else {
+        activeCount++;
+      }
+    });
+
+    if (kpiSavedEl) kpiSavedEl.textContent = `MXN $${totalSaved.toFixed(2)}`;
+    if (kpiCountEl) kpiCountEl.textContent = `${activeCount} Activo${activeCount === 1 ? '' : 's'}`;
+
+    const countAllEl = document.getElementById('countDiscountsAll');
+    const countActiveEl = document.getElementById('countDiscountsActive');
+    const countRedeemedEl = document.getElementById('countDiscountsRedeemed');
+    if (countAllEl) countAllEl.textContent = PARTNER_DISCOUNTS.length;
+    if (countActiveEl) countActiveEl.textContent = activeCount;
+    if (countRedeemedEl) countRedeemedEl.textContent = redeemedCount;
+
+    // Filter Switcher state (Requerimiento 5)
+    accountState.discountsFilter = accountState.discountsFilter || 'all';
+    document.querySelectorAll('[data-action="set-discount-filter"]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === accountState.discountsFilter);
+    });
+
+    const filteredDiscounts = PARTNER_DISCOUNTS.filter(d => {
+      if (accountState.discountsFilter === 'active') return !d.redeemed;
+      if (accountState.discountsFilter === 'redeemed') return d.redeemed;
+      return true;
+    });
+
+    if (filteredDiscounts.length === 0) {
+      listEl.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.78rem;">
+          No hay cupones ${accountState.discountsFilter === 'active' ? 'activos' : 'redimidos'} disponibles.
+        </div>
+      `;
+      return;
+    }
+
+    // Grid 3x3 en Formato 4:5 (Requerimiento 5)
+    listEl.innerHTML = filteredDiscounts.map(d => {
+      const discountDisplay = d.discountPercent ? `${d.discountPercent}% OFF` : (d.discountFixed ? `MXN $${d.discountFixed} OFF` : 'ENVIO GRATIS');
+      return `
+        <div class="discount-card-4x5 ${d.redeemed ? 'redeemed' : ''}">
+          <div class="dcard-top">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
+              <span class="dcard-ally-badge">${d.ally}</span>
+              <span class="order-status-badge ${d.redeemed ? 'status-pending' : 'status-approved'}" style="font-size: 0.58rem; padding: 2px 6px;">
+                ${d.redeemed ? 'REDIMIDO' : 'DISPONIBLE'}
+              </span>
+            </div>
+            <div class="dcard-value-display">${discountDisplay}</div>
+          </div>
+
+          <div class="dcard-mid">
+            <strong class="dcard-title">${d.title}</strong>
+            <div class="dcard-min-order">Compra min: MXN $${d.minOrder}</div>
+            ${d.redeemed ? `
+              <div class="dcard-redeemed-text">
+                Ahorraste MXN $${(d.savedAmount || 0).toFixed(2)}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="dcard-bottom">
+            <div class="dcard-code-pill" data-action="copy-discount-code" data-code="${d.code}" title="Toca para copiar código">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span class="font-mono">${d.code}</span>
+            </div>
+            ${!d.redeemed ? `
+              <button type="button" class="btn-dcard-apply" data-action="apply-discount-code" data-code="${d.code}">
+                Aplicar al Carrito
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderAccountSettingsView(session) {
+    // 1. Desvinculación de Google
+    const unlinkRow = document.getElementById('accGoogleUnlinkRow');
+    if (unlinkRow) {
+      const isGoogleLinked = (session && (session.provider === 'google' || session.google_linked));
+      if (isGoogleLinked) {
+        unlinkRow.innerHTML = `
+          <button type="button" class="btn-account-secondary" data-action="unlink-google-account" style="width: 100%; padding: 8px; font-size: 0.72rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+            Desvincular Cuenta de Google
+          </button>
+        `;
+      } else {
+        unlinkRow.innerHTML = `
+          <div style="font-size: 0.7rem; color: var(--text-muted); padding: 4px 0;">
+            Tu cuenta no tiene vinculación con Google activa actualmente.
+          </div>
+        `;
+      }
+    }
+
+    // 2. Estado de 2FA
+    const waBtn = document.getElementById('btnToggle2FAWhatsApp');
+    const appBtn = document.getElementById('btnToggle2FAApp');
+    if (waBtn) {
+      waBtn.textContent = session?.twoFaWhatsApp ? 'Desactivar' : 'Activar';
+      waBtn.classList.toggle('active', !!session?.twoFaWhatsApp);
+    }
+    if (appBtn) {
+      appBtn.textContent = session?.twoFaApp ? 'Desvincular' : 'Configurar';
+      appBtn.classList.toggle('active', !!session?.twoFaApp);
+    }
   }
 
   function renderAccountSubscription() {
@@ -4322,7 +4950,7 @@
       return;
     }
 
-    // 14. Aplicar Filtros del Drawer
+    // 14. Aplicar Filtros del Drawer (Regla 6.35: Filtros Facetados Extendidos en Storefront)
     const applyBtn = e.target.closest('[data-action="apply-filters"]');
     if (applyBtn) {
       e.preventDefault();
@@ -4333,10 +4961,31 @@
       storeState.activeColors = Array.from(document.querySelectorAll('input[name="filter_color"]:checked')).map(cb => cb.value);
       storeState.activeVolumes = Array.from(document.querySelectorAll('input[name="filter_volume"]:checked')).map(cb => cb.value);
       storeState.activeShades = Array.from(document.querySelectorAll('input[name="filter_shade"]:checked')).map(cb => cb.value);
+
+      const pendingFacets = {
+        activeCategories: storeState.activeCategories,
+        activeSuppliers: storeState.activeSuppliers,
+        activeSizes: storeState.activeSizes,
+        activeFabrics: storeState.activeFabrics,
+        activeColors: storeState.activeColors,
+        activeVolumes: storeState.activeVolumes,
+        activeShades: storeState.activeShades,
+      };
+      try {
+        sessionStorage.setItem('multiverse_active_facets', JSON.stringify(pendingFacets));
+      } catch (e) {}
+
       closeAllDrawers();
+
+      if (!document.getElementById('catalogProductsGrid')) {
+        window.location.href = '/?tab=catalog';
+        return;
+      }
+
+      switchDockTab('catalog');
       renderProductsGrid('homeProductsGrid');
       renderProductsGrid('catalogProductsGrid');
-      showToastNotification('Filtros aplicados');
+      showToastNotification('Filtros facetados aplicados');
       return;
     }
 
@@ -4359,14 +5008,17 @@
       storeState.activeColor = 'all';
       storeState.activeVolume = 'all';
       storeState.activeShade = 'all';
+      try { sessionStorage.removeItem('multiverse_active_facets'); } catch (e) {}
       document.querySelectorAll('[data-action="filter-category"]').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('[data-action="filter-size"]').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('[data-action="filter-fabric"]').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('[data-action="filter-color"]').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('[data-action="filter-volume"]').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('[data-action="filter-shade"]').forEach(p => p.classList.remove('active'));
-      renderProductsGrid('homeProductsGrid');
-      renderProductsGrid('catalogProductsGrid');
+      if (document.getElementById('catalogProductsGrid')) {
+        renderProductsGrid('homeProductsGrid');
+        renderProductsGrid('catalogProductsGrid');
+      }
       showToastNotification('Filtros restablecidos');
       return;
     }
@@ -4604,23 +5256,249 @@
       return;
     }
 
-    const editAddrBtn = e.target.closest('[data-action="edit-acc-address"]');
-    if (editAddrBtn) {
+    const viewOrderDetailBtn = e.target.closest('[data-action="view-order-detail"]');
+    if (viewOrderDetailBtn) {
       e.preventDefault();
-      accountState.editingAddress = true;
-      let sess = null;
-      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-      renderAccountAddress(sess);
+      const folio = viewOrderDetailBtn.dataset.folio;
+      if (folio) showOrderDetail(folio);
       return;
     }
 
-    const cancelAddrBtn = e.target.closest('[data-action="cancel-acc-address"]');
-    if (cancelAddrBtn) {
+    const backOrdersBtn = e.target.closest('[data-action="back-to-orders-list"]');
+    if (backOrdersBtn) {
       e.preventDefault();
-      accountState.editingAddress = false;
+      backToOrdersList();
+      return;
+    }
+
+    const showAddAddrBtn = e.target.closest('[data-action="show-add-address-form"]');
+    if (showAddAddrBtn) {
+      e.preventDefault();
+      showAddAddressForm(null);
+      return;
+    }
+
+    const addrTypeBtn = e.target.closest('[data-action="select-address-type"]');
+    if (addrTypeBtn) {
+      e.preventDefault();
+      setAddressType(addrTypeBtn.dataset.type);
+      return;
+    }
+
+    const editAddrBtn = e.target.closest('[data-action="edit-acc-address"]');
+    if (editAddrBtn) {
+      e.preventDefault();
       let sess = null;
       try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
-      renderAccountAddress(sess);
+      const targetId = editAddrBtn.dataset.id;
+      const addr = (sess?.addresses || []).find(a => a.id === targetId);
+      showAddAddressForm(addr || null);
+      return;
+    }
+
+    const cancelEditAddrBtn = e.target.closest('[data-action="cancel-edit-address"]');
+    if (cancelEditAddrBtn) {
+      e.preventDefault();
+      const form = document.getElementById('accountAddressEditForm');
+      if (form) form.style.display = 'none';
+      return;
+    }
+
+    const setDefAddrBtn = e.target.closest('[data-action="set-default-address"]');
+    if (setDefAddrBtn) {
+      e.preventDefault();
+      setDefaultAddress(setDefAddrBtn.dataset.id);
+      return;
+    }
+
+    const deleteAddrBtn = e.target.closest('[data-action="delete-acc-address"]');
+    if (deleteAddrBtn) {
+      e.preventDefault();
+      deleteAddress(deleteAddrBtn.dataset.id);
+      return;
+    }
+
+    const saveProfileBtn = e.target.closest('[data-action="save-profile-info"]');
+    if (saveProfileBtn) {
+      e.preventDefault();
+      let sess = {};
+      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+      sess.name = (document.getElementById('accProfileName')?.value || '').trim();
+      sess.email = (document.getElementById('accProfileEmail')?.value || '').trim();
+      sess.phone = (document.getElementById('accProfilePhone')?.value || '').trim();
+      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
+      renderAccountSheetContent();
+      showToastNotification('Información personal guardada con éxito.');
+      return;
+    }
+
+    const linkGoogleBtn = e.target.closest('[data-action="link-google-account"]');
+    if (linkGoogleBtn) {
+      e.preventDefault();
+      loginWithGoogle('account');
+      return;
+    }
+
+    const unlinkGoogleBtn = e.target.closest('[data-action="unlink-google-account"]');
+    if (unlinkGoogleBtn) {
+      e.preventDefault();
+      let sess = {};
+      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+      sess.provider = 'local';
+      delete sess.google_linked;
+      delete sess.google_email;
+      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
+      renderAccountSheetContent();
+      showToastNotification('Cuenta de Google desvinculada exitosamente.');
+      return;
+    }
+
+    const copyDiscountBtn = e.target.closest('[data-action="copy-discount-code"]');
+    if (copyDiscountBtn) {
+      e.preventDefault();
+      const code = copyDiscountBtn.dataset.code;
+      if (code && navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(() => {
+          showToastNotification(`Código ${code} copiado al portapapeles.`);
+        }).catch(() => {
+          showToastNotification(`Código: ${code}`);
+        });
+      } else if (code) {
+        showToastNotification(`Código: ${code}`);
+      }
+      return;
+    }
+
+    const applyDiscountBtn = e.target.closest('[data-action="apply-discount-code"]');
+    if (applyDiscountBtn) {
+      e.preventDefault();
+      const code = applyDiscountBtn.dataset.code;
+      if (code) {
+        applyDiscountCoupon(code);
+        openDrawer('cartSheet');
+      }
+      return;
+    }
+
+    const filterDiscBtn = e.target.closest('[data-action="set-discount-filter"]');
+    if (filterDiscBtn) {
+      e.preventDefault();
+      accountState.discountsFilter = filterDiscBtn.dataset.filter || 'all';
+      renderAccountDiscounts();
+      return;
+    }
+
+    const reorderBtn = e.target.closest('[data-action="reorder-order-items"]');
+    if (reorderBtn) {
+      e.preventDefault();
+      const folio = reorderBtn.dataset.folio;
+      const orders = window.__latestOrders || [];
+      let ord = orders.find(o => (o.folio === folio || o.order_number === folio));
+      if (!ord) {
+        try {
+          const local = JSON.parse(localStorage.getItem('multiverse_customer_orders') || '[]');
+          ord = local.find(o => (o.folio === folio || o.order_number === folio));
+        } catch(e){}
+      }
+      if (ord && ord.items && ord.items.length > 0) {
+        let addedCount = 0;
+        ord.items.forEach(it => {
+          const pid = it.productId || it.product_id || it.id;
+          const prod = (window.storeState.products || []).find(p => String(p.id) === String(pid));
+          if (prod) {
+            addToCart(prod, it.size || 'M', it.color || 'Unico', it.quantity || 1);
+            addedCount++;
+          }
+        });
+        showToastNotification(`Prendas del pedido ${folio} agregadas a tu carrito.`);
+        openDrawer('cartSheet');
+      } else {
+        showToastNotification('No se encontraron prendas para reordenar.');
+      }
+      return;
+    }
+
+    const copyRefBtn = e.target.closest('[data-action="copy-referral-link"]');
+    if (copyRefBtn) {
+      e.preventDefault();
+      const link = window.location.origin + '/?ref=TORZO-REF-7492';
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => {
+          showToastNotification('Enlace de referidos copiado al portapapeles.');
+        }).catch(() => {
+          showToastNotification(`Enlace: ${link}`);
+        });
+      } else {
+        showToastNotification(`Enlace: ${link}`);
+      }
+      return;
+    }
+
+    const shareWaRefBtn = e.target.closest('[data-action="share-referral-whatsapp"]');
+    if (shareWaRefBtn) {
+      e.preventDefault();
+      const msg = encodeURIComponent('Te regalo $150 MXN en tu primera compra de ropa interior anatomica con mi codigo TORZO-REF-7492: ' + window.location.origin + '/?ref=TORZO-REF-7492');
+      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+      return;
+    }
+
+    const redeemWalletBtn = e.target.closest('[data-action="redeem-wallet-to-cart"]');
+    if (redeemWalletBtn) {
+      e.preventDefault();
+      showToastNotification('Saldo de Monedero Wallet aplicado a tu carrito.');
+      openDrawer('cartSheet');
+      return;
+    }
+
+    const toggleDiscreteBtn = e.target.closest('[data-action="toggle-discrete-packaging"]');
+    if (toggleDiscreteBtn) {
+      let sess = {};
+      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+      sess.discretePackaging = toggleDiscreteBtn.checked;
+      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
+      renderAccountPersonalAndAddresses(sess);
+      renderAccountSheetContent();
+      showToastNotification(sess.discretePackaging ? 'Empaque discreto activado (100% anonimo).' : 'Empaque comercial estandar asignado.');
+      return;
+    }
+
+    const toggle2FAWABtn = e.target.closest('[data-action="toggle-2fa-whatsapp"]');
+    if (toggle2FAWABtn) {
+      e.preventDefault();
+      let sess = {};
+      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+      sess.twoFaWhatsApp = !sess.twoFaWhatsApp;
+      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
+      renderAccountSheetContent();
+      showToastNotification(sess.twoFaWhatsApp ? '2FA por WhatsApp activado exitosamente.' : '2FA por WhatsApp desactivado.');
+      return;
+    }
+
+    const toggle2FAAppBtn = e.target.closest('[data-action="toggle-2fa-app"]');
+    if (toggle2FAAppBtn) {
+      e.preventDefault();
+      let sess = {};
+      try { sess = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+      sess.twoFaApp = !sess.twoFaApp;
+      try { localStorage.setItem('multiverse_customer_session', JSON.stringify(sess)); } catch(e){}
+      renderAccountSheetContent();
+      showToastNotification(sess.twoFaApp ? 'App Authenticator vinculada (Clave TOTP activa).' : 'App Authenticator desvinculada.');
+      return;
+    }
+
+    const deleteAccountBtn = e.target.closest('[data-action="delete-customer-account"]');
+    if (deleteAccountBtn) {
+      e.preventDefault();
+      if (confirm('¿Estás seguro de que deseas eliminar tu cuenta y datos personales? Esta acción es irreversible conforme a los lineamientos de privacidad ARCO.')) {
+        localStorage.removeItem('multiverse_customer_session');
+        localStorage.removeItem('multiverse_customer_orders');
+        localStorage.removeItem('multiverse_store_wishlist');
+        storeState.wishlist = [];
+        updateWishlistBadges();
+        closeAllDrawers();
+        showToastNotification('Tu cuenta y datos han sido eliminados.');
+        setTimeout(() => { window.location.reload(); }, 600);
+      }
       return;
     }
 
@@ -4890,15 +5768,27 @@
       width: 26px;
       height: 26px;
       border-radius: 4px;
-      border: 1px solid var(--border-medium);
-      background: #ffffff;
-      color: #050505;
+      border: 1px solid var(--border-medium, #e4e4e7);
+      background: var(--bg-surface, #ffffff);
+      color: var(--text-primary, #050505);
       font-weight: 800;
       font-size: 0.8rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .btn-qty-control:hover {
+      background: var(--bg-tertiary, #f4f4f5);
+    }
+    html.dark .btn-qty-control {
+      background: #22222b !important;
+      color: #f4f4f6 !important;
+      border-color: #3b3b4a !important;
+    }
+    html.dark .btn-qty-control:hover {
+      background: #2c2c38 !important;
     }
     .btn-remove-item {
       background: transparent;
@@ -4943,6 +5833,63 @@
     renderCouponBoxes();
     initPushNotifications();
     setAppTheme(getAppTheme(), false);
+
+    // Regla 6.35: Restaurar facetas activas si se redirigió desde PDP o sesión previa
+    try {
+      const savedFacetsRaw = sessionStorage.getItem('multiverse_active_facets');
+      if (savedFacetsRaw) {
+        const f = JSON.parse(savedFacetsRaw);
+        if (Array.isArray(f.activeCategories)) storeState.activeCategories = f.activeCategories;
+        if (Array.isArray(f.activeSuppliers)) storeState.activeSuppliers = f.activeSuppliers;
+        if (Array.isArray(f.activeSizes)) storeState.activeSizes = f.activeSizes;
+        if (Array.isArray(f.activeFabrics)) storeState.activeFabrics = f.activeFabrics;
+        if (Array.isArray(f.activeColors)) storeState.activeColors = f.activeColors;
+        if (Array.isArray(f.activeVolumes)) storeState.activeVolumes = f.activeVolumes;
+        if (Array.isArray(f.activeShades)) storeState.activeShades = f.activeShades;
+
+        document.querySelectorAll('.filter-facet-checkbox').forEach(cb => {
+          const type = cb.dataset.facetType;
+          const val = cb.value;
+          if (type === 'category' && storeState.activeCategories.includes(val)) cb.checked = true;
+          if (type === 'supplier' && storeState.activeSuppliers.includes(val)) cb.checked = true;
+          if (type === 'size' && storeState.activeSizes.includes(val)) cb.checked = true;
+          if (type === 'fabric' && storeState.activeFabrics.includes(val)) cb.checked = true;
+          if (type === 'color' && storeState.activeColors.includes(val)) cb.checked = true;
+          if (type === 'volume' && storeState.activeVolumes.includes(val)) cb.checked = true;
+          if (type === 'shade' && storeState.activeShades.includes(val)) cb.checked = true;
+        });
+
+        if (document.getElementById('catalogProductsGrid')) {
+          renderProductsGrid('catalogProductsGrid');
+          renderProductsGrid('homeProductsGrid');
+        }
+      }
+    } catch (e) {}
+
+    // Regla 6.35: Sincronización reactiva en tiempo real al conmutar cualquier checkbox de faceta
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('.filter-facet-checkbox')) {
+        storeState.activeCategories = Array.from(document.querySelectorAll('input[name="filter_category"]:checked')).map(cb => cb.value);
+        storeState.activeSuppliers = Array.from(document.querySelectorAll('input[name="filter_supplier"]:checked')).map(cb => cb.value);
+        storeState.activeSizes = Array.from(document.querySelectorAll('input[name="filter_size"]:checked')).map(cb => cb.value);
+        storeState.activeFabrics = Array.from(document.querySelectorAll('input[name="filter_fabric"]:checked')).map(cb => cb.value);
+        storeState.activeColors = Array.from(document.querySelectorAll('input[name="filter_color"]:checked')).map(cb => cb.value);
+        storeState.activeVolumes = Array.from(document.querySelectorAll('input[name="filter_volume"]:checked')).map(cb => cb.value);
+        storeState.activeShades = Array.from(document.querySelectorAll('input[name="filter_shade"]:checked')).map(cb => cb.value);
+
+        if (document.getElementById('catalogProductsGrid')) {
+          renderProductsGrid('catalogProductsGrid');
+          renderProductsGrid('homeProductsGrid');
+        }
+      }
+    });
+
+    try {
+      const tabParam = new URLSearchParams(window.location.search).get('tab');
+      if (tabParam && ['home', 'explore', 'catalog'].includes(tabParam)) {
+        switchDockTab(tabParam);
+      }
+    } catch (e) {}
 
     // Registro de Service Worker PWA
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

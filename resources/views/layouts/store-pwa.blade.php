@@ -566,9 +566,9 @@
 
         <!-- Enlaces Oficiales Canónicos (Regla 4.13: Inicio, Explorar, Catálogo, Carrito, Cuenta) -->
         <nav class="nav-links-desktop">
-          <a href="#" class="nav-link-item active" data-action="switch-dock-tab" data-dock-tab="home">INICIO</a>
-          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="explore">EXPLORAR</a>
-          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">CATÁLOGO</a>
+          <a href="{{ route('store.home', ['tab' => 'home']) }}" class="nav-link-item active" data-action="switch-dock-tab" data-dock-tab="home">INICIO</a>
+          <a href="{{ route('store.home', ['tab' => 'explore']) }}" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="explore">EXPLORAR</a>
+          <a href="{{ route('store.home', ['tab' => 'catalog']) }}" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">CATÁLOGO</a>
           <a href="#" class="nav-link-item" data-action="open-cart">
             <span>CARRITO</span>
             <span id="desktopNavCartCount" class="cart-count-badge" style="display:inline-flex;">0</span>
@@ -587,7 +587,7 @@
             <span>DESEOS</span>
             <span id="desktopWishlistCount" class="cart-count-badge" style="display:none;">0</span>
           </button>
-          <button type="button" class="btn-pill-action quick-theme-toggle-btn" data-action="toggle-app-theme-quick" title="Alternar Modo Claro / Oscuro" aria-label="Cambiar tema">
+          <button type="button" class="btn-pill-action" data-action="toggle-app-theme-quick" title="Alternar Modo Claro / Oscuro" aria-label="Cambiar tema">
             <svg class="theme-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="theme-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <span>TEMA</span>
@@ -656,19 +656,22 @@
         <div>
           <div class="footer-brand-name">{{ $currentStorefront['brandName'] ?? 'MARTE' }} // Contemporary fashion studio</div>
           <p style="line-height: 1.6; max-width: 420px; margin-bottom: 16px;">
-            Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.
+            {{ $footerConfig['brand_summary'] ?? 'Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.' }}
           </p>
           <div style="font-size: 0.75rem; color: #71717a;">
-            Escribenos por WhatsApp: <strong>+52 55 7510 2015</strong>
+            Escribenos por WhatsApp: <strong>{{ $footerConfig['whatsapp_contact'] ?? '+52 55 7510 2015' }}</strong>
+            @if(!empty($footerConfig['support_email']))
+              <div style="margin-top: 4px;">Email: <strong>{{ $footerConfig['support_email'] }}</strong></div>
+            @endif
           </div>
         </div>
 
         <div>
           <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Pagos y envios</strong>
           <ul class="footer-link-list">
-            <li><span>Paqueteria nacional express ($149 / Gratis +$999)</span></li>
-            <li><span>Entrega personal discreta y segura</span></li>
-            <li><span>Pagos 100% seguros con Tarjeta & OXXO Pay</span></li>
+            <li><span>{{ $footerConfig['shipping_badge_text'] ?? 'Paqueteria nacional express ($149 / Gratis +$999)' }}</span></li>
+            <li><span>{{ $footerConfig['packaging_badge_text'] ?? 'Entrega personal discreta y segura' }}</span></li>
+            <li><span>{{ $footerConfig['payments_badge_text'] ?? 'Pagos 100% seguros con Tarjeta & OXXO Pay' }}</span></li>
           </ul>
         </div>
 
@@ -698,6 +701,7 @@
           </ul>
 
           <!-- Acceso al Panel RevOps -->
+          @if(filter_var($footerConfig['show_revops_link'] ?? true, FILTER_VALIDATE_BOOLEAN))
           <div class="footer-revops-card">
             <div>
               <span style="font-size: 0.7rem; color: #d4d4d8; display: block; font-weight: 700;">Consola RevOps</span>
@@ -708,12 +712,15 @@
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
+          @endif
         </div>
       </div>
 
       <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap-2; font-size: 0.7rem; color: #71717a;">
-        <span>(C) 2026 MULTIVERSO STORE. Todos los derechos reservados. <a href="/privacidad" style="color: inherit; text-decoration: underline; margin-left: 8px;">Aviso de Privacidad</a> <a href="/cookies" style="color: inherit; text-decoration: underline; margin-left: 8px;">Política de Cookies</a></span>
-        <span>Política Estricta Cero Emojis // Vectorial Only</span>
+        <span>{{ $footerConfig['copyright_text'] ?? '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.' }} <a href="/privacidad" style="color: inherit; text-decoration: underline; margin-left: 8px;">Aviso de Privacidad</a> <a href="/cookies" style="color: inherit; text-decoration: underline; margin-left: 8px;">Política de Cookies</a></span>
+        @if(filter_var($footerConfig['show_zero_emojis_badge'] ?? true, FILTER_VALIDATE_BOOLEAN))
+          <span>Política Estricta Cero Emojis // Vectorial Only</span>
+        @endif
       </div>
     </div>
   </footer>
@@ -1091,55 +1098,206 @@
         <!-- Renderizado dinámico desde store-pwa.js -->
       </div>
 
-      <!-- Barra de Pestañas Táctiles del Portal -->
+      <!-- Barra de Pestañas Táctiles del Portal (5 Pestañas Oficiales en Grid sin Scroll) -->
       <div class="account-tabs-nav" id="accountTabsNav">
         <button type="button" class="account-tab-btn active" data-action="switch-account-tab" data-tab="orders">
-          <span>Mis Pedidos</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span class="account-tab-text">Pedidos</span>
           <span id="accountOrdersBadge" class="account-tab-badge">0</span>
         </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="anatomy">
-          <span>Perfil Anatómico</span>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="account">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="account-tab-text">Cuenta</span>
         </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="address">
-          <span>Dirección</span>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="discounts">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <path d="M7 15h.01M17 15h.01"></path>
+          </svg>
+          <span class="account-tab-text">Descuentos</span>
         </button>
         <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="subscription">
-          <span>Club MRR</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          </svg>
+          <span class="account-tab-text">Club MRR</span>
         </button>
         <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="settings">
-          <span>Configuración</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="account-tab-text">Ajustes</span>
         </button>
       </div>
 
       <!-- Paneles de Contenido por Pestaña -->
-      <!-- Pestaña 1: Mis Pedidos & Rastreo -->
+
+      <!-- Pestaña 1: Mis Pedidos & Rastreo + Wishlist -->
       <div id="accountTabOrders" class="account-tab-panel active">
-        <div class="account-lookup-box">
-          <span class="account-section-tag">Rastreo de Pedido por Folio</span>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="accountLookupFolioInput" placeholder="Ej: #MIX-2026-1048 o #ORD-2026-..." class="account-input">
-            <button type="button" class="btn-account-action" data-action="account-lookup-folio">Buscar</button>
-          </div>
+        <!-- Vista de Detalle de Pedido (oculta inicialmente, se abre al pulsar un pedido) -->
+        <div id="orderDetailViewContainer" style="display: none; margin-bottom: 20px;">
+          <!-- Renderizado dinámico desde store-pwa.js -->
         </div>
 
-        <div id="accountLookupResult" style="display: none; margin-bottom: 16px;"></div>
+        <div id="orderListViewContainer">
+          <div id="accountOrdersList">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
 
-        <div id="accountOrdersList">
-          <!-- Renderizado dinámico desde store-pwa.js -->
+          <!-- Sección Integrada de Wishlist en Mis Pedidos -->
+          <div class="account-wishlist-integrated" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--border-medium);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none" style="color: #e11d48;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <h4 class="account-subheading" style="margin: 0;">Mis Deseos &amp; Favoritos</h4>
+              </div>
+              <span id="accountWishlistCountBadge" style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted);">0 prendas</span>
+            </div>
+            <div id="accountWishlistItemsList" class="account-wishlist-grid">
+              <!-- Renderizado dinámico desde store-pwa.js -->
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Pestaña 2: Perfil Anatómico -->
-      <div id="accountTabAnatomy" class="account-tab-panel" style="display: none;">
-        <div class="anatomy-panel-content">
+      <!-- Pestaña 2: Cuenta (Datos Personales, Google, Direcciones Casa/Trabajo, Perfil Anatómico) -->
+      <div id="accountTabAccount" class="account-tab-panel" style="display: none;">
+        <!-- Sección 1: Datos Personales & Google Link -->
+        <div class="account-section-card" style="margin-bottom: 18px;">
+          <div class="account-section-header" style="margin-bottom: 12px;">
+            <h4 class="account-subheading">Datos del Perfil</h4>
+            <p class="account-subheading-desc">Administra tu información de contacto y métodos de acceso.</p>
+          </div>
+
+          <div class="acc-form-group">
+            <label class="checkout-label">Nombre Completo</label>
+            <input type="text" id="accProfileName" class="checkout-input" placeholder="Tu nombre">
+          </div>
+          <div class="checkout-form-row">
+            <div class="checkout-form-group" style="flex: 1;">
+              <label class="checkout-label">Correo Electrónico</label>
+              <input type="email" id="accProfileEmail" class="checkout-input" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="checkout-form-group" style="flex: 1;">
+              <label class="checkout-label">Teléfono Móvil</label>
+              <input type="tel" id="accProfilePhone" class="checkout-input font-mono" placeholder="55 1234 5678">
+            </div>
+          </div>
+
+          <!-- Vinculación con Cuenta de Google -->
+          <div id="accGoogleLinkCard" style="background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 12px; margin: 12px 0;">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <!-- Preferencia de Empaque Discreto 100% Anónimo (Recomendación 1) -->
+          <div id="accDiscretePackagingContainer" style="margin: 12px 0;">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <button type="button" class="btn-account-primary" data-action="save-profile-info" style="width: 100%; margin-top: 6px;">
+            <span>GUARDAR INFORMACIÓN</span>
+          </button>
+        </div>
+
+        <!-- Libreta de Direcciones (Casa / Trabajo) -->
+        <div class="account-section-card" style="margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <h4 class="account-subheading">Libreta de Direcciones</h4>
+              <p class="account-subheading-desc">Guarda direcciones para casa y trabajo con prellenado rápido.</p>
+            </div>
+            <button type="button" class="btn-account-action" data-action="show-add-address-form" style="font-size: 0.72rem; padding: 4px 10px; white-space: nowrap;">
+              + Nueva
+            </button>
+          </div>
+
+          <!-- Lista de Direcciones Guardadas -->
+          <div id="accountAddressList">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <!-- Formulario Añadir / Editar Dirección -->
+          <div id="accountAddressEditForm" class="address-edit-form" style="display: none; margin-top: 12px; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: 8px;">
+            <div style="font-size: 0.76rem; font-weight: 800; color: var(--text-primary); margin-bottom: 10px;" id="accAddressFormTitle">
+              Añadir Dirección de Entrega
+            </div>
+            <input type="hidden" id="accAddressEditId" value="">
+
+            <!-- Selector de Tipo de Dirección: Casa o Trabajo -->
+            <div class="checkout-form-group">
+              <label class="checkout-label">Tipo de Ubicación *</label>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="address-type-pill active" id="addrTypeCasaBtn" data-action="select-address-type" data-type="casa">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                  <span>Casa</span>
+                </button>
+                <button type="button" class="address-type-pill" id="addrTypeTrabajoBtn" data-action="select-address-type" data-type="trabajo">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                  <span>Trabajo</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="checkout-form-group">
+              <label for="accShippingStreet" class="checkout-label">Calle y Número Exterior / Interior *</label>
+              <input type="text" id="accShippingStreet" class="checkout-input" placeholder="Ej: Calle Génova 42 Depto 301">
+            </div>
+            <div class="checkout-form-row">
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingZip" class="checkout-label">Código Postal (5 dígitos) *</label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="accShippingZip" class="checkout-input font-mono" placeholder="06600" maxlength="5">
+                  <button type="button" class="btn-zip-lookup" data-action="acc-lookup-postal-code" title="Validar SEPOMEX">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingState" class="checkout-label">Estado *</label>
+                <input type="text" id="accShippingState" class="checkout-input" placeholder="Ciudad de México">
+              </div>
+            </div>
+            <div class="checkout-form-row">
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingCity" class="checkout-label">Alcaldía / Municipio *</label>
+                <input type="text" id="accShippingCity" class="checkout-input" placeholder="Cuauhtémoc">
+              </div>
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingColony" class="checkout-label">Colonia *</label>
+                <input type="text" id="accShippingColony" class="checkout-input" placeholder="Juárez">
+              </div>
+            </div>
+            <div class="checkout-form-group">
+              <label for="accShippingRefs" class="checkout-label">Referencias de Entrega</label>
+              <input type="text" id="accShippingRefs" class="checkout-input" placeholder="Ej: Portón café, timbre 301">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+              <button type="button" class="btn-account-secondary" data-action="cancel-edit-address" style="flex: 1;">Cancelar</button>
+              <button type="button" class="btn-account-primary" data-action="save-acc-address" style="flex: 1;">Guardar Dirección</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección 2: Perfil Anatómico & Preferencias -->
+        <div class="account-section-card">
           <div class="anatomy-header">
-            <h4 class="anatomy-title">Configuración de Perfil Anatómico</h4>
+            <h4 class="anatomy-title">Perfil Anatómico y Preferencias</h4>
             <p class="anatomy-desc">Ajusta tu medida de cintura para que la tienda preseleccione tu talla recomendada en cada prenda.</p>
           </div>
 
           <div class="anatomy-slider-card">
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-              <span style="font-size: 0.78rem; font-weight: 700; color: #050505;">Medida de Cintura</span>
+              <span class="acc-slider-label">Medida de Cintura</span>
               <strong id="anatomyWaistValueDisplay" style="font-family: monospace; font-size: 1.1rem; color: #2563eb;">82 cm</strong>
             </div>
             <input type="range" id="anatomyWaistSlider" min="70" max="102" value="82" step="1" class="anatomy-slider" data-action="anatomy-slider-change">
@@ -1187,56 +1345,47 @@
         </div>
       </div>
 
-      <!-- Pestaña 3: Dirección de Entrega -->
-      <div id="accountTabAddress" class="account-tab-panel" style="display: none;">
-        <div class="address-panel-content">
-          <div class="address-header">
-            <h4 class="address-title">Libreta de Direcciones</h4>
-            <p class="address-desc">Tu dirección guardada se utiliza para prellenar el checkout en 1 solo tap.</p>
-          </div>
-
-          <div id="accountAddressSummary" class="address-summary-card">
+      <!-- Pestaña 3: Mis Descuentos (Códigos Aliados, Estado Redimido/Disponible, Dinero Ahorrado, Wallet & Referidos) -->
+      <div id="accountTabDiscounts" class="account-tab-panel" style="display: none;">
+        <div class="discounts-panel-content">
+          <!-- Monedero Wallet Cashback (Recomendación 8) -->
+          <div id="accWalletCardContainer" style="margin-bottom: 14px;">
             <!-- Renderizado dinámico desde store-pwa.js -->
           </div>
 
-          <div id="accountAddressEditForm" class="address-edit-form" style="display: none;">
-            <div class="checkout-form-group">
-              <label for="accShippingStreet" class="checkout-label">Calle y Número Exterior/Interior *</label>
-              <input type="text" id="accShippingStreet" class="checkout-input" placeholder="Ej: Calle Génova 42 Depto 301">
+          <!-- Programa de Referidos Invita a un Amigo (Recomendación 7) -->
+          <div id="accReferralCardContainer" style="margin-bottom: 14px;">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <!-- KPI Banner de Dinero Ahorrado -->
+          <div class="discounts-kpi-banner">
+            <div class="kpi-banner-item">
+              <span class="kpi-banner-label">Total Ahorrado con Aliados</span>
+              <strong class="kpi-banner-value" id="kpiTotalDiscountsSaved">MXN $450.00</strong>
             </div>
-            <div class="checkout-form-row">
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingZip" class="checkout-label">Código Postal (5 dígitos) *</label>
-                <div style="display: flex; gap: 6px;">
-                  <input type="text" id="accShippingZip" class="checkout-input font-mono" placeholder="06600" maxlength="5">
-                  <button type="button" class="btn-zip-lookup" data-action="acc-lookup-postal-code" title="Validar SEPOMEX">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingState" class="checkout-label">Estado *</label>
-                <input type="text" id="accShippingState" class="checkout-input" placeholder="Ciudad de México">
-              </div>
+            <div class="kpi-banner-divider"></div>
+            <div class="kpi-banner-item">
+              <span class="kpi-banner-label">Cupones Disponibles</span>
+              <strong class="kpi-banner-value" id="kpiActiveDiscountsCount">3 Activos</strong>
             </div>
-            <div class="checkout-form-row">
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingCity" class="checkout-label">Alcaldía / Municipio *</label>
-                <input type="text" id="accShippingCity" class="checkout-input" placeholder="Cuauhtémoc">
-              </div>
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingColony" class="checkout-label">Colonia *</label>
-                <input type="text" id="accShippingColony" class="checkout-input" placeholder="Juárez">
-              </div>
-            </div>
-            <div class="checkout-form-group">
-              <label for="accShippingRefs" class="checkout-label">Referencias de Entrega</label>
-              <input type="text" id="accShippingRefs" class="checkout-input" placeholder="Ej: Portón café, entre Reforma y Hamburgo">
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-              <button type="button" class="btn-account-secondary" data-action="cancel-edit-address" style="flex: 1;">Cancelar</button>
-              <button type="button" class="btn-account-primary" data-action="save-acc-address" style="flex: 1;">Guardar Dirección</button>
-            </div>
+          </div>
+
+          <div class="discounts-header" style="margin: 16px 0 10px;">
+            <h4 class="account-subheading">Códigos de Descuento &amp; Aliados</h4>
+            <p class="account-subheading-desc">Beneficios exclusivos con marcas y eventos aliados en formato 4:5.</p>
+          </div>
+
+          <!-- Filtro Conmutador de Cupones Activos y Redimidos (Requerimiento 5) -->
+          <div class="discounts-filter-bar" id="accDiscountsFilterBar">
+            <button type="button" class="discount-filter-btn active" data-action="set-discount-filter" data-filter="all">Todos (<span id="countDiscountsAll">5</span>)</button>
+            <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="active">Disponibles (<span id="countDiscountsActive">3</span>)</button>
+            <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="redeemed">Redimidos (<span id="countDiscountsRedeemed">2</span>)</button>
+          </div>
+
+          <!-- Grid de Cupones 3x3 en formato 4:5 -->
+          <div id="accountDiscountsList" class="discounts-grid-3x3">
+            <!-- Renderizado dinámico desde store-pwa.js -->
           </div>
         </div>
       </div>
@@ -1255,12 +1404,12 @@
         </div>
       </div>
 
-      <!-- Pestaña 5: Configuración & Preferencias (Tema Dark/Light/Sistema & Web Push) (Regla 2) -->
+      <!-- Pestaña 5: Configuración & Preferencias (Tema, Web Push, 2FA WhatsApp/Authenticator, Gestión de Cuenta) -->
       <div id="accountTabSettings" class="account-tab-panel" style="display: none;">
         <div class="settings-panel-content" style="padding: 4px 0;">
           <div class="settings-header" style="margin-bottom: 16px;">
-            <h4 style="font-family: var(--font-heading); font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">Configuración de la Cuenta</h4>
-            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0;">Personaliza la apariencia visual de la tienda y tus canales de comunicación directa.</p>
+            <h4 class="account-subheading">Configuración de la Cuenta</h4>
+            <p class="account-subheading-desc">Personaliza la apariencia visual, seguridad 2FA y canales de comunicación directa.</p>
           </div>
 
           <!-- Selector de Modo Oscuro / Claro / Sistema -->
@@ -1269,7 +1418,7 @@
               <div style="display: flex; align-items: center; gap: 8px;">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                 <div>
-                  <strong style="font-size: 0.8rem; color: var(--text-primary); display: block;">Apariencia Visual</strong>
+                  <strong class="settings-card-title">Apariencia Visual</strong>
                   <span style="font-size: 0.68rem; color: var(--text-muted);">Soporte Dark Mode &amp; Light Mode</span>
                 </div>
               </div>
@@ -1301,19 +1450,66 @@
           <div class="push-notifications-card" id="accountPushCenter">
             <!-- Renderizado dinámicamente desde store-pwa.js -->
           </div>
-        </div>
-      </div>
 
-      <!-- Acceso a Consola RevOps para Operadores -->
-      <div class="admin-console-shortcut">
-        <div style="font-family: var(--font-heading); font-size: 0.78rem; font-weight: 800; margin-bottom: 4px;">Consola RevOps Interna</div>
-        <p style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.35;">
-          Acceso reservado a operadores y administradores de los 7 Hubs operativos.
-        </p>
-        <a href="{{ route('portal.dashboard') }}" class="btn-revops-shortcut">
-          <span>Ir a Consola RevOps</span>
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
+          <!-- Seguridad y Autenticación de Dos Factores (2FA) -->
+          <div class="security-2fa-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <strong class="settings-card-title">Seguridad en Dos Pasos (2FA)</strong>
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Protege tus compras y datos de cuenta mediante códigos temporales de un solo uso.</p>
+
+            <!-- 2FA WhatsApp -->
+            <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(34, 197, 94, 0.12); color: #16a34a; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+                </div>
+                <div>
+                  <div class="twofa-title" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">Verificación por WhatsApp</div>
+                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Códigos de seguridad vía WhatsApp al celular registrado.</div>
+                </div>
+              </div>
+              <button type="button" class="btn-account-secondary" id="btnToggle2FAWhatsApp" data-action="toggle-2fa-whatsapp" style="font-size: 0.7rem; padding: 4px 10px;">
+                Activar
+              </button>
+            </div>
+
+            <!-- 2FA Authenticator App -->
+            <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(79, 70, 229, 0.12); color: #4f46e5; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="1" y1="12" x2="4" y2="12"/></svg>
+                </div>
+                <div>
+                  <div class="twofa-title" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">Google Authenticator / Authy</div>
+                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Clave temporal TOTP de 6 dígitos sin depender de señal celular.</div>
+                </div>
+              </div>
+              <button type="button" class="btn-account-secondary" id="btnToggle2FAApp" data-action="toggle-2fa-app" style="font-size: 0.7rem; padding: 4px 10px;">
+                Configurar
+              </button>
+            </div>
+          </div>
+
+          <!-- Gestión y Privacidad de la Cuenta -->
+          <div class="account-management-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444;"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <strong class="settings-card-title">Gestión de la Cuenta &amp; Privacidad</strong>
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Controla la vinculación con servicios de terceros y tus derechos ARCO de cancelación de datos.</p>
+
+            <div id="accGoogleUnlinkRow" style="margin-bottom: 10px;">
+              <!-- Renderizado dinámicamente: botón de desvincular Google si aplica -->
+            </div>
+
+            <button type="button" class="btn-danger-account" data-action="delete-customer-account" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 12px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Eliminar Mi Cuenta y Datos Personales</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </aside>

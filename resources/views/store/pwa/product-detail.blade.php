@@ -695,6 +695,201 @@
     font-weight: 800;
     color: var(--brand-primary, #09090b);
   }
+
+  /* Botones de acción superiores PDP */
+  .pdp-action-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--bg-surface, #ffffff);
+    border: 1.5px solid var(--border-medium, #e4e4e7);
+    border-radius: 8px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-primary, #18181b);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .pdp-action-nav-btn:hover {
+    background: var(--bg-tertiary, #f4f4f5);
+  }
+
+  /* Caja de composición textil oficial */
+  .pdp-composition-box {
+    background: var(--bg-surface, #fafafa);
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle, #f4f4f5);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  /* Botones de swatch de color PDP */
+  .pdp-color-swatch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border-medium, #d4d4d8);
+    background: var(--bg-surface, #ffffff);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .pdp-color-swatch-btn:hover {
+    background: var(--bg-tertiary, #f4f4f5);
+  }
+  .pdp-color-swatch-btn.selected {
+    border-color: var(--brand-primary, #09090b);
+    background: var(--bg-tertiary, #fafafa);
+  }
+  .pdp-color-swatch-btn .pdp-color-name-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary, #18181b);
+  }
+
+  /* ESTILOS DARK MODE PARA PDP (Multitonos oscuros con profundidad zinc) */
+  html.dark .pdp-page-container {
+    color: #f4f4f6;
+  }
+  html.dark .pdp-action-nav-btn {
+    background: #18181f !important;
+    border-color: #2e2e3c !important;
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-action-nav-btn:hover {
+    background: #252532 !important;
+    border-color: #49495c !important;
+  }
+  html.dark .pdp-main-image-card {
+    background: #121216 !important;
+    border-color: #272732 !important;
+  }
+  html.dark .pdp-pillars-grid {
+    background: #18181f !important;
+    border-color: #272732 !important;
+  }
+  html.dark .pdp-pillar-item {
+    color: #cbd5e1 !important;
+  }
+  html.dark .pdp-pillar-item strong {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-composition-box {
+    background: #18181f !important;
+    border-color: #272732 !important;
+  }
+  html.dark .pdp-composition-box p {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-accordion-card {
+    background: #121216 !important;
+    border-color: #272732 !important;
+  }
+  html.dark .pdp-accordion-header {
+    background: #18181f !important;
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-accordion-header:hover {
+    background: #22222b !important;
+  }
+  html.dark .pdp-accordion-body {
+    background: #121216 !important;
+    color: #cbd5e1 !important;
+    border-top: 1px solid #272732 !important;
+  }
+  html.dark .torzo-size-table th {
+    background: #22222b !important;
+    color: #f4f4f6 !important;
+    border-color: #3b3b4a !important;
+  }
+  html.dark .torzo-size-table td {
+    background: #18181f !important;
+    color: #cbd5e1 !important;
+    border-bottom: 1px solid #272732 !important;
+  }
+  html.dark .pdp-sticky-bar {
+    background: #121216 !important;
+    border-top-color: #272732 !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5) !important;
+  }
+  html.dark .pdp-sticky-title {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-sticky-price {
+    color: #ffffff !important;
+  }
+  html.dark .pdp-qty-stepper {
+    background: #18181f !important;
+    border-color: #2e2e3c !important;
+  }
+  html.dark .pdp-qty-stepper button,
+  html.dark .pdp-qty-stepper span {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-color-swatch-btn {
+    background: #18181f !important;
+    border-color: #3b3b4a !important;
+  }
+  html.dark .pdp-color-swatch-btn:hover {
+    background: #22222b !important;
+  }
+  html.dark .pdp-color-swatch-btn.selected {
+    background: #2b2b37 !important;
+    border-color: #f4f4f6 !important;
+  }
+  html.dark .pdp-color-swatch-btn .pdp-color-name-text {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-breadcrumb-nav a {
+    color: #9da0ae !important;
+  }
+  html.dark .pdp-breadcrumb-current {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-title {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-price-amount,
+  html.dark #pdpDisplayPrice {
+    color: #ffffff !important;
+  }
+  html.dark .pdp-meta-bar {
+    border-bottom-color: #252938 !important;
+    color: #94a3b8 !important;
+  }
+  html.dark .pdp-sku-badge {
+    color: #cbd5e1 !important;
+  }
+  html.dark .pdp-section-heading {
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-size-pill {
+    background: #18181f !important;
+    border-color: #3b3b4a !important;
+    color: #f4f4f6 !important;
+  }
+  html.dark .pdp-size-pill:hover {
+    background: #22222b !important;
+    border-color: #6366f1 !important;
+  }
+  html.dark .pdp-size-pill.selected {
+    background: #f4f4f6 !important;
+    color: #0c0d12 !important;
+    border-color: #ffffff !important;
+  }
+  html.dark .pdp-stock-notice-box {
+    background: #18181f !important;
+    border: 1px solid #252938 !important;
+    color: #cbd5e1 !important;
+  }
+  html.dark #pdpStockNoticeText,
+  html.dark #pdpStockNoticeText strong {
+    color: #f4f4f6 !important;
+  }
 </style>
 @endpush
 
@@ -703,12 +898,12 @@
   
   <!-- Regla 4: Botón Volver Atrás y Botón que Conmuta a Filtros -->
   <div class="pdp-top-actions-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px;">
-    <button type="button" class="pdp-action-nav-btn" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href='{{ route('store.home', ['universo' => $activeUniverse]) }}'; }" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #ffffff; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #18181b; cursor: pointer; text-decoration: none;" aria-label="Volver atrás">
+    <button type="button" class="pdp-action-nav-btn" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href='{{ route('store.home', ['universo' => $activeUniverse]) }}'; }" aria-label="Volver atrás">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
       <span>Volver Atrás</span>
     </button>
 
-    <button type="button" class="pdp-action-nav-btn" data-action="open-filters" onclick="window.openDrawer ? window.openDrawer('filterDrawer') : (document.getElementById('filterDrawer')?.classList.add('show'))" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #ffffff; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #18181b; cursor: pointer;" aria-label="Abrir filtros">
+    <button type="button" class="pdp-action-nav-btn" data-action="open-filters" onclick="window.openDrawer ? window.openDrawer('filterDrawer') : (document.getElementById('filterDrawer')?.classList.add('show'))" aria-label="Abrir filtros">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
       <span>Filtros</span>
     </button>
@@ -788,16 +983,21 @@
           </div>
           <div class="pdp-color-swatches-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
             @foreach($product['colors'] as $cIndex => $cData)
+              @php
+                $isMulti = str_contains(strtolower($cData['name'] ?? ''), 'multicolor');
+                $swatchBg = $isMulti
+                  ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                  : ($cData['hex'] ?? '#0f172a');
+              @endphp
               <button type="button"
                       class="pdp-color-swatch-btn {{ $loop->first ? 'selected' : '' }}"
                       data-color-name="{{ $cData['name'] }}"
-                      data-color-hex="{{ $cData['hex'] }}"
+                      data-color-hex="{{ $swatchBg }}"
                       data-color-image="{{ asset($cData['image'] ?? $product['image']) }}"
                       onclick="selectPdpColor(this)"
-                      style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; border: 1.5px solid {{ $loop->first ? '#09090b' : '#d4d4d8' }}; background: {{ $loop->first ? '#fafafa' : '#ffffff' }}; cursor: pointer; transition: all 0.15s ease;"
                       title="{{ $cData['name'] }}">
-                <span style="width: 14px; height: 14px; border-radius: 50%; background: {{ $cData['hex'] }}; border: 1px solid rgba(0,0,0,0.2); display: inline-block;"></span>
-                <span style="font-size: 0.78rem; font-weight: 700; color: #18181b;">{{ $cData['name'] }}</span>
+                <span class="pdp-swatch-circle {{ $isMulti ? 'color-dot-multicolor' : '' }}" style="width: 14px; height: 14px; border-radius: 50%; background: {{ $swatchBg }}; border: 1px solid rgba(0,0,0,0.2); display: inline-block; flex-shrink: 0;"></span>
+                <span class="pdp-color-name-text">{{ $cData['name'] }}</span>
               </button>
             @endforeach
           </div>
@@ -884,9 +1084,9 @@
       </div>
 
       <!-- Ficha Técnica de Composición Textil -->
-      <div style="background: #fafafa; padding: 18px; border-radius: 12px; border: 1px solid #f4f4f5; font-size: 0.82rem; line-height: 1.5;">
-        <strong style="text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; display: block; margin-bottom: 6px; color: #52525b;">Composición Textil Oficial</strong>
-        <p style="margin: 0; color: #27272a;">{{ $product['fabricComposition'] }}</p>
+      <div class="pdp-composition-box">
+        <strong style="text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; display: block; margin-bottom: 6px; color: var(--text-muted, #52525b);">Composición Textil Oficial</strong>
+        <p style="margin: 0; color: var(--text-primary, #27272a);">{{ $product['fabricComposition'] }}</p>
       </div>
 
     </div>
@@ -1053,12 +1253,8 @@
   function selectPdpColor(btn) {
     document.querySelectorAll('.pdp-color-swatch-btn').forEach(el => {
       el.classList.remove('selected');
-      el.style.borderColor = '#d4d4d8';
-      el.style.background = '#ffffff';
     });
     btn.classList.add('selected');
-    btn.style.borderColor = '#09090b';
-    btn.style.background = '#fafafa';
 
     currentSelectedColor = btn.dataset.colorName;
     const nameEl = document.getElementById('pdpSelectedColorName');
@@ -1067,15 +1263,26 @@
     // Regla 6: Las imágenes del producto conmutan al color indexado acordado
     const newImgSrc = btn.dataset.colorImage;
     const mainImg = document.getElementById('pdpMainImg');
-    if (mainImg && newImgSrc) {
-      mainImg.src = newImgSrc;
+
+    let colorImgs = (pdpImagesByColor && pdpImagesByColor[currentSelectedColor] && pdpImagesByColor[currentSelectedColor].length > 0)
+      ? pdpImagesByColor[currentSelectedColor]
+      : (newImgSrc ? [newImgSrc] : []);
+
+    if (mainImg && colorImgs.length > 0) {
+      mainImg.src = colorImgs[0];
+      if (typeof currentPdpImageIndex !== 'undefined') {
+        currentPdpImageIndex = 0;
+      }
     }
 
-    if (pdpImagesByColor && pdpImagesByColor[currentSelectedColor] && pdpImagesByColor[currentSelectedColor].length > 0) {
-      const colorImgs = pdpImagesByColor[currentSelectedColor];
-      if (mainImg && colorImgs[0]) {
-        mainImg.src = colorImgs[0];
-      }
+    // Actualizar miniatura de galería si existen
+    const thumbsStrip = document.querySelector('.pdp-thumbs-strip');
+    if (thumbsStrip && colorImgs.length > 1) {
+      thumbsStrip.innerHTML = colorImgs.map((img, i) => `
+        <button type="button" class="pdp-thumb-btn ${i === 0 ? 'active' : ''}" onclick="switchPdpImage('${img}', this, ${i})" aria-label="Ver miniatura ${i+1}">
+          <img src="${img}" alt="Miniatura ${i+1}">
+        </button>
+      `).join('');
     }
   }
 

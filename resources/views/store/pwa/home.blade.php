@@ -18,14 +18,44 @@
             $gradDir = $settings['gradient_direction'] ?? 'to bottom';
             $gradOpacity = isset($settings['gradient_opacity']) ? ((int)$settings['gradient_opacity'] / 100) : 0.85;
 
-            $bgLayers = [];
-            if ($enableGradient) {
-                $bgLayers[] = "linear-gradient({$gradDir}, {$gradStart}, {$gradEnd})";
+            $hexToRgba = function ($hex, $alpha = 1.0) {
+                $hex = ltrim((string)$hex, '#');
+                if (strlen($hex) === 3) {
+                    $r = hexdec(str_repeat(substr($hex, 0, 1), 2));
+                    $g = hexdec(str_repeat(substr($hex, 1, 1), 2));
+                    $b = hexdec(str_repeat(substr($hex, 2, 1), 2));
+                } elseif (strlen($hex) >= 6) {
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                } else {
+                    return $hex;
+                }
+                return sprintf('rgba(%d, %d, %d, %s)', $r, $g, $b, rtrim(rtrim(sprintf('%.2f', $alpha), '0'), '.'));
+            };
+
+            $bgImageUrl = !empty($bgImage) ? asset(ltrim($bgImage, '/')) : null;
+            $cssDeclarations = [];
+
+            if (!empty($bgImageUrl) && $enableGradient) {
+                $overlayAlpha = min(0.70, max(0.15, $gradOpacity * 0.65));
+                $rgbaStart = $hexToRgba($gradStart, $overlayAlpha);
+                $rgbaEnd = $hexToRgba($gradEnd, $overlayAlpha);
+                $cssDeclarations[] = "background-image: linear-gradient({$gradDir}, {$rgbaStart}, {$rgbaEnd}), url('{$bgImageUrl}') !important";
+                $cssDeclarations[] = "background-size: cover, cover !important";
+                $cssDeclarations[] = "background-position: center, center !important";
+                $cssDeclarations[] = "background-repeat: no-repeat, no-repeat !important";
+            } elseif (!empty($bgImageUrl)) {
+                $cssDeclarations[] = "background-image: url('{$bgImageUrl}') !important";
+                $cssDeclarations[] = "background-size: cover !important";
+                $cssDeclarations[] = "background-position: center !important";
+                $cssDeclarations[] = "background-repeat: no-repeat !important";
+            } elseif ($enableGradient) {
+                $cssDeclarations[] = "background-image: linear-gradient({$gradDir}, {$gradStart}, {$gradEnd}) !important";
+                $cssDeclarations[] = "background-size: cover !important";
+                $cssDeclarations[] = "background-position: center !important";
             }
-            if (!empty($bgImage)) {
-                $bgLayers[] = "url('{$bgImage}') center/cover no-repeat";
-            }
-            $heroBgStyle = !empty($bgLayers) ? 'background: ' . implode(', ', $bgLayers) . ' !important;' : '';
+            $heroBgStyle = !empty($cssDeclarations) ? implode('; ', $cssDeclarations) . ';' : '';
 
             $ctaPrimaryText = $settings['cta_primary_text'] ?? $settings['cta_text'] ?? $sec->query_rules['cta_text'] ?? 'EXPLORAR CATÁLOGO';
             $ctaPrimaryUrl = $settings['cta_primary_url'] ?? $settings['cta_url'] ?? $sec->query_rules['cta_url'] ?? null;
@@ -37,7 +67,7 @@
           <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-full-width' : '' }}" data-section-id="{{ $sec->id }}">
             @if($heroMode === 'custom')
               {{-- MODO CÓDIGO PERSONALIZADO (AISLADO, NO DUPLICA EL HERO) --}}
-              <div class="hero-custom-container" style="{{ $heroBgStyle }}">
+              <div class="hero-custom-container" style="{!! $heroBgStyle !!}">
                 @if(!empty($sec->custom_css))
                   <style>{!! $sec->custom_css !!}</style>
                 @endif
@@ -50,7 +80,7 @@
               </div>
             @else
               {{-- MODO VISUAL ESTRUCTURADO (FORMULARIO DINÁMICO) --}}
-              <div class="hero-banner-card" style="{{ $heroBgStyle }}">
+              <div class="hero-banner-card" style="{!! $heroBgStyle !!}">
                 @if(!empty($sec->badge) || !empty($currentStorefront['heroTag']))
                   <div class="hero-tag-pill">
                     <span class="hero-pulse-dot"></span>
@@ -172,7 +202,7 @@
               <script>{!! $sec->custom_js !!}</script>
             @endif
           </section>
-        @elseif(in_array($sec->type, ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud']))
+        @elseif(in_array($sec->type, ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'catalog_section']))
           <!-- Feed de Prendas Destacadas / Colección Curada ({{ $sec->type }}) -->
           @php
             $sectionProducts = $sec->resolved_products ?? $products;
@@ -229,6 +259,19 @@
                         <span class="product-price">{{ $prod['price_formatted'] ?? ('MXN $' . number_format((float)($prod['price'] ?? 0), 2)) }}</span>
                         <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
                       </div>
+                      @if(!empty($prod['colors']))
+                        <div class="product-card-colors">
+                          @foreach($prod['colors'] as $c)
+                            @php
+                              $isMulti = str_contains(strtolower($c['name'] ?? ''), 'multicolor');
+                              $dotBg = $isMulti
+                                ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                                : ($c['hex'] ?? '#0f172a');
+                            @endphp
+                            <span class="product-card-color-dot {{ $isMulti ? 'color-dot-multicolor' : '' }}" data-color-name="{{ $c['name'] }}" title="{{ $c['name'] }}" style="background: {{ $dotBg }};"></span>
+                          @endforeach
+                        </div>
+                      @endif
                     </div>
                     <div>
                       <div class="product-sizes-selector">
@@ -316,9 +359,15 @@
                         <span class="product-price" style="font-size: 0.85rem;">{{ $prod['price_formatted'] ?? ('MXN $' . number_format((float)($prod['price'] ?? 0), 2)) }}</span>
                       </div>
                       @if(!empty($prod['colors']))
-                        <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 5px; align-items: center;">
+                        <div class="product-card-colors">
                           @foreach($prod['colors'] as $c)
-                            <span class="product-card-color-dot" title="{{ $c['name'] }}" style="width: 10px; height: 10px; border-radius: 50%; background: {{ $c['hex'] }}; border: 1px solid rgba(0,0,0,0.18); display: inline-block;"></span>
+                            @php
+                              $isMulti = str_contains(strtolower($c['name'] ?? ''), 'multicolor');
+                              $dotBg = $isMulti
+                                ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                                : ($c['hex'] ?? '#0f172a');
+                            @endphp
+                            <span class="product-card-color-dot {{ $isMulti ? 'color-dot-multicolor' : '' }}" data-color-name="{{ $c['name'] }}" title="{{ $c['name'] }}" style="background: {{ $dotBg }};"></span>
                           @endforeach
                         </div>
                       @endif
@@ -526,9 +575,15 @@
                     <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
                   </div>
                   @if(!empty($prod['colors']))
-                    <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 6px; align-items: center;">
+                    <div class="product-card-colors">
                       @foreach($prod['colors'] as $c)
-                        <span class="product-card-color-dot" title="{{ $c['name'] }}" style="width: 11px; height: 11px; border-radius: 50%; background: {{ $c['hex'] }}; border: 1px solid rgba(0,0,0,0.18); display: inline-block;"></span>
+                        @php
+                          $isMulti = str_contains(strtolower($c['name'] ?? ''), 'multicolor');
+                          $dotBg = $isMulti
+                            ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                            : ($c['hex'] ?? '#0f172a');
+                        @endphp
+                        <span class="product-card-color-dot {{ $isMulti ? 'color-dot-multicolor' : '' }}" data-color-name="{{ $c['name'] }}" title="{{ $c['name'] }}" style="background: {{ $dotBg }};"></span>
                       @endforeach
                       <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">{{ count($prod['colors']) }} {{ count($prod['colors']) === 1 ? 'color' : 'colores' }}</span>
                     </div>
@@ -867,9 +922,15 @@
                 <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">IVA incluido</span>
               </div>
               @if(!empty($prod['colors']))
-                <div class="product-card-colors" style="display: flex; gap: 4px; margin-top: 6px; align-items: center;">
+                <div class="product-card-colors">
                   @foreach($prod['colors'] as $c)
-                    <span class="product-card-color-dot" title="{{ $c['name'] }}" style="width: 11px; height: 11px; border-radius: 50%; background: {{ $c['hex'] }}; border: 1px solid rgba(0,0,0,0.18); display: inline-block;"></span>
+                    @php
+                      $isMulti = str_contains(strtolower($c['name'] ?? ''), 'multicolor');
+                      $dotBg = $isMulti
+                        ? 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)'
+                        : ($c['hex'] ?? '#0f172a');
+                    @endphp
+                    <span class="product-card-color-dot {{ $isMulti ? 'color-dot-multicolor' : '' }}" data-color-name="{{ $c['name'] }}" title="{{ $c['name'] }}" style="background: {{ $dotBg }};"></span>
                   @endforeach
                   <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 2px;">{{ count($prod['colors']) }} {{ count($prod['colors']) === 1 ? 'color' : 'colores' }}</span>
                 </div>

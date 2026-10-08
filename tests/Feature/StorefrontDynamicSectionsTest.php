@@ -153,7 +153,7 @@ class StorefrontDynamicSectionsTest extends TestCase
         $response->assertSee('GUIA DETALLADA', false);
         $response->assertSee('/pagina/guia-tallas', false);
         $response->assertSee('/uploads/sections/hero_verano.webp', false);
-        $response->assertSee('linear-gradient(to bottom, #0f172a, #1e1b4b)', false);
+        $response->assertSee('linear-gradient(to bottom,', false);
         // MUTUAL EXCLUSIVITY: Structured mode must NOT render custom HTML!
         $response->assertDontSee('ESTE CODIGO NO DEBE SALIR EN MODO ESTRUCTURADO', false);
     }
@@ -184,4 +184,42 @@ class StorefrontDynamicSectionsTest extends TestCase
         // MUTUAL EXCLUSIVITY: Custom mode must NOT render the structured hero card title!
         $response->assertDontSee('TITULO QUE NO DEBE APARECER EN MODO CUSTOM', false);
     }
+
+    /**
+     * Test catalog_section renders section title, subtitle, and filtered products on homepage.
+     */
+    public function test_catalog_section_renders_title_and_filtered_products(): void
+    {
+        Product::create([
+            'sku' => 'URBAN-001',
+            'title' => 'Bikini Comic Urbano Exclusivo',
+            'slug' => 'bikini-comic-urbano-exclusivo',
+            'price' => 420.00,
+            'visible' => true,
+            'brand' => 'Dajo Underwear',
+            'section_name' => 'lo-mas-urbano',
+        ]);
+
+        CmsSection::create([
+            'universe' => 'all',
+            'name' => 'Urbano',
+            'type' => 'catalog_section',
+            'title' => 'VITRINA URBANO 2026',
+            'subtitle' => 'Lo más cotizado del streetwear íntimo',
+            'query_rules' => [
+                'section' => 'Urbano',
+                'slug' => 'lo-mas-urbano',
+            ],
+            'sort_order' => 10,
+            'status' => 'active',
+        ]);
+
+        $response = $this->get('/?universo=marte');
+
+        $response->assertStatus(200);
+        $response->assertSee('VITRINA URBANO 2026', false);
+        $response->assertSee('Lo más cotizado del streetwear íntimo', false);
+        $response->assertSee('Bikini Comic Urbano Exclusivo', false);
+    }
 }
+

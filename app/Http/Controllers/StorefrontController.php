@@ -149,7 +149,7 @@ class StorefrontController extends Controller
         $pwaProducts = $this->getPwaStoreProducts();
 
         foreach ($sections as $section) {
-            if (in_array($section->type, ['curated_products', 'categories_grid', 'subcategories_slider', 'family_showcase', 'tags_cloud'])) {
+            if (in_array($section->type, ['curated_products', 'categories_grid', 'subcategories_slider', 'family_showcase', 'tags_cloud', 'catalog_section'])) {
                 $section->resolved_products = $this->getFilteredProductsForSection($section, $pwaProducts);
             }
         }
@@ -224,7 +224,30 @@ class StorefrontController extends Controller
             $rules = json_decode($rules, true) ?: [];
         }
 
-        $filtered = array_filter($allProducts, function ($p) use ($rules) {
+        $filtered = array_filter($allProducts, function ($p) use ($rules, $section) {
+            // Section / Vitrina filter
+            $sectionTarget = $rules['section'] ?? $rules['slug'] ?? ($section->type === 'catalog_section' ? $section->slug : null);
+            if (!empty($sectionTarget) && $sectionTarget !== 'all') {
+                $targetSlug = \Illuminate\Support\Str::slug((string) $sectionTarget);
+                $ruleSlug = !empty($rules['slug']) ? \Illuminate\Support\Str::slug((string) $rules['slug']) : null;
+                $pSec = \Illuminate\Support\Str::slug((string) ($p['section_name'] ?? ''));
+                $pName = strtolower(trim((string) ($p['name'] ?? '')));
+                $pBrand = strtolower(trim((string) ($p['brand'] ?? '')));
+                $targetLower = strtolower(trim((string) $sectionTarget));
+
+                $matchesSection = !empty($pSec) && (
+                    $pSec === $targetSlug 
+                    || ($ruleSlug && $pSec === $ruleSlug) 
+                    || str_contains($pSec, $targetSlug) 
+                    || str_contains($targetSlug, $pSec)
+                );
+                $matchesKeyword = str_contains($pName, $targetLower) || str_contains($pBrand, $targetLower);
+
+                if (!$matchesSection && !$matchesKeyword) {
+                    return false;
+                }
+            }
+
             // Garment type filter
             if (!empty($rules['garment_type']) && $rules['garment_type'] !== 'all') {
                 $gtTarget = strtolower(trim($rules['garment_type']));
@@ -2077,6 +2100,7 @@ class StorefrontController extends Controller
         }
         $name = mb_strtolower(trim($colorName), 'UTF-8');
         return match (true) {
+            str_contains($name, 'multicolor') || str_contains($name, 'multi') => 'linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%)',
             str_contains($name, 'galaxia') || str_contains($name, 'holo') => 'linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%)',
             str_contains($name, 'aurora') || str_contains($name, 'boreal') => 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #6366f1 100%)',
             str_contains($name, 'tornasol') => 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
@@ -2094,60 +2118,146 @@ class StorefrontController extends Controller
         };
     }
 
+    public static function cleanStoreImageUrl(?string $url): string
+    {
+        if (empty($url) || !is_string($url)) {
+            return '/user-avatar.png';
+        }
+        $url = trim($url);
+        if (preg_match('#^https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/.*)$#i', $url, $m)) {
+            return $m[1];
+        }
+        return str_replace('/./', '/', $url);
+    }
+
     public static function resolveProductColorData(Product $product, string $mainImage, array $allImages): array
     {
         $colors = [];
         $imagesByColor = [];
-        $variants = $product->variants;
+        $mainImage = self::cleanStoreImageUrl($mainImage);
+        $allImages = array_map([self::class, 'cleanStoreImageUrl'], $allImages);
 
-        foreach ($variants as $v) {
+        static $crudColors = null;
+        if ($crudColors === null) {
+            try {
+                $crudColors = \Illuminate\Support\Facades\DB::table('apparel_colors')->where('is_active', true)->get();
+            } catch (\Throwable $e) {
+                $crudColors = collect();
+            }
+        }
+
+        $addColor = function (string $rawName, ?string $rawHex, ?string $rawImg) use (&$colors, &$imagesByColor, $mainImage, $crudColors, $product) {
+            $name = trim($rawName);
+            if (preg_match('#^(https?://|/|\w+\.\w+)#i', $name) || str_contains($name, '/') || strlen($name) > 40) {
+                return;
+            }
+            if (in_array(strtolower($name), ['único', 'unico', 'general', ''])) {
+                return;
+            }
+
+            // Normalización canónica con CRUD de Colores (apparel_colors)
+            $matchedCrud = $crudColors->first(fn($c) => strcasecmp($c->name, $name) === 0);
+            if (!$matchedCrud) {
+                $metaCol = trim((string) data_get($product->meta, 'color_name', ''));
+                if ($metaCol !== '' && (stripos($name, $metaCol) !== false || stripos($metaCol, $name) !== false)) {
+                    $matchedCrud = $crudColors->first(fn($c) => strcasecmp($c->name, $metaCol) === 0);
+                    if ($matchedCrud) {
+                        $name = $matchedCrud->name;
+                    }
+                } else {
+                    $fuzzy = $crudColors->first(function($c) use ($name) {
+                        $cLower = strtolower($c->name);
+                        $nLower = strtolower($name);
+                        return preg_match('/\b' . preg_quote($cLower, '/') . '\b/i', $nLower);
+                    });
+                    if ($fuzzy) {
+                        $name = $fuzzy->name;
+                        $matchedCrud = $fuzzy;
+                    }
+                }
+            }
+
+            $img = $rawImg ? self::cleanStoreImageUrl($rawImg) : $mainImage;
+            if (!isset($colors[$name])) {
+                $isGradientColor = ($matchedCrud && in_array($matchedCrud->color_type ?? '', ['gradient', 'iridescent'])) || str_contains(strtolower($name), 'multicolor') || str_contains(strtolower($name), 'tornasol') || str_contains(strtolower($name), 'holo') || str_contains(strtolower($name), 'aurora');
+                $hex = $isGradientColor
+                    ? ($matchedCrud?->gradient_css ?: self::detectColorHex($name))
+                    : ($rawHex ?: ($matchedCrud?->hex_code ?: self::detectColorHex($name)));
+                $type = $isGradientColor ? 'gradient' : ($matchedCrud?->color_type ?: 'solid');
+                $colors[$name] = [
+                    'name' => $name,
+                    'hex' => $hex,
+                    'type' => $type,
+                    'image' => $img,
+                ];
+            }
+            if (!isset($imagesByColor[$name])) {
+                $imagesByColor[$name] = [];
+            }
+            if ($img && !in_array($img, $imagesByColor[$name])) {
+                $imagesByColor[$name][] = $img;
+            }
+        };
+
+        // 1. Variantes de BD
+        foreach ($product->variants as $v) {
             $cName = data_get($v->attributes, 'color');
-            if ($cName && trim((string)$cName) !== '' && !in_array(strtolower(trim((string)$cName)), ['único', 'unico'])) {
-                $cName = trim((string)$cName);
-                if (!isset($colors[$cName])) {
-                    $cHex = data_get($v->attributes, 'color_hex') ?: self::detectColorHex($cName);
-                    $cType = str_contains(strtolower($cName), 'tornasol') || str_contains(strtolower($cName), 'holo') || str_contains(strtolower($cName), 'aurora') ? 'iridescent' : 'solid';
-                    $vImg = data_get($v->attributes, 'image') ?: $mainImage;
-                    $colors[$cName] = [
-                        'name' => $cName,
-                        'hex' => $cHex,
-                        'type' => $cType,
-                        'image' => $vImg,
-                    ];
-                    $imagesByColor[$cName] = [$vImg];
+            if ($cName) {
+                $cHex = data_get($v->attributes, 'color_hex');
+                $vImg = data_get($v->attributes, 'image');
+                $addColor((string)$cName, $cHex ? (string)$cHex : null, $vImg ? (string)$vImg : null);
+            }
+        }
+
+        // 2. Meta 'gallery' [{ url, color_name, is_primary }]
+        if ($product->meta && isset($product->meta['gallery']) && is_array($product->meta['gallery'])) {
+            foreach ($product->meta['gallery'] as $gItem) {
+                if (is_array($gItem) && !empty($gItem['color_name']) && !empty($gItem['url'])) {
+                    $addColor((string)$gItem['color_name'], null, (string)$gItem['url']);
                 }
             }
         }
 
+        // 3. Meta 'colors'
         if ($product->meta && isset($product->meta['colors']) && is_array($product->meta['colors'])) {
             foreach ($product->meta['colors'] as $c) {
                 $cName = is_array($c) ? ($c['name'] ?? null) : (string)$c;
-                if ($cName && !isset($colors[$cName])) {
-                    $colors[$cName] = [
-                        'name' => $cName,
-                        'hex' => is_array($c) && !empty($c['hex']) ? $c['hex'] : self::detectColorHex($cName),
-                        'type' => is_array($c) && !empty($c['type']) ? $c['type'] : (str_contains(strtolower($cName), 'tornasol') ? 'iridescent' : 'solid'),
-                        'image' => is_array($c) && !empty($c['image']) ? $c['image'] : $mainImage,
-                    ];
-                    $imagesByColor[$cName] = [$colors[$cName]['image']];
+                if ($cName) {
+                    $cHex = is_array($c) ? ($c['hex'] ?? null) : null;
+                    $cImg = is_array($c) ? ($c['image'] ?? null) : null;
+                    $addColor((string)$cName, $cHex ? (string)$cHex : null, $cImg ? (string)$cImg : null);
                 }
             }
         }
 
-        if ($product->meta && isset($product->meta['images_by_color']) && is_array($product->meta['images_by_color'])) {
-            foreach ($product->meta['images_by_color'] as $cName => $cImgs) {
-                $imagesByColor[$cName] = (array)$cImgs;
-                if (!isset($colors[$cName])) {
-                    $colors[$cName] = [
-                        'name' => $cName,
-                        'hex' => self::detectColorHex($cName),
-                        'type' => str_contains(strtolower($cName), 'tornasol') ? 'iridescent' : 'solid',
-                        'image' => ((array)$cImgs)[0] ?? $mainImage,
-                    ];
+        // 4. Meta 'images_by_color' o 'image_color_map'
+        $imgColorMap = data_get($product->meta, 'images_by_color') ?: data_get($product->meta, 'image_color_map');
+        if (is_array($imgColorMap)) {
+            foreach ($imgColorMap as $key => $val) {
+                $keyStr = (string)$key;
+                if (preg_match('#^(https?://|/|\w+\.\w+)#i', $keyStr) || str_contains($keyStr, '/')) {
+                    if (is_string($val) && trim($val) !== '') {
+                        $addColor(trim($val), null, $keyStr);
+                    }
+                } else {
+                    if (is_array($val)) {
+                        foreach ($val as $subImg) {
+                            $addColor($keyStr, null, (string)$subImg);
+                        }
+                    } elseif (is_string($val)) {
+                        $addColor($keyStr, null, $val);
+                    }
                 }
             }
         }
 
+        // 5. Meta 'color_name' / 'color_hex'
+        $metaColorName = data_get($product->meta, 'color_name');
+        if ($metaColorName && is_string($metaColorName)) {
+            $addColor($metaColorName, data_get($product->meta, 'color_hex'), $mainImage);
+        }
+
+        // Fallback default color
         if (empty($colors)) {
             $colors['Negro'] = [
                 'name' => 'Negro',
@@ -2297,6 +2407,7 @@ class StorefrontController extends Controller
                     'sizes' => $sizes,
                     'description' => $product->description ?: 'Prenda anatómica confeccionada con textiles transpirables.',
                     'brand' => (string) ($product->brand ?? ''),
+                    'section_name' => (string) ($product->section_name ?? data_get($product->meta, 'section', '')),
                     'garment_type' => (string) data_get($product->meta, 'garment_type', ''),
                     'fabric_type' => (string) ($product->fabric ?: data_get($product->meta, 'fabric', data_get($product->meta, 'fabric_type', ''))),
                     'discount_pct' => (float) data_get($product->meta, 'discount_pct', 0),

@@ -231,8 +231,8 @@
                     <span class="truncate">2. Contenido &amp; Reglas</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                    <span class="store-subnav-count">3 Módulos</span>
-                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido y Reglas" data-help-title="Contenido, Reglas &amp; Editorial" data-help-desc="Panel unificado con 3 módulos expandibles: Banners &amp; Marquesinas, Reglas de Flete y Guía Oficial de Tallas.">?</span>
+                    <span class="store-subnav-count">4 Módulos</span>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Contenido y Reglas" data-help-title="Contenido, Reglas &amp; Editorial" data-help-desc="Panel unificado con 4 módulos expandibles: Banners &amp; Marquesinas, Reglas de Flete, Guía Oficial de Tallas y Editor de Pie de Página (Footer).">?</span>
                 </div>
             </button>
 
@@ -1147,6 +1147,140 @@
             </div>
         </div>
         <!-- FIN SECCIÓN 3 ACORDEÓN -->
+
+        <!-- SECCIÓN 4 ACORDEÓN: EDITOR OFICIAL DE PIE DE PÁGINA (FOOTER DE TIENDA) -->
+        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecFooter">
+            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecFooter')">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-900">4. Editor Oficial de Pie de Página (Footer &amp; Contacto)</div>
+                        <div class="text-[11px] text-slate-500">Configuración global del pie de página del Storefront: narrativa corporativa, canales de soporte, badges de confianza y derechos.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-mono">Storefront PWA</span>
+                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+            </button>
+            <div class="store-accordion-body p-6 border-t border-slate-100 hidden" id="accordionSecFooterBody" style="display: none;">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-6">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Configuración y Contenidos del Footer Storefront</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Control directo sobre los textos corporativos, números de atención al cliente y distintivos de seguridad que se renderizan en el pie de página.</p>
+                    </div>
+                    <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-mono">CmsOfficialDocument: STORE_FOOTER_CONFIG</span>
+                </div>
+
+                <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'STORE_FOOTER_CONFIG']) }}" class="space-y-6 text-xs">
+                    @csrf
+
+                    <!-- Grid 1: Narrativa y Contacto -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Narrativa de Marca / Resumen Corporativo</label>
+                                <textarea name="payload[brand_summary]" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">{{ $footerConfig['brand_summary'] ?? '' }}</textarea>
+                                <span class="text-[10px] text-slate-400 block mt-1">Párrafo institucional descriptivo visible debajo del nombre de marca en la primera columna del footer.</span>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Texto de Copyright &amp; Titularidad Legal</label>
+                                <input type="text" name="payload[copyright_text]" value="{{ $footerConfig['copyright_text'] ?? '' }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                                <span class="text-[10px] text-slate-400 block mt-1">Línea de derechos reservada al pie de la página antes de los enlaces legales.</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">WhatsApp de Atención al Cliente</label>
+                                <div class="flex items-center gap-2">
+                                    <div class="p-2 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 shrink-0">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                    </div>
+                                    <input type="text" name="payload[whatsapp_contact]" value="{{ $footerConfig['whatsapp_contact'] ?? '' }}" placeholder="+52 55 7510 2015" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                                </div>
+                                <span class="text-[10px] text-slate-400 block mt-1">Número telefónico con código internacional para contacto directo con concierge.</span>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Correo Electrónico de Soporte</label>
+                                <div class="flex items-center gap-2">
+                                    <div class="p-2 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 shrink-0">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    </div>
+                                    <input type="email" name="payload[support_email]" value="{{ $footerConfig['support_email'] ?? '' }}" placeholder="hola@mitienda.online" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                                </div>
+                                <span class="text-[10px] text-slate-400 block mt-1">Email institucional para consultas de facturación y seguimiento.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid 2: Badges de Confianza / Pagos y Envíos -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                        <h4 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span>Distintivos de Seguridad &amp; Políticas (Columna 2)</span>
+                        </h4>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Badge de Paquetería &amp; Flete</label>
+                                <input type="text" name="payload[shipping_badge_text]" value="{{ $footerConfig['shipping_badge_text'] ?? '' }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Badge de Empaque Discreto</label>
+                                <input type="text" name="payload[packaging_badge_text]" value="{{ $footerConfig['packaging_badge_text'] ?? '' }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Badge de Pasarela de Pago</label>
+                                <input type="text" name="payload[payments_badge_text]" value="{{ $footerConfig['payments_badge_text'] ?? '' }}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid 3: Switches de Elementos Opcionales -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-teal-300 transition">
+                            <input type="hidden" name="payload[show_revops_link]" value="0">
+                            <input type="checkbox" name="payload[show_revops_link]" value="1" {{ !empty($footerConfig['show_revops_link']) ? 'checked' : '' }} class="mt-0.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
+                            <div>
+                                <strong class="text-slate-800 font-semibold block">Mostrar Acceso a Consola RevOps</strong>
+                                <span class="text-[11px] text-slate-500 block mt-0.5">Muestra la tarjeta de acceso rápido al Panel de Administración en la cuarta columna del footer.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-teal-300 transition">
+                            <input type="hidden" name="payload[show_zero_emojis_badge]" value="0">
+                            <input type="checkbox" name="payload[show_zero_emojis_badge]" value="1" {{ !empty($footerConfig['show_zero_emojis_badge']) ? 'checked' : '' }} class="mt-0.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
+                            <div>
+                                <strong class="text-slate-800 font-semibold block">Mostrar Badge Política Cero Emojis</strong>
+                                <span class="text-[11px] text-slate-500 block mt-0.5">Renderiza la etiqueta &ldquo;Política Estricta Cero Emojis // Vectorial Only&rdquo; en el sub-footer legal.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                        <a href="{{ url('/?universo=marte') }}" target="_blank" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                            <span>Previsualizar Tienda Online</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                        <button type="submit" class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Guardar Configuración del Footer</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- FIN SECCIÓN 4 ACORDEÓN -->
     </div>
 </div>
 <!-- FIN SUBMÓDULO 2: CONTENIDO & REGLAS -->
@@ -3000,7 +3134,8 @@
     const subSectionMap = {
         'banners': { tab: 'content_rules', accordionId: 'accordionSecBanners' },
         'shipping': { tab: 'content_rules', accordionId: 'accordionSecShipping' },
-        'editorial': { tab: 'content_rules', accordionId: 'accordionSecEditorial' }
+        'editorial': { tab: 'content_rules', accordionId: 'accordionSecEditorial' },
+        'footer': { tab: 'content_rules', accordionId: 'accordionSecFooter' }
     };
 
     // Funciones operativas de Acordeón
@@ -3024,7 +3159,7 @@
     };
 
     window.toggleAllStoreAccordions = function(expand) {
-        const sections = ['accordionSecBanners', 'accordionSecShipping', 'accordionSecEditorial'];
+        const sections = ['accordionSecBanners', 'accordionSecShipping', 'accordionSecEditorial', 'accordionSecFooter'];
         sections.forEach(secId => {
             const section = document.getElementById(secId);
             const body = document.getElementById(secId + 'Body');

@@ -155,4 +155,43 @@ class Hub2CmsPersistenceTest extends TestCase
         $visibleFilters = CmsCatalogFilter::visible()->get();
         $this->assertTrue($visibleFilters->contains('filter_key', 'custom_filter_test'));
     }
+
+    /**
+     * Test official footer config document persistence and update.
+     */
+    public function test_footer_config_persistence_and_update(): void
+    {
+        $doc = CmsOfficialDocument::create([
+            'code' => 'STORE_FOOTER_CONFIG',
+            'title' => 'Editor Oficial de Pie de Página (Footer de Tienda)',
+            'payload' => [
+                'brand_summary' => 'Texto inicial de prueba para footer',
+                'whatsapp_contact' => '+52 55 1111 2222',
+                'support_email' => 'test@tienda.com',
+                'shipping_badge_text' => 'Envíos asegurados',
+                'packaging_badge_text' => 'Empaque 100% neutro',
+                'payments_badge_text' => 'Pagos encriptados SSL',
+                'copyright_text' => '(C) 2026 Test Store',
+                'show_revops_link' => true,
+                'show_zero_emojis_badge' => true,
+            ],
+            'version' => '1.0',
+            'is_active' => true,
+        ]);
+
+        $this->assertDatabaseHas('cms_official_documents', [
+            'code' => 'STORE_FOOTER_CONFIG',
+        ]);
+
+        $retrieved = CmsOfficialDocument::getByCode('STORE_FOOTER_CONFIG');
+        $this->assertEquals('+52 55 1111 2222', $retrieved['whatsapp_contact']);
+        $this->assertEquals('Texto inicial de prueba para footer', $retrieved['brand_summary']);
+
+        // Update payload
+        $retrieved['whatsapp_contact'] = '+52 55 9999 8888';
+        $doc->update(['payload' => $retrieved]);
+
+        $fresh = CmsOfficialDocument::getByCode('STORE_FOOTER_CONFIG');
+        $this->assertEquals('+52 55 9999 8888', $fresh['whatsapp_contact']);
+    }
 }
