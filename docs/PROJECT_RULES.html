@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Código Oficial de Reglas del Proyecto — Mi Tienda Online</title>
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 14mm 12mm;
+    @bottom-right {
+      content: "Página " counter(page) " de " counter(pages);
+      font-size: 7pt;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #94a3b8;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    line-height: 1.45;
+    font-size: 8.5pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Portada */
+  .cover-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 20px 20px;
+    background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
+    color: #ffffff;
+    border-radius: 8px;
+    page-break-after: always;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.25);
+    border: 1px solid rgba(165, 180, 252, 0.4);
+    color: #c7d2fe;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .cover-title {
+    font-size: 26pt;
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #ffffff 0%, #e0e7ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cover-subtitle {
+    font-size: 10.5pt;
+    color: #cbd5e1;
+    margin: 0 0 20px;
+    max-width: 580px;
+    line-height: 1.4;
+  }
+
+  .cover-pillars {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .pillar-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 10px 12px;
+    backdrop-filter: blur(10px);
+  }
+
+  .pillar-card h4 {
+    margin: 0 0 4px;
+    font-size: 9pt;
+    color: #a5b4fc;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .pillar-card p {
+    margin: 0;
+    font-size: 7.5pt;
+    color: #cbd5e1;
+    line-height: 1.35;
+  }
+
+  .cover-meta {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    font-size: 7.5pt;
+  }
+
+  .meta-item strong {
+    display: block;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-size: 6.5pt;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+
+  .meta-item span {
+    color: #f1f5f9;
+    font-weight: 600;
+  }
+
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: #94a3b8;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Encabezados de Capítulo */
+  .chapter-title {
+    font-size: 12.5pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 4px;
+    margin: 18px 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: -0.01em;
+  }
+
+  .rule-badge {
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    font-size: 7pt;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  /* Reglas Individuales */
+  .rule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+
+  .rule-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3.5px solid #4f46e5;
+    border-radius: 4px;
+    padding: 7px 10px;
+    display: flex;
+    gap: 9px;
+  }
+
+  .rule-number {
+    font-weight: 800;
+    font-size: 8pt;
+    color: #4f46e5;
+    background: #eef2ff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rule-content {
+    flex: 1;
+    font-size: 8pt;
+    line-height: 1.4;
+  }
+
+  .rule-content strong {
+    color: #0f172a;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 8.5pt;
+  }
+
+  .rule-content code {
+    background: #e2e8f0;
+    color: #334155;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .formula-banner {
+    background: #0f172a;
+    color: #38bdf8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin: 5px 0;
+    font-size: 7.5pt;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #1e293b;
+  }
+
+  /* Tablas de Reglas */
+  table.rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 7.5pt;
+  }
+  table.rules-table th {
+    background: #0f172a;
+    color: #ffffff;
+    text-align: left;
+    padding: 5px 7px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 6.8pt;
+    letter-spacing: 0.04em;
+  }
+  table.rules-table td {
+    padding: 5px 7px;
+    border-bottom: 1px solid #e2e8f0;
+    line-height: 1.35;
+  }
+  table.rules-table tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover-container">
+  <div>
+    <span class="cover-badge">Estatuto de Ingeniería & Gobernanza</span>
+    <h1 class="cover-title">CÓDIGO OFICIAL DE REGLAS DEL PROYECTO</h1>
+    <p class="cover-subtitle">
+      Compendio canónico de arquitectura fullstack, directrices de base de datos, aislamiento DOM, sincronización multiverso, ergonomía de navegación y contratos de backend para el ecosistema Mi Tienda Online.
+    </p>
+
+    <div class="cover-pillars">
+      <div class="pillar-card">
+        <h4>1. Vertical Slice Senior (End-to-End)</h4>
+        <p>Cero datos mockeados o interfaces cosméticas. Toda funcionalidad persiste en MySQL, modelos Eloquent, FormRequests y pruebas PHPUnit.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>2. Sincronización Mandatoria (Regla 1.3)</h4>
+        <p>Toda tabla, endpoint, FormRequest y esquema JSON debe quedar 100% formalizado y blindado en <code>BACKEND_INTEGRATION_SPEC.md</code>.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>3. Ergonomía Sin Scroll Horizontal (Regla 6.4)</h4>
+        <p>Subnavegaciones en cuadrícula compacta (2x3). Conmutador de vitrinas accesible de forma transversal en el encabezado superior de todas las pestañas.</p>
+      </div>
+      <div class="pillar-card">
+        <h4>4. Catálogo Multiverso & Curaduría de Color</h4>
+        <p>Filtros facetados en árbol, multi-color con conmutación dinámica de imágenes y trazabilidad desde curaduría previa de scraping hasta PDP.</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <strong>Proyecto:</strong>
+        <span>Mi Tienda Online (PWA RevOps)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Alcance:</strong>
+        <span>Hubs 1 al 7 + Storefront D2C</span>
+      </div>
+      <div class="meta-item">
+        <strong>Vigencia:</strong>
+        <span>Normativa Obligatoria 2026</span>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div><strong>Estatus:</strong> Activo / Mandatorio</div>
+      <div><strong>Compilación:</strong> Tríptico Documental (MD + HTML + PDF)</div>
+      <div><strong>Versión:</strong> Canon v2.6 Sincronizado</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 1 -->
+<h2 class="chapter-title">
+  <span>1. PRINCIPIOS FUNDAMENTALES DE INGENIERÍA</span>
+  <span class="rule-badge">Norma 1.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 1.1: Metodología Fullstack Senior (Vertical Slice)</strong>
+      Queda estrictamente prohibido el desarrollo cosmético sin persistencia real. Toda tarea debe entregarse como un Vertical Slice completo:
+      <div class="formula-banner">
+        MySQL (DDL) ➔ Eloquent ➔ Servicios ACID (Kardex) ➔ Endpoints REST ➔ UI PWA ➔ PHPUnit Tests
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 1.2: Integridad del Código Existente y Comentarios</strong>
+      Preservar rigurosamente los comentarios, docstrings e implementaciones previas. Ninguna refactorización debe romper submódulos adyacentes ni alterar contratos existentes sin previa validación en pruebas de regresión.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 1.3: Sincronización Mandatoria con BACKEND_INTEGRATION_SPEC.md</strong>
+      Ninguna tarea se considera "Completada" si su arquitectura de persistencia, migración de base de datos, modelo Eloquent, endpoints RESTful con esquemas JSON de petición/respuesta y reglas de validación en FormRequests no están 100% formalizados y blindados en <code>BACKEND_INTEGRATION_SPEC.md</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 1.4: Codificación Universal y Obligatoria UTF-8</strong>
+      Todo el ecosistema opera bajo <code>UTF-8 universal</code> (MySQL <code>utf8mb4_unicode_ci</code>). Toda plantilla Blade declara <code>&lt;meta charset="utf-8"&gt;</code>, las cabeceras HTTP emiten <code>charset=UTF-8</code> y los archivos fuente se guardan sin BOM, erradicando Mojibake o codificaciones regionales.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 2 -->
+<h2 class="chapter-title">
+  <span>2. PERSISTENCIA, MODELADO & CONTRATOS DE BACKEND</span>
+  <span class="rule-badge">Norma 2.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 2.1: Transaccionalidad y Atomicidad en Kardex y Finanzas (ACID)</strong>
+      Todo movimiento de inventario (entradas, ensambles BOM, apartados de checkout, despachos, devoluciones) se ejecuta bajo transacciones atómicas. El Kardex de Hub 4 es la fuente única de verdad contable y calcula rigurosamente el Costo Promedio Ponderado (CPP).
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 3 -->
+<h2 class="chapter-title">
+  <span>3. ARQUITECTURA MULTIVERSO & POOL CENTRAL DE INVENTARIO</span>
+  <span class="rule-badge">Norma 3.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 3.1: Desacoplamiento de Vitrinas frente al Stock Central (Single Inventory Pool)</strong>
+      Un único almacén físico central en Hub 4 abastece a 4 vitrinas multiverso (Marte, Venus, Tiresias, Terra). Cero inventarios duplicados; la asignación se gestiona mediante reglas taxonómicas, marcas y categorías. Si el stock se agota en Kardex, se oculta automáticamente en todas las vitrinas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 3.2: Desacoplamiento de Contenido Editorial</strong>
+      Identidad de marca, tokens cromáticos, banners y páginas se configuran por vitrina en Hub 2 (CMS), con independencia total del inventario físico transaccional.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 4 -->
+<h2 class="chapter-title">
+  <span>4. INTERCONEXIÓN CROSS-HUB & WORKFLOWS (SIN ROLES)</span>
+  <span class="rule-badge">Norma 4.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 4.1: Especificación de Workflows Centrada en la Aplicación</strong>
+      La documentación técnica explica exhaustivamente cómo se interlazan los datos entre los 7 Hubs operativos, prohibiendo estructurar manuales como perfiles de puestos de recursos humanos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 4.2: Cascada de Margen Neto Real</strong>
+      Toda orden calcula su rentabilidad real: GMV - Descuentos - Pasarela - COGS Kardex - Flete - Empaque BOM - Impuestos = Margen Neto Real. Cero costos teóricos.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 5 -->
+<h2 class="chapter-title">
+  <span>5. INTEGRIDAD DOM, BLADE & AISLAMIENTO DE COMPONENTES</span>
+  <span class="rule-badge">Norma 5.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 5.1: Aislamiento Estructural de Paneles y Modales (Regla Anti-Anidamiento)</strong>
+      Los paneles de pestañas (<code>.tab-panel</code>) y modales operativos residen como elementos hermanos directos bajo <code>#storeAppRoot</code> (depth=2). Prohibido anidar modales dentro de contenedores con <code>display: none</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 5.2: Balance Matemático y Cierre Estricto de Etiquetas Blade</strong>
+      Paridad estricta entre aperturas <code>&lt;div&gt;</code> y cierres <code>&lt;/div&gt;</code>, con comentarios de cierre en secciones complejas de acordeón.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 5.3: Limpieza y Control de Estilos en Apertura de Modales</strong>
+      Toda apertura de modal ejecuta <code>modal.style.removeProperty('display')</code> antes de <code>display: flex</code>, restableciendo el estado inicial determinista.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 6 -->
+<h2 class="chapter-title">
+  <span>6. INTERFAZ DE USUARIO, CSS, PWA & EXPERIENCIA MÓVIL</span>
+  <span class="rule-badge">Norma 6.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 6.1: Sangrado de Pantalla Completa (Full-Width Breakout)</strong>
+      Hero banners y carruseles pueden expandirse al 100% del viewport (<code>width: 100vw; margin-left: -50vw; left: 50%;</code>) con <code>overflow-x: hidden</code> en layout.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 6.2: Paridad y Aislamiento en Media Queries</strong>
+      Bloques <code>@media</code> con apertura y cierre balanceados; prohibido anidar desktop en móvil o viceversa.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 6.3: Cache Busting Dinámico en Activos Críticos</strong>
+      Inyección obligatoria de <code>?v={{ filemtime(...) }}</code> en CSS y JS para invalidar caché en navegadores móviles y PWA.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 6.4: Ergonomía de Navegación y Subnavegaciones Sin Scroll Horizontal</strong>
+      Las barras de subnavegación complejas (Subnav Hub 2) se distribuyen en cuadrículas compactas sin scroll horizontal (ej. 2 filas de 3 columnas en desktop que colapsan a 2 o 1 en móvil). Los elementos de selección contextual frecuente (como el Conmutador de Vitrinas <code>.universe-selector-bar</code>) deben permanecer accesibles de manera transversal en el encabezado superior de todas las pestañas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">5</div>
+    <div class="rule-content">
+      <strong>Regla 6.5: Sobriedad Visual en Paneles Administrativos (Cero Emojis Informales)</strong>
+      Exclusividad de iconografía vectorial SVG y tipografía monoespaciada para claves técnicas, SKUs y métricas operativas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">6</div>
+    <div class="rule-content">
+      <strong>Regla 6.6: Restricción Estricta de Cajas de Texto (Solo Vertical, Jamás Horizontal)</strong>
+      Ninguna caja de texto (<code>&lt;textarea&gt;</code>) puede expandirse horizontalmente. Toda área aplica obligatoriamente <code>resize: vertical !important; max-width: 100% !important; box-sizing: border-box !important;</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">7</div>
+    <div class="rule-content">
+      <strong>Regla 6.7: Ficha Independiente de Producto (PDP) — Supresión de WhatsApp & Galería Modal con Swipe</strong>
+      Cero botón o gatillo de WhatsApp en PDP. Visor lightbox interactivo a pantalla completa con soporte de gestos táctiles de deslizamiento (swipe horizontal), flechas, atajos de teclado y dot indicators.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">8</div>
+    <div class="rule-content">
+      <strong>Regla 6.8: Despliegue de Filtros del Storefront en Drawer Izquierdo (Off-Canvas)</strong>
+      Los filtros de catálogo (<code>#filterDrawer</code>) se despliegan como drawer lateral deslizante desde la izquierda (<code>left: 0; transform: translateX(-100%);</code> a <code>translateX(0)</code>) con backdrop oscuro. Prohibidos acordeones que empujen el grid hacia abajo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">9</div>
+    <div class="rule-content">
+      <strong>Regla 6.9: Reserva Temporal de Inventario y Cuenta Regresiva Exclusiva en Checkout</strong>
+      El temporizador de 5 minutos y reserva de stock se activan exclusivamente en el checkout. Al expirar, las prendas permanecen en el carrito (nunca se vacía). Si se agota, despliega obligatoriamente "Ya no hay existencias" con badge rojo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">10</div>
+    <div class="rule-content">
+      <strong>Regla 6.10: Supresión Definitiva de SPEI & Estandarización de Pasarelas</strong>
+      Cero SPEI en storefront. El flujo opera estrictamente con: 1) Tarjetas de Crédito y Débito tokenizadas, y 2) OXXO Pay con referencia de 14 dígitos y ventana de 48 horas.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">11</div>
+    <div class="rule-content">
+      <strong>Regla 6.11: Navbar Sticky Visible Todo el Tiempo (Desktop & Móvil)</strong>
+      El encabezado (<code>.sticky-header-wrapper</code>) permanece permanentemente visible en scroll (<code>position: sticky; top: 0; z-index: 999; backdrop-filter: blur(16px);</code>). Prohibido auto-hide o retráctil.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">12</div>
+    <div class="rule-content">
+      <strong>Regla 6.12: Edición de Navbar y Cinta Banner Superior desde Hub 2</strong>
+      Cinta marquesina superior y navegación se gestionan desde Hub 2 Pestaña Páginas & Navbar (<code>storePagesPanel</code>).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">13</div>
+    <div class="rule-content">
+      <strong>Regla 6.13: Gestión Dual Desktop y Móvil de Páginas Institucionales</strong>
+      Checkboxes independientes para Desktop (<code>show_in_navbar</code>), Móvil (<code>show_in_mobile</code>) y Footer (<code>show_in_footer</code>) con CRUD completo y modal en depth=2.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">14</div>
+    <div class="rule-content">
+      <strong>Regla 6.14: Optimización SEO Integral & Sitemap XML Dinámico</strong>
+      OpenGraph, Twitter Cards, Schema.org JSON-LD (<code>Organization</code>, <code>WebSite</code>, <code>Product</code>) y <code>/sitemap.xml</code> dinámico.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">15</div>
+    <div class="rule-content">
+      <strong>Regla 6.15: Navbar Canónico Permanente de 5 Botones (Desktop & Móvil)</strong>
+      Estrictamente 5 botones oficiales: Inicio, Explorar, Catálogo, Carrito (con badge reactivo) y Cuenta.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">16</div>
+    <div class="rule-content">
+      <strong>Regla 6.16: Home Modular como Revista Digital Oficial</strong>
+      La portada de la tienda es la revista digital oficial; no existen blogs separados desarticulados. Orquestado desde Hub 2 Tab 1.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">17</div>
+    <div class="rule-content">
+      <strong>Regla 6.17: Páginas de Explorar con Botones de Imagen y Filtros Directos</strong>
+      Ruta <code>/explorar</code> con tarjetas 4:5 que actúan como botones interactivos vinculados a filtros de universo, categoría o proveedor.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">18</div>
+    <div class="rule-content">
+      <strong>Regla 6.18: Inmutabilidad Canónica de Catálogo y Facetas</strong>
+      Multiverso con stock y facetas inmutable en estructura base.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">19</div>
+    <div class="rule-content">
+      <strong>Regla 6.19: Lista Guardar para Después en Carrito</strong>
+      Persistencia en <code>localStorage</code> para artículos diferidos sin impactar subtotales ni checkout.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">20</div>
+    <div class="rule-content">
+      <strong>Regla 6.20: Exclusividad de Iconografía Vectorial SVG</strong>
+      Vectoriales SVG puros en el 100% de plantillas y scripts; prohibición total de emojis informales en código fuente.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">21</div>
+    <div class="rule-content">
+      <strong>Regla 6.21: Modal Independiente de Edición de Páginas en Nivel Raíz</strong>
+      <code>#editPageModal</code> posicionado como hermano de <code>#storeAppRoot</code> (depth=2) para erradicar herencias de visibilidad oculta.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">22</div>
+    <div class="rule-content">
+      <strong>Regla 6.22: Wishlist en Drawer de Carrito y Botón Navbar</strong>
+      Sección Mis Deseos en <code>#cartSheet</code> y botón corazón en navbar desktop con badge <code>#desktopWishlistCount</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">23</div>
+    <div class="rule-content">
+      <strong>Regla 6.23: Header Móvil Limpio Sin Slogan & Sin Carrito Redundante</strong>
+      Solo logo de marca, corazón de deseos y lupa; botón de filtros condicionado al catálogo; cero carrito redundante en header superior.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">24</div>
+    <div class="rule-content">
+      <strong>Regla 6.24: Erradicación de Barras Móviles Redundantes</strong>
+      Suprimidas <code>.mobile-institutional-bar</code> y <code>.universe-selector-bar</code> del layout móvil del storefront para despejar la vista.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">25</div>
+    <div class="rule-content">
+      <strong>Regla 6.25: Barra de Búsqueda Desplegable Universal</strong>
+      Gatillo lupa interactivo que conmuta <code>#storeSearchBar</code> con filtrado reactivo en tiempo real.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">26</div>
+    <div class="rule-content">
+      <strong>Regla 6.26: Tarjetas de Explorar en Proporción 4:5 y Degradados Personalizables</strong>
+      Formato visual 4:5 con overlays degradados ajustables (hexadecimal y opacidad superior/inferior).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">27</div>
+    <div class="rule-content">
+      <strong>Regla 6.27: Hub 2 Tab 3 Formalizado como "Páginas de Explorar"</strong>
+      Panel CMS dedicado exclusivamente a curar las colecciones de la sección Explorar.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">28</div>
+    <div class="rule-content">
+      <strong>Regla 6.28: Ordenamiento Drag & Drop en Páginas de Explorar</strong>
+      Reordenamiento reactivo con persistencia asíncrona en <code>POST /admin/tienda-cms/paginas/reorder</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">29</div>
+    <div class="rule-content">
+      <strong>Regla 6.29: Overlay, Degradados y Contraste Garantizado de Texto</strong>
+      Selectores de color y opacidad con live preview 4:5 en modales de creación y edición.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">30</div>
+    <div class="rule-content">
+      <strong>Regla 6.30: Carrusel Automático de Imágenes y Conmutación Dinámica</strong>
+      Carrusel crossfade cada 3.5s o extracción dinámica de fotografías desde el catálogo filtrado (<code>catalog</code>).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">31</div>
+    <div class="rule-content">
+      <strong>Regla 6.31: Soporte Integral de Dark Mode, Light Mode y Sistema</strong>
+      Conmutación nativa con persistencia en <code>localStorage</code> y prevención de parpadeo (Anti-FOUC).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">32</div>
+    <div class="rule-content">
+      <strong>Regla 6.32: Contraste Riguroso y Accesibilidad Universal WCAG AA</strong>
+      Ratio superior a 4.5:1 en light y 5.5:1 en dark, bordes perimetrales visibles y campos de formulario de alto contraste.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">33</div>
+    <div class="rule-content">
+      <strong>Regla 6.33: Ciclo de Vida y Curaduría de Scraping (VS Code, Hub 3 y Badge "Drop Bajo Pedido")</strong>
+      Limpieza previa en VS Code, ingesta a bandeja de curaduría de Hub 3, badge obligatorio "Drop Bajo Pedido" y alta rápida de color y tela.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">34</div>
+    <div class="rule-content">
+      <strong>Regla 6.34: Creación Jerárquica de Filtros desde Hub 4 (Ajustes > Categorías & Familias)</strong>
+      Creación de categorías raíz y subcategorías child con Drag & Drop, alimentando filtros del storefront y Páginas de Explorar de Hub 2.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">35</div>
+    <div class="rule-content">
+      <strong>Regla 6.35: Filtros Facetados Extendidos en Storefront</strong>
+      Facetas para Categorías, Proveedores, Tallas, Telas, Colores/Tornasol, Volúmenes y Tonos Cosméticos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">36</div>
+    <div class="rule-content">
+      <strong>Regla 6.36: Proveedores como Dimensión de Filtrado Transversal</strong>
+      Los proveedores forman parte de los filtros del sistema, incidiendo en Hub 4, Hub 2 (Explorar) y Storefront.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">37</div>
+    <div class="rule-content">
+      <strong>Regla 6.37: Formato de Árbol Plegable con Checkboxes en Filtros Facetados</strong>
+      Árbol jerárquico con checkboxes y acordeones colapsables/expandibles independientes en <code>#filterDrawer</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">38</div>
+    <div class="rule-content">
+      <strong>Regla 6.38: PDP — Botón de Retorno Rápido y Gatillo Conmutador de Filtros</strong>
+      Botón volver atrás y botón <code>data-action="open-filters"</code> directo en la cabecera de la ficha de producto.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">39</div>
+    <div class="rule-content">
+      <strong>Regla 6.39: Exhibidor Visual de Color Indexado en Catálogo y PDP</strong>
+      Muestras de color cromáticas (swatches) en tarjetas de vitrina y ficha PDP para colores sólidos y tornasoles.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">40</div>
+    <div class="rule-content">
+      <strong>Regla 6.40: Soporte Multi-Color por Modelo y Conmutación Dinámica de Imágenes</strong>
+      Modelos con 1 o más variantes de color. Al pulsar un color en PDP, la galería conmuta dinámicamente mostrando las fotos asociadas a ese color indexado.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">41</div>
+    <div class="rule-content">
+      <strong>Regla 6.41: Miniaturas Visuales de Producto en Carrito de Compras</strong>
+      El Drawer de Carrito (<code>#cartSheet</code>) y checkout muestran la miniatura de cada prenda agregada.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">42</div>
+    <div class="rule-content">
+      <strong>Regla 6.42: Formulario de Cupón Confinado Exclusivamente al Paso 1 del Checkout</strong>
+      El formulario de cupón no satura el carrito pasivo; aparece única y exclusivamente dentro del Primer Paso del Checkout.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">43</div>
+    <div class="rule-content">
+      <strong>Regla 6.43: Miniaturas en Inventario y Asignación de Color a Imágenes en Hub 4</strong>
+      Miniatura en tabla de inventario y sección de asignación de foto a variante de color en el modal de producto.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">44</div>
+    <div class="rule-content">
+      <strong>Regla 6.44: Curaduría de Scraping con Asignación de Variabilidad de Color a Imágenes</strong>
+      Mapeo obligatorio de imagen scrapeada a variante de color en bandeja previa antes de autorizar la ingesta oficial.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">45</div>
+    <div class="rule-content">
+      <strong>Regla 6.45: Estructura en Árbol de Proveedor-Marcas y Alta Manual Fiscal/Contacto en Hub 4</strong>
+      Presentación jerárquica en árbol desplegable de proveedores y sus marcas desprendidas, más modal de alta/edición manual con captura integral de datos de contacto y tributarios (RFC, razón social, régimen, domicilio fiscal y facturación).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">46</div>
+    <div class="rule-content">
+      <strong>Regla 6.46: Gestión Integral de Marcas Comerciales (CRUD Completo en Modal y Ajustes, Ficha Fiscal Reactiva y Sincronización Transversal de Filtros)</strong>
+      Gobernanza completa de marcas comerciales en Hub 4 Ajustes y en la Pestaña 3 del modal de proveedor (alta rápida, edición, activación/pausa, archivado y eliminación con persistencia REST); botón "Ficha / Fiscal" reactivo con elevación de z-index (<code>z-[120]</code>) y desacoplamiento estructural a nivel raíz (Regla 5.1); y sincronización transversal inmediata con filtros de Hub 4 (<code>brandFilter</code>), Hub 2 (vitrinas de Explorar) y Storefront PWA (árbol facetado con checkboxes).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">47</div>
+    <div class="rule-content">
+      <strong>Regla 6.47: Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría con Alta Rápida In Situ</strong>
+      Presencia obligatoria de selectores reactivos jerárquicos de Proveedor y Marca Comercial en: (1) Alta de Producto (<code>newProductPanoramicModal</code>), (2) Curaduría de Scraping (<code>scrapingCurationModalOpen</code>) y (3) Ficha de Edición / Drawer (<code>skuPanoramicModal</code>). Cada selector incluye botones rápidos de alta instantánea (<code>+ Nuevo Proveedor</code> a <code>z-[120]</code> y <code>+ Nueva Marca</code> a <code>z-[130]</code>) que abren sobre el formulario sin perder datos de captura y auto-seleccionan de inmediato la entidad creada.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">48</div>
+    <div class="rule-content">
+      <strong>Regla 6.48: Distinción Estricta e Inviolable entre Marcas Comerciales y Líneas de Producto / Tipos de Prenda</strong>
+      Separación taxonómica tajante: Queda estrictamente prohibido listar o registrar tipos de prenda / líneas de producto (ej. <code>TANGA</code>, <code>BIKINI</code>, <code>JOCKSTRAPS</code>, <code>BRIEF/BOXERS</code>, <code>TANK TOPS</code>, <code>T-SHIRTS</code>, etc.) como marcas comerciales. Las tipologías pertenecen con exclusividad a <code>category</code> y <code>meta.garment_type</code>. Blindaje en backend (<code>Supplier::getBrandsTree</code> y <code>BrandApiController</code> con validación 422 frente a <code>PRODUCT_LINE_CATEGORIES</code>) y frontend (<code>inventory-module.js</code> con filtro <code>isProductLineCategory</code>).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">49</div>
+    <div class="rule-content">
+      <strong>Regla 6.49: Asociación de Curvas de Tallas a Marcas y Proveedores y Reactividad de Edición</strong>
+      Capacidad relacional en <code>apparel_size_curves</code> para vincularse a un Proveedor (<code>supplier_id</code>) y/o a una Marca Comercial (<code>brand_id</code>) o mantenerse universales. El gestor en Hub 4 incorpora selectores jerárquicos y badges informativos (<code>Prov: ...</code>, <code>Marca: ...</code> o <code>Curva Universal</code>). Se prohíben estrictamente las expresiones ternarias en directivas <code>x-model</code>, unificando los formularios <code>curveForm</code> y <code>sizeForm</code> para garantizar reactividad inmediata y prevenir fallas de asignación al editar.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">50</div>
+    <div class="rule-content">
+      <strong>Regla 6.50: Asociación Mandatoria de Marcas Comerciales a un Proveedor y Sincronización Reactiva de Árbol</strong>
+      Gobernanza mandatoria: ninguna marca puede existir sin proveedor (<code>supplier_id</code> obligatorio en backend y frontend). Sincronización relacional bidireccional automática con la columna <code>brands</code> del proveedor y actualización reactiva en memoria de <code>prov.brands</code>, <code>prov.brandsTree</code> y la tabla de proveedores sin recargar pantalla.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">51</div>
+    <div class="rule-content">
+      <strong>Regla 6.51: Fotografías Manuales con Asignación de Color de Prenda para Conmutación y Filtros de Variante</strong>
+      Tanto en el Workstation de Alta de Producto como en la Curaduría de Scraping, el catalogador puede añadir manualmente fotografías adicionales por URL o subida. Cada imagen cuenta con asignación de color de prenda (<code>color_name</code>) de la paleta oficial y designación de fotografía de portada (<code>is_primary</code>), garantizando la conmutación inmediata de variantes de color en filtros y catálogo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">52</div>
+    <div class="rule-content">
+      <strong>Regla 6.52: Alta In Situ de Categorías y Subcategorías sin Abandonar la Línea de Trabajo</strong>
+      Tanto en el Workstation como en la Curaduría de Scraping se incorporan botones in situ <code>+ Categoría</code> y <code>+ Subcategoría</code> con un modal interactivo rápido (<code>quickCategoryModalOpen</code>) que crea y auto-asigna la taxonomía al formulario activo y al árbol reactivo en memoria sin perder los datos del producto en captura.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">53</div>
+    <div class="rule-content">
+      <strong>Regla 6.53: Asignación de Variantes de Color por Fotografía en la Ficha de Producto (Drawer) y Conmutación Reactiva</strong>
+      En la ficha / drawer de producto (<code>skuPanoramicModal</code>), el operador puede cargar fotos, asociar cada una a una variante de color de la paleta oficial (<code>color_name</code>), designar foto principal (&starf;) y registrar nuevos colores in situ. Los metadatos persisten en <code>images_by_color</code> y <code>gallery</code> para conmutación reactiva de fotos en vitrina y PDP.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">54</div>
+    <div class="rule-content">
+      <strong>Regla 6.54: Conversión Universal Obligatoria a WebP y Normalización Estándar (1080x1350 px, Proporción 4:5)</strong>
+      Toda imagen subida al sistema se convierte forzosamente a formato <code>.webp</code> (calidad 85) y se normaliza al estándar universal e-commerce de <strong>1080 &times; 1350 px</strong> (proporción 4:5) con fondo blanco neutral (#FFFFFF) centrado y antialiasing, garantizando uniformidad visual perfecta en desktop y móvil.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">55</div>
+    <div class="rule-content">
+      <strong>Regla 6.55: Alta In Situ de Nuevos Colores de Prenda en el Workstation (Sin Salir del Workstation)</strong>
+      El Workstation de Alta de Producto dispone de botones <code>+ Color</code> en el selector principal y en cada foto para abrir un modal rápido (<code>quickColorModalOpen</code>). Permite capturar nombre, código hexadecimal y tipo (sólido o degradado CSS), insertándose de inmediato en memoria y seleccionándose sin recargar ni perder la captura.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">56</div>
+    <div class="rule-content">
+      <strong>Regla 6.56: Código SKU Dinámico Reactivo Basado en Cualidades del Producto</strong>
+      El SKU es inteligente y reactivo: se recalcula y actualiza en caliente mediante <code>SkuGeneratorService</code> ante cambios en el proveedor, marca, categoría, tipo de tela o color del producto, garantizando consistencia taxonómica y evitando duplicidades en el Kardex.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">57</div>
+    <div class="rule-content">
+      <strong>Regla 6.57: CRUD Integral de Telas en Ajustes de Inventario y Alta In Situ en el Workstation (+ Tipo de Tela)</strong>
+      Gestor CRUD completo de telas textiles en los ajustes de inventario (creación, edición, activación, archivo y eliminación). Si una tela requerida no existe, el Workstation provee el botón <code>+ Tipo de Tela</code> con modal liviano (<code>quickFabricModalOpen</code>) para darla de alta al vuelo sin abandonar el formulario.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">58</div>
+    <div class="rule-content">
+      <strong>Regla 6.58: Asociación Directa y Estricta del Tipo de Tela con los Productos (fabric / fabric_id)</strong>
+      El tipo de tela se asocia de forma directa y formal en la tabla <code>products</code> a través de las columnas <code>fabric</code> y <code>fabric_id</code>, con relaciones Eloquent formales <code>fabricRelation()</code> y <code>fabric()</code> en <code>Product</code> y <code>products()</code> en <code>ApparelFabric</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">59</div>
+    <div class="rule-content">
+      <strong>Regla 6.59: CRUD Integral de Secciones del Sitio Web E-Commerce (Home Hub 2, Dimensiones y Filtros Facetados)</strong>
+      Pestaña dedicada en Ajustes de Inventario con CRUD completo (crear, editar, activar, archivar, eliminar) de secciones web (<code>cms_sections</code>). Se vinculan modularmente con el Home de Hub 2 y constituyen dimensiones activas para los filtros facetados de catálogo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">60</div>
+    <div class="rule-content">
+      <strong>Regla 6.60: Poblado Real de la Bandeja de Curaduría de Scraping (Cero Mocks, 259 Productos Reales de Torzo y Persistencia End-to-End)</strong>
+      Erradicación total de ejemplos simulados (<code>TOR-RAW-019/020</code>). La bandeja de curaduría de inventario se puebla con 259 registros reales de Torzo B2B en <code>scraped_pending_items</code> (fotos reales de alta resolución, tallas, costos, PVPs sugeridos, telas y colores cromáticos #hex). Equipada con búsqueda reactiva, filtro por categoría, scroll ergonómico y persistencia bidireccional completa (aprobación/descarte contra API).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">61</div>
+    <div class="rule-content">
+      <strong>Regla 6.61: Gobernanza del Ciclo de Scraping, Descontinuación en Origen y Herramienta de Productos Archivados</strong>
+      Ciclo de 5 fases estrictas: 1) Mapeo y normalización en VSC; 2) Visto bueno e inserción en bandeja de curaduría (<code>scraped_pending_items</code> en pending, prohibida la validación automática, estrictamente aislados del catálogo operativo); 3) Frecuencia de scrapeo regulable por proveedor en tabla interactiva persistida vía API (<code>PATCH suppliers/{id}/frequency</code>); 4) Notificación de discrepancia B2B por productos retirados en origen con modal resolutivo de 3 opciones (Retirar del Catálogo / Archivar / Eliminar); y 5) Herramienta permanente en catálogo operativo de Productos Archivados y Descontinuados para reactivación o eliminación definitiva.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">62</div>
+    <div class="rule-content">
+      <strong>Regla 6.62: Integración Nativa con Google Gemini AI (Copiloto de Producto, Chat Estratégico Ejecutivo y Telemetría de Salud)</strong>
+      Conexión centralizada en <code>.env</code> con <code>GEMINI_API_KEY</code>, modelo primario <code>gemini-flash-lite-latest</code> y fallback a <code>gemini-flash-latest</code>. Motor <code>GeminiService</code> con reintentos y JSON nativo (<code>responseMimeType: "application/json"</code>). Conecta el Copiloto IA de Producto en el Workstation (redacción comercial persuasiva, bullets y SEO tags), el Chat Estratégico Ejecutivo del Dashboard (análisis EBITDA, cortes DHL 14:00h, quiebres ROP y rescate de carritos) y endpoint de telemetría en vivo (<code>GET /api/v1/dashboard/copilot/status</code>).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">63</div>
+    <div class="rule-content">
+      <strong>Regla 6.63: Acción de Archivo Directo en Catálogo Operativo hacia Archivados</strong>
+      Botón dedicado en cada fila del catálogo operativo para archivar productos de inmediato, trasladándolos transaccionalmente a la herramienta de archivados con <code>action: 'archive'</code>.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">64</div>
+    <div class="rule-content">
+      <strong>Regla 6.64: Paridad Estructural y Taxonómica en Curaduría de Scraping</strong>
+      Homologación completa de la bandeja de curaduría con el Workstation: taxonomías in situ, telas in situ, colores in situ, swatches por foto y Copiloto IA.
+      <br><strong>Paridad de diseño visual:</strong> la curaduría de scraping debe tener el mismo diseño que el Workstation de Alta de Producto: misma estructura y orden de secciones, mismas tarjetas, etiquetas, inputs, selects y botones in situ; misma tarjeta clara índigo de Margen Comercial &amp; Pricing (Regla 6.75); mismos toggles de Acabado y Modalidad Logística; misma galería 4:5 con color por foto; misma paleta y tipografía (sin fondos oscuros ni estilos propios, cero emojis). Todo cambio de diseño en una pantalla se replica en la otra en el mismo commit, preferentemente con parciales Blade compartidos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">65</div>
+    <div class="rule-content">
+      <strong>Regla 6.65: Generación Persuasiva de Contenido y Metadatos con Copiloto IA Gemini</strong>
+      Redacción comercial de alta conversión B2C integrada tanto en el Workstation como en la Curaduría de Scraping con títulos, 2 párrafos sensoriales, bullets y tags SEO.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">66</div>
+    <div class="rule-content">
+      <strong>Regla 6.66: Centralización de Ajustes, Telemetría y Pruebas de IA en Ajustes de Módulo</strong>
+      Pestaña permanente de Inteligencia Artificial en el modal de Ajustes para gobernar API Keys, conmutar modelos primario/fallback, regular temperatura y ejecutar pruebas de conexión en vivo.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">67</div>
+    <div class="rule-content">
+      <strong>Regla 6.67: Pre-guardado en Borrador y Aprobación Oficial para Catálogo Operativo</strong>
+      Bifurcación en el pie de Workstation para pre-guardar como borrador (<code>draft</code>, aislado del catálogo operativo) o aprobar oficialmente (<code>approved</code>), con gestor modal de borradores.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">68</div>
+    <div class="rule-content">
+      <strong>Regla 6.68: Tipificación de Producto Liso o Con Diseño en Workstation de Alta</strong>
+      Selector explícito en Paso 2 para definir si el producto es de color liso o cuenta con diseño/estampado, reflejado de forma reactiva con badges temáticos en la ficha técnica.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">69</div>
+    <div class="rule-content">
+      <strong>Regla 6.69: Alta In Situ de Vitrinas Web E-Commerce y Sincronización con Ajustes</strong>
+      Botón <code>+ Vitrina</code> en Paso 2 para crear nuevas vitrinas comerciales al vuelo mediante modal liviano, sincronizándolas con la API y los ajustes del módulo de inventario.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">70</div>
+    <div class="rule-content">
+      <strong>Regla 6.70: Color Multicolor Nativo de Sistema Inmutable con Degradado Arcoíris</strong>
+      Checkbox "Es Multicolor" en el alta de colores que anula la paleta hex y activa el degradado arcoíris de 6 tonos. Entidad nativa del sistema protegida contra eliminación o recreación.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">71</div>
+    <div class="rule-content">
+      <strong>Regla 6.71: Workstation Alta de Producto Paginado por Pasos (Wizard Secuencial en Columna 1)</strong>
+      División secuencial en 4 pasos paginados (Fotos & Colores, Datos & Diseño, Variantes & Slotting, Copiloto & Pricing) con navegación anterior/siguiente erradicando scrolls y desbordamientos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">72</div>
+    <div class="rule-content">
+      <strong>Regla 6.72: Desacoplamiento de Color Principal en Paso 3 y Asignación Exclusiva por Foto</strong>
+      Eliminación de la sección redundante Color Principal en el Paso 3. La asociación cromática se define exclusivamente en cada fotografía en el Paso 1.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">73</div>
+    <div class="rule-content">
+      <strong>Regla 6.73: División Vertical de Columna 2: Galería 30% (Portada +10%) y Datos en Vivo 70%</strong>
+      Estructura vertical optimizada: sección superior (30% de altura) para galería con la portada 10% destacada; sección inferior (70% de altura con scroll) para resumen reactivo en tiempo real de todos los pasos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">74</div>
+    <div class="rule-content">
+      <strong>Regla 6.74: Fidelidad Taxonómica Estricta en Workstation y Copiloto IA</strong>
+      El resumen en vivo de Columna 2 y las descripciones/bullets redactados por el Copiloto IA deben corresponderse estrictamente con las características curadas por el usuario (telas de BD, acabados, colores y marcas), con prohibición expresa a la IA de inventar fibras no provistas (como modal).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">75</div>
+    <div class="rule-content">
+      <strong>Regla 6.75: Carga Múltiple de Fotografías, Curaduría Secuencial 4:5 y Armonía Visual de Pricing</strong>
+      El cargador de fotos admite múltiples archivos simultáneos procesándolos en una cola interactiva donde el usuario encuadra y recorta las imágenes una por una hasta curar todas. La tarjeta de margen y pricing se presenta en un esquema claro, sobrio y de alto contraste.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">76</div>
+    <div class="rule-content">
+      <strong>Regla 6.76: Login RevOps Aislado & Erradicación Total de Chrome del Storefront (TASK-AUTH-01)</strong>
+      La pantalla de autenticación del panel administrativo (/login, /ingreso/usuario) es una vista dedicada y centrada, desvinculada por completo de la tienda pública (sin barra de navegación, ofertas, marcas, catálogo, guía de tallas, carrito, WhatsApp ni buscador, y sin sidebars de filtro rápido). Presenta exclusivamente la tarjeta de acceso con correo corporativo, contraseña con alternador visual SVG, remember me, alertas de validación y estética sobria ejecutiva.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- CAPÍTULO 7 -->
+<h2 class="chapter-title">
+  <span>7. MERCHANDISING, CMS & SECCIONES MODULARES (HUB 2)</span>
+  <span class="rule-badge">Norma 7.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 7.1: Bifurcación Mutuamente Excluyente del Hero (Cero Duplicados)</strong>
+      Conmutación limpia entre Modo A (Visual Estructurado) y Modo B (Código Custom Scoped), renderizando uno solo en Blade.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 7.2: Regla de Oro del Catálogo vs Contenido Custom</strong>
+      Secciones de catálogo 100% dinámicas desde Hub 4 (cero HTML libre). Secciones de contenido permiten edición custom scoped.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 7.3: Confinamiento de Herramientas Especializadas</strong>
+      El gestor Drag & Drop de secciones modulares reside exclusivamente en el Editor Visual (Tab 1).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 7.4: Generación Asistida de Rutas y Anclas Modulares</strong>
+      Generación automática de anclas (<code>#section-{id}</code>) con botones de copiado rápido y selectores en Hero.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 8 -->
+<h2 class="chapter-title">
+  <span>8. SEGURIDAD, SANITIZACIÓN & PRIVACIDAD</span>
+  <span class="rule-badge">Norma 8.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 8.1: Sanitización de Entradas en Backend contra XSS</strong>
+      Limpieza estricta de inputs HTML/CSS antes de persistir o renderizar para bloquear scripts maliciosos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 8.2: Aislamiento Estricto por Rol (RBAC)</strong>
+      Segregación estricta entre Directores (financiero), Almacén (operativo) y Aliados B2B (extranet aislada).
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 8.3: Protección Sanitaria y Normativa PROFECO</strong>
+      Política de no devolución de ropa íntima visible en PDP, checkout y etiquetas de empaque expedidas.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 9 -->
+<h2 class="chapter-title">
+  <span>9. CALIDAD, PRUEBAS AUTOMATIZADAS & VALIDACIÓN CDP</span>
+  <span class="rule-badge">Norma 9.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 9.1: Cero Pruebas Rotas (100% Passing Test Suite)</strong>
+      Toda suite PHPUnit debe permanecer 100% en verde; prohibido consolidar commits con tests fallidos.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 9.2: Validación en Navegador Real con Chrome DevTools Protocol (CDP)</strong>
+      Auditoría en Chrome Headless para validar dimensiones reales, opacidades y jerarquía DOM sin emulaciones falsas.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 10 -->
+<h2 class="chapter-title">
+  <span>10. DOCUMENTACIÓN VIVA, TRÍPTICO & GOBERNANZA</span>
+  <span class="rule-badge">Norma 10.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 10.1: Tríptico Documental Obligatorio (Markdown + HTML + PDF)</strong>
+      Toda especificación se publica de manera sincrónica en <code>.md</code>, <code>.html</code> y compilado oficial <code>.pdf</code> generado con Chrome Headless.
+    </div>
+  </div>
+
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 10.2: Registro Continuo en PENDING_TASKS.md</strong>
+      Cualquier nuevo requerimiento o punto ciego se registra de inmediato con identificador <code>TASK-XXX-NN</code>.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 11 -->
+<h2 class="chapter-title">
+  <span>11. CONTROL DE VERSIONES & COMMITS SEMÁNTICOS</span>
+  <span class="rule-badge">Norma 11.0</span>
+</h2>
+
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 11.1: Commits Atómicos y Semánticos</strong>
+      Commits agrupados por alcance (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>) acompañados de su ID formal de tarea. Prohibidos mensajes genéricos.
+    </div>
+  </div>
+</div>
+
+<!-- CAPÍTULO 12 -->
+<h2 class="chapter-title">
+  <span>12. GOBERNANZA POR CICLOS OPERATIVOS (INVENTARIO, CATÁLOGO, PROVEEDORES & COMPRAS)</span>
+  <span class="rule-badge">Norma 12.0</span>
+</h2>
+
+<p style="font-size: 8pt; color: #475569; margin-bottom: 12px; background: #f8fafc; border-left: 3px solid #6366f1; padding: 6px 10px; border-radius: 4px;">
+  <strong>Canon de Regla 10:</strong> Las normas operativas se estructuran de forma indisoluble por <em>Ciclos Operativos</em> para auditar qué procesos de la cadena de valor están 100% blindados y detectar con claridad brechas pendientes de reglamentación.
+</p>
+
+<!-- Subsección 12.1 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 10px 0 6px; letter-spacing: 0.04em;">
+  12.1 Ciclo Operativo 1: Catálogo, Ingesta & Curaduría de Producto
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">1</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.1: Fidelidad Taxonómica Estricta en Catálogo & Copiloto IA</strong>
+      Sincronización mandatoria con <code>apparel_fabrics</code> en base de datos. Cero invenciones de fibras ("modal"); prompt estricto y exactitud fáctica en descripciones y ficha técnica.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">2</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.2: Curaduría Multi-Foto Secuencial 1 a 1 (Lienzo 4:5 y WebP Universal)</strong>
+      Carga simultánea de hasta 10 fotos con cola interactiva de recorte una por una a 1080&times;1350 px (4:5) sobre lienzo neutral y compresión obligatoria a <code>.webp</code>.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">3</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.3: Asignación Cromática Foto-Color en Galería y Portada Destacada (+10%)</strong>
+      Eliminación de color en variantes; variante cromática directa por fotografía en Paso 1, portada un 10% mayor y conmutación dinámica de fotos en PDP según el swatch seleccionado.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">4</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.4: Taxonomías In Situ sin Abandono de Flujo de Captura</strong>
+      Alta al vuelo de categorías, subcategorías, telas, colores y vitrinas con modales livianos e inserción reactiva inmediata en el formulario en curso.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">5</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.5: Wizard Secuencial de 4 Pasos & Previsualización Vertical 30/70</strong>
+      Formulario distribuido en 4 pasos sin desbordamientos de pantalla, acompañado de Live Preview 30% galería y 70% ficha técnica reactiva.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">6</div>
+    <div class="rule-content">
+      <strong>Regla 12.1.6: Aislamiento y Gobernanza de Borradores (Publicación Condicionada)</strong>
+      Prendas en borrador (<code>draft</code>) permanecen invisibles y aisladas de vitrinas y catálogo operativo hasta recibir visto bueno en la bandeja de aprobación.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.2 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.2 Ciclo Operativo 2: Gobernanza de Proveedores & Marcas
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">7</div>
+    <div class="rule-content">
+      <strong>Regla 12.2.1: Estructura Jerárquica de Árbol Proveedor-Marcas</strong>
+      El proveedor es la entidad comercial matriz (fabricante/distribuidor). Las marcas comerciales son entidades hijas vinculadas obligatoriamente a un proveedor padre registrado (cero marcas huérfanas).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">8</div>
+    <div class="rule-content">
+      <strong>Regla 12.2.2: Tabuladores MOQ Exclusivos e Independientes por Proveedor</strong>
+      Las escalas de Pedido Mínimo (MOQ) y precios por volumen son exclusivas por proveedor. Prohibidos tabuladores predeterminados; se requiere registrar previamente al proveedor para crear su tabulador.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.3 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.3 Ciclo Operativo 3: Planeación de Compras y Tabuladores MOQ
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">9</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.1: Árbol Único Consolidado de Proveedor y Marcas en Bandeja MOQ</strong>
+      Las marcas pertenecientes a un mismo fabricante (ej. Torzo y Mazho) se agrupan en un único árbol de pedido, consolidando el volumen hacia el MOQ del fabricante y generando una sola Orden de Compra (PO).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">10</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.2: Reactividad Instantánea y Auto-Recálculo ante Modificación de Tabuladores</strong>
+      La Bandeja MOQ se actualiza y recalcula de inmediato ante altas, ediciones o eliminaciones de tabuladores en Ajustes, sin recargar el navegador ni perder el estado de la vista.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">11</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.3: Tabulación Dinámica de Costos por Escalas de Volumen y Salto de MOQ</strong>
+      Al acumular unidades planificadas y superar un umbral de escala superior (ej. de 50 a 100 piezas), el costo unitario de todas las partidas del fabricante se recalcula reactivamente según la matriz MOQ.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">12</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.4: Jerarquía de Fallback en Matriz MOQ</strong>
+      Resolución jerárquica: Categoría específica &rarr; General &rarr; Fila única. Si un tabulador tiene una sola fila configurada, todas las prendas del fabricante adoptan dicha escala.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">13</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.5: Erradicación Absoluta de Datos Mock en Submódulo de Compras</strong>
+      El flujo de compras, bandeja MOQ y expediente operan exclusivamente con datos reales persistidos en base de datos (Torzo, Dajo B2B, productos de catálogo y acuerdos de crédito reales).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">14</div>
+    <div class="rule-content">
+      <strong>Regla 12.3.6: Visibilidad de Ahorro Real ($ y %) y Nivel de Tabulación Activo en Bandeja MOQ</strong>
+      Cada árbol de proveedor en la Bandeja MOQ expone reactivamente el nivel de tabulación alcanzado según las prendas planificadas, computando el dinero real ahorrado en pesos (<code>-$X.XX MXN</code>) y el porcentaje de descuento efectivo frente al costo unitario base.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.4 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.4 Ciclo Operativo 4: Discrepancias, Acuerdos Mercantiles y Notas de Crédito
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">15</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.1: Pestaña Permanente de Acuerdos Mercantiles y Notas de Crédito</strong>
+      Submódulo dedicado en Compras para auditar convenios compensatorios generados con proveedores por incidencias físicas en rampa (faltantes, defectos o mermas).
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">16</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.2: Trazabilidad, Edición y Referenciación Inmutable de Discrepancias</strong>
+      Expediente auditable por acuerdo con folio único, remisión afectada, desglose de piezas, costo aplicado, importe a favor, contacto autorizador y estados <code>pendiente</code> / <code>aplicado</code>.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">17</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.3: Selector de Acuerdos Mercantiles Pendientes y Compensación en PO</strong>
+      Selector dinámico en el generador de PO que recupera acuerdos pendientes del proveedor, deduce el monto automáticamente del total a pagar e incorpora la Cláusula 4 legal en el PDF.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">18</div>
+    <div class="rule-content">
+      <strong>Regla 12.4.4: Estricto Aislamiento de Acuerdos por Proveedor y Multi-Selección en Emisión de PO</strong>
+      Filtrado estricto e inviolable de notas de crédito pertenecientes exclusivamente al proveedor de la orden, permitiendo seleccionar uno o más acuerdos simultáneamente con acumulación matemática de importes a favor.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.5 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.5 Ciclo Operativo 5: Emisión de Orden de Compra (PO), Despacho y Kardex de Auditoría
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">19</div>
+    <div class="rule-content">
+      <strong>Regla 12.5.1: Snapshot Inmutable y Expediente PO en PDF</strong>
+      Persistencia completa de la PO emitida (<code>po_snapshot</code>) garantizando que reimpresiones históricas preserven fidedignamente precios, deducciones y partidas originales.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">20</div>
+    <div class="rule-content">
+      <strong>Regla 12.5.2: Despacho Electrónico B2B con Token de Acuse de Recibo</strong>
+      Envío estructurado por email al ejecutivo de cuenta del fabricante con PDF adjunto y registro transaccional en la bitácora operativa.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">21</div>
+    <div class="rule-content">
+      <strong>Regla 12.5.3: Trazabilidad Transaccional ACID en Kardex de Compras</strong>
+      Registro cronológico inmutable en <code>purchase_kardex</code> de cada movimiento (emisión, conversión on-demand, acuerdos aplicados y recepciones inbound).
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.6 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.6 Ciclo Operativo 6: Segregación de Roles RBAC en Hub 1 (Almacén vs Compras)
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">22</div>
+    <div class="rule-content">
+      <strong>Regla 12.6.1: Segregación Operativa de Tareas en Hub 1 por Rol RBAC</strong>
+      Bandeja operativa de Hub 1 conmutativamente segregada entre Almacén & Empaque Físico (Carlos Almacén: corte DHL 14:00, rampa ciega, cero finanzas) y Compras & Abastecimiento B2B (Elena Compras: discrepancias, MOQs, acuerdos, órdenes ROP), con pastillas de conmutación fluida.
+    </div>
+  </div>
+</div>
+
+<!-- Subsección 12.7 -->
+<h3 style="font-size: 9pt; font-weight: 800; color: #1e1b4b; text-transform: uppercase; margin: 14px 0 6px; letter-spacing: 0.04em;">
+  12.7 Ciclo Operativo 7: Gobernanza de Hubs y Extranet de Proveedores (Hub 5 y Hub 7)
+</h3>
+<div class="rule-list">
+  <div class="rule-item avoid-break">
+    <div class="rule-number">23</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.1: Preservación de Enlaces de Navegación en Sidebar y Gobernanza de Hub 5 (Finanzas)</strong>
+      Los hipervínculos del sidebar no deben ser destruidos del DOM al alternar perfiles. La capa de permisos RBAC gestiona accesos sin mutilar la arquitectura de navegación de los 8 Hubs.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">24</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.2: Unificación del Portal Extranet de Proveedores en Hub 7</strong>
+      Centralización de toda extranet de terceros en Hub 7, con conmutador de 3 modos: Administración RevOps, Portal de Aliados Comerciales y Extranet B2B de Proveedores y Fabricantes.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- RESUMEN DE CUMPLIMIENTO -->
+<h2 class="chapter-title">
+  <span>MATRIZ DE CUMPLIMIENTO Y VERIFICACIÓN INMEDIATA</span>
+  <span class="rule-badge">Audit Canon</span>
+</h2>
+
+<table class="rules-table">
+  <thead>
+    <tr>
+      <th style="width: 18%;">Dominio</th>
+      <th style="width: 32%;">Regla Clave</th>
+      <th style="width: 50%;">Mecanismo de Verificación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ingeniería</strong></td>
+      <td>Vertical Slice End-to-End (1.1)</td>
+      <td>Cero mocks; persistencia real en MySQL, Eloquent, FormRequests y pruebas PHPUnit.</td>
+    </tr>
+    <tr>
+      <td><strong>Contrato Backend</strong></td>
+      <td>Sincronización BACKEND_INTEGRATION_SPEC (1.3)</td>
+      <td>Esquemas JSON, FormRequests, endpoints y migraciones formalizados al 100%.</td>
+    </tr>
+    <tr>
+      <td><strong>Codificación</strong></td>
+      <td>UTF-8 Universal Obligatorio (1.4)</td>
+      <td><code>&lt;meta charset="utf-8"&gt;</code>, MySQL <code>utf8mb4_unicode_ci</code>, saneamiento activo.</td>
+    </tr>
+    <tr>
+      <td><strong>Arquitectura</strong></td>
+      <td>Single Inventory Pool Multiverso (3.1)</td>
+      <td>Stock centralizado en Hub 4; 4 vitrinas desacopladas sin duplicidad de SKUs.</td>
+    </tr>
+    <tr>
+      <td><strong>Estructura DOM</strong></td>
+      <td>Aislamiento de Paneles y Modales (5.1)</td>
+      <td>Nodos hermanos bajo <code>#storeAppRoot</code> (depth=2); paridad de <code>&lt;div&gt;</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Navegación</strong></td>
+      <td>Ergonomía Sin Scroll Horizontal (6.4)</td>
+      <td>Subnav en cuadrícula 2x3 compacta; conmutador de vitrinas en encabezado superior transversal.</td>
+    </tr>
+    <tr>
+      <td><strong>Filtros Storefront</strong></td>
+      <td>Drawer Lateral Izquierdo (6.8)</td>
+      <td>Off-canvas desde <code>left: 0</code>, backdrop modal, formato de árbol con checkboxes.</td>
+    </tr>
+    <tr>
+      <td><strong>Categorías Hub 4</strong></td>
+      <td>Creación y Jerarquía Drag & Drop (6.34)</td>
+      <td>Alta de categorías raíz y subcategorías en Hub 4 Ajustes, alimentando Storefront y Hub 2.</td>
+    </tr>
+    <tr>
+      <td><strong>Proveedores Filtro</strong></td>
+      <td>Dimensión Transversal (6.36)</td>
+      <td>Proveedores como faceta en Hub 4, Hub 2 (Páginas de Explorar con <code>filter_supplier</code>) y Storefront.</td>
+    </tr>
+    <tr>
+      <td><strong>Filtros Facetados</strong></td>
+      <td>Árbol con Checkboxes y Acordeón (6.37)</td>
+      <td>Árbol jerárquico desplegable con pestañas contraíbles/expandibles en <code>#filterDrawer</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>PDP Navegación</strong></td>
+      <td>Botón Volver & Gatillo Filtros (6.38)</td>
+      <td>Retorno rápido y apertura de drawer de filtros <code>data-action="open-filters"</code> directo en PDP.</td>
+    </tr>
+    <tr>
+      <td><strong>Swatches de Color</strong></td>
+      <td>Exhibidor Visual Indexado (6.39)</td>
+      <td>Muestras de color sólidas y tornasoles en tarjetas de catálogo y ficha de producto PDP.</td>
+    </tr>
+    <tr>
+      <td><strong>Variante de Color</strong></td>
+      <td>Conmutación Dinámica de Fotos (6.40)</td>
+      <td>Fotos conmutan al color seleccionado en PDP mediante mapa relacional <code>images_by_color</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Miniaturas Carrito</strong></td>
+      <td>Fotografías en Drawer de Carrito (6.41)</td>
+      <td>Miniaturas visibles por cada prenda en <code>#cartSheet</code> y checkout.</td>
+    </tr>
+    <tr>
+      <td><strong>Cupón Descuento</strong></td>
+      <td>Confinado al Paso 1 del Checkout (6.42)</td>
+      <td>Formulario exclusivo en paso 1; suprimido del drawer pasivo de carrito.</td>
+    </tr>
+    <tr>
+      <td><strong>Inventario & Color</strong></td>
+      <td>Miniaturas y Mapeo Foto-Color (6.43)</td>
+      <td>Miniatura en tabla de Hub 4 y asignación de color a fotos en modal de edición.</td>
+    </tr>
+    <tr>
+      <td><strong>Scraping & Color</strong></td>
+      <td>Curaduría de Imágenes por Color (6.44)</td>
+      <td>Mapeo obligatorio imagen-color en bandeja de curaduría previa de scraping.</td>
+    </tr>
+    <tr>
+      <td><strong>Proveedores & Marcas</strong></td>
+      <td>Árbol de Marcas y Alta Manual Fiscal (6.45)</td>
+      <td>Estructura en árbol Proveedor &rarr; Marcas en Hub 4 Ajustes y captura completa de datos de contacto y fiscales para proveedores manuales.</td>
+    </tr>
+    <tr>
+      <td><strong>Marcas Comerciales</strong></td>
+      <td>CRUD Autónomo & Filtros Transversales (6.46)</td>
+      <td>Alta, edición, archivo y borrado de marcas en Hub 4; ficha fiscal reactiva; filtros en Hub 4, Hub 2 y Storefront.</td>
+    </tr>
+    <tr>
+      <td><strong>Fichas & Curaduría</strong></td>
+      <td>Proveedor y Marca In Situ (6.47)</td>
+      <td>Selectores jerárquicos y botones de alta rápida de Proveedor y Marca en Alta de Producto, Curaduría de Scraping y Drawer.</td>
+    </tr>
+    <tr>
+      <td><strong>Líneas vs Marcas</strong></td>
+      <td>Separación Taxonómica Estricta (6.48)</td>
+      <td>Tipos de prenda (Tanga, Bikini, etc.) pertenecen a categoría; blindaje en backend y frontend con exclusión de marcas.</td>
+    </tr>
+    <tr>
+      <td><strong>Curvas de Tallas</strong></td>
+      <td>Asociación a Proveedor & Marca (6.49)</td>
+      <td>Vínculo relacional a proveedor y marca, erradicación de ternarios en x-model y edición reactiva inmediata.</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Marcas</strong></td>
+      <td>Asociación Mandatoria a Proveedor (6.50)</td>
+      <td>Toda marca requiere supplier_id (cero marcas huérfanas) y sincronización reactiva de árbol en memoria.</td>
+    </tr>
+    <tr>
+      <td><strong>Fotos & Color</strong></td>
+      <td>Galería Manual & Variante de Color (6.51)</td>
+      <td>Entrada ágil de URLs en Workstation y Curaduría; selector de color de prenda por foto y portada.</td>
+    </tr>
+    <tr>
+      <td><strong>Alta In Situ</strong></td>
+      <td>Categorías y Subcategorías al Vuelo (6.52)</td>
+      <td>Botones y modal liviano para dar de alta taxonomías sin perder el formulario de producto activo.</td>
+    </tr>
+    <tr>
+      <td><strong>Variantes Color Ficha</strong></td>
+      <td>Conmutación Foto-Color en Drawer (6.53)</td>
+      <td>Carga de fotos, asignación de color por foto, portada &starf; y alta de color in situ en ficha.</td>
+    </tr>
+    <tr>
+      <td><strong>WebP & Normalización</strong></td>
+      <td>WebP Universal & 1080x1350 px (6.54)</td>
+      <td>Conversión obligatoria a .webp, lienzo 4:5 centrado y fondo blanco neutral para desktop y móvil.</td>
+    </tr>
+    <tr>
+      <td><strong>Alta In Situ Color</strong></td>
+      <td>Color al Vuelo en Workstation (6.55)</td>
+      <td>Botones + Color y modal interactivo hex/degradado sin abandonar el alta ni recargar.</td>
+    </tr>
+    <tr>
+      <td><strong>SKU Dinámico</strong></td>
+      <td>Reactividad por Atributos (6.56)</td>
+      <td>Auto-actualización sensible a cambios de proveedor, marca, categoría, tela y color.</td>
+    </tr>
+    <tr>
+      <td><strong>CRUD de Telas</strong></td>
+      <td>Telas en Ajustes & In Situ (6.57)</td>
+      <td>Gestor CRUD en Pestaña 1 y botón + Tipo de Tela en Workstation con actualización reactiva.</td>
+    </tr>
+    <tr>
+      <td><strong>Asociación de Telas</strong></td>
+      <td>Vínculo Directo Producto-Tela (6.58)</td>
+      <td>Columnas fabric / fabric_id y relaciones formales Product &harr; ApparelFabric.</td>
+    </tr>
+    <tr>
+      <td><strong>Secciones E-Commerce</strong></td>
+      <td>CRUD Secciones & Hub 2 Home (6.59)</td>
+      <td>Gestor Pestaña 7, modularidad en Home Hub 2 y dimensión transversal para filtros.</td>
+    </tr>
+    <tr>
+      <td><strong>Bandeja Curaduría Real</strong></td>
+      <td>259 Prendas Torzo & Cero Mocks (6.60)</td>
+      <td>Poblado real en <code>scraped_pending_items</code>, búsqueda reactiva, fotos reales y persistencia end-to-end.</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Scraping & Archivo</strong></td>
+      <td>5 Fases, Descontinuación & Archivo (6.61)</td>
+      <td>Mapeo VSC, visto bueno curaduría, frecuencia regulable, modal discrepancias (retirar/archivar/eliminar) y herramienta de archivados.</td>
+    </tr>
+    <tr>
+      <td><strong>Integración Google Gemini AI</strong></td>
+      <td>Copiloto Producto & Chat Ejecutivo (6.62)</td>
+      <td>Motor GeminiService con fallback, descripciones en Workstation y chat multi-turno en Dashboard.</td>
+    </tr>
+    <tr>
+      <td><strong>Tipificación Diseño</strong></td>
+      <td>Liso vs Con Diseño (6.68)</td>
+      <td>Selector explícito en Paso 2 y badge reactivo en ficha técnica Columna 2.</td>
+    </tr>
+    <tr>
+      <td><strong>Vitrinas In Situ</strong></td>
+      <td>Alta Rápida de Vitrina Web (6.69)</td>
+      <td>Botón + Vitrina en Paso 2 sincronizado con API y ajustes generales.</td>
+    </tr>
+    <tr>
+      <td><strong>Color Multicolor</strong></td>
+      <td>Multicolor Arcoíris Nativo (6.70)</td>
+      <td>Checkbox "Es Multicolor", degradado 6 colores e inmutabilidad de sistema.</td>
+    </tr>
+    <tr>
+      <td><strong>Workstation Wizard</strong></td>
+      <td>4 Pasos Paginados en Columna 1 (6.71)</td>
+      <td>Paginación secuencial por pasos (1-4) erradicando desbordamientos de pantalla.</td>
+    </tr>
+    <tr>
+      <td><strong>Desacople Color Paso 3</strong></td>
+      <td>Color Exclusivo por Foto en Paso 1 (6.72)</td>
+      <td>Eliminado Color Principal de Paso 3; asignación cromática directa en fotos.</td>
+    </tr>
+    <tr>
+      <td><strong>Preview 30/70 Col 2</strong></td>
+      <td>Galería 30% (Portada +10%) & Datos 70% (6.73)</td>
+      <td>División vertical ergonómica: fotos 30% y ficha técnica en vivo 70%.</td>
+    </tr>
+    <tr>
+      <td><strong>Fidelidad Taxonómica</strong></td>
+      <td>Telas y Atributos Curados en IA & Resumen (6.74)</td>
+      <td>Cero invenciones de fibras ("modal"); sincronización real con BD y prompt estricto.</td>
+    </tr>
+    <tr>
+      <td><strong>Curaduría Multi-Foto</strong></td>
+      <td>Carga Múltiple & Recorte Secuencial 1 a 1 (6.75)</td>
+      <td>Cola de fotos en dropzone; recorte interactivo una por una y pricing pulido.</td>
+    </tr>
+    <tr>
+      <td><strong>Login RevOps Aislado</strong></td>
+      <td>Pantalla de Ingreso Exclusiva & Cero Chrome Storefront (6.76)</td>
+      <td>Vista dedicada centrada; erradicación total de navbar, carrito, búsqueda y filtros de tienda.</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Ciclos</strong></td>
+      <td>Estructuración por Ciclos de Valor (12.0)</td>
+      <td>Mapeo de ciclos operativos, auditoría de cobertura e identificación explícita de brechas.</td>
+    </tr>
+    <tr>
+      <td><strong>Fidelidad Taxonómica</strong></td>
+      <td>Correspondencia Textil Estricta (12.1.1)</td>
+      <td>Cero invenciones de fibras; telas sincronizadas con <code>apparel_fabrics</code> y prompt veraz.</td>
+    </tr>
+    <tr>
+      <td><strong>Curaduría 4:5 WebP</strong></td>
+      <td>Estandarización Universal (12.1.2)</td>
+      <td>Carga en cola, recorte interactivo 1 a 1 y conversión mandatoria a <code>.webp</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Foto-Color & Portada 10%</strong></td>
+      <td>Conmutación Visual & Portada Mayor (12.1.3)</td>
+      <td>Color por foto en Paso 1, portada +10% en ficha y conmutación automática en PDP.</td>
+    </tr>
+    <tr>
+      <td><strong>Taxonomías In Situ</strong></td>
+      <td>Alta al Vuelo sin Salir de Captura (12.1.4)</td>
+      <td>Botones + Categoría, + Tela, + Color, + Vitrina con modales livianos e inserción reactiva.</td>
+    </tr>
+    <tr>
+      <td><strong>Árbol Proveedor-Marcas</strong></td>
+      <td>Jerarquía Matriz & Cero Huérfanas (12.2.1)</td>
+      <td>Marcas hijas con <code>supplier_id</code> mandatorio consolidando volumen del fabricante padre.</td>
+    </tr>
+    <tr>
+      <td><strong>Tabuladores MOQ</strong></td>
+      <td>Escalas Exclusivas por Proveedor (12.2.2)</td>
+      <td>Tabuladores individuales sin predeterminados; requiere proveedor registrado previo.</td>
+    </tr>
+    <tr>
+      <td><strong>Bandeja MOQ Consolidada</strong></td>
+      <td>Pedido Único por Fabricante y Marcas (12.3.1)</td>
+      <td>Consolidación de marcas bajo el proveedor padre en un solo árbol generando 1 sola PO.</td>
+    </tr>
+    <tr>
+      <td><strong>Reactividad MOQ Instantánea</strong></td>
+      <td>Recálculo Dinámico en Caliente (12.3.2)</td>
+      <td>Actualización automática de la Bandeja MOQ al crear, editar o borrar tabuladores.</td>
+    </tr>
+    <tr>
+      <td><strong>Salto de Escala de Costo</strong></td>
+      <td>Tabulación Automática por Volumen (12.3.3)</td>
+      <td>Actualización en tiempo real del costo de partidas al superar umbrales de escala MOQ.</td>
+    </tr>
+    <tr>
+      <td><strong>Fallback Matriz MOQ</strong></td>
+      <td>Tolerancia Categórica Jerárquica (12.3.4)</td>
+      <td>Categoría específica &rarr; General &rarr; Fila única para evitar partidas sin costo.</td>
+    </tr>
+    <tr>
+      <td><strong>Cero Mocks en Compras</strong></td>
+      <td>Datos 100% Reales y Auditables (12.3.5)</td>
+      <td>Erradicación total de mocks; persistencia en BD de proveedores, lotes y acuerdos.</td>
+    </tr>
+    <tr>
+      <td><strong>Acuerdos y Notas Crédito</strong></td>
+      <td>Pestaña Dedicada de Acuerdos Mercantiles (12.4.1)</td>
+      <td>Submódulo permanente en Compras para auditar convenios por incidencias en rampa.</td>
+    </tr>
+    <tr>
+      <td><strong>Trazabilidad Discrepancias</strong></td>
+      <td>Edición y Expediente de Acuerdo (12.4.2)</td>
+      <td>Folio, remisión, piezas, costo, importe, contacto y estados <code>pendiente</code> / <code>aplicado</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Compensación Contable PO</strong></td>
+      <td>Deducción Automática en Emisión de PO (12.4.3)</td>
+      <td>Selector de acuerdos pendientes que descuenta el saldo del total a pagar en la PO.</td>
+    </tr>
+    <tr>
+      <td><strong>Expediente PO en PDF</strong></td>
+      <td>Snapshot Fidedigno e Inmutable (12.5.1)</td>
+      <td>Persistencia íntegra de la PO emitida (<code>po_snapshot</code>) para reimpresión histórica idéntica.</td>
+    </tr>
+    <tr>
+      <td><strong>Despacho B2B Correo</strong></td>
+      <td>Notificación con Token de Acuse (12.5.2)</td>
+      <td>Envío formal por email al ejecutivo del taller con PDF y registro en auditoría.</td>
+    </tr>
+    <tr>
+      <td><strong>Kardex Compras ACID</strong></td>
+      <td>Bitácora Transaccional Inmutable (12.5.3)</td>
+      <td>Registro cronológico en <code>purchase_kardex</code> de cada hito económico y logístico.</td>
+    </tr>
+    <tr>
+      <td><strong>Ahorro Real en MOQ</strong></td>
+      <td>Nivel Activo y Ahorro $ / % (12.3.6)</td>
+      <td>Visibilidad reactiva de nivel de tabulación, dinero real ahorrado ($) y porcentaje de descuento (%).</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Acuerdos en PO</strong></td>
+      <td>Estricto Aislamiento y Multi-Selección (12.4.4)</td>
+      <td>Selector filtrado por proveedor con selección de múltiples notas de crédito y suma acumulada.</td>
+    </tr>
+    <tr>
+      <td><strong>Segregación Hub 1 RBAC</strong></td>
+      <td>Almacén vs Compras (12.6.1)</td>
+      <td>Sub-área Carlos Almacén (DHL 14:00, rampa ciega) vs Elena Compras (discrepancias, MOQs, acuerdos).</td>
+    </tr>
+    <tr>
+      <td><strong>Gobernanza Sidebar</strong></td>
+      <td>Preservación de Hub 5 Finanzas (12.7.1)</td>
+      <td>Navegación estable en el DOM sin mutilación de enlaces; control por capa de permisos RBAC.</td>
+    </tr>
+    <tr>
+      <td><strong>Extranet Proveedores</strong></td>
+      <td>Portal Unificado en Hub 7 (12.7.2)</td>
+      <td>Residencia de Extranet B2B de Proveedores en Hub 7 conmutando con Aliados y RevOps Admin.</td>
+    </tr>
+    <tr>
+      <td><strong>Documentación</strong></td>
+      <td>Tríptico Documental & PDF (10.1)</td>
+      <td>Markdown + HTML estilizado + PDF compilado vía Chrome headless.</td>
+    </tr>
+    <tr>
+      <td><strong>Calidad</strong></td>
+      <td>100% Tests Green & Auditoría CDP (9.1)</td>
+      <td>PHPUnit sin errores; pruebas en Chrome Headless.</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

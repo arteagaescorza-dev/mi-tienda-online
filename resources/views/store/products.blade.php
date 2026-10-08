@@ -38,15 +38,38 @@
                 <button type="button" class="btn ghost" data-filter-reset>Limpiar</button>
             </div>
 
+            <!-- Filtro Faceteado en Árbol: Proveedores & Marcas Comerciales (Reglas 6.45 / Regla 2 y 3) -->
             <details class="filter-tree" open>
-                <summary>Marca</summary>
-                <div class="tree-options">
-                    @foreach($brands as $brand)
-                        <label>
-                            <input type="checkbox" data-filter-group="brand" value="{{ $brand }}">
-                            <span>{{ $brand }}</span>
-                        </label>
-                    @endforeach
+                <summary>Marcas & Proveedores (Árbol)</summary>
+                <div class="tree-options space-y-2">
+                    @if(isset($suppliersTree) && count($suppliersTree) > 0)
+                        @foreach($suppliersTree as $supplierNode)
+                            <div class="supplier-tree-node border-l-2 border-indigo-200 pl-2.5 py-1">
+                                <label class="font-bold text-xs text-slate-800 flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" data-filter-group="supplier" value="{{ $supplierNode['name'] }}">
+                                    <span>{{ $supplierNode['name'] }}</span>
+                                    <span class="text-[10px] text-indigo-600 font-normal">({{ count($supplierNode['brands'] ?? []) }})</span>
+                                </label>
+                                @if(!empty($supplierNode['brands']))
+                                    <div class="pl-4 mt-1 space-y-1">
+                                        @foreach($supplierNode['brands'] as $childBrand)
+                                            <label class="text-xs text-slate-600 flex items-center gap-1.5 cursor-pointer">
+                                                <input type="checkbox" data-filter-group="brand" value="{{ $childBrand['name'] }}">
+                                                <span>{{ $childBrand['name'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        @foreach($brands as $brand)
+                            <label>
+                                <input type="checkbox" data-filter-group="brand" value="{{ $brand }}">
+                                <span>{{ $brand }}</span>
+                            </label>
+                        @endforeach
+                    @endif
                 </div>
             </details>
 

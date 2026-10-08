@@ -14,4 +14,16 @@ class ApparelColor extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    protected $appends = ['hex', 'type'];
+
+    public function getHexAttribute(): string
+    {
+        return $this->gradient_css ?: ($this->hex_code ?: '#000000');
+    }
+
+    public function getTypeAttribute(): string
+    {
+        return in_array($this->color_type, ['gradient', 'iridescent']) ? 'iridescent' : 'solid';
+    }
 }

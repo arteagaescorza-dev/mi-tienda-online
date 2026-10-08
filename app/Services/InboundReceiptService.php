@@ -95,14 +95,33 @@ class InboundReceiptService
                         if ($product->type === 'dropship') {
                             $product->type = 'both';
                         }
+                        $meta = $product->meta ?? [];
                         if ($hasSanitary) {
-                            $meta = $product->meta ?? [];
                             if (!empty($batchNumber)) $meta['batch_number'] = $batchNumber;
                             if (!empty($expirationDate)) $meta['expiration_date'] = $expirationDate;
                             if (!empty($paoMonths)) $meta['pao_months'] = $paoMonths;
                             $meta['requires_sanitary_control'] = true;
-                            $product->meta = $meta;
                         }
+
+                        // Trazabilidad de Costos MOQ por Lote de Compra (Regla 1)
+                        $moqTierLabel = $po->moq_tier_label ?? ($po->po_snapshot['moq_tier_label'] ?? null);
+                        if ($moqTierLabel || $item->unit_cost > 0) {
+                            $layers = $meta['moq_cost_layers'] ?? [];
+                            $layers[] = [
+                                'order_id' => $po->po_number,
+                                'supplier' => $po->supplier?->name ?? 'Proveedor',
+                                'moq_tier_label' => $moqTierLabel ?: 'Compra Estándar',
+                                'unit_cost' => (float) $item->unit_cost,
+                                'quantity' => $qtyToReceive,
+                                'received_at' => now()->toIso8601String(),
+                                'batch_number' => $batchNumber,
+                            ];
+                            $meta['moq_cost_layers'] = $layers;
+                            $meta['last_moq_tier'] = $moqTierLabel ?: 'Compra Estándar';
+                            $meta['last_moq_cost'] = (float) $item->unit_cost;
+                        }
+
+                        $product->meta = $meta;
                         $product->save();
                     }
 
@@ -113,10 +132,12 @@ class InboundReceiptService
                     $sanitaryTag = $hasSanitary 
                         ? sprintf(' [Lote: %s | Cad: %s | PAO: %dM]', $batchNumber ?: 'N/A', $expirationDate ?: 'N/A', $paoMonths ?: 12) 
                         : '';
+                    $moqTag = !empty($moqTierLabel) ? sprintf(' [Nivel MOQ: %s @ $%.2f]', $moqTierLabel, (float)$item->unit_cost) : '';
 
                     $movementNote = sprintf(
-                        'ENTRADA_COMPRA OC #%s - Valuacion CPP: $%0.2f -> $%0.2f (Lote @ $%0.2f)%s%s',
+                        'ENTRADA_COMPRA OC #%s%s - Valuacion CPP: $%0.2f -> $%0.2f (Lote @ $%0.2f)%s%s',
                         $po->po_number,
+                        $moqTag,
                         $prevCost,
                         $newCpp,
                         $item->unit_cost,

@@ -31,7 +31,13 @@ class ProductSkuAndDuplicateApiController extends Controller
         $validated = $request->validate([
             'category' => 'nullable',
             'brand' => 'nullable|string|max:100',
+            'supplier_id' => 'nullable',
+            'supplier' => 'nullable|string|max:100',
+            'fabric' => 'nullable|string|max:100',
+            'fabric_type' => 'nullable|string|max:100',
+            'color_name' => 'nullable|string|max:100',
             'title' => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
             'variant_code' => 'nullable',
             'variant' => 'nullable',
             'prefix_override' => 'nullable|string|max:10',
@@ -157,9 +163,15 @@ class ProductSkuAndDuplicateApiController extends Controller
             'subcategory' => $meta['subcategory'] ?? '',
             'type' => ($product->type === 'physical' ? 'propio' : ($product->type ?? 'propio')),
             'is_published' => (bool) ($product->visible ?? true),
-            'website_section' => $meta['website_section'] ?? 'basicos',
+            'website_section' => $product->section_name ?? ($meta['section_name'] ?? ($meta['website_section'] ?? 'basicos')),
+            'section_name' => $product->section_name ?? ($meta['section_name'] ?? ($meta['website_section'] ?? 'Línea Básicos Esenciales')),
             'description' => $product->description ?? '',
-            'fabric_type' => $meta['fabric_type'] ?? 'Algodon & Modal',
+            'fabric_type' => $product->fabric ?? ($meta['fabric'] ?? ($meta['fabric_type'] ?? 'Algodon & Modal')),
+            'fabric' => $product->fabric ?? ($meta['fabric'] ?? ($meta['fabric_type'] ?? 'Algodon & Modal')),
+            'fabric_id' => $product->fabric_id ?? ($meta['fabric_id'] ?? null),
+            'image' => $meta['image'] ?? null,
+            'images' => $meta['images'] ?? (!empty($meta['gallery']) ? array_column($meta['gallery'], 'url') : (!empty($meta['image']) ? [$meta['image']] : [])),
+            'gallery' => $meta['gallery'] ?? [],
             'color_name' => $meta['color_name'] ?? 'Negro Clasico',
             'color_hex' => $meta['color_hex'] ?? '#0f172a',
             'color_type' => $meta['color_type'] ?? 'solid',
@@ -216,6 +228,7 @@ class ProductSkuAndDuplicateApiController extends Controller
             'title' => 'nullable|string|max:255',
             'name' => 'nullable|string|max:255',
             'brand' => 'nullable|string|max:100',
+            'supplier_id' => 'nullable',
             'category' => 'nullable|string|max:100',
             'subcategory' => 'nullable|string|max:100',
             'type' => 'nullable|string|in:propio,physical,dropship,both',
@@ -229,11 +242,14 @@ class ProductSkuAndDuplicateApiController extends Controller
             'volumes' => 'nullable|array',
             'location' => 'nullable|string|max:100',
             'fabric_type' => 'nullable|string|max:100',
+            'fabric' => 'nullable|string|max:120',
+            'fabric_id' => 'nullable|integer',
             'color_name' => 'nullable|string|max:100',
             'color_hex' => 'nullable|string|max:20',
             'color_type' => 'nullable|string|max:50',
             'design_type' => 'nullable|string|max:50',
-            'website_section' => 'nullable|string|max:50',
+            'website_section' => 'nullable|string|max:120',
+            'section_name' => 'nullable|string|max:120',
             'is_published' => 'nullable|boolean',
             'description' => 'nullable|string',
             'bullet_points' => 'nullable|array',
@@ -244,10 +260,17 @@ class ProductSkuAndDuplicateApiController extends Controller
             'pao_months' => 'nullable|integer|min:0',
             'provider' => 'nullable|string|max:100',
             'provider_url' => 'nullable|string|max:255',
+            'approval_status' => 'nullable|string|in:draft,approved',
+            'images' => 'nullable|array',
+            'images.*.url' => 'nullable|string|max:1000',
+            'images.*.color_name' => 'nullable|string|max:100',
+            'images.*.is_primary' => 'nullable|boolean',
         ]);
 
         $cleanSku = trim(strtoupper($validated['sku']));
         $title = $validated['title'] ?? ($validated['name'] ?? 'Nuevo Producto');
+        $approvalStatus = $validated['approval_status'] ?? $request->input('approval_status', 'approved');
+        $isDraft = ($approvalStatus === 'draft');
         $rawType = $validated['type'] ?? 'physical';
         $dbType = ($rawType === 'propio') ? 'physical' : $rawType;
 
@@ -271,6 +294,55 @@ class ProductSkuAndDuplicateApiController extends Controller
             }
         }
 
+        // Procesar imágenes con variante de color de prenda (Regla 1 y 2)
+        $rawImages = $validated['images'] ?? [];
+        $imageColorMap = $request->input('images_by_color', $request->input('image_color_map', []));
+        $formattedGallery = [];
+        $primaryImageUrl = null;
+        if (is_array($rawImages)) {
+            foreach ($rawImages as $img) {
+                if (is_string($img) && !empty($img)) {
+                    $cName = $imageColorMap[$img] ?? ($validated['color_name'] ?? null);
+                    $formattedGallery[] = [
+                        'url' => $img,
+                        'color_name' => $cName,
+                        'is_primary' => empty($formattedGallery),
+                    ];
+                    if (!$primaryImageUrl) $primaryImageUrl = $img;
+                } elseif (is_array($img) && !empty($img['url'])) {
+                    $url = $img['url'];
+                    $cName = $img['color_name'] ?? ($imageColorMap[$url] ?? ($validated['color_name'] ?? null));
+                    $isPrim = !empty($img['is_primary']);
+                    $formattedGallery[] = [
+                        'url' => $url,
+                        'color_name' => $cName,
+                        'is_primary' => $isPrim,
+                    ];
+                    if ($isPrim || !$primaryImageUrl) {
+                        $primaryImageUrl = $url;
+                    }
+                }
+            }
+        }
+
+        // Resolver Fabric (Telas - Reglas 5 y 6)
+        $fabricName = $validated['fabric'] ?? ($validated['fabric_type'] ?? null);
+        $fabricId = $validated['fabric_id'] ?? null;
+        if (!empty($fabricName) && empty($fabricId)) {
+            $fabModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', Str::slug($fabricName))->first();
+            if ($fabModel) {
+                $fabricId = $fabModel->id;
+                $fabricName = $fabModel->name;
+            }
+        } elseif (!empty($fabricId) && empty($fabricName)) {
+            $fabModel = \App\Models\ApparelFabric::find($fabricId);
+            if ($fabModel) {
+                $fabricName = $fabModel->name;
+            }
+        }
+
+        $sectionName = $validated['section_name'] ?? ($validated['website_section'] ?? 'Línea Básicos Esenciales');
+
         $meta = [
             'category' => $validated['category'] ?? 'General',
             'subcategory' => $validated['subcategory'] ?? '',
@@ -283,35 +355,58 @@ class ProductSkuAndDuplicateApiController extends Controller
             'volumes' => $validated['volumes'] ?? [],
             'local_stock' => $localStock,
             'location' => $validated['location'] ?? 'A-01-A',
-            'fabric_type' => $validated['fabric_type'] ?? '',
+            'fabric_type' => $fabricName ?? '',
+            'fabric' => $fabricName ?? '',
+            'fabric_id' => $fabricId,
             'color_name' => $validated['color_name'] ?? '',
             'color_hex' => $validated['color_hex'] ?? '#0f172a',
             'color_type' => $validated['color_type'] ?? 'solid',
             'design_type' => $validated['design_type'] ?? 'sin_diseno',
-            'website_section' => $validated['website_section'] ?? 'basicos',
+            'website_section' => $sectionName,
+            'section_name' => $sectionName,
             'bullet_points' => $validated['bullet_points'] ?? [],
             'seo_tags' => $validated['seo_tags'] ?? [],
             'requires_sanitary_control' => (bool) ($validated['requires_sanitary_control'] ?? false),
             'batch_number' => $validated['batch_number'] ?? null,
             'expiration_date' => $validated['expiration_date'] ?? null,
             'pao_months' => $validated['pao_months'] ?? 12,
+            'supplier_id' => $validated['supplier_id'] ?? null,
             'provider' => $validated['provider'] ?? 'ModaIntima Textil MX',
             'provider_url' => $validated['provider_url'] ?? '',
+            'images' => array_column($formattedGallery, 'url'),
+            'gallery' => $formattedGallery,
+            'images_by_color' => $imageColorMap ?: array_column($formattedGallery, 'color_name', 'url'),
+            'image_color_map' => $imageColorMap ?: array_column($formattedGallery, 'color_name', 'url'),
+            'image' => $primaryImageUrl,
+            'approval_status' => $approvalStatus,
+            'is_approved' => !$isDraft,
         ];
 
-        return DB::transaction(function () use ($cleanSku, $title, $validated, $pvp, $cost, $dbType, $meta, $effectivePrice, $localStock, $marginPct, $sizes) {
+        return DB::transaction(function () use ($cleanSku, $title, $validated, $pvp, $cost, $dbType, $meta, $effectivePrice, $localStock, $marginPct, $sizes, $fabricName, $fabricId, $sectionName, $isDraft, $approvalStatus) {
             $product = Product::create([
                 'sku' => $cleanSku,
                 'title' => $title,
                 'slug' => Str::slug($title) . '-' . strtolower($cleanSku),
                 'brand' => $validated['brand'] ?? 'Generico',
+                'fabric' => $fabricName,
+                'fabric_id' => $fabricId,
+                'section_name' => $sectionName,
                 'price' => $pvp,
                 'cost' => $cost,
                 'type' => $dbType,
-                'visible' => isset($validated['is_published']) ? (bool) $validated['is_published'] : true,
+                'visible' => $isDraft ? false : (isset($validated['is_published']) ? (bool) $validated['is_published'] : true),
                 'description' => $validated['description'] ?? '',
                 'meta' => $meta,
             ]);
+
+            // Vincular automáticamente a la categoría si existe
+            if (!empty($validated['category'])) {
+                $categoryModel = \App\Models\Category::firstOrCreate(
+                    ['name' => trim($validated['category'])],
+                    ['slug' => Str::slug(trim($validated['category'])), 'is_active' => true]
+                );
+                $product->categories()->syncWithoutDetaching([$categoryModel->id]);
+            }
 
             if (!empty($sizes) && is_array($sizes)) {
                 foreach ($sizes as $szKey => $qty) {
@@ -368,9 +463,13 @@ class ProductSkuAndDuplicateApiController extends Controller
                 ]);
             }
 
+            $successMsg = $isDraft 
+                ? "Producto {$cleanSku} pre-guardado como borrador (pendiente de aprobación)."
+                : "Producto {$cleanSku} creado y aprobado exitosamente en el catálogo operativo.";
+
             return response()->json([
                 'status' => 'success',
-                'message' => "Producto {$cleanSku} creado exitosamente en el catalogo.",
+                'message' => $successMsg,
                 'data' => [
                     'id' => $product->id,
                     'sku' => $product->sku,
@@ -378,10 +477,51 @@ class ProductSkuAndDuplicateApiController extends Controller
                     'effective_price' => $effectivePrice,
                     'local_stock' => $localStock,
                     'margin_pct' => $marginPct,
+                    'visible' => $product->visible,
+                    'approval_status' => $approvalStatus,
+                    'is_approved' => !$isDraft,
                     'created_at' => $product->created_at->toIso8601String(),
                 ],
             ], 201);
         });
+    }
+
+    /**
+     * Regla 5: Aprueba oficialmente un producto en estado de borrador para ingresarlo al catálogo operativo.
+     */
+    public function approveProduct(Request $request, int|string $id): JsonResponse
+    {
+        $product = is_numeric($id) ? Product::find((int) $id) : Product::where('sku', strtoupper(trim($id)))->first();
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Producto no encontrado para aprobación.'
+            ], 404);
+        }
+
+        $meta = $product->meta ?? [];
+        $meta['approval_status'] = 'approved';
+        $meta['is_approved'] = true;
+        $meta['approved_at'] = now()->toIso8601String();
+        $meta['approved_by'] = auth()->id() ?? 'admin';
+
+        $product->update([
+            'visible' => true,
+            'meta' => $meta,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Producto {$product->sku} aprobado y publicado oficialmente en el catálogo operativo.",
+            'data' => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'title' => $product->title,
+                'visible' => $product->visible,
+                'approval_status' => 'approved',
+                'is_approved' => true,
+            ]
+        ]);
     }
 
     /**
@@ -407,19 +547,27 @@ class ProductSkuAndDuplicateApiController extends Controller
             'volumes' => 'nullable|array',
             'location' => 'nullable|string|max:100',
             'fabric_type' => 'nullable|string|max:100',
+            'fabric' => 'nullable|string|max:120',
+            'fabric_id' => 'nullable|integer',
             'color_name' => 'nullable|string|max:100',
             'color_hex' => 'nullable|string|max:20',
             'color_type' => 'nullable|string|max:50',
             'design_type' => 'nullable|string|max:50',
-            'website_section' => 'nullable|string|max:50',
+            'website_section' => 'nullable|string|max:120',
+            'section_name' => 'nullable|string|max:120',
             'is_published' => 'nullable|boolean',
             'description' => 'nullable|string',
             'requires_sanitary_control' => 'nullable|boolean',
             'batch_number' => 'nullable|string|max:100',
             'expiration_date' => 'nullable|string|max:50',
             'pao_months' => 'nullable|integer|min:0',
+            'supplier_id' => 'nullable',
             'provider' => 'nullable|string|max:100',
             'provider_url' => 'nullable|string|max:255',
+            'image' => 'nullable|string|max:1000',
+            'images' => 'nullable|array',
+            'images_by_color' => 'nullable|array',
+            'image_color_map' => 'nullable|array',
         ]);
 
         $product = Product::where('sku', $cleanSku)->first();
@@ -441,6 +589,92 @@ class ProductSkuAndDuplicateApiController extends Controller
         $localStock = array_sum(array_map('intval', $sizes));
 
         $existingMeta = $product && is_array($product->meta) ? $product->meta : [];
+
+        // Resolver Fabric (Telas - Reglas 5 y 6)
+        $fabricName = $validated['fabric'] ?? ($validated['fabric_type'] ?? null);
+        if (empty($fabricName)) {
+            $fabricName = $existingMeta['fabric'] ?? ($existingMeta['fabric_type'] ?? null);
+        }
+
+        $fabricId = null;
+        if (!empty($fabricName)) {
+            $fabModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', Str::slug($fabricName))->first();
+            if (!$fabModel) {
+                $fabModel = \App\Models\ApparelFabric::create([
+                    'name' => $fabricName,
+                    'slug' => Str::slug($fabricName),
+                    'description' => 'Fibra textil para indumentaria',
+                    'is_active' => true,
+                ]);
+            }
+            $fabricId = $fabModel->id;
+            $fabricName = $fabModel->name;
+        } elseif (!empty($validated['fabric_id'])) {
+            $fabModel = \App\Models\ApparelFabric::find($validated['fabric_id']);
+            if ($fabModel) {
+                $fabricId = $fabModel->id;
+                $fabricName = $fabModel->name;
+            }
+        }
+
+        // Validación final de existencia de clave foránea
+        if ($fabricId && !\App\Models\ApparelFabric::where('id', $fabricId)->exists()) {
+            $fabricId = null;
+        }
+
+        $sectionName = $validated['section_name'] ?? ($validated['website_section'] ?? ($existingMeta['section_name'] ?? ($existingMeta['website_section'] ?? 'Línea Básicos Esenciales')));
+
+        // Resolver Color y Hex Cromático (Regla 1)
+        $colorName = $validated['color_name'] ?? ($existingMeta['color_name'] ?? 'Negro Clásico');
+        $colorHex = $validated['color_hex'] ?? ($existingMeta['color_hex'] ?? null);
+        $colorType = $validated['color_type'] ?? ($existingMeta['color_type'] ?? 'solid');
+
+        if (empty($colorHex) || $colorHex === '#0f172a' || $colorHex === '#111827') {
+            $foundColor = \App\Models\ApparelColor::where('name', $colorName)
+                ->orWhere('name', 'like', '%' . explode(' ', $colorName)[0] . '%')
+                ->first();
+            if ($foundColor && $foundColor->hex_code) {
+                $colorHex = $foundColor->hex_code;
+                $colorType = $foundColor->color_type ?: $colorType;
+            }
+        }
+        $colorHex = $colorHex ?: '#0f172a';
+
+        // Procesar Imágenes con Variante de Color (Regla 1)
+        $rawImages = $request->input('images', $existingMeta['gallery'] ?? ($existingMeta['images'] ?? []));
+        $imageColorMap = $request->input('images_by_color', $request->input('image_color_map', []));
+        $formattedGallery = [];
+        $primaryImageUrl = $validated['image'] ?? ($existingMeta['image'] ?? null);
+
+        if (is_array($rawImages)) {
+            foreach ($rawImages as $img) {
+                if (is_string($img) && !empty($img)) {
+                    $cName = $imageColorMap[$img] ?? ($colorName ?? ($existingMeta['color_name'] ?? null));
+                    $isPrim = ($img === $primaryImageUrl) || empty($formattedGallery);
+                    $formattedGallery[] = [
+                        'url' => $img,
+                        'color_name' => $cName,
+                        'is_primary' => $isPrim,
+                    ];
+                    if ($isPrim && empty($primaryImageUrl)) $primaryImageUrl = $img;
+                } elseif (is_array($img) && !empty($img['url'])) {
+                    $url = $img['url'];
+                    $cName = $img['color_name'] ?? ($imageColorMap[$url] ?? ($colorName ?? ($existingMeta['color_name'] ?? null)));
+                    $isPrim = !empty($img['is_primary']) || ($url === $primaryImageUrl);
+                    $formattedGallery[] = [
+                        'url' => $url,
+                        'color_name' => $cName,
+                        'is_primary' => $isPrim,
+                    ];
+                    if ($isPrim) $primaryImageUrl = $url;
+                }
+            }
+        }
+        if (empty($primaryImageUrl) && !empty($formattedGallery)) {
+            $primaryImageUrl = $formattedGallery[0]['url'];
+            $formattedGallery[0]['is_primary'] = true;
+        }
+
         $newMeta = array_merge($existingMeta, [
             'category' => $validated['category'] ?? ($existingMeta['category'] ?? 'General'),
             'subcategory' => $validated['subcategory'] ?? ($existingMeta['subcategory'] ?? ''),
@@ -453,25 +687,37 @@ class ProductSkuAndDuplicateApiController extends Controller
             'volumes' => $validated['volumes'] ?? ($existingMeta['volumes'] ?? []),
             'local_stock' => $localStock,
             'location' => $validated['location'] ?? ($existingMeta['location'] ?? 'A-01-A'),
-            'fabric_type' => $validated['fabric_type'] ?? ($existingMeta['fabric_type'] ?? 'Algodon & Modal'),
-            'color_name' => $validated['color_name'] ?? ($existingMeta['color_name'] ?? 'Negro Clasico'),
-            'color_hex' => $validated['color_hex'] ?? ($existingMeta['color_hex'] ?? '#0f172a'),
-            'color_type' => $validated['color_type'] ?? ($existingMeta['color_type'] ?? 'solid'),
+            'fabric_type' => $fabricName ?? ($existingMeta['fabric_type'] ?? 'Algodon & Modal'),
+            'fabric' => $fabricName ?? '',
+            'fabric_id' => $fabricId,
+            'color_name' => $colorName,
+            'color_hex' => $colorHex,
+            'color_type' => $colorType,
             'design_type' => $validated['design_type'] ?? ($existingMeta['design_type'] ?? 'sin_diseno'),
-            'website_section' => $validated['website_section'] ?? ($existingMeta['website_section'] ?? 'basicos'),
+            'website_section' => $sectionName,
+            'section_name' => $sectionName,
             'requires_sanitary_control' => (bool) ($validated['requires_sanitary_control'] ?? ($existingMeta['requires_sanitary_control'] ?? false)),
             'batch_number' => $validated['batch_number'] ?? ($existingMeta['batch_number'] ?? null),
             'expiration_date' => $validated['expiration_date'] ?? ($existingMeta['expiration_date'] ?? null),
             'pao_months' => $validated['pao_months'] ?? ($existingMeta['pao_months'] ?? 12),
+            'supplier_id' => $validated['supplier_id'] ?? ($existingMeta['supplier_id'] ?? null),
             'provider' => $validated['provider'] ?? ($existingMeta['provider'] ?? 'ModaIntima Textil MX'),
             'provider_url' => $validated['provider_url'] ?? ($existingMeta['provider_url'] ?? ''),
+            'image' => $primaryImageUrl,
+            'images' => array_column($formattedGallery, 'url'),
+            'gallery' => $formattedGallery,
+            'images_by_color' => $imageColorMap ?: array_column($formattedGallery, 'color_name', 'url'),
+            'image_color_map' => $imageColorMap ?: array_column($formattedGallery, 'color_name', 'url'),
         ]);
 
-        return DB::transaction(function () use ($product, $cleanSku, $title, $validated, $pvp, $cost, $dbType, $newMeta, $effectivePrice, $localStock, $marginPct) {
+        return DB::transaction(function () use ($product, $cleanSku, $title, $validated, $pvp, $cost, $dbType, $newMeta, $effectivePrice, $localStock, $marginPct, $fabricName, $fabricId, $sectionName) {
             if ($product) {
                 $product->update([
                     'title' => $title,
                     'brand' => $validated['brand'] ?? $product->brand,
+                    'fabric' => $fabricName,
+                    'fabric_id' => $fabricId,
+                    'section_name' => $sectionName,
                     'price' => $pvp,
                     'cost' => $cost,
                     'type' => $dbType,
@@ -485,6 +731,9 @@ class ProductSkuAndDuplicateApiController extends Controller
                     'title' => $title,
                     'slug' => Str::slug($title) . '-' . strtolower($cleanSku),
                     'brand' => $validated['brand'] ?? 'Generico',
+                    'fabric' => $fabricName,
+                    'fabric_id' => $fabricId,
+                    'section_name' => $sectionName,
                     'price' => $pvp,
                     'cost' => $cost,
                     'type' => $dbType,

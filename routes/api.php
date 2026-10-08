@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RevOps\InventoryApiController;
 use App\Http\Controllers\Api\RevOps\InventorySettingsApiController;
 use App\Http\Controllers\Api\RevOps\ProductSkuAndDuplicateApiController;
 use App\Http\Controllers\Api\RevOps\SupplierApiController;
+use App\Http\Controllers\Api\RevOps\BrandApiController;
 use App\Http\Controllers\Api\RevOps\StockReservationApiController;
 use App\Http\Controllers\Api\RevOps\MarketingApiController;
 use App\Http\Controllers\Api\RevOps\FinanceApiController;
@@ -37,6 +38,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/purchases/credit-agreements', [InventoryApiController::class, 'getCreditAgreements']);
         Route::post('/purchases/credit-agreements', [InventoryApiController::class, 'storeCreditAgreement']);
         Route::get('/purchases/credit-agreements/{id}', [InventoryApiController::class, 'getCreditAgreementDetail']);
+        Route::put('/purchases/credit-agreements/{id}', [InventoryApiController::class, 'updateCreditAgreement']);
         Route::post('/purchases/credit-agreements/{id}/void', [InventoryApiController::class, 'voidCreditAgreement']);
         Route::get('/purchases/orders', [InventoryApiController::class, 'getPurchaseOrders']);
         Route::get('/purchases/orders/{id}', [InventoryApiController::class, 'getPurchaseOrderDetail']);
@@ -50,6 +52,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/bundles', [InventoryApiController::class, 'storeBundle']);
         Route::post('/bundles/audit-deficit', [InventoryApiController::class, 'auditBomDeficit']);
         Route::post('/adjust', [InventoryApiController::class, 'adjustStock']);
+        Route::post('/upload-image', [InventoryApiController::class, 'uploadImage']);
+        Route::get('/archived-products', [InventoryApiController::class, 'getArchivedProducts']);
+        Route::post('/products/{id}/resolve-discontinued', [InventoryApiController::class, 'resolveDiscontinuedProduct']);
+        Route::post('/products/{id}/reactivate', [InventoryApiController::class, 'reactivateArchivedProduct']);
+        Route::delete('/products/{id}', [InventoryApiController::class, 'destroyProduct']);
 
         // GESTION FULLSTACK DE PROVEEDORES & EXTRANET HUB 7 (TASK-PUR-02 / SLICE 4)
         Route::prefix('suppliers')->group(function () {
@@ -57,9 +64,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [SupplierApiController::class, 'store']);
             Route::get('/{id}', [SupplierApiController::class, 'show']);
             Route::put('/{id}', [SupplierApiController::class, 'update']);
+            Route::patch('/{id}/frequency', [SupplierApiController::class, 'updateFrequency']);
             Route::delete('/{id}', [SupplierApiController::class, 'destroy']);
             Route::post('/{id}/toggle-status', [SupplierApiController::class, 'toggleStatus']);
             Route::post('/{id}/invite-extranet', [SupplierApiController::class, 'inviteExtranet']);
+            Route::post('/{id}/brands', [SupplierApiController::class, 'addBrand']);
+            Route::delete('/{id}/brands', [SupplierApiController::class, 'removeBrand']);
         });
 
         // ALTA DE PRODUCTO DESDE MODAL PANORAMICO (TASK-INV-20 / SLICE 6)
@@ -73,6 +83,9 @@ Route::prefix('v1')->group(function () {
         // MODAL PANORAMICO CENTRADO DE DETALLE Y ACTUALIZACION INTEGRAL DE SKU (TASK-INV-18 / SLICE 4)
         Route::get('/products/{sku}/detail', [ProductSkuAndDuplicateApiController::class, 'getSkuDetail']);
         Route::put('/products/{sku}/update-complete', [ProductSkuAndDuplicateApiController::class, 'updateComplete']);
+
+        // APROBACION DE PRODUCTOS EN BORRADOR (REGLA 5)
+        Route::post('/products/{id}/approve', [ProductSkuAndDuplicateApiController::class, 'approveProduct']);
 
         // GESTOR DE AJUSTES DE INVENTARIO: TALLAS, VOLUMENES Y CATEGORIAS (TASK-INV-14)
         Route::prefix('settings')->group(function () {
@@ -104,6 +117,62 @@ Route::prefix('v1')->group(function () {
             Route::post('/categories/{id}/archive', [InventorySettingsApiController::class, 'archiveCategory']);
             Route::post('/categories/{id}/restore', [InventorySettingsApiController::class, 'restoreCategory']);
             Route::delete('/categories/{id}', [InventorySettingsApiController::class, 'destroyCategory']);
+
+            // GESTOR DE TELAS & FIBRAS (REGLA 5 Y 6)
+            Route::get('/fabrics', [InventorySettingsApiController::class, 'getFabrics']);
+            Route::post('/fabrics', [InventorySettingsApiController::class, 'storeFabric']);
+            Route::put('/fabrics/{id}', [InventorySettingsApiController::class, 'updateFabric']);
+            Route::patch('/fabrics/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleFabricActive']);
+            Route::match(['post', 'patch'], '/fabrics/{id}/archive', [InventorySettingsApiController::class, 'archiveFabric']);
+            Route::match(['post', 'patch'], '/fabrics/{id}/restore', [InventorySettingsApiController::class, 'restoreFabric']);
+            Route::delete('/fabrics/{id}', [InventorySettingsApiController::class, 'destroyFabric']);
+
+            // GESTOR DE COLORES & SWATCHES (REGLA 3)
+            Route::get('/colors', [InventorySettingsApiController::class, 'getColors']);
+            Route::post('/colors', [InventorySettingsApiController::class, 'storeColor']);
+            Route::put('/colors/{id}', [InventorySettingsApiController::class, 'updateColor']);
+            Route::patch('/colors/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleColorActive']);
+            Route::delete('/colors/{id}', [InventorySettingsApiController::class, 'destroyColor']);
+
+            // SECCIONES DEL SITIO WEB E-COMMERCE (REGLA 7)
+            Route::get('/store-sections', [InventorySettingsApiController::class, 'getStoreSections']);
+            Route::post('/store-sections', [InventorySettingsApiController::class, 'storeStoreSection']);
+            Route::put('/store-sections/{id}', [InventorySettingsApiController::class, 'updateStoreSection']);
+            Route::patch('/store-sections/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleStoreSectionActive']);
+            Route::match(['post', 'patch'], '/store-sections/{id}/archive', [InventorySettingsApiController::class, 'archiveStoreSection']);
+            Route::match(['post', 'patch'], '/store-sections/{id}/restore', [InventorySettingsApiController::class, 'restoreStoreSection']);
+            Route::delete('/store-sections/{id}', [InventorySettingsApiController::class, 'destroyStoreSection']);
+
+            // GESTIÓN INTEGRAL DE MARCAS COMERCIALES (TASK-BRD-01)
+            Route::get('/brands', [BrandApiController::class, 'index']);
+            Route::post('/brands', [BrandApiController::class, 'store']);
+            Route::get('/brands/{id}', [BrandApiController::class, 'show']);
+            Route::put('/brands/{id}', [BrandApiController::class, 'update']);
+            Route::patch('/brands/{id}/toggle-active', [BrandApiController::class, 'toggleActive']);
+            Route::post('/brands/{id}/archive', [BrandApiController::class, 'archive']);
+            Route::post('/brands/{id}/restore', [BrandApiController::class, 'restore']);
+            Route::delete('/brands/{id}', [BrandApiController::class, 'destroy']);
+            Route::post('/brands/{id}/assign-supplier', [BrandApiController::class, 'assignSupplier']);
+
+            // TABULADORES DE PRECIOS MOQ POR PROVEEDOR (REGLA COMPRAS & INVENTARIO)
+            Route::get('/moq-sheets', [InventorySettingsApiController::class, 'getMoqSheets']);
+            Route::post('/moq-sheets', [InventorySettingsApiController::class, 'storeMoqSheet']);
+            Route::put('/moq-sheets/{id}', [InventorySettingsApiController::class, 'updateMoqSheet']);
+            Route::patch('/moq-sheets/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleMoqSheetActive']);
+            Route::delete('/moq-sheets/{id}', [InventorySettingsApiController::class, 'destroyMoqSheet']);
+        });
+
+        // RUTA DIRECTA DE MARCAS EN INVENTARIO
+        Route::prefix('brands')->group(function () {
+            Route::get('/', [BrandApiController::class, 'index']);
+            Route::post('/', [BrandApiController::class, 'store']);
+            Route::get('/{id}', [BrandApiController::class, 'show']);
+            Route::put('/{id}', [BrandApiController::class, 'update']);
+            Route::patch('/{id}/toggle-active', [BrandApiController::class, 'toggleActive']);
+            Route::post('/{id}/archive', [BrandApiController::class, 'archive']);
+            Route::post('/{id}/restore', [BrandApiController::class, 'restore']);
+            Route::delete('/{id}', [BrandApiController::class, 'destroy']);
+            Route::post('/{id}/assign-supplier', [BrandApiController::class, 'assignSupplier']);
         });
     });
 
@@ -197,6 +266,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/system-health/ping', [DashboardApiController::class, 'pingSystemHealth']);
         Route::post('/environment/switch', [DashboardApiController::class, 'switchEnvironment']);
         Route::post('/copilot/chat', [DashboardApiController::class, 'copilotChat']);
+        Route::get('/copilot/status', [DashboardApiController::class, 'getCopilotStatus']);
     });
 
     // 8. STOREFRONT D2C CATALOG, PDP & CARRITO CON RESERVA TEMPORAL (PRIORIDAD 1 - SLICE 1.2 & 1.3)

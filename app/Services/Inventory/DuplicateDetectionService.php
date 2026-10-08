@@ -50,8 +50,15 @@ class DuplicateDetectionService
             ];
         }
 
-        // Obtener productos para comparacion
-        $query = Product::with('categories');
+        // Obtener productos para comparacion: REGLA: solo productos aprobados en el catalogo operativo
+        $query = Product::with(['categories', 'variants.inventories'])
+            ->where('visible', true)
+            ->where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('meta->approval_status')
+                  ->orWhere('meta->approval_status', '!=', 'draft');
+            });
+
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
@@ -72,12 +79,23 @@ class DuplicateDetectionService
             );
 
             if ($eval['similarity_score'] >= $thresholdWarning) {
+                $firstImg = data_get($product->meta, 'image')
+                    ?: (data_get($product->meta, 'images.0')
+                    ?: (data_get($product->meta, 'gallery.0.url') ?: null));
+
+                if (is_array($firstImg)) {
+                    $firstImg = $firstImg['url'] ?? ($firstImg['preview'] ?? null);
+                }
+
                 $matches[] = [
                     'id' => $product->id,
                     'sku' => $product->sku,
                     'title' => $product->title,
                     'brand' => $product->brand,
+                    'category' => $product->categories->first()?->name ?? 'General',
                     'price' => (float) $product->price,
+                    'image' => $firstImg,
+                    'stock' => (int) $product->variants->sum(fn ($v) => $v->inventories->sum('quantity')),
                     'similarity_score' => round($eval['similarity_score'], 1),
                     'match_reasons' => $eval['reasons'],
                 ];

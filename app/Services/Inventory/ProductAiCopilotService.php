@@ -2,10 +2,17 @@
 
 namespace App\Services\Inventory;
 
+use App\Services\Ai\GeminiService;
 use Illuminate\Support\Str;
 
 class ProductAiCopilotService
 {
+    public function __construct(
+        protected ?GeminiService $gemini = null
+    ) {
+        $this->gemini = $gemini ?? app(GeminiService::class);
+    }
+
     /**
      * Genera contenido comercial persuasivo, especificaciones tecnicas y tags SEO
      * a partir de los atributos tecnicos del producto.
@@ -28,16 +35,85 @@ class ProductAiCopilotService
         $name = trim((string) ($attributes['name'] ?? ($attributes['title'] ?? 'Prenda de Ropa Interior')));
         $category = trim((string) ($attributes['category'] ?? 'Ropa Interior'));
         $brand = trim((string) ($attributes['brand'] ?? 'Torzo'));
-        $fabric = trim((string) ($attributes['fabric_type'] ?? 'Algodon Pima & Modal'));
-        $color = trim((string) ($attributes['color_name'] ?? 'Negro Clasico'));
-        $designType = trim((string) ($attributes['design_type'] ?? 'sin_diseno'));
+        $fabric = trim((string) ($attributes['fabric_type'] ?? ($attributes['fabric'] ?? 'Textil Anatómico')));
+        $color = trim((string) ($attributes['color_name'] ?? 'Negro Clásico'));
+        $designType = trim((string) ($attributes['design_type'] ?? 'liso'));
         $audience = trim((string) ($attributes['target_audience'] ?? 'Marte'));
         $price = isset($attributes['pvp']) && is_numeric($attributes['pvp']) ? (float) $attributes['pvp'] : null;
 
+        // Intentar generación inteligente enriquecida mediante Google Gemini AI
+        if ($this->gemini && $this->gemini->isConfigured()) {
+            $geminiPrompt = "Eres un redactor experto en moda íntima y E-Commerce D2C de alta conversión para 'Mi Tienda Online'.
+Genera contenido comercial conciso y SEO para la siguiente prenda de ropa interior:
+- Nombre: {$name}
+- Categoría: {$category}
+- Marca: {$brand}
+- Tipo de Tela / Composición: {$fabric}
+- Color: {$color}
+- Acabado: {$designType}
+- Audiencia: {$audience}" . ($price ? " - Precio: MXN \${$price}" : "") . "
+
+REGLA CRÍTICA DE FIDELIDAD TAXONÓMICA:
+La descripción comercial ('commercial_description') y viñetas DEBEN basarse ESTRICTAMENTE en el Tipo de Tela / Composición provisto ('{$fabric}') y en el acabado ('{$designType}').
+Queda TERMINANTEMENTE PROHIBIDO inventar o mencionar telas o fibras no provistas (como modal, seda o algodón) si no forman parte explícita de '{$fabric}'.
+
+REGLA DE LONGITUD: La descripción comercial ('commercial_description') DEBE TENER UN MÁXIMO ABSOLUTO DE 75 CARACTERES (concisa, persuasiva, directa al punto).
+No modifiques el nombre del producto en el título.
+
+Genera un JSON con esta estructura exacta:
+{
+  \"optimized_title\": \"{$name}\",
+  \"commercial_description\": \"Máximo 75 caracteres destacando confort y soporte en {$fabric}.\",
+  \"bullet_points\": [\"Punto destacado 1\", \"Punto destacado 2\", \"Punto destacado 3\", \"Punto destacado 4\"],
+  \"seo_tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\", \"tag6\"]
+}";
+
+            $aiResult = $this->gemini->generateJson($geminiPrompt, [
+                'temperature' => 0.7,
+                'max_tokens' => 1000,
+            ]);
+
+            if (is_array($aiResult) && !empty($aiResult['commercial_description'])) {
+                $optimizedTitle = trim((string) ($aiResult['optimized_title'] ?? $this->buildOptimizedTitle($name, $category, $brand, $fabric)));
+                if (stripos($optimizedTitle, $brand) === false) {
+                    $optimizedTitle = "{$brand} - {$optimizedTitle}";
+                }
+                $commercialDesc = mb_substr(trim((string) $aiResult['commercial_description']), 0, 75);
+                $bulletPoints = is_array($aiResult['bullet_points'] ?? null) && count($aiResult['bullet_points']) > 0
+                    ? $aiResult['bullet_points']
+                    : $this->buildTechnicalBulletPoints($category, $fabric, $color, $designType);
+                $seoTags = is_array($aiResult['seo_tags'] ?? null) && count($aiResult['seo_tags']) > 0
+                    ? $aiResult['seo_tags']
+                    : $this->buildSeoTags($name, $category, $brand, $fabric, $color, $audience);
+
+                return [
+                    'title' => $optimizedTitle,
+                    'optimized_title' => $optimizedTitle,
+                    'name' => $name,
+                    'description' => $commercialDesc,
+                    'commercial_description' => $commercialDesc,
+                    'bullet_points' => $bulletPoints,
+                    'technical_bullet_points' => $bulletPoints,
+                    'seo_tags' => $seoTags,
+                    'suggested_tags' => implode(', ', $seoTags),
+                    'category' => $category,
+                    'brand' => $brand,
+                    'metadata' => [
+                        'fabric' => $fabric,
+                        'color' => $color,
+                        'ai_provider' => 'gemini-flash',
+                        'ai_model' => $this->gemini->getModel(),
+                    ],
+                    'generated_at' => now()->toIso8601String(),
+                ];
+            }
+        }
+
+        // Fallback robusto determinístico si la IA no está disponible
         // 1. Titulo optimizado para conversion
         $optimizedTitle = $this->buildOptimizedTitle($name, $category, $brand, $fabric);
 
-        // 2. Descripcion persuasiva en 2 parrafos
+        // 2. Descripcion persuasiva de max 75 caracteres
         $commercialDesc = $this->buildCommercialDescription($name, $category, $brand, $fabric, $color, $designType, $audience);
 
         // 3. Puntos tecnicos destacados
@@ -49,6 +125,7 @@ class ProductAiCopilotService
         return [
             'title' => $optimizedTitle,
             'optimized_title' => $optimizedTitle,
+            'name' => $name,
             'description' => $commercialDesc,
             'commercial_description' => $commercialDesc,
             'bullet_points' => $bulletPoints,
@@ -60,6 +137,7 @@ class ProductAiCopilotService
             'metadata' => [
                 'fabric' => $fabric,
                 'color' => $color,
+                'ai_provider' => 'heuristic_fallback',
             ],
             'generated_at' => now()->toIso8601String(),
         ];
@@ -78,7 +156,7 @@ class ProductAiCopilotService
     }
 
     /**
-     * Redacta una descripcion comercial persuasiva de dos parrafos estructurados.
+     * Redacta una descripcion comercial persuasiva de maximo 75 caracteres.
      */
     protected function buildCommercialDescription(
         string $name,
@@ -89,15 +167,9 @@ class ProductAiCopilotService
         string $designType,
         string $audience
     ): string {
-        $p1 = "Experimenta el maximo confort y soporte anatomico con {$name} de {$brand}. Confeccionado minuciosamente a partir de {$fabric}, este diseno en tonalidad {$color} ofrece una sensacion tactil ultrasuave de segunda piel y una transpirabilidad termoreguladora que se adapta a cada uno de tus movimientos cotidianos sin presiones innecesarias.";
-
-        $designNote = ($designType === 'con_diseno')
-            ? 'Su acabado exclusivo con patrones estampados de autor resalta tu identidad con elegancia vanguardista.'
-            : 'Su silueta limpia y patronaje ergonomico sin costuras visibles garantiza discrecion absoluta bajo cualquier prenda exterior.';
-
-        $p2 = "{$designNote} Incorpora elastico reforzado con memoria que evita enrollamientos indeseados y costuras planas anti-friccion, consolidandose como una pieza imprescindible de alta durabilidad para tu guardarropa intimo.";
-
-        return "{$p1}\n\n{$p2}";
+        $design = ($designType === 'con_diseno') ? 'con diseño exclusivo' : 'en tono liso';
+        $desc = "{$name} en {$fabric} {$design} ({$brand}). Confort y soporte ergonómico.";
+        return mb_substr($desc, 0, 75);
     }
 
     /**

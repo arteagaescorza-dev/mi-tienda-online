@@ -57,27 +57,57 @@ class SkuGeneratorService
     public function generateSku(array $params = []): array
     {
         $prefix = $this->resolveCategoryPrefix(
-            $params['category'] ?? null,
+            $params['category'] ?? ($params['title'] ?? ($params['name'] ?? null)),
             $params['prefix_override'] ?? null
         );
 
-        $brandCode = $this->resolveBrandCode($params['brand'] ?? null);
+        $brandCandidate = $params['brand'] ?? null;
+        if (empty($brandCandidate) && !empty($params['supplier_id'])) {
+            $sup = \App\Models\Supplier::find($params['supplier_id']);
+            if ($sup) {
+                $brandCandidate = $sup->name;
+            }
+        } elseif (empty($brandCandidate) && !empty($params['supplier'])) {
+            $brandCandidate = $params['supplier'];
+        }
+
+        $brandCode = $this->resolveBrandCode($brandCandidate);
+
+        // Resolver codigo de tela opcional (Regla 4 y 5)
+        $fabricCandidate = $params['fabric'] ?? ($params['fabric_type'] ?? null);
+        $fabricCode = $this->resolveFabricCode($fabricCandidate);
+
+        // Resolver sufijo opcional de variante o color (Regla 4)
+        $variantCandidate = $params['variant_code'] ?? ($params['variant'] ?? null);
+        if (empty($variantCandidate) && !empty($params['color_name'])) {
+            $variantCandidate = $this->resolveColorCode($params['color_name']);
+        }
+        $variantSuffix = $this->resolveVariantSuffix($variantCandidate);
 
         $sequenceData = $this->resolveNextConsecutiveSequence($prefix, $brandCode);
         $nextSeq = $sequenceData['sequence'];
         $formattedSeq = $sequenceData['formatted_sequence'];
-        $baseSku = "{$prefix}-{$brandCode}-{$formattedSeq}";
 
-        // Resolver sufijo opcional de variante
-        $variantSuffix = $this->resolveVariantSuffix($params['variant_code'] ?? ($params['variant'] ?? null));
+        $skuParts = [$prefix, $brandCode];
+        if (!empty($fabricCode)) {
+            $skuParts[] = $fabricCode;
+        }
+        $skuParts[] = $formattedSeq;
+        $baseSku = implode('-', $skuParts);
+
         $finalSku = $variantSuffix ? "{$baseSku}-{$variantSuffix}" : $baseSku;
 
-        // Validar unicidad total (re-incrementar si colisiona con variante existente)
+        // Validar unicidad total
         $guardIterations = 0;
         while ($this->skuExistsInDatabase($finalSku) && $guardIterations < 100) {
             $nextSeq++;
             $formattedSeq = str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT);
-            $baseSku = "{$prefix}-{$brandCode}-{$formattedSeq}";
+            $skuParts = [$prefix, $brandCode];
+            if (!empty($fabricCode)) {
+                $skuParts[] = $fabricCode;
+            }
+            $skuParts[] = $formattedSeq;
+            $baseSku = implode('-', $skuParts);
             $finalSku = $variantSuffix ? "{$baseSku}-{$variantSuffix}" : $baseSku;
             $guardIterations++;
         }
@@ -328,6 +358,87 @@ class SkuGeneratorService
         }
 
         return null;
+    }
+
+    /**
+     * Resuelve las siglas estandarizadas del tipo de tela (2 a 3 caracteres).
+     */
+    public function resolveFabricCode(?string $fabric): ?string
+    {
+        if (empty($fabric)) {
+            return null;
+        }
+
+        $clean = strtolower(Str::ascii(trim($fabric)));
+
+        $fabricMap = [
+            'modal' => 'MOD',
+            'modal seamless' => 'MOD',
+            'algodon' => 'ALG',
+            'algodon pima' => 'ALG',
+            'seda' => 'SED',
+            'satin' => 'SED',
+            'microfibra' => 'MIC',
+            'malla' => 'MAL',
+            'mesh' => 'MSH',
+            'spandex' => 'SPX',
+            'elastano' => 'ELA',
+            'licra' => 'LIC',
+            'lycra' => 'LIC',
+            'encaje' => 'ENC',
+            'poliester' => 'POL',
+            'lino' => 'LIN',
+            'viscosa' => 'VIS',
+        ];
+
+        foreach ($fabricMap as $key => $code) {
+            if (str_contains($clean, $key)) {
+                return $code;
+            }
+        }
+
+        $letters = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $clean));
+        return strlen($letters) >= 3 ? substr($letters, 0, 3) : (strlen($letters) > 0 ? $letters : null);
+    }
+
+    /**
+     * Resuelve las siglas estandarizadas del color (2 a 3 caracteres).
+     */
+    public function resolveColorCode(?string $color): ?string
+    {
+        if (empty($color)) {
+            return null;
+        }
+
+        $clean = strtolower(Str::ascii(trim($color)));
+
+        $colorMap = [
+            'negro' => 'NG',
+            'blanco' => 'BL',
+            'rojo' => 'RJ',
+            'azul' => 'AZ',
+            'gris' => 'GR',
+            'verde' => 'VD',
+            'amarillo' => 'AM',
+            'rosa' => 'RS',
+            'morado' => 'MR',
+            'vino' => 'VN',
+            'marino' => 'MN',
+            'nude' => 'ND',
+            'beige' => 'BG',
+            'cafe' => 'CF',
+            'plata' => 'PL',
+            'dorado' => 'OR',
+        ];
+
+        foreach ($colorMap as $key => $code) {
+            if (str_contains($clean, $key)) {
+                return $code;
+            }
+        }
+
+        $letters = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $clean));
+        return strlen($letters) >= 2 ? substr($letters, 0, 2) : (strlen($letters) > 0 ? $letters : null);
     }
 
     /**

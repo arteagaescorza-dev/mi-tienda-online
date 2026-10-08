@@ -12,8 +12,22 @@ class ScrapedPendingItem extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'sizes' => 'array',
+        'images' => 'array',
+        'raw_snapshot' => 'array',
+        'external_price' => 'decimal:2',
+        'scraped_cost' => 'decimal:2',
+        'curated_price' => 'decimal:2',
+    ];
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function supplierProduct(): BelongsTo
+    {
+        return $this->belongsTo(SupplierProduct::class);
     }
 }

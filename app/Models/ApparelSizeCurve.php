@@ -15,15 +15,29 @@ class ApparelSizeCurve extends Model
         'name',
         'slug',
         'category_scope',
+        'supplier_id',
+        'brand_id',
         'description',
         'is_default',
         'is_active',
     ];
 
     protected $casts = [
+        'supplier_id' => 'integer',
+        'brand_id' => 'integer',
         'is_default' => 'boolean',
         'is_active' => 'boolean',
     ];
+
+    public function supplier(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function brand(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
+    }
 
     public function sizes(): HasMany
     {

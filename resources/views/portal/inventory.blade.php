@@ -45,6 +45,7 @@
     {{-- Inyección de Datos Reales de Inventario desde Laravel (259 SKUs, 1,283 variantes) --}}
     <script>
         window.serverInventoryProducts = @json($portalProducts);
+        window.serverDraftProducts = @json($portalDraftProducts ?? []);
         window.serverSuppliers = @json($portalProviders);
         window.serverPurchaseOrders = @json($portalPurchaseOrders);
         window.serverFuturePurchaseOrders = @json($portalFuturePurchaseOrders);
@@ -55,7 +56,14 @@
         window.serverSizeCurves = @json($portalSizeCurves ?? []);
         window.serverFragranceVolumes = @json($portalFragranceVolumes ?? []);
         window.serverCategories = @json($portalCategories ?? []);
+        window.serverBrands = @json($portalBrands ?? []);
+        window.serverFabrics = @json($portalFabrics ?? []);
+        window.serverApparelColors = @json($portalApparelColors ?? []);
+        window.serverStoreSections = @json($portalStoreSections ?? []);
         window.serverOnDemandRequests = @json($portalOnDemandRequests ?? []);
+        window.serverScrapedPendingItems = @json($portalScrapedPendingItems ?? []);
+        window.serverArchivedProducts = @json($portalArchivedProducts ?? []);
+        window.serverMoqSheets = @json($portalMoqSheets ?? []);
     </script>
 
     <!-- ========================================================================= -->
@@ -318,6 +326,36 @@
                           x-text="activeStockLocksCount + ' en espera'"></span>
                 </button>
 
+                <!-- Botón Productos Archivados & Descontinuados (Regla 5) -->
+                <button 
+                    type="button"
+                    @click.stop="archivedProductsModalOpen = true" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 hover:text-amber-900 rounded-lg text-xs font-bold transition border border-amber-200 cursor-pointer"
+                    style="min-height: unset;"
+                    title="Herramienta de Productos Archivados y Descontinuados"
+                >
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    <span>Archivados & Descontinuados</span>
+                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900" x-text="archivedProducts.length"></span>
+                </button>
+
+                <!-- Botón Pre-guardados / Borradores Pendientes de Aprobación (Regla 5) -->
+                <button 
+                    type="button"
+                    @click.stop="draftsModalOpen = true" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 hover:text-sky-900 rounded-lg text-xs font-bold transition border border-sky-200 cursor-pointer"
+                    style="min-height: unset;"
+                    title="Prendas pre-guardadas en borrador pendientes de aprobación oficial"
+                >
+                    <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Borradores</span>
+                    <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-200 text-sky-900" x-text="(draftProducts || []).length"></span>
+                </button>
+
                 <!-- Menú Desplegable "Herramientas de Stock" (TASK-INV-10) -->
                 <div class="relative inline-block text-left" @click.outside="toolsDropdownOpen = false">
                     <button 
@@ -426,6 +464,48 @@
                                 x-text="cycleCountModal.isCompletedToday ? 'OK' : '3 SKUs'"
                             ></span>
                         </button>
+
+                        <!-- Opción 4: Catálogo de Archivados & Descontinuados (Regla 5) -->
+                        <button 
+                            type="button" 
+                            @click="toolsDropdownOpen = false; archivedProductsModalOpen = true;" 
+                            class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
+                            style="min-height: unset;"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="p-1 rounded-md bg-amber-50 text-amber-600 border border-amber-100 group-hover:bg-amber-100 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-800">Archivados & Descontinuados</div>
+                                    <div class="text-[10px] text-slate-400">Reactivar o eliminar productos</div>
+                                </div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" x-text="archivedProducts.length"></span>
+                        </button>
+
+                        <!-- Opción 5: Borradores Pendientes de Aprobación (Regla 5) -->
+                        <button 
+                            type="button" 
+                            @click="toolsDropdownOpen = false; draftsModalOpen = true;" 
+                            class="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer group"
+                            style="min-height: unset;"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="p-1 rounded-md bg-sky-50 text-sky-600 border border-sky-100 group-hover:bg-sky-100 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <div class="text-xs font-bold text-slate-800">Borradores Pre-guardados</div>
+                                    <div class="text-[10px] text-slate-400">Aprobar o continuar edición</div>
+                                </div>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-200" x-text="(draftProducts || []).length"></span>
+                        </button>
                     </div>
                 </div>
 
@@ -468,6 +548,18 @@
                     <option value="all">Todos los orígenes</option>
                     <option value="propio">Stock Propio</option>
                     <option value="dropship">Dropshipping (Torzo)</option>
+                </select>
+
+                <!-- Filtro Marca Comercial / Proveedor (TASK-BRD-FILTERS) -->
+                <select 
+                    x-model="brandFilter" 
+                    class="text-xs bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-700 font-medium"
+                    title="Filtrar catálogo por marca comercial o proveedor"
+                >
+                    <option value="all">Todas las Marcas / Proveedores</option>
+                    <template x-for="bName in availableBrandNames" :key="bName">
+                        <option :value="bName" x-text="bName"></option>
+                    </template>
                 </select>
 
                 <!-- Filtro Clase ABC (Pareto) -->
@@ -613,7 +705,7 @@
                             </th>
                             <th class="py-3 px-3 text-center">Margen</th>
                             <th class="py-3 px-3">Ubicación</th>
-                            <th class="py-3 px-3 min-w-[260px]">
+                            <th class="py-3 px-3 min-w-[180px] max-w-[220px]">
                                 <div class="inline-flex items-center gap-1">
                                     <span>Ajuste Rápido de Stock</span>
                                     <!-- Help Icon -->
@@ -766,9 +858,14 @@
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="relative w-11 h-11 mx-auto rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center cursor-pointer shadow-xs group-hover:shadow transition"
                                          @click="openProductDrawer(item)">
-                                        <svg class="w-6 h-6 text-slate-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                        </svg>
+                                        <template x-if="resolveProductImage(item)">
+                                            <img :src="resolveProductImage(item)" :alt="item.name" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!resolveProductImage(item)">
+                                            <svg class="w-6 h-6 text-slate-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                            </svg>
+                                        </template>
                                         <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white"
                                               :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-emerald-500'"></span>
                                     </div>
@@ -805,7 +902,10 @@
                                               x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropship Torzo'">
                                         </span>
                                         <span class="text-slate-300">&bull;</span>
-                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || (item.type === 'dropship' ? 'Torzo B2B' : 'ModaIntima Textil MX')"></span>
+                                        <span class="text-[11px] font-semibold text-slate-600" x-text="item.brand || item.provider || 'Marca'"></span>
+                                        <template x-if="item.provider && item.brand && item.provider !== item.brand">
+                                            <span class="text-[10px] text-slate-400 font-mono" x-text="'(' + item.provider + ')'"></span>
+                                        </template>
                                     </div>
 
                                     <!-- Swatches Cromáticos de Cosmética (TASK-INV-09) -->
@@ -830,15 +930,24 @@
                                     <template x-if="item.variantDimension !== 'shade'">
                                         <div class="flex flex-wrap items-center gap-1.5 mt-1">
                                             <!-- Swatch Color & Tornasol -->
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200" :title="'Color: ' + (item.colorName || 'Negro')">
-                                                <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
-                                                <span x-text="item.colorName || 'Negro'"></span>
-                                            </span>
+                                            <template x-if="item.colorName">
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200" :title="'Color: ' + item.colorName">
+                                                    <template x-if="item.colorName?.toLowerCase() === 'multicolor' || (item.colorHex && item.colorHex.includes('gradient'))">
+                                                        <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0 shadow-3xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                    </template>
+                                                    <template x-if="item.colorName?.toLowerCase() !== 'multicolor' && (!item.colorHex || !item.colorHex.includes('gradient'))">
+                                                        <span class="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0 shadow-3xs" :style="'background: ' + (item.colorHex || '#0f172a')"></span>
+                                                    </template>
+                                                    <span x-text="item.colorName"></span>
+                                                </span>
+                                            </template>
 
                                             <!-- Badge Tipo de Tela -->
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'Composición textil: ' + (item.fabricType || 'Modal')">
-                                                <span x-text="item.fabricType || 'Modal'"></span>
-                                            </span>
+                                            <template x-if="item.fabricType">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" :title="'Composición textil: ' + item.fabricType">
+                                                    <span x-text="item.fabricType"></span>
+                                                </span>
+                                            </template>
 
                                             <!-- Badge Variante Diseño -->
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
@@ -1083,53 +1192,60 @@
                                     </template>
                                 </td>
 
-                                <!-- Columna: AJUSTE RÁPIDO -->
-                                <td class="py-3.5 px-4">
+                                <!-- Columna: AJUSTE RÁPIDO (2 SALTOS DE LÍNEA) -->
+                                <td class="py-2.5 px-2">
                                     <!-- FILA TIPO 1: STOCK PROPIO -->
                                     <template x-if="item.type === 'propio'">
-                                        <div class="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                                            <select 
-                                                x-model="item.adjustType" 
-                                                class="text-xs py-1 px-1.5 bg-white border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
-                                                <option value="add">+ Entr.</option>
-                                                <option value="sub">- Sal.</option>
-                                            </select>
+                                        <div class="flex flex-col gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200 min-w-[160px] max-w-[210px]">
+                                            <!-- Línea 1: Dropdown (+ Entr. / - Sal.) + Cantidad -->
+                                            <div class="flex items-center gap-1.5">
+                                                <select 
+                                                    x-model="item.adjustType" 
+                                                    class="text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 shrink-0"
+                                                >
+                                                    <option value="add">+ Entr.</option>
+                                                    <option value="sub">- Sal.</option>
+                                                </select>
 
-                                            <input 
-                                                type="number" 
-                                                min="1" 
-                                                x-model.number="item.adjustQty" 
-                                                placeholder="Cant." 
-                                                class="w-14 text-xs py-1 px-1.5 bg-white border border-slate-200 rounded text-center text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+                                                <input 
+                                                    type="number" 
+                                                    min="1" 
+                                                    x-model.number="item.adjustQty" 
+                                                    placeholder="Cant." 
+                                                    class="flex-1 min-w-0 text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded text-center text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                >
+                                            </div>
 
-                                            <input 
-                                                type="text" 
-                                                x-model="item.adjustReason" 
-                                                placeholder="Motivo..." 
-                                                class="flex-1 text-xs py-1 px-2 bg-white border border-slate-200 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+                                            <!-- Línea 2: Motivo + Botón Aplicar -->
+                                            <div class="flex items-center gap-1.5">
+                                                <input 
+                                                    type="text" 
+                                                    x-model="item.adjustReason" 
+                                                    placeholder="Motivo..." 
+                                                    class="flex-1 min-w-0 text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                >
 
-                                            <button 
-                                                @click="applyQuickStockAdjustment(item)" 
-                                                :disabled="item.isAdjusting"
-                                                class="px-2.5 py-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded transition shadow-xs cursor-pointer inline-flex items-center gap-1 shrink-0"
-                                                title="Aplicar ajuste"
-                                            >
-                                                <svg x-show="item.isAdjusting" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                <span x-text="item.isAdjusting ? '...' : 'Aplicar'"></span>
-                                            </button>
+                                                <button 
+                                                    @click="applyQuickStockAdjustment(item)" 
+                                                    :disabled="item.isAdjusting"
+                                                    class="px-2 py-1 text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded transition shadow-xs cursor-pointer inline-flex items-center gap-1 shrink-0"
+                                                    title="Aplicar ajuste"
+                                                >
+                                                    <svg x-show="item.isAdjusting" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                    <span x-text="item.isAdjusting ? '...' : 'Aplicar'"></span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </template>
 
                                     <!-- FILA TIPO 2: DROPSHIPPING -->
                                     <template x-if="item.type === 'dropship'">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex flex-col gap-1.5 min-w-[140px] max-w-[190px]">
                                             <a 
-                                                :href="item.providerUrl" 
+                                                :href="item.providerUrl || item.supplierUrl || item.originUrl || '#'" 
                                                 target="_blank" 
-                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition"
+                                                rel="noopener noreferrer"
+                                                class="inline-flex items-center justify-center gap-1 px-2 py-1 text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition"
                                             >
                                                 <span>Ver en Proveedor</span>
                                                 <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
@@ -1138,7 +1254,7 @@
                                             <button 
                                                 @click="rescrapeProduct(item)" 
                                                 :disabled="item.isScraping"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition disabled:opacity-50 cursor-pointer"
+                                                class="inline-flex items-center justify-center gap-1 px-2 py-1 text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition disabled:opacity-50 cursor-pointer"
                                             >
                                                 <svg :class="item.isScraping ? 'animate-spin' : ''" class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                                 <span x-text="item.isScraping ? 'Scraping...' : 'Re-scrape'"></span>
@@ -1179,6 +1295,15 @@
                                             class="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors border border-indigo-200 cursor-pointer shadow-3xs flex items-center justify-center"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        </button>
+                                        <!-- Regla 1: Acción de Archivar Prenda en Catálogo Operativo -->
+                                        <button 
+                                            type="button"
+                                            @click.stop="archiveProduct(item)"
+                                            title="Archivar prenda (Enviar a la herramienta de Archivados y Descontinuados)"
+                                            class="p-1.5 text-amber-700 bg-amber-50 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-200 cursor-pointer shadow-3xs flex items-center justify-center"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                                         </button>
                                     </div>
                                 </td>
@@ -1382,21 +1507,57 @@
                         </div>
                     </div>
 
+                    <!-- Filtro y Búsqueda Rápida en Bandeja de Curaduría -->
+                    <div class="mt-4 flex flex-col sm:flex-row items-center gap-2">
+                        <div class="relative flex-1 w-full">
+                            <input 
+                                type="text" 
+                                x-model="scrapedSearchQuery" 
+                                placeholder="Buscar en prendas scrapeadas por SKU, nombre, tela o color..." 
+                                class="w-full bg-slate-800/90 text-xs text-white placeholder-slate-400 pl-8 pr-3 py-1.5 rounded-lg border border-slate-700 focus:outline-hidden focus:border-indigo-500"
+                            >
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <select 
+                            x-model="scrapedCategoryFilter" 
+                            class="w-full sm:w-auto bg-slate-800/90 text-xs text-slate-300 py-1.5 px-3 rounded-lg border border-slate-700 focus:outline-hidden focus:border-indigo-500 cursor-pointer"
+                        >
+                            <option value="all">Todas las categorías</option>
+                            <option value="Tanga">Tanga</option>
+                            <option value="Bikini">Bikini</option>
+                            <option value="Jockstraps">Jockstraps</option>
+                            <option value="Boxers">Boxers</option>
+                            <option value="Camisillas">Camisillas</option>
+                            <option value="Playeras">Playeras</option>
+                            <option value="Trajes de Baño">Trajes de Baño</option>
+                            <option value="Truzas">Truzas</option>
+                            <option value="Combos">Combos</option>
+                            <option value="Ropa Interior">Ropa Interior</option>
+                        </select>
+                    </div>
+
                     <!-- Listado Vertical Ergonómico de Prendas Scrapeadas -->
-                    <div class="space-y-3 mt-4">
-                        <template x-for="item in scrapedPendingItems" :key="item.id">
+                    <div class="space-y-3 mt-4 max-h-[780px] overflow-y-auto pr-1.5 custom-scrollbar">
+                        <template x-for="item in filteredScrapedPendingItems" :key="item.id">
                             <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-600 transition space-y-3">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs font-mono text-indigo-400 font-semibold" x-text="item.supplierSku || item.suggestedSku"></span>
-                                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-300" x-text="item.brand"></span>
+                                    <div class="flex items-start gap-3">
+                                        <!-- Miniatura de Imagen de la Prenda -->
+                                        <div class="w-14 h-16 rounded-lg bg-slate-900 overflow-hidden shrink-0 border border-slate-700/80 flex items-center justify-center">
+                                            <img :src="item.image || (item.images && item.images[0])" :alt="item.name" class="w-full h-full object-cover" onerror="this.src='https://torzo.kexe.mx/imagenes_productos/default.jpg'">
                                         </div>
-                                        <h4 class="text-sm font-bold text-white mt-1" x-text="item.name"></h4>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-mono text-indigo-400 font-semibold" x-text="item.supplierSku || item.suggestedSku"></span>
+                                                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-medium" x-text="item.brand"></span>
+                                            </div>
+                                            <h4 class="text-sm font-bold text-white mt-1 leading-snug" x-text="item.name"></h4>
+                                        </div>
                                     </div>
                                     <div class="text-right shrink-0">
                                         <span class="text-[10px] text-slate-400 block uppercase">Costo Fábrica</span>
                                         <span class="text-sm font-bold text-emerald-400 font-mono" x-text="'$' + (item.scrapedCost || item.cost || 0).toFixed(2)"></span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5" x-text="'PVP: $' + (item.suggestedPvp || 0).toFixed(2)"></span>
                                     </div>
                                 </div>
 
@@ -1405,7 +1566,12 @@
                                     <span class="px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]" x-text="'Cat: ' + item.suggestedCategory"></span>
                                     <span class="px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]" x-text="'Tela: ' + item.suggestedFabric"></span>
                                     <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 text-slate-300 border border-slate-700 text-[11px]">
-                                        <span class="w-2.5 h-2.5 rounded-full border border-white/20" :style="'background-color: ' + item.detectedColorHex"></span>
+                                        <template x-if="item.detectedColorName?.toLowerCase() === 'multicolor' || (item.detectedColorHex && item.detectedColorHex.includes('gradient'))">
+                                            <span class="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0 shadow-3xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                        </template>
+                                        <template x-if="item.detectedColorName?.toLowerCase() !== 'multicolor' && (!item.detectedColorHex || !item.detectedColorHex.includes('gradient'))">
+                                            <span class="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0 shadow-3xs" :style="'background: ' + (item.detectedColorHex || '#0f172a')"></span>
+                                        </template>
                                         <span x-text="item.detectedColorName"></span>
                                     </span>
                                     <span class="px-2 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800 text-[11px]" x-text="'Tallas: ' + (Array.isArray(item.availableSizes) ? item.availableSizes.join(', ') : 'CH, M, G, XL')"></span>
@@ -1429,11 +1595,11 @@
                             </div>
                         </template>
 
-                        <template x-if="scrapedPendingItems.length === 0">
+                        <template x-if="filteredScrapedPendingItems.length === 0">
                             <div class="py-8 text-center text-slate-400 bg-slate-800/40 rounded-xl border border-slate-800">
                                 <svg class="w-8 h-8 text-emerald-400 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <p class="text-sm font-semibold text-slate-300">Bandeja de curaduría al día</p>
-                                <p class="text-xs text-slate-400 mt-0.5">Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catálogo.</p>
+                                <p class="text-sm font-semibold text-slate-300">No hay prendas que coincidan</p>
+                                <p class="text-xs text-slate-400 mt-0.5" x-text="scrapedPendingItems.length === 0 ? 'Todas las prendas scrapeadas de proveedores han sido validadas y publicadas en el catálogo.' : 'Prueba cambiando los términos de búsqueda o el filtro de categoría.'"></p>
                             </div>
                         </template>
                     </div>
@@ -1503,6 +1669,15 @@
                             class="px-2.5 py-1 rounded-lg transition cursor-pointer"
                         >
                             Demoras SLA (<span x-text="(scrapingAlerts || []).filter(a => a.category === 'sla_delays').length"></span>)
+                        </button>
+                        <button 
+                            type="button" 
+                            @click="discrepancyCategoryFilter = 'discontinued'"
+                            :class="discrepancyCategoryFilter === 'discontinued' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
+                            class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1"
+                        >
+                            <span>Descontinuados en Origen</span>
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-mono font-bold" x-text="(scrapingAlerts || []).filter(a => a.category === 'discontinued').length"></span>
                         </button>
                     </div>
 
@@ -1606,6 +1781,18 @@
                                             </button>
                                         </div>
                                     </template>
+                                    <template x-if="!alert.resolved && alert.category === 'discontinued'">
+                                        <div class="flex items-center gap-1.5">
+                                            <button 
+                                                type="button" 
+                                                @click="openDiscontinuedModal(alert)"
+                                                class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                <span>Gestionar Descontinuado (Regla 4)</span>
+                                            </button>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </template>
@@ -1633,371 +1820,6 @@
                 </div>
             </div>
 
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- MODAL ERGONÓMICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
-        <!-- ================================================================= -->
-        <div 
-            x-show="providerModalOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[90] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            style="display: none;"
-        >
-            <div 
-                @click.outside="providerModalOpen = false"
-                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
-                <!-- Cabecera del Modal -->
-                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingProvider ? 'Conectar / Registrar Nuevo Proveedor' : (isEditingProvider ? 'Editar Condiciones: ' + (providerForm.tradeName || providerForm.name) : 'Ficha de Proveedor & Scorecard SLA')"></h3>
-                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confección, fabricante cosmético o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' • ' + providerForm.name : 'Información técnica y comercial')"></p>
-                        </div>
-                    </div>
-                    <button 
-                        type="button" 
-                        @click="providerModalOpen = false" 
-                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-                        aria-label="Cerrar modal"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-
-                <!-- Cuerpo del Modal (2 Columnas) -->
-                <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6">
-                    
-                    <!-- Columna Izquierda: Ficha Comercial & Contacto (7 Cols) -->
-                    <div class="md:col-span-7 space-y-4">
-                        <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información General & Contacto</h4>
-                            <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
-                        </div>
-
-                        <!-- Razón Social y Nombre Comercial -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Razón Social *</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.name" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Ej. Confecciones Textiles Puebla SA de CV" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre Comercial / Marca *</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.tradeName" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Ej. ModaIntima MX" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Tipo de Proveedor y Ciudad -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo / Giro Comercial *</label>
-                                <select 
-                                    x-model="providerForm.type" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                                    <option value="workshop">Taller de Confección Textil</option>
-                                    <option value="cosmetics">Fabricante Cosmética & Skincare</option>
-                                    <option value="distributor">Distribuidor Mayorista</option>
-                                    <option value="packaging">Insumos de Empaque & Cajas</option>
-                                    <option value="commercial">Proveedor Comercial Directo</option>
-                                    <option value="scraper">Integración Automatizada (Scraper/API)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / Ubicación</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.city" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Ej. CDMX, Puebla, Guadalajara" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Persona de Contacto, Teléfono y Correo -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Contacto Operativo *</label>
-                                <input 
-                                    type="text" 
-                                    x-model="providerForm.contactName" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="Nombre completo" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / Teléfono *</label>
-                                <input 
-                                    type="tel" 
-                                    x-model="providerForm.phone" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="+52 55..." 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Pedidos</label>
-                                <input 
-                                    type="email" 
-                                    x-model="providerForm.email" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    placeholder="pedidos@empresa.com" 
-                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Condiciones Comerciales: Lead Time y Plazos de Pago -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (Días)</label>
-                                <div class="flex items-center gap-2">
-                                    <input 
-                                        type="number" 
-                                        min="1" 
-                                        max="90" 
-                                        x-model="providerForm.leadTimeDays" 
-                                        :disabled="!isCreatingProvider && !isEditingProvider"
-                                        class="w-24 px-3 py-1.5 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200 text-center"
-                                    >
-                                    <span class="text-xs text-slate-500">días hábiles a rampa</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Términos de Pago</label>
-                                <select 
-                                    x-model="providerForm.paymentTerms" 
-                                    :disabled="!isCreatingProvider && !isEditingProvider"
-                                    class="w-full px-3 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200"
-                                >
-                                    <option value="contado">Contado / Anticipo 100%</option>
-                                    <option value="credito_15">Crédito Comercial 15 días</option>
-                                    <option value="credito_30">Crédito Comercial 30 días</option>
-                                    <option value="credito_60">Crédito Comercial 60 días</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Notas Operativas -->
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Notas Internas & Acuerdos de Maquila</label>
-                            <textarea 
-                                x-model="providerForm.notes" 
-                                :disabled="!isCreatingProvider && !isEditingProvider"
-                                rows="2" 
-                                placeholder="Detalles de maquila, acuerdos especiales de tela, MOQ o especificaciones..." 
-                                class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Columna Derecha: Scorecard SLA & Control de Estado (5 Cols) -->
-                    <div class="md:col-span-5 space-y-4">
-                        <div class="border-b border-slate-100 pb-2">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Desempeño SLA & Confiabilidad</h4>
-                        </div>
-
-                        <!-- Modo Proveedor Existente: Scorecard SLA -->
-                        <div x-show="!isCreatingProvider && selectedProvider" class="space-y-4">
-                            <!-- Tarjeta On-Time Delivery -->
-                            <div class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-xs font-bold text-emerald-900">Entregas a Tiempo (On-Time)</span>
-                                    <span class="text-sm font-black text-emerald-700" x-text="(selectedProvider?.slaOnTimePct || 100) + '%'"></span>
-                                </div>
-                                <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaOnTimePct || 100) + '%'"></div>
-                                </div>
-                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">Histórico validado en rampa de recepción contra fecha compromiso de OC.</p>
-                            </div>
-
-                            <!-- Tarjeta Fill Rate (Sin Faltantes) -->
-                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-xs font-bold text-indigo-900">Cumplimiento de Cantidad (Fill Rate)</span>
-                                    <span class="text-sm font-black text-indigo-700" x-text="(selectedProvider?.slaFillRatePct || 100) + '%'"></span>
-                                </div>
-                                <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaFillRatePct || 100) + '%'"></div>
-                                </div>
-                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas físicas recibidas completas sin remanentes pendientes.</p>
-                            </div>
-
-                            <!-- Comparativa Lead Time y Órdenes -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Demora Promedio</span>
-                                    <span class="text-base font-black text-slate-800" x-text="'+' + (selectedProvider?.avgDelayDays || 0) + ' d'"></span>
-                                    <span class="block text-[10px] text-slate-500">sobre fecha pactada</span>
-                                </div>
-                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Órdenes OCs</span>
-                                    <span class="text-base font-black text-slate-800" x-text="(selectedProvider?.completedOrders || 0) + ' / ' + (selectedProvider?.totalOrders || 0)"></span>
-                                    <span class="block text-[10px] text-slate-500">completadas</span>
-                                </div>
-                            </div>
-
-                            <!-- Selector de Estado Técnico / Operativo -->
-                            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                <label class="block text-[11px] font-bold text-slate-700 mb-2">Estado Operativo en Plataforma</label>
-                                <template x-if="selectedProvider?.status === 'archived'">
-                                    <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 text-center">
-                                        <div class="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                                            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
-                                            <span>Proveedor Archivado / Descontinuado</span>
-                                        </div>
-                                        <p class="text-[10px] text-slate-500 mb-2">No recibe pedidos automáticos ni órdenes de reabastecimiento.</p>
-                                        <button 
-                                            type="button" 
-                                            @click="restoreProvider(selectedProvider)"
-                                            class="w-full py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
-                                        >
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                            <span>Restaurar a Estado Conectado</span>
-                                        </button>
-                                    </div>
-                                </template>
-                                <template x-if="selectedProvider?.status !== 'archived'">
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'connected'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'connected')"
-                                            :class="providerForm.status === 'connected' ? 'bg-emerald-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Conectado
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'maintenance'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'maintenance')"
-                                            :class="providerForm.status === 'maintenance' ? 'bg-amber-500 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Mantenimiento
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            @click="providerForm.status = 'paused'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'paused')"
-                                            :class="providerForm.status === 'paused' ? 'bg-slate-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
-                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
-                                        >
-                                            Pausado
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Modo Alta: Tarjeta informativa de SLA -->
-                        <div x-show="isCreatingProvider" class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 text-slate-700 space-y-2">
-                            <div class="flex items-center gap-2 font-bold text-xs text-indigo-900">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Monitoreo Automático de Desempeño</span>
-                            </div>
-                            <p class="text-xs leading-relaxed text-slate-600">
-                                Al vincular este proveedor comercial o taller, el sistema comenzará a auditar automáticamente sus tiempos de entrega y cumplimiento de piezas en el Kardex de Compras (TASK-INV-16) cada vez que se reciba un lote en la rampa de almacén.
-                            </p>
-                            <div class="pt-2 text-[11px] font-semibold text-slate-500">
-                                Estado inicial recomendado: <span class="text-emerald-700 font-bold">Conectado / Activo</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Pie del Modal: Acciones -->
-                <div class="px-6 py-4 border-t border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span x-show="!isCreatingProvider && !isEditingProvider" class="text-xs text-slate-400 font-mono" x-text="'ID: ' + (selectedProvider?.id || '')"></span>
-                        <template x-if="!isCreatingProvider && !isEditingProvider && selectedProvider">
-                            <div class="inline-flex items-center gap-2 ml-3 pl-3 border-l border-slate-200">
-                                <template x-if="selectedProvider.status !== 'archived'">
-                                    <button 
-                                        type="button" 
-                                        @click="archiveProvider(selectedProvider)" 
-                                        class="px-2.5 py-1 text-xs text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-slate-200 hover:border-amber-200"
-                                        title="Archivar proveedor"
-                                    >
-                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                        <span>Archivar</span>
-                                    </button>
-                                </template>
-                                <template x-if="selectedProvider.status === 'archived'">
-                                    <button 
-                                        type="button" 
-                                        @click="restoreProvider(selectedProvider)" 
-                                        class="px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-emerald-300"
-                                        title="Restaurar proveedor a activo"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>Restaurar</span>
-                                    </button>
-                                </template>
-                                <button 
-                                    type="button" 
-                                    @click="deleteProvider(selectedProvider)" 
-                                    class="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-rose-200"
-                                    title="Eliminar definitivamente de la base de datos"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    <span>Eliminar</span>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button 
-                            type="button" 
-                            @click="cancelProviderEdit()" 
-                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold rounded-xl hover:bg-slate-200/60 transition cursor-pointer"
-                        >
-                            <span x-text="isCreatingProvider ? 'Cancelar' : (isEditingProvider ? 'Descartar Cambios' : 'Cerrar')"></span>
-                        </button>
-                        <button 
-                            type="button" 
-                            x-show="!isCreatingProvider && !isEditingProvider"
-                            @click="editProviderFromModal()" 
-                            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition border border-indigo-200/80 cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            <span>Editar Condiciones</span>
-                        </button>
-                        <button 
-                            type="button" 
-                            x-show="isCreatingProvider || isEditingProvider"
-                            @click="saveProvider()" 
-                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span x-text="isCreatingProvider ? 'Guardar Proveedor' : 'Guardar Cambios'"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- ================================================================= -->
@@ -2456,90 +2278,12 @@
     <!-- ================================================================= -->
     <!-- PESTAÑA 3: COMPRAS & REABASTECIMIENTO                             -->
     <!-- ================================================================= -->
+    <!-- ================================================================= -->
     <div x-show="activeTab === 'purchases' && isTabAllowed('purchases')" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
         
-        <!-- 4 KPI Cards Compras con Tooltips ? -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <!-- KPI 1: Órdenes en Tránsito -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Órdenes en Tránsito</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Activas</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Pedidos de compra ya emitidos a mayoristas o fabricantes que se encuentran en preparación o despacho con guía de paquetería.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-xl font-bold text-indigo-600 mt-2">2 Órdenes</div>
-                <p class="text-xs text-slate-500 mt-1">1 en camino &bull; 1 por confirmar</p>
-            </div>
-
-            <!-- KPI 2: Lotes Planificados -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lotes Planificados</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Cola de Futuras Compras</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Artículos agregados desde los Drawers de producto para consolidar pedidos masivos antes de quebrar existencias.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-xl font-bold text-indigo-600 mt-2" x-text="futurePurchaseOrders.length + ' lotes en cola'"></div>
-                <p class="text-xs text-emerald-600 mt-1 font-medium">Acumulando para MOQ de proveedor</p>
-            </div>
-
-            <!-- KPI 3: Inversión Proyectada -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Inversión Estimada</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Compromiso Financiero RevOps</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Costo total proyectado de la reposición planificada en cola calculada a costo mayorista directo.</p>
-                            <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-xl font-bold text-emerald-600 mt-2" x-text="formatCurrency(futurePurchaseOrders.reduce((acc, o) => acc + (o.totalCost || 0), 0))"></div>
-                <p class="text-xs text-slate-500 mt-1">Calculado a costo unitario neto</p>
-            </div>
-
-            <!-- KPI 4: Lead Time Promedio -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lead Time Promedio</span>
-                    <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                        <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                        </span>
-                        <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                            <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Tiempo de Reabastecimiento</div>
-                            <p class="text-[10px] text-slate-200 leading-snug">Días promedio desde la confirmación de la orden hasta la recepción e ingreso físico a rack en almacén.</p>
-                            <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-xl font-bold text-slate-900 mt-2">4.2 días</div>
-                <p class="text-xs text-emerald-600 mt-1 font-medium">Logística rápida optimizada</p>
-            </div>
-        </div>
-
-        <!-- Sub-navegación interna de Compras: Reabastecimiento vs Solicitudes On-Demand -->
+        <!-- Sub-navegación interna de Compras: Planeación vs Seguimiento Fletero vs On-Demand vs Kardex -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 <button 
                     type="button"
                     @click="purchasesSubTab = 'reorder'"
@@ -2549,9 +2293,23 @@
                     class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
                     style="min-height: unset;"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span>Órdenes & Reabastecimiento Mayorista</span>
-                    <span :class="purchasesSubTab === 'reorder' ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-700'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="futurePurchaseOrders.length + 2"></span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span>Planeación de Compras (Bandeja MOQ)</span>
+                    <span :class="purchasesSubTab === 'reorder' ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-700'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="futurePurchaseOrders.length"></span>
+                </button>
+                <button 
+                    type="button"
+                    x-show="canAccessInboundTracking()"
+                    @click="purchasesSubTab = 'inbound_tracking'"
+                    :class="purchasesSubTab === 'inbound_tracking' 
+                        ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
+                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
+                    style="min-height: unset;"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                    <span>Órdenes Emitidas & Seguimiento Fletero</span>
+                    <span :class="purchasesSubTab === 'inbound_tracking' ? 'bg-blue-700 text-white' : 'bg-blue-100 text-blue-800'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length"></span>
                 </button>
                 <button 
                     type="button"
@@ -2566,19 +2324,130 @@
                     <span>Solicitudes On-Demand (Carritos de Clientes)</span>
                     <span :class="purchasesSubTab === 'on_demand' ? 'bg-amber-700 text-white' : 'bg-amber-100 text-amber-800'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="customerOnDemandRequests.length"></span>
                 </button>
+                <button 
+                    type="button"
+                    @click="purchasesSubTab = 'agreements'"
+                    :class="purchasesSubTab === 'agreements' 
+                        ? 'bg-rose-600 text-white font-bold shadow-xs' 
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
+                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
+                    style="min-height: unset;"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m0 0l-3-3m3 3l3 3M3 21h18M5 10v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                    <span>Acuerdos & Notas de Crédito</span>
+                    <span :class="purchasesSubTab === 'agreements' ? 'bg-rose-700 text-white' : 'bg-rose-100 text-rose-800'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="(pendingCreditAgreements || []).length"></span>
+                </button>
+                <button 
+                    type="button"
+                    @click="purchasesSubTab = 'kardex'"
+                    :class="purchasesSubTab === 'kardex' 
+                        ? 'bg-slate-900 text-white font-bold shadow-xs' 
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'"
+                    class="px-3.5 py-2 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer"
+                    style="min-height: unset;"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>Kardex de Auditoría de Compras</span>
+                    <span :class="purchasesSubTab === 'kardex' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-700'" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" x-text="purchaseKardexLog.length"></span>
+                </button>
             </div>
-            <div class="text-xs text-slate-500 font-medium px-2">
+            <div class="text-xs text-slate-500 font-medium px-2 shrink-0">
                 <template x-if="purchasesSubTab === 'reorder'">
-                    <span>Órdenes a mayoristas y lotes acumulados</span>
+                    <span>Planificación de lotes, sugerencias ROP y cálculo de MOQ</span>
+                </template>
+                <template x-if="purchasesSubTab === 'inbound_tracking'">
+                    <span>Telemetría de guías, transportistas y expedientes PO emitidos</span>
                 </template>
                 <template x-if="purchasesSubTab === 'on_demand'">
                     <span>Backorders y líneas proveedor de carritos mixtos</span>
+                </template>
+                <template x-if="purchasesSubTab === 'kardex'">
+                    <span>Trazabilidad inmutable de OCs, ajustes y resoluciones</span>
                 </template>
             </div>
         </div>
 
         <!-- SUB-VISTA 1: ÓRDENES Y REABASTECIMIENTO MAYORISTA -->
         <div x-show="purchasesSubTab === 'reorder'" class="space-y-6">
+            
+            <!-- 4 KPI Cards Compras con Tooltips ? (Exclusivo de Planeación) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- KPI 1: Órdenes en Tránsito -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Órdenes en Tránsito</span>
+                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
+                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
+                            </span>
+                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Órdenes Activas</div>
+                                <p class="text-[10px] text-slate-200 leading-snug">Pedidos de compra ya emitidos a mayoristas o fabricantes que se encuentran en preparación o despacho con guía de paquetería.</p>
+                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xl font-bold text-indigo-600 mt-2">2 Órdenes</div>
+                    <p class="text-xs text-slate-500 mt-1">1 en camino &bull; 1 por confirmar</p>
+                </div>
+
+                <!-- KPI 2: Lotes Planificados -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lotes Planificados</span>
+                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
+                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
+                            </span>
+                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Cola de Futuras Compras</div>
+                                <p class="text-[10px] text-slate-200 leading-snug">Artículos agregados desde los Drawers de producto para consolidar pedidos masivos antes de quebrar existencias.</p>
+                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xl font-bold text-indigo-600 mt-2" x-text="futurePurchaseOrders.length + ' lotes en cola'"></div>
+                    <p class="text-xs text-emerald-600 mt-1 font-medium">Acumulando para MOQ de proveedor</p>
+                </div>
+
+                <!-- KPI 3: Inversión Proyectada -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Inversión Estimada</span>
+                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
+                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
+                            </span>
+                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Compromiso Financiero RevOps</div>
+                                <p class="text-[10px] text-slate-200 leading-snug">Costo total proyectado de la reposición planificada en cola calculada a costo mayorista directo.</p>
+                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xl font-bold text-emerald-600 mt-2" x-text="formatCurrency(futurePurchaseOrders.reduce((acc, o) => acc + (o.totalCost || 0), 0))"></div>
+                    <p class="text-xs text-slate-500 mt-1">Calculado a costo unitario neto</p>
+                </div>
+
+                <!-- KPI 4: Lead Time Promedio -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lead Time Promedio</span>
+                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
+                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
+                            </span>
+                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full right-0 mt-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Tiempo de Reabastecimiento</div>
+                                <p class="text-[10px] text-slate-200 leading-snug">Días promedio desde la confirmación de la orden hasta la recepción e ingreso físico a rack en almacén.</p>
+                                <span class="absolute bottom-full right-3 -mb-1 border-4 border-transparent border-b-slate-900"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xl font-bold text-slate-900 mt-2">4.2 días</div>
+                    <p class="text-xs text-emerald-600 mt-1 font-medium">Logística rápida optimizada</p>
+                </div>
+            </div>
 
         <!-- [P2.1] BANNER DE CARRITO MIXTO LIBERADO TRAS RECEPCIÓN DE MERCANCÍA -->
         <template x-if="mixedCartLiberated.show">
@@ -2616,131 +2485,9 @@
             </div>
         </template>
 
-        <!-- Tabla 1: Órdenes de Compra y Dropshipping Pendientes (Reactiva con Recepción Inbound) -->
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm mb-8">
-            <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h3 class="text-base font-bold text-slate-900">Órdenes de Compra y Dropshipping Pendientes</h3>
-                        <!-- Help Icon -->
-                        <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
-                            </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Seguimiento de Reabastecimiento</div>
-                                <p class="text-[11px] text-slate-200 leading-snug">Monitorea órdenes enviadas a mayoristas para resurtir prendas en bodega o para envíos directos, con seguimiento de guía de transporte y recepción física.</p>
-                                <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500">Reabastecimiento y envíos directos solicitados a proveedor</p>
-                </div>
-                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100">
-                    <span x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length"></span> Órdenes Activas
-                </span>
-            </div>
-
-            <div class="overflow-x-auto rounded-b-xl">
-                <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                            <th class="py-3 px-4">ID Orden</th>
-                            <th class="py-3 px-4">Proveedor & Guía</th>
-                            <th class="py-3 px-4">Artículos Solicitados</th>
-                            <th class="py-3 px-4 text-right">Total ($)</th>
-                            <th class="py-3 px-4">Fecha & ETA</th>
-                            <th class="py-3 px-4 text-center">Estado</th>
-                            <th class="py-3 px-4 text-right">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                        <template x-for="(order, index) in activePurchaseOrders" :key="order.id">
-                            <tr class="hover:bg-slate-50 transition">
-                                <td class="py-3.5 px-4 font-mono font-bold text-indigo-600" x-text="'#' + order.id"></td>
-                                <td class="py-3.5 px-4">
-                                    <span class="font-bold text-slate-900 block" x-text="order.supplier"></span>
-                                    <span class="text-slate-500 text-[11px] block font-mono" x-text="order.carrier"></span>
-                                </td>
-                                <td class="py-3.5 px-4">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="font-bold text-slate-900" x-text="order.qty + ' unidades'"></span>
-                                        <template x-if="order.linkedCartId">
-                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200" title="Contiene ítems de Carrito Mixto">
-                                                Pedido Mixto
-                                            </span>
-                                        </template>
-                                    </div>
-                                    <span class="text-slate-600 text-xs block truncate max-w-xs" x-text="order.productName"></span>
-                                    <div class="flex items-center gap-1 mt-0.5 text-[10px] text-slate-400">
-                                        <span>Tallas:</span>
-                                        <span class="font-mono text-slate-600" x-text="'CH:' + (order.sizes.ch||0) + ' M:' + (order.sizes.m||0) + ' G:' + (order.sizes.g||0) + ' XL:' + (order.sizes.xl||0) + (order.sizes['2xl'] ? ' 2XL:' + order.sizes['2xl'] : '')"></span>
-                                    </div>
-                                </td>
-                                <td class="py-3.5 px-4 text-right font-bold text-slate-900" x-text="'$' + order.totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2})"></td>
-                                <td class="py-3.5 px-4">
-                                    <span class="text-slate-700 font-medium block" x-text="order.date"></span>
-                                    <span class="text-[11px] text-indigo-600 font-semibold block" x-text="'ETA: ' + order.eta"></span>
-                                </td>
-                                <td class="py-3.5 px-4 text-center">
-                                    <template x-if="order.status === 'En Camino'">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                                            <span>En Camino</span>
-                                        </span>
-                                    </template>
-                                    <template x-if="order.status === 'Recibida en Almacén'">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                            <span>Recibida en Almacén</span>
-                                        </span>
-                                    </template>
-                                    <template x-if="order.status === 'Pendiente Confirmación' || order.status === 'Por Despachar'">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span>Pendiente</span>
-                                        </span>
-                                    </template>
-                                </td>
-                                <td class="py-3.5 px-4 text-right">
-                                    <template x-if="order.status === 'En Camino'">
-                                        <button 
-                                            type="button"
-                                            @click="openReceiveOrderModal(order)"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition cursor-pointer"
-                                        >
-                                            <svg class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                                            <span>Recibir Mercancía</span>
-                                        </button>
-                                    </template>
-                                    <template x-if="order.status === 'Recibida en Almacén'">
-                                        <button 
-                                            type="button"
-                                            @click="openKardexForRef(order.id)"
-                                            class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 hover:underline flex items-center justify-end gap-1 cursor-pointer"
-                                        >
-                                            <span>Ver en Kardex &rarr;</span>
-                                        </button>
-                                    </template>
-                                    <template x-if="order.status === 'Pendiente Confirmación'">
-                                        <button 
-                                            type="button"
-                                            @click="openOrderExportModal(order.supplier)"
-                                            class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                                        >
-                                            Enviar WhatsApp
-                                        </button>
-                                    </template>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Tabla 3: Lista Reactiva de Futuras Compras (Reabastecimiento Planificado desde el Drawer) -->
+        <!-- Tabla: Lista Reactiva de Futuras Compras (Reabastecimiento Planificado - TASK-INV-16) -->
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
-            <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-200 inline-flex items-center justify-center">
@@ -2749,40 +2496,379 @@
                         <h3 class="text-base font-bold text-slate-900">Lista de Futuras Compras & Reabastecimiento Planificado</h3>
                         <!-- Help Icon -->
                         <div x-data="{ tip: false }" class="relative inline-flex items-center">
-                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors">
+                            <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
                             </span>
-                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
-                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Consolidación de Compras</div>
-                                <p class="text-[11px] text-slate-200 leading-snug">Artículos agregados individualmente desde el Drawer de producto para generar una orden consolidada por fabricante.</p>
+                            <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Consolidación y Edición en Vivo (TASK-INV-16)</div>
+                                <p class="text-[11px] text-slate-200 leading-snug">Edita cantidades y curva de tallas en tiempo real. Agrupa por fabricante para verificar el MOQ antes de emitir la Orden de Compra oficial en PDF.</p>
                                 <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                             </div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500">Lotes de reposición acumulados desde el panel lateral de producto</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Lotes sugeridos acumulados con edición directa de unidades y control de Pedido Mínimo (MOQ)</p>
                 </div>
-                <div class="flex items-center gap-2">
+
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <!-- Selector de Vista: Árbol Agrupado vs Lista Plana -->
+                    <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
+                        <button 
+                            type="button"
+                            @click="purchasesViewMode = 'tree'" 
+                            :class="purchasesViewMode === 'tree' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
+                            class="px-2.5 py-1 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                            <span>Por Proveedor (Árbol)</span>
+                        </button>
+                        <button 
+                            type="button"
+                            @click="purchasesViewMode = 'flat'" 
+                            :class="purchasesViewMode === 'flat' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
+                            class="px-2.5 py-1 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <span>Lista Plana</span>
+                        </button>
+                    </div>
+
+                    <!-- Botón Generar PO Oficial PDF -->
+                    <button 
+                        type="button"
+                        @click="openPoGenerator('all')" 
+                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                        title="Generar e imprimir orden de compra formal en PDF con folio"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Generar PO Oficial (PDF)</span>
+                    </button>
+
+                    <!-- Botón Exportar WhatsApp -->
                     <button 
                         type="button"
                         @click="exportPurchaseOrdersToExcel()" 
-                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
                     >
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        <span>Exportar Orden Consolidada</span>
+                        <span>Exportar WhatsApp</span>
                     </button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-b-xl">
+            <!-- VISTA 1: ÁRBOL AGRUPADO POR PROVEEDOR (TREE-VIEW) -->
+            <div x-show="purchasesViewMode === 'tree'" class="p-5 space-y-6">
+                <template x-if="futurePurchaseOrders.length === 0">
+                    <div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                        <p class="text-xs font-semibold text-slate-500">No hay órdenes de compra planificadas en cola. Agrega productos desde el Catálogo con el botón "+ Generar PO" o convierte solicitudes On-Demand.</p>
+                    </div>
+                </template>
+
+                <template x-for="group in getPlannedOrdersBySupplier()" :key="group.supplier">
+                    <div class="bg-slate-50/70 rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                        <!-- Cabecera del Proveedor en el Árbol -->
+                        <div class="p-4 bg-white border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div class="flex items-start sm:items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                </div>
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h4 class="text-sm font-bold text-slate-900" x-text="group.supplier"></h4>
+                                        <template x-if="group.brands && group.brands.length > 0">
+                                            <span class="text-[10px] font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                <span class="text-slate-400 font-normal">Marcas:</span>
+                                                <span class="font-bold text-slate-800" x-text="group.brands.join(', ')"></span>
+                                            </span>
+                                        </template>
+                                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold" x-text="group.providerData ? group.providerData.vendorCode : 'VND-EXT'"></span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="'Lead Time: ' + group.leadTime"></span>
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                        <span>Contacto: <strong class="text-slate-700" x-text="group.contact"></strong></span>
+                                        <span>•</span>
+                                        <span>Términos: <strong class="text-slate-700" x-text="group.paymentTerms"></strong></span>
+                                        <template x-if="group.activeTier">
+                                            <span class="text-indigo-700 font-semibold flex items-center gap-1.5 flex-wrap">
+                                                <span>• Nivel Tabulación Activo:</span>
+                                                <strong class="px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-900 font-mono text-[11px]" x-text="group.activeTier.label"></strong>
+                                                <template x-if="group.savingsAmount > 0">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 border border-emerald-300 text-emerald-800 shadow-3xs" title="Dinero y porcentaje real ahorrado por escala MOQ frente a precio base de menudeo">
+                                                        <svg class="w-3.5 h-3.5 text-emerald-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                                        <span x-text="'-' + formatCurrency(group.savingsAmount) + ' (' + group.savingsPercent + '% de ahorro)'"></span>
+                                                    </span>
+                                                </template>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Barra de Progreso MOQ y Subtotales del Proveedor -->
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                                <!-- Progreso MOQ -->
+                                <div class="min-w-[180px]">
+                                    <div class="flex items-center justify-between text-[11px] mb-1">
+                                        <span class="font-bold text-slate-600">Progreso Pedido Mínimo (MOQ):</span>
+                                        <span 
+                                            class="font-mono font-extrabold text-[10px]"
+                                            :class="getSupplierMoqProgress(group).isMet ? 'text-emerald-700' : 'text-amber-700'"
+                                            x-text="getSupplierMoqProgress(group).percentage + '%'"
+                                        ></span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                        <div 
+                                            class="h-2 rounded-full transition-all duration-300"
+                                            :class="getSupplierMoqProgress(group).isMet ? 'bg-emerald-500' : 'bg-amber-500'"
+                                            :style="'width: ' + getSupplierMoqProgress(group).percentage + '%'"
+                                        ></div>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 block mt-0.5" x-text="getSupplierMoqProgress(group).label"></span>
+                                </div>
+
+                                <!-- Subtotal Piezas e Inversión -->
+                                <div class="text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-2 sm:pt-0 sm:pl-4">
+                                    <div class="text-[11px] text-slate-500">Subtotal del Fabricante</div>
+                                    <div class="text-sm font-extrabold text-slate-900" x-text="formatCurrency(group.totalCost)"></div>
+                                    <div class="flex items-center justify-end gap-1.5 mt-0.5">
+                                        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded" x-text="group.totalQty + ' piezas'"></span>
+                                        <template x-if="group.savingsAmount > 0">
+                                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded" x-text="'-' + formatCurrency(group.savingsAmount) + ' (' + group.savingsPercent + '%)'"></span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Acción Rápida: Emitir PO para este Proveedor -->
+                                <button 
+                                    type="button" 
+                                    @click="openPoGenerator(group.supplier)"
+                                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                                    title="Emitir orden de compra formal exclusivamente para este proveedor"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <span>Generar PO (PDF)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tabla Anidada de Artículos del Proveedor -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-600 text-[10px] uppercase tracking-wider font-semibold">
+                                        <th class="py-2.5 px-4">Lote Ref</th>
+                                        <th class="py-2.5 px-4">Producto & SKU</th>
+                                        <th class="py-2.5 px-4 text-center">Unidades (Editable)</th>
+                                        <th class="py-2.5 px-4 text-center">Curva de Tallas (Editable)</th>
+                                        <th class="py-2.5 px-4 text-right">Costo Unit. (Editable)</th>
+                                        <th class="py-2.5 px-4 text-right">Subtotal MXN</th>
+                                        <th class="py-2.5 px-4 text-center">Prioridad (Editable)</th>
+                                        <th class="py-2.5 px-4 text-right">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200/60 font-medium text-slate-700 bg-white">
+                                    <template x-for="(order, oIdx) in group.items" :key="order.id">
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-2.5 px-4 font-mono font-bold text-indigo-600 text-xs" x-text="order.id"></td>
+                                            <td class="py-2.5 px-4">
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="font-bold text-slate-900" x-text="order.productName"></span>
+                                                    <template x-if="order.brand">
+                                                        <span class="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200" x-text="order.brand"></span>
+                                                    </template>
+                                                </div>
+                                                <span class="text-slate-400 font-mono text-[10px]" x-text="'SKU: ' + order.sku"></span>
+                                            </td>
+                                            <!-- Edición Directa de Cantidad -->
+                                            <td class="py-2.5 px-4 text-center">
+                                                <div class="inline-flex items-center gap-1">
+                                                    <input 
+                                                        type="number" 
+                                                        min="1" 
+                                                        max="9999"
+                                                        :value="order.qty" 
+                                                        @change="updatePlannedOrderQty(order.id, $event.target.value)" 
+                                                        class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                        title="Modificar unidades a comprar (recalcula subtotales e inversión global)"
+                                                    >
+                                                    <span class="text-[11px] text-slate-400 font-medium">uds</span>
+                                                </div>
+                                            </td>
+                                            <!-- Curva de Tallas con Edición Directa / En Línea y Modal Alternativo -->
+                                            <td class="py-2.5 px-4 text-center">
+                                                <!-- MODO 1: VISUALIZACIÓN RÁPIDA DE BADGES CON BOTÓN DE ACTIVACIÓN -->
+                                                <div x-show="!order._editingSizes" class="flex items-center justify-center gap-1 text-[10px] flex-wrap">
+                                                    <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'CH:' + (order.sizes ? (order.sizes.ch || 0) : 0)"></span>
+                                                    <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'M:' + (order.sizes ? (order.sizes.m || 0) : 0)"></span>
+                                                    <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'G:' + (order.sizes ? (order.sizes.g || 0) : 0)"></span>
+                                                    <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'XL:' + (order.sizes ? (order.sizes.xl || 0) : 0)"></span>
+                                                    <template x-if="order.sizes && order.sizes['2xl'] > 0">
+                                                        <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'2XL:' + order.sizes['2xl']"></span>
+                                                    </template>
+                                                    <template x-if="order.sizes && order.sizes['3xl'] > 0">
+                                                        <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'3XL:' + order.sizes['3xl']"></span>
+                                                    </template>
+                                                    <!-- BOTÓN EDITAR EN LÍNEA -->
+                                                    <button 
+                                                        type="button" 
+                                                        @click.stop="order._editingSizes = true"
+                                                        style="min-height: unset; padding: 2px 6px;"
+                                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 border border-indigo-200 hover:border-indigo-600 rounded transition cursor-pointer ml-1"
+                                                        title="Activar edición de curva de tallas en la tabla"
+                                                    >
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                        <span>Editar</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- MODO 2: EDICIÓN EN LÍNEA DIRECTA CON INPUTS NUMÉRICOS Y RECALCULO AUTOMÁTICO -->
+                                                <div x-show="order._editingSizes" class="inline-flex flex-wrap items-center justify-center gap-1 p-1 bg-indigo-50/90 border border-indigo-200 rounded-lg shadow-2xs">
+                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
+                                                        <span class="text-[9px] font-bold text-slate-500">CH</span>
+                                                        <input 
+                                                            type="number" 
+                                                            min="0" 
+                                                            max="999" 
+                                                            :value="order.sizes ? (order.sizes.ch || 0) : 0" 
+                                                            @input="updatePlannedOrderSize(order.id, 'ch', $event.target.value)"
+                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
+                                                        >
+                                                    </div>
+                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
+                                                        <span class="text-[9px] font-bold text-indigo-700">M</span>
+                                                        <input 
+                                                            type="number" 
+                                                            min="0" 
+                                                            max="999" 
+                                                            :value="order.sizes ? (order.sizes.m || 0) : 0" 
+                                                            @input="updatePlannedOrderSize(order.id, 'm', $event.target.value)"
+                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
+                                                        >
+                                                    </div>
+                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
+                                                        <span class="text-[9px] font-bold text-indigo-700">G</span>
+                                                        <input 
+                                                            type="number" 
+                                                            min="0" 
+                                                            max="999" 
+                                                            :value="order.sizes ? (order.sizes.g || 0) : 0" 
+                                                            @input="updatePlannedOrderSize(order.id, 'g', $event.target.value)"
+                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
+                                                        >
+                                                    </div>
+                                                    <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
+                                                        <span class="text-[9px] font-bold text-slate-500">XL</span>
+                                                        <input 
+                                                            type="number" 
+                                                            min="0" 
+                                                            max="999" 
+                                                            :value="order.sizes ? (order.sizes.xl || 0) : 0" 
+                                                            @input="updatePlannedOrderSize(order.id, 'xl', $event.target.value)"
+                                                            class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
+                                                        >
+                                                    </div>
+                                                    <template x-if="order.sizes && order.sizes['2xl'] !== undefined">
+                                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
+                                                            <span class="text-[9px] font-bold text-amber-700">2XL</span>
+                                                            <input 
+                                                                type="number" 
+                                                                min="0" 
+                                                                max="999" 
+                                                                :value="order.sizes['2xl'] || 0" 
+                                                                @input="updatePlannedOrderSize(order.id, '2xl', $event.target.value)"
+                                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
+                                                            >
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="order.sizes && order.sizes['3xl'] !== undefined">
+                                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
+                                                            <span class="text-[9px] font-bold text-amber-700">3XL</span>
+                                                            <input 
+                                                                type="number" 
+                                                                min="0" 
+                                                                max="999" 
+                                                                :value="order.sizes['3xl'] || 0" 
+                                                                @input="updatePlannedOrderSize(order.id, '3xl', $event.target.value)"
+                                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
+                                                            >
+                                                        </div>
+                                                    </template>
+                                                    <!-- BOTÓN GUARDAR Y CERRAR -->
+                                                    <button 
+                                                        type="button" 
+                                                        @click.stop="order._editingSizes = false; showToast('Curva de tallas guardada (' + order.qty + ' uds).', 'success')"
+                                                        style="min-height: unset; padding: 2px 8px;"
+                                                        class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-extrabold transition shadow-2xs cursor-pointer flex items-center gap-1 ml-1"
+                                                        title="Guardar y cerrar edición"
+                                                    >
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                        <span>Listo</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <!-- Costo Unitario Editable -->
+                                            <td class="py-2.5 px-4 text-right">
+                                                <div class="inline-flex items-center gap-1 justify-end">
+                                                    <span class="text-xs text-slate-400 font-semibold">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.50" 
+                                                        min="0" 
+                                                        :value="order.costUnit" 
+                                                        @change="updatePlannedOrderCost(order.id, $event.target.value)" 
+                                                        class="w-20 px-1.5 py-1 text-right font-mono font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                        title="Modificar costo unitario pactado con fabricante"
+                                                    >
+                                                    <span class="text-[10px] text-slate-400 font-medium">MXN</span>
+                                                </div>
+                                            </td>
+                                            <!-- Subtotal Recalculado Dinámicamente -->
+                                            <td class="py-2.5 px-4 text-right font-bold text-slate-900 font-mono" x-text="formatCurrency(order.totalCost)"></td>
+                                            <!-- Prioridad Editable (Reglas ROP / Ajuste Manual) -->
+                                            <td class="py-2.5 px-4 text-center">
+                                                <select 
+                                                    :value="order.priority" 
+                                                    @change="updatePlannedOrderPriority(order.id, $event.target.value)"
+                                                    class="text-[10px] font-extrabold uppercase tracking-wider rounded-lg px-2 py-1 border cursor-pointer focus:outline-none transition shadow-2xs font-sans"
+                                                    :class="order.priority === 'critica' ? 'bg-purple-50 text-purple-700 border-purple-300' : (order.priority === 'alta' ? 'bg-rose-50 text-rose-700 border-rose-300' : (order.priority === 'media' ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-emerald-50 text-emerald-700 border-emerald-300'))"
+                                                    title="Prioridad según criticidad ROP o manual"
+                                                >
+                                                    <option value="critica" class="bg-white text-purple-700 font-bold">CRÍTICA</option>
+                                                    <option value="alta" class="bg-white text-rose-700 font-bold">ALTA</option>
+                                                    <option value="media" class="bg-white text-amber-700 font-bold">MEDIA</option>
+                                                    <option value="baja" class="bg-white text-emerald-700 font-bold">BAJA</option>
+                                                </select>
+                                            </td>
+                                            <td class="py-2.5 px-4 text-right">
+                                                <button 
+                                                    type="button"
+                                                    @click="futurePurchaseOrders = futurePurchaseOrders.filter(o => o.id !== order.id); showToast('Partida removida de compras planificadas.', 'info')" 
+                                                    class="text-xs text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
+                                                >
+                                                    Quitar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- VISTA 2: LISTA PLANA CONTINUA -->
+            <div x-show="purchasesViewMode === 'flat'" class="overflow-x-auto rounded-b-xl">
                 <table class="w-full text-left border-collapse text-xs sm:text-sm">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                             <th class="py-3 px-4">Código Lote</th>
                             <th class="py-3 px-4">Producto & SKU</th>
                             <th class="py-3 px-4">Proveedor Asignado</th>
-                            <th class="py-3 px-4 text-center">Unidades</th>
+                            <th class="py-3 px-4 text-center">Unidades (Editable)</th>
+                            <th class="py-3 px-4 text-center">Curva Tallas (Editable)</th>
+                            <th class="py-3 px-4 text-right">Costo Unit. (Editable)</th>
                             <th class="py-3 px-4 text-right">Inversión Estimada</th>
-                            <th class="py-3 px-4 text-center">Prioridad</th>
+                            <th class="py-3 px-4 text-center">Prioridad (Editable)</th>
                             <th class="py-3 px-4 text-center">Estado</th>
                             <th class="py-3 px-4 text-right">Acción</th>
                         </tr>
@@ -2797,29 +2883,161 @@
                                 </td>
                                 <td class="py-3.5 px-4 font-semibold text-slate-800" x-text="order.supplier"></td>
                                 <td class="py-3.5 px-4 text-center">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-800" x-text="order.qty + ' uds'"></span>
-                                    <template x-if="order.sizes">
-                                        <div class="flex items-center justify-center gap-1 mt-1 text-[10px]">
-                                            <span class="px-1 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'CH:' + (order.sizes.ch || 0)"></span>
-                                            <span class="px-1 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'M:' + (order.sizes.m || 0)"></span>
-                                            <span class="px-1 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'G:' + (order.sizes.g || 0)"></span>
-                                            <span class="px-1 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'XL:' + (order.sizes.xl || 0)"></span>
-                                            <template x-if="order.sizes['2xl'] > 0">
-                                                <span class="px-1 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'2XL:' + order.sizes['2xl']"></span>
-                                            </template>
-                                            <template x-if="order.sizes['3xl'] > 0">
-                                                <span class="px-1 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'3XL:' + order.sizes['3xl']"></span>
-                                            </template>
-                                        </div>
-                                    </template>
+                                    <div class="inline-flex items-center gap-1">
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            max="9999"
+                                            :value="order.qty" 
+                                            @change="updatePlannedOrderQty(order.id, $event.target.value)" 
+                                            class="w-16 px-2 py-1 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                        <span class="text-[11px] text-slate-400">uds</span>
+                                    </div>
                                 </td>
-                                <td class="py-3.5 px-4 text-right font-bold text-slate-900" x-text="formatCurrency(order.totalCost)"></td>
                                 <td class="py-3.5 px-4 text-center">
-                                    <span 
-                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
-                                        :class="order.priority === 'alta' ? 'bg-rose-50 text-rose-700 border border-rose-200' : (order.priority === 'media' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200')"
-                                        x-text="order.priority"
-                                    ></span>
+                                    <!-- MODO 1: VISUALIZACIÓN RÁPIDA DE BADGES CON BOTÓN DE ACTIVACIÓN -->
+                                    <div x-show="!order._editingSizes" class="flex items-center justify-center gap-1 text-[10px] flex-wrap">
+                                        <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'CH:' + (order.sizes ? (order.sizes.ch || 0) : 0)"></span>
+                                        <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'M:' + (order.sizes ? (order.sizes.m || 0) : 0)"></span>
+                                        <span class="px-1.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-indigo-700 font-bold" x-text="'G:' + (order.sizes ? (order.sizes.g || 0) : 0)"></span>
+                                        <span class="px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-semibold" x-text="'XL:' + (order.sizes ? (order.sizes.xl || 0) : 0)"></span>
+                                        <template x-if="order.sizes && order.sizes['2xl'] > 0">
+                                            <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'2XL:' + order.sizes['2xl']"></span>
+                                        </template>
+                                        <template x-if="order.sizes && order.sizes['3xl'] > 0">
+                                            <span class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold" x-text="'3XL:' + order.sizes['3xl']"></span>
+                                        </template>
+                                        <!-- BOTÓN EDITAR EN LÍNEA -->
+                                        <button 
+                                            type="button" 
+                                            @click.stop="order._editingSizes = true"
+                                            style="min-height: unset; padding: 2px 6px;"
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 border border-indigo-200 hover:border-indigo-600 rounded transition cursor-pointer ml-1"
+                                            title="Activar edición de curva de tallas en la tabla"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                            <span>Editar</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- MODO 2: EDICIÓN EN LÍNEA DIRECTA CON INPUTS NUMÉRICOS Y RECALCULO AUTOMÁTICO -->
+                                    <div x-show="order._editingSizes" class="inline-flex flex-wrap items-center justify-center gap-1 p-1 bg-indigo-50/90 border border-indigo-200 rounded-lg shadow-2xs">
+                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
+                                            <span class="text-[9px] font-bold text-slate-500">CH</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="999" 
+                                                :value="order.sizes ? (order.sizes.ch || 0) : 0" 
+                                                @input="updatePlannedOrderSize(order.id, 'ch', $event.target.value)"
+                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
+                                            >
+                                        </div>
+                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
+                                            <span class="text-[9px] font-bold text-indigo-700">M</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="999" 
+                                                :value="order.sizes ? (order.sizes.m || 0) : 0" 
+                                                @input="updatePlannedOrderSize(order.id, 'm', $event.target.value)"
+                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
+                                            >
+                                        </div>
+                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-indigo-200">
+                                            <span class="text-[9px] font-bold text-indigo-700">G</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="999" 
+                                                :value="order.sizes ? (order.sizes.g || 0) : 0" 
+                                                @input="updatePlannedOrderSize(order.id, 'g', $event.target.value)"
+                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-indigo-700"
+                                            >
+                                        </div>
+                                        <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-slate-200">
+                                            <span class="text-[9px] font-bold text-slate-500">XL</span>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="999" 
+                                                :value="order.sizes ? (order.sizes.xl || 0) : 0" 
+                                                @input="updatePlannedOrderSize(order.id, 'xl', $event.target.value)"
+                                                class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-slate-800"
+                                            >
+                                        </div>
+                                        <template x-if="order.sizes && order.sizes['2xl'] !== undefined">
+                                            <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
+                                                <span class="text-[9px] font-bold text-amber-700">2XL</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    max="999" 
+                                                    :value="order.sizes['2xl'] || 0" 
+                                                    @input="updatePlannedOrderSize(order.id, '2xl', $event.target.value)"
+                                                    class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
+                                                >
+                                            </div>
+                                        </template>
+                                        <template x-if="order.sizes && order.sizes['3xl'] !== undefined">
+                                            <div class="flex items-center gap-0.5 bg-white px-1 py-0.5 rounded border border-amber-200">
+                                                <span class="text-[9px] font-bold text-amber-700">3XL</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    max="999" 
+                                                    :value="order.sizes['3xl'] || 0" 
+                                                    @input="updatePlannedOrderSize(order.id, '3xl', $event.target.value)"
+                                                    class="w-9 text-center font-bold text-xs bg-transparent border-0 outline-none p-0 text-amber-800"
+                                                >
+                                            </div>
+                                        </template>
+                                        <!-- BOTÓN GUARDAR Y CERRAR -->
+                                        <button 
+                                            type="button" 
+                                            @click.stop="order._editingSizes = false; showToast('Curva de tallas guardada (' + order.qty + ' uds).', 'success')"
+                                            style="min-height: unset; padding: 2px 8px;"
+                                            class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-extrabold transition shadow-2xs cursor-pointer flex items-center gap-1 ml-1"
+                                            title="Guardar y cerrar edición"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Listo</span>
+                                        </button>
+                                    </div>
+                                </td>
+                                <!-- Costo Unitario Editable -->
+                                <td class="py-3.5 px-4 text-right">
+                                    <div class="inline-flex items-center gap-1 justify-end">
+                                        <span class="text-xs text-slate-400 font-semibold">$</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.50" 
+                                            min="0" 
+                                            :value="order.costUnit" 
+                                            @change="updatePlannedOrderCost(order.id, $event.target.value)" 
+                                            class="w-20 px-1.5 py-1 text-right font-mono font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            title="Modificar costo unitario pactado con fabricante"
+                                        >
+                                        <span class="text-[10px] text-slate-400 font-medium">MXN</span>
+                                    </div>
+                                </td>
+                                <!-- Inversión Estimada Recalculada -->
+                                <td class="py-3.5 px-4 text-right font-bold text-slate-900 font-mono" x-text="formatCurrency(order.totalCost)"></td>
+                                <!-- Prioridad Editable -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <select 
+                                        :value="order.priority" 
+                                        @change="updatePlannedOrderPriority(order.id, $event.target.value)"
+                                        class="text-[10px] font-extrabold uppercase tracking-wider rounded-lg px-2 py-1 border cursor-pointer focus:outline-none transition shadow-2xs font-sans"
+                                        :class="order.priority === 'critica' ? 'bg-purple-50 text-purple-700 border-purple-300' : (order.priority === 'alta' ? 'bg-rose-50 text-rose-700 border-rose-300' : (order.priority === 'media' ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-emerald-50 text-emerald-700 border-emerald-300'))"
+                                        title="Prioridad según criticidad ROP o manual"
+                                    >
+                                        <option value="critica" class="bg-white text-purple-700 font-bold">CRÍTICA</option>
+                                        <option value="alta" class="bg-white text-rose-700 font-bold">ALTA</option>
+                                        <option value="media" class="bg-white text-amber-700 font-bold">MEDIA</option>
+                                        <option value="baja" class="bg-white text-emerald-700 font-bold">BAJA</option>
+                                    </select>
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
                                     <span class="inline-flex items-center gap-1 text-xs text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
@@ -2829,6 +3047,7 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-right">
                                     <button 
+                                        type="button"
                                         @click="futurePurchaseOrders.splice(index, 1); showToast('Ítem removido de la lista de futuras compras.', 'info')" 
                                         class="text-xs text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
                                     >
@@ -2844,10 +3063,203 @@
 
         </div> <!-- Fin de SUB-VISTA 1 (purchasesSubTab === 'reorder') -->
 
-        <!-- SUB-VISTA 2: BANDEJA DE SOLICITUDES ON-DEMAND DE CLIENTES -->
-        <div x-show="purchasesSubTab === 'on_demand'" class="space-y-6" style="display: none;">
+        <!-- SUB-VISTA 2: ÓRDENES EMITIDAS & SEGUIMIENTO FLETERO (INBOUND TRACKING - EXCLUSIVO COMPRAS) -->
+        <div x-show="purchasesSubTab === 'inbound_tracking' && canAccessInboundTracking()" class="space-y-6" style="display: none;">
+            <!-- KPI Strip de Seguimiento Fletero -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Órdenes en Tránsito</span>
+                        <div class="text-xl font-bold text-blue-600 mt-0.5" x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length + ' Activas'"></div>
+                        <p class="text-[11px] text-slate-400">Despachadas con transportista</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Piezas en Embarque</span>
+                        <div class="text-xl font-bold text-slate-900 mt-0.5" x-text="activePurchaseOrders.reduce((sum, o) => sum + (Number(o.qty) || 0), 0) + ' unidades'"></div>
+                        <p class="text-[11px] text-emerald-600 font-medium">Inventario comprometido</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Inversión Inbound</span>
+                        <div class="text-xl font-bold text-indigo-600 mt-0.5" x-text="formatCurrency(activePurchaseOrders.reduce((sum, o) => sum + (Number(o.totalCost) || 0), 0))"></div>
+                        <p class="text-[11px] text-slate-400">CxP registradas en Hub 5</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Muelle de Descarga</span>
+                        <div class="text-base font-bold text-slate-900 mt-0.5">Rampa 02 Inbound</div>
+                        <p class="text-[11px] text-slate-400">CEDIS Patio Naucalpan</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center shrink-0 border border-slate-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Órdenes Emitidas & Seguimiento Fletero -->
             <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
                 <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 inline-flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                            </span>
+                            <h3 class="text-base font-bold text-slate-900">Órdenes Emitidas & Seguimiento Fletero (Inbound Tracking)</h3>
+                            <!-- Help Icon -->
+                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
+                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-blue-600 transition-colors cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
+                                </span>
+                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                    <div class="font-bold text-blue-300 text-[11px] mb-0.5">Seguimiento Fletero para Compras</div>
+                                    <p class="text-[10px] text-slate-200 leading-snug">Expedientes de órdenes de compra emitidas oficialmente. Consulta la telemetría de ruta de las paqueterías (DHL, FedEx, Estafeta), visualiza el PDF formal con firmas y da seguimiento previo a la recepción en rampa.</p>
+                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Expedientes de compra oficiales despachados a fabricantes con telemetría de transporte en tránsito a CEDIS.</p>
+                    </div>
+                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                        <span x-text="activePurchaseOrders.filter(o => o.status !== 'Recibida en Almacén').length"></span> Órdenes en Seguimiento
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto rounded-b-xl">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                                <th class="py-3 px-4">Folio PO</th>
+                                <th class="py-3 px-4">Proveedor & Guía Fletera</th>
+                                <th class="py-3 px-4">Prendas & Curvas de Tallas</th>
+                                <th class="py-3 px-4 text-right">Total ($)</th>
+                                <th class="py-3 px-4">Fecha & ETA</th>
+                                <th class="py-3 px-4 text-center">Estado del Flete</th>
+                                <th class="py-3 px-4 text-right">Acciones (Compras)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <template x-for="(order, index) in activePurchaseOrders" :key="order.id">
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="py-3.5 px-4 font-mono font-bold text-indigo-600 whitespace-nowrap" x-text="'#' + order.id"></td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="font-bold text-slate-900 block" x-text="order.supplier"></span>
+                                        <div class="flex items-center gap-1.5 mt-0.5">
+                                            <span class="text-slate-500 text-[11px] font-mono" x-text="order.carrier"></span>
+                                            <button 
+                                                type="button" 
+                                                @click="copyTrackingNumber(order.carrier)" 
+                                                class="text-slate-400 hover:text-slate-600 transition p-0.5 rounded cursor-pointer"
+                                                title="Copiar guía"
+                                            >
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-bold text-slate-900" x-text="order.qty + ' unidades'"></span>
+                                            <template x-if="order.linkedCartId">
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                    Pedido Mixto
+                                                </span>
+                                            </template>
+                                        </div>
+                                        <span class="text-slate-600 text-xs block truncate max-w-xs mt-0.5" x-text="order.productName"></span>
+                                        <div class="flex items-center gap-1 mt-1 text-[10px] text-slate-500 flex-wrap">
+                                            <span class="font-medium text-slate-400">Tallas:</span>
+                                            <template x-if="order.sizes">
+                                                <div class="flex items-center gap-1 font-mono">
+                                                    <template x-for="(sQty, sKey) in order.sizes" :key="sKey">
+                                                        <span x-show="sQty > 0" class="px-1 py-0.2 bg-slate-100 rounded text-[10px] text-slate-700 border border-slate-200" x-text="sKey.toUpperCase() + ':' + sQty"></span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right font-bold text-slate-900 whitespace-nowrap" x-text="formatCurrency(order.totalCost)"></td>
+                                    <td class="py-3.5 px-4 whitespace-nowrap">
+                                        <span class="text-slate-700 font-medium block" x-text="order.date"></span>
+                                        <span class="text-[11px] text-indigo-600 font-semibold block" x-text="'ETA: ' + order.eta"></span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <template x-if="order.status === 'En Camino'">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                                <span>En Camino</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="order.status === 'Recibida en Almacén'">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                <span>Recibida en Almacén</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="order.status === 'Pendiente Confirmación' || order.status === 'Pendiente'">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                <span>Pendiente</span>
+                                            </span>
+                                        </template>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button 
+                                                type="button" 
+                                                @click="viewPoPdfFromActiveOrder(order)"
+                                                class="px-2.5 py-1 text-xs font-bold bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 rounded-lg shadow-3xs transition cursor-pointer flex items-center gap-1"
+                                                title="Consultar expediente formal de Orden de Compra y reimprimir documento"
+                                            >
+                                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                                <span>Reimprimir / Ver PDF</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="openCarrierTrackingModal(order)"
+                                                class="px-2.5 py-1 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-3xs transition cursor-pointer flex items-center gap-1"
+                                                title="Ver telemetría y ruta de transportista"
+                                            >
+                                                <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                                <span>Rastrear Guía</span>
+                                            </button>
+                                            <template x-if="order.status === 'Recibida en Almacén'">
+                                                <button 
+                                                    type="button" 
+                                                    @click="openKardexForRef(order.id)"
+                                                    class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 hover:underline flex items-center justify-end gap-1 cursor-pointer ml-1"
+                                                >
+                                                    <span>Kardex &rarr;</span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div> <!-- Fin de SUB-VISTA 2 (purchasesSubTab === 'inbound_tracking') -->
+
+        <!-- SUB-VISTA 3: BANDEJA DE SOLICITUDES ON-DEMAND DE CLIENTES (TASK-INV-16 & TASK-INT-22) -->
+        <div x-show="purchasesSubTab === 'on_demand'" class="space-y-6" style="display: none;">
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+                <div class="p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="p-1.5 bg-amber-50 text-amber-600 rounded-lg border border-amber-200 inline-flex items-center justify-center">
@@ -2857,19 +3269,57 @@
                             <!-- Help Icon -->
                             <div x-data="{ tip: false }" class="relative inline-flex items-center">
                                 <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-amber-600 transition-colors cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg></span>
-                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-64 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
                                     <div class="font-bold text-amber-300 text-[11px] mb-0.5">Atención Rápida On-Demand</div>
-                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas añadidas en 'Carritos para Solicitud de Pedido' o líneas externas de 'Carritos Mixtos'. Valida existencias con el proveedor antes de emitir el enlace de pago.</p>
+                                    <p class="text-[10px] text-slate-200 leading-snug">Prendas añadidas en 'Carritos para Solicitud de Pedido' o líneas externas de 'Carritos Mixtos'. Valida existencias con el proveedor y pasa a compras planificadas o marca como agotada con aviso automático a Atención a Clientes.</p>
                                     <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
                                 </div>
                             </div>
                         </div>
                         <p class="text-xs text-slate-500 mt-0.5">Atención y verificación de existencias remotas con temporizador SLA</p>
                     </div>
-                    <div class="flex items-center gap-2">
+
+                    <!-- Filtros de Estado On-Demand -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="inline-flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
+                            <button 
+                                type="button"
+                                @click="onDemandStatusFilter = 'todas'"
+                                :class="onDemandStatusFilter === 'todas' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                                class="px-2.5 py-1 rounded-md transition cursor-pointer"
+                            >
+                                Todas (<span x-text="customerOnDemandRequests.length"></span>)
+                            </button>
+                            <button 
+                                type="button"
+                                @click="onDemandStatusFilter = 'pendientes'"
+                                :class="onDemandStatusFilter === 'pendientes' ? 'bg-white text-amber-800 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                                class="px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1"
+                            >
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span>Por Verificar (<span x-text="customerOnDemandRequests.filter(r => r.verificationStatus === 'pendiente').length"></span>)</span>
+                            </button>
+                            <button 
+                                type="button"
+                                @click="onDemandStatusFilter = 'en_compra'"
+                                :class="onDemandStatusFilter === 'en_compra' ? 'bg-white text-indigo-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                                class="px-2.5 py-1 rounded-md transition cursor-pointer"
+                            >
+                                En Compra (<span x-text="customerOnDemandRequests.filter(r => r.verificationStatus === 'en_compra' || r.verificationStatus === 'confirmado').length"></span>)
+                            </button>
+                            <button 
+                                type="button"
+                                @click="onDemandStatusFilter = 'agotadas'"
+                                :class="onDemandStatusFilter === 'agotadas' ? 'bg-white text-rose-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                                class="px-2.5 py-1 rounded-md transition cursor-pointer"
+                            >
+                                Agotadas (<span x-text="customerOnDemandRequests.filter(r => r.verificationStatus === 'agotado' || r.verificationStatus === 'sin_stock').length"></span>)
+                            </button>
+                        </div>
+
                         <span class="text-xs text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-bold flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span>SLA Objetivo: &lt; 2 horas</span>
+                            <span>SLA Objetivo: &lt; 2h</span>
                         </span>
                     </div>
                 </div>
@@ -2889,7 +3339,14 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                            <template x-for="(req, index) in customerOnDemandRequests" :key="req.id">
+                            <template x-if="filteredOnDemandRequests.length === 0">
+                                <tr>
+                                    <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
+                                        No hay solicitudes bajo este filtro de estado.
+                                    </td>
+                                </tr>
+                            </template>
+                            <template x-for="(req, index) in filteredOnDemandRequests" :key="req.id">
                                 <tr class="hover:bg-slate-50 transition">
                                     <td class="py-3.5 px-4 font-mono font-bold text-amber-700" x-text="req.id"></td>
                                     <td class="py-3.5 px-4">
@@ -2918,16 +3375,16 @@
                                     </td>
                                     <td class="py-3.5 px-4 font-semibold text-slate-800" x-text="req.supplier"></td>
                                     <td class="py-3.5 px-4 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">
-                                            <span>⏱</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">
+                                            <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v6l4 2"/></svg>
                                             <span x-text="req.slaMinutes + ' min'"></span>
                                         </span>
                                     </td>
                                     <td class="py-3.5 px-4 text-center">
-                                        <template x-if="req.verificationStatus === 'confirmado'">
+                                        <template x-if="req.verificationStatus === 'en_compra' || req.verificationStatus === 'confirmado'">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                                                <span>Stock Confirmado</span>
+                                                <span>En Compra Planificada</span>
                                             </span>
                                         </template>
                                         <template x-if="req.verificationStatus === 'pendiente'">
@@ -2936,38 +3393,64 @@
                                                 <span>Por Verificar</span>
                                             </span>
                                         </template>
+                                        <template x-if="req.verificationStatus === 'agotado' || req.verificationStatus === 'sin_stock'">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                                <span>Agotado / Sin Stock</span>
+                                            </span>
+                                        </template>
                                     </td>
                                     <td class="py-3.5 px-4 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
-                                            <!-- Acción 1: Verificar con Proveedor -->
-                                            <button 
-                                                type="button" 
-                                                @click="verifyRequestWithSupplier(req)" 
-                                                class="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded text-[11px] font-bold transition cursor-pointer"
-                                                style="min-height:unset;"
-                                                title="Verificar disponibilidad en vivo con proveedor/Torzo"
-                                            >
-                                                Verificar
-                                            </button>
-                                            <!-- Acción 2: WhatsApp Link de Pago -->
+                                            <!-- Si está pendiente: opciones interactivas completas -->
+                                            <template x-if="req.verificationStatus === 'pendiente'">
+                                                <div class="flex items-center gap-1">
+                                                    <!-- Confirmar y mandar a compras -->
+                                                    <button 
+                                                        type="button" 
+                                                        @click="resolveOnDemandToPlanned(req)" 
+                                                        class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold transition cursor-pointer"
+                                                        style="min-height:unset;"
+                                                        title="Confirmar existencia y agregar a compras planificadas del proveedor"
+                                                    >
+                                                        + A Compras
+                                                    </button>
+                                                    <!-- Marcar agotado -->
+                                                    <button 
+                                                        type="button" 
+                                                        @click="openOnDemandRejectModal(req)" 
+                                                        class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded text-[11px] font-bold transition cursor-pointer"
+                                                        style="min-height:unset;"
+                                                        title="Marcar como agotado y remitir ticket a Atención a Clientes (Hub 3)"
+                                                    >
+                                                        Agotado
+                                                    </button>
+                                                </div>
+                                            </template>
+
+                                            <!-- Si ya está en compra -->
+                                            <template x-if="req.verificationStatus === 'en_compra' || req.verificationStatus === 'confirmado'">
+                                                <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold border border-emerald-200">
+                                                    En Lote Sugerido
+                                                </span>
+                                            </template>
+
+                                            <!-- Si está agotado -->
+                                            <template x-if="req.verificationStatus === 'agotado' || req.verificationStatus === 'sin_stock'">
+                                                <span class="text-[10px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded font-semibold border border-rose-200">
+                                                    Aviso en Hub 3
+                                                </span>
+                                            </template>
+
+                                            <!-- Acción WhatsApp siempre disponible -->
                                             <button 
                                                 type="button" 
                                                 @click="sendPaymentLinkToCustomer(req)" 
-                                                class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
+                                                class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
                                                 style="min-height:unset;"
-                                                title="Enviar link de pago confirmado por WhatsApp"
+                                                title="Contactar al cliente por WhatsApp"
                                             >
                                                 <span>WhatsApp</span>
-                                            </button>
-                                            <!-- Acción 3: Pasar a Orden de Compra -->
-                                            <button 
-                                                type="button" 
-                                                @click="convertRequestToPurchaseOrder(req)" 
-                                                class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[11px] font-bold transition cursor-pointer"
-                                                style="min-height:unset;"
-                                                title="Sumar a la orden de compra del proveedor"
-                                            >
-                                                + A Compra
                                             </button>
                                         </div>
                                     </td>
@@ -2978,6 +3461,335 @@
                 </div>
             </div>
         </div> <!-- Fin de SUB-VISTA 2 (purchasesSubTab === 'on_demand') -->
+
+        <!-- SUB-VISTA 3: KARDEX HISTÓRICO DE AUDITORÍA DE COMPRAS (TASK-INV-16) -->
+        <div x-show="purchasesSubTab === 'kardex'" class="space-y-6" style="display: none;">
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 bg-slate-900 text-white rounded-lg inline-flex items-center justify-center shadow-2xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </span>
+                            <h3 class="text-base font-bold text-slate-900">Kardex de Auditoría & Trazabilidad de Compras</h3>
+                            <!-- Help Icon -->
+                            <div x-data="{ tip: false }" class="relative inline-flex items-center">
+                                <span @mouseenter="tip = true" @mouseleave="tip = false" @click.stop="tip = !tip" class="help-icon text-slate-400 hover:text-slate-800 transition-colors cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m0 3.5h.01"/></svg>
+                                </span>
+                                <div x-show="tip" @click.away="tip = false" x-transition class="absolute top-full left-0 mt-2 w-72 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none normal-case font-normal text-left border border-slate-700/80" style="display: none;">
+                                    <div class="font-bold text-indigo-300 text-[11px] mb-0.5">Libro Mayor Inmutable de Compras</div>
+                                    <p class="text-[11px] text-slate-200 leading-snug">Registra cada evento mercantil del submódulo: órdenes formalizadas, cambios de volumen, rechazos On-Demand e ingresos físicos a rampa.</p>
+                                    <span class="absolute bottom-full left-4 -mb-1 border-4 border-transparent border-b-slate-900"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Historial cronológico auditado de movimientos comerciales y acuerdos con talleres</p>
+                    </div>
+
+                    <!-- Filtros y Búsqueda del Kardex -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                x-model="purchaseKardexSearch" 
+                                placeholder="Buscar folio, SKU, proveedor..." 
+                                class="w-56 pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-800"
+                            >
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <select 
+                            x-model="purchaseKardexFilter" 
+                            class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-800"
+                        >
+                            <option value="all">Todos los Eventos</option>
+                            <option value="PO_EMITIDA">Emisión de PO</option>
+                            <option value="AJUSTE_CANTIDAD">Ajuste de Unidades</option>
+                            <option value="ON_DEMAND_CONVERTIDO">On-Demand a PO</option>
+                            <option value="ON_DEMAND_AGOTADO">On-Demand Rechazado</option>
+                            <option value="RECEPCION_RAMPA">Recepción en Rampa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-b-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] uppercase tracking-wider font-semibold">
+                                <th class="py-3 px-4">Folio / Fecha</th>
+                                <th class="py-3 px-4">Tipo de Evento</th>
+                                <th class="py-3 px-4">Proveedor / Taller</th>
+                                <th class="py-3 px-4">Referencia / Ítems</th>
+                                <th class="py-3 px-4 text-center">Variación</th>
+                                <th class="py-3 px-4 text-right">Monto Afectado</th>
+                                <th class="py-3 px-4">Operador</th>
+                                <th class="py-3 px-4">Detalle / Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <template x-if="filteredPurchaseKardex.length === 0">
+                                <tr>
+                                    <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
+                                        No se encontraron movimientos que coincidan con los filtros de búsqueda.
+                                    </td>
+                                </tr>
+                            </template>
+                            <template x-for="item in filteredPurchaseKardex" :key="item.id">
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="py-3 px-4">
+                                        <span class="font-mono font-bold text-slate-900 block text-xs" x-text="item.poNumber"></span>
+                                        <span class="text-[10px] text-slate-400 block" x-text="item.timestamp"></span>
+                                        <template x-if="item.type === 'PO_EMITIDA' || (item.poNumber && item.poNumber.startsWith('PO-'))">
+                                            <button 
+                                                type="button" 
+                                                @click="viewPoPdfFromPoNumber(item.poNumber)"
+                                                class="mt-1 px-2 py-0.5 text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded transition cursor-pointer inline-flex items-center gap-1 shadow-3xs"
+                                                title="Consultar expediente formal y reimprimir PO"
+                                            >
+                                                <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                <span>Ver / Reimprimir PO</span>
+                                            </button>
+                                        </template>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span 
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
+                                            :class="item.badgeClass || 'bg-slate-50 text-slate-700 border-slate-200'"
+                                            x-text="item.typeLabel || item.type"
+                                        ></span>
+                                    </td>
+                                    <td class="py-3 px-4 font-semibold text-slate-800" x-text="item.supplier"></td>
+                                    <td class="py-3 px-4">
+                                        <span class="font-bold text-slate-900 block" x-text="item.productName"></span>
+                                        <span class="text-slate-400 font-mono text-[10px]" x-text="item.sku"></span>
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-mono font-bold text-xs" x-text="item.deltaQty"></td>
+                                    <td class="py-3 px-4 text-right font-mono font-bold text-slate-900 text-xs" x-text="item.totalAmount > 0 ? formatCurrency(item.totalAmount) : '—'"></td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700">
+                                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                            <span x-text="item.user"></span>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-slate-600 text-[11px] max-w-xs truncate" :title="item.notes" x-text="item.notes"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div> <!-- Fin de SUB-VISTA 3 (purchasesSubTab === 'kardex') -->
+
+        <!-- ================================================================= -->
+        <!-- SUB-VISTA 5: ACUERDOS POR DISCREPANCIAS & NOTAS DE CRÉDITO        -->
+        <!-- ================================================================= -->
+        <div x-show="purchasesSubTab === 'agreements'" class="space-y-6" style="display: none;">
+            
+            <!-- Cabecera de la Sub-Vista con Botón Principal -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">Regla 1 Compras</span>
+                        <h3 class="text-base font-bold text-slate-900">Acuerdos Mercantiles &amp; Notas de Crédito por Discrepancias</h3>
+                    </div>
+                    <p class="text-xs text-slate-500">Gestión formal, trazable y auditable de saldos a favor devengados por incidencias en rampa, mermas textiles o penalizaciones logísticas.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button 
+                        type="button" 
+                        @click="openNewCreditAgreementModal()" 
+                        class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-2 cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>+ Levantar Acuerdo / Nota de Crédito</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjetas KPI Resumen Superior -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Saldo a Favor Disponible</div>
+                    <div class="text-xl font-black text-rose-600 font-mono" x-text="formatCurrency(getCreditAgreementsSummary().totalAvailable)"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Deducible en próximas OCs</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Acuerdos Pendientes</div>
+                    <div class="text-xl font-black text-amber-600 font-mono" x-text="getCreditAgreementsSummary().pendingCount"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Esperando liquidación</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Total Compensado</div>
+                    <div class="text-xl font-black text-emerald-600 font-mono" x-text="formatCurrency(getCreditAgreementsSummary().totalCompensated)"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Aplicado en OCs emitidas</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                    <div class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Prendas con Discrepancia</div>
+                    <div class="text-xl font-black text-slate-800 font-mono" x-text="getCreditAgreementsSummary().totalUnits + ' uds'"></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Faltantes y mermas históricas</div>
+                </div>
+            </div>
+
+            <!-- Filtros & Buscador -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2 flex-1 max-w-md">
+                    <div class="relative w-full">
+                        <input 
+                            type="text" 
+                            x-model="agreementsSearch" 
+                            placeholder="Buscar por folio (NC-...), proveedor o motivo..." 
+                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-1.5 text-xs">
+                        <span class="text-slate-500 text-[11px] font-semibold">Proveedor:</span>
+                        <select 
+                            x-model="agreementsSupplierFilter" 
+                            class="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none"
+                        >
+                            <option value="all">Todos los proveedores</option>
+                            <template x-for="p in providers" :key="p.dbId || p.id">
+                                <option :value="p.tradeName || p.name" x-text="p.tradeName || p.name"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs">
+                        <span class="text-slate-500 text-[11px] font-semibold">Estatus:</span>
+                        <select 
+                            x-model="agreementsStatusFilter" 
+                            class="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer focus:outline-none"
+                        >
+                            <option value="all">Todos los estatus</option>
+                            <option value="pending">Pendientes de Aplicar</option>
+                            <option value="applied">Compensadas en PO</option>
+                            <option value="void">Anuladas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Acuerdos y Notas de Crédito -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-[10px] uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="py-3 px-4">Folio Minuta / NC</th>
+                                <th class="py-3 px-4">Proveedor</th>
+                                <th class="py-3 px-4">Tipo &amp; Motivo</th>
+                                <th class="py-3 px-4 text-center">Unidades Afectadas</th>
+                                <th class="py-3 px-4 text-right">Compensación</th>
+                                <th class="py-3 px-4 text-center">Estatus</th>
+                                <th class="py-3 px-4">Aplicado En</th>
+                                <th class="py-3 px-4">Fecha</th>
+                                <th class="py-3 px-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <template x-for="ag in getFilteredCreditAgreements()" :key="ag.id || ag.ref">
+                                <tr class="hover:bg-slate-50/70 transition">
+                                    <!-- Folio -->
+                                    <td class="py-3 px-4">
+                                        <span class="font-mono font-bold text-rose-700 block text-xs" x-text="ag.ref || ag.reference_folio"></span>
+                                        <span class="text-[9px] text-slate-400 font-mono" x-text="ag.authorized_by ? ('Auth: ' + ag.authorized_by) : ''"></span>
+                                    </td>
+                                    <!-- Proveedor -->
+                                    <td class="py-3 px-4">
+                                        <strong class="text-slate-900 block" x-text="ag.supplier"></strong>
+                                        <span class="text-[10px] text-slate-400" x-text="ag.discrepancy_type === 'missing_units' ? 'Faltante en Rampa' : (ag.discrepancy_type === 'damaged_units' ? 'Merma / Defecto' : 'Ajuste Inbound')"></span>
+                                    </td>
+                                    <!-- Motivo / Resolución -->
+                                    <td class="py-3 px-4 max-w-xs">
+                                        <p class="text-xs text-slate-700 line-clamp-2" x-text="ag.reason || ag.resolution_notes"></p>
+                                    </td>
+                                    <!-- Unidades -->
+                                    <td class="py-3 px-4 text-center">
+                                        <div class="inline-flex items-center gap-1 text-[10px] font-bold">
+                                            <template x-if="(ag.missing_units || ag.missing_units_count) > 0">
+                                                <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded" x-text="'Faltan: ' + (ag.missing_units || ag.missing_units_count)"></span>
+                                            </template>
+                                            <template x-if="(ag.damaged_units || ag.damaged_units_count) > 0">
+                                                <span class="px-1.5 py-0.5 bg-rose-50 text-rose-800 border border-rose-200 rounded" x-text="'Mermas: ' + (ag.damaged_units || ag.damaged_units_count)"></span>
+                                            </template>
+                                            <template x-if="!(ag.missing_units || ag.missing_units_count) && !(ag.damaged_units || ag.damaged_units_count)">
+                                                <span class="text-slate-400">—</span>
+                                            </template>
+                                        </div>
+                                    </td>
+                                    <!-- Monto Compensatorio -->
+                                    <td class="py-3 px-4 text-right">
+                                        <span class="font-mono font-black text-rose-600 text-sm" x-text="'-' + formatCurrency(ag.amount)"></span>
+                                    </td>
+                                    <!-- Estatus -->
+                                    <td class="py-3 px-4 text-center">
+                                        <span 
+                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                            :class="{
+                                                'bg-amber-100 text-amber-800 border border-amber-200': (ag.status || '').toLowerCase().includes('pendiente') || ag.raw_status === 'pending',
+                                                'bg-emerald-100 text-emerald-800 border border-emerald-200': (ag.status || '').toLowerCase().includes('aplicada') || (ag.status || '').toLowerCase().includes('compens') || ag.raw_status === 'applied',
+                                                'bg-slate-100 text-slate-600 border border-slate-200': (ag.status || '').toLowerCase().includes('anulada') || ag.raw_status === 'void'
+                                            }"
+                                            x-text="ag.status"
+                                        ></span>
+                                    </td>
+                                    <!-- Aplicado en -->
+                                    <td class="py-3 px-4">
+                                        <template x-if="ag.applied_to_po_id">
+                                            <span class="font-mono text-xs font-bold text-indigo-600" x-text="'PO-2026-' + String(ag.applied_to_po_id).padStart(4, '0')"></span>
+                                        </template>
+                                        <template x-if="!ag.applied_to_po_id">
+                                            <span class="text-slate-400 text-[11px] italic">Sin aplicar</span>
+                                        </template>
+                                    </td>
+                                    <!-- Fecha -->
+                                    <td class="py-3 px-4 text-slate-500 font-mono text-[11px]" x-text="ag.date || ag.created_at"></td>
+                                    <!-- Acciones -->
+                                    <td class="py-3 px-4 text-right">
+                                        <div class="inline-flex items-center gap-1">
+                                            <!-- Botón Editar (si no está aplicada) -->
+                                            <template x-if="!(ag.status || '').toLowerCase().includes('aplicada') && ag.raw_status !== 'applied'">
+                                                <button 
+                                                    type="button" 
+                                                    @click="openEditCreditAgreementModal(ag)" 
+                                                    class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                                                    title="Modificar términos de este acuerdo"
+                                                >
+                                                    <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                    <span>Editar</span>
+                                                </button>
+                                            </template>
+                                            <!-- Botón Anular (si no está aplicada ni anulada) -->
+                                            <template x-if="!(ag.status || '').toLowerCase().includes('aplicada') && !(ag.status || '').toLowerCase().includes('anulada') && ag.raw_status !== 'applied' && ag.raw_status !== 'void'">
+                                                <button 
+                                                    type="button" 
+                                                    @click="voidCreditAgreementAction(ag)" 
+                                                    class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
+                                                    title="Anular acuerdo por reposición física de mercancía"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                            <!-- Empty State -->
+                            <tr x-show="getFilteredCreditAgreements().length === 0">
+                                <td colspan="9" class="py-12 text-center text-slate-400">
+                                    <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <p class="font-bold text-slate-600 text-xs">No se encontraron acuerdos con los filtros seleccionados.</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Puedes registrar un nuevo acuerdo o limpiar los filtros.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div> <!-- Fin de SUB-VISTA 5 (purchasesSubTab === 'agreements') -->
     </div>
 
     <!-- ================================================================= -->
@@ -3258,9 +4070,9 @@
                                         </td>
                                         <td class="py-3.5 px-3 text-center">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
-                                                  :class="item.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
-                                                <span class="w-1.5 h-1.5 rounded-full" :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-emerald-500'"></span>
-                                                <span x-text="item.type === 'propio' ? 'Stock Propio' : 'Dropshipping'"></span>
+                                                  :class="item.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-amber-50 text-amber-800 border border-amber-200'">
+                                                <span class="w-1.5 h-1.5 rounded-full" :class="item.type === 'propio' ? 'bg-indigo-600' : 'bg-amber-500'"></span>
+                                                <span x-text="item.type === 'propio' ? 'Stock Propio' : 'Drop Bajo Pedido'"></span>
                                             </span>
                                         </td>
                                         <td class="py-3.5 px-4 text-right">
@@ -3352,8 +4164,8 @@
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1 text-sm font-mono font-bold rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200" x-text="selectedProduct?.sku"></span>
                     <span class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider"
-                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
-                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Dropshipping'">
+                          :class="selectedProduct?.type === 'propio' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-amber-50 text-amber-800 border border-amber-200'"
+                          x-text="selectedProduct?.type === 'propio' ? 'Stock Propio' : 'Drop Bajo Pedido'">
                     </span>
                     <span class="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5"
                           :class="drawerIsPublished ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700 border border-slate-300'">
@@ -3406,31 +4218,206 @@
                             </div>
                         </div>
 
-                        <!-- 2. Catalogación & Proveedor -->
+                        <!-- Regla 9: Fotografía del Producto & Asignación de Variantes de Color -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
-                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
-                            
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Marca / Proveedor</label>
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Fotografía &amp; Variante de Color</span>
+                                </h4>
+                                <span class="text-[10px] text-slate-400 font-mono" x-text="(drawerImages?.length || (drawerImage ? 1 : 0)) + ' foto(s)'"></span>
+                            </div>
+
+                            <!-- Preview Principal de la Prenda -->
+                            <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
+                                <div class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <template x-if="drawerImage">
+                                        <img :src="resolveProductImage(drawerImage)" alt="Prenda" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!drawerImage">
+                                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                    </template>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">URL Imagen Principal</label>
                                     <input 
                                         type="text" 
-                                        x-model="drawerBrand" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        placeholder="Ej: Torzo B2B, ModaIntima MX"
+                                        x-model="drawerImage" 
+                                        class="w-full px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500" 
+                                        placeholder="https://... o /storage/..."
                                     >
                                 </div>
-                                <div>
-                                    <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sección en Tienda Web</label>
-                                    <select 
-                                        x-model="drawerWebsiteSection" 
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            </div>
+
+                            <!-- Galería con Asignación de Color a cada Imagen -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-[11px] font-semibold text-slate-600 block">Asignar Variante de Color por Imagen (Conmutación)</label>
+                                    <input 
+                                        type="file" 
+                                        x-ref="drawerFileInput" 
+                                        @change="uploadImageFile($event, 'drawer')" 
+                                        accept="image/jpeg,image/png,image/webp,image/avif" 
+                                        class="hidden"
                                     >
-                                        <option value="basicos">Línea Básicos Esenciales</option>
-                                        <option value="disenador">Línea Diseñador & Autor</option>
-                                        <option value="temporada">Colección Temporada / Drops</option>
-                                        <option value="general">Catálogo General</option>
+                                    <button 
+                                        type="button" 
+                                        @click="$refs.drawerFileInput.click()" 
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer"
+                                        title="Subir archivo normalizado a WebP"
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>+ Subir Foto (WebP)</span>
+                                    </button>
+                                </div>
+
+                                <!-- Entrada de Foto Manual por URL en Drawer -->
+                                <div class="flex items-center gap-1.5">
+                                    <input 
+                                        type="url" 
+                                        x-model="drawerNewImageUrl" 
+                                        @keydown.enter.prevent="addManualImageToDrawer()" 
+                                        placeholder="Pegar URL de foto adicional..." 
+                                        class="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="addManualImageToDrawer()" 
+                                        class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                        title="Agregar foto por URL"
+                                    >
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ URL</span>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                                    <template x-for="(imgUrl, imgIdx) in (drawerImages?.length ? drawerImages : (drawerImage ? [drawerImage] : []))" :key="imgIdx">
+                                        <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition">
+                                            <img :src="resolveProductImage(imgUrl)" class="w-10 h-10 rounded object-cover border border-slate-200 shrink-0">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-1.5">
+                                                    <select 
+                                                        :value="drawerImageColorMap[imgUrl] || drawerColorName"
+                                                        @change="drawerImageColorMap[imgUrl] = $event.target.value"
+                                                        class="flex-1 p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                        <template x-for="col in apparelColors" :key="col.id">
+                                                            <option :value="col.name" x-text="col.name"></option>
+                                                        </template>
+                                                    </select>
+                                                    <button 
+                                                        type="button" 
+                                                        @click="openQuickColorModal('drawer', imgUrl)" 
+                                                        class="px-1.5 py-1 text-[10px] font-bold rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                        title="Crear y asignar nuevo color para esta foto"
+                                                    >
+                                                        + Color
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                type="button" 
+                                                @click="drawerImage = imgUrl" 
+                                                class="px-1.5 py-1 text-[10px] font-bold rounded bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 transition cursor-pointer shrink-0"
+                                                :class="drawerImage === imgUrl ? 'bg-indigo-600 text-white hover:bg-indigo-700' : ''"
+                                                title="Fijar como foto principal"
+                                            >
+                                                <span x-text="drawerImage === imgUrl ? 'Principal ★' : 'Principal'"></span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="removeDrawerImage(imgIdx)" 
+                                                class="p-1 rounded text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
+                                                title="Eliminar foto de la prenda"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Catalogación & Proveedor (Regla 6.47) -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-3 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Catalogación & Proveedor</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">Regla 6.47</span>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <!-- Selector de Proveedor -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                            <span>Proveedor / Fabricante</span>
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <button 
+                                            type="button" 
+                                            @click="openCreateProviderModal()" 
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            title="Dar de alta proveedor si no existe"
+                                        >
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ Nuevo Proveedor</span>
+                                        </button>
+                                    </div>
+                                    <select 
+                                        x-model="drawerSupplierId" 
+                                        @change="onDrawerSupplierChange()"
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                    >
+                                        <option value="">-- Seleccionar Proveedor --</option>
+                                        <template x-for="p in providers" :key="p.id">
+                                            <option :value="p.id" :selected="String(drawerSupplierId) === String(p.id)" x-text="p.tradeName || p.name"></option>
+                                        </template>
                                     </select>
+                                </div>
+
+                                <!-- Fila: Marca y Sección Web -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                                <span>Marca Comercial</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openCreateBrandModal(drawerSupplierId)" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta marca para este proveedor"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Marca</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="drawerBrand" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                            <option value="">-- Seleccionar Marca --</option>
+                                            <template x-if="drawerBrand && !getBrandsForSupplier(drawerSupplierId).some(b => b.name === drawerBrand)">
+                                                <option :value="drawerBrand" selected x-text="drawerBrand"></option>
+                                            </template>
+                                            <template x-for="b in getBrandsForSupplier(drawerSupplierId)" :key="b.name">
+                                                <option :value="b.name" :selected="drawerBrand === b.name" x-text="b.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Sección en Tienda Web</label>
+                                        <select 
+                                            x-model="drawerWebsiteSection" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                            <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                <option :value="sec.slug" :selected="drawerWebsiteSection === sec.slug" x-text="sec.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -3464,7 +4451,7 @@
                                 <label class="font-bold text-xs uppercase tracking-wider text-slate-700">Tipo de Tela & Fibras</label>
                                 <button 
                                     type="button" 
-                                    @click="activeSettingsTab = 'fabrics'; moduleSettingsModalOpen = true;"
+                                    @click="openQuickFabricModal('drawer')" 
                                     class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
                                 >
                                     + Nueva Tela
@@ -3494,7 +4481,12 @@
                             </div>
                             
                             <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + drawerColorHex"></span>
+                                <template x-if="drawerColorName?.toLowerCase() === 'multicolor' || (drawerColorHex && drawerColorHex.includes('gradient'))">
+                                    <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                </template>
+                                <template x-if="drawerColorName?.toLowerCase() !== 'multicolor' && (!drawerColorHex || !drawerColorHex.includes('gradient'))">
+                                    <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + (drawerColorHex || '#0f172a')"></span>
+                                </template>
                                 <div class="flex-1 min-w-0">
                                     <div class="text-xs font-bold text-slate-900 truncate" x-text="drawerColorName"></div>
                                     <div class="text-[10px] text-slate-400 font-mono" x-text="drawerColorType === 'iridescent' ? 'Tornasol Holográfico' : 'Color Sólido'"></div>
@@ -3506,7 +4498,7 @@
                                 <template x-for="c in apparelColors" :key="c.id">
                                     <button 
                                         type="button" 
-                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type;"
+                                        @click="drawerColorName = c.name; drawerColorHex = c.hex; drawerColorType = c.type; if (drawerImages && drawerImages.length === 1 && drawerImages[0]) { if (!drawerImageColorMap) drawerImageColorMap = {}; drawerImageColorMap[drawerImages[0]] = c.name; }"
                                         class="p-1 rounded-lg border flex flex-col items-center gap-1 transition cursor-pointer hover:scale-105"
                                         :class="drawerColorName === c.name ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-white' : 'border-slate-200 bg-slate-100'"
                                         :title="c.name"
@@ -3614,73 +4606,98 @@
                                     <span class="text-xs text-slate-500">Total calculado: <strong class="text-indigo-600 font-bold" x-text="livePhysicalStock()"></strong> piezas</span>
                                 </div>
 
-                                <!-- Fila 1: Tallas Centrales (CH a XL) -->
-                                <div class="grid grid-cols-4 gap-2">
-                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.ch" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
+                                <!-- Caso 1: Talla Única / Unitalla (UNI) -->
+                                <template x-if="isDrawerUnitalla()">
+                                    <div class="bg-white p-3.5 rounded-xl border border-indigo-200 shadow-2xs space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-xs font-bold text-indigo-700 block">Unitalla (UNI)</span>
+                                                <span class="text-[11px] text-slate-400">Modelo con talla única universal adaptable</span>
+                                            </div>
+                                            <div class="w-28">
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.uni" 
+                                                    class="w-full text-center bg-indigo-50/40 border border-indigo-200 rounded-lg py-1.5 px-2 font-extrabold text-indigo-700 text-base focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
-                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.m" 
-                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
-                                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.g" 
-                                            class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                    <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
-                                        <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
-                                        <input 
-                                            type="number" 
-                                            min="0" 
-                                            x-model.number="drawerSizes.xl" 
-                                            class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-                                        >
-                                    </div>
-                                </div>
+                                </template>
 
-                                <!-- Fila 2: Tallas Extendidas (Plus Size) -->
-                                <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
-                                    <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                        <span>Tallas Extendidas (Plus Size)</span>
-                                        <span>Volumen reducido</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerSizes['2xl']" 
-                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+                                <!-- Caso 2: Curva Torso Estándar (CH a 3XL) -->
+                                <template x-if="!isDrawerUnitalla()">
+                                    <div class="space-y-3">
+                                        <!-- Fila 1: Tallas Centrales (CH a XL) -->
+                                        <div class="grid grid-cols-4 gap-2">
+                                            <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                                <span class="text-[11px] font-bold text-slate-600 block mb-1">CH (S)</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.ch" 
+                                                    class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                            <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                                <span class="text-[11px] font-bold text-indigo-700 block mb-1">M</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.m" 
+                                                    class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                            <div class="bg-white p-2 rounded-lg border border-indigo-200 text-center">
+                                                <span class="text-[11px] font-bold text-indigo-700 block mb-1">G (L)</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.g" 
+                                                    class="w-full text-center bg-indigo-50/30 border border-indigo-200 rounded py-1 px-1 font-extrabold text-indigo-700 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
+                                            <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                                <span class="text-[11px] font-bold text-slate-600 block mb-1">XL</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0" 
+                                                    x-model.number="drawerSizes.xl" 
+                                                    class="w-full text-center bg-slate-50 border border-slate-200 rounded py-1 px-1 font-bold text-slate-800 text-sm focus:bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                >
+                                            </div>
                                         </div>
-                                        <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                x-model.number="drawerSizes['3xl']" 
-                                                class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            >
+
+                                        <!-- Fila 2: Tallas Extendidas (Plus Size) -->
+                                        <div class="p-2.5 bg-slate-100/70 rounded-lg border border-slate-200 space-y-1.5">
+                                            <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                                <span>Tallas Extendidas (Plus Size)</span>
+                                                <span>Volumen reducido</span>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                                    <span class="text-xs font-bold text-slate-600 pl-1">2XL</span>
+                                                    <input 
+                                                        type="number" 
+                                                        min="0" 
+                                                        x-model.number="drawerSizes['2xl']" 
+                                                        class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                                <div class="bg-white p-1.5 rounded-md border border-slate-200 flex items-center justify-between gap-2">
+                                                    <span class="text-xs font-bold text-slate-600 pl-1">3XL</span>
+                                                    <input 
+                                                        type="number" 
+                                                        min="0" 
+                                                        x-model.number="drawerSizes['3xl']" 
+                                                        class="w-20 bg-slate-50 border border-slate-200 rounded py-1 px-1 text-center text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
                         </template>
 
@@ -3760,6 +4777,47 @@
                                 </div>
                             </div>
                         </template>
+
+                        <!-- Trazabilidad de Costos MOQ en Existencias (Regla 1) -->
+                        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-4 rounded-xl border border-indigo-500/30 shadow-sm space-y-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-400/30">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </span>
+                                    <div>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-white">Trazabilidad de Costos MOQ en Existencia</h4>
+                                        <span class="text-[10px] text-indigo-300">Existencias compradas a distintos volúmenes y precios</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-bold">
+                                    CPP: <span x-text="'$' + (drawerCpp ? drawerCpp.toFixed(2) : '0.00')"></span>
+                                </span>
+                            </div>
+
+                            <!-- Tabla de Capas / Lotes de Costo MOQ -->
+                            <div class="space-y-1.5 max-h-48 overflow-y-auto no-scrollbar">
+                                <template x-for="(layer, lIdx) in getProductMoqCostLayers(selectedProduct)" :key="lIdx">
+                                    <div class="flex items-center justify-between p-2 bg-slate-800/80 rounded-lg border border-slate-700/60 text-xs font-mono">
+                                        <div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40" x-text="layer.moq_tier_label || 'Escala Estándar'"></span>
+                                                <span class="text-[11px] text-slate-300 font-sans" x-text="layer.order_id || 'Lote Inicial'"></span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-400 font-sans block" x-text="'Proveedor: ' + (layer.supplier || drawerBrand) + (layer.received_at ? ' • ' + layer.received_at : '')"></span>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs font-bold text-amber-300 block" x-text="'$' + (parseFloat(layer.unit_cost || 0).toFixed(2)) + ' /u'"></span>
+                                            <span class="text-[10px] text-slate-300" x-text="(layer.quantity || 0) + ' prendas'"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <p class="text-[10px] text-slate-400 italic">
+                                * Cada lote recibido conserva su costo unitario según el nivel de MOQ negociado en la orden de compra.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- ========================================================= -->
@@ -3944,6 +5002,27 @@
                                 </div>
                             </div>
 
+                            <!-- Sugerencia Dinámica de Escala MOQ (Regla 1) -->
+                            <template x-if="getDrawerMoqTierSuggestion(selectedProduct)">
+                                <div class="bg-indigo-950/40 p-2.5 rounded-xl border border-indigo-500/30 text-xs">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">Tabulador MOQ Proveedor</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold" x-text="getDrawerMoqTierSuggestion(selectedProduct)?.tierLabel"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-1 text-[11px]">
+                                        <span class="text-slate-300">Costo Unitario Escala:</span>
+                                        <span class="font-bold text-emerald-400 font-mono" x-text="'$' + (getDrawerMoqTierSuggestion(selectedProduct)?.unitPrice || 0) + ' MXN'"></span>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        @click="applyDrawerSuggestedMoqCost(selectedProduct)"
+                                        class="mt-2 w-full text-center py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-400/30 rounded-lg text-[10px] font-bold transition cursor-pointer"
+                                    >
+                                        Aplicar Costo de Escala MOQ a Reorden ($<span x-text="getDrawerMoqTierSuggestion(selectedProduct)?.unitPrice"></span>)
+                                    </button>
+                                </div>
+                            </template>
+
                             <button 
                                 type="button" 
                                 @click="addToFuturePurchaseList()" 
@@ -4082,160 +5161,321 @@
                     </div>
                 </div>
 
-                <!-- Contenedor de 3 Paneles Ergonómicos con Scroll -->
-                <div class="p-6 overflow-y-auto flex-1">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Contenedor Principal: 2 Columnas (Col 1: Pasos de Captura, Col 2: Resumen Ficha Técnica en Vivo) -->
+                <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
                         <!-- ========================================================= -->
-                        <!-- PANEL 1: IDENTIDAD, SKU Y CONTROL DE DUPLICADOS (4 COLS)  -->
+                        <!-- COLUMNA 1: FORMULARIO SECUENCIAL POR PASOS (7 COLS)       -->
                         <!-- ========================================================= -->
-                        <div class="lg:col-span-4 space-y-5">
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
+                        <div class="lg:col-span-7 space-y-6">
+
+                            <!-- Mini Stepper de Navegación Rápida Interactiva (Regla UX 1) -->
+                            <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs grid grid-cols-4 gap-1.5 text-[11px] font-bold">
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(1)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 1 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 1 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">1</span>
+                                    <span class="truncate">Fotos & Colores</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(2)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 2 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 2 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">2</span>
+                                    <span class="truncate">Datos & Diseño</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(3)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 3 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 3 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">3</span>
+                                    <span class="truncate">Variantes & Slot</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="setWorkstationStep(4)" 
+                                    class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                    :class="workstationStep === 4 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                >
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="workstationStep === 4 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">4</span>
+                                    <span class="truncate">Copiloto & Pricing</span>
+                                </button>
+                            </div>
+
+                            <!-- PASO 1: FOTOGRAFÍAS, CROP 4:5, PORTADA & VARIANTES DE COLOR -->
+                            <div id="step-1-photos" x-show="workstationStep === 1" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">1</div>
-                                        <h3 class="font-bold text-slate-800 text-sm">Identidad & Codificacion</h3>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">1</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Fotografías del Producto & Variantes de Color</h3>
+                                            <p class="text-[11px] text-slate-500">Carga interactiva, encuadre 4:5, selección de portada y asociación de color</p>
+                                        </div>
                                     </div>
-                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Unicidad</span>
+                                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
                                 </div>
 
-                                <!-- Código SKU Oficial con Auto-Generador y Candado -->
-                                <div>
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Codigo SKU Oficial</label>
-                                        <button 
-                                            type="button" 
-                                            @click="toggleSkuLock()" 
-                                            class="text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
-                                            :class="newProduct.skuLocked ? 'text-slate-500 hover:text-slate-700' : 'text-amber-600 hover:text-amber-700'"
-                                        >
-                                            <svg x-show="newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                <!-- Dropzone interactivo con recorte 4:5 -->
+                                <div 
+                                    @dragover.prevent="isDraggingImages = true"
+                                    @dragleave.prevent="isDraggingImages = false"
+                                    @drop.prevent="handleWorkstationImageDrop($event)"
+                                    class="border-2 border-dashed rounded-xl p-4 text-center transition cursor-pointer"
+                                    :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/70'"
+                                    @click="$refs.newProductFileInput.click()"
+                                >
+                                    <input 
+                                        type="file" 
+                                        x-ref="newProductFileInput" 
+                                        @change="handleWorkstationImageSelect($event)" 
+                                        accept="image/jpeg,image/png,image/webp,image/avif" 
+                                        multiple 
+                                        class="hidden"
+                                    >
+                                    <div class="flex flex-col items-center justify-center gap-1.5 text-slate-600">
+                                        <div class="w-10 h-10 rounded-xl bg-white border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-2xs">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <svg x-show="!newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span x-text="newProduct.skuLocked ? 'Bloqueado' : 'Edicion Manual'"></span>
-                                        </button>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-800">Cargar Fotografías & Encuadrar 4:5</span>
+                                        <span class="text-[11px] text-slate-500">Admite múltiples fotos; se curan y encuadran una por una (1080×1350 px)</span>
                                     </div>
-                                    <div class="relative flex items-center">
-                                        <input 
-                                            type="text" 
-                                            x-model="newProduct.sku" 
-                                            :disabled="newProduct.skuLocked"
-                                            placeholder="TXT-TRZ-0001" 
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 disabled:opacity-75 disabled:cursor-not-allowed"
-                                        >
-                                    </div>
-                                    <p class="text-[10px] text-slate-400 mt-1">Formato: [PREFIJO]-[MARCA]-[CORRELATIVO 4D]-[VARIANTE]</p>
                                 </div>
 
-                                <!-- Nombre del Producto con Análisis Reactivo de Duplicados -->
+                                <!-- Entrada de Foto Manual por URL -->
+                                <div class="flex items-center gap-1.5">
+                                    <input 
+                                        type="url" 
+                                        x-model="newProductManualImageUrl" 
+                                        @keydown.enter.prevent="addManualImageUrlToNewProduct()" 
+                                        placeholder="Pegar URL de foto adicional (https://...)" 
+                                        class="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="addManualImageUrlToNewProduct()" 
+                                        class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ URL</span>
+                                    </button>
+                                </div>
+
+                                <!-- Galería de Miniaturas con Portada & Variantes de Color -->
+                                <template x-if="newProduct.images && newProduct.images.length > 0">
+                                    <div class="space-y-2 pt-2 border-t border-slate-100 max-h-64 overflow-y-auto pr-1">
+                                        <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
+                                            <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 transition">
+                                                <div class="relative w-14 h-17 rounded-lg overflow-hidden border border-slate-200 bg-white shrink-0 shadow-2xs">
+                                                    <img :src="resolveProductImage(img)" class="w-full h-full object-cover">
+                                                    <span x-show="img.is_primary" class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-xs">Portada</span>
+                                                </div>
+                                                <div class="flex-1 min-w-0 space-y-1.5">
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="text-xs font-bold text-slate-800 truncate" x-text="img.name || ('Foto ' + (idx + 1))"></span>
+                                                        <div class="flex items-center gap-1.5">
+                                                            <button 
+                                                                type="button" 
+                                                                @click.stop="setPrimaryImage(idx)" 
+                                                                class="px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer"
+                                                                :class="img.is_primary ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-indigo-50 text-indigo-700 border-slate-200'"
+                                                            >
+                                                                <span x-text="img.is_primary ? 'Es Portada' : 'Hacer Portada'"></span>
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                @click.stop="removeImage(idx)" 
+                                                                class="p-1 rounded text-rose-500 hover:bg-rose-50 transition cursor-pointer" 
+                                                                title="Eliminar foto"
+                                                            >
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Selector de Color de Prenda para esta Foto + Botón In Situ + Color -->
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider shrink-0">Color Variante:</span>
+                                                        <select 
+                                                            x-model="img.color_name" 
+                                                            class="flex-1 px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                        >
+                                                            <template x-for="col in apparelColors" :key="col.id">
+                                                                <option :value="col.name" :selected="col.name === img.color_name" x-text="col.name"></option>
+                                                            </template>
+                                                        </select>
+                                                        <button 
+                                                            type="button" 
+                                                            @click.stop="openQuickColorModal('targetImg', resolveProductImage(img))" 
+                                                            class="px-2 py-1 text-[10px] font-bold rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                            title="Dar de alta color in situ para esta foto"
+                                                        >
+                                                            + Color
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- Pie de Navegación del Paso 1 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(2)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>Continuar a Datos & Diseño</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- PASO 2: PROVEEDOR, MARCA, CATEGORÍA, SUBCATEGORÍA, LISO O CON DISEÑO, MODALIDAD LOGÍSTICA -->
+                            <div id="step-2-taxonomy" x-show="workstationStep === 2" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">2</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Proveedor, Marca, Categoría & Modalidad</h3>
+                                            <p class="text-[11px] text-slate-500">Identidad comercial, clasificación, tipificación de diseño y logística</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Taxonomía</span>
+                                </div>
+
+                                <!-- Nombre Comercial del Modelo con Análisis Reactivo de Duplicados -->
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre Comercial del Modelo</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre Comercial del Modelo <span class="text-rose-500">*</span></label>
                                     <input 
                                         type="text" 
                                         x-model="newProduct.name" 
-                                        @input.debounce.350ms="checkProductDuplicate()"
+                                        @input.debounce.350ms="checkProductDuplicate()" 
                                         placeholder="Ej: Boxer Trunk Modal Eco Air" 
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                        class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                                     >
 
                                     <!-- Indicador de Alerta de Duplicados Reactivo -->
                                     <div class="mt-2" x-cloak>
-                                        <!-- Analizando en progreso -->
                                         <div x-show="newProduct.isCheckingDuplicate" class="flex items-center gap-1.5 text-[11px] text-slate-500 py-1">
-                                            <svg class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                            </svg>
-                                            <span>Verificando unicidad en catalogo...</span>
+                                            <svg class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Verificando unicidad en catálogo operativo...</span>
                                         </div>
-
-                                        <!-- Duplicado crítico detectado -->
-                                        <div 
-                                            x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'duplicate_match'" 
-                                            class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5"
-                                        >
+                                        <div x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'duplicate_match'" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-1.5 font-bold">
-                                                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                                    </svg>
+                                                <span class="flex items-center gap-1.5 font-bold">
+                                                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                                     <span>Posible Duplicado Detectado</span>
-                                                </div>
+                                                </span>
                                                 <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-200 text-rose-900" x-text="newProduct.duplicateScore + '% match'"></span>
                                             </div>
-                                            <p class="text-[11px] text-rose-700 leading-snug">
-                                                Ya existe un producto con caracteristicas y nombre altamente similares.
-                                            </p>
-                                            <button 
-                                                type="button" 
-                                                @click="openDuplicateModal()" 
-                                                class="w-full text-center py-1 px-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition cursor-pointer"
-                                            >
-                                                Resolver Conflicto Lado a Lado
-                                            </button>
+                                            <p class="text-[11px] text-rose-700 leading-snug">Ya existe un producto con características similares en el catálogo aprobado.</p>
+                                            <button type="button" @click="openDuplicateModal()" class="w-full text-center py-1 px-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition cursor-pointer">Resolver Conflicto Lado a Lado</button>
                                         </div>
-
-                                        <!-- Advertencia moderada -->
-                                        <div 
-                                            x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'warning'" 
-                                            class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-1"
-                                        >
+                                        <div x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateRisk === 'warning'" class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-1">
                                             <div class="flex items-center justify-between font-bold">
                                                 <span class="flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
-                                                    </svg>
+                                                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/></svg>
                                                     <span>Similitud Moderada</span>
                                                 </span>
                                                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900" x-text="newProduct.duplicateScore + '%'"></span>
                                             </div>
-                                            <button 
-                                                type="button" 
-                                                @click="openDuplicateModal()" 
-                                                class="text-[10px] font-bold text-amber-800 hover:underline block"
-                                            >
-                                                Revisar coincidencias en catalogo
-                                            </button>
+                                            <button type="button" @click="openDuplicateModal()" class="text-[10px] font-bold text-amber-800 hover:underline block">Revisar coincidencias en catálogo</button>
                                         </div>
-
-                                        <!-- Verificado limpio -->
-                                        <div 
-                                            x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateChecked && newProduct.duplicateRisk === 'none' && newProduct.name.length >= 3" 
-                                            class="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 py-1"
-                                        >
-                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                            </svg>
-                                            <span>Nombre verificado: sin duplicados en catalogo.</span>
+                                        <div x-show="!newProduct.isCheckingDuplicate && newProduct.duplicateChecked && newProduct.duplicateRisk === 'none' && newProduct.name.length >= 3" class="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 py-1">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Nombre verificado: sin duplicados en catálogo.</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Marca / Fabricante -->
-                                <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Marca / Proveedor</label>
-                                    <input 
-                                        type="text" 
-                                        x-model="newProduct.brand" 
-                                        @input.debounce.350ms="checkProductDuplicate()"
-                                        placeholder="ModaIntima Textil MX / Torzo B2B" 
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                                    >
+                                <!-- Proveedor / Fabricante & Marca Comercial (Grid 2 cols) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                <span>Proveedor / Fabricante</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openCreateProviderModal()" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Proveedor</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="newProduct.supplier_id" 
+                                            @change="onNewProductSupplierChange(); checkProductDuplicate(); updateDynamicSku();" 
+                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                        >
+                                            <option value="">-- Seleccionar Proveedor --</option>
+                                            <template x-for="p in providers" :key="p.id">
+                                                <option :value="p.id" :selected="String(newProduct.supplier_id) === String(p.id)" x-text="(p.tradeName || p.name) + (p.origin === 'scraping' ? ' [Scraping]' : ' [Directo]')"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                <span>Marca Comercial</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openCreateBrandModal(newProduct.supplier_id)" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Marca</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="newProduct.brand" 
+                                            @change="checkProductDuplicate(); updateDynamicSku();" 
+                                            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                        >
+                                            <option value="">-- Seleccionar Marca --</option>
+                                            <template x-for="b in getBrandsForSupplier(newProduct.supplier_id)" :key="b.name">
+                                                <option :value="b.name" :selected="newProduct.brand === b.name" x-text="b.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <!-- Categoría y Subcategoría -->
-                                <div class="grid grid-cols-2 gap-3">
+                                <!-- Categoría & Subcategoría (Grid 2 cols) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Categoria</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Categoría</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickCategoryModal('category', 'newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Categoría</span>
+                                            </button>
+                                        </div>
                                         <select 
                                             x-model="newProduct.category" 
-                                            @change="onNewProductCategoryChange()"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                            @change="onNewProductCategoryChange(); updateDynamicSku();" 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
                                         >
+                                            <template x-for="cat in categoriesTree" :key="cat.id">
+                                                <option :value="cat.name" :selected="newProduct.category === cat.name" x-text="cat.name"></option>
+                                            </template>
                                             <option value="Boxers">Boxers</option>
                                             <option value="Jocks">Jocks</option>
                                             <option value="Tangas">Tangas</option>
@@ -4247,119 +5487,187 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Subcategoria</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Subcategoría</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickCategoryModal('subcategory', 'newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Subcategoría</span>
+                                            </button>
+                                        </div>
                                         <input 
                                             type="text" 
                                             x-model="newProduct.subcategory" 
-                                            placeholder="Ej: Trunks / Briefs" 
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                            placeholder="Ej: Trunks / Briefs / Deportivo" 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
                                         >
                                     </div>
                                 </div>
 
-                                <!-- Modalidad Logística -->
+                                <!-- Regla: Tipificación si el producto tiene color liso o cuenta con diseño -->
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Modalidad Logistica</label>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Acabado / Diseño del Producto</label>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <label 
-                                            class="flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition"
-                                            :class="newProduct.type === 'propio' ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                        <button 
+                                            type="button" 
+                                            @click="newProduct.designType = 'sin_diseno'" 
+                                            class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                            :class="newProduct.designType === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-900 shadow-2xs ring-1 ring-indigo-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
                                         >
-                                            <input type="radio" value="propio" x-model="newProduct.type" class="sr-only">
-                                            <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
-                                            <span>Propio (Bodega)</span>
-                                        </label>
-                                        <label 
-                                            class="flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition"
-                                            :class="newProduct.type === 'dropship' ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                            <span class="w-2.5 h-2.5 rounded-full" :class="newProduct.designType === 'sin_diseno' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                            <span>Color Liso (Sólido)</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="newProduct.designType = 'con_diseno'" 
+                                            class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                            :class="newProduct.designType === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-900 shadow-2xs ring-1 ring-purple-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
                                         >
-                                            <input type="radio" value="dropship" x-model="newProduct.type" class="sr-only">
-                                            <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'dropship' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
-                                            <span>Dropshipping</span>
-                                        </label>
+                                            <span class="w-2.5 h-2.5 rounded-full" :class="newProduct.designType === 'con_diseno' ? 'bg-purple-600' : 'bg-slate-300'"></span>
+                                            <span>Con Diseño (Estampado / Pattern)</span>
+                                        </button>
                                     </div>
                                 </div>
 
-                                <!-- Sección Vitrina y Publicación -->
-                                <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                    <div class="flex-1 mr-3">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Seccion Vitrina</label>
-                                        <select 
-                                            x-model="newProduct.websiteSection"
-                                            class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none"
-                                        >
-                                            <option value="basicos">Coleccion Basicos</option>
-                                            <option value="ofertas">Seccion Ofertas</option>
-                                            <option value="temporada">Nueva Temporada</option>
-                                            <option value="destacados">Vitrina Principal</option>
-                                        </select>
+                                <!-- Modalidad Logística & Sección Vitrina -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-slate-100">
+                                    <!-- Modalidad Logística -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Modalidad Logística</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <label 
+                                                class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                :class="newProduct.type === 'propio' ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                            >
+                                                <input type="radio" value="propio" x-model="newProduct.type" class="sr-only">
+                                                <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                                <span>Propio</span>
+                                            </label>
+                                            <label 
+                                                class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                :class="newProduct.type === 'dropship' ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                            >
+                                                <input type="radio" value="dropship" x-model="newProduct.type" class="sr-only">
+                                                <span class="w-2 h-2 rounded-full" :class="newProduct.type === 'dropship' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                                                <span>Dropship</span>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-2 pt-3">
-                                        <input 
-                                            type="checkbox" 
-                                            id="new_prod_published" 
-                                            x-model="newProduct.isPublished"
-                                            class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                        >
-                                        <label for="new_prod_published" class="text-xs font-bold text-slate-700 cursor-pointer">Publicar</label>
+
+                                    <!-- Regla: Sección Vitrina con Botón + Vitrina -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Sección Vitrina</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickStoreSectionModal('newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta una nueva vitrina web in situ"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Vitrina</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <select 
+                                                x-model="newProduct.websiteSection" 
+                                                class="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                                <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                    <option :value="sec.slug" :selected="newProduct.websiteSection === sec.slug" x-text="sec.name"></option>
+                                                </template>
+                                            </select>
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <input type="checkbox" id="new_prod_published_step2" x-model="newProduct.isPublished" class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                                <label for="new_prod_published_step2" class="text-xs font-bold text-slate-700 cursor-pointer">Publicar</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Pie de Navegación del Paso 2 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(1)" 
+                                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        <span>Paso 1: Fotos & Colores</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(3)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>Continuar a Variantes & Slotting</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- ========================================================= -->
-                        <!-- PANEL 2: MATRIZ DE TALLAS, CURVAS & ATRIBUTOS (4 COLS)    -->
-                        <!-- ========================================================= -->
-                        <div class="lg:col-span-4 space-y-5">
-                            <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
+                            <!-- PASO 3: DIMENSIÓN DE VARIANTE, MATRIZ DE STOCK, TELA (SOLO TEXTIL) & SLOTTING -->
+                            <div id="step-3-matrix" x-show="workstationStep === 3" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">2</div>
-                                        <h3 class="font-bold text-slate-800 text-sm">Matriz & Curva de Tallas</h3>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">3</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Dimensión de Variante, Stock & Almacén</h3>
+                                            <p class="text-[11px] text-slate-500">Curvas de patronaje, matriz dinámica, composición textil y slotting</p>
+                                        </div>
                                     </div>
                                     <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Inventario</span>
                                 </div>
 
                                 <!-- Dimensión de Variante -->
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Dimension de Variante</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Dimensión de Variante</label>
+                                        <div class="flex items-center gap-1.5 text-[10px]">
+                                            <button type="button" @click="activeSettingsTab = 'sizes'; moduleSettingsModalOpen = true;" class="text-indigo-600 hover:underline font-semibold cursor-pointer">CRUD Tallas</button>
+                                            <span class="text-slate-300">•</span>
+                                            <button type="button" @click="activeSettingsTab = 'shades'; moduleSettingsModalOpen = true;" class="text-indigo-600 hover:underline font-semibold cursor-pointer">Tonos</button>
+                                            <span class="text-slate-300">•</span>
+                                            <button type="button" @click="activeSettingsTab = 'volumes'; moduleSettingsModalOpen = true;" class="text-indigo-600 hover:underline font-semibold cursor-pointer">Volúmenes</button>
+                                        </div>
+                                    </div>
                                     <select 
                                         x-model="newProduct.variantDimension" 
-                                        @change="onNewProductCategoryChange()"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none"
+                                        @change="onVariantDimensionChange()" 
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                     >
                                         <option value="size">Tallas Textiles (Curvas de Patronaje)</option>
-                                        <option value="shade">Tonos / Shades (Cosmetica Facial & Corporal)</option>
-                                        <option value="volume">Volumenes (Perfumeria & Fragancias)</option>
-                                        <option value="none">Pieza Unica / Accesorio Fijo</option>
+                                        <option value="shade">Tonos / Shades (Cosmética Facial & Corporal)</option>
+                                        <option value="volume">Volúmenes (Perfumería & Fragancias)</option>
+                                        <option value="none">Pieza Única / Accesorio Fijo</option>
                                     </select>
                                 </div>
 
                                 <!-- Matriz Dinámica para Dimensión Tallas (Textil) -->
                                 <template x-if="newProduct.variantDimension === 'size'">
                                     <div class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                        <!-- Selector de Curva de Tallas Configurable (TASK-INV-14) -->
                                         <div>
                                             <div class="flex items-center justify-between mb-1">
-                                                <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Curva de Tallas Operativa</label>
-                                                <span class="text-[10px] text-slate-400">TASK-INV-14</span>
+                                                <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Curva de Tallas del Proveedor</label>
+                                                <button type="button" @click="activeSettingsTab = 'sizes'; moduleSettingsModalOpen = true;" class="text-[10px] text-indigo-600 hover:underline font-bold cursor-pointer">+ Gestionar Curvas</button>
                                             </div>
                                             <select 
                                                 x-model="newProduct.selectedSizeCurveId" 
-                                                @change="onSizeCurveChange()"
+                                                @change="onSizeCurveChange()" 
                                                 class="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                             >
-                                                <template x-for="curve in getAvailableSizeCurves()" :key="curve.id">
-                                                    <option :value="curve.id" x-text="curve.name"></option>
+                                                <template x-for="curve in getAvailableSizeCurves(newProduct.supplier_id, newProduct.brand)" :key="curve.id">
+                                                    <option :value="curve.id" x-text="curve.name + (curve.supplier ? ' [' + (curve.supplier.trade_name || curve.supplier.name) + ']' : (curve.brand ? ' [' + curve.brand.name + ']' : ''))"></option>
                                                 </template>
                                             </select>
                                         </div>
 
-                                        <!-- Grid Reactivo de Tallas Dinámicas -->
                                         <div>
                                             <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Stock Inicial por Talla (Piezas)</label>
-                                            <div class="grid grid-cols-3 gap-2">
+                                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                                 <template x-for="sz in getCurrentNewProductSizes()" :key="sz.code">
                                                     <div class="bg-white p-2 rounded-lg border border-slate-200 text-center shadow-2xs">
                                                         <span class="text-xs font-bold text-indigo-700 block" x-text="sz.code"></span>
@@ -4367,7 +5675,7 @@
                                                             type="number" 
                                                             min="0" 
                                                             x-model.number="newProduct.sizes[(sz.code || '').toLowerCase()]" 
-                                                            placeholder="0"
+                                                            placeholder="0" 
                                                             class="w-full text-center mt-1 py-0.5 text-xs font-bold border border-slate-200 rounded focus:border-indigo-600 focus:outline-none"
                                                         >
                                                     </div>
@@ -4386,7 +5694,7 @@
                                 <template x-if="newProduct.variantDimension === 'shade'">
                                     <div class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
                                         <div class="flex items-center justify-between">
-                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tonos Cosmeticos (Shades)</label>
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tonos Cosméticos (Shades)</label>
                                             <span class="text-[10px] text-slate-400">6 Tonos</span>
                                         </div>
                                         <div class="grid grid-cols-3 gap-2">
@@ -4422,7 +5730,7 @@
                                 <template x-if="newProduct.variantDimension === 'volume'">
                                     <div class="space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
                                         <div class="flex items-center justify-between">
-                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Volumenes de Presentacion</label>
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Volúmenes de Presentación</label>
                                             <span class="text-[10px] text-slate-400">Mililitros</span>
                                         </div>
                                         <div class="grid grid-cols-3 gap-2">
@@ -4442,10 +5750,10 @@
                                     </div>
                                 </template>
 
-                                <!-- Pieza Única / Accesorio -->
+                                <!-- Pieza Única / Accesorio Fijo -->
                                 <template x-if="newProduct.variantDimension === 'none'">
                                     <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Stock Fisico Inicial</label>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Stock Físico Inicial (Pieza Única)</label>
                                         <input 
                                             type="number" 
                                             min="0" 
@@ -4455,158 +5763,119 @@
                                     </div>
                                 </template>
 
-                                <!-- Atributos Físicos: Tela & Color -->
-                                <div class="grid grid-cols-2 gap-3 pt-2">
-                                    <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Tipo de Tela</label>
-                                        <input 
-                                            type="text" 
-                                            x-model="newProduct.fabricType" 
-                                            placeholder="Modal Seamless / Algodon" 
-                                            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
-                                        >
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Color / Swatch</label>
-                                        <div class="flex items-center gap-2">
-                                            <input 
-                                                type="color" 
-                                                x-model="newProduct.colorHex" 
-                                                class="w-7 h-7 p-0 border border-slate-300 rounded cursor-pointer shrink-0"
+                                <!-- Regla CRÍTICA: Tipo de Tela solo visible si la dimensión es textil (size) -->
+                                <template x-if="newProduct.variantDimension === 'size'">
+                                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tipo de Tela & Fibras Textiles</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickFabricModal('newProduct')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
+                                                title="Dar de alta tipo de tela in situ si no existe"
                                             >
-                                            <input 
-                                                type="text" 
-                                                x-model="newProduct.colorName" 
-                                                placeholder="Negro Profundo" 
-                                                class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
-                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Tipo de Tela</span>
+                                            </button>
                                         </div>
+                                        <select 
+                                            x-model="newProduct.fabricType" 
+                                            @change="updateDynamicSku()" 
+                                            class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                            <template x-for="fab in apparelFabrics" :key="fab.id || fab.name">
+                                                <option :value="fab.name" x-text="fab.name"></option>
+                                            </template>
+                                        </select>
                                     </div>
-                                </div>
+                                </template>
 
-                                <!-- Slotting de Almacén en Bodega -->
-                                <div class="pt-2 border-t border-slate-100">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Ubicacion en Bodega (Slotting)</label>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <div>
-                                            <span class="text-[10px] text-slate-400 block mb-0.5">Pasillo</span>
-                                            <select x-model="newProduct.aisle" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold">
+                                <!-- Ubicación en Bodega (Slotting) (Color Principal removido por Regla UX 3) -->
+                                <div class="pt-3 border-t border-slate-100">
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Ubicación en Bodega (Slotting)</label>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Pasillo</span>
+                                            <select x-model="newProduct.aisle" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-slate-800">
                                                 <option value="A">Pasillo A</option>
                                                 <option value="B">Pasillo B</option>
                                                 <option value="C">Pasillo C</option>
+                                                <option value="D">Pasillo D</option>
                                             </select>
                                         </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-400 block mb-0.5">Rack</span>
-                                            <input type="text" x-model="newProduct.rack" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-center">
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Rack / Estante</span>
+                                            <input type="text" x-model="newProduct.rack" placeholder="01" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-slate-800">
                                         </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-400 block mb-0.5">Gaveta</span>
-                                            <input type="text" x-model="newProduct.bin" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-center">
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Gaveta / Bin</span>
+                                            <input type="text" x-model="newProduct.bin" placeholder="A" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-center text-slate-800">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Galería de Imágenes -->
-                                <div class="pt-2 border-t border-slate-100">
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Fotografias de Producto</label>
-                                        <span class="text-[10px] font-semibold text-slate-400" x-text="(newProduct.images ? newProduct.images.length : 0) + ' / 10 fotos'"></span>
-                                    </div>
-                                    
-                                    <!-- Dropzone -->
-                                    <div 
-                                        @dragover.prevent="isDraggingImages = true"
-                                        @dragleave.prevent="isDraggingImages = false"
-                                        @drop.prevent="handleImageDrop($event)"
-                                        class="border-2 border-dashed rounded-xl p-3 text-center transition cursor-pointer"
-                                        :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-slate-200 bg-slate-50 hover:bg-slate-100/60'"
-                                        @click="$refs.newProductFileInput.click()"
+                                <!-- Pie de Navegación del Paso 3 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(2)" 
+                                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                        <input 
-                                            type="file" 
-                                            x-ref="newProductFileInput" 
-                                            @change="handleImageUpload($event)"
-                                            multiple 
-                                            accept="image/jpeg,image/png,image/webp,image/avif" 
-                                            class="hidden"
-                                        >
-                                        <div class="flex flex-col items-center justify-center gap-1 text-slate-500">
-                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span class="text-[11px] font-semibold text-slate-700">Arrastra fotos o haz clic para subir</span>
-                                            <span class="text-[10px] text-slate-400">JPG, PNG, WEBP, AVIF (Max 5MB)</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Thumbnails -->
-                                    <template x-if="newProduct.images && newProduct.images.length > 0">
-                                        <div class="grid grid-cols-4 gap-2 mt-2">
-                                            <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
-                                                <div class="relative group rounded-lg overflow-hidden border border-slate-200 aspect-square bg-slate-100">
-                                                    <img :src="img.preview" class="w-full h-full object-cover">
-                                                    <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1">
-                                                        <button type="button" @click.stop="setPrimaryImage(idx)" class="p-1 rounded bg-white/90 text-slate-800 text-[9px] font-bold" title="Hacer Portada">P</button>
-                                                        <button type="button" @click.stop="removeImage(idx)" class="p-1 rounded bg-rose-600 text-white text-[9px] font-bold" title="Eliminar">X</button>
-                                                    </div>
-                                                    <span x-show="img.is_primary" class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-bold px-1 rounded">Portada</span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        <span>Paso 2: Datos & Diseño</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(4)" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>Continuar a Copiloto & Pricing</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
                                 </div>
-
                             </div>
-                        </div>
 
-                        <!-- ========================================================= -->
-                        <!-- PANEL 3: COPILOTO IA, SEO & PRICING COMERCIAL (4 COLS)    -->
-                        <!-- ========================================================= -->
-                        <div class="lg:col-span-4 space-y-5">
-                            
-                            <!-- Tarjeta Copiloto IA Comercial -->
-                            <div class="bg-white p-5 rounded-2xl border border-indigo-200/90 shadow-2xs space-y-4 relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-28 h-28 bg-indigo-50 rounded-bl-full pointer-events-none -z-0 opacity-60"></div>
-                                
-                                <div class="flex items-center justify-between pb-3 border-b border-indigo-100 relative z-10">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">3</div>
-                                        <h3 class="font-bold text-slate-800 text-sm">Copiloto Comercial IA</h3>
+                            <!-- PASO 4: COPILOTO COMERCIAL IA, PRICING & AUTO-SKU -->
+                            <div id="step-4-copilot-sku" x-show="workstationStep === 4" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">4</div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 text-sm">Copiloto IA, Pricing Comercial & Auto-SKU</h3>
+                                            <p class="text-[11px] text-slate-500">Copy persuasivo B2C, tags SEO, cálculo de margen y codificación SKU</p>
+                                        </div>
                                     </div>
                                     <button 
                                         type="button" 
                                         @click="generateAiDescription()" 
-                                        :disabled="newProduct.isGeneratingAi || !newProduct.name || newProduct.name.trim().length === 0"
+                                        :disabled="newProduct.isGeneratingAi" 
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                        title="Generar descripcion persuasiva y tags SEO con IA"
                                     >
-                                        <svg x-show="!newProduct.isGeneratingAi" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        <svg x-show="newProduct.isGeneratingAi" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                        </svg>
+                                        <svg x-show="!newProduct.isGeneratingAi" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                        <svg x-show="newProduct.isGeneratingAi" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                         <span x-text="newProduct.isGeneratingAi ? 'Redactando...' : 'Generar con IA'"></span>
                                     </button>
                                 </div>
 
-                                <!-- Descripción Persuasiva Comercial -->
-                                <div class="relative z-10">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Descripcion Persuasiva (B2C)</label>
+                                <!-- Descripción Persuasiva Comercial (Regla: Máximo 75 caracteres) -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Descripción Persuasiva (B2C)</label>
+                                        <span class="text-[10px] font-bold" :class="(newProduct.description || '').length > 75 ? 'text-rose-600 font-extrabold' : 'text-slate-400'" x-text="((newProduct.description || '').length) + ' / 75 car.'"></span>
+                                    </div>
                                     <textarea 
                                         x-model="newProduct.description" 
-                                        rows="4" 
-                                        placeholder="Haz clic en 'Generar con IA' para redactar una descripcion comercial optimizada en base a la composicion textil y marca..."
+                                        maxlength="75" 
+                                        rows="2" 
+                                        placeholder="Máximo 75 caracteres. Confort premium, soporte y máxima suavidad..." 
                                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 resize-none"
                                     ></textarea>
                                 </div>
 
                                 <!-- Viñetas / Puntos Clave Técnicos -->
                                 <template x-if="newProduct.bulletPoints && newProduct.bulletPoints.length > 0">
-                                    <div class="relative z-10 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
-                                        <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1.5">Especificaciones Tecnicas</span>
+                                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                        <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1.5">Especificaciones Técnicas</span>
                                         <ul class="space-y-1 text-[11px] text-slate-700">
                                             <template x-for="(bp, bIdx) in newProduct.bulletPoints" :key="bIdx">
                                                 <li class="flex items-start gap-1.5">
@@ -4618,9 +5887,9 @@
                                     </div>
                                 </template>
 
-                                <!-- Tags SEO & Vitrina Web -->
-                                <div class="relative z-10">
-                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Tags SEO & Busqueda Storefront</label>
+                                <!-- Tags SEO & Búsqueda Storefront -->
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Tags SEO & Búsqueda Frontstore</label>
                                     <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[44px]">
                                         <template x-for="(tag, tIdx) in newProduct.seoTags" :key="tIdx">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200 shadow-2xs">
@@ -4638,78 +5907,358 @@
                                     </div>
                                     <p class="text-[10px] text-slate-400 mt-1">Escribe una palabra clave y presiona Enter para agregarla.</p>
                                 </div>
-                            </div>
 
-                            <!-- Tarjeta Pricing & Margen en Tiempo Real -->
-                            <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl border border-slate-800 shadow-sm space-y-4">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-                                    <h4 class="font-bold text-xs text-white uppercase tracking-wider">Margen Comercial & Pricing</h4>
-                                    <span class="text-[10px] text-indigo-300 font-semibold">Calculo Reactivo</span>
-                                </div>
+                                <!-- Margen Comercial & Pricing -->
+                                <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 space-y-3.5 shadow-2xs">
+                                    <div class="flex items-center justify-between pb-2 border-b border-indigo-100/80">
+                                        <div class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <h4 class="font-bold text-xs text-indigo-950 uppercase tracking-wider">Margen Comercial & Pricing</h4>
+                                        </div>
+                                        <span class="text-[10px] text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-200 font-semibold shadow-2xs">Cálculo Reactivo</span>
+                                    </div>
 
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="text-[10px] text-slate-300 block mb-1">Precio Venta (PVP)</label>
-                                        <div class="relative">
-                                            <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="text-[11px] font-bold text-slate-700 block mb-1">Precio Venta (PVP) <span class="text-rose-500">*</span></label>
+                                            <div class="relative">
+                                                <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.5" 
+                                                    x-model.number="newProduct.pvp" 
+                                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
+                                                >
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="text-[11px] font-bold text-slate-700 block mb-1">Costo Unitario <span class="text-rose-500">*</span></label>
+                                            <div class="relative">
+                                                <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.5" 
+                                                    x-model.number="newProduct.cost" 
+                                                    class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-2.5 border-t border-indigo-100 flex items-center justify-between text-xs bg-white/70 p-2.5 rounded-lg border border-indigo-100/70">
+                                        <div>
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Utilidad por Pieza:</span>
+                                            <strong class="text-emerald-600 text-sm font-mono font-extrabold" x-text="formatCurrency(calculateNewProductProfit())"></strong>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Margen Bruto:</span>
+                                            <div class="flex items-center gap-1.5 justify-end">
+                                                <span 
+                                                    class="text-sm font-extrabold font-mono" 
+                                                    :class="calculateNewProductMargin() >= 50 ? 'text-emerald-700' : (calculateNewProductMargin() >= 30 ? 'text-amber-700' : 'text-rose-700')" 
+                                                    x-text="calculateNewProductMargin() + '%'"
+                                                ></span>
+                                                <span 
+                                                    class="text-[9px] px-2 py-0.5 rounded font-extrabold uppercase tracking-wider border" 
+                                                    :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (calculateNewProductMargin() >= 30 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200')" 
+                                                    x-text="calculateNewProductMargin() >= 50 ? 'Saludable' : (calculateNewProductMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
+                                                ></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Proveedor URL si es dropshipping -->
+                                    <template x-if="newProduct.type === 'dropship'">
+                                        <div class="pt-2 border-t border-indigo-100">
+                                            <label class="text-[10px] font-bold text-slate-600 block mb-1 uppercase tracking-wider">Enlace / SKU Proveedor Mayorista</label>
                                             <input 
-                                                type="number" 
-                                                step="0.5" 
-                                                x-model.number="newProduct.pvp" 
-                                                class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                                type="text" 
+                                                x-model="newProduct.providerUrl" 
+                                                placeholder="https://torzo.com/items/..." 
+                                                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                             >
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] text-slate-300 block mb-1">Costo Unitario</label>
-                                        <div class="relative">
-                                            <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
-                                            <input 
-                                                type="number" 
-                                                step="0.5" 
-                                                x-model.number="newProduct.cost" 
-                                                class="w-full bg-slate-800/90 border border-slate-700 rounded-lg py-1.5 pl-6 pr-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                    </template>
+                                </div>
+
+                                <!-- Codificación SKU Oficial con Botón Auto-SKU y Candado -->
+                                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Código SKU Oficial</label>
+                                            <button 
+                                                type="button" 
+                                                @click="generateAutoSku()" 
+                                                :disabled="newProduct.isGeneratingSku" 
+                                                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition cursor-pointer shadow-2xs"
+                                                title="Generar SKU automático"
                                             >
+                                                <svg x-show="!newProduct.isGeneratingSku" class="w-3 h-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                <svg x-show="newProduct.isGeneratingSku" class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                <span>Auto-SKU</span>
+                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                                    <div>
-                                        <span class="text-[10px] text-slate-400 block">Utilidad por Pieza:</span>
-                                        <strong class="text-emerald-400 text-sm font-mono" x-text="formatCurrency(calculateNewProductProfit())"></strong>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[10px] text-slate-400 block">Margen Bruto:</span>
-                                        <div class="flex items-center gap-1.5 justify-end">
-                                            <span 
-                                                class="text-sm font-extrabold font-mono" 
-                                                :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')" 
-                                                x-text="calculateNewProductMargin() + '%'"
-                                            ></span>
-                                            <span 
-                                                class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
-                                                :class="calculateNewProductMargin() >= 50 ? 'bg-emerald-500/20 text-emerald-300' : (calculateNewProductMargin() >= 30 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300')"
-                                                x-text="calculateNewProductMargin() >= 50 ? 'Saludable' : (calculateNewProductMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
-                                            ></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Proveedor URL si es dropshipping -->
-                                <template x-if="newProduct.type === 'dropship'">
-                                    <div class="pt-2 border-t border-slate-800">
-                                        <label class="text-[10px] text-slate-400 block mb-1">Enlace / SKU Proveedor Mayorista</label>
-                                        <input 
-                                            type="text" 
-                                            x-model="newProduct.providerUrl" 
-                                            placeholder="https://torzo.com/items/..." 
-                                            class="w-full px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 focus:outline-none"
+                                        <button 
+                                            type="button" 
+                                            @click="toggleSkuLock()" 
+                                            class="text-[10px] font-bold inline-flex items-center gap-1 transition cursor-pointer" 
+                                            :class="newProduct.skuLocked ? 'text-slate-500 hover:text-slate-700' : 'text-amber-600 hover:text-amber-700'"
                                         >
+                                            <svg x-show="newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            <svg x-show="!newProduct.skuLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                            <span x-text="newProduct.skuLocked ? 'Bloqueado' : 'Edición Manual'"></span>
+                                        </button>
                                     </div>
-                                </template>
+                                    <input 
+                                        type="text" 
+                                        x-model="newProduct.sku" 
+                                        :disabled="newProduct.skuLocked" 
+                                        placeholder="TXT-DAJ-0001-UNI" 
+                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-80 disabled:cursor-not-allowed"
+                                    >
+                                    <p class="text-[10px] text-slate-400">Formato: [PREFIJO]-[MARCA]-[CORRELATIVO 4D]-[VARIANTE]</p>
+                                </div>
+
+                                <!-- Pie de Navegación del Paso 4 (Regla UX 1) -->
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button 
+                                        type="button" 
+                                        @click="setWorkstationStep(3)" 
+                                        class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        <span>Paso 3: Variantes & Slotting</span>
+                                    </button>
+                                    <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Listo para Dar de Alta en el Footer</span>
+                                    </span>
+                                </div>
                             </div>
 
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- COLUMNA 2: RESUMEN DE FICHA DE PRODUCTO EN VIVO (5 COLS)  -->
+                        <!-- ========================================================= -->
+                        <div class="lg:col-span-5 sticky top-0">
+                            <div class="bg-white rounded-3xl border border-slate-200/90 shadow-lg overflow-hidden flex flex-col h-[650px] max-h-[82vh]">
+                                
+                                <!-- ========================================================= -->
+                                <!-- SECCIÓN SUPERIOR (30% DE LA ALTURA): GALERÍA DE RESUMEN  -->
+                                <!-- ========================================================= -->
+                                <div class="h-[30%] min-h-[170px] max-h-[210px] bg-slate-950 p-3 relative flex flex-col justify-between shrink-0 border-b border-slate-800">
+                                    <!-- Header de la Galería -->
+                                    <div class="flex items-center justify-between pb-1 z-10">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-300">Galería de Ficha</span>
+                                            <span class="text-[9px] font-bold text-slate-400" x-text="'(' + (newProduct.images ? newProduct.images.length : 0) + ')'"></span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 tracking-wide uppercase">Live Preview</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Render de todas las imágenes cargadas del producto (Portada 10% más grande) -->
+                                    <div class="flex-1 flex items-center justify-center overflow-hidden py-1">
+                                        <!-- Cuando hay imágenes cargadas -->
+                                        <template x-if="newProduct.images && newProduct.images.length > 0">
+                                            <div class="flex items-center gap-2.5 overflow-x-auto px-2 py-1 h-full w-full justify-start scrollbar-thin">
+                                                <template x-for="(img, idx) in newProduct.images" :key="img.id || idx">
+                                                    <div 
+                                                        @click="setPrimaryImage(idx)"
+                                                        class="relative shrink-0 rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col items-center justify-center group"
+                                                        :class="img.is_primary 
+                                                            ? 'w-[75px] h-[95px] scale-110 z-10 mx-1.5 ring-2 ring-indigo-500 border-indigo-400 shadow-md shadow-indigo-500/20' 
+                                                            : 'w-[68px] h-[86px] border-slate-700/80 opacity-80 hover:opacity-100 hover:border-slate-500'"
+                                                        :title="img.is_primary ? 'Imagen de Portada (10% destacada)' : 'Hacer portada'"
+                                                    >
+                                                        <img :src="resolveProductImage(img)" class="w-full h-full object-cover">
+                                                        
+                                                        <!-- Badge Portada en la imagen principal -->
+                                                        <div x-show="img.is_primary" class="absolute top-1 left-1 bg-indigo-600/90 text-white text-[7px] font-extrabold px-1 py-0.5 rounded shadow-xs uppercase tracking-wider backdrop-blur-xs">
+                                                            Portada
+                                                        </div>
+
+                                                        <!-- Badge de color asociado a la variante de la foto -->
+                                                        <div class="absolute bottom-1 inset-x-1 flex items-center justify-center pointer-events-none">
+                                                            <span class="px-1 py-0.5 rounded text-[8px] font-bold bg-slate-900/85 text-white truncate max-w-full backdrop-blur-xs border border-white/10" x-text="img.color_name || 'Color'"></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Estado Vacío cuando no hay imágenes -->
+                                        <template x-if="!newProduct.images || newProduct.images.length === 0">
+                                            <div class="flex flex-col items-center justify-center text-slate-500 p-2 text-center">
+                                                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-1">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                </div>
+                                                <span class="text-[11px] font-bold text-slate-400">Sin Fotografías Cargadas</span>
+                                                <span class="text-[9px] text-slate-600">Sube fotos en el Paso 1</span>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Badges flotantes en la barra inferior de galería -->
+                                    <div class="flex items-center justify-between text-[9px] pt-1 border-t border-slate-800/80 text-slate-400">
+                                        <span class="font-mono font-bold text-slate-300" x-text="newProduct.sku || 'SKU PENDIENTE'"></span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span 
+                                                class="px-1.5 py-0.5 rounded font-bold uppercase text-[8px]"
+                                                :class="newProduct.type === 'dropship' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-indigo-950 text-indigo-300 border border-indigo-800'"
+                                                x-text="newProduct.type === 'dropship' ? 'Dropship' : 'Propio'"
+                                            ></span>
+                                            <span 
+                                                class="px-1.5 py-0.5 rounded font-extrabold uppercase text-[8px]"
+                                                :class="newProduct.isPublished ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-700/60' : 'bg-slate-800 text-slate-400 border border-slate-700'"
+                                                x-text="newProduct.isPublished ? 'Público' : 'Borrador'"
+                                            ></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ========================================================= -->
+                                <!-- SECCIÓN INFERIOR (70% DE LA ALTURA): INFORMACIÓN EN VIVO  -->
+                                <!-- ========================================================= -->
+                                <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs bg-white">
+                                    <!-- Nombre & Clasificación & Tipificación -->
+                                    <div class="space-y-1 pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="newProduct.category || 'Categoría'"></span>
+                                            <template x-if="newProduct.subcategory">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" x-text="newProduct.subcategory"></span>
+                                            </template>
+                                            <span 
+                                                class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                                :class="newProduct.designType === 'con_diseno' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-slate-100 text-slate-700 border border-slate-200'"
+                                                x-text="newProduct.designType === 'con_diseno' ? 'Con Diseño' : 'Color Liso'"
+                                            ></span>
+                                        </div>
+                                        <h4 class="text-base font-extrabold text-slate-900 leading-snug" x-text="newProduct.name || 'Nombre del modelo en preparación...'"></h4>
+                                        <p class="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+                                            <span class="text-indigo-700 font-bold" x-text="newProduct.brand || 'Sin Marca'"></span>
+                                            <span class="text-slate-300">•</span>
+                                            <span x-text="getSupplierName(newProduct.supplier_id) || newProduct.provider || 'Sin Proveedor'"></span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Vitrina Web & Slotting de Almacén -->
+                                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div class="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                                            <span class="text-[9px] text-indigo-500 font-bold uppercase block mb-0.5">Vitrina Web</span>
+                                            <span class="font-bold text-indigo-900 truncate block" x-text="getStoreSectionName(newProduct.websiteSection)"></span>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                            <span class="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Ubicación Bodega</span>
+                                            <span class="font-bold text-slate-800 truncate block font-mono" x-text="'Pasillo ' + (newProduct.aisle || 'A') + ' • R' + (newProduct.rack || '01') + ' • G' + (newProduct.bin || 'A')"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fila de Tejido / Modalidad (Solo si es textil se muestra tipo de tela) -->
+                                    <template x-if="newProduct.variantDimension === 'size'">
+                                        <div class="p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-100/70 flex items-center justify-between">
+                                            <span class="text-[10px] text-indigo-900 font-bold uppercase">Tejido / Tela:</span>
+                                            <span class="font-extrabold text-indigo-700 text-xs" x-text="newProduct.fabricType || 'No especificada'"></span>
+                                        </div>
+                                    </template>
+
+                                    <!-- Resumen de Stock por Matriz -->
+                                    <div class="space-y-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Existencias Preparadas</span>
+                                            <span class="font-extrabold text-indigo-700 text-xs" x-text="calculateNewProductTotalStock() + ' piezas'"></span>
+                                        </div>
+                                        
+                                        <!-- Desglose Tallas Textiles -->
+                                        <template x-if="newProduct.variantDimension === 'size'">
+                                            <div class="flex flex-wrap gap-1">
+                                                <template x-for="sz in getCurrentNewProductSizes()" :key="sz.code">
+                                                    <span 
+                                                        class="px-2 py-0.5 rounded text-[10px] font-bold border"
+                                                        :class="(newProduct.sizes[(sz.code || '').toLowerCase()] || 0) > 0 ? 'bg-indigo-100 border-indigo-300 text-indigo-900' : 'bg-white border-slate-200 text-slate-400'"
+                                                    >
+                                                        <span x-text="sz.code + ': '"></span>
+                                                        <span x-text="newProduct.sizes[(sz.code || '').toLowerCase()] || 0"></span>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Desglose Tonos Cosméticos -->
+                                        <template x-if="newProduct.variantDimension === 'shade'">
+                                            <div class="flex flex-wrap gap-1 text-[10px]">
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T01: ' + (newProduct.shades.t01 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T02: ' + (newProduct.shades.t02 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T03: ' + (newProduct.shades.t03 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T04: ' + (newProduct.shades.t04 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T05: ' + (newProduct.shades.t05 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'T06: ' + (newProduct.shades.t06 || 0)"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- Desglose Volúmenes -->
+                                        <template x-if="newProduct.variantDimension === 'volume'">
+                                            <div class="flex flex-wrap gap-1 text-[10px]">
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'10ml: ' + (newProduct.volumes.v10 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'50ml: ' + (newProduct.volumes.v50 || 0)"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200" x-text="'100ml: ' + (newProduct.volumes.v100 || 0)"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- Desglose Pieza Única -->
+                                        <template x-if="newProduct.variantDimension === 'none'">
+                                            <div class="text-[11px] font-bold text-slate-700">
+                                                <span x-text="'Piezas únicas en stock: ' + (newProduct.unitStock || 0)"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Pricing & Margen en Vivo -->
+                                    <div class="p-3 bg-slate-900 text-white rounded-xl space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-[9px] text-slate-400 uppercase block font-semibold">PVP Comercial</span>
+                                                <span class="text-base font-extrabold text-white font-mono" x-text="formatCurrency(newProduct.pvp || 0)"></span>
+                                            </div>
+                                            <div class="text-center">
+                                                <span class="text-[9px] text-slate-400 uppercase block font-semibold">Costo</span>
+                                                <span class="text-xs font-bold text-slate-300 font-mono" x-text="formatCurrency(newProduct.cost || 0)"></span>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[9px] text-slate-400 uppercase block font-semibold">Margen Bruto</span>
+                                                <span 
+                                                    class="text-sm font-extrabold font-mono"
+                                                    :class="calculateNewProductMargin() >= 50 ? 'text-emerald-400' : (calculateNewProductMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')"
+                                                    x-text="calculateNewProductMargin() + '%'"
+                                                ></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Copy Persuasivo & Tags SEO -->
+                                    <template x-if="newProduct.description">
+                                        <div class="p-3 bg-indigo-50/40 rounded-xl border border-indigo-100/80">
+                                            <span class="text-[9px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">Copy Persuasivo B2C</span>
+                                            <p class="text-[11px] text-slate-700 italic leading-snug" x-text="newProduct.description"></p>
+                                        </div>
+                                    </template>
+
+                                    <!-- Tags SEO Chips -->
+                                    <template x-if="newProduct.seoTags && newProduct.seoTags.length > 0">
+                                        <div class="space-y-1">
+                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tags de Indexación Frontstore</span>
+                                            <div class="flex flex-wrap gap-1">
+                                                <template x-for="(tag, tIdx) in newProduct.seoTags" :key="tIdx">
+                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200" x-text="'#' + tag"></span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -4720,23 +6269,37 @@
                     <div class="text-xs text-slate-500">
                         <span class="font-bold text-slate-700" x-text="calculateNewProductTotalStock() + ' unidades'"></span> preparadas para ingresar al inventario.
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         <button 
                             type="button"
                             @click="closeCreateProductDrawer()" 
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
+                            class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                         >
                             Cancelar
                         </button>
+                        <!-- Regla 5: Pre-guardar como borrador para aprobar después -->
+                        <button 
+                            type="button" 
+                            @click="saveNewProductAsDraft()" 
+                            class="px-4 py-2 text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                            title="Pre-guardar el producto como borrador para revisarlo y aprobarlo después"
+                        >
+                            <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Pre-guardar Borrador</span>
+                        </button>
+                        <!-- Regla 5: Aprobar oficialmente y publicar en catálogo operativo -->
                         <button 
                             type="button"
-                            @click="saveNewProduct()" 
+                            @click="saveNewProduct(true)" 
                             class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                            title="Aprobar y dar de alta oficialmente en el catálogo operativo"
                         >
                             <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span>Guardar Producto en Catalogo</span>
+                            <span>Aprobar y Publicar en Catálogo</span>
                         </button>
                     </div>
                 </div>
@@ -4808,7 +6371,7 @@
                     </button>
                 </div>
 
-                <!-- Comparativa Lado a Lado: Borrador vs Producto Existente -->
+                <!-- Comparativa Lado a Lado: Borrador vs Producto Existente (Regla: Mostrar fotografías de ambos) -->
                 <div class="py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     <!-- Columna Izquierda: Nuevo Borrador -->
@@ -4817,34 +6380,51 @@
                             <span class="text-xs font-bold text-indigo-900 uppercase tracking-wider">Tu Borrador Actual</span>
                             <span class="text-[10px] font-extrabold px-1.5 py-0.5 bg-indigo-200 text-indigo-800 rounded">Nuevo</span>
                         </div>
-                        <div class="space-y-2 text-xs">
+                        
+                        <div class="flex gap-3">
+                            <!-- Miniatura 4:5 Borrador -->
+                            <div class="w-20 h-25 rounded-lg border border-indigo-200 bg-white overflow-hidden shrink-0 flex items-center justify-center relative shadow-2xs">
+                                <template x-if="newProduct.images && newProduct.images.length > 0">
+                                    <img :src="resolveProductImage(newProduct.images[0])" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!newProduct.images || newProduct.images.length === 0">
+                                    <div class="flex flex-col items-center justify-center text-slate-400 p-1 text-center">
+                                        <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span class="text-[9px] mt-0.5 font-medium leading-none">Sin foto</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <!-- Datos del Borrador -->
+                            <div class="flex-1 min-w-0 space-y-1.5 text-xs">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">SKU Propuesto:</span>
+                                    <span class="font-mono font-bold text-slate-800 truncate block" x-text="newProduct.sku || 'Por generar'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Nombre del Modelo:</span>
+                                    <span class="font-bold text-slate-800 line-clamp-1" x-text="newProduct.name"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Marca:</span>
+                                        <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.brand || '-'"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Categoría:</span>
+                                        <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.category"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-100 text-xs">
                             <div>
-                                <span class="text-[10px] text-slate-400 block">SKU Propuesto:</span>
-                                <span class="font-mono font-bold text-slate-800" x-text="newProduct.sku || 'Por generar'"></span>
+                                <span class="text-[10px] text-slate-400 block">PVP:</span>
+                                <span class="font-mono font-bold text-slate-800" x-text="formatCurrency(newProduct.pvp || 0)"></span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-400 block">Nombre del Modelo:</span>
-                                <span class="font-bold text-slate-800" x-text="newProduct.name"></span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Marca:</span>
-                                    <span class="font-semibold text-slate-700" x-text="newProduct.brand || '-'"></span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Categoria:</span>
-                                    <span class="font-semibold text-slate-700" x-text="newProduct.category"></span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-indigo-100">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">PVP:</span>
-                                    <span class="font-mono font-bold text-slate-800" x-text="formatCurrency(newProduct.pvp || 0)"></span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Stock a Ingresar:</span>
-                                    <span class="font-mono font-bold text-indigo-700" x-text="calculateNewProductTotalStock() + ' uds'"></span>
-                                </div>
+                                <span class="text-[10px] text-slate-400 block">Stock a Ingresar:</span>
+                                <span class="font-mono font-bold text-indigo-700" x-text="calculateNewProductTotalStock() + ' uds'"></span>
                             </div>
                         </div>
                     </div>
@@ -4852,30 +6432,48 @@
                     <!-- Columna Derecha: Producto Existente Detectado -->
                     <div class="p-4 rounded-xl border border-rose-200 bg-rose-50/40 space-y-3">
                         <div class="flex items-center justify-between pb-2 border-b border-rose-100">
-                            <span class="text-xs font-bold text-rose-900 uppercase tracking-wider">Producto en Catalogo</span>
+                            <span class="text-xs font-bold text-rose-900 uppercase tracking-wider">Producto en Catálogo</span>
                             <span class="text-[10px] font-extrabold px-1.5 py-0.5 bg-rose-200 text-rose-800 rounded">Existente</span>
                         </div>
                         <template x-if="newProduct.duplicateSelectedMatch">
-                            <div class="space-y-2 text-xs">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">SKU Registrado:</span>
-                                    <span class="font-mono font-bold text-rose-800" x-text="newProduct.duplicateSelectedMatch.sku"></span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Nombre Registrado:</span>
-                                    <span class="font-bold text-slate-800" x-text="newProduct.duplicateSelectedMatch.title"></span>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <span class="text-[10px] text-slate-400 block">Marca:</span>
-                                        <span class="font-semibold text-slate-700" x-text="newProduct.duplicateSelectedMatch.brand || '-'"></span>
+                            <div class="space-y-3">
+                                <div class="flex gap-3">
+                                    <!-- Miniatura 4:5 Existente -->
+                                    <div class="w-20 h-25 rounded-lg border border-rose-200 bg-white overflow-hidden shrink-0 flex items-center justify-center relative shadow-2xs">
+                                        <template x-if="newProduct.duplicateSelectedMatch.image">
+                                            <img :src="resolveProductImage(newProduct.duplicateSelectedMatch.image)" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!newProduct.duplicateSelectedMatch.image">
+                                            <div class="flex flex-col items-center justify-center text-slate-400 p-1 text-center">
+                                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span class="text-[9px] mt-0.5 font-medium leading-none">Sin foto</span>
+                                            </div>
+                                        </template>
                                     </div>
-                                    <div>
-                                        <span class="text-[10px] text-slate-400 block">Categoria:</span>
-                                        <span class="font-semibold text-slate-700" x-text="newProduct.duplicateSelectedMatch.category || 'General'"></span>
+                                    <!-- Datos del Existente -->
+                                    <div class="flex-1 min-w-0 space-y-1.5 text-xs">
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block">SKU Registrado:</span>
+                                            <span class="font-mono font-bold text-rose-800 truncate block" x-text="newProduct.duplicateSelectedMatch.sku"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block">Nombre Registrado:</span>
+                                            <span class="font-bold text-slate-800 line-clamp-1" x-text="newProduct.duplicateSelectedMatch.title"></span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <span class="text-[10px] text-slate-400 block">Marca:</span>
+                                                <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.duplicateSelectedMatch.brand || '-'"></span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-400 block">Categoría:</span>
+                                                <span class="font-semibold text-slate-700 truncate block" x-text="newProduct.duplicateSelectedMatch.category || 'General'"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-rose-100">
+
+                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-rose-100 text-xs">
                                     <div>
                                         <span class="text-[10px] text-slate-400 block">Precio Actual:</span>
                                         <span class="font-mono font-bold text-slate-800" x-text="formatCurrency(newProduct.duplicateSelectedMatch.price || 0)"></span>
@@ -4894,7 +6492,7 @@
                             </div>
                         </template>
                         <template x-if="!newProduct.duplicateSelectedMatch">
-                            <p class="text-xs text-slate-400 italic">No se encontro el producto en memoria.</p>
+                            <p class="text-xs text-slate-400 italic">No se encontró el producto en catálogo.</p>
                         </template>
                     </div>
 
@@ -4933,6 +6531,196 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL DE ENCUADRE Y RECORTE 4:5 ESTÁNDAR (WORKSTATION PRODUCTOS)  -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="imageCropModalOpen" 
+        class="fixed inset-0 z-[90] overflow-y-auto" 
+        style="z-index: 90; display: none;"
+        role="dialog" 
+        aria-modal="true"
+        @keydown.escape.window="closeCropModal()"
+    >
+        <!-- Backdrop oscuro -->
+        <div 
+            x-show="imageCropModalOpen"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity"
+            @click="closeCropModal()"
+        ></div>
+
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div 
+                x-show="imageCropModalOpen"
+                x-transition:enter="ease-out duration-300 transform"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="ease-in duration-200 transform"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="relative bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 overflow-hidden"
+                @click.stop
+            >
+                <!-- Encabezado del Modal con Indicador de Cola Multi-Foto -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-bold text-slate-900">Encuadre & Recorte 4:5</h3>
+                                <template x-if="imageCropQueue && imageCropQueue.length > 0">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow-2xs animate-pulse" x-text="'Foto ' + imageCropCurrentIndex + ' de ' + imageCropTotalCount"></span>
+                                </template>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Acomoda y estandariza la prenda al catálogo (1080 × 1350 px)</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="closeCropModal()" 
+                        class="p-1 rounded-lg text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                        title="Cancelar y cerrar recorte"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Visor 4:5 con Enmarcado Interactivo y Guías de Composición -->
+                <div class="py-4 flex flex-col items-center">
+                    <div 
+                        class="relative w-[320px] h-[400px] bg-slate-950 rounded-xl overflow-hidden shadow-inner border-2 border-indigo-500/80 cursor-grab active:cursor-grabbing select-none"
+                        @mousedown="onCropMouseDown($event)"
+                        @mousemove="onCropMouseMove($event)"
+                        @mouseup="onCropMouseUp()"
+                        @mouseleave="onCropMouseUp()"
+                        @touchstart.passive="onCropTouchStart($event)"
+                        @touchmove.prevent="onCropTouchMove($event)"
+                        @touchend="onCropTouchEnd()"
+                    >
+                        <!-- Imagen dentro del visor -->
+                        <template x-if="imageCropSource">
+                            <img 
+                                :src="imageCropSource" 
+                                :style="getImageCropTransformStyle()"
+                                class="absolute pointer-events-none select-none"
+                                draggable="false"
+                            >
+                        </template>
+
+                        <!-- Rejilla de Composición (Regla de Tercios) -->
+                        <div class="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3 border border-white/20">
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-b border-white/15"></div>
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-r border-b border-white/15"></div>
+                            <div class="border-b border-white/15"></div>
+                            <div class="border-r border-white/15"></div>
+                            <div class="border-r border-white/15"></div>
+                            <div></div>
+                        </div>
+
+                        <!-- Badge Indicador Proporción 4:5 -->
+                        <div class="absolute bottom-2 left-2 pointer-events-none bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <span>4:5 (1080×1350)</span>
+                        </div>
+                    </div>
+
+                    <!-- Controles de Zoom y Ajuste -->
+                    <div class="w-[320px] mt-4 space-y-3">
+                        <div class="flex items-center justify-between text-xs text-slate-600 font-semibold">
+                            <span class="flex items-center gap-1 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                Zoom
+                            </span>
+                            <span class="font-mono text-indigo-700 font-bold text-xs" x-text="Math.round(cropZoom * 100) + '%'"></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button 
+                                type="button" 
+                                @click="cropZoomOut()" 
+                                class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm transition cursor-pointer"
+                                title="Reducir zoom"
+                            >
+                                -
+                            </button>
+                            <input 
+                                type="range" 
+                                min="1" 
+                                max="3" 
+                                step="0.05" 
+                                x-model.number="cropZoom" 
+                                class="flex-1 accent-indigo-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                            >
+                            <button 
+                                type="button" 
+                                @click="cropZoomIn()" 
+                                class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm transition cursor-pointer"
+                                title="Aumentar zoom"
+                            >
+                                +
+                            </button>
+                            <button 
+                                type="button" 
+                                @click="cropReset()" 
+                                class="px-2 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-800 bg-slate-100 rounded-lg transition cursor-pointer"
+                                title="Restablecer posición y zoom"
+                            >
+                                Reset
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-center text-slate-400">
+                            Arrastra la imagen para centrar la prenda dentro del marco.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Footer de Acciones con botón Crop -->
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+                    <button 
+                        type="button" 
+                        @click="closeCropModal()" 
+                        class="px-3.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                    >
+                        <span x-text="imageCropQueue && imageCropQueue.length > 0 ? 'Cancelar Restantes' : 'Cancelar'"></span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="applyCrop45()" 
+                        :disabled="isProcessingCrop"
+                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition cursor-pointer disabled:opacity-50"
+                    >
+                        <svg x-show="!isProcessingCrop" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <svg x-show="isProcessingCrop" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span x-text="isProcessingCrop 
+                            ? 'Recortando y Estandarizando...' 
+                            : (imageCropQueue && imageCropQueue.length > 0 
+                                ? ('Guardar y Continuar (' + (imageCropCurrentIndex) + '/' + imageCropTotalCount + ')') 
+                                : 'Recortar y Aplicar (4:5)')"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -6313,6 +8101,32 @@
                         </button>
                     </div>
 
+                    <!-- Escala / Nivel de MOQ Adquirido (Regla 1 Compras e Inventario) -->
+                    <div class="p-3 bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="p-1.5 bg-amber-500/20 text-amber-300 rounded-lg border border-amber-400/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] uppercase font-bold text-amber-300 tracking-wider">Escala MOQ del Lote</span>
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-mono">Regla 1 Trazabilidad</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-slate-300 block">Asocia este costo unitario a las existencias que ingresan</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] font-bold text-slate-300 whitespace-nowrap">Nivel Confirmado:</label>
+                            <input 
+                                type="text" 
+                                x-model="receivingMoqTierLabel" 
+                                placeholder="Ej. 100 prendas"
+                                class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-amber-300 focus:outline-none focus:ring-1 focus:ring-indigo-400 min-w-[150px]"
+                            >
+                        </div>
+                    </div>
+
                     <!-- Matriz de Tallas a Cotejar -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -6536,7 +8350,870 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL GENERADOR DE ORDEN DE COMPRA FORMAL PARA WHATSAPP           -->
+    <!-- ================================================================= -->
+    <!-- MODAL 1: GENERADOR FORMAL DE ORDEN DE COMPRA (PO EN PDF)          -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="poGeneratorModalOpen" 
+        class="fixed inset-0 z-[95] overflow-y-auto po-modal-wrapper print:static print:overflow-visible" 
+        :style="poGeneratorModalOpen ? 'display: block !important; z-index: 95;' : 'display: none !important;'"
+        style="display: none;"
+        @keydown.escape.window="closePoGenerator()"
+    >
+        <!-- Backdrop oscuro -->
+        <div 
+            x-show="poGeneratorModalOpen"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity po-backdrop-dark no-print print:hidden"
+            @click="closePoGenerator()"
+        ></div>
+
+        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4 po-modal-centering print:block print:p-0 print:m-0 print:min-h-0">
+            <div 
+                x-show="poGeneratorModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                class="inline-block w-full max-w-4xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative po-modal-card print:border-none print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-full print:max-w-none print:overflow-visible print:static"
+                @click.stop
+            >
+                <!-- Header de la PO (no print) -->
+                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 po-modal-header no-print print:hidden">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-bold text-white">Orden de Compra Formal (Expediente PO)</h3>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30" x-text="currentPoData ? currentPoData.poNumber : 'PO-2026-0000'"></span>
+                            </div>
+                            <p class="text-xs text-slate-400">Documento mercantil oficial para emisión a fabricante, registro de compromiso y recepción en rampa</p>
+                        </div>
+                    </div>
+                    <button @click="closePoGenerator()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Panel de Acuerdos de Notas de Crédito & Discrepancias (no-print) -->
+                <template x-if="currentPoData">
+                    <div class="bg-amber-50/70 border-b border-amber-200/80 px-6 py-4 po-discrepancy-panel no-print print:hidden">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div class="flex items-start gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-700 shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-800">Recuperación de Acuerdos por Discrepancias Previas</span>
+                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">Notas de Crédito & Compensación</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 mt-0.5">Aplica descuentos acordados por faltantes en muelle, penalizaciones o defectos textiles en entregas anteriores.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition select-none"
+                                    :class="currentPoData.hasCreditDeduction ? 'bg-amber-100/90 border-amber-300 text-amber-900 shadow-3xs' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'">
+                                    <input type="checkbox" :checked="currentPoData.hasCreditDeduction" @change="togglePoCreditDeduction()" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+                                    <span>Aplicar deducción a esta orden</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- SELECTOR MULTI-ACUERDO DE COMPENSACIÓN MERCANTIL POR PROVEEDOR -->
+                        <div class="mt-3 pt-3 border-t border-amber-200/60">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                                <div>
+                                    <label class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span>Acuerdos de Compensación & Notas de Crédito Pendientes:</span>
+                                    </label>
+                                    <p class="text-[11px] text-amber-800">Selecciona uno o más acuerdos registrados exclusivamente para este proveedor para deducirlos de esta orden.</p>
+                                </div>
+                                <template x-if="getPendingAgreementsForCurrentPo().length > 0">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" @click="selectAllPendingAgreements()" class="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 bg-white border border-indigo-200 px-2 py-0.5 rounded cursor-pointer transition">Seleccionar Todos</button>
+                                        <button type="button" @click="clearSelectedAgreements()" class="text-[10px] font-bold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 px-2 py-0.5 rounded cursor-pointer transition">Limpiar</button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Lista de Acuerdos del Proveedor (Multi-Selección con Checkboxes) -->
+                            <template x-if="getPendingAgreementsForCurrentPo().length > 0">
+                                <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                    <template x-for="agr in getPendingAgreementsForCurrentPo()" :key="agr.ref">
+                                        <label 
+                                            class="p-2.5 rounded-xl border transition flex items-start justify-between gap-3 cursor-pointer select-none"
+                                            :class="isCreditAgreementSelected(agr.ref) ? 'bg-amber-100/90 border-amber-400 shadow-2xs ring-1 ring-amber-400' : 'bg-white hover:bg-amber-50/50 border-amber-200/80'"
+                                        >
+                                            <div class="flex items-start gap-2.5 min-w-0">
+                                                <input 
+                                                    type="checkbox" 
+                                                    :checked="isCreditAgreementSelected(agr.ref)" 
+                                                    @change="toggleCreditAgreementSelection(agr)"
+                                                    class="mt-1 rounded text-amber-600 focus:ring-amber-500 cursor-pointer shrink-0"
+                                                >
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <span class="font-mono font-bold text-xs text-slate-900" x-text="agr.ref"></span>
+                                                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-200 text-amber-900">Pendiente de Conciliar</span>
+                                                        <span class="text-[10px] text-slate-500 font-medium" x-text="agr.supplier"></span>
+                                                    </div>
+                                                    <p class="text-xs text-slate-700 mt-0.5" x-text="agr.reason"></p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <span class="font-mono font-black text-sm text-amber-950 block" x-text="formatCurrency(agr.amount)"></span>
+                                                <span class="text-[10px] text-amber-800 font-medium block">a deducir</span>
+                                            </div>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="getPendingAgreementsForCurrentPo().length === 0">
+                                <div class="p-3 bg-white/70 border border-amber-200 rounded-xl text-center">
+                                    <span class="text-xs font-medium text-amber-800">No hay acuerdos mercantiles pendientes registrados específicamente para <strong x-text="currentPoData.supplier"></strong>.</span>
+                                </div>
+                            </template>
+
+                            <!-- Resumen Dinámico de Deducción Acumulada -->
+                            <template x-if="currentPoData.hasCreditDeduction && currentPoData.deductionAmount > 0">
+                                <div class="mt-2.5 p-2 bg-amber-200/60 rounded-xl border border-amber-300 flex items-center justify-between text-xs text-amber-950">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span><strong>Deducción total acumulada:</strong> <span class="font-mono font-bold" x-text="currentPoData.creditNoteRef"></span></span>
+                                    </div>
+                                    <span class="font-mono font-black text-sm text-amber-900" x-text="'-' + formatCurrency(currentPoData.deductionAmount)"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Campos editables si la deducción está activa -->
+                        <div x-show="currentPoData.hasCreditDeduction" class="mt-3 pt-3 border-t border-amber-200/60 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">Folio del Acuerdo / Nota de Crédito:</label>
+                                <input 
+                                    type="text" 
+                                    x-model="currentPoData.creditNoteRef" 
+                                    placeholder="Ej. NC-TORZO-2026-012"
+                                    class="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">Monto a Compensar ($ MXN):</label>
+                                <input 
+                                    type="number" 
+                                    step="0.01" 
+                                    min="0"
+                                    x-model.number="currentPoData.creditNoteAmount" 
+                                    @input="recalculatePoTotals()"
+                                    class="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-900 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">Causa / Discrepancia Citada:</label>
+                                <input 
+                                    type="text" 
+                                    x-model="currentPoData.creditNoteReason" 
+                                    placeholder="Ej. Faltante en muelle rampa Inbound 02"
+                                    class="w-full bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-amber-500 focus:outline-none"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Documento Imprimible (PO Sheet) -->
+                <template x-if="currentPoData">
+                    <div class="p-8 space-y-6 max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible text-slate-800 font-sans" id="printablePurchaseOrderDoc">
+                        <!-- Membrete Corporativo -->
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between pb-6 border-b-2 border-slate-900 gap-4">
+                            <div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-indigo-600">División de Abastecimiento & Compras</div>
+                                <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">MI TIENDA ONLINE S.A. DE C.V.</h1>
+                                <p class="text-xs text-slate-600 mt-1">RFC: <strong>MTO-240815-9K2</strong> • Régimen General de Ley Personas Morales</p>
+                                <p class="text-xs text-slate-500">Av. Insurgentes Sur #1898, Piso 4, Col. Florida, Alcaldía Álvaro Obregón, C.P. 01030, CDMX</p>
+                                <p class="text-xs text-slate-500">Tel: +52 55 8421 9000 • Email: compras@mitienda.com</p>
+                            </div>
+                            <div class="text-right sm:min-w-[200px] bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 block">Folio de Orden de Compra</span>
+                                <span class="text-xl font-mono font-black text-slate-900 block" x-text="currentPoData.poNumber"></span>
+                                <div class="mt-2 pt-2 border-t border-slate-200 text-xs text-slate-600">
+                                    <div>Fecha: <strong class="text-slate-900" x-text="currentPoData.date"></strong></div>
+                                    <div class="text-emerald-700 font-semibold mt-0.5">Estatus: Emitida / Aprobada</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloque 2 Columnas: Datos del Proveedor y Condiciones de Entrega -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <!-- Datos del Proveedor -->
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Datos del Fabricante / Proveedor</span>
+                                <div class="text-sm font-bold text-slate-900" x-text="currentPoData.supplier"></div>
+                                <div class="text-slate-600">Código Proveedor: <strong class="font-mono text-slate-800" x-text="currentPoData.vendorCode"></strong></div>
+                                <div class="text-slate-600">Contacto: <span class="font-medium text-slate-800" x-text="currentPoData.contactName"></span></div>
+                                <div class="text-slate-600">Teléfono: <span class="font-mono text-slate-800" x-text="currentPoData.contactPhone"></span></div>
+                                <div class="text-slate-600">Correo Comercial: <span class="text-slate-800" x-text="currentPoData.contactEmail"></span></div>
+                                <div class="text-indigo-800 font-semibold pt-1">Términos de Pago: <span class="font-bold" x-text="currentPoData.paymentTerms"></span></div>
+                            </div>
+
+                            <!-- Condiciones Logísticas y Rampa -->
+                            <div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block mb-2">Condiciones Logísticas & Entrega</span>
+                                <div class="text-slate-700">Muelle de Recepción: <strong class="text-slate-900 block" x-text="currentPoData.deliveryDock"></strong></div>
+                                <div class="text-slate-700 mt-1">Fecha Compromiso de Entrega: <strong class="text-indigo-800 block" x-text="currentPoData.deliveryCommitmentDate"></strong></div>
+                                <div class="text-slate-700 mt-1">Horario de Rampa: <span class="text-slate-900 font-medium">Lunes a Viernes 07:00 a 14:00 hrs</span></div>
+                                <div class="text-[11px] text-slate-500 mt-2 italic">Requisito obligatorio: Acompañar el embarque con remisión física y copia de esta PO para cotejo ciego de piezas en rampa.</div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla Detallada de Partidas y Curvas de Tallas -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-100 text-slate-700 uppercase tracking-wider font-bold text-[10px] border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-2.5 px-3 text-center">Partida</th>
+                                        <th class="py-2.5 px-3">Código SKU</th>
+                                        <th class="py-2.5 px-3">Descripción de la Prenda</th>
+                                        <th class="py-2.5 px-3 text-center">Curva de Tallas</th>
+                                        <th class="py-2.5 px-3 text-center">Cantidad</th>
+                                        <th class="py-2.5 px-3 text-right">Precio Unit. Pactado</th>
+                                        <th class="py-2.5 px-3 text-right">Importe Total MXN</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 font-medium">
+                                    <template x-for="(item, idx) in currentPoData.items" :key="idx">
+                                        <tr class="hover:bg-slate-50/50">
+                                            <td class="py-3 px-3 text-center font-bold text-slate-400" x-text="idx + 1"></td>
+                                            <td class="py-3 px-3 font-mono font-bold text-indigo-700" x-text="item.sku"></td>
+                                            <td class="py-3 px-3 font-bold text-slate-900" x-text="item.productName"></td>
+                                            <td class="py-3 px-3 text-center">
+                                                <div class="flex items-center justify-center gap-1 font-mono text-[10px]">
+                                                    <span class="px-1 bg-slate-100 border border-slate-200 rounded" x-text="'CH:' + (item.sizes ? (item.sizes.ch || 0) : 0)"></span>
+                                                    <span class="px-1 bg-indigo-50 border border-indigo-200 rounded font-bold text-indigo-700" x-text="'M:' + (item.sizes ? (item.sizes.m || 0) : 0)"></span>
+                                                    <span class="px-1 bg-indigo-50 border border-indigo-200 rounded font-bold text-indigo-700" x-text="'G:' + (item.sizes ? (item.sizes.g || 0) : 0)"></span>
+                                                    <span class="px-1 bg-slate-100 border border-slate-200 rounded" x-text="'XL:' + (item.sizes ? (item.sizes.xl || 0) : 0)"></span>
+                                                    <template x-if="item.sizes && item.sizes['2xl'] > 0">
+                                                        <span class="px-1 bg-amber-50 border border-amber-200 rounded font-bold text-amber-800" x-text="'2XL:' + item.sizes['2xl']"></span>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-3 text-center font-bold text-slate-900" x-text="item.qty + ' uds'"></td>
+                                            <td class="py-3 px-3 text-right font-mono text-slate-700" x-text="formatCurrency(item.costUnit)"></td>
+                                            <td class="py-3 px-3 text-right font-bold font-mono text-slate-900" x-text="formatCurrency(item.totalCost)"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Resumen Económico -->
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pt-2">
+                            <div class="sm:max-w-md text-[11px] text-slate-500 space-y-1">
+                                <strong class="text-slate-700 block">Notas Comerciales & Cláusula de Aceptación:</strong>
+                                <p class="leading-relaxed">1. Todo embarque recibido en muelle será cotejado a ciegas por el personal de Almacén contra las cantidades y curva de tallas detalladas en esta orden.</p>
+                                <p class="leading-relaxed">2. Las piezas con merma textil o discrepancias cuantitativas serán sujetas a Nota de Crédito o retención en el cotejo de 3 vías de Finanzas (TASK-INT-07).</p>
+                                <p class="leading-relaxed font-semibold text-slate-600">3. Favor de confirmar número de guía fletera a compras@mitienda.com en cuanto el transporte sea recolectado.</p>
+                                <template x-if="currentPoData.hasCreditDeduction && currentPoData.deductionAmount > 0">
+                                    <p class="leading-relaxed text-amber-900 bg-amber-50/80 p-2.5 rounded-lg border border-amber-200 mt-2 font-medium">
+                                        4. <strong>Acuerdo de Compensación Comercial:</strong> Se aplica una deducción líquida de <strong x-text="formatCurrency(currentPoData.deductionAmount)"></strong> amparada bajo el acuerdo <span class="font-mono font-bold" x-text="currentPoData.creditNoteRef"></span> correspondiente a: <em x-text="currentPoData.creditNoteReason"></em>. Dicho importe se descuenta directamente de la liquidación de la presente orden mercantil.
+                                    </p>
+                                </template>
+                            </div>
+
+                            <div class="min-w-[260px] bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-600 font-medium">Total de Unidades:</span>
+                                    <span class="font-bold text-slate-900 font-mono" x-text="currentPoData.totalPieces + ' piezas'"></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-600 font-medium">Importe Bruto Partidas:</span>
+                                    <span class="font-bold text-slate-900 font-mono" x-text="formatCurrency(currentPoData.grossSubtotal || currentPoData.subtotal)"></span>
+                                </div>
+                                <template x-if="currentPoData.hasCreditDeduction && currentPoData.deductionAmount > 0">
+                                    <div class="flex items-start justify-between text-amber-900 bg-amber-100/70 p-2 rounded-lg border border-amber-200/90">
+                                        <div>
+                                            <div class="font-bold text-[11px]">(-) Nota de Crédito / Deducción:</div>
+                                            <div class="text-[10px] font-mono opacity-80" x-text="currentPoData.creditNoteRef"></div>
+                                        </div>
+                                        <span class="font-bold font-mono text-amber-900" x-text="'-' + formatCurrency(currentPoData.deductionAmount)"></span>
+                                    </div>
+                                </template>
+                                <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                                    <span class="text-slate-600 font-medium">Subtotal Gravable Neto:</span>
+                                    <span class="font-bold text-slate-900 font-mono" x-text="formatCurrency(currentPoData.subtotal)"></span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-600">
+                                    <span>IVA Trasladado (16%):</span>
+                                    <span class="font-mono" x-text="formatCurrency(currentPoData.iva)"></span>
+                                </div>
+                                <div class="border-t-2 border-slate-300 pt-2 flex items-center justify-between text-sm">
+                                    <span class="font-black text-slate-900">Total Orden de Compra:</span>
+                                    <span class="font-black text-indigo-700 font-mono text-base" x-text="formatCurrency(currentPoData.total)"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloque de Firmas -->
+                        <div class="grid grid-cols-2 gap-12 pt-10 text-center text-xs">
+                            <div class="border-t border-slate-400 pt-3">
+                                <span class="font-bold text-slate-900 block" x-text="currentPoData.buyerAgent"></span>
+                                <span class="text-[11px] text-slate-500">Autorización Comercial de Compra • Mi Tienda Online</span>
+                            </div>
+                            <div class="border-t border-slate-400 pt-3">
+                                <span class="font-bold text-slate-900 block" x-text="currentPoData.supplier"></span>
+                                <span class="text-[11px] text-slate-500">Acuse de Recibo y Aceptación de Taller / Fabricante</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Footer del Modal con Acciones -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 po-modal-footer no-print print:hidden">
+                    <button 
+                        type="button" 
+                        @click="closePoGenerator()" 
+                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cerrar Borrador
+                    </button>
+                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
+                        <button 
+                            type="button" 
+                            @click="printPurchaseOrderDoc()" 
+                            class="px-4 py-2 text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-300 shadow-3xs transition cursor-pointer flex items-center gap-1.5"
+                        >
+                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            <span>Imprimir / Descargar PDF</span>
+                        </button>
+                        <template x-if="currentPoData && !currentPoData.isIssued">
+                            <button 
+                                type="button" 
+                                @click="openEmailDispatchModal()" 
+                                class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer"
+                                title="Preparar correo de despacho con la PO adjunta y emitir formalmente"
+                            >
+                                <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>Emitir y Enviar por Correo al Proveedor</span>
+                            </button>
+                        </template>
+                        <template x-if="currentPoData && currentPoData.isIssued">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-3xs">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Orden Emitida Oficialmente (Hub 5 Comprometido)</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 1.2: DESPACHO Y ENVÍO DE ORDEN DE COMPRA POR CORREO         -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="emailDispatchModalOpen" 
+        class="fixed inset-0 z-[100] overflow-y-auto" 
+        :style="emailDispatchModalOpen ? 'display: block !important; z-index: 100;' : 'display: none !important;'"
+        style="display: none;"
+        @keydown.escape.window="closeEmailDispatchModal()"
+    >
+        <!-- Backdrop oscuro -->
+        <div 
+            x-show="emailDispatchModalOpen"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            @click="closeEmailDispatchModal()"
+        ></div>
+
+        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+            <div 
+                x-show="emailDispatchModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                class="inline-block w-full max-w-2xl bg-white rounded-2xl text-left shadow-2xl transform transition-all border border-slate-200 overflow-hidden relative z-10"
+                @click.stop
+            >
+                <!-- Header del Modal de Correo -->
+                <div class="px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-bold text-white">Despacho de Orden de Compra por Correo</h3>
+                                <template x-if="emailDispatchData">
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30" x-text="emailDispatchData.poNumber"></span>
+                                </template>
+                            </div>
+                            <p class="text-xs text-indigo-200">Revisa los datos de envío, personaliza el mensaje y confirma la transmisión al proveedor</p>
+                        </div>
+                    </div>
+                    <button @click="closeEmailDispatchModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Formulario de Correo -->
+                <template x-if="emailDispatchData">
+                    <div class="p-6 space-y-4 text-xs font-sans text-slate-700">
+                        <!-- Destinatario (Para) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Para (Correo del Fabricante / Taller):</label>
+                                <input 
+                                    type="email" 
+                                    x-model="emailDispatchData.to" 
+                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                                    placeholder="contacto@proveedor.com"
+                                >
+                            </div>
+                            <div>
+                                <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Con Copia (CC Operativo):</label>
+                                <input 
+                                    type="text" 
+                                    x-model="emailDispatchData.cc" 
+                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                                    placeholder="compras@mitienda.com, logistica@mitienda.com"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Asunto -->
+                        <div>
+                            <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Asunto del Mensaje:</label>
+                            <input 
+                                type="text" 
+                                x-model="emailDispatchData.subject" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                            >
+                        </div>
+
+                        <!-- Cuerpo del Mensaje (Vertical resize only) -->
+                        <div>
+                            <label class="font-bold text-slate-800 block mb-1 uppercase tracking-wider text-[10px]">Cuerpo del Mensaje (Instrucciones & Términos):</label>
+                            <textarea 
+                                x-model="emailDispatchData.body" 
+                                rows="7" 
+                                class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs leading-relaxed text-slate-800 font-sans focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600 resize-y max-w-full"
+                                style="resize: vertical; max-width: 100%;"
+                            ></textarea>
+                        </div>
+
+                        <!-- Card de Adjunto PDF & Notificación Extranet B2B -->
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-black text-xs shrink-0">
+                                    PDF
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5 flex-wrap">
+                                        <span x-text="emailDispatchData.fileName"></span>
+                                        <span class="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold">Adjunto Generado</span>
+                                        <span class="px-1.5 py-0.2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-[10px] font-bold">Extranet B2B Sincronizado</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 mt-0.5" x-text="emailDispatchData.pieces + ' unidades • Total: ' + formatCurrency(emailDispatchData.total) + ' • Notificación automática a Extranet Proveedores'"></div>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold text-indigo-600 shrink-0">Firmado & Vinculado</span>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Footer del Modal de Correo -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <button 
+                        type="button" 
+                        @click="closeEmailDispatchModal()" 
+                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Volver a la Orden
+                    </button>
+                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
+                        <button 
+                            type="button" 
+                            @click="sendPoEmailAndIssue()" 
+                            class="w-full sm:w-auto px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span>Confirmar y Enviar Correo al Fabricante</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 1.5: TELEMETRÍA FLETERA & RASTREO DE GUÍA INBOUND (TASK-INV-16) -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="carrierTrackingModalOpen" 
+        class="fixed inset-0 z-[86] overflow-y-auto" 
+        style="display: none;"
+        @keydown.escape.window="closeCarrierTrackingModal()"
+    >
+        <div 
+            x-show="carrierTrackingModalOpen"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" 
+            @click="closeCarrierTrackingModal()"
+        ></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div 
+                x-show="carrierTrackingModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200"
+                @click.stop
+            >
+                <!-- Header del Modal -->
+                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-500/30 border border-blue-400/30 flex items-center justify-center text-blue-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-bold text-white">Telemetría de Ruta Fletera (Inbound)</h3>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30" x-text="selectedTrackingOrder ? '#' + selectedTrackingOrder.id : ''"></span>
+                            </div>
+                            <p class="text-xs text-slate-400">Rastreo y tiempos de tránsito del transporte en ruta a CEDIS Naucalpan</p>
+                        </div>
+                    </div>
+                    <button @click="closeCarrierTrackingModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Contenido de Telemetría -->
+                <template x-if="selectedTrackingOrder">
+                    <div class="p-6 space-y-6">
+                        <!-- Ficha de la Guía y Transportista -->
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Transportista Asignado</span>
+                                <span class="text-sm font-bold text-slate-900 block mt-0.5" x-text="selectedTrackingOrder.carrier"></span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-slate-600">Proveedor: <strong class="text-slate-800" x-text="selectedTrackingOrder.supplier"></strong></span>
+                                    <span class="text-slate-300">&bull;</span>
+                                    <span class="text-xs text-slate-600">Lote: <strong class="text-slate-800" x-text="selectedTrackingOrder.qty + ' uds'"></strong></span>
+                                </div>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Fecha Estimada (ETA)</span>
+                                <span class="text-sm font-black text-indigo-700 block mt-0.5" x-text="selectedTrackingOrder.eta"></span>
+                                <span class="text-[11px] text-emerald-600 font-semibold inline-flex items-center gap-1 mt-0.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>Tránsito Normal (Sin demoras)</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Línea de Tiempo de Hitos (Timeline) -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Hitos de Despacho & Arribo a Muelle</h4>
+                            
+                            <div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                                <!-- Hito 1: Recolección en Taller -->
+                                <div class="relative">
+                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-100 flex items-center justify-center">
+                                        <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-bold text-slate-900">1. Recolección & Manifiesto en Origen</span>
+                                            <span class="text-slate-400 font-mono text-[11px]" x-text="selectedTrackingOrder.date"></span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Bultos precintados en taller mayorista y entregados al transportista con guía oficial.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Hito 2: En Tránsito Carretero / Aéreo -->
+                                <div class="relative">
+                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-blue-600 ring-4 ring-blue-100 flex items-center justify-center">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                    </span>
+                                    <div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-bold text-blue-900">2. En Tránsito Interurbano</span>
+                                            <span class="text-blue-600 font-mono text-[11px] font-semibold">En Curso</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Unidad en ruta hacia centro de distribución metropolitano con telemetría activa.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Hito 3: Arribo a Patio Naucalpan -->
+                                <div class="relative">
+                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-slate-300 ring-4 ring-slate-100"></span>
+                                    <div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-bold text-slate-700">3. Arribo a Patio de Maniobras Naucalpan</span>
+                                            <span class="text-slate-400 text-[11px]" x-text="'ETA: ' + selectedTrackingOrder.eta"></span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Ingreso al predio para validación de sellos de seguridad fleteros.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Hito 4: Descarga en Rampa 02 -->
+                                <div class="relative">
+                                    <span class="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-slate-300 ring-4 ring-slate-100"></span>
+                                    <div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-bold text-slate-700">4. Descarga & Cotejo Físico a Ciegas (Carlos Almacén)</span>
+                                            <span class="text-slate-400 text-[11px]">Rampa 02 Inbound</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Recepción física, inspección textil por tallas e ingreso formal a existencias de rack.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Banner Informativo para Compras -->
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
+                            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div>
+                                <span class="font-bold block">Protocolo Operativo de Compras:</span>
+                                <span>Elena Compras monitorea esta telemetría para notificar al proveedor en caso de atrasos. Una vez descargado en rampa, Carlos Almacén realizará el conteo físico a ciegas en Hub 6.</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Footer del Modal -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <button 
+                        type="button" 
+                        @click="closeCarrierTrackingModal()" 
+                        class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cerrar
+                    </button>
+                    <div class="w-full sm:w-auto flex items-center justify-end gap-2.5">
+                        <button 
+                            type="button" 
+                            @click="closeCarrierTrackingModal(); if(selectedTrackingOrder) viewPoPdfFromActiveOrder(selectedTrackingOrder);" 
+                            class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span>Ver Expediente PO (PDF)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- ================================================================= -->
+    <!-- MODAL ALTA / EDICIÓN DE ACUERDO POR DISCREPANCIA (TASK-PUR-02)    -->
+    <!-- ================================================================= -->
+    <div 
+        x-show="creditAgreementModalOpen" 
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        style="display: none;"
+    >
+        <div 
+            @click.away="closeCreditAgreementModal()" 
+            class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden my-8"
+        >
+            <!-- Header Modal -->
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-600 flex items-center justify-center text-white font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m0 0l-3-3m3 3l3 3M3 21h18M5 10v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white" x-text="editingCreditAgreement ? 'Modificar Acuerdo por Discrepancia' : 'Levantar Acuerdo / Nota de Crédito'"></h3>
+                        <p class="text-[11px] text-slate-300">Auditoría inmutable de saldos a favor devengados en compras</p>
+                    </div>
+                </div>
+                <button type="button" @click="closeCreditAgreementModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Body Formulario -->
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Proveedor -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Proveedor Preexistente *</label>
+                        <select 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                            :value="creditAgreementForm.supplier_id"
+                            @change="onAgreementFormSupplierChange($event.target.value)"
+                        >
+                            <template x-for="p in providers" :key="p.dbId || p.id">
+                                <option :value="p.dbId || p.id" :selected="creditAgreementForm.supplier_id == (p.dbId || p.id)" x-text="(p.tradeName || p.name) + (p.vendorCode ? ' [' + p.vendorCode + ']' : '')"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Folio de Referencia -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Folio del Acuerdo / NC *</label>
+                        <input 
+                            type="text" 
+                            x-model="creditAgreementForm.reference_folio" 
+                            placeholder="Ej. NC-TORZO-2026-001" 
+                            class="w-full px-3 py-2 font-mono font-bold text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                </div>
+
+                <!-- Tipo de Discrepancia -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Causa Mercantil / Tipo de Discrepancia</label>
+                    <select 
+                        x-model="creditAgreementForm.discrepancy_type" 
+                        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                    >
+                        <option value="missing_units">Faltante Físico en Rampa Inbound</option>
+                        <option value="damaged_units">Merma Textil / Costuras Defectuosas</option>
+                        <option value="logistics_delay">Penalización Acordada por Demora de Transporte</option>
+                        <option value="commercial_bonus">Bonificación Comercial por Volumen Trimestral</option>
+                        <option value="price_discrepancy">Diferencia de Precio Pactado vs Facturado</option>
+                    </select>
+                </div>
+
+                <!-- Desglose de Unidades y Costo Unitario -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Uds Faltantes</label>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            x-model="creditAgreementForm.missing_units_count" 
+                            @input="recalculateAgreementFormAmount()" 
+                            class="w-full px-2.5 py-1.5 text-xs text-center font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Uds Dañadas</label>
+                        <input 
+                            type="number" 
+                            min="0" 
+                            x-model="creditAgreementForm.damaged_units_count" 
+                            @input="recalculateAgreementFormAmount()" 
+                            class="w-full px-2.5 py-1.5 text-xs text-center font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Costo Unitario Ref ($)</label>
+                        <input 
+                            type="number" 
+                            step="0.50" 
+                            min="0" 
+                            x-model="creditAgreementForm.unit_cost_applied" 
+                            @input="recalculateAgreementFormAmount()" 
+                            class="w-full px-2.5 py-1.5 text-xs text-right font-bold font-mono bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500"
+                        >
+                    </div>
+                </div>
+
+                <!-- Monto Compensatorio Líquido -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Importe Compensatorio Total a Favor ($ MXN) *</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400 font-bold text-xs">$</span>
+                        <input 
+                            type="number" 
+                            step="0.50" 
+                            min="0" 
+                            x-model="creditAgreementForm.amount" 
+                            class="w-full pl-7 pr-12 py-2 font-mono font-black text-sm bg-rose-50/50 border border-rose-300 rounded-lg text-rose-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                            placeholder="0.00"
+                        >
+                        <span class="absolute right-3 top-2.5 text-slate-400 font-bold text-xs">MXN</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">Este importe se descontará automáticamente de la liquidación de la próxima Orden de Compra.</p>
+                </div>
+
+                <!-- Representante que Autoriza -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Autorizado por Representante de Taller / Proveedor</label>
+                    <input 
+                        type="text" 
+                        x-model="creditAgreementForm.authorized_by_vendor_contact" 
+                        placeholder="Ej. Ing. Carlos Mendoza (Gerente de Maquila)" 
+                        class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    >
+                </div>
+
+                <!-- Minuta / Notas de Resolución -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Minuta Detallada &amp; Observaciones de Resolución *</label>
+                    <textarea 
+                        x-model="creditAgreementForm.resolution_notes" 
+                        rows="3" 
+                        placeholder="Describe la causa, lote anterior de origen, evidencias de recepción y términos del acuerdo pactado con el taller..." 
+                        class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 leading-relaxed"
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <!-- Footer Acciones -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                <button 
+                    type="button" 
+                    @click="closeCreditAgreementModal()" 
+                    class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg transition cursor-pointer"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="button" 
+                    @click="saveCreditAgreement()" 
+                    class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span x-text="editingCreditAgreement ? 'Actualizar Acuerdo & Kardex' : 'Guardar y Vincular Acuerdo'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!-- MODAL GENERADOR DE ORDEN DE COMPRA FORMAL PARA WHATSAPP           -->
     <!-- ================================================================= -->
     <div 
         x-show="orderExportModalOpen" 
@@ -7836,6 +10513,15 @@
                     </button>
                     <button 
                         type="button" 
+                        @click="activeSettingsTab = 'brands'" 
+                        :class="activeSettingsTab === 'brands' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <span>Marcas Comerciales</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'brands' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(brands || []).length"></span>
+                    </button>
+                    <button 
+                        type="button" 
                         @click="activeSettingsTab = 'sections'" 
                         class="cursor-pointer whitespace-nowrap px-2"
                     >
@@ -7851,6 +10537,28 @@
                         <span>Recetas BOM & Combos</span>
                         <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'bundles' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="productBundles.filter(b => b.isActive !== false).length"></span>
                     </button>
+                    <!-- TAB IA (REGLA 4) -->
+                    <button 
+                        type="button" 
+                        @click="activeSettingsTab = 'ai'" 
+                        :class="activeSettingsTab === 'ai' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Inteligencia Artificial (Gemini)</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="aiSettings.status === 'connected' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'" x-text="aiSettings.status === 'connected' ? 'En Línea' : 'Setup'"></span>
+                    </button>
+                    <!-- TAB TABULADORES DE MOQ (REGLA 1 COMPRAS & INVENTARIO) -->
+                    <button 
+                        type="button" 
+                        @click="activeSettingsTab = 'moq'" 
+                        :class="activeSettingsTab === 'moq' ? 'border-indigo-600 text-indigo-600 border-b-2 py-3' : 'text-slate-500 hover:text-slate-800 py-3 border-b-2 border-transparent'"
+                        class="cursor-pointer whitespace-nowrap px-2 flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Tabuladores MOQ Proveedores</span>
+                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" :class="activeSettingsTab === 'moq' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'" x-text="(moqSheets || []).length"></span>
+                    </button>
                 </div>
 
         <!-- Full-Screen Scrollable Content Area -->
@@ -7863,26 +10571,26 @@
                             <!-- Formulario de Alta / Edición de Tela -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="fabricEditState.isEditing ? 'Editar Tipo de Tela: ' + fabricEditState.form.name : 'Dar de Alta Nuevo Tipo de Tela'"></h4>
-                                    <span x-show="fabricEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingFabric ? 'Editar Tipo de Tela: ' + fabricForm.name : 'Dar de Alta Nuevo Tipo de Tela'"></h4>
+                                    <span x-show="isEditingFabric" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Tela</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.name : newFabricForm.name" placeholder="Ej: Modal Peinado Premium" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="fabricForm.name" placeholder="Ej: Modal Peinado Premium" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propiedad Textil</label>
-                                        <input type="text" x-model="fabricEditState.isEditing ? fabricEditState.form.description : newFabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rápido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="fabricForm.description" placeholder="Ej: 95% celulosa vegetal, secado ultra-rápido" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <template x-if="!fabricEditState.isEditing">
+                                    <template x-if="!isEditingFabric">
                                         <button type="button" @click="addNewFabric()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                             Guardar Tipo de Tela
                                         </button>
                                     </template>
-                                    <template x-if="fabricEditState.isEditing">
+                                    <template x-if="isEditingFabric">
                                         <div class="flex items-center gap-2">
                                             <button type="button" @click="saveFabric()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Actualizar Tela
@@ -7959,54 +10667,95 @@
                             <!-- Formulario Alta / Edición Color -->
                             <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 space-y-3">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="colorEditState.isEditing ? 'Editar Color: ' + colorEditState.form.name : 'Registrar Nuevo Color o Tornasol'"></h4>
-                                    <span x-show="colorEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingColor ? 'Editar Color: ' + colorForm.name : 'Registrar Nuevo Color o Tornasol'"></h4>
+                                    <span x-show="isEditingColor" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Color</label>
-                                        <input type="text" x-model="colorEditState.isEditing ? colorEditState.form.name : newColorForm.name" placeholder="Ej: Esmeralda Aurora" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+
+                                <!-- Checkbox Opción Multicolor Nativa (Regla de Negocio) -->
+                                <div class="p-3 bg-gradient-to-r from-red-50 via-amber-50 to-indigo-50 rounded-xl border border-indigo-200 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <input 
+                                            type="checkbox" 
+                                            id="settingsColorIsMulticolor" 
+                                            x-model="colorForm.isMulticolor"
+                                            class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                        <label for="settingsColorIsMulticolor" class="text-xs font-bold text-slate-900 cursor-pointer flex items-center gap-1.5">
+                                            <span class="w-3.5 h-3.5 rounded-full inline-block shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                            <span>Opción Multicolor (Arcoíris del Sistema)</span>
+                                        </label>
                                     </div>
-                                    <div>
+                                    <span class="text-[10px] text-slate-500 font-semibold hidden sm:inline">Color nativo protegido por defecto. No admite eliminación ni duplicación.</span>
+                                </div>
+
+                                <template x-if="colorForm.isMulticolor">
+                                    <div class="p-3 bg-white/80 rounded-xl border border-indigo-200 text-xs text-indigo-900 flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl border border-indigo-300 shadow-sm shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></div>
+                                        <div>
+                                            <div class="font-bold text-slate-900">Color Nativo "Multicolor" Activo</div>
+                                            <div class="text-[11px] text-slate-600">Este checkbox anula la creación manual y confirma la disponibilidad de Multicolor en todo el catálogo y filtros.</div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div x-show="!colorForm.isMulticolor" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                                    <div class="sm:col-span-4">
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre del Color</label>
+                                        <input type="text" x-model="colorForm.name" placeholder="Ej: Esmeralda Aurora" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div class="sm:col-span-3">
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Tipo de Color</label>
-                                        <select x-model="colorEditState.isEditing ? colorEditState.form.type : newColorForm.type" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <select x-model="colorForm.type" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <option value="solid">Sólido (Un solo tono HEX)</option>
                                             <option value="iridescent">Tornasol Iridiscente (Degradado)</option>
                                         </select>
                                     </div>
-                                    <div>
-                                        <template x-if="(colorEditState.isEditing ? colorEditState.form.type : newColorForm.type) === 'solid'">
+                                    <div class="sm:col-span-3">
+                                        <template x-if="colorForm.type === 'solid'">
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código HEX</label>
-                                                <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.hex : newColorForm.hex" class="w-full h-8 px-1 py-0.5 bg-white border border-slate-300 rounded-lg cursor-pointer">
+                                                <div class="flex items-center gap-2">
+                                                    <input type="color" x-model="colorForm.hex" class="w-10 h-8 px-1 py-0.5 bg-white border border-slate-300 rounded-lg cursor-pointer shrink-0">
+                                                    <input type="text" x-model="colorForm.hex" class="w-full px-2 py-1 text-xs uppercase font-mono bg-white border border-slate-300 rounded-lg focus:outline-none">
+                                                </div>
                                             </div>
                                         </template>
-                                        <template x-if="(colorEditState.isEditing ? colorEditState.form.type : newColorForm.type) === 'iridescent'">
-                                            <div class="flex items-center gap-1">
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 1</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor1 : newColorForm.gradientColor1" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 2</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor2 : newColorForm.gradientColor2" class="w-10 h-8 border rounded cursor-pointer">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[10px] text-slate-600 block">Tono 3</label>
-                                                    <input type="color" x-model="colorEditState.isEditing ? colorEditState.form.gradientColor3 : newColorForm.gradientColor3" class="w-10 h-8 border rounded cursor-pointer">
+                                        <template x-if="colorForm.type === 'iridescent'">
+                                            <div>
+                                                <label class="text-[11px] font-semibold text-slate-700 block mb-1">Gradiente (3 Tonos)</label>
+                                                <div class="flex items-center gap-1.5">
+                                                    <div class="flex-1">
+                                                        <label class="text-[9px] text-slate-500 block">Tono 1</label>
+                                                        <input type="color" x-model="colorForm.gradientColor1" class="w-full h-8 border rounded cursor-pointer">
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <label class="text-[9px] text-slate-500 block">Tono 2</label>
+                                                        <input type="color" x-model="colorForm.gradientColor2" class="w-full h-8 border rounded cursor-pointer">
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <label class="text-[9px] text-slate-500 block">Tono 3</label>
+                                                        <input type="color" x-model="colorForm.gradientColor3" class="w-full h-8 border rounded cursor-pointer">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </template>
                                     </div>
+                                    <!-- Live Preview Widget -->
+                                    <div class="sm:col-span-2 flex flex-col items-center justify-center p-2 bg-white rounded-lg border border-slate-200">
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Vista Previa</span>
+                                        <div class="w-10 h-10 rounded-xl border border-slate-300 shadow-inner"
+                                             :style="'background: ' + (colorForm.type === 'iridescent' ? `linear-gradient(135deg, ${colorForm.gradientColor1} 0%, ${colorForm.gradientColor2} 50%, ${colorForm.gradientColor3} 100%)` : colorForm.hex)">
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center gap-2">
-                                    <template x-if="!colorEditState.isEditing">
+                                <div class="flex items-center gap-2 pt-1">
+                                    <template x-if="!isEditingColor">
                                         <button type="button" @click="addNewColor()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
-                                            Agregar a la Paleta
+                                            <span x-text="colorForm.isMulticolor ? 'Confirmar Multicolor en Paleta' : 'Agregar a la Paleta'"></span>
                                         </button>
                                     </template>
-                                    <template x-if="colorEditState.isEditing">
+                                    <template x-if="isEditingColor">
                                         <div class="flex items-center gap-2">
                                             <button type="button" @click="saveColor()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Actualizar Color
@@ -8026,22 +10775,34 @@
                                     <template x-for="col in apparelColors" :key="col.id">
                                         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2.5" :class="col.is_active === false ? 'opacity-60' : ''">
                                             <div class="flex items-center gap-2.5 min-w-0">
-                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + col.hex"></span>
+                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shadow-xs shrink-0" :style="'background: ' + (col.hex || col.gradient_css || col.hex_code || '#6366f1')"></span>
                                                 <div class="min-w-0">
-                                                    <div class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></div>
-                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')"></div>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="text-xs font-bold text-slate-900 truncate" x-text="col.name"></span>
+                                                        <template x-if="col.name && col.name.toLowerCase() === 'multicolor'">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-red-500 via-amber-500 to-indigo-600 text-white shadow-2xs">Arcoíris</span>
+                                                        </template>
+                                                    </div>
+                                                    <div class="text-[10px] text-slate-400 capitalize" x-text="(col.name && col.name.toLowerCase() === 'multicolor' ? 'Sistema / Arcoíris' : ((col.type === 'iridescent' || col.color_type === 'gradient' ? 'Tornasol' : 'Sólido') + (col.is_active === false ? ' (Archivado)' : '')))"></div>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-1 shrink-0">
-                                                <button type="button" @click="editColor(col)" class="p-1 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-200 transition cursor-pointer" title="Editar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                                </button>
-                                                <button type="button" @click="toggleArchiveColor(col)" class="p-1 rounded transition cursor-pointer" :class="col.is_active !== false ? 'text-amber-700 hover:bg-amber-100' : 'text-emerald-700 hover:bg-emerald-100'" :title="col.is_active !== false ? 'Archivar' : 'Restaurar'">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
-                                                </button>
-                                                <button type="button" @click="deleteColor(col.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
-                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                </button>
+                                                <template x-if="col.name && col.name.toLowerCase() === 'multicolor' || col.is_system">
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">Nativo</span>
+                                                </template>
+                                                <template x-if="!(col.name && col.name.toLowerCase() === 'multicolor' || col.is_system)">
+                                                    <div class="flex items-center gap-1">
+                                                        <button type="button" @click="editColor(col)" class="p-1 text-slate-600 hover:text-slate-900 rounded hover:bg-slate-200 transition cursor-pointer" title="Editar">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                        </button>
+                                                        <button type="button" @click="toggleArchiveColor(col)" class="p-1 rounded transition cursor-pointer" :class="col.is_active !== false ? 'text-amber-700 hover:bg-amber-100' : 'text-emerald-700 hover:bg-emerald-100'" :title="col.is_active !== false ? 'Archivar' : 'Restaurar'">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                                                        </button>
+                                                        <button type="button" @click="deleteColor(col.id)" class="p-1 text-rose-600 hover:text-rose-800 rounded hover:bg-rose-100 transition cursor-pointer" title="Eliminar">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </template>
@@ -8054,55 +10815,83 @@
                     <template x-if="activeSettingsTab === 'sizes'">
                         <div class="space-y-6">
                             <!-- Top: Gestor de Curvas Maestras -->
-                            <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
+                            <div id="curveManagementFormCard" class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
                                 <div class="flex items-center justify-between flex-wrap gap-2">
                                     <div>
-                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="curveEditState.isEditing ? 'Editar Curva de Tallas: ' + curveEditState.form.name : 'Crear Nueva Curva de Tallas'"></h4>
-                                        <p class="text-[11px] text-slate-600">Configura escalas maestras de tallas (Americana, Pantalones numéricos, Lencería, Unitalla).</p>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingCurve ? 'Editar Curva de Tallas: ' + curveForm.name : 'Crear Nueva Curva de Tallas'"></h4>
+                                        <p class="text-[11px] text-slate-600">Configura escalas maestras de tallas (Americana, Pantalones numéricos, Lencería, Unitalla) asociadas a marcas o proveedores.</p>
                                     </div>
-                                    <span x-show="curveEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Curva</span>
+                                    <span x-show="isEditingCurve" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Curva</span>
                                 </div>
 
                                 <!-- Formulario Alta / Edición Curva -->
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Curva</label>
-                                        <input type="text" x-model="curveEditState.isEditing ? curveEditState.form.name : newCurveForm.name" placeholder="Ej: Curva Americana Estándar" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <div class="space-y-3">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Curva</label>
+                                            <input type="text" x-model="curveForm.name" placeholder="Ej: Curva Americana Estándar" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Ámbito / Scope</label>
+                                            <select x-model="curveForm.category_scope" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                                <option value="textil">Textil (Ropa Interior, Boxers, Playeras)</option>
+                                                <option value="calzado">Calzado & Sneakers</option>
+                                                <option value="one_size">Unitalla / Accesorios</option>
+                                                <option value="general">General</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
+                                            <input type="text" x-model="curveForm.description" placeholder="Ej: Tallas comerciales XS a 4XL" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Ámbito / Scope</label>
-                                        <select x-model="curveEditState.isEditing ? curveEditState.form.category_scope : newCurveForm.category_scope" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
-                                            <option value="textil">Textil (Ropa Interior, Boxers, Playeras)</option>
-                                            <option value="calzado">Calzado & Sneakers</option>
-                                            <option value="one_size">Unitalla / Accesorios</option>
-                                            <option value="general">General</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
-                                        <input type="text" x-model="curveEditState.isEditing ? curveEditState.form.description : newCurveForm.description" placeholder="Ej: Tallas comerciales XS a 4XL" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+
+                                    <!-- Regla: Las curvas de tallas se pueden asociar a marcas y proveedores -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-indigo-100/70">
+                                        <div>
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">
+                                                Proveedor Asociado <span class="text-slate-400 font-normal">(Opcional)</span>
+                                            </label>
+                                            <select x-model="curveForm.supplier_id" @change="onCurveSupplierChange()" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700">
+                                                <option value="">(Global / Aplica a todos los Proveedores)</option>
+                                                <template x-for="p in providers" :key="p.id">
+                                                    <option :value="p.dbId || String(p.id).replace('prov_', '')" x-text="p.tradeName || p.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">
+                                                Marca Comercial Asociada <span class="text-slate-400 font-normal">(Opcional)</span>
+                                            </label>
+                                            <select x-model="curveForm.brand_id" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700">
+                                                <option value="">(Global / Aplica a todas las Marcas)</option>
+                                                <template x-for="b in getBrandsForCurveSupplier()" :key="b.id || b.name">
+                                                    <option :value="b.id" x-text="b.name + (b.supplier_name ? ' — Prov: ' + b.supplier_name : '')"></option>
+                                                </template>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
                                     <div class="flex items-center gap-4 text-xs">
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                            <input type="checkbox" x-model="curveEditState.isEditing ? curveEditState.form.is_default : newCurveForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            <input type="checkbox" x-model="curveForm.is_default" class="rounded text-indigo-600 focus:ring-indigo-500">
                                             <span class="font-medium text-slate-700">Curva Predeterminada</span>
                                         </label>
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                            <input type="checkbox" x-model="curveEditState.isEditing ? curveEditState.form.is_active : newCurveForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                            <input type="checkbox" x-model="curveForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
                                             <span class="font-medium text-slate-700">Activa</span>
                                         </label>
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <template x-if="!curveEditState.isEditing">
+                                        <template x-if="!isEditingCurve">
                                             <button type="button" @click="addNewCurve()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Crear Curva de Tallas
                                             </button>
                                         </template>
-                                        <template x-if="curveEditState.isEditing">
+                                        <template x-if="isEditingCurve">
                                             <div class="flex items-center gap-2">
                                                 <button type="button" @click="saveCurve()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                     Actualizar Curva
@@ -8127,7 +10916,7 @@
                                             :class="selectedCurveId === curve.id ? 'bg-indigo-50/50 border-indigo-500 shadow-xs ring-1 ring-indigo-500' : 'bg-white border-slate-200 hover:border-slate-300'"
                                         >
                                             <div class="flex items-start justify-between gap-2">
-                                                <div>
+                                                <div class="w-full">
                                                     <div class="flex items-center gap-1.5 flex-wrap">
                                                         <span class="font-bold text-xs text-slate-900" x-text="curve.name"></span>
                                                         <template x-if="curve.is_default">
@@ -8139,21 +10928,41 @@
                                                             x-text="curve.deleted_at ? 'Archivada' : (curve.is_active ? 'Activa' : 'Inactiva')"
                                                         ></span>
                                                     </div>
-                                                    <p class="text-[11px] text-slate-500 mt-1" x-text="curve.description || 'Sin descripcion'"></p>
+                                                    
+                                                    <!-- Badges de Asociación: Proveedor & Marca -->
+                                                    <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
+                                                        <template x-if="curve.supplier || curve.supplier_id">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                                                                Prov: <span x-text="curve.supplier ? (curve.supplier.trade_name || curve.supplier.name) : ('ID ' + curve.supplier_id)"></span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="curve.brand || curve.brand_id">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-purple-50 text-purple-800 border border-purple-200">
+                                                                Marca: <span x-text="curve.brand ? curve.brand.name : ('ID ' + curve.brand_id)"></span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="!curve.supplier_id && !curve.brand_id">
+                                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-normal bg-slate-100 text-slate-600 border border-slate-200">
+                                                                Curva Universal
+                                                            </span>
+                                                        </template>
+                                                    </div>
+
+                                                    <p class="text-[11px] text-slate-500 mt-1" x-text="curve.description || 'Sin descripción'"></p>
                                                     <div class="text-[10px] text-slate-400 mt-0.5">
-                                                        Ambito: <span class="font-semibold text-slate-600 uppercase" x-text="curve.category_scope"></span> | <span class="font-bold text-indigo-700" x-text="(curve.sizes || []).length"></span> tallas
+                                                        Ámbito: <span class="font-semibold text-slate-600 uppercase" x-text="curve.category_scope"></span> | <span class="font-bold text-indigo-700" x-text="(curve.sizes || []).length"></span> tallas
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- Acciones de la Curva (Universal Rule) -->
                                             <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-1.5" @click.stop>
-                                                <button type="button" @click="editCurve(curve)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar curva">
+                                                <button type="button" @click.stop="editCurve(curve)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar curva">
                                                     Editar
                                                 </button>
-                                                <button type="button" @click="toggleActiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="curve.is_active ? 'Desactivar' : 'Activar'" x-text="curve.is_active ? 'Desactivar' : 'Activar'"></button>
-                                                <button type="button" @click="archiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="curve.deleted_at ? 'Restaurar' : 'Archivar'" x-text="curve.deleted_at ? 'Restaurar' : 'Archivar'"></button>
-                                                <button type="button" @click="deleteCurve(curve.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                <button type="button" @click.stop="toggleActiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="curve.is_active ? 'Desactivar' : 'Activar'" x-text="curve.is_active ? 'Desactivar' : 'Activar'"></button>
+                                                <button type="button" @click.stop="archiveCurve(curve)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="curve.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="curve.deleted_at ? 'Restaurar' : 'Archivar'" x-text="curve.deleted_at ? 'Restaurar' : 'Archivar'"></button>
+                                                <button type="button" @click.stop="deleteCurve(curve.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
                                                     Eliminar
                                                 </button>
                                             </div>
@@ -8172,7 +10981,7 @@
                                             </h4>
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800" x-text="(selectedCurve.sizes || []).length + ' Tallas'"></span>
                                         </div>
-                                        <span x-show="sizeEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Talla</span>
+                                        <span x-show="isEditingSize" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Talla</span>
                                     </div>
 
                                     <!-- Formulario Alta / Edición Talla Individual -->
@@ -8180,39 +10989,39 @@
                                         <div class="grid grid-cols-1 sm:grid-cols-6 gap-3">
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Código (ej: XS, 32)</label>
-                                                <input type="text" x-model="sizeEditState.isEditing ? sizeEditState.form.code : newSizeForm.code" placeholder="XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold uppercase">
+                                                <input type="text" x-model="sizeForm.code" placeholder="XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold uppercase">
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Etiqueta Descriptiva</label>
-                                                <input type="text" x-model="sizeEditState.isEditing ? sizeEditState.form.label : newSizeForm.label" placeholder="Extra Chica / XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <input type="text" x-model="sizeForm.label" placeholder="Extra Chica / XS" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             </div>
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Orden (Sort)</label>
-                                                <input type="number" x-model.number="sizeEditState.isEditing ? sizeEditState.form.sort_order : newSizeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                                <input type="number" x-model.number="sizeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                             </div>
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Cintura Min (cm)</label>
-                                                <input type="number" step="0.5" x-model.number="sizeEditState.isEditing ? sizeEditState.form.waist_min_cm : newSizeForm.waist_min_cm" placeholder="65" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                                <input type="number" step="0.5" x-model.number="sizeForm.waist_min_cm" placeholder="65" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                             </div>
                                             <div>
                                                 <label class="text-[11px] font-semibold text-slate-700 block mb-1">Cintura Max (cm)</label>
-                                                <input type="number" step="0.5" x-model.number="sizeEditState.isEditing ? sizeEditState.form.waist_max_cm : newSizeForm.waist_max_cm" placeholder="70" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                                <input type="number" step="0.5" x-model.number="sizeForm.waist_max_cm" placeholder="70" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                             </div>
                                         </div>
 
                                         <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-200">
                                             <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
-                                                <input type="checkbox" x-model="sizeEditState.isEditing ? sizeEditState.form.is_active : newSizeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                                <input type="checkbox" x-model="sizeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
                                                 <span class="font-medium text-slate-700">Talla Activa para Catálogo</span>
                                             </label>
 
                                             <div class="flex items-center gap-2">
-                                                <template x-if="!sizeEditState.isEditing">
+                                                <template x-if="!isEditingSize">
                                                     <button type="button" @click="addNewSize()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                         + Agregar Talla
                                                     </button>
                                                 </template>
-                                                <template x-if="sizeEditState.isEditing">
+                                                <template x-if="isEditingSize">
                                                     <div class="flex items-center gap-2">
                                                         <button type="button" @click="saveSize()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                             Actualizar Talla
@@ -8538,12 +11347,22 @@
                             <!-- Árbol Jerárquico de Categorías & Subcategorías -->
                             <div>
                                 <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-3">Familias Principales & Subcategorías Activas</h4>
-                                <div class="space-y-3">
-                                    <template x-for="rootCat in categoriesTree" :key="rootCat.id">
-                                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                                 <div class="space-y-3">
+                                    <template x-for="(rootCat, catIdx) in categoriesTree" :key="rootCat.id">
+                                        <div 
+                                            class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs transition-shadow"
+                                            draggable="true" 
+                                            @dragstart="handleCategoryDragStart($event, catIdx)" 
+                                            @dragover="handleCategoryDragOver($event)" 
+                                            @drop="handleCategoryDrop($event, catIdx)"
+                                        >
                                             <!-- Fila Padre (Categoría Raíz) -->
                                             <div class="p-3.5 bg-slate-50 flex items-center justify-between gap-3 border-b border-slate-200/80">
                                                 <div class="flex items-center gap-2.5 min-w-0">
+                                                    <!-- Drag handle icon -->
+                                                    <span class="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1 -ml-1 rounded select-none" title="Arrastra para reordenar esta categoría jerárquicamente">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                                    </span>
                                                     <span class="p-2 bg-indigo-100 text-indigo-700 rounded-lg shrink-0">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                                     </span>
@@ -8551,6 +11370,7 @@
                                                         <div class="flex items-center gap-2 flex-wrap">
                                                             <span class="font-bold text-xs text-slate-900" x-text="rootCat.name"></span>
                                                             <span class="font-mono text-[10px] text-slate-500 bg-slate-200 px-1.5 py-0.2 rounded" x-text="'/' + rootCat.slug"></span>
+
                                                             <span 
                                                                 class="px-2 py-0.2 rounded-full text-[9px] font-bold border"
                                                                 :class="rootCat.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (rootCat.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
@@ -8871,6 +11691,33 @@
                                         >
                                     </div>
                                     <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                        <div class="flex items-center gap-1">
+                                            <button 
+                                                type="button" 
+                                                @click="expandAllSuppliers()" 
+                                                class="px-2 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1"
+                                                title="Expandir todos los nodos de proveedores para ver sus marcas desprendidas"
+                                            >
+                                                <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                                <span>Expandir Árbol</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="collapseAllSuppliers()" 
+                                                class="px-2 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+                                                title="Contraer todas las ramas del árbol"
+                                            >
+                                                Contraer
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500">
+                                            <span class="font-medium">Origen:</span>
+                                            <select x-model="providerOriginFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
+                                                <option value="all">Todos los orígenes</option>
+                                                <option value="manual">Alta Manual (Fiscal/Contacto)</option>
+                                                <option value="scraping">Scrapers & APIs B2B</option>
+                                            </select>
+                                        </div>
                                         <div class="flex items-center gap-1 text-xs text-slate-500">
                                             <span class="font-medium">Estado:</span>
                                             <select x-model="providerStatusFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
@@ -8894,16 +11741,16 @@
                                     </div>
                                 </div>
 
-                                <!-- Tabla con Registros Reactivos -->
+                                <!-- Tabla con Registros Reactivos en Árbol -->
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left border-collapse text-xs">
                                         <thead>
                                             <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
-                                                <th class="py-2.5 px-3">Proveedor</th>
-                                                <th class="py-2.5 px-3">Método de Extracción</th>
-                                                <th class="py-2.5 px-3">Frecuencia</th>
-                                                <th class="py-2.5 px-3">Último Scrape</th>
-                                                <th class="py-2.5 px-3 text-center">Items Sincronizados</th>
+                                                <th class="py-2.5 px-3">Proveedor / Estructura en Árbol</th>
+                                                <th class="py-2.5 px-3">Origen & Extracción</th>
+                                                <th class="py-2.5 px-3">Frecuencia / Lead</th>
+                                                <th class="py-2.5 px-3">Último Scrape / Audit</th>
+                                                <th class="py-2.5 px-3 text-center">Items / SKUs</th>
                                                 <th class="py-2.5 px-3 text-center">Estado</th>
                                                 <th class="py-2.5 px-3 text-center">Extranet Hub 7</th>
                                                 <th class="py-2.5 px-3 text-right">Acciones</th>
@@ -8914,6 +11761,16 @@
                                                 <tr class="hover:bg-slate-50 transition" :class="prov.status === 'archived' ? 'opacity-70 bg-slate-50/40' : ''">
                                                     <td class="py-2.5 px-3">
                                                         <div class="flex items-center gap-2">
+                                                            <!-- Botón Chevron para Expandir / Contraer Marcas Desprendidas -->
+                                                            <button 
+                                                                type="button" 
+                                                                @click="toggleSupplierExpanded(prov.id)" 
+                                                                class="p-1 rounded hover:bg-slate-200/80 text-slate-400 hover:text-indigo-600 transition cursor-pointer shrink-0"
+                                                                :title="isSupplierExpanded(prov.id) ? 'Contraer árbol de marcas' : 'Expandir marcas desprendidas'"
+                                                            >
+                                                                <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="isSupplierExpanded(prov.id) ? 'rotate-90 text-indigo-600' : 'text-slate-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                            </button>
+
                                                             <span 
                                                                 class="w-2 h-2 rounded-full shrink-0"
                                                                 :class="{
@@ -8924,19 +11781,39 @@
                                                                 }"
                                                             ></span>
                                                             <div>
-                                                                <div class="flex items-center gap-1.5">
+                                                                <div class="flex items-center gap-1.5 flex-wrap">
                                                                     <span class="font-bold text-slate-900" x-text="prov.tradeName || prov.name"></span>
                                                                     <span class="font-mono text-[10px] px-1 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200" x-text="prov.vendorCode"></span>
+                                                                    <span x-show="prov.isManual || prov.origin === 'manual'" class="text-[9px] px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-200 font-bold">Alta Manual</span>
+                                                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold cursor-pointer" @click="toggleSupplierExpanded(prov.id)" x-text="(prov.brandsTree || []).length + ' marcas'"></span>
                                                                     <span x-show="prov.status === 'archived'" class="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 font-semibold">Archivado</span>
                                                                 </div>
-                                                                <span class="text-[10px] text-slate-400 font-normal block" x-text="(prov.city || 'Nacional') + ' • ' + (prov.typeLabel || 'Proveedor')"></span>
+                                                                <span class="text-[10px] text-slate-400 font-normal block" x-text="(prov.city || 'Nacional') + ' • ' + (prov.typeLabel || 'Proveedor') + (prov.legalName ? ' (' + prov.legalName + ')' : '')"></span>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600" x-text="prov.extractionMethod"></td>
+                                                    <td class="py-2.5 px-3">
+                                                        <span class="font-mono text-[11px] text-slate-700 block font-semibold" x-text="prov.extractionMethod"></span>
+                                                        <span class="text-[10px] text-slate-400 font-normal" x-text="prov.origin === 'manual' || prov.isManual ? 'Captura Manual / Directa' : 'Sincronización Automatizada'"></span>
+                                                    </td>
                                                     <td class="py-2.5 px-3 text-slate-600">
-                                                        <span class="block text-xs" x-text="prov.frequency"></span>
-                                                        <span class="text-[10px] text-slate-400" x-text="'Lead Time: ' + prov.leadTimeDays + ' d'"></span>
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <select 
+                                                                :value="prov.scrape_frequency || prov.frequency || 'every_6_hours'"
+                                                                @change="updateSupplierFrequency(prov.dbId || prov.id, $event.target.value)"
+                                                                class="text-[11px] bg-white border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-800 shadow-2xs hover:border-indigo-400 focus:ring-1 focus:ring-indigo-500 cursor-pointer transition"
+                                                                title="Ajustar tiempo de actualización de scraping (Regla 3)"
+                                                            >
+                                                                <option value="every_1_hour">Cada 1 hr</option>
+                                                                <option value="every_2_hours">Cada 2 hrs</option>
+                                                                <option value="every_6_hours">Cada 6 hrs</option>
+                                                                <option value="every_12_hours">Cada 12 hrs</option>
+                                                                <option value="daily">Diario (24 hrs)</option>
+                                                                <option value="weekly">Semanal</option>
+                                                                <option value="manual">Manual / Bajo demanda</option>
+                                                            </select>
+                                                        </div>
+                                                        <span class="text-[10px] text-slate-400 block" x-text="'Lead Time: ' + prov.leadTimeDays + ' d'"></span>
                                                     </td>
                                                     <td class="py-2.5 px-3 text-slate-500" x-text="prov.lastScrapeTime"></td>
                                                     <td class="py-2.5 px-3 text-center font-bold text-slate-800" x-text="(prov.syncedItemsCount || 0) + ' SKUs'"></td>
@@ -8985,11 +11862,11 @@
                                                         <div class="inline-flex items-center gap-1">
                                                             <button 
                                                                 type="button"
-                                                                @click="openProviderDetails(prov)" 
+                                                                @click="openProviderFiscalModal(prov)" 
                                                                 class="px-2 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer shadow-3xs"
-                                                                title="Ver ficha técnica, condiciones comerciales y Scorecard de SLA"
+                                                                title="Ver ficha técnica, datos fiscales, marcas y Scorecard de SLA"
                                                             >
-                                                                Detalles / SLA
+                                                                Ficha / Fiscal
                                                             </button>
                                                             <template x-if="prov.status !== 'archived'">
                                                                 <div class="inline-flex items-center gap-1">
@@ -9037,6 +11914,67 @@
                                                         </div>
                                                     </td>
                                                 </tr>
+
+                                                <!-- NODO RAMA DEL ÁRBOL: MARCAS DESPRENDIDAS DEL PROVEEDOR (REGLA 6.45) -->
+                                                <tr x-show="isSupplierExpanded(prov.id)" class="bg-indigo-50/20 border-b border-indigo-100/60">
+                                                    <td colspan="8" class="p-0">
+                                                        <div class="py-3 px-6 pl-10 border-l-4 border-indigo-500 bg-gradient-to-r from-indigo-50/50 via-white to-transparent">
+                                                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                                                <div class="flex items-center gap-2">
+                                                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                                                    <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Marcas Comerciales Desprendidas (Árbol Jerárquico):</span>
+                                                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-bold" x-text="(prov.brandsTree || []).length + ' marcas activas'"></span>
+                                                                </div>
+                                                                <div class="flex items-center gap-2">
+                                                                    <button 
+                                                                        type="button" 
+                                                                        @click="openCreateBrandModal(prov.id)" 
+                                                                        class="px-2.5 py-1 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                                                                        title="Dar de alta y asociar una nueva marca comercial a este proveedor"
+                                                                    >
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                                        <span>+ Desprender Nueva Marca</span>
+                                                                    </button>
+                                                                    <span class="text-[11px] text-slate-400 hidden sm:inline">Proveedor &rarr; Marcas &rarr; Catálogo / Storefront</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1">
+                                                                <template x-for="brand in (prov.brandsTree || [])" :key="brand.name">
+                                                                    <div class="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200 shadow-3xs group hover:border-indigo-300 transition">
+                                                                        <div class="flex items-center gap-2 min-w-0">
+                                                                            <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+                                                                            <div class="truncate">
+                                                                                <span class="font-bold text-xs text-slate-900 block truncate" x-text="brand.name"></span>
+                                                                                <span class="text-[10px] text-slate-400 font-mono truncate" x-text="'slug: ' + brand.slug"></span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="flex items-center gap-1 shrink-0">
+                                                                            <button 
+                                                                                type="button" 
+                                                                                @click="openEditBrandByName(brand.name, prov.id)" 
+                                                                                class="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition cursor-pointer"
+                                                                                title="Editar marca comercial"
+                                                                            >
+                                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                                            </button>
+                                                                            <button 
+                                                                                type="button" 
+                                                                                @click="removeBrandFromSupplier(prov, brand.name)" 
+                                                                                class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
+                                                                                title="Desvincular marca de este proveedor"
+                                                                            >
+                                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </template>
+                                                                <div x-show="(prov.brandsTree || []).length === 0" class="col-span-full py-2 text-xs text-slate-400 italic">
+                                                                    No hay marcas secundarias registradas. Este proveedor comercializa bajo su propio nombre comercial.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             </template>
                                             <tr x-show="filteredProviders.length === 0">
                                                 <td colspan="8" class="py-6 text-center text-slate-400 text-xs">
@@ -9050,29 +11988,351 @@
                         </div>
                     </template>
 
-                    <!-- TAB 7: SECCIONES WEB -->
+                    <!-- TAB: GESTIÓN INTEGRAL DE MARCAS COMERCIALES (CRUD COMPLETO - REGLAS MARCAS & PROVEEDORES) -->
+                    <template x-if="activeSettingsTab === 'brands'">
+                        <div class="space-y-5">
+                            <!-- Cabecera de la Sección de Marcas -->
+                            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-xl border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-base font-bold text-white leading-none">Gestor de Marcas Comerciales</h4>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30" x-text="(brands || []).length + ' Marcas'"></span>
+                                        </div>
+                                        <p class="text-xs text-slate-300 mt-1">Gobernanza de marcas comerciales, despiece de marcas por proveedor y sincronización automática con filtros de catálogo, vitrinas de Hub 2 y facetas del Storefront.</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    @click="openCreateBrandModal()" 
+                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer shrink-0 self-start sm:self-auto"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                    <span>+ Nueva Marca Comercial</span>
+                                </button>
+                            </div>
+
+                            <!-- KPIs Resumen de Marcas -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Marcas</span>
+                                    <span class="text-xl font-black text-slate-900 mt-0.5 block" x-text="(brands || []).length"></span>
+                                    <span class="text-[10px] text-slate-500 font-medium">Catálogo unificado</span>
+                                </div>
+                                <div class="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">Marcas Activas</span>
+                                    <span class="text-xl font-black text-emerald-700 mt-0.5 block" x-text="(brands || []).filter(b => b.is_active && !b.is_archived).length"></span>
+                                    <span class="text-[10px] text-emerald-600 font-medium">En Storefront & Filtros</span>
+                                </div>
+                                <div class="bg-amber-50/50 p-3.5 rounded-xl border border-amber-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">Marcas Archivadas</span>
+                                    <span class="text-xl font-black text-amber-700 mt-0.5 block" x-text="(brands || []).filter(b => b.is_archived).length"></span>
+                                    <span class="text-[10px] text-amber-600 font-medium">Fuera de comercialización</span>
+                                </div>
+                                <div class="bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 block">Marcas con Proveedor</span>
+                                    <span class="text-xl font-black text-indigo-700 mt-0.5 block" x-text="(brands || []).filter(b => b.supplier_id).length"></span>
+                                    <span class="text-[10px] text-indigo-600 font-medium">Desprendidas en árbol</span>
+                                </div>
+                            </div>
+
+                            <!-- Filtros y Búsqueda de Marcas -->
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                                <div class="relative flex-1 max-w-sm">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    </span>
+                                    <input 
+                                        type="text" 
+                                        x-model="brandSearch" 
+                                        placeholder="Buscar por marca, slug o proveedor..." 
+                                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500 text-slate-700"
+                                    >
+                                </div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <div class="flex items-center gap-1 text-xs text-slate-500">
+                                        <span class="font-medium">Estado:</span>
+                                        <select x-model="brandStatusFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white">
+                                            <option value="all">Todas</option>
+                                            <option value="active">Activas</option>
+                                            <option value="archived">Archivadas</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-xs text-slate-500">
+                                        <span class="font-medium">Proveedor:</span>
+                                        <select x-model="brandSupplierFilter" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:bg-white max-w-[200px] truncate">
+                                            <option value="all">Todos los proveedores</option>
+                                            <option value="unassigned">Marcas Directas (Sin Proveedor)</option>
+                                            <template x-for="prov in providers" :key="prov.id">
+                                                <option :value="prov.id" x-text="prov.tradeName || prov.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla Maestra de Marcas Comerciales -->
+                            <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+                                                <th class="py-2.5 px-3">Marca Comercial & Slug</th>
+                                                <th class="py-2.5 px-3">Proveedor Asociado</th>
+                                                <th class="py-2.5 px-3">Descripción / Posicionamiento</th>
+                                                <th class="py-2.5 px-3 text-center">SKUs en Catálogo</th>
+                                                <th class="py-2.5 px-3 text-center">Estado</th>
+                                                <th class="py-2.5 px-3 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                            <template x-for="brand in filteredBrands" :key="brand.id">
+                                                <tr class="hover:bg-slate-50 transition" :class="brand.is_archived ? 'opacity-60 bg-slate-50/40' : ''">
+                                                    <td class="py-2.5 px-3">
+                                                        <div class="flex items-center gap-2.5">
+                                                            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-700 text-xs shrink-0">
+                                                                <template x-if="brand.logo_url">
+                                                                    <img :src="brand.logo_url" class="w-full h-full object-contain rounded-lg" onerror="this.style.display='none'">
+                                                                </template>
+                                                                <span x-show="!brand.logo_url" x-text="brand.name.substring(0, 2).toUpperCase()"></span>
+                                                            </div>
+                                                            <div>
+                                                                <span class="font-bold text-slate-900 block" x-text="brand.name"></span>
+                                                                <span class="text-[10px] text-slate-400 font-mono" x-text="'slug: ' + brand.slug"></span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2.5 px-3">
+                                                        <template x-if="brand.supplier_id">
+                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                                                <span x-text="brand.supplier_name"></span>
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="!brand.supplier_id">
+                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                                                <span>Marca Directa / Independiente</span>
+                                                            </span>
+                                                        </template>
+                                                    </td>
+                                                    <td class="py-2.5 px-3 max-w-xs text-slate-500 truncate" x-text="brand.description || 'Sin descripción comercial registrada'"></td>
+                                                    <td class="py-2.5 px-3 text-center font-bold text-slate-800 font-mono" x-text="(brand.sku_count || 0) + ' SKUs'"></td>
+                                                    <td class="py-2.5 px-3 text-center">
+                                                        <span 
+                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                                                            :class="brand.is_archived ? 'bg-slate-200 text-slate-600 border-slate-300' : (brand.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200')"
+                                                        >
+                                                            <span class="w-1.5 h-1.5 rounded-full" :class="brand.is_archived ? 'bg-slate-500' : (brand.is_active ? 'bg-emerald-500' : 'bg-amber-500')"></span>
+                                                            <span x-text="brand.is_archived ? 'Archivada' : (brand.is_active ? 'Activa' : 'Inactiva')"></span>
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-2.5 px-3 text-right">
+                                                        <div class="inline-flex items-center gap-1">
+                                                            <button 
+                                                                type="button" 
+                                                                @click="openEditBrandModal(brand)" 
+                                                                class="px-2 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer shadow-3xs"
+                                                                title="Editar marca comercial"
+                                                            >
+                                                                Editar
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                x-show="!brand.is_archived"
+                                                                @click="toggleActiveBrand(brand)" 
+                                                                class="px-2 py-1 text-xs font-semibold rounded-lg transition cursor-pointer"
+                                                                :class="brand.is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-700' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'"
+                                                                :title="brand.is_active ? 'Desactivar de filtros' : 'Activar en filtros'"
+                                                                x-text="brand.is_active ? 'Desactivar' : 'Activar'"
+                                                            ></button>
+                                                            <button 
+                                                                type="button" 
+                                                                x-show="!brand.is_archived"
+                                                                @click="archiveBrand(brand)" 
+                                                                class="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
+                                                                title="Archivar marca comercial"
+                                                            >
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                x-show="brand.is_archived"
+                                                                @click="restoreBrand(brand)" 
+                                                                class="px-2 py-1 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition cursor-pointer flex items-center gap-1"
+                                                                title="Restaurar marca"
+                                                            >
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                                <span>Restaurar</span>
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                @click="deleteBrand(brand)" 
+                                                                class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                                                                title="Eliminar permanentemente"
+                                                            >
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            <tr x-show="filteredBrands.length === 0">
+                                                <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+                                                    No se encontraron marcas comerciales que coincidan con los filtros seleccionados.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- TAB 7: SECCIONES WEB E-COMMERCE (CRUD COMPLETO - REGLA 7) -->
                     <template x-if="activeSettingsTab === 'sections'">
                         <div class="space-y-4">
-                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                                <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Secciones del Sitio Web E-Commerce</h4>
-                                <ul class="space-y-2 text-xs">
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea Básicos Esenciales</span>
-                                        <span class="text-slate-400">Prendas lisas de alta rotación</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Línea Diseñador & Autor</span>
-                                        <span class="text-slate-400">Prendas con diseño, estampados y tornasoles</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Colección Temporada / Drops</span>
-                                        <span class="text-slate-400">Lanzamientos de edición limitada</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200">
-                                        <span class="font-bold text-slate-800">Catálogo General</span>
-                                        <span class="text-slate-400">Vitrina multiverso estándar</span>
-                                    </li>
-                                </ul>
+                            <!-- Formulario de Alta / Edición de Sección Web -->
+                            <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingStoreSection ? 'Editar Sección: ' + storeSectionForm.name : 'Dar de Alta Nueva Sección de Tienda Web'"></h4>
+                                    <span x-show="isEditingStoreSection" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Sección</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="storeSectionForm.name" 
+                                            placeholder="Ej: Línea Básicos Esenciales" 
+                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Slug / Identificador</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="storeSectionForm.slug" 
+                                            placeholder="Ej: basicos (autogenerado si vacío)" 
+                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito Comercial</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="storeSectionForm.description" 
+                                            placeholder="Ej: Prendas lisas de alta rotación para uso diario continuo" 
+                                            class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <template x-if="!isEditingStoreSection">
+                                        <button 
+                                            type="button" 
+                                            @click="addNewStoreSection()" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                                        >
+                                            + Guardar Sección
+                                        </button>
+                                    </template>
+                                    <template x-if="isEditingStoreSection">
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="saveStoreSection()" 
+                                                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer"
+                                            >
+                                                Actualizar Sección
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="cancelEditStoreSection()" 
+                                                class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition cursor-pointer"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de Secciones Web Registradas -->
+                            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                                <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">Secciones del Sitio Web E-Commerce</h4>
+                                    <span class="text-xs text-slate-500 font-semibold" x-text="storeSections.length + ' secciones configuradas'"></span>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                                            <tr>
+                                                <th class="py-2.5 px-4">Sección / Nombre</th>
+                                                <th class="py-2.5 px-4">Identificador / Slug</th>
+                                                <th class="py-2.5 px-4">Descripción / Propósito</th>
+                                                <th class="py-2.5 px-4 text-center">Estado</th>
+                                                <th class="py-2.5 px-4 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100">
+                                            <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                <tr class="hover:bg-slate-50/80 transition" :class="sec.is_archived ? 'opacity-60 bg-slate-50/40' : ''">
+                                                    <td class="py-2.5 px-4 font-bold text-slate-800" x-text="sec.name"></td>
+                                                    <td class="py-2.5 px-4 font-mono text-[11px] text-indigo-700 font-semibold" x-text="sec.slug"></td>
+                                                    <td class="py-2.5 px-4 text-slate-500 max-w-xs truncate" x-text="sec.description || 'Sin descripción'"></td>
+                                                    <td class="py-2.5 px-4 text-center">
+                                                        <span 
+                                                            x-show="!sec.is_archived" 
+                                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                                            :class="sec.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                                                            x-text="sec.is_active ? 'Activo' : 'En Pausa'"
+                                                        ></span>
+                                                        <span 
+                                                            x-show="sec.is_archived" 
+                                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800"
+                                                        >
+                                                            Archivado
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-2.5 px-4 text-right space-x-1.5">
+                                                        <button 
+                                                            type="button" 
+                                                            @click="editStoreSection(sec)" 
+                                                            class="text-indigo-600 hover:text-indigo-900 font-bold text-[11px] cursor-pointer"
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                        <span class="text-slate-300">|</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="toggleStoreSectionActive(sec)" 
+                                                            class="text-slate-600 hover:text-slate-900 text-[11px] cursor-pointer"
+                                                            x-text="sec.is_active ? 'Pausar' : 'Activar'"
+                                                        ></button>
+                                                        <span class="text-slate-300">|</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="archiveStoreSection(sec)" 
+                                                            class="text-amber-600 hover:text-amber-800 text-[11px] cursor-pointer"
+                                                            x-text="sec.is_archived ? 'Restaurar' : 'Archivar'"
+                                                        ></button>
+                                                        <span class="text-slate-300">|</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="deleteStoreSection(sec.id)" 
+                                                            class="text-rose-600 hover:text-rose-800 text-[11px] cursor-pointer"
+                                                        >
+                                                            Eliminar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -9652,6 +12912,495 @@
                         </div>
                     </template>
 
+                    <!-- TAB IA: INTELIGENCIA ARTIFICIAL & GOOGLE GEMINI (REGLA 4) -->
+                    <template x-if="activeSettingsTab === 'ai'">
+                        <div class="space-y-6">
+                            <!-- Card Principal: Google Gemini Copilot Settings -->
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                                <div class="px-6 py-4 bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white flex flex-wrap items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                            <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-white leading-tight">Configuración de Inteligencia Artificial (Google Gemini)</h3>
+                                            <p class="text-xs text-indigo-200">Regla 4: Copiloto Comercial B2C y Curaduría Inteligente de Scraping con Gemini API.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                                              :class="{
+                                                  'bg-emerald-500/20 text-emerald-200 border border-emerald-400/30': aiSettings.status === 'connected',
+                                                  'bg-rose-500/20 text-rose-200 border border-rose-400/30': aiSettings.status === 'error',
+                                                  'bg-amber-500/20 text-amber-200 border border-amber-400/30': aiSettings.status === 'unknown'
+                                              }">
+                                            <span class="w-2 h-2 rounded-full"
+                                                  :class="{
+                                                      'bg-emerald-400 animate-pulse': aiSettings.status === 'connected',
+                                                      'bg-rose-400': aiSettings.status === 'error',
+                                                      'bg-amber-400': aiSettings.status === 'unknown'
+                                                  }"></span>
+                                            <span x-text="aiSettings.status === 'connected' ? 'Servicio Conectado' : (aiSettings.status === 'error' ? 'Error de Conexión' : 'Sin Verificar')"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="p-6 space-y-6">
+                                    <!-- Formulario de Configuración -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- API Key -->
+                                        <div class="space-y-1.5 md:col-span-2">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Gemini API Key
+                                            </label>
+                                            <div class="relative">
+                                                <input 
+                                                    :type="aiSettings.showApiKey ? 'text' : 'password'" 
+                                                    x-model="aiSettings.apiKey" 
+                                                    placeholder="AQ.Ab8RN6I9h-ZuGkxn1FL7qhChcE98DauzJrAm2RYugDmyZBO4PA" 
+                                                    class="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 pr-24"
+                                                >
+                                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 gap-1">
+                                                    <button 
+                                                        type="button" 
+                                                        @click="aiSettings.showApiKey = !aiSettings.showApiKey" 
+                                                        class="px-2 py-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-lg shadow-2xs hover:bg-slate-50 cursor-pointer"
+                                                    >
+                                                        <span x-text="aiSettings.showApiKey ? 'Ocultar' : 'Mostrar'"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p class="text-[11px] text-slate-500">Clave de autenticación para Google Generative Language API (v1beta / REST).</p>
+                                        </div>
+
+                                        <!-- Project ID / Number -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Proyecto de Google Cloud
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                x-model="aiSettings.projectId" 
+                                                placeholder="projects/506510812817" 
+                                                class="w-full px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                            >
+                                            <p class="text-[11px] text-slate-500">Identificador del proyecto GCP asociado a la cuota.</p>
+                                        </div>
+
+                                        <!-- Modelo Principal -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Modelo Principal
+                                            </label>
+                                            <select 
+                                                x-model="aiSettings.model" 
+                                                class="w-full px-3 py-2 text-xs font-medium bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                            >
+                                                <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Recomendado: Ultrarrápido y Económico)</option>
+                                                <option value="gemini-flash-latest">gemini-flash-latest (Balance rendimiento y creatividad)</option>
+                                                <option value="gemini-pro-latest">gemini-pro-latest (Máxima profundidad analítica)</option>
+                                            </select>
+                                            <p class="text-[11px] text-slate-500">Motor de generación ejecutado en Curaduría y Copiloto Comercial.</p>
+                                        </div>
+
+                                        <!-- Modelo de Respaldo (Fallback) -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                Modelo de Respaldo (Failover)
+                                            </label>
+                                            <select 
+                                                x-model="aiSettings.fallbackModel" 
+                                                class="w-full px-3 py-2 text-xs font-medium bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                            >
+                                                <option value="gemini-flash-latest">gemini-flash-latest</option>
+                                                <option value="gemini-flash-lite-latest">gemini-flash-lite-latest</option>
+                                            </select>
+                                            <p class="text-[11px] text-slate-500">Activado automáticamente ante rate limit 429 o indisponibilidad temporal.</p>
+                                        </div>
+
+                                        <!-- Temperatura Creativa -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center justify-between">
+                                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                    Temperatura de Generación
+                                                </label>
+                                                <span class="text-xs font-mono font-bold text-indigo-600" x-text="aiSettings.temperature"></span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0.1" 
+                                                max="1.0" 
+                                                step="0.05" 
+                                                x-model.number="aiSettings.temperature" 
+                                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                            >
+                                            <div class="flex justify-between text-[10px] text-slate-400">
+                                                <span>0.1 (Preciso / Fáctico)</span>
+                                                <span>0.7 (Recomendado)</span>
+                                                <span>1.0 (Muy Persuasivo)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Panel de Telemetría y Test -->
+                                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-center gap-4">
+                                            <div>
+                                                <span class="text-[11px] text-slate-400 block">Latencia de Respuesta</span>
+                                                <span class="text-sm font-bold text-slate-800" x-text="aiSettings.latencyMs ? aiSettings.latencyMs + ' ms' : '--'"></span>
+                                            </div>
+                                            <div class="h-8 w-px bg-slate-200"></div>
+                                            <div>
+                                                <span class="text-[11px] text-slate-400 block">Última Verificación</span>
+                                                <span class="text-sm font-bold text-slate-800" x-text="aiSettings.lastTestedAt || 'Nunca'"></span>
+                                            </div>
+                                            <div class="h-8 w-px bg-slate-200"></div>
+                                            <div>
+                                                <span class="text-[11px] text-slate-400 block">Features Activas</span>
+                                                <span class="text-xs font-semibold text-indigo-700">Copiloto Comercial, Curaduría Scraping, SEO Tags</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="testGeminiConnection()" 
+                                                :disabled="aiSettings.isTesting" 
+                                                class="px-4 py-2 bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                            >
+                                                <svg class="w-4 h-4 text-indigo-600" :class="aiSettings.isTesting ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                <span x-text="aiSettings.isTesting ? 'Verificando con Gemini...' : 'Probar Conexión con Gemini'"></span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="saveAiSettings()" 
+                                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                <span>Guardar Ajustes de IA</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- TAB 13: TABULADORES DE MOQ POR PROVEEDOR (REGLA 1 COMPRAS & INVENTARIO) -->
+                    <template x-if="activeSettingsTab === 'moq'">
+                        <div class="space-y-6">
+                            <!-- Card Principal: Tabuladores de Precios MOQ -->
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                                <!-- Banner Header -->
+                                <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-wrap items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 backdrop-blur-md flex items-center justify-center border border-indigo-400/30 text-indigo-300">
+                                            <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="text-base font-bold text-white leading-tight">Tabuladores de MOQ & Escalas de Costo Mayorista</h3>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-300/30 font-mono">Regla 1 Compras</span>
+                                            </div>
+                                            <p class="text-xs text-indigo-200 mt-0.5">Define los costos escalonados por proveedor y volumen mínimo de compra (MOQ) con trazabilidad por lote en inventario.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Acciones Superiores -->
+                                    <div class="flex items-center gap-2">
+                                        <button 
+                                            type="button" 
+                                            x-show="moqSheetForm"
+                                            @click="saveCurrentMoqSheet()" 
+                                            class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Guardar Tabulador</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="p-6 space-y-6">
+                                    <!-- Selector de Proveedor a Configurar (Regla: Proveedor Primero e Independiente) -->
+                                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">Proveedor a Configurar:</label>
+                                            <select 
+                                                class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer min-w-[280px]"
+                                                :value="moqSelectedSupplierId"
+                                                @change="selectMoqSupplier($event.target.value)"
+                                            >
+                                                <option value="" disabled :selected="!moqSelectedSupplierId">-- Selecciona un proveedor --</option>
+                                                <template x-for="p in providers" :key="p.dbId || p.id">
+                                                    <option 
+                                                        :value="p.dbId || p.id" 
+                                                        :selected="moqSelectedSupplierId == (p.dbId || p.id)" 
+                                                        x-text="(p.tradeName || p.name) + (hasMoqSheet(p.dbId || p.id) ? ' (✓ Configurado)' : ' (Sin Tabulador)')"
+                                                    ></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            <template x-if="moqSheetForm && moqSheetForm.id">
+                                                <button 
+                                                    type="button" 
+                                                    @click="deleteCurrentMoqSheet()" 
+                                                    class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1"
+                                                    title="Eliminar tabulador de este proveedor"
+                                                >
+                                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    <span>Eliminar Tabulador</span>
+                                                </button>
+                                            </template>
+                                            <button 
+                                                type="button" 
+                                                @click="activeSettingsTab = 'providers'" 
+                                                class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer flex items-center gap-1"
+                                            >
+                                                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                                <span>Gestionar Proveedores</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado 1: Proveedor seleccionado NO tiene tabulador registrado -->
+                                    <template x-if="!moqSheetForm && moqSelectedSupplierId">
+                                        <div class="bg-white p-8 rounded-2xl border border-dashed border-slate-300 text-center space-y-4">
+                                            <div class="w-12 h-12 mx-auto rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-slate-800" x-text="'El proveedor ' + getSelectedSupplierName() + ' no tiene un tabulador MOQ registrado'"></h4>
+                                                <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">Los tabuladores MOQ son independientes para cada fabricante. Da de alta sus escalas de volumen y costos para que las órdenes se tabulen automáticamente.</p>
+                                            </div>
+                                            <div>
+                                                <button 
+                                                    type="button" 
+                                                    @click="createMoqSheetForSupplier(moqSelectedSupplierId)" 
+                                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    <span x-text="'+ Crear Tabulador MOQ para ' + getSelectedSupplierName()"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Estado 2: Editor de Tabulador Activo para el Proveedor -->
+                                    <template x-if="moqSheetForm">
+                                        <div class="space-y-6">
+                                            <!-- Datos Generales del Tabulador -->
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-slate-200">
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Nombre del Tabulador</label>
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="moqSheetForm.title" 
+                                                        placeholder="Ej. Torzo Precios Mayoreo 2026" 
+                                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Vigencia / Periodo</label>
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="moqSheetForm.validity" 
+                                                        placeholder="Ej. Vigencia: Junio 2026" 
+                                                        class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+
+                                                <div class="flex items-center justify-between sm:justify-end gap-4 pt-4">
+                                                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-emerald-700">
+                                                        <input type="checkbox" x-model="moqSheetForm.is_active" class="rounded text-emerald-600 focus:ring-emerald-500">
+                                                        <span>Tabulador Activo</span>
+                                                    </label>
+                                                    <span class="text-[11px] text-slate-400 font-mono" x-text="'Moneda: ' + (moqSheetForm.currency || 'MXN')"></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Matriz Spreadsheet de Precios MOQ (Estilo Torzo) -->
+                                    <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 shadow-xl space-y-4">
+                                        <!-- Header de la Matriz -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                                            <div class="flex items-center gap-3">
+                                                <div class="px-2.5 py-1 rounded-md bg-rose-500/20 border border-rose-500/40 text-rose-300 font-black text-xs font-mono">
+                                                    TABULADOR MOQ
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-black text-white uppercase tracking-wider" x-text="moqSheetForm.title || 'Tabulador de Precios Mayoreo'"></h4>
+                                                    <span class="text-xs text-slate-400 font-mono" x-text="moqSheetForm.validity || 'Vigencia oficial'"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-2">
+                                                <button 
+                                                    type="button" 
+                                                    @click="openAddMoqTierModal()" 
+                                                    class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Agregar Escala MOQ</span>
+                                                </button>
+                                                <button 
+                                                    type="button" 
+                                                    @click="openAddMoqRowModal()" 
+                                                    class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Agregar Prenda</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tabla Matriz SpreadSheet -->
+                                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                                            <table class="w-full text-left border-collapse text-xs">
+                                                <thead>
+                                                    <tr class="bg-slate-900 border-b border-slate-800 text-slate-300 text-[11px] uppercase tracking-wider font-extrabold">
+                                                        <th class="py-3 px-4 w-44">Prenda / Categoría</th>
+                                                        <!-- Columnas Dinámicas de Tiers -->
+                                                        <template x-for="(tier, tIdx) in moqSheetForm.tiers" :key="tier.key">
+                                                            <th class="py-3 px-3 text-center border-l border-slate-800">
+                                                                <div class="flex flex-col items-center">
+                                                                    <div class="flex items-center gap-1">
+                                                                        <span class="text-sm font-black" :style="{ color: tier.color || '#fff' }" x-text="tier.min_qty"></span>
+                                                                        <template x-if="tIdx > 0">
+                                                                            <button 
+                                                                                type="button" 
+                                                                                @click="removeMoqTier(tIdx)" 
+                                                                                class="text-slate-600 hover:text-rose-400 font-bold ml-1 cursor-pointer"
+                                                                                title="Eliminar esta escala de MOQ"
+                                                                            >&times;</button>
+                                                                        </template>
+                                                                    </div>
+                                                                    <span class="text-[9px] uppercase tracking-widest text-slate-400 font-semibold" x-text="tier.label"></span>
+                                                                </div>
+                                                            </th>
+                                                        </template>
+                                                        <th class="py-3 px-3 text-center border-l border-slate-800 text-emerald-400">Ahorro Máx.</th>
+                                                        <th class="py-3 px-2 text-center w-12 border-l border-slate-800"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-800/80 font-mono font-bold text-slate-200">
+                                                    <template x-for="(row, rIdx) in moqSheetForm.rows" :key="rIdx">
+                                                        <tr class="hover:bg-slate-900/60 transition">
+                                                            <!-- Categoría / Prenda -->
+                                                            <td class="py-3 px-4 font-sans font-extrabold text-white text-sm">
+                                                                <input 
+                                                                    type="text" 
+                                                                    x-model="row.category" 
+                                                                    class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:bg-slate-900 px-1 py-0.5 rounded text-white font-bold text-xs w-full focus:outline-none"
+                                                                >
+                                                            </td>
+
+                                                            <!-- Precios por Escala MOQ -->
+                                                            <template x-for="tier in moqSheetForm.tiers" :key="tier.key">
+                                                                <td class="py-2.5 px-2 text-center border-l border-slate-800/60">
+                                                                    <div class="inline-flex items-center justify-center relative">
+                                                                        <span class="text-slate-500 text-[10px] mr-0.5">$</span>
+                                                                        <input 
+                                                                            type="number" 
+                                                                            step="0.5" 
+                                                                            min="0"
+                                                                            x-model.number="row.prices[tier.key]" 
+                                                                            :style="{ color: tier.color || '#fff' }"
+                                                                            class="w-16 bg-slate-900/90 border border-slate-700/80 rounded py-1 px-1.5 text-center font-bold text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                                                                        >
+                                                                    </div>
+                                                                </td>
+                                                            </template>
+
+                                                            <!-- Ahorro Máximo % -->
+                                                            <td class="py-2.5 px-3 text-center border-l border-slate-800/60">
+                                                                <span 
+                                                                    class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                                                                    x-text="calculateRowMaxSavings(row)"
+                                                                ></span>
+                                                            </td>
+
+                                                            <!-- Eliminar Fila -->
+                                                            <td class="py-2.5 px-2 text-center border-l border-slate-800/60">
+                                                                <button 
+                                                                    type="button" 
+                                                                    @click="removeMoqRow(rIdx)" 
+                                                                    class="p-1 text-slate-500 hover:text-rose-400 rounded transition cursor-pointer"
+                                                                    title="Eliminar fila"
+                                                                >
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Resumen Explicativo de la Regla -->
+                                        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs text-slate-400 flex items-start gap-2.5">
+                                            <span class="p-1 bg-indigo-500/20 text-indigo-400 rounded shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </span>
+                                            <div>
+                                                <strong class="text-slate-200">Mecanismo de Incidencia en Compras & Trazabilidad Inbound:</strong>
+                                                <p class="text-[11px] leading-relaxed mt-0.5">
+                                                    Cuando se emite o reordena una compra con este proveedor, el sistema detecta la cantidad de piezas y asocia el nivel de MOQ correspondiente. Al confirmar la recepción en rampa, el inventario almacena el lote con su costo de adquisición exacto de MOQ, permitiendo que un mismo producto conserve existencias compradas a distintos precios con trazabilidad contable (CPP) y física por partida.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                            <!-- Modal Agregar Escala MOQ -->
+                            <div x-show="addMoqTierModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="addMoqTierModalOpen = false">
+                                <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 space-y-4" @click.stop>
+                                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                        <h4 class="font-bold text-sm text-slate-900">Nueva Escala MOQ</h4>
+                                        <button type="button" @click="addMoqTierModalOpen = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Nombre / Etiqueta</label>
+                                        <input type="text" x-model="newMoqTierForm.label" placeholder="Ej. 500 prendas" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Volumen Mínimo (Prendas)</label>
+                                        <input type="number" min="1" x-model.number="newMoqTierForm.min_qty" placeholder="500" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                        <button type="button" @click="addMoqTierModalOpen = false" class="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">Cancelar</button>
+                                        <button type="button" @click="confirmAddMoqTier()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer">Agregar Escala</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Agregar Prenda / Categoría -->
+                            <div x-show="addMoqRowModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="addMoqRowModalOpen = false">
+                                <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 space-y-4" @click.stop>
+                                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                        <h4 class="font-bold text-sm text-slate-900">Nueva Prenda o Categoría</h4>
+                                        <button type="button" @click="addMoqRowModalOpen = false" class="text-slate-400 hover:text-slate-600">&times;</button>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Nombre de la Prenda / Categoría</label>
+                                        <input type="text" x-model="newMoqRowForm.category" placeholder="Ej. Harness / Arnés" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Precio Menudeo Base ($)</label>
+                                        <input type="number" min="0" x-model.number="newMoqRowForm.basePrice" placeholder="250" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                                        <button type="button" @click="addMoqRowModalOpen = false" class="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">Cancelar</button>
+                                        <button type="button" @click="confirmAddMoqRow()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer">Agregar Fila</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
             </div>
         </div>
 
@@ -9708,172 +13457,949 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                class="inline-block w-full max-w-3xl bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
+                class="inline-block w-full max-w-6xl bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all my-8 align-middle border border-slate-200 z-10"
                 @click.stop
             >
-                <!-- Curation Header -->
-                <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="p-2 bg-indigo-500/20 text-indigo-300 rounded-xl border border-indigo-500/30">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        </span>
-                        <div>
-                            <h3 class="text-base font-bold text-white" id="curation-modal-title">Validación & Curaduría de Prenda Scrapeada</h3>
-                            <p class="text-xs text-indigo-200">Revisa la descripción y asigna color exacto, tela y sección antes de publicar</p>
+                <!-- Header de Curaduría (Regla 6.64: mismo diseño que el Workstation de Alta de Producto) -->
+                <div class="p-5 border-b border-slate-200 bg-white shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200/80 inline-flex items-center justify-center shadow-2xs">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-lg font-bold text-slate-900" id="curation-modal-title">Curaduría de Prenda Scrapeada</h2>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 tracking-wide uppercase">RevOps Catalogo</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">Codificación inteligente SKU, matriz multidimensional y generación con Copiloto IA</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button 
+                                type="button"
+                                @click="generateCuratingAutoSku()" 
+                                :disabled="curatingItem.isGeneratingSku"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold transition cursor-pointer"
+                                title="Generar código SKU automático estructurado"
+                            >
+                                <svg x-show="!curatingItem.isGeneratingSku" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <svg x-show="curatingItem.isGeneratingSku" class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                </svg>
+                                <span>Auto-SKU</span>
+                            </button>
+                            <button 
+                                type="button"
+                                @click="scrapingCurationModalOpen = false" 
+                                class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                aria-label="Cerrar curaduría"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
                         </div>
                     </div>
-                    <button @click="scrapingCurationModalOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
                 </div>
 
-                <!-- Curation Body -->
+                <!-- Cuerpo de Curaduría: 2 Columnas (Col 1: Formulario Secuencial por Pasos, Col 2: Resumen Ficha Técnica en Vivo) -->
                 <template x-if="curatingItem">
-                    <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm">
-                        <!-- Top Banner de la prenda -->
-                        <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                            <div>
-                                <span class="text-xs font-mono font-bold text-indigo-600" x-text="curatingItem.suggestedSku"></span>
-                                <h4 class="font-bold text-slate-900 text-base mt-0.5" x-text="curatingItem.name"></h4>
-                                <span class="text-xs text-slate-500" x-text="'Proveedor: ' + curatingItem.brand + ' • ' + curatingItem.suggestedCategory"></span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Costo Mayorista</span>
-                                <span class="text-lg font-extrabold text-emerald-600 font-mono" x-text="'$' + curatingItem.cost.toFixed(2)"></span>
-                            </div>
-                        </div>
+                    <div class="p-6 max-h-[72vh] overflow-y-auto bg-slate-50/50">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                        <!-- 1. Validación / Edición de la Descripción Scrapeada -->
-                        <div>
-                            <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Descripción del Producto (Validación Humana)</label>
-                            <textarea 
-                                x-model="curatingItem.scrapedDescription" 
-                                rows="3" 
-                                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                placeholder="Verifica que la descripción técnica y comercial sea correcta..."
-                            ></textarea>
-                        </div>
+                            <!-- ========================================================= -->
+                            <!-- COLUMNA 1: FORMULARIO SECUENCIAL POR PASOS (7 COLS)       -->
+                            <!-- ========================================================= -->
+                            <div class="lg:col-span-7 space-y-6">
 
-                        <!-- 2. Selección de Color / Tornasol & Tipo de Tela -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Selector de Color / Tornasol -->
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Color / Tornasol Exacto</label>
-                                <div class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
-                                    <span class="w-6 h-6 rounded-md border border-slate-300 shrink-0" :style="'background: ' + curatingItem.detectedColorHex"></span>
-                                    <span class="text-xs font-bold text-slate-900" x-text="curatingItem.detectedColorName"></span>
-                                </div>
-                                <select 
-                                    @change="
-                                        const c = apparelColors.find(x => x.name === $event.target.value);
-                                        if (c) {
-                                            curatingItem.detectedColorName = c.name;
-                                            curatingItem.detectedColorHex = c.hex;
-                                            curatingItem.colorType = c.type;
-                                        }
-                                    "
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <template x-for="col in apparelColors" :key="col.id">
-                                        <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- Selector de Tela -->
-                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block">Tipo de Tela</label>
-                                <select 
-                                    x-model="curatingItem.suggestedFabric" 
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <template x-for="fab in apparelFabrics" :key="fab.id">
-                                        <option :value="fab.name" x-text="fab.name"></option>
-                                    </template>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 3. Diseño & Sección Web -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Variante Diseño -->
-                            <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Variante de Diseño</label>
-                                <div class="grid grid-cols-2 gap-2">
+                                <!-- Mini Stepper de Navegación Rápida Interactiva (Regla UX 1) -->
+                                <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs grid grid-cols-4 gap-1.5 text-[11px] font-bold">
                                     <button 
                                         type="button" 
-                                        @click="curatingItem.suggestedDesign = 'sin_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                                        @click="setCuratingStep(1)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 1 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
                                     >
-                                        Sin Diseño (Liso)
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 1 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">1</span>
+                                        <span class="truncate">Fotos & Colores</span>
                                     </button>
                                     <button 
                                         type="button" 
-                                        @click="curatingItem.suggestedDesign = 'con_diseno'"
-                                        class="p-2 rounded-lg text-xs font-bold border text-center transition cursor-pointer"
-                                        :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-700' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                                        @click="setCuratingStep(2)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 2 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
                                     >
-                                        Con Diseño (Pattern)
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 2 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">2</span>
+                                        <span class="truncate">Datos & Diseño</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setCuratingStep(3)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 3 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                    >
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 3 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">3</span>
+                                        <span class="truncate">Tela & Stock</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="setCuratingStep(4)" 
+                                        class="py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 truncate cursor-pointer"
+                                        :class="curatingStep === 4 ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'"
+                                    >
+                                        <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" :class="curatingStep === 4 ? 'bg-white text-indigo-700' : 'bg-slate-200 text-slate-700'">4</span>
+                                        <span class="truncate">Copiloto & Pricing</span>
                                     </button>
                                 </div>
-                            </div>
 
-                            <!-- Sección Web -->
-                            <div>
-                                <label class="font-bold text-xs uppercase tracking-wider text-slate-700 block mb-1">Sección Web de Publicación</label>
-                                <select 
-                                    x-model="curatingItem.suggestedSection" 
-                                    class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                                >
-                                    <option value="basicos">Línea Básicos Esenciales</option>
-                                    <option value="disenador">Línea Diseñador & Autor</option>
-                                    <option value="temporada">Colección Temporada</option>
-                                    <option value="general">Catálogo General</option>
-                                </select>
-                            </div>
-                        </div>
+                                <!-- PASO 1: FOTOGRAFÍAS, CROP 4:5, PORTADA & VARIANTES DE COLOR -->
+                                <div id="curating-step-1-photos" x-show="curatingStep === 1" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">1</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Curaduría de Fotografías & Variante de Color</h3>
+                                                <p class="text-[11px] text-slate-500">Carga interactiva, encuadre 4:5, selección de portada y asociación de color</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200" x-text="(curatingItem.images ? curatingItem.images.length : 0) + ' / 10 fotos'"></span>
+                                    </div>
 
-                        <!-- 4. PVP Sugerido & Margen Calculado -->
-                        <div class="p-3.5 bg-slate-900 text-white rounded-xl border border-slate-800 flex items-center justify-between">
-                            <div>
-                                <label class="text-[11px] text-slate-400 block">PVP Venta al Público</label>
-                                <div class="flex items-center gap-1 mt-0.5">
-                                    <span class="text-slate-400 text-sm">$</span>
-                                    <input type="number" x-model.number="curatingItem.suggestedPvp" class="w-24 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm font-bold text-white font-mono">
+                                    <!-- Dropzone interactivo con encuadre 4:5 -->
+                                    <div 
+                                        @dragover.prevent="isDraggingImages = true"
+                                        @dragleave.prevent="isDraggingImages = false"
+                                        @drop.prevent="handleCuratingImageDrop($event)"
+                                        class="border-2 border-dashed rounded-xl p-4 text-center transition cursor-pointer"
+                                        :class="isDraggingImages ? 'border-indigo-500 bg-indigo-50/60' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/70'"
+                                        @click="$refs.curatingFileInput.click()"
+                                    >
+                                        <input 
+                                            type="file" 
+                                            x-ref="curatingFileInput" 
+                                            @change="handleCuratingImageSelect($event)" 
+                                            accept="image/jpeg,image/png,image/webp,image/avif" 
+                                            multiple 
+                                            class="hidden"
+                                        >
+                                        <div class="flex flex-col items-center justify-center gap-1.5 text-slate-600">
+                                            <div class="w-10 h-10 rounded-xl bg-white border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-2xs">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-bold text-slate-800">Cargar Fotografías & Encuadrar 4:5</span>
+                                            <span class="text-[11px] text-slate-500">Admite múltiples fotos; se curan y encuadran una por una (1080×1350 px)</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Entrada de Foto Manual por URL -->
+                                    <div class="flex items-center gap-1.5">
+                                        <input 
+                                            type="url" 
+                                            x-model="curatingNewImageUrl" 
+                                            @keydown.enter.prevent="addManualImageToCuratingItem()" 
+                                            placeholder="Pegar URL de foto adicional (https://...)" 
+                                            class="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white"
+                                        >
+                                        <button 
+                                            type="button" 
+                                            @click="addManualImageToCuratingItem()" 
+                                            class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            <span>+ URL</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Galería de Miniaturas con Portada & Variantes de Color -->
+                                    <template x-if="curatingItem.images && curatingItem.images.length > 0">
+                                        <div class="space-y-2 pt-2 border-t border-slate-100 max-h-64 overflow-y-auto pr-1">
+                                            <template x-for="(scrapedImg, imgIdx) in (curatingItem.images || [])" :key="imgIdx">
+                                                <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 transition">
+                                                    <div class="relative w-14 h-17 rounded-lg overflow-hidden border border-slate-200 bg-white shrink-0 shadow-2xs">
+                                                        <img :src="scrapedImg" alt="Foto Prenda" class="w-full h-full object-cover">
+                                                        <span x-show="imgIdx === 0" class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-xs">Portada</span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0 space-y-1.5">
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-xs font-bold text-slate-800 truncate" x-text="'Foto ' + (imgIdx + 1)"></span>
+                                                            <div class="flex items-center gap-1.5">
+                                                                <button 
+                                                                    type="button" 
+                                                                    @click.stop="setPrimaryCuratingImage(imgIdx)" 
+                                                                    class="px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer"
+                                                                    :class="imgIdx === 0 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:bg-indigo-50 text-indigo-700 border-slate-200'"
+                                                                >
+                                                                    <span x-text="imgIdx === 0 ? 'Es Portada' : 'Hacer Portada'"></span>
+                                                                </button>
+                                                                <button 
+                                                                    type="button" 
+                                                                    @click.stop="removeImageFromCuratingItem(imgIdx)" 
+                                                                    class="p-1 rounded text-rose-500 hover:bg-rose-50 transition cursor-pointer" 
+                                                                    title="Eliminar foto"
+                                                                >
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Selector de Color de Prenda para esta Foto + Botón In Situ + Color -->
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider shrink-0">Color Variante:</span>
+                                                            <select 
+                                                                :value="curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName"
+                                                                @change="if (!curatingItem.imageColorMap) curatingItem.imageColorMap = {}; curatingItem.imageColorMap[scrapedImg] = $event.target.value"
+                                                                class="flex-1 px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                            >
+                                                                <template x-for="col in apparelColors" :key="col.id">
+                                                                    <option :value="col.name" :selected="col.name === (curatingItem.imageColorMap?.[scrapedImg] || curatingItem.detectedColorName)" x-text="col.name"></option>
+                                                                </template>
+                                                            </select>
+                                                            <button 
+                                                                type="button" 
+                                                                @click.stop="openQuickColorModal('curating', scrapedImg)" 
+                                                                class="px-2 py-1 text-[10px] font-bold rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer shrink-0"
+                                                                title="Dar de alta color in situ para esta foto"
+                                                            >
+                                                                + Color
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Color Principal de la Prenda (Swatch Exacto) -->
+                                    <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Color Principal / Swatch Exacto</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickColorModal('curating')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta color in situ sin salir de la curaduría"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Color</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <template x-if="curatingItem.detectedColorName?.toLowerCase() === 'multicolor'">
+                                                <span class="w-8 h-8 rounded-lg border border-slate-300 shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                            </template>
+                                            <template x-if="curatingItem.detectedColorName?.toLowerCase() !== 'multicolor'">
+                                                <input 
+                                                    type="color" 
+                                                    x-model="curatingItem.detectedColorHex" 
+                                                    class="w-8 h-8 p-0 border border-slate-300 rounded-lg cursor-pointer shrink-0"
+                                                >
+                                            </template>
+                                            <select 
+                                                x-model="curatingItem.detectedColorName" 
+                                                @change="
+                                                    const c = apparelColors.find(x => x.name === curatingItem.detectedColorName);
+                                                    if (c) {
+                                                        curatingItem.detectedColorHex = c.hex;
+                                                        curatingItem.colorType = c.type;
+                                                    }
+                                                "
+                                                class="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                            >
+                                                <template x-for="col in apparelColors" :key="col.id">
+                                                    <option :value="col.name" :selected="col.name === curatingItem.detectedColorName" x-text="col.name + ' (' + (col.type === 'iridescent' ? 'Tornasol' : 'Sólido') + ')'"></option>
+                                                </template>
+                                            </select>
+                                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 border" :class="curatingItem.colorType === 'iridescent' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-white text-slate-600 border-slate-200'" x-text="curatingItem.colorType === 'iridescent' ? 'Tornasol' : 'Sólido'"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 1 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(2)" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>Continuar a Datos & Diseño</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
+
+                                <!-- PASO 2: PROVEEDOR, MARCA, CATEGORÍA, SUBCATEGORÍA, LISO O CON DISEÑO, MODALIDAD LOGÍSTICA -->
+                                <div id="curating-step-2-taxonomy" x-show="curatingStep === 2" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">2</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Proveedor, Marca, Categoría & Modalidad</h3>
+                                                <p class="text-[11px] text-slate-500">Identidad comercial, clasificación, tipificación de diseño y logística</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Taxonomía</span>
+                                    </div>
+
+                                    <!-- Nombre Comercial del Modelo -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Nombre Comercial del Modelo <span class="text-rose-500">*</span></label>
+                                        <input 
+                                            type="text" 
+                                            x-model="curatingItem.name" 
+                                            placeholder="Ej: Boxer Trunk Modal Eco Air" 
+                                            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                                        >
+                                    </div>
+
+                                    <!-- Proveedor / Fabricante & Marca Comercial (Grid 2 cols) -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                    <span>Proveedor / Fabricante</span>
+                                                    <span class="text-rose-500">*</span>
+                                                </label>
+                                                <button 
+                                                    type="button" 
+                                                    @click="openCreateProviderModal()" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Proveedor</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.supplier_id" 
+                                                @change="onCuratingSupplierChange()"
+                                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                            >
+                                                <option value="">-- Seleccionar Proveedor --</option>
+                                                <template x-for="p in providers" :key="p.id">
+                                                    <option :value="p.id" :selected="String(curatingItem.supplier_id) === String(p.id)" x-text="(p.tradeName || p.name) + (p.origin === 'scraping' ? ' [Scraping]' : ' [Directo]')"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                                    <span>Marca Comercial</span>
+                                                    <span class="text-rose-500">*</span>
+                                                </label>
+                                                <button 
+                                                    type="button" 
+                                                    @click="openCreateBrandModal(curatingItem.supplier_id)" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Marca</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.brand" 
+                                                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                                            >
+                                                <option value="">-- Seleccionar Marca --</option>
+                                                <template x-for="b in getBrandsForSupplier(curatingItem.supplier_id)" :key="b.name">
+                                                    <option :value="b.name" :selected="curatingItem.brand === b.name" x-text="b.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Categoría & Subcategoría (Grid 2 cols) -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Categoría</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickCategoryModal('category', 'curating')" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Categoría</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.suggestedCategory" 
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                                <template x-for="cat in categoriesTree" :key="cat.id">
+                                                    <option :value="cat.name" :selected="curatingItem.suggestedCategory === cat.name" x-text="cat.name"></option>
+                                                </template>
+                                                <option value="Boxers">Boxers</option>
+                                                <option value="Jocks">Jocks</option>
+                                                <option value="Tangas">Tangas</option>
+                                                <option value="Bikinis">Bikinis</option>
+                                                <option value="Camisillas">Camisillas</option>
+                                                <option value="Cosmetica / Skincare">Cosmetica / Skincare</option>
+                                                <option value="Perfumeria / Fragancias">Perfumeria / Fragancias</option>
+                                                <option value="Accesorios & Cuidado">Accesorios & Cuidado</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Subcategoría</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickCategoryModal('subcategory', 'curating')" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Subcategoría</span>
+                                                </button>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                x-model="curatingItem.suggestedSubcategory" 
+                                                placeholder="Ej: Trunks / Briefs / Deportivo" 
+                                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- Acabado / Diseño del Producto -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Acabado / Diseño del Producto</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button 
+                                                type="button" 
+                                                @click="curatingItem.suggestedDesign = 'sin_diseno'" 
+                                                class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                                :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-50 border-indigo-600 text-indigo-900 shadow-2xs ring-1 ring-indigo-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
+                                            >
+                                                <span class="w-2.5 h-2.5 rounded-full" :class="curatingItem.suggestedDesign === 'sin_diseno' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                                <span>Color Liso (Sólido)</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                @click="curatingItem.suggestedDesign = 'con_diseno'" 
+                                                class="p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                                                :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-50 border-purple-600 text-purple-900 shadow-2xs ring-1 ring-purple-500/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'"
+                                            >
+                                                <span class="w-2.5 h-2.5 rounded-full" :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-600' : 'bg-slate-300'"></span>
+                                                <span>Con Diseño (Estampado / Pattern)</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modalidad Logística & Sección Vitrina -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-slate-100">
+                                        <div>
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Modalidad Logística</label>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <label 
+                                                    class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                    :class="curatingItem.type === 'propio' ? 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                                >
+                                                    <input type="radio" value="propio" x-model="curatingItem.type" class="sr-only">
+                                                    <span class="w-2 h-2 rounded-full" :class="curatingItem.type === 'propio' ? 'bg-indigo-600' : 'bg-slate-300'"></span>
+                                                    <span>Propio</span>
+                                                </label>
+                                                <label 
+                                                    class="flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition"
+                                                    :class="curatingItem.type === 'dropship' ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                                >
+                                                    <input type="radio" value="dropship" x-model="curatingItem.type" class="sr-only">
+                                                    <span class="w-2 h-2 rounded-full" :class="curatingItem.type === 'dropship' ? 'bg-emerald-600' : 'bg-slate-300'"></span>
+                                                    <span>Dropship</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Sección Vitrina</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click.stop="openQuickStoreSectionModal('curating')" 
+                                                    class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                    title="Dar de alta una nueva vitrina web in situ"
+                                                >
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>+ Vitrina</span>
+                                                </button>
+                                            </div>
+                                            <select 
+                                                x-model="curatingItem.suggestedSection" 
+                                                class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none"
+                                            >
+                                                <template x-for="sec in storeSections" :key="sec.id || sec.slug">
+                                                    <option :value="sec.slug" :selected="curatingItem.suggestedSection === sec.slug" x-text="sec.name"></option>
+                                                </template>
+                                                <template x-if="!storeSections || storeSections.length === 0">
+                                                    <option value="basicos">Línea Básicos Esenciales</option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 2 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(1)" 
+                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            <span>Paso 1: Fotos & Colores</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(3)" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>Continuar a Tela & Stock</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PASO 3: TELA & INVENTARIO -->
+                                <div id="curating-step-3-matrix" x-show="curatingStep === 3" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">3</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Composición Textil & Inventario</h3>
+                                                <p class="text-[11px] text-slate-500">Tipo de tela, fibras y unidades disponibles para venta</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Inventario</span>
+                                    </div>
+
+                                    <!-- Tipo de Tela & Fibras Textiles -->
+                                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider">Tipo de Tela & Fibras Textiles</label>
+                                            <button 
+                                                type="button" 
+                                                @click.stop="openQuickFabricModal('curating')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
+                                                title="Dar de alta tipo de tela in situ si no existe"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Tipo de Tela</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="curatingItem.suggestedFabric" 
+                                            class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                            <template x-for="fab in apparelFabrics" :key="fab.id || fab.name">
+                                                <option :value="fab.name" :selected="curatingItem.suggestedFabric === fab.name" x-text="fab.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Stock / Inventario Disponible -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Inventario / Stock Disponible</label>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            x-model.number="curatingItem.stock" 
+                                            placeholder="50" 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                        <p class="text-[10px] text-slate-400 mt-1" x-text="curatingItem.type === 'dropship' ? 'Dropship: stock reportado por el proveedor (bajo pedido).' : 'Propio: unidades físicas disponibles en bodega local.'"></p>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 3 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(2)" 
+                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            <span>Paso 2: Datos & Diseño</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(4)" 
+                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>Continuar a Copiloto & Pricing</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PASO 4: COPILOTO IA & PRICING COMERCIAL -->
+                                <div id="curating-step-4-pricing" x-show="curatingStep === 4" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-2xs">4</div>
+                                            <div>
+                                                <h3 class="font-bold text-slate-900 text-sm">Copiloto IA & Pricing Comercial</h3>
+                                                <p class="text-[11px] text-slate-500">Copy persuasivo B2C, tags SEO y cálculo de margen</p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            @click="generateAiDescription('curating')" 
+                                            :disabled="isCuratingAiGenerating"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Generar descripción persuasiva comercial con Google Gemini"
+                                        >
+                                            <svg x-show="!isCuratingAiGenerating" class="w-3.5 h-3.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                            <svg x-show="isCuratingAiGenerating" class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isCuratingAiGenerating ? 'Redactando...' : 'Generar con IA'"></span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Descripción Persuasiva Comercial -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">Descripción Persuasiva (B2C)</label>
+                                        <textarea 
+                                            x-model="curatingItem.scrapedDescription" 
+                                            rows="3" 
+                                            placeholder="Haz clic en 'Generar con IA' para redactar una descripción comercial optimizada..." 
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                    <!-- Viñetas / Puntos Clave Técnicos -->
+                                    <template x-if="curatingItem.bulletPoints && curatingItem.bulletPoints.length > 0">
+                                        <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                            <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wider block mb-1.5">Especificaciones Técnicas</span>
+                                            <ul class="space-y-1 text-[11px] text-slate-700">
+                                                <template x-for="(bp, bIdx) in curatingItem.bulletPoints" :key="bIdx">
+                                                    <li class="flex items-start gap-1.5">
+                                                        <span class="text-indigo-600 font-bold shrink-0">&bull;</span>
+                                                        <span x-text="bp"></span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </template>
+
+                                    <!-- Tags SEO & Búsqueda Storefront -->
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Tags SEO & Búsqueda Frontstore</label>
+                                        <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 min-h-[44px]">
+                                            <template x-for="(tag, tIdx) in (curatingItem.seoTags || [])" :key="tIdx">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200 shadow-2xs">
+                                                    <span x-text="tag"></span>
+                                                    <button type="button" @click="removeCuratingSeoTag(tIdx)" class="text-slate-400 hover:text-rose-600 font-extrabold cursor-pointer">&times;</button>
+                                                </span>
+                                            </template>
+                                            <input 
+                                                type="text" 
+                                                x-model="curatingNewTagInput" 
+                                                @keydown.enter.prevent="addCuratingSeoTag()" 
+                                                placeholder="+ tag..." 
+                                                class="text-[11px] bg-transparent outline-none flex-1 min-w-[70px] text-slate-700"
+                                            >
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 mt-1">Escribe una palabra clave y presiona Enter para agregarla.</p>
+                                    </div>
+
+                                    <!-- Margen Comercial & Pricing (mismo diseño claro índigo del Workstation, Regla 6.75) -->
+                                    <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 space-y-3.5 shadow-2xs">
+                                        <div class="flex items-center justify-between pb-2 border-b border-indigo-100/80">
+                                            <div class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <h4 class="font-bold text-xs text-indigo-950 uppercase tracking-wider">Margen Comercial & Pricing</h4>
+                                            </div>
+                                            <span class="text-[10px] text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-200 font-semibold shadow-2xs">Cálculo Reactivo</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-700 block mb-1">Precio Venta (PVP) <span class="text-rose-500">*</span></label>
+                                                <div class="relative">
+                                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.5" 
+                                                        x-model.number="curatingItem.suggestedPvp" 
+                                                        class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
+                                                    >
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="text-[11px] font-bold text-slate-700 block mb-1">Costo Unitario <span class="text-rose-500">*</span></label>
+                                                <div class="relative">
+                                                    <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.5" 
+                                                        x-model.number="curatingItem.cost" 
+                                                        class="w-full bg-white border border-slate-200 rounded-lg py-1.5 pl-6 pr-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono shadow-2xs"
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-2.5 border-t border-indigo-100 flex items-center justify-between text-xs bg-white/70 p-2.5 rounded-lg border border-indigo-100/70">
+                                            <div>
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Utilidad por Pieza:</span>
+                                                <strong class="text-emerald-600 text-sm font-mono font-extrabold" x-text="formatCurrency((Number(curatingItem.suggestedPvp) || 0) - (Number(curatingItem.cost) || 0))"></strong>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Margen Bruto:</span>
+                                                <div class="flex items-center gap-1.5 justify-end">
+                                                    <span 
+                                                        class="text-sm font-extrabold font-mono" 
+                                                        :class="calculateCuratingMargin() >= 50 ? 'text-emerald-700' : (calculateCuratingMargin() >= 30 ? 'text-amber-700' : 'text-rose-700')" 
+                                                        x-text="calculateCuratingMargin() + '%'"
+                                                    ></span>
+                                                    <span 
+                                                        class="text-[9px] px-2 py-0.5 rounded font-extrabold uppercase tracking-wider border" 
+                                                        :class="calculateCuratingMargin() >= 50 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (calculateCuratingMargin() >= 30 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200')" 
+                                                        x-text="calculateCuratingMargin() >= 50 ? 'Saludable' : (calculateCuratingMargin() >= 30 ? 'Aceptable' : 'Riesgo')"
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Código SKU Oficial con Botón Auto-SKU -->
+                                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Código SKU Oficial</label>
+                                                <button 
+                                                    type="button" 
+                                                    @click="generateCuratingAutoSku()" 
+                                                    :disabled="curatingItem.isGeneratingSku" 
+                                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition cursor-pointer shadow-2xs"
+                                                    title="Generar SKU automático"
+                                                >
+                                                    <svg x-show="!curatingItem.isGeneratingSku" class="w-3 h-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                    <svg x-show="curatingItem.isGeneratingSku" class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                    <span>Auto-SKU</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            x-model="curatingItem.suggestedSku" 
+                                            placeholder="TXT-DAJ-0001-UNI" 
+                                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold text-indigo-700 uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        >
+                                        <p class="text-[10px] text-slate-400">Formato: [PREFIJO]-[MARCA]-[CORRELATIVO 4D]-[VARIANTE]</p>
+                                    </div>
+
+                                    <!-- Pie de Navegación del Paso 4 (Regla UX 1) -->
+                                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <button 
+                                            type="button" 
+                                            @click="setCuratingStep(3)" 
+                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                            <span>Paso 3: Tela & Stock</span>
+                                        </button>
+                                        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            <span>Listo para Publicar en el Footer</span>
+                                        </span>
+                                    </div>
+                                </div>
+
                             </div>
-                            <div class="text-right">
-                                <span class="text-[11px] text-slate-400 block">Margen Comercial Estimado</span>
-                                <span class="text-base font-extrabold text-emerald-400 font-mono" x-text="(((curatingItem.suggestedPvp - curatingItem.cost) / curatingItem.suggestedPvp) * 100).toFixed(1) + '%'"></span>
+
+                            <!-- ========================================================= -->
+                            <!-- COLUMNA 2: RESUMEN DE FICHA DE PRODUCTO EN VIVO (5 COLS)  -->
+                            <!-- ========================================================= -->
+                            <div class="lg:col-span-5 sticky top-0">
+                                <div class="bg-white rounded-3xl border border-slate-200/90 shadow-lg overflow-hidden flex flex-col h-[650px] max-h-[82vh]">
+                                    
+                                    <!-- ========================================================= -->
+                                    <!-- SECCIÓN SUPERIOR (30% DE LA ALTURA): GALERÍA DE RESUMEN  -->
+                                    <!-- ========================================================= -->
+                                    <div class="h-[30%] min-h-[170px] max-h-[210px] bg-slate-950 p-3 relative flex flex-col justify-between shrink-0 border-b border-slate-800">
+                                        <!-- Header de la Galería -->
+                                        <div class="flex items-center justify-between pb-1 z-10">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-300">Galería de Ficha</span>
+                                                <span class="text-[9px] font-bold text-slate-400" x-text="'(' + (curatingItem.images ? curatingItem.images.length : 0) + ')'"></span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 tracking-wide uppercase">Live Preview</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Render de todas las imágenes cargadas del producto -->
+                                        <div class="flex-1 flex items-center justify-center overflow-hidden py-1">
+                                            <template x-if="curatingItem.images && curatingItem.images.length > 0">
+                                                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-full px-1">
+                                                    <template x-for="(imgUrl, iIdx) in curatingItem.images" :key="iIdx">
+                                                        <div 
+                                                            class="relative rounded-lg overflow-hidden border shrink-0 transition"
+                                                            :class="iIdx === 0 ? 'w-16 h-20 border-indigo-400 shadow-md ring-2 ring-indigo-500/50' : 'w-12 h-16 border-slate-700 opacity-70 hover:opacity-100'"
+                                                        >
+                                                            <img :src="imgUrl" class="w-full h-full object-cover">
+                                                            <span x-show="iIdx === 0" class="absolute top-0.5 left-0.5 bg-indigo-600 text-white text-[7px] font-extrabold px-1 rounded">P1</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="!curatingItem.images || curatingItem.images.length === 0">
+                                                <div class="flex flex-col items-center justify-center text-slate-500 p-2 text-center">
+                                                    <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-1">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    </div>
+                                                    <span class="text-[11px] font-bold text-slate-400">Sin Fotografías Cargadas</span>
+                                                    <span class="text-[9px] text-slate-600">Sube fotos en el Paso 1</span>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Badges flotantes en la barra inferior de galería -->
+                                        <div class="flex items-center justify-between text-[9px] pt-1 border-t border-slate-800/80 text-slate-400">
+                                            <span class="font-mono font-bold text-slate-300" x-text="curatingItem.suggestedSku || 'SKU PENDIENTE'"></span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span 
+                                                    class="px-1.5 py-0.5 rounded font-bold uppercase text-[8px]"
+                                                    :class="curatingItem.type === 'dropship' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-indigo-950 text-indigo-300 border border-indigo-800'"
+                                                    x-text="curatingItem.type === 'dropship' ? 'Dropship' : 'Propio'"
+                                                ></span>
+                                                <span 
+                                                    class="px-1.5 py-0.5 rounded font-extrabold uppercase text-[8px] bg-emerald-900/60 text-emerald-300 border border-emerald-700/60"
+                                                >
+                                                    Público
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ========================================================= -->
+                                    <!-- SECCIÓN INFERIOR (70% DE LA ALTURA): INFORMACIÓN EN VIVO  -->
+                                    <!-- ========================================================= -->
+                                    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs bg-white">
+                                        <!-- Nombre & Clasificación & Tipificación -->
+                                        <div class="space-y-1 pb-3 border-b border-slate-100">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="curatingItem.suggestedCategory || 'Categoría'"></span>
+                                                <template x-if="curatingItem.suggestedSubcategory">
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" x-text="curatingItem.suggestedSubcategory"></span>
+                                                </template>
+                                                <span 
+                                                    class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                                    :class="curatingItem.suggestedDesign === 'con_diseno' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-slate-100 text-slate-700 border border-slate-200'"
+                                                    x-text="curatingItem.suggestedDesign === 'con_diseno' ? 'Con Diseño' : 'Color Liso'"
+                                                ></span>
+                                            </div>
+                                            <h4 class="text-base font-extrabold text-slate-900 leading-snug" x-text="curatingItem.name || 'Nombre del modelo en preparación...'"></h4>
+                                            <p class="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+                                                <span class="text-indigo-700 font-bold" x-text="curatingItem.brand || 'Sin Marca'"></span>
+                                                <span class="text-slate-300">•</span>
+                                                <span x-text="getSupplierName(curatingItem.supplier_id) || 'Torzo'"></span>
+                                            </p>
+                                        </div>
+
+                                        <!-- Vitrina Web & Slotting / Ubicación Bodega -->
+                                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                            <div class="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                                                <span class="text-[9px] text-indigo-500 font-bold uppercase block mb-0.5">Vitrina Web</span>
+                                                <span class="font-bold text-indigo-900 truncate block" x-text="getStoreSectionName(curatingItem.suggestedSection)"></span>
+                                            </div>
+                                            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                                                <span class="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Modalidad & Stock</span>
+                                                <span class="font-bold text-slate-800 truncate block font-mono" x-text="(curatingItem.type === 'dropship' ? 'Drop Bajo Pedido' : 'Stock Local Propio') + ' • ' + (curatingItem.stock || 50) + ' u.'"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fila de Tejido / Tela -->
+                                        <div class="p-2.5 bg-indigo-50/40 rounded-xl border border-indigo-100/70 flex items-center justify-between">
+                                            <span class="text-[10px] text-indigo-900 font-bold uppercase">Tejido / Tela:</span>
+                                            <span class="font-extrabold text-indigo-700 text-xs" x-text="curatingItem.suggestedFabric || 'No especificada'"></span>
+                                        </div>
+
+                                        <!-- Color de la Prenda -->
+                                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase">Color Principal:</span>
+                                            <div class="flex items-center gap-2">
+                                                <template x-if="curatingItem.detectedColorName?.toLowerCase() === 'multicolor' || (curatingItem.detectedColorHex && curatingItem.detectedColorHex.includes('gradient'))">
+                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                </template>
+                                                <template x-if="curatingItem.detectedColorName?.toLowerCase() !== 'multicolor' && (!curatingItem.detectedColorHex || !curatingItem.detectedColorHex.includes('gradient'))">
+                                                    <span class="w-4 h-4 rounded-full border border-slate-300 shrink-0" :style="'background: ' + (curatingItem.detectedColorHex || '#0f172a')"></span>
+                                                </template>
+                                                <span class="font-bold text-slate-800 text-xs" x-text="curatingItem.detectedColorName"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pricing & Margen en Vivo (Dark card matching Workstation!) -->
+                                        <div class="p-3 bg-slate-900 text-white rounded-xl space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <span class="text-[9px] text-slate-400 uppercase block font-semibold">PVP Comercial</span>
+                                                    <span class="text-base font-extrabold text-white font-mono" x-text="formatCurrency(curatingItem.suggestedPvp || 0)"></span>
+                                                </div>
+                                                <div class="text-center">
+                                                    <span class="text-[9px] text-slate-400 uppercase block font-semibold">Costo</span>
+                                                    <span class="text-xs font-bold text-slate-300 font-mono" x-text="formatCurrency(curatingItem.cost || 0)"></span>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span class="text-[9px] text-slate-400 uppercase block font-semibold">Margen Bruto</span>
+                                                    <span 
+                                                        class="text-sm font-extrabold font-mono"
+                                                        :class="calculateCuratingMargin() >= 50 ? 'text-emerald-400' : (calculateCuratingMargin() >= 30 ? 'text-amber-400' : 'text-rose-400')"
+                                                        x-text="calculateCuratingMargin() + '%'"
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Copy Persuasivo & Tags SEO -->
+                                        <template x-if="curatingItem.scrapedDescription">
+                                            <div class="p-3 bg-indigo-50/40 rounded-xl border border-indigo-100/80">
+                                                <span class="text-[9px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">Copy Persuasivo B2C</span>
+                                                <p class="text-[11px] text-slate-700 italic leading-snug" x-text="curatingItem.scrapedDescription"></p>
+                                            </div>
+                                        </template>
+
+                                        <!-- Tags SEO Chips -->
+                                        <template x-if="curatingItem.seoTags && curatingItem.seoTags.length > 0">
+                                            <div class="space-y-1">
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tags de Indexación Frontstore</span>
+                                                <div class="flex flex-wrap gap-1">
+                                                    <template x-for="(tag, tIdx) in curatingItem.seoTags" :key="tIdx">
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200" x-text="'#' + tag"></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </template>
 
-                <!-- Curation Footer -->
-                <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <button 
-                        type="button" 
-                        @click="discardScrapedItem(curatingItem.id)" 
-                        class="px-4 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition cursor-pointer"
-                    >
-                        Descartar Prenda
-                    </button>
+                <!-- Footer de Curaduría (mismo diseño que el Workstation) -->
+                <div class="p-4 border-t border-slate-200 bg-white flex items-center justify-between">
+                    <div class="text-xs text-slate-500">
+                        <span class="font-bold text-slate-700" x-text="(curatingItem ? (curatingItem.stock || 50) : 50) + ' unidades'"></span> preparadas para ingresar al inventario.
+                    </div>
                     <div class="flex items-center gap-2">
                         <button 
                             type="button" 
+                            @click="discardScrapedItem(curatingItem.id)" 
+                            class="px-3.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                        >
+                            Descartar Prenda
+                        </button>
+                        <button 
+                            type="button" 
                             @click="scrapingCurationModalOpen = false" 
-                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold transition cursor-pointer"
+                            class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                         >
                             Cancelar
                         </button>
                         <button 
                             type="button" 
                             @click="approveScrapedItem()" 
-                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
+                            class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition cursor-pointer flex items-center gap-1.5"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span>Aprobar y Publicar en Catálogo</span>
                         </button>
                     </div>
@@ -9882,10 +14408,1837 @@
         </div>
     </div>
 
+
+        <!-- ================================================================= -->
+        <!-- MODAL ERGONÓMICO: DETALLES, CONDICIONES & SLA SCORECARD (TASK-INV-13) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="providerModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[120] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 120 !important; display: none;"
+        >
+            <div 
+                @click.outside="providerModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+                <!-- Cabecera del Modal -->
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingProvider ? 'Conectar / Registrar Nuevo Proveedor' : (isEditingProvider ? 'Editar Condiciones: ' + (providerForm.tradeName || providerForm.name) : 'Ficha de Proveedor & Scorecard SLA')"></h3>
+                            <p class="text-xs text-slate-500" x-text="isCreatingProvider ? 'Alta de taller de confección, fabricante cosmético o mayorista local' : (providerForm.vendorCode ? 'Código ' + providerForm.vendorCode + ' • ' + providerForm.name : 'Información técnica y comercial')"></p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="providerModalOpen = false" 
+                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                        aria-label="Cerrar modal"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Selector de Pestañas del Modal de Proveedor (Regla 6.45: Alta Manual, Fiscal y Árbol de Marcas) -->
+                <div class="px-6 pt-2 pb-0 border-b border-slate-200/80 bg-slate-50/50 flex items-center gap-1 overflow-x-auto text-xs shrink-0">
+                    <button 
+                        type="button" 
+                        @click="providerModalTab = 'general'" 
+                        :class="providerModalTab === 'general' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
+                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        <span>1. Contacto & Operativo</span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="providerModalTab = 'fiscal'" 
+                        :class="providerModalTab === 'fiscal' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
+                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>2. Información Fiscal & Facturación</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded font-bold" :class="providerForm.taxId ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'" x-text="providerForm.taxId ? 'RFC ✓' : 'Pendiente'"></span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="providerModalTab = 'brands'" 
+                        :class="providerModalTab === 'brands' ? 'border-b-2 border-indigo-600 text-indigo-700 font-bold bg-white rounded-t-lg' : 'text-slate-500 hover:text-slate-800'" 
+                        class="py-2.5 px-4 whitespace-nowrap cursor-pointer transition flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        <span>3. Marcas Desprendidas (Árbol)</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 font-bold" x-text="(providerForm.brands || []).length"></span>
+                    </button>
+                </div>
+
+                <!-- Cuerpo del Modal (2 Columnas) -->
+                <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6">
+                    
+                    <!-- Columna Izquierda: Ficha Comercial, Fiscal o Marcas según Pestaña Activa (7 Cols) -->
+                    <div class="md:col-span-7 space-y-4">
+                        
+                        <!-- PESTAÑA 1: INFORMACIÓN GENERAL & CONTACTO -->
+                        <div x-show="providerModalTab === 'general'" class="space-y-4">
+                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información General, Origen & Contacto</h4>
+                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
+                            </div>
+
+                            <!-- Razón Social y Nombre Comercial -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Nombre Comercial / Fantasía *</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.name" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. Torzo Tech / ModaIntima MX" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Alias Comercial en Sistema *</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.tradeName" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. Torzo B2B" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Origen del Proveedor y Giro Comercial -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Origen de Alta *</label>
+                                    <select 
+                                        x-model="providerForm.origin" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                        <option value="manual">Alta Manual (Taller / Distribuidor Directo)</option>
+                                        <option value="scraping">Scraping / Integración Automatizada B2B</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipo / Giro Comercial *</label>
+                                    <select 
+                                        x-model="providerForm.type" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                        <option value="workshop">Taller de Confección Textil</option>
+                                        <option value="cosmetics">Fabricante Cosmética & Skincare</option>
+                                        <option value="distributor">Distribuidor Mayorista</option>
+                                        <option value="packaging">Insumos de Empaque & Cajas</option>
+                                        <option value="commercial">Proveedor Comercial Directo</option>
+                                        <option value="scraper">Integración Automatizada (Scraper/API)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Ciudad y Sitio Web -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Ciudad / Ubicación Física</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.city" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. CDMX, Puebla, Guadalajara" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Sitio Web / Catálogo Digital</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.website" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="https://..." 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Persona de Contacto, Teléfono y Correo -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Contacto Operativo *</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.contactName" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Nombre completo" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp / Teléfono *</label>
+                                    <input 
+                                        type="tel" 
+                                        x-model="providerForm.phone" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="+52 55..." 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Pedidos</label>
+                                    <input 
+                                        type="email" 
+                                        x-model="providerForm.email" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="pedidos@empresa.com" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Condiciones Comerciales: Lead Time y Plazos de Pago -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Lead Time Prometido (Días)</label>
+                                    <div class="flex items-center gap-2">
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            max="90" 
+                                            x-model="providerForm.leadTimeDays" 
+                                            :disabled="!isCreatingProvider && !isEditingProvider"
+                                            class="w-24 px-3 py-1.5 text-xs font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200 text-center"
+                                        >
+                                        <span class="text-xs text-slate-500">días hábiles a rampa</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Términos de Pago</label>
+                                    <select 
+                                        x-model="providerForm.paymentTerms" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        class="w-full px-3 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-white disabled:text-slate-800 border-slate-200"
+                                    >
+                                        <option value="contado">Contado / Anticipo 100%</option>
+                                        <option value="credito_15">Crédito Comercial 15 días</option>
+                                        <option value="credito_30">Crédito Comercial 30 días</option>
+                                        <option value="credito_60">Crédito Comercial 60 días</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Notas Operativas -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Notas Internas & Acuerdos de Maquila</label>
+                                <textarea 
+                                    x-model="providerForm.notes" 
+                                    :disabled="!isCreatingProvider && !isEditingProvider"
+                                    rows="2" 
+                                    placeholder="Detalles de maquila, acuerdos especiales de tela, MOQ o especificaciones..." 
+                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <!-- PESTAÑA 2: INFORMACIÓN FISCAL & FACTURACIÓN (ALTA MANUAL COMPLETA) -->
+                        <div x-show="providerModalTab === 'fiscal'" class="space-y-4">
+                            <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Información Fiscal, CFDI & Facturación</h4>
+                                    <p class="text-[11px] text-slate-400">Captura de datos tributarios para compras con factura oficial y conciliación de cuentas por pagar</p>
+                                </div>
+                                <span x-show="!isCreatingProvider && !isEditingProvider" class="text-[11px] text-slate-400 font-medium">Modo solo lectura</span>
+                            </div>
+
+                            <!-- RFC y Razón Social Fiscal -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">RFC / Tax ID / NIF</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.taxId" 
+                                        @input="providerForm.taxId = $event.target.value.toUpperCase()"
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. CTP850101XYZ" 
+                                        class="w-full px-3 py-2 text-xs font-mono font-bold uppercase border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Razón Social Fiscal Completa</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.legalName" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. Confecciones Textiles Puebla SA de CV" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Régimen Fiscal y Código Postal Fiscal -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Régimen Fiscal (SAT / Tributario)</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.fiscalRegime" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="Ej. 601 - General de Ley Personas Morales" 
+                                        class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Código Postal Fiscal</label>
+                                    <input 
+                                        type="text" 
+                                        x-model="providerForm.fiscalZip" 
+                                        :disabled="!isCreatingProvider && !isEditingProvider"
+                                        placeholder="72000" 
+                                        class="w-full px-3 py-2 text-xs font-mono border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 text-center"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Domicilio Fiscal Completo -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Domicilio Fiscal Completo (Calle, No. Ext/Int, Colonia, Municipio)</label>
+                                <textarea 
+                                    x-model="providerForm.fiscalAddress" 
+                                    :disabled="!isCreatingProvider && !isEditingProvider"
+                                    rows="2" 
+                                    placeholder="Av. Reforma 1234 Int 5, Col. Centro, Puebla, Puebla..." 
+                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200 resize-none"
+                                ></textarea>
+                            </div>
+
+                            <!-- Email para Envío/Recepción de CFDI / Facturas -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de Facturación / CFDI</label>
+                                <input 
+                                    type="email" 
+                                    x-model="providerForm.invoiceEmail" 
+                                    :disabled="!isCreatingProvider && !isEditingProvider"
+                                    placeholder="facturacion@proveedor.com" 
+                                    class="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-600 border-slate-200"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- PESTAÑA 3: ÁRBOL DE MARCAS DESPRENDIDAS DEL PROVEEDOR (REGLAS 6.45 & 6.46) -->
+                        <div x-show="providerModalTab === 'brands'" class="space-y-4">
+                            <div class="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800">Gobernanza de Marcas Comerciales Desprendidas</h4>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800" x-text="getDetailedBrandsForCurrentProvider().length + ' marcas'"></span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Crea, edita, archiva o desvincula marcas asociadas a este proveedor. Se sincronizan en Hub 4, Hub 2 y Storefront PWA.</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button 
+                                        type="button" 
+                                        @click="openCreateBrandModal(selectedProvider ? (selectedProvider.dbId || String(selectedProvider.id).replace('prov_', '')) : (providerForm.dbId || providerForm.id))" 
+                                        class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                        title="Dar de alta una nueva marca comercial con ficha completa"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        <span>+ Nueva Marca</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Input para desprendimiento rápido en caliente -->
+                            <div class="p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-2">
+                                <label class="block text-xs font-bold text-indigo-950">Desprender / Asociar Nueva Marca Comercial</label>
+                                <div class="flex items-center gap-2">
+                                    <input 
+                                        type="text" 
+                                        x-model="newBrandTag" 
+                                        @keydown.enter.prevent="addAndPersistBrandToProvider()" 
+                                        placeholder="Nombre de la marca comercial (ej. Aura Lingerie, Torzo Denim)..." 
+                                        class="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 placeholder-slate-400"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        @click="addAndPersistBrandToProvider()" 
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition cursor-pointer shrink-0 flex items-center gap-1 shadow-2xs"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        <span>Crear &amp; Vincular</span>
+                                    </button>
+                                </div>
+                                <span class="text-[10px] text-slate-500 block">Escribe el nombre y presiona Enter o el botón para crear la marca de inmediato y persistirla en la base de datos.</span>
+                            </div>
+
+                            <!-- Visualización de Marcas Desprendidas con Acciones CRUD Completas -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                    <span>Marcas registradas bajo este proveedor:</span>
+                                    <span class="text-slate-400 font-normal normal-case" x-text="getDetailedBrandsForCurrentProvider().length + ' marcas'"></span>
+                                </div>
+
+                                <div class="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                                    <template x-for="brand in getDetailedBrandsForCurrentProvider()" :key="brand.id || brand.name">
+                                        <div class="p-3 bg-white rounded-xl border border-slate-200/90 shadow-3xs flex items-center justify-between gap-3 hover:border-indigo-300 transition">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 font-black text-xs uppercase" x-text="(brand.name || '').substring(0, 2)">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold text-xs text-slate-900 truncate" x-text="brand.name"></span>
+                                                        <span 
+                                                            class="px-2 py-0.2 rounded-full text-[10px] font-bold"
+                                                            :class="brand.is_archived ? 'bg-amber-100 text-amber-800' : (brand.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700')"
+                                                            x-text="brand.is_archived ? 'Archivada' : (brand.is_active ? 'Activa' : 'Inactiva')"
+                                                        ></span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                                                        <span class="font-mono text-indigo-600" x-text="'slug: ' + (brand.slug || '')"></span>
+                                                        <span>•</span>
+                                                        <span x-text="(brand.sku_count || 0) + ' SKUs vinculados'"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Botones de Acción: Editar, Activar/Pausar, Archivar, Eliminar -->
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <!-- Editar -->
+                                                <button 
+                                                    type="button" 
+                                                    @click="openEditBrandByName(brand.name, selectedProvider ? (selectedProvider.dbId || String(selectedProvider.id).replace('prov_', '')) : null)"
+                                                    class="px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-3xs"
+                                                    title="Editar nombre, slug, logo y detalles de la marca"
+                                                >
+                                                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    <span>Editar</span>
+                                                </button>
+
+                                                <!-- Conmutar Activo / Inactivo -->
+                                                <button 
+                                                    type="button" 
+                                                    x-show="!brand.is_archived"
+                                                    @click="toggleActiveBrandFromProvider(brand)"
+                                                    class="p-1 rounded-lg border transition cursor-pointer"
+                                                    :class="brand.is_active ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 border-slate-200' : 'text-emerald-600 hover:bg-emerald-50 border-emerald-200'"
+                                                    :title="brand.is_active ? 'Pausar / Desactivar marca' : 'Activar marca'"
+                                                >
+                                                    <svg x-show="brand.is_active" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <svg x-show="!brand.is_active" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </button>
+
+                                                <!-- Archivar / Restaurar -->
+                                                <button 
+                                                    type="button" 
+                                                    @click="toggleArchiveBrandFromProvider(brand)"
+                                                    class="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 transition cursor-pointer"
+                                                    :class="brand.is_archived ? 'text-emerald-600 hover:bg-emerald-50 border-emerald-200' : 'text-slate-400 hover:text-amber-600'"
+                                                    :title="brand.is_archived ? 'Restaurar marca archivada' : 'Archivar marca'"
+                                                >
+                                                    <svg x-show="!brand.is_archived" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                                    <svg x-show="brand.is_archived" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                </button>
+
+                                                <!-- Eliminar / Desvincular -->
+                                                <button 
+                                                    type="button" 
+                                                    @click="deleteOrDetachBrandFromProvider(brand)"
+                                                    class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer"
+                                                    title="Eliminar o desvincular marca permanentemente"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <div x-show="getDetailedBrandsForCurrentProvider().length === 0" class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-xs text-slate-500 text-center">
+                                        <p class="font-semibold text-slate-700">Sin marcas adicionales desprendidas</p>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Usa el campo superior para dar de alta una marca comercial y vincularla a este proveedor.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Columna Derecha: Scorecard SLA & Control de Estado (5 Cols) -->
+                    <div class="md:col-span-5 space-y-4">
+                        <div class="border-b border-slate-100 pb-2">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Desempeño SLA & Confiabilidad</h4>
+                        </div>
+
+                        <!-- Modo Proveedor Existente: Scorecard SLA -->
+                        <div x-show="!isCreatingProvider && selectedProvider" class="space-y-4">
+                            <!-- Tarjeta On-Time Delivery -->
+                            <div class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-bold text-emerald-900">Entregas a Tiempo (On-Time)</span>
+                                    <span class="text-sm font-black text-emerald-700" x-text="(selectedProvider?.slaOnTimePct || 100) + '%'"></span>
+                                </div>
+                                <div class="w-full bg-emerald-200/60 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaOnTimePct || 100) + '%'"></div>
+                                </div>
+                                <p class="text-[10px] text-emerald-800 mt-1.5 font-medium">Histórico validado en rampa de recepción contra fecha compromiso de OC.</p>
+                            </div>
+
+                            <!-- Tarjeta Fill Rate (Sin Faltantes) -->
+                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-bold text-indigo-900">Cumplimiento de Cantidad (Fill Rate)</span>
+                                    <span class="text-sm font-black text-indigo-700" x-text="(selectedProvider?.slaFillRatePct || 100) + '%'"></span>
+                                </div>
+                                <div class="w-full bg-indigo-200/60 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" :style="'width: ' + (selectedProvider?.slaFillRatePct || 100) + '%'"></div>
+                                </div>
+                                <p class="text-[10px] text-indigo-800 mt-1.5 font-medium">Porcentaje de piezas físicas recibidas completas sin remanentes pendientes.</p>
+                            </div>
+
+                            <!-- Comparativa Lead Time y Órdenes -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Demora Promedio</span>
+                                    <span class="text-base font-black text-slate-800" x-text="'+' + (selectedProvider?.avgDelayDays || 0) + ' d'"></span>
+                                    <span class="block text-[10px] text-slate-500">sobre fecha pactada</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Órdenes OCs</span>
+                                    <span class="text-base font-black text-slate-800" x-text="(selectedProvider?.completedOrders || 0) + ' / ' + (selectedProvider?.totalOrders || 0)"></span>
+                                    <span class="block text-[10px] text-slate-500">completadas</span>
+                                </div>
+                            </div>
+
+                            <!-- Selector de Estado Técnico / Operativo -->
+                            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                                <label class="block text-[11px] font-bold text-slate-700 mb-2">Estado Operativo en Plataforma</label>
+                                <template x-if="selectedProvider?.status === 'archived'">
+                                    <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 text-center">
+                                        <div class="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+                                            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                                            <span>Proveedor Archivado / Descontinuado</span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mb-2">No recibe pedidos automáticos ni órdenes de reabastecimiento.</p>
+                                        <button 
+                                            type="button" 
+                                            @click="restoreProvider(selectedProvider)"
+                                            class="w-full py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <span>Restaurar a Estado Conectado</span>
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="selectedProvider?.status !== 'archived'">
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button 
+                                            type="button" 
+                                            @click="providerForm.status = 'connected'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'connected')"
+                                            :class="providerForm.status === 'connected' ? 'bg-emerald-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
+                                        >
+                                            Conectado
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="providerForm.status = 'maintenance'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'maintenance')"
+                                            :class="providerForm.status === 'maintenance' ? 'bg-amber-500 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
+                                        >
+                                            Mantenimiento
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            @click="providerForm.status = 'paused'; if (!isEditingProvider) toggleProviderStatus(selectedProvider, 'paused')"
+                                            :class="providerForm.status === 'paused' ? 'bg-slate-600 text-white font-bold' : 'bg-white text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 transition text-center cursor-pointer"
+                                        >
+                                            Pausado
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Modo Alta: Tarjeta informativa de SLA y Resumen del Alta Manual -->
+                        <div x-show="isCreatingProvider" class="space-y-3">
+                            <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 text-slate-700 space-y-2.5">
+                                <div class="flex items-center gap-2 font-bold text-xs text-indigo-900">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Resumen de Alta (Regla 6.45)</span>
+                                </div>
+                                <div class="space-y-1.5 text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200/80">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-[11px]">Tipo de Alta:</span>
+                                        <span class="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded text-[10px]" x-text="providerForm.origin === 'manual' ? 'Alta Manual Directa' : 'Conector Scraping'"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-[11px]">RFC / Tax ID:</span>
+                                        <span class="font-mono font-bold text-slate-800" x-text="providerForm.taxId || 'Pendiente'"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-400 text-[11px]">Marcas en Árbol:</span>
+                                        <span class="font-bold text-indigo-700" x-text="(providerForm.brands || []).length + ' marcas'"></span>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] leading-relaxed text-slate-500">
+                                    Al guardar este proveedor, sus marcas se incorporan al árbol jerárquico de filtros faceteados y sus datos fiscales quedarán listos para facturación y Kardex.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Pie del Modal: Acciones -->
+                <div class="px-6 py-4 border-t border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span x-show="!isCreatingProvider && !isEditingProvider" class="text-xs text-slate-400 font-mono" x-text="'ID: ' + (selectedProvider?.id || '')"></span>
+                        <template x-if="!isCreatingProvider && !isEditingProvider && selectedProvider">
+                            <div class="inline-flex items-center gap-2 ml-3 pl-3 border-l border-slate-200">
+                                <template x-if="selectedProvider.status !== 'archived'">
+                                    <button 
+                                        type="button" 
+                                        @click="archiveProvider(selectedProvider)" 
+                                        class="px-2.5 py-1 text-xs text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-slate-200 hover:border-amber-200"
+                                        title="Archivar proveedor"
+                                    >
+                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                        <span>Archivar</span>
+                                    </button>
+                                </template>
+                                <template x-if="selectedProvider.status === 'archived'">
+                                    <button 
+                                        type="button" 
+                                        @click="restoreProvider(selectedProvider)" 
+                                        class="px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-emerald-300"
+                                        title="Restaurar proveedor a activo"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>Restaurar</span>
+                                    </button>
+                                </template>
+                                <button 
+                                    type="button" 
+                                    @click="deleteProvider(selectedProvider)" 
+                                    class="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer flex items-center gap-1 border border-rose-200"
+                                    title="Eliminar definitivamente de la base de datos"
+                                >
+                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <span>Eliminar</span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            type="button" 
+                            @click="cancelProviderEdit()" 
+                            class="px-4 py-2 text-slate-600 hover:text-slate-800 text-xs font-semibold rounded-xl hover:bg-slate-200/60 transition cursor-pointer"
+                        >
+                            <span x-text="isCreatingProvider ? 'Cancelar' : (isEditingProvider ? 'Descartar Cambios' : 'Cerrar')"></span>
+                        </button>
+                        <button 
+                            type="button" 
+                            x-show="!isCreatingProvider && !isEditingProvider"
+                            @click="editProviderFromModal()" 
+                            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition border border-indigo-200/80 cursor-pointer flex items-center gap-1.5"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Editar Condiciones</span>
+                        </button>
+                        <button 
+                            type="button" 
+                            x-show="isCreatingProvider || isEditingProvider"
+                            @click="saveProvider()" 
+                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span x-text="isCreatingProvider ? 'Guardar Proveedor' : 'Guardar Cambios'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL ERGONÓMICO: ALTA Y EDICIÓN DE MARCAS COMERCIALES (TASK-BRD-01) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="brandModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[130] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 130 !important; display: none;"
+        >
+            <div 
+                @click.outside="brandModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl overflow-hidden flex flex-col"
+            >
+                <!-- Cabecera del Modal -->
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-slate-50/60 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900" x-text="isCreatingBrand ? 'Nueva Marca Comercial' : 'Editar Marca: ' + brandForm.name"></h3>
+                            <p class="text-xs text-slate-500">Gobernanza comercial y vinculación con proveedores y storefront</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="brandModalOpen = false" 
+                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                        aria-label="Cerrar modal"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Formulario -->
+                <div class="p-6 space-y-4">
+                    <!-- Nombre y Slug -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial *</label>
+                            <input 
+                                type="text" 
+                                x-model="brandForm.name" 
+                                placeholder="Ej. Torzo Denim, ModaIntima Lux..." 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                            <input 
+                                type="text" 
+                                x-model="brandForm.slug" 
+                                placeholder="torzo-denim (auto-generado)" 
+                                class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Proveedor Asociado (Regla 1: Mandatorio) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700">Proveedor Comercial Asociado <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.2 rounded">Obligatorio (Regla 1)</span>
+                        </div>
+                        <select 
+                            x-model="brandForm.supplier_id" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white font-semibold text-slate-800"
+                            required
+                        >
+                            <option value="">-- Selecciona el Proveedor Obligatorio --</option>
+                            <template x-for="prov in providers" :key="prov.id">
+                                <option :value="String(prov.dbId || String(prov.id).replace('prov_', ''))" x-text="(prov.tradeName || prov.name) + (prov.vendorCode ? ' (' + prov.vendorCode + ')' : '')"></option>
+                            </template>
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1">Regla 1: Toda marca comercial debe estar asociada a un proveedor registrado para integrarse a su árbol jerárquico y reflejarse en catálogos y filtros.</p>
+                    </div>
+
+                    <!-- Descripción / Posicionamiento -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Descripción / Propuesta de Valor</label>
+                        <textarea 
+                            x-model="brandForm.description" 
+                            rows="2" 
+                            placeholder="Breve reseña del estilo, audiencia o catálogo de la marca..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <!-- Logotipo y Sitio Web -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">URL de Logotipo / Imagotipo</label>
+                            <input 
+                                type="url" 
+                                x-model="brandForm.logo_url" 
+                                placeholder="https://ejemplo.com/logo.png" 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Sitio Web Oficial</label>
+                            <input 
+                                type="url" 
+                                x-model="brandForm.website" 
+                                placeholder="https://..." 
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Estado Activo -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <input 
+                            type="checkbox" 
+                            id="brandActiveCheck"
+                            x-model="brandForm.is_active" 
+                            class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        >
+                        <label for="brandActiveCheck" class="text-xs font-semibold text-slate-700 cursor-pointer">
+                            Marca Activa para comercialización en vitrinas y filtros
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="brandModalOpen = false" 
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveBrandModal()" 
+                        class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span x-text="isCreatingBrand ? 'Dar de Alta Marca' : 'Guardar Cambios'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE CATEGORÍA / SUBCATEGORÍA (Regla 3) -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickCategoryModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickCategoryModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white" x-text="quickCategoryType === 'subcategory' ? 'Nueva Subcategoría In Situ' : 'Nueva Categoría In Situ'"></h3>
+                            <p class="text-[10px] text-slate-300" x-text="quickCategoryType === 'subcategory' ? ('Asociada a: ' + quickCategoryParentName) : 'Catálogo Maestro RevOps'"></p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickCategoryModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal rápido"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <div x-show="quickCategoryType === 'subcategory'" class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100 flex items-center gap-2 text-indigo-900">
+                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                        <span class="text-[11px] font-semibold">Categoría Padre: <b class="font-bold text-indigo-950" x-text="quickCategoryParentName"></b></span>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span x-text="quickCategoryType === 'subcategory' ? 'Nombre de la Subcategoría' : 'Nombre de la Categoría'"></span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickCategoryForm.name" 
+                            @keydown.enter.prevent="saveQuickCategory()"
+                            :placeholder="quickCategoryType === 'subcategory' ? 'Ej: Micro-Briefs, Seamless, Compresión...' : 'Ej: Jockstraps Deportivos, Loungewear...'" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Descripción / Notas (Opcional)</label>
+                        <textarea 
+                            x-model="quickCategoryForm.description" 
+                            rows="2" 
+                            placeholder="Detalle o clasificación técnica..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Regla 3: Se creará en el catálogo maestro y se auto-seleccionará inmediatamente en tu línea de trabajo activa sin perder tu progreso.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickCategoryModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickCategory()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Guardar y Asignar In Situ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE VITRINA WEB (Regla Workstation)    -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickStoreSectionModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickStoreSectionModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Nueva Vitrina Web In Situ</h3>
+                            <p class="text-[10px] text-slate-300">Sincronización directa con Ajustes de Vitrina Web</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickStoreSectionModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal de vitrina"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span>Nombre de la Vitrina / Sección Web</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickStoreSectionForm.name" 
+                            @keydown.enter.prevent="saveQuickStoreSection()"
+                            placeholder="Ej: Lo Más Vendido, Novedades Primavera, Liquidación VIP..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Slug URL (Opcional)</label>
+                        <input 
+                            type="text" 
+                            x-model="quickStoreSectionForm.slug" 
+                            placeholder="lo-mas-vendido (auto-generado si se omite)" 
+                            class="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-600"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Descripción / Propósito Comercial (Opcional)</label>
+                        <textarea 
+                            x-model="quickStoreSectionForm.description" 
+                            rows="2" 
+                            placeholder="Ej: Sección destacada en la página principal para artículos con alto volumen de conversión..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Regla: Esta vitrina se creará en el catálogo y quedará sincronizada con los ajustes de vitrina web del módulo, asignándose automáticamente a este producto.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickStoreSectionModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickStoreSection()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Crear y Sincronizar Vitrina</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE TIPO DE TELA (Regla 5)              -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickFabricModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickFabricModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Nuevo Tipo de Tela In Situ</h3>
+                            <p class="text-[10px] text-slate-300">Catálogo de Fibras Textiles RevOps</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickFabricModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal de tela"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span>Nombre de la Tela / Fibra</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickFabricForm.name" 
+                            @keydown.enter.prevent="saveQuickFabric()"
+                            placeholder="Ej: Modal Peinado Premium, Seda / Satín, Algodón Pima" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Descripción / Propiedad Textil (Opcional)</label>
+                        <textarea 
+                            x-model="quickFabricForm.description" 
+                            rows="2" 
+                            placeholder="Ej: 95% celulosa natural ultra-sedosa con secado rápido..." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 resize-none"
+                        ></textarea>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Regla 5 &amp; 6: La tela se asociará directamente al producto y quedará disponible permanentemente en los ajustes de inventario.
+                    </p>
+                </div>
+
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickFabricModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickFabric()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Crear y Asignar Tela</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODAL RÁPIDO DE ALTA IN SITU DE COLOR / TORNASOL (Reglas 1 y 3)     -->
+        <!-- ================================================================= -->
+        <div 
+            x-show="quickColorModalOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-[150] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            style="z-index: 150 !important; display: none;"
+        >
+            <div 
+                @click.outside="quickColorModalOpen = false"
+                class="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden flex flex-col"
+            >
+                <div class="px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-slate-900 to-purple-950 text-white flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Nuevo Color / Tornasol In Situ</h3>
+                            <p class="text-[10px] text-purple-200">Variantes de Color para Conmutación Web</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="quickColorModalOpen = false" 
+                        class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        aria-label="Cerrar modal de color"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-3.5 text-xs">
+                    <!-- Checkbox de Opción Multicolor Nativa (Regla de Negocio) -->
+                    <div class="p-3 bg-gradient-to-r from-red-50 via-amber-50 to-indigo-50 rounded-xl border border-indigo-200 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <input 
+                                type="checkbox" 
+                                id="quickColorIsMulticolor" 
+                                x-model="quickColorForm.isMulticolor"
+                                class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                            >
+                            <label for="quickColorIsMulticolor" class="text-xs font-bold text-slate-900 cursor-pointer flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-full inline-block shrink-0 shadow-2xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                <span>Opción Multicolor (Arcoíris del Sistema)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje y preview reactivo si Multicolor está seleccionado -->
+                    <template x-if="quickColorForm.isMulticolor">
+                        <div class="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl border border-indigo-300 shadow-xs shrink-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></div>
+                                <div>
+                                    <div class="font-bold text-slate-900">Color Multicolor Nativo Seleccionado</div>
+                                    <p class="text-[11px] text-slate-600 leading-tight mt-0.5">
+                                        Anula la creación de un nuevo color y asigna directamente la opción <b>Multicolor</b> arcoíris predeterminada del sistema.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Formulario Manual (Solo si no es multicolor) -->
+                    <div x-show="!quickColorForm.isMulticolor" class="space-y-3.5">
+                        <!-- Toggle Sólido vs Tornasol -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tipo de Acabado</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button 
+                                    type="button" 
+                                    @click="quickColorForm.type = 'solid'" 
+                                    class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
+                                    :class="quickColorForm.type === 'solid' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                                >
+                                    Color Sólido
+                                </button>
+                                <button 
+                                    type="button" 
+                                    @click="quickColorForm.type = 'iridescent'" 
+                                    class="p-2 rounded-lg font-bold border text-center transition cursor-pointer text-xs"
+                                    :class="quickColorForm.type === 'iridescent' ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-2xs' : 'bg-slate-50 text-slate-600 border-slate-200'"
+                                >
+                                    Tornasol / Degradado
+                                </button>
+                            </div>
+                        </div>
+
+                    <!-- Nombre del Color -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">
+                            <span>Nombre del Color</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            x-model="quickColorForm.name" 
+                            @keydown.enter.prevent="saveQuickColor()"
+                            placeholder="Ej: Negro Profundo, Azul Eléctrico, Galaxia Tornasol" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-semibold text-slate-900"
+                            autofocus
+                        >
+                    </div>
+
+                    <!-- Selector de Color Sólido -->
+                    <div x-show="quickColorForm.type === 'solid'">
+                        <label class="block font-bold text-slate-700 mb-1">Muestra Hexadecimal</label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="color" 
+                                x-model="quickColorForm.hex" 
+                                class="w-10 h-10 p-0 border border-slate-300 rounded-lg cursor-pointer shrink-0"
+                            >
+                            <input 
+                                type="text" 
+                                x-model="quickColorForm.hex" 
+                                placeholder="#0f172a" 
+                                class="w-full px-3 py-2 text-xs font-mono font-bold border border-slate-300 rounded-lg text-slate-900 uppercase"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Selector de Tornasol / Degradado -->
+                    <div x-show="quickColorForm.type === 'iridescent'" class="space-y-2">
+                        <label class="block font-bold text-slate-700 mb-1">Paradas de Degradado Tornasol (3 Tonos)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-0.5">Tono 1</span>
+                                <input type="color" x-model="quickColorForm.gradientColor1" class="w-full h-8 p-0 border border-slate-300 rounded cursor-pointer">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-0.5">Tono 2</span>
+                                <input type="color" x-model="quickColorForm.gradientColor2" class="w-full h-8 p-0 border border-slate-300 rounded cursor-pointer">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-0.5">Tono 3</span>
+                                <input type="color" x-model="quickColorForm.gradientColor3" class="w-full h-8 p-0 border border-slate-300 rounded cursor-pointer">
+                            </div>
+                        </div>
+                        <!-- Preview Tornasol -->
+                        <div 
+                            class="h-8 rounded-lg border border-slate-300 shadow-inner"
+                            :style="'background: linear-gradient(135deg, ' + quickColorForm.gradientColor1 + ' 0%, ' + quickColorForm.gradientColor2 + ' 50%, ' + quickColorForm.gradientColor3 + ' 100%)'"
+                        ></div>
+                    </div>
+
+                    <p class="text-[10px] text-slate-400">
+                        Reglas 1 y 3: Se asociará automáticamente a la prenda o a la fotografía activa para la correcta conmutación por filtros en tienda web.
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="quickColorModalOpen = false" 
+                        class="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="saveQuickColor()" 
+                        class="px-4 py-1.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span x-text="quickColorForm.isMulticolor ? 'Asignar Multicolor In Situ' : 'Crear y Asignar Color'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL DE DISCREPANCIA B2B: PRODUCTO DESCONTINUADO EN ORIGEN (REGLA 4)     -->
+        <!-- ========================================================================= -->
+        <div 
+            x-show="discontinuedProductModalOpen" 
+            class="fixed inset-0 z-[130] overflow-y-auto" 
+            style="display: none;"
+            @keydown.escape.window="discontinuedProductModalOpen = false"
+        >
+            <div 
+                x-show="discontinuedProductModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+                @click="discontinuedProductModalOpen = false"
+            ></div>
+
+            <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+                <div 
+                    x-show="discontinuedProductModalOpen"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="relative bg-white rounded-2xl max-w-xl w-full text-left shadow-2xl overflow-hidden border border-slate-200 z-10 my-8"
+                    @click.stop
+                >
+                    <!-- Header -->
+                    <div class="px-6 py-4 bg-amber-500 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white/20 rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white leading-tight">Discrepancia B2B: Prenda Descontinuada en Origen</h3>
+                                <p class="text-xs text-amber-100 font-medium mt-0.5">Regla 4: Notificación del Centro de Auditoría y Discrepancias B2B</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="discontinuedProductModalOpen = false" 
+                            class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6 space-y-4">
+                        <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
+                            <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <strong>Producto retirado por proveedor:</strong> La actualización de scraping detectó que esta referencia fue removida del catálogo del proveedor mayorista. Selecciona la acción operativa requerida.
+                            </div>
+                        </div>
+
+                        <!-- Ficha de la prenda -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200" x-show="selectedDiscontinuedAlert">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-white rounded-lg border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <template x-if="selectedDiscontinuedAlert?.image">
+                                        <img :src="selectedDiscontinuedAlert.image" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!selectedDiscontinuedAlert?.image">
+                                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </template>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100" x-text="selectedDiscontinuedAlert?.sku"></span>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500" x-text="selectedDiscontinuedAlert?.supplier || 'Proveedor B2B'"></span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-900 mt-1 truncate" x-text="selectedDiscontinuedAlert?.name || selectedDiscontinuedAlert?.productTitle"></h4>
+                                    <p class="text-xs text-slate-500 mt-0.5" x-text="'Alerta: ' + (selectedDiscontinuedAlert?.description || selectedDiscontinuedAlert?.issue || 'Descontinuado en origen')"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo / Justificación -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">
+                                Motivo / Justificación de la decisión operativa:
+                            </label>
+                            <input 
+                                type="text" 
+                                x-model="discontinuedActionReason" 
+                                placeholder="Ej: Confirmado con proveedor Torzo / Ya no se fabricará / Fuera de temporada"
+                                class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium text-slate-800"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Acciones Operativas (Regla 4: Retirar, Archivar, Eliminar) -->
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <button 
+                            type="button" 
+                            @click="discontinuedProductModalOpen = false" 
+                            class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition cursor-pointer"
+                        >
+                            Cancelar
+                        </button>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                            <!-- Opción 1: Retirar del Catálogo (Ocultar) -->
+                            <button 
+                                type="button" 
+                                @click="resolveDiscontinuedProduct('hide')" 
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+                                title="Oculta la prenda de la vitrina sin destruirla"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                                <span>Retirar del Catálogo</span>
+                            </button>
+
+                            <!-- Opción 2: Archivar Producto -->
+                            <button 
+                                type="button" 
+                                @click="resolveDiscontinuedProduct('archive')" 
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+                                title="Mueve el producto a la herramienta de archivados y descontinuados"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                <span>Archivar Producto</span>
+                            </button>
+
+                            <!-- Opción 3: Eliminar Producto -->
+                            <button 
+                                type="button" 
+                                @click="resolveDiscontinuedProduct('delete')" 
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+                                title="Elimina definitivamente el producto del sistema"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                <span>Eliminar Producto</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL / HERRAMIENTA: PRODUCTOS ARCHIVADOS Y DESCONTINUADOS (REGLA 5)       -->
+        <!-- ========================================================================= -->
+        <div 
+            x-show="archivedProductsModalOpen" 
+            class="fixed inset-0 z-[130] overflow-y-auto" 
+            style="display: none;"
+            @keydown.escape.window="archivedProductsModalOpen = false"
+        >
+            <div 
+                x-show="archivedProductsModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+                @click="archivedProductsModalOpen = false"
+            ></div>
+
+            <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+                <div 
+                    x-show="archivedProductsModalOpen"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="relative bg-white rounded-2xl max-w-5xl w-full text-left shadow-2xl overflow-hidden border border-slate-200 z-10 my-8 flex flex-col max-h-[88vh]"
+                    @click.stop
+                >
+                    <!-- Header -->
+                    <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white leading-tight">Herramienta de Productos Archivados y Descontinuados</h3>
+                                <p class="text-xs text-slate-300 mt-0.5">Regla 5: Histórico de prendas fuera de catálogo. Puedes volver a activarlas o eliminarlas definitivamente.</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="archivedProductsModalOpen = false" 
+                            class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Toolbar de búsqueda y filtros -->
+                    <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                        <div class="relative flex-1 min-w-[240px] max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </span>
+                            <input 
+                                type="text" 
+                                x-model="archivedSearchQuery" 
+                                placeholder="Buscar por SKU, nombre, motivo o marca..."
+                                class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium text-slate-800 bg-white"
+                            >
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-500">Total en archivo:</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200" x-text="filteredArchivedProducts.length + ' prendas'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de productos archivados / descontinuados -->
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <template x-if="filteredArchivedProducts.length === 0">
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-3">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                    </svg>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-700">No hay productos archivados ni descontinuados</h4>
+                                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Cuando un proveedor retire productos en los escrapeos o decidas archivarlos desde la auditoría operativa, residirán en esta herramienta.</p>
+                            </div>
+                        </template>
+
+                        <template x-if="filteredArchivedProducts.length > 0">
+                            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3">Prenda / Modelo</th>
+                                            <th class="px-4 py-3">SKU</th>
+                                            <th class="px-4 py-3">Motivo de Retiro</th>
+                                            <th class="px-4 py-3">Fecha</th>
+                                            <th class="px-4 py-3 text-right">Acciones (Regla 5)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 bg-white">
+                                        <template x-for="prod in filteredArchivedProducts" :key="prod.id || prod.sku">
+                                            <tr class="hover:bg-slate-50 transition">
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                                                            <template x-if="prod.image">
+                                                                <img :src="prod.image" class="w-full h-full object-cover">
+                                                            </template>
+                                                            <template x-if="!prod.image">
+                                                                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                            </template>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="font-bold text-slate-900 truncate" x-text="prod.name"></div>
+                                                            <div class="text-[10px] text-slate-400" x-text="prod.brand || 'Marca General'"></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 font-mono font-semibold text-slate-700" x-text="prod.sku"></td>
+                                                <td class="px-4 py-3">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                        <span x-text="prod.discontinuedReason || 'Descontinuado'"></span>
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3 text-slate-500 font-mono text-[11px]" x-text="prod.archivedAt || 'Reciente'"></td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <!-- Botón Volver a Activar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="reactivateArchivedProduct(prod.id)" 
+                                                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition cursor-pointer"
+                                                            title="Volver a activar producto en el catálogo operativo"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                            </svg>
+                                                            <span>Activar</span>
+                                                        </button>
+
+                                                        <!-- Botón Eliminar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="deleteArchivedProduct(prod.id)" 
+                                                            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition cursor-pointer"
+                                                            title="Eliminar producto definitivamente"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                            <span>Eliminar</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                        <div class="text-[11px] text-slate-500">
+                            Los productos activados volverán de inmediato a la vista del catálogo operativo y vitrina comercial.
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="archivedProductsModalOpen = false" 
+                            class="px-4 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition cursor-pointer"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL / HERRAMIENTA: BORRADORES PRE-GUARDADOS (REGLA 5)                   -->
+        <!-- ========================================================================= -->
+        <div 
+            x-show="draftsModalOpen" 
+            class="fixed inset-0 z-[130] overflow-y-auto" 
+            style="display: none;"
+            @keydown.escape.window="draftsModalOpen = false"
+        >
+            <div 
+                x-show="draftsModalOpen"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" 
+                @click="draftsModalOpen = false"
+            ></div>
+
+            <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+                <div 
+                    x-show="draftsModalOpen"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    class="relative bg-white rounded-2xl max-w-5xl w-full text-left shadow-2xl overflow-hidden border border-slate-200 z-10 my-8 flex flex-col max-h-[88vh]"
+                    @click.stop
+                >
+                    <!-- Header -->
+                    <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-xl border border-sky-500/30">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white leading-tight">Borradores y Prendas Pre-guardadas</h3>
+                                <p class="text-xs text-slate-300 mt-0.5">Regla 5: Las prendas aquí pre-guardadas NO están en el catálogo operativo. Solo tras ser aprobadas pasan oficialmente a la venta.</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="draftsModalOpen = false" 
+                            class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Toolbar de búsqueda y filtros -->
+                    <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                        <div class="relative flex-1 min-w-[240px] max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </span>
+                            <input 
+                                type="text" 
+                                x-model="draftSearchQuery" 
+                                placeholder="Buscar borrador por SKU, título, marca o categoría..." 
+                                class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-medium text-slate-800 bg-white"
+                            >
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-500">Pendientes de Aprobación:</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200" x-text="filteredDraftProducts.length + ' borradores'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Listado de Borradores -->
+                    <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                        <!-- Empty State: Sin borradores en general -->
+                        <template x-if="!draftProducts || draftProducts.length === 0">
+                            <div class="py-12 text-center">
+                                <div class="w-16 h-16 bg-sky-50 text-sky-500 border border-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-800">No hay borradores pendientes</h4>
+                                <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">Todos los productos dados de alta han sido aprobados oficialmente y están activos en el catálogo operativo. Puedes usar el botón "Pre-guardar Borrador" en el Workstation para guardar prendas en revisión.</p>
+                            </div>
+                        </template>
+
+                        <!-- Empty State: Búsqueda sin coincidencias -->
+                        <template x-if="draftProducts && draftProducts.length > 0 && filteredDraftProducts.length === 0">
+                            <div class="py-8 text-center text-slate-500 text-xs">
+                                No se encontraron borradores que coincidan con "<span class="font-bold text-slate-700" x-text="draftSearchQuery"></span>".
+                            </div>
+                        </template>
+
+                        <!-- Tabla de Borradores -->
+                        <template x-if="filteredDraftProducts && filteredDraftProducts.length > 0">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3">Prenda</th>
+                                            <th class="px-4 py-3">Categoría & Sección</th>
+                                            <th class="px-4 py-3">Tela & Color</th>
+                                            <th class="px-4 py-3 text-right">PVP / Stock</th>
+                                            <th class="px-4 py-3 text-right">Acciones de Aprobación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <template x-for="draft in filteredDraftProducts" :key="draft.id || draft.sku">
+                                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-12 h-15 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+                                                            <img 
+                                                                :src="resolveProductImage(draft)" 
+                                                                class="w-full h-full object-cover" 
+                                                                :alt="draft.name"
+                                                            >
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-mono font-bold text-[11px] text-sky-800" x-text="draft.sku"></div>
+                                                            <div class="font-semibold text-slate-800 text-xs line-clamp-1" x-text="draft.name"></div>
+                                                            <div class="text-[10px] text-slate-400 mt-0.5">
+                                                                <span class="font-medium text-slate-600" x-text="draft.brand || 'ModaIntima Textil MX'"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex flex-col gap-0.5">
+                                                        <span class="font-semibold text-slate-700" x-text="draft.category || 'General'"></span>
+                                                        <span class="text-[10px] text-slate-400 uppercase tracking-wider" x-text="draft.websiteSection || 'Básicos'"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex flex-col gap-1">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 w-fit" x-text="draft.fabricType || 'Algodón Peinado'"></span>
+                                                        <div class="flex items-center gap-1.5">
+                                                            <template x-if="draft.colorName?.toLowerCase() === 'multicolor' || (draft.colorHex && draft.colorHex.includes('gradient'))">
+                                                                <span class="w-3 h-3 rounded-full border border-slate-300 shrink-0 shadow-3xs" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #a855f7 100%);"></span>
+                                                            </template>
+                                                            <template x-if="draft.colorName?.toLowerCase() !== 'multicolor' && (!draft.colorHex || !draft.colorHex.includes('gradient'))">
+                                                                <span class="w-3 h-3 rounded-full border border-slate-300 shrink-0 shadow-3xs" :style="'background: ' + (draft.colorHex || '#0f172a')"></span>
+                                                            </template>
+                                                            <span class="text-[11px] text-slate-600" x-text="draft.colorName || 'Negro'"></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="font-bold text-slate-900" x-text="formatCurrency(draft.pvp || draft.price || 0)"></div>
+                                                    <div class="text-[10px] text-slate-500 mt-0.5">
+                                                        <span class="font-semibold" x-text="draft.sizes ? Object.values(draft.sizes).reduce((acc, v) => acc + Number(v || 0), 0) : (draft.localStock || draft.stock || 0)"></span> un. pre-asignadas
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <!-- Botón Aprobar y Publicar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="approveDraftProduct(draft)" 
+                                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-2xs transition cursor-pointer"
+                                                            title="Aprobar oficialmente y enviar al catálogo operativo"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <span>Aprobar & Publicar</span>
+                                                        </button>
+
+                                                        <!-- Botón Cargar en Workstation -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="loadDraftIntoWorkstation(draft)" 
+                                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition cursor-pointer"
+                                                            title="Cargar en el workstation para editar y revisar"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                            </svg>
+                                                            <span>Editar</span>
+                                                        </button>
+
+                                                        <!-- Botón Descartar -->
+                                                        <button 
+                                                            type="button" 
+                                                            @click="discardDraftProduct(draft)" 
+                                                            class="inline-flex items-center p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition cursor-pointer"
+                                                            title="Descartar borrador"
+                                                        >
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                        <div class="text-[11px] text-slate-500">
+                            Los productos aprobados entran de inmediato al catálogo operativo, inventario activo y vitrina comercial.
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="draftsModalOpen = false" 
+                            class="px-4 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition cursor-pointer"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 </div>
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20260927"></script>
+    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v11"></script>
 @endpush

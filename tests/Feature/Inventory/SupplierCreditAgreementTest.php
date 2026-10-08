@@ -272,4 +272,89 @@ class SupplierCreditAgreementTest extends TestCase
         $this->assertEquals($po->id, $agreement->purchase_order_id);
         $this->assertEquals($po->id, $agreement->applied_to_po_id);
     }
+
+    public function test_can_update_credit_agreement_and_records_kardex_traceability(): void
+    {
+        $agreement = SupplierCreditAgreement::create([
+            'supplier_id' => $this->supplier->id,
+            'reference_folio' => 'NC-TORZO-2026-0044',
+            'amount' => 500.00,
+            'status' => 'pending',
+            'resolution_notes' => 'Monto inicial pactado',
+        ]);
+
+        $updatePayload = [
+            'amount' => 850.00,
+            'resolution_notes' => 'Ajuste renegociado con taller por 2 prendas extra defectuosas',
+            'authorized_by_vendor_contact' => 'Lic. Roberto Morales',
+        ];
+
+        $response = $this->actingAs($this->user)->putJson('/api/v1/inventory/purchases/credit-agreements/' . $agreement->id, $updatePayload);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'agreement' => [
+                'ref' => 'NC-TORZO-2026-0044',
+                'amount' => 850.00,
+            ],
+        ]);
+
+        $agreement->refresh();
+        $this->assertEquals(850.00, (float) $agreement->amount);
+        $this->assertEquals('Ajuste renegociado con taller por 2 prendas extra defectuosas', $agreement->resolution_notes);
+
+        // Verificar trazabilidad inmutable en PurchaseKardex
+        $kardex = PurchaseKardex::where('movement_type', 'DISCREPANCY_UPDATED')
+            ->where('supplier_id', $this->supplier->id)
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($kardex);
+        $this->assertStringContainsString('NC-TORZO-2026-0044', $kardex->description);
+        $this->assertStringContainsString('850.00', $kardex->description);
+    }
+
+    public function test_cannot_update_applied_credit_agreement(): void
+    {
+        $agreement = SupplierCreditAgreement::create([
+            'supplier_id' => $this->supplier->id,
+            'reference_folio' => 'NC-TORZO-2026-0099',
+            'amount' => 1200.00,
+            'status' => 'applied',
+            'resolution_notes' => 'Ya liquidada en PO',
+        ]);
+
+        $response = $this->actingAs($this->user)->putJson('/api/v1/inventory/purchases/credit-agreements/' . $agreement->id, [
+            'amount' => 1500.00,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'success' => false,
+        ]);
+    }
+
+    public function test_can_query_all_agreements_with_status_all(): void
+    {
+        SupplierCreditAgreement::create([
+            'supplier_id' => $this->supplier->id,
+            'reference_folio' => 'NC-STATUS-PENDING',
+            'amount' => 100.00,
+            'status' => 'pending',
+        ]);
+        SupplierCreditAgreement::create([
+            'supplier_id' => $this->supplier->id,
+            'reference_folio' => 'NC-STATUS-APPLIED',
+            'amount' => 200.00,
+            'status' => 'applied',
+        ]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/inventory/purchases/credit-agreements?status=all');
+
+        $response->assertOk();
+        $refs = collect($response->json('agreements'))->pluck('ref')->all();
+        $this->assertContains('NC-STATUS-PENDING', $refs);
+        $this->assertContains('NC-STATUS-APPLIED', $refs);
+    }
 }

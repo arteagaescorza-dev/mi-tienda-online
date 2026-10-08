@@ -19,8 +19,10 @@ Tiene como objetivos:
 | **Operador de Empaque y Picking** | `picker` / `packer` | Surtido por pasillo, validación de prendas, ensamblado físico de combos, embalaje volumétrico y rotulación térmica | Restringido (solo cantidades físicas) | Hub 1 (Kanban Piso) & Hub 6 (Logística) |
 | **Encargada de Compras & Abastecimiento** | `purchases` / `buyer` | Reabastecimiento ROP, emisión de OCs a talleres, relación B2B, curaduría de scraping y cotejo de 3 vías | Costos de compra (CPP), términos de crédito y fletes | Hub 4 (Compras & Proveedores) & Hub 7 (B2B) |
 | **Asesora Comercial & Atención (Ana)** | `sales` / `support` | Validación Sepomex, recuperación de carritos WhatsApp, membresías MRR, guía de tallas y escudo antifraude | PVP, cupones de descuento y estados de pago | Hub 1 (Dashboard Ventas) & WhatsApp CRM |
+| **Editor de Contenidos & CMS / Merchandiser** | `cms_editor` / `store_manager` | Curaduría de vitrinas multiverso, constructor modular Drag & Drop, paleta cromática de 8 tokens, gestión de banners, páginas y revista digital | Cero acceso a balances contables ni márgenes confidenciales | Hub 2 (Tienda & CMS Multiverso) & Storefront PWA |
 | **Director General / RevOps / Finanzas** | `admin` / `finance` | Cascada de margen neto real, análisis Pareto ABC, conversión multiverso, fiscal SAT y telemetría de sistemas | Acceso total a facturación, P&L, MRR y márgenes | Hub 1 (Dashboard Ejecutivo) & Todos los Hubs |
 | **Operador Integral / Administrador Multirrol** | `all_roles` / `super_operator` | Orquestación total y ejecución transversal de todas las áreas operativas, comerciales y directivas | Acceso total e irrestricto | Todos los Hubs (Hub 1 al Hub 7) |
+
 
 ---
 
@@ -717,7 +719,86 @@ flowchart TD
 
 ---
 
+### 3.7. Rol: Editor de Contenidos & CMS / Merchandiser de Vitrina (`cms_editor` / `store_manager`)
+
+#### Función C1: Configuración de Vitrina Multiverso, Activos Gráficos & Paleta Cromática (8 Tokens)
+- **Objetivo Operativo:** Administrar la identidad comercial de las 4 vitrinas (`marte`, `venus`, `tiresias`, `terra`), actualizando logos vectoriales para desktop, logos compactos para PWA, favicon del sitio y la paleta de 8 tokens cromáticos sincronizados con el storefront en tiempo real.
+- **Secciones del Sistema:**
+  - *Hub 2 (Tienda & CMS Multiverso):* Submódulo 1 (`storeVisualPanel`) $\rightarrow$ Conmutador de Vitrinas $\rightarrow$ Formulario de Identidad & Paleta de Vitrina.
+  - *Previsualizador en Vivo a Escala:* Frame interactivo con conmutador Desktop / Móvil (375px) y visualización inmediata de tokens CSS.
+- **Punto Ciego:** Guardar cambios de color que comprometan el contraste y legibilidad según pautas WCAG AA (ej. texto oscuro sobre fondo oscuro o botones invisibles).
+- **Mitigación en Software:** El formulario incluye pickers con feedback de valor hexadecimal simultáneo, validación reactiva en el Previsualizador en Vivo y aplicación inmediata de variables CSS scoped en `:root` (`--brand-primary`, `--brand-secondary`, `--brand-accent`, `--brand-bg`, `--brand-surface`, `--brand-text`, `--brand-muted`, `--brand-border`).
+- **Diagrama de Decisión: Configuración de Vitrina y Paleta Cromática:**
+```mermaid
+flowchart TD
+    A37["Seleccionar Vitrina Multiverso (Marte/Venus/Tiresias/Terra)"] --> B37["Ajustar Nombre Comercial, Kicker & Activos de Marca"]
+    B37 --> C37["Cargar / Actualizar Logo Desktop, Logo Movil PWA y Favicon"]
+    C37 --> D37["Configurar Paleta Integral de 8 Tokens Cromaticos"]
+    D37 --> E37["Verificar Legibilidad y Jerarquia en Previsualizador en Vivo"]
+    E37 --> F37{"Pasa Contraste y Escala Responsive (Desktop/375px)?"}
+    F37 -- "Si (Optimo)" --> G37["Guardar Asincronamente en Base de Datos (AJAX)"]
+    G37 --> H37["Inyeccion Automatica en Storefront PWA (Tokens :root)"]
+    F37 -- "No (Bajo Contraste)" --> I37["Ajustar Tokens de Superficie, Texto o Acento"]
+    I37 --> E37
+```
+
+#### Función C2: Constructor Modular Drag & Drop & Ordenamiento Visual del Home
+- **Objetivo Operativo:** Construir, reordenar y activar secciones dinámicas en la página de inicio pública mediante la interfaz ergonómica SortableJS (bifurcación entre colecciones de catálogo y contenido institucional).
+- **Secciones del Sistema:**
+  - *Hub 2 (Tienda & CMS):* Submódulo 1 $\rightarrow$ Tabla Modular de Secciones del Home con tirador de arrastre (drag handle `:::`) y botones de acción rápida.
+  - *Modal Bifurcador:* `openCreateSectionModal()` con modo `catalog` (taxonomías, marcas, tipos de prenda, descuentos) vs modo `content` (heros, carruseles, custom HTML/CSS/JS).
+- **Punto Ciego:** Crear secciones de catálogo apuntando a marcas o etiquetas sin inventario físico disponible en bodega, resultando en estantes vacíos.
+- **Mitigación en Software:** La directiva Blade `@forelse` evalúa el conteo de SKUs activos y oculta automáticamente contenedores vacíos; además, el editor permite filtrar taxonomías con contador de productos en tiempo real.
+- **Diagrama de Decisión: Creación y Reordenamiento de Secciones:**
+```mermaid
+flowchart TD
+    A38["Abrir Modal 'Nueva Sección' en Hub 2"] --> B38{"Tipo de Seccion Requerida"}
+    B38 -- "Catalogo de Productos" --> C38["Seleccionar Taxonomias (Familia, Categoria, Descuento, Marca)"]
+    C38 --> D38["Definir Layout (Grid de Tarjetas / Carrusel Horizontal)"]
+    B38 -- "Contenido Editorial / Banner" --> E38["Seleccionar Hero, Banner Promocional o Custom HTML"]
+    E38 --> F38["Configurar Imagen, Copy Persuasivo y CTA de Destino"]
+    D38 --> G38["Guardar Seccion y Asignar a Vitrina"]
+    F38 --> G38
+    G38 --> H38["Reordenar Posicion en Tabla con Drag & Drop (SortableJS)"]
+    H38 --> I38["Sincronizacion Atomica de 'sort_order' en Base de Datos"]
+```
+
+#### Función C3: Desacoplamiento de Heros, Banners Promocionales y Marquesinas
+- **Objetivo Operativo:** Gestionar los banners de impacto comercial y la marquesina de anuncios superiores de forma desacoplada de la configuración estática de vitrina, permitiendo programar campañas temporales sin alterar la identidad de marca.
+- **Secciones del Sistema:**
+  - *Hub 2 (Tienda & CMS):* Submódulo 2 (`storeBannersPanel`) $\rightarrow$ Marquesina de Avisos y Gestor de Banners Publicitarios.
+- **Punto Ciego:** Mantener banners activos de promociones ya vencidas (ej. "Cyber Monday" o "Envío Gratis 24 Horas"), induciendo a error al comprador.
+- **Mitigación en Software:** Conmutador atómico de estado (`Activo` / `Inactivo`) con botón de un clic que sincroniza el banner de inmediato en todas las vistas públicas.
+- **Diagrama de Decisión: Gestión de Anuncios y Banners:**
+```mermaid
+flowchart TD
+    A39["Planificacion de Campaña Comercial"] --> B39{"Tipo de Elemento Publicitario"}
+    B39 -- "Marquesina Superior de Anuncios" --> C39["Actualizar Texto Persuasivo y Color de Acento"]
+    C39 --> D39["Guardar Marquesina con Toggle de Activacion Global"]
+    B39 -- "Banner Promocional de Impacto" --> E39["Definir Titulo, Subtitulo, Imagen y URL de Destino"]
+    E39 --> F39["Asignar Vitrina de Despliegue y Estado Inicial"]
+    F39 --> G39["Monitorear Interacciones y Conmutar a Inactivo al Vencer"]
+```
+
+#### Función C4: Auditoría de Protocolos de Tallas y Documentos Oficiales
+- **Objetivo Operativo:** Asegurar que las guías de tallas anatómicas (Torzo Masculino, Femenino y No Binario) y los protocolos de cuidado textil estén permanentemente actualizados para reducir devoluciones y quejas en soporte.
+- **Secciones del Sistema:**
+  - *Hub 2 (Tienda & CMS):* Submódulo 4 (`storeEditorialPanel`) $\rightarrow$ Formularios JSON estructurados de Guías de Tallas y Protocolos de Cuidado.
+- **Punto Ciego:** Discrepancias en medidas anatómicas que provocan que los clientes compren tallas incorrectas, incrementando el costo logístico inverso.
+- **Mitigación en Software:** Los documentos oficiales se guardan como JSON inmutable en `cms_official_documents`, con validación estricta de rangos de cintura, cadera y talla de pantalón.
+- **Diagrama de Decisión: Actualización de Guías de Tallas:**
+```mermaid
+flowchart TD
+    A40["Reporte de Ana Atencion: Devoluciones por Talla"] --> B40["Revisar Matriz de Tallas en Submodulo 4 (Editorial)"]
+    B40 --> C40["Ajustar Medidas en Centimetros y Recomendacion de Calce"]
+    C40 --> D40["Guardar Documento Oficial (SIZE_GUIDE_TORZO)"]
+    D40 --> E40["Verificar Despliegue Inmediato en Storefront PWA"]
+```
+
+---
+
 ## 4. Matriz de Puntos Ciegos Cruzados entre Roles
+
 
 | Intersección entre Roles | Punto Ciego Operativo Común | Solución Sistémica en Plataforma |
 | :--- | :--- | :--- |
@@ -728,6 +809,9 @@ flowchart TD
 | **Compras $\leftrightarrow$ Dirección** | Compromiso de pagos a proveedores sin visibilidad del calendario de ingresos por suscripción MRR. | Conciliación directa en el Concentrador Ejecutivo entre proyecciones de cobro bimensual y vencimientos de crédito de maquila. |
 | **Operador Integral $\leftrightarrow$ Almacén / Empaque** | Pérdida de la recolección courier de las 14:00 hrs por atender dudas de clientes o compras en la mañana. | Bloqueo de prioridades matutinas en Hub 1 enfocado exclusivamente en semáforo SLA de corte DHL hasta liberar la cola de empaque. |
 | **Operador Integral $\leftrightarrow$ Auditoría / Finanzas** | Sesgo de auto-auditoría: mermas o diferencias de conteo no se asientan formalmente al no haber supervisión externa. | Registro inmutable forzado en Kardex con causa tipificada obligatoria y trazabilidad criptográfica de usuario único. |
+| **Editor CMS $\leftrightarrow$ Compras / Inventario** | Publicación de colecciones de productos o vitrinas destacadas sin stock visible en bodega. | El motor dinámico de secciones de Hub 2 evalúa existencias activas y oculta automáticamente estantes sin inventario. |
+| **Editor CMS $\leftrightarrow$ Ventas / Dirección** | Inconsistencia de identidad visual, paletas ilegibles o banners con promociones vencidas. | Tokens cromáticos centralizados inyectados en `:root` del Storefront PWA y conmutador atómico de activación de banners. |
+
 
 ---
 

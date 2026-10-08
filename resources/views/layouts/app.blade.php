@@ -9,6 +9,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/crm.css?v=20260908">
+    <script>
+        (function() {
+            try {
+                var savedTheme = localStorage.getItem('theme_preference') || localStorage.getItem('app_theme') || 'system';
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
 @php($isHome = request()->path() === '/')
 @php($isStorePage = request()->is('/') || request()->is('productos') || request()->is('productos/*') || request()->is('categorias') || request()->is('ofertas') || request()->is('nosotros') || request()->is('contacto') || request()->is('carrito') || request()->is('checkout') || request()->is('checkout/*') || request()->is('search') || request()->is('privacidad') || request()->is('cookies'))
@@ -21,7 +36,7 @@
             <div class="storefront-announcement" role="status" aria-label="Avisos de la tienda">
                 <div class="storefront-announcement-track">
                     <span>Envios seguros a todo Mexico</span><b aria-hidden="true">/</b>
-                    <span>Transferencias SPEI sin comision</span><b aria-hidden="true">/</b>
+                    <span>Pagos seguros con Tarjeta y OXXO</span><b aria-hidden="true">/</b>
                     <span>Stock fisico con entrega inmediata</span><b aria-hidden="true">/</b>
                     <span>250+ prendas exclusivas</span><b aria-hidden="true">/</b>
                     <span>Pedidos directos por WhatsApp</span><b aria-hidden="true">/</b>

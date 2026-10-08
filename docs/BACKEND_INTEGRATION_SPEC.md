@@ -13722,6 +13722,538 @@ class VendorManagementService
 }
 ```
 
+---
+
+## 21. Especificación Técnica de Catálogo Multiverso, Filtros Facetados, Curaduría de Scraping & Variantes Multi-Color (Reglas Canónicas 6.34 - 6.44)
+
+Esta sección formaliza y blinda en el contrato de backend los requerimientos canónicos de arquitectura relacional, contratos de endpoints, esquemas JSON y flujos transaccionales tipificados bajo las **Reglas 6.34 a 6.44 de `PROJECT_RULES.md`**.
+
+```mermaid
+graph TD
+    subgraph Hub4 [Hub 4: Inventario & Ajustes]
+        H4_Cat[Categorías & Familias en Árbol]
+        H4_Vend[Proveedores Registrados]
+        H4_Prod[Alta / Edición de Producto con Mapeo Foto-Color]
+    end
+
+    subgraph Hub3 [Hub 3: Ingesta & Scraping]
+        H3_Staging[Bandeja Previa de Curaduría]
+        H3_Map[Asignación Foto -> Variante de Color]
+        H3_Approve[Publicación con Badge 'Drop Bajo Pedido']
+    end
+
+    subgraph Hub2 [Hub 2: CMS & Explorar]
+        H2_Pages[Páginas de Explorar con filter_supplier]
+        H2_Filters[Reorganización Drag & Drop de Filtros]
+    end
+
+    subgraph Storefront [Storefront PWA & PDP]
+        SW_Drawer[Drawer Izquierdo: Árbol con Checkboxes & Acordeones]
+        SW_PDP[PDP: Botón Volver + Conmutador Filtros + Swatches + Switcher de Fotos]
+        SW_Cart[Carrito con Miniaturas + Cupón Exclusivo en Checkout Paso 1]
+    end
+
+    H4_Cat -->|Alimenta Facetas| SW_Drawer
+    H4_Cat -->|Alimenta Categorías| H2_Pages
+    H4_Vend -->|Dimensión Proveedor| SW_Drawer
+    H4_Vend -->|Selector Proveedor| H2_Pages
+    H3_Staging --> H3_Map --> H3_Approve -->|Ingesta al Kardex| H4_Prod
+    H4_Prod -->|images_by_color| SW_PDP
+    H2_Pages -->|Filtro Preaplicado| SW_Drawer
+    SW_PDP --> SW_Cart
+```
+
+---
+
+### 21.1. Arquitectura Relacional & Migraciones de Base de Datos
+
+#### 1. Migración: `filter_supplier` en Tabla `cms_pages`
+* **Archivo de Migración:** `database/migrations/2026_10_02_003000_add_filter_supplier_to_cms_pages_table.php`
+* **Definición de Esquema:**
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('cms_pages', function (Blueprint $table) {
+            if (!Schema::hasColumn('cms_pages', 'filter_supplier')) {
+                $table->string('filter_supplier', 100)->nullable()->after('filter_category');
+                $table->index('filter_supplier');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('cms_pages', function (Blueprint $table) {
+            if (Schema::hasColumn('cms_pages', 'filter_supplier')) {
+                $table->dropIndex(['filter_supplier']);
+                $table->dropColumn('filter_supplier');
+            }
+        });
+    }
+};
+```
+
+#### 2. Modelo Eloquent: `App\Models\CmsPage`
+* **Atributos Asignables (`$fillable`):**
+```php
+protected $fillable = [
+    'title',
+    'slug',
+    'type',
+    'filter_universe',
+    'filter_category',
+    'filter_supplier', // Regla Canónica 6.36
+    'content',
+    'is_published',
+    'navbar_order',
+    'card_badge',
+    'card_headline',
+    'card_subheadline',
+    'image_urls',
+    'gradient_start_color',
+    'gradient_end_color',
+    'gradient_start_opacity',
+    'gradient_end_opacity',
+    'gradient_direction',
+    'text_color',
+    'image_source_mode',
+];
+```
+
+#### 3. Modelo Eloquent: `App\Models\Product` & Contrato de Color Extendido
+* **Estructura en Meta JSON y Accesores de Dominio:**
+  - `colors`: Array estructurado de muestras cromáticas:
+    ```json
+    [
+      { "id": "negro_profundo", "name": "Negro Profundo", "hex": "#0f172a", "type": "solid" },
+      { "id": "plata_iridiscente", "name": "Plata Iridiscente", "hex": "linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)", "type": "iridescent" }
+    ]
+    ```
+  - `images_by_color`: Diccionario relacional asociando cada URL fotográfica a su nombre de color indexado:
+    ```json
+    {
+      "https://example.com/photos/prod-1-black.jpg": "Negro Profundo",
+      "https://example.com/photos/prod-1-silver.jpg": "Plata Iridiscente"
+    }
+    ```
+  - `stockLabel`: String canónico (`'Stock Físico Bodega'` | `'Drop Bajo Pedido'`). Las prendas provenientes de scraping o dropshipping portan permanentemente `'Drop Bajo Pedido'`.
+
+---
+
+### 21.2. Endpoints de Administración de Páginas de Explorar (Hub 2)
+
+#### 1. Alta de Página de Explorar con Filtro de Proveedor
+* **POST** `/admin/tienda-cms/paginas/crear`
+* **Controlador:** `App\Http\Controllers\PortalStoreController@storeCmsPage`
+* **Validación FormRequest:**
+```php
+$request->validate([
+    'title' => 'required|string|max:150',
+    'slug' => 'nullable|string|max:150|unique:cms_pages,slug',
+    'type' => 'required|in:institutional,explore,blog',
+    'filter_universe' => 'nullable|string|in:marte,venus,tiresias,terra,all',
+    'filter_category' => 'nullable|string|max:100',
+    'filter_supplier' => 'nullable|string|max:100', // Regla 6.36
+    'card_headline' => 'nullable|string|max:150',
+    'card_subheadline' => 'nullable|string|max:255',
+    'card_badge' => 'nullable|string|max:50',
+    'image_urls' => 'nullable|string',
+    'text_color' => 'nullable|string|max:20',
+    'gradient_start_color' => 'nullable|string|max:20',
+    'gradient_end_color' => 'nullable|string|max:20',
+    'gradient_start_opacity' => 'nullable|numeric|min:0|max:100',
+    'gradient_end_opacity' => 'nullable|numeric|min:0|max:100',
+    'gradient_direction' => 'nullable|string|max:30',
+    'image_source_mode' => 'nullable|in:custom,catalog',
+    'is_published' => 'nullable|boolean',
+]);
+```
+* **Payload JSON:**
+```json
+{
+  "title": "Colección Silk & Cotton",
+  "type": "explore",
+  "filter_universe": "marte",
+  "filter_category": "Boxers",
+  "filter_supplier": "Silk & Cotton Iberia SL",
+  "card_headline": "SEDA PURA & ALGODÓN",
+  "card_subheadline": "Prendas confeccionadas con hilatura italiana de máxima suavidad.",
+  "card_badge": "PREMIUM",
+  "text_color": "#ffffff",
+  "gradient_start_color": "#0f172a",
+  "gradient_end_color": "#000000",
+  "gradient_start_opacity": 30,
+  "gradient_end_opacity": 85,
+  "gradient_direction": "to bottom",
+  "image_source_mode": "custom",
+  "is_published": 1
+}
+```
+* **Respuesta Exitosa (`201 Created` / `302 Redirect` con Flash Message):**
+```json
+{
+  "success": true,
+  "message": "Página de Explorar creada con vinculación a proveedor exitosamente.",
+  "data": {
+    "id": 14,
+    "slug": "coleccion-silk-cotton",
+    "filter_supplier": "Silk & Cotton Iberia SL"
+  }
+}
+```
+
+#### 2. Edición de Página de Explorar
+* **PUT** `/admin/tienda-cms/paginas/{page}/actualizar`
+* **Controlador:** `App\Http\Controllers\PortalStoreController@updateCmsPage`
+
+---
+
+### 21.3. Contratos de Datos e Ingesta del Storefront PWA
+
+#### 1. Inyección de Facetas en Vitrina Pública (`/` y `/explorar`)
+* **Controlador:** `App\Http\Controllers\StorefrontController@home`
+* **Estructura del Árbol Jerárquico de Categorías (`$categoriesTree`):**
+```json
+[
+  {
+    "id": "boxers",
+    "name": "Boxers",
+    "slug": "boxers",
+    "count": 48,
+    "children": [
+      { "id": "boxers_seamless", "name": "Boxers Seamless", "slug": "boxers-seamless", "count": 22 },
+      { "id": "boxers_largos", "name": "Boxers Largos Deportivos", "slug": "boxers-largos", "count": 26 }
+    ]
+  },
+  {
+    "id": "jocks",
+    "name": "Jockstraps",
+    "slug": "jockstraps",
+    "count": 31,
+    "children": []
+  }
+]
+```
+
+* **Estructura de Proveedores Activos (`$suppliers`):**
+```json
+[
+  "Lingerie Drop Global",
+  "ModaIntima Textil MX",
+  "Seamless Tech Apparel",
+  "Silk & Cotton Iberia SL",
+  "Torzo B2B"
+]
+```
+
+#### 2. Esquema de Hidratación de Productos (`window.__INITIAL_STORE_PRODUCTS__`)
+Cada objeto de prenda inyectado para el motor reactivo de filtros en caliente (`store-pwa.js`) contiene:
+```json
+{
+  "id": 102,
+  "sku": "TOR-RAW-019",
+  "name": "Torzo Holographic Prism Jockstrap",
+  "slug": "torzo-holographic-prism-jockstrap",
+  "category": "Jocks",
+  "supplier": "Torzo B2B",
+  "fabricType": "Malla / Mesh Transpirable",
+  "stockLabel": "Drop Bajo Pedido",
+  "stockType": "dropship",
+  "price": 390.00,
+  "image": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400",
+  "images": [
+    "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400",
+    "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400"
+  ],
+  "colors": [
+    {
+      "id": "plata_iridiscente",
+      "name": "Plata Iridiscente Prism",
+      "hex": "linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%)",
+      "type": "iridescent"
+    }
+  ],
+  "images_by_color": {
+    "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400": "Plata Iridiscente Prism",
+    "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400": "Plata Iridiscente Prism"
+  },
+  "sizes": { "ch": 10, "m": 25, "g": 20, "xl": 10 },
+  "volumes": {},
+  "shades": {}
+}
+```
+
+---
+
+### 21.4. Hub 4: Actualización Integral de Producto & Mapeo Foto-Color
+
+* **PUT** `/api/v1/inventory/products/{sku}/update-complete`
+* **Controlador:** `App\Http\Controllers\InventoryController@updateComplete`
+* **Payload JSON:**
+```json
+{
+  "name": "Boxer Microfibra Seamless",
+  "brand": "ModaIntima Textil MX",
+  "image": "https://example.com/photos/prod-black.jpg",
+  "images": [
+    "https://example.com/photos/prod-black.jpg",
+    "https://example.com/photos/prod-navy.jpg"
+  ],
+  "images_by_color": {
+    "https://example.com/photos/prod-black.jpg": "Negro Profundo",
+    "https://example.com/photos/prod-navy.jpg": "Azul Marino"
+  },
+  "fabric_type": "Modal Seamless",
+  "color_name": "Negro Profundo",
+  "color_hex": "#0f172a",
+  "color_type": "solid",
+  "design_type": "sin_diseno",
+  "website_section": "basicos",
+  "location": "A-02-B",
+  "regular_price": 420.00,
+  "discount_pct": 10.00,
+  "pvp": 378.00,
+  "cost": 125.00,
+  "cpp": 120.00,
+  "sizes": { "ch": 20, "m": 45, "g": 35, "xl": 15 },
+  "shades": {},
+  "physical_stock": 115,
+  "is_published": true
+}
+```
+* **Respuesta Exitosa (`200 OK`):**
+```json
+{
+  "success": true,
+  "message": "Producto actualizado correctamente con mapeo de imágenes por color.",
+  "data": {
+    "sku": "BX-MIC-001",
+    "images_count": 2,
+    "colors_mapped": ["Negro Profundo", "Azul Marino"]
+  }
+}
+```
+
+---
+
+### 21.5. Hub 3: Bandeja de Curaduría Previa de Scraping & Variantes de Color
+
+1. **Ciclo de Ingesta:**
+   - Ingesta de catálogos scrapeados a la *Bandeja de Curaduría Previa* (`scrapedPendingItems`).
+   - Cada prenda en curaduría porta `images: string[]` e inicializa `imageColorMap: Record<string, string>`.
+2. **Validación Humana Obligatoria (Regla Canónica 6.44):**
+   - El operador inspecciona la fotografía y asigna del selector de colores registrados la variante exacta correspondiente a cada imagen.
+   - En caso de color o fibra inexistente, se utilizan las acciones inline `saveInlineColor()` o `saveInlineFabric()`.
+3. **Publicación Oficial al Kardex (`approveScrapedItem`):**
+   - Transfiere el objeto con `stockLabel = 'Drop Bajo Pedido'` e `is_scraped = true`.
+   - Asocia de forma inmutable el diccionario `images_by_color` al modelo para su sincronización inmediata con la PDP.
+
+---
+
+### 21.6. Contratos de Carrito y Checkout
+
+1. **Items en Drawer de Carrito (`#cartSheet`):**
+   - Todo item agregado al carrito registra de manera obligatoria:
+     ```json
+     {
+       "id": 102,
+       "name": "Torzo Holographic Prism Jockstrap",
+       "sku": "TOR-RAW-019",
+       "price": 390.00,
+       "image": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400",
+       "color": "Plata Iridiscente Prism",
+       "size": "M",
+       "qty": 1
+     }
+     ```
+   - El componente `renderItemHtml()` del frontend valida y renderiza la etiqueta `<img src="${item.image}" ...>` por cada artículo.
+2. **Confinamiento de Cupones al Paso 1 del Checkout (Regla Canónica 6.42):**
+   - **POST** `/api/cart/apply-coupon`
+   - El formulario de descuento `#checkoutCouponBox` opera única y exclusivamente cuando `currentCheckoutStep === 1`.
+   - El drawer pasivo de carrito (`#cartSheet`) tiene estrictamente suprimido cualquier input de código promocional para evitar saturación visual y fricción en la intención de compra.
+
+---
+
+### 21.7. Hub 4 Ajustes: Estructura en Árbol de Proveedor-Marcas y Alta Manual Fiscal/Contacto (Regla Canónica 6.45)
+
+#### 1. Migración y Modelo `Supplier` (`database/migrations/2026_10_02_120000_add_fiscal_details_and_brands_to_suppliers_table.php`)
+Ampliación de la tabla `suppliers` para soportar tanto proveedores scrapeados como proveedores manuales con datos de facturación oficial y árbol de marcas comerciales desprendidas:
+
+```php
+Schema::table('suppliers', function (Blueprint $table) {
+    $table->string('tax_id', 50)->nullable()->after('vendor_code'); // RFC / Tax ID / NIF
+    $table->string('legal_name', 255)->nullable()->after('name'); // Razon Social Fiscal Completa
+    $table->string('fiscal_regime', 150)->nullable()->after('tax_id'); // Regimen Fiscal (SAT)
+    $table->text('fiscal_address')->nullable()->after('fiscal_regime'); // Domicilio Fiscal Completo
+    $table->string('fiscal_zip', 20)->nullable()->after('fiscal_address'); // Codigo Postal Fiscal
+    $table->string('invoice_email', 150)->nullable()->after('contact_email'); // Email para CFDI / Facturas
+    $table->string('origin', 30)->default('manual')->after('type'); // 'manual' o 'scraping'
+    $table->json('brands')->nullable()->after('credentials'); // Array JSON con marcas comerciales desprendidas
+});
+```
+
+#### 2. Endpoints de Gestión de Proveedores & Marcas en Árbol
+- **POST** `/api/v1/inventory/suppliers`: Registra un nuevo proveedor capturando datos de contacto, fiscales y marcas desprendidas.
+- **PUT** `/api/v1/inventory/suppliers/{id}`: Actualiza condiciones comerciales, datos de contacto, régimen fiscal y lista de marcas.
+- **POST** `/api/v1/inventory/suppliers/{id}/brands`: Asocia una nueva marca al árbol de marcas del proveedor.
+- **DELETE** `/api/v1/inventory/suppliers/{id}/brands`: Desvincula una marca del árbol del proveedor.
+
+#### 3. Esquema JSON Canónico del Proveedor (`transformSupplier`)
+```json
+{
+  "id": "prov_1",
+  "dbId": 1,
+  "vendorCode": "VND-TORZ-001",
+  "name": "Torzo Official B2B",
+  "tradeName": "Torzo B2B",
+  "legalName": "Torzo Internacional SA de CV",
+  "taxId": "TIN980401XYZ",
+  "fiscalRegime": "601 - General de Ley Personas Morales",
+  "fiscalAddress": "Av. Insurgentes Sur 1200, Col. Del Valle, Benito Juárez, CDMX",
+  "fiscalZip": "03100",
+  "invoiceEmail": "cfdi@torzo.com",
+  "website": "https://torzo.com",
+  "origin": "manual",
+  "isManual": true,
+  "brands": [
+    "Torzo Men",
+    "Torzo Denim",
+    "Torzo Active"
+  ],
+  "brandsTree": [
+    {
+      "name": "Torzo Men",
+      "slug": "torzo-men",
+      "origin": "manual",
+      "is_active": true
+    },
+    {
+      "name": "Torzo Denim",
+      "slug": "torzo-denim",
+      "origin": "manual",
+      "is_active": true
+    },
+    {
+      "name": "Torzo Active",
+      "slug": "torzo-active",
+      "origin": "manual",
+      "is_active": true
+    }
+  ],
+  "type": "workshop",
+  "city": "CDMX",
+  "contactName": "Carlos Mendoza",
+  "phone": "+52 55 4182 9901",
+  "email": "pedidos@torzo.com",
+  "extractionMethod": "Alta Manual / Contacto Directo",
+  "status": "connected",
+  "leadTimeDays": 5,
+  "paymentTerms": "credito_30",
+  "hasExtranetAccess": true
+}
+```
+
+#### 4. Comportamiento en Frontend de Hub 4 (Ajustes)
+1. **Árbol de Proveedores:**
+   - Cada fila de proveedor incluye control chevron para alternar entre estado contraído y expandido.
+   - El nodo secundario despliega las marcas desprendidas con visualización en ramas tipo árbol.
+   - Filtro por origen (`providerOriginFilter`: `all`, `manual`, `scraping`) y botones masivos `Expandir Árbol` / `Contraer`.
+2. **Modal de Alta / Edición de Proveedor (`providerModalOpen`):**
+   - Pestaña 1: Información General, Contacto y Operativa.
+   - Pestaña 2: Información Fiscal, RFC, Régimen, Domicilio y Facturación CFDI.
+   - Pestaña 3: Árbol de Marcas Desprendidas con chips interactivos y soporte de captura rápida vía teclado.
+
+### 21.5. Gestión Integral de Marcas Comerciales (Brand CRUD - TASK-BRD-01)
+
+#### 1. Esquema de Base de Datos (`brands`)
+```php
+Schema::create('brands', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
+    $table->string('name')->unique();
+    $table->string('slug')->unique();
+    $table->text('description')->nullable();
+    $table->string('logo_url')->nullable();
+    $table->string('website')->nullable();
+    $table->boolean('is_active')->default(true);
+    $table->boolean('is_archived')->default(false);
+    $table->integer('sort_order')->default(0);
+    $table->json('meta')->nullable();
+    $table->timestamps();
+    $table->softDeletes();
+
+    $table->index(['is_active', 'is_archived']);
+    $table->index('supplier_id');
+});
+```
+
+#### 2. Endpoints de la API de Marcas Comerciales
+- **GET** `/api/v1/inventory/brands`: Listado paginado o completo de marcas maestras con conteo de SKUs asociados y filtros por `status` (active, inactive, archived) y `supplier_id`.
+- **POST** `/api/v1/inventory/brands`: Alta de nueva marca comercial (genera slug único y sincroniza array de marcas del proveedor asignado).
+- **GET** `/api/v1/inventory/brands/{id}`: Detalle de una marca con información del proveedor asociado y conteo de productos.
+- **PUT** `/api/v1/inventory/brands/{id}`: Actualización integral de nombre, slug, descripción, logo, web y asignación de proveedor.
+- **PATCH** `/api/v1/inventory/brands/{id}/toggle-active`: Conmuta reactivamente el estado activo/inactivo (`is_active`).
+- **POST** `/api/v1/inventory/brands/{id}/archive`: Archiva la marca (`is_archived = true`, `is_active = false`).
+- **POST** `/api/v1/inventory/brands/{id}/restore`: Restaura la marca archivada (`is_archived = false`, `is_active = true`).
+- **DELETE** `/api/v1/inventory/brands/{id}`: Eliminación física o soft-delete con desvinculación segura de productos.
+- **POST** `/api/v1/inventory/brands/{id}/assign-supplier`: Asocia o desvincula en caliente un proveedor de la marca.
+
+#### 3. Esquema JSON de Respuesta Canónica (`BrandApiController`)
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "supplier_id": 4,
+    "supplier": {
+      "id": 4,
+      "name": "Torzo Official B2B",
+      "tradeName": "Torzo B2B"
+    },
+    "name": "Torzo Active",
+    "slug": "torzo-active",
+    "description": "Línea deportiva de alta compresión y secado rápido.",
+    "logo_url": "https://example.com/logo.png",
+    "website": "https://torzoactive.com",
+    "is_active": true,
+    "is_archived": false,
+    "sku_count": 28
+  }
+}
+```
+
+### 21.6. Sincronización Transversal de Filtros Dependientes (Hub 4 $\leftrightarrow$ Hub 2 $\leftrightarrow$ Storefront)
+
+1. **Hub 4 (Catálogo de Inventario):**
+   - El selector `brandFilter` en la barra superior de herramientas del catálogo se alimenta dinámicamente de `availableBrandNames`.
+   - `filteredProducts` computa coincidencias en cascada: `q`, `categoryFilter`, `brandFilter`, `supplierFilter`, `stockFilter` y `statusFilter`.
+
+2. **Hub 2 (Tienda & CMS Multiverso):**
+   - En `PortalStoreController@index`, se suministran las marcas registradas consolidadas desde `Brand::active()`, `Product` y `Supplier`.
+   - Los modales de creación y edición de vitrinas en `resources/views/portal/store.blade.php` incorporan selectores dependientes de `Proveedor` y `Marca Comercial` vinculando las tarjetas de *Páginas de Explorar* a rutas parametrizadas (`/catalogo?brand={slug}` o `/catalogo?supplier={id}`).
+
+3. **Storefront PWA (`products.blade.php` & `site.js`):**
+   - En `#filterDrawer`, la faceta de proveedores y marcas se despliega mediante una estructura jerárquica colapsable:
+     ```html
+     <details class="filter-tree" open>
+       <summary>Marcas & Proveedores (Árbol)</summary>
+       <div class="filter-tree-content">
+         <!-- Proveedor Padre con Checkbox -->
+         <!-- Marcas Hijas Indentadas con Checkbox -->
+       </div>
+     </details>
+     ```
+   - El motor de filtrado reactivo de `site.js` incluye `'supplier'` y `'brand'` en `filterKeys`, aplicando lógica multi-criterio OR dentro de la misma faceta y AND entre diferentes dimensiones.
+
+
+
+
 
 
 

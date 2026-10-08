@@ -2,9 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\CmsBlogPost;
+use App\Models\CmsCatalogFilter;
+use App\Models\CmsOfficialDocument;
+use App\Models\CmsPage;
+use App\Models\CmsSection;
+use App\Models\CmsStorefrontConfig;
+use App\Models\CmsTrackingSetting;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class PortalStoreController extends Controller
 {
@@ -54,9 +63,17 @@ class PortalStoreController extends Controller
                 'id' => 'marte',
                 'name' => 'Marte Store',
                 'kicker' => 'Moda Masculina & Sensualidad Ergonómica',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#09090b',
+                'secondaryColor' => '#27272a',
                 'accentColor' => '#4f46e5',
                 'backgroundColor' => '#fafafa',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#09090b',
+                'mutedTextColor' => '#71717a',
+                'borderColor' => '#e4e4e7',
                 'heroTitle' => 'Diseño, Comodidad y Firmeza sin Censura',
                 'heroSubtitle' => 'Textiles premium de modal y bambú diseñados para la máxima libertad de movimiento y soporte atlético.',
                 'heroCtaText' => 'Ver Colección Masculina',
@@ -68,9 +85,17 @@ class PortalStoreController extends Controller
                 'id' => 'venus',
                 'name' => 'Venus Lingerie & Beauty',
                 'kicker' => 'Lencería de Autor, Bralettes y Cuidado Íntimo',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#1c1917',
+                'secondaryColor' => '#44403c',
                 'accentColor' => '#db2777',
                 'backgroundColor' => '#fff1f2',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#1c1917',
+                'mutedTextColor' => '#78716c',
+                'borderColor' => '#fecdd3',
                 'heroTitle' => 'Elegancia Sensorial y Suavidad para tu Piel',
                 'heroSubtitle' => 'Encajes finos, satín italiano y fórmulas limpias de cuidado personal pensadas para tu bienestar diario.',
                 'heroCtaText' => 'Explorar Colección Femenina',
@@ -82,9 +107,17 @@ class PortalStoreController extends Controller
                 'id' => 'tiresias',
                 'name' => 'Tiresias Moda Afirmativa',
                 'kicker' => 'Binders de Compresión Segura, Packing y Cuidado Afirmativo',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#0f172a',
+                'secondaryColor' => '#334155',
                 'accentColor' => '#8b5cf6',
                 'backgroundColor' => '#faf5ff',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#0f172a',
+                'mutedTextColor' => '#64748b',
+                'borderColor' => '#e9d5ff',
                 'heroTitle' => 'Libertad de Expresión y Ajuste Seguro para Todo Cuerpo',
                 'heroSubtitle' => 'Prendas afirmativas confeccionadas con ingeniería textil transpirable de compresión médica segura.',
                 'heroCtaText' => 'Ver Binders y Accesorios',
@@ -96,9 +129,17 @@ class PortalStoreController extends Controller
                 'id' => 'terra',
                 'name' => 'Terra Multiverse',
                 'kicker' => 'Ecosistema Global de Moda Íntima y Cuidado Personal',
+                'logoUrl' => null,
+                'logoMobileUrl' => null,
+                'faviconUrl' => null,
                 'primaryColor' => '#09090b',
+                'secondaryColor' => '#27272a',
                 'accentColor' => '#0284c7',
                 'backgroundColor' => '#f8fafc',
+                'surfaceColor' => '#ffffff',
+                'textColor' => '#09090b',
+                'mutedTextColor' => '#71717a',
+                'borderColor' => '#e4e4e7',
                 'heroTitle' => 'El Ecosistema Completo de Bienestar y Estilo',
                 'heroSubtitle' => 'Catálogo unificado, suscripciones mensuales recurrentes y fórmulas de autocuidado para todas las identidades.',
                 'heroCtaText' => 'Descubrir Todo el Catálogo',
@@ -108,10 +149,36 @@ class PortalStoreController extends Controller
             ]
         ];
 
+        $dbConfigs = CmsStorefrontConfig::all()->keyBy('universe');
         $storefronts = [];
         foreach ($defaultStorefronts as $key => $defaultData) {
             $cached = Cache::get('cms_storefront_' . $key, []);
-            $merged = array_merge($defaultData, $cached);
+            $dbData = [];
+            if ($dbConfigs->has($key)) {
+                $c = $dbConfigs[$key];
+                $dbData = array_filter([
+                    'name' => $c->brand_name,
+                    'kicker' => $c->kicker,
+                    'logoUrl' => $c->logo_url,
+                    'logoMobileUrl' => $c->logo_mobile_url,
+                    'faviconUrl' => $c->favicon_url,
+                    'primaryColor' => $c->primary_color,
+                    'secondaryColor' => $c->secondary_color,
+                    'accentColor' => $c->accent_color,
+                    'backgroundColor' => $c->background_color,
+                    'surfaceColor' => $c->surface_color,
+                    'textColor' => $c->text_color,
+                    'mutedTextColor' => $c->muted_text_color,
+                    'borderColor' => $c->border_color,
+                    'heroTitle' => $c->hero_title,
+                    'heroSubtitle' => $c->hero_subtitle,
+                    'heroCtaText' => $c->hero_cta_text,
+                    'heroCtaUrl' => $c->hero_cta_url,
+                    'customCss' => $c->custom_css,
+                    'customJs' => $c->custom_js,
+                ], fn($val) => !is_null($val) && $val !== '');
+            }
+            $merged = array_merge($defaultData, $dbData, $cached);
             $merged['activeSkus'] = $defaultData['activeSkus'];
             $merged['sampleProducts'] = $defaultData['sampleProducts'];
             $storefronts[$key] = $merged;
@@ -166,8 +233,9 @@ class PortalStoreController extends Controller
             'isHealthy' => $projectedMargin >= 30.00
         ];
 
-        // 6. Size Guide Torzo (TASK-INT-10)
-        $sizeGuide = [
+        // 6. Size Guide Torzo & Care Protocols from Database (with fallback)
+        $officialDocs = CmsOfficialDocument::where('is_active', true)->get()->keyBy('code');
+        $sizeGuide = $officialDocs['SIZE_GUIDE_TORZO']->payload ?? [
             ['size' => 'CH', 'waistCm' => '71 - 76 cm', 'hipsCm' => '86 - 91 cm', 'pantsSize' => '28 - 30', 'isCore' => false, 'advice' => 'Ajuste ceñido anatómico'],
             ['size' => 'M', 'waistCm' => '77 - 84 cm', 'hipsCm' => '92 - 99 cm', 'pantsSize' => '31 - 33', 'isCore' => true, 'advice' => 'Talla Core más vendida (42% de demanda)'],
             ['size' => 'G', 'waistCm' => '85 - 92 cm', 'hipsCm' => '100 - 107 cm', 'pantsSize' => '34 - 36', 'isCore' => true, 'advice' => 'Talla Core más vendida (34% de demanda)'],
@@ -177,11 +245,67 @@ class PortalStoreController extends Controller
         ];
 
         // 7. Care Protocols & PROFECO Health Notice
-        $careProtocols = [
+        $careProtocols = $officialDocs['CARE_PROTOCOLS']->payload ?? [
             ['fiber' => 'Modal & Viscosa de Bambú', 'rule' => 'Lavar con agua fría (< 30°C) en ciclo delicado dentro de la Bolsa de Malla Protectora Terra.', 'warning' => 'Nunca usar secadora ni blanqueadores clorados; secar a la sombra en superficie plana.'],
             ['fiber' => 'Microfibra Velvet & Elásticos de Jockstraps', 'rule' => 'Lavar a mano o máquina en bolsa cerrada para evitar que los elásticos se enganchen con cremalleras.', 'warning' => 'El calor excesivo degrada el elastano; no planchar directamente sobre los elásticos.'],
             ['fiber' => 'Binders de Compresión Médica', 'rule' => 'Lavar cada 2-3 puestas con jabón líquido suave. Secar al aire sin retorcer la tela de compresión.', 'warning' => 'No estirar de forma asimétrica al escurrir para preservar la memoria elástica del tejido.']
         ];
+
+        $profecoNotice = $officialDocs['PROFECO_SANITARY_NOTICE']->payload ?? [
+            'legal_basis' => 'Artículo 53 de la Ley Federal de Protección al Consumidor.',
+            'statement' => 'Por motivos estrictos de higiene y protección sanitaria, no se admiten devoluciones ni cambios en prendas íntimas con precinto de seguridad vulnerado.',
+            'discreet_shipping' => 'Envíos en empaque 100% neutro y discreto.',
+        ];
+
+        // 7.1. Footer Configuration (Hub 2 - Submódulo 2 - Sección 4)
+        $defaultFooterConfig = [
+            'brand_summary' => 'Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.',
+            'whatsapp_contact' => '+52 55 7510 2015',
+            'support_email' => 'hola@mitienda.online',
+            'shipping_badge_text' => 'Paqueteria nacional express ($149 / Gratis +$999)',
+            'packaging_badge_text' => 'Entrega personal discreta y segura en empaque 100% neutro',
+            'payments_badge_text' => 'Pagos 100% seguros con Tarjeta, SPEI y OXXO Pay',
+            'copyright_text' => '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.',
+            'show_revops_link' => true,
+            'show_zero_emojis_badge' => true,
+        ];
+        $footerConfig = $officialDocs['STORE_FOOTER_CONFIG']->payload ?? $defaultFooterConfig;
+
+        // 8. Secciones dinámicas y taxonomías de catálogo de Hub 4
+        $sections = CmsSection::orderBy('sort_order')->get();
+        $categories = Category::whereNull('parent_id')->select('id', 'name', 'slug')->get();
+        $subcategories = Category::whereNotNull('parent_id')->select('id', 'name', 'slug', 'parent_id')->get();
+        $dbBrands = \App\Models\Brand::active()->pluck('name')->toArray();
+        $productBrands = Product::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand')->toArray();
+        $supplierBrands = \App\Models\Supplier::whereNotNull('brands')->get()->pluck('brands')->flatten()->toArray();
+        $brands = collect(array_values(array_unique(array_filter(array_merge($dbBrands, $productBrands, $supplierBrands)))))->sort()->values();
+        if ($brands->isEmpty()) {
+            $brands = collect(['Marte', 'Torzo Denim', 'Venus Intimates', 'Seda & Encaje']);
+        }
+        $textileFamilies = ['Modal Velvet', 'Algodón Pima', 'Bambú Orgánico', 'Microfibra Dry-Fit', 'Malla Transpirable', 'Satín & Seda'];
+        $garmentTypes = ['Boxer Trunk', 'Jockstrap', 'Brief', 'Bikini / Tanga', 'Harness / Arnés', 'Tank Top / Playera', 'Bodysuit'];
+        $styleTags = ['Sensual', 'Deportivo / Gym', 'Afirmativo / Compresión', 'Minimalista', 'Edición Limitada', 'Básico Diario'];
+        $discountOptions = [
+            'all' => 'Cualquier prenda',
+            'only_sale' => 'Solo con descuento / Liquidación',
+            'min_15' => 'Descuento mín. 15%',
+            'min_25' => 'Descuento mín. 25%',
+        ];
+
+        // 9. Páginas CMS, Blog Revista Digital, Tracking y Filtros
+        $pages = CmsPage::orderBy('navbar_order')->get();
+        $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
+        $tracking = CmsTrackingSetting::current();
+        $catalogFilters = CmsCatalogFilter::orderBy('sort_order')->get();
+        $suppliers = \App\Models\Supplier::where('status', '!=', 'archived')->select('id', 'name', 'legal_name')->get();
+        if ($suppliers->isEmpty()) {
+            $suppliers = collect([
+                (object)['id' => 1, 'name' => 'Torzo B2B'],
+                (object)['id' => 2, 'name' => 'ModaIntima Textil MX'],
+                (object)['id' => 3, 'name' => 'Seamless Tech Apparel'],
+                (object)['id' => 4, 'name' => 'Silk & Cotton Iberia SL'],
+            ]);
+        }
 
         return view('portal.store', [
             'storefronts' => $storefronts,
@@ -189,10 +313,25 @@ class PortalStoreController extends Controller
             'announcements' => $announcements,
             'announcementActive' => $announcementActive,
             'banners' => $banners,
+            'sections' => $sections,
+            'categories' => $categories,
+            'subcategories' => $subcategories,
+            'suppliers' => $suppliers,
+            'brands' => $brands,
+            'textileFamilies' => $textileFamilies,
+            'garmentTypes' => $garmentTypes,
+            'styleTags' => $styleTags,
+            'discountOptions' => $discountOptions,
             'shippingRule' => $shippingRule,
             'simulator' => $simulator,
             'sizeGuide' => $sizeGuide,
             'careProtocols' => $careProtocols,
+            'profecoNotice' => $profecoNotice,
+            'pages' => $pages,
+            'blogPosts' => $blogPosts,
+            'tracking' => $tracking,
+            'catalogFilters' => $catalogFilters,
+            'footerConfig' => $footerConfig,
         ]);
     }
 
@@ -302,22 +441,808 @@ class PortalStoreController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string|max:120',
+            'brandName' => 'nullable|string|max:120',
+            'brand_name' => 'nullable|string|max:120',
+            'kicker' => 'nullable|string|max:200',
+            'logo_url' => 'nullable|string|max:255',
+            'logoUrl' => 'nullable|string|max:255',
+            'logo_mobile_url' => 'nullable|string|max:255',
+            'logoMobileUrl' => 'nullable|string|max:255',
+            'favicon_url' => 'nullable|string|max:255',
+            'faviconUrl' => 'nullable|string|max:255',
+            'primaryColor' => 'nullable|string|max:20',
+            'primary_color' => 'nullable|string|max:20',
+            'secondaryColor' => 'nullable|string|max:20',
+            'secondary_color' => 'nullable|string|max:20',
             'accentColor' => 'nullable|string|max:20',
+            'accent_color' => 'nullable|string|max:20',
             'backgroundColor' => 'nullable|string|max:20',
+            'background_color' => 'nullable|string|max:20',
+            'surfaceColor' => 'nullable|string|max:20',
+            'surface_color' => 'nullable|string|max:20',
+            'textColor' => 'nullable|string|max:20',
+            'text_color' => 'nullable|string|max:20',
+            'mutedTextColor' => 'nullable|string|max:20',
+            'muted_text_color' => 'nullable|string|max:20',
+            'borderColor' => 'nullable|string|max:20',
+            'border_color' => 'nullable|string|max:20',
             'heroTitle' => 'nullable|string|max:200',
+            'hero_title' => 'nullable|string|max:200',
             'heroSubtitle' => 'nullable|string|max:500',
+            'hero_subtitle' => 'nullable|string|max:500',
             'heroCtaText' => 'nullable|string|max:80',
+            'hero_cta_text' => 'nullable|string|max:80',
+            'heroCtaUrl' => 'nullable|string|max:255',
+            'hero_cta_url' => 'nullable|string|max:255',
+            'customCss' => 'nullable|string',
+            'custom_css' => 'nullable|string',
+            'customJs' => 'nullable|string',
+            'custom_js' => 'nullable|string',
         ]);
 
-        $cached = Cache::get('cms_storefront_' . $universe, []);
-        $merged = array_merge($cached, array_filter($validated));
+        $config = CmsStorefrontConfig::forUniverse($universe);
 
-        Cache::forever('cms_storefront_' . $universe, $merged);
+        $brandName = $request->input('brand_name') ?? $request->input('brandName') ?? $request->input('name');
+        if ($brandName) {
+            $config->brand_name = $brandName;
+        }
+        if ($request->filled('kicker')) {
+            $config->kicker = $request->input('kicker');
+        }
+
+        // Carga y Gestión de Activos Gráficos (Logos & Favicon)
+        if ($request->hasFile('logo_file')) {
+            $file = $request->file('logo_file');
+            $filename = 'logo_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/branding');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $config->logo_url = '/uploads/branding/' . $filename;
+        } elseif ($request->filled('logo_url') || $request->filled('logoUrl')) {
+            $config->logo_url = $request->input('logo_url') ?? $request->input('logoUrl');
+        }
+
+        if ($request->hasFile('logo_mobile_file')) {
+            $file = $request->file('logo_mobile_file');
+            $filename = 'logo_mob_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/branding');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $config->logo_mobile_url = '/uploads/branding/' . $filename;
+        } elseif ($request->filled('logo_mobile_url') || $request->filled('logoMobileUrl')) {
+            $config->logo_mobile_url = $request->input('logo_mobile_url') ?? $request->input('logoMobileUrl');
+        }
+
+        if ($request->hasFile('favicon_file')) {
+            $file = $request->file('favicon_file');
+            $filename = 'fav_' . $universe . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/branding');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $config->favicon_url = '/uploads/branding/' . $filename;
+        } elseif ($request->filled('favicon_url') || $request->filled('faviconUrl')) {
+            $config->favicon_url = $request->input('favicon_url') ?? $request->input('faviconUrl');
+        }
+
+        // Paleta Cromática Completa (8 Tokens)
+        if ($request->filled('primary_color') || $request->filled('primaryColor')) {
+            $config->primary_color = $request->input('primary_color') ?? $request->input('primaryColor');
+        }
+        if ($request->filled('secondary_color') || $request->filled('secondaryColor')) {
+            $config->secondary_color = $request->input('secondary_color') ?? $request->input('secondaryColor');
+        }
+        if ($request->filled('accent_color') || $request->filled('accentColor')) {
+            $config->accent_color = $request->input('accent_color') ?? $request->input('accentColor');
+        }
+        if ($request->filled('background_color') || $request->filled('backgroundColor')) {
+            $config->background_color = $request->input('background_color') ?? $request->input('backgroundColor');
+        }
+        if ($request->filled('surface_color') || $request->filled('surfaceColor')) {
+            $config->surface_color = $request->input('surface_color') ?? $request->input('surfaceColor');
+        }
+        if ($request->filled('text_color') || $request->filled('textColor')) {
+            $config->text_color = $request->input('text_color') ?? $request->input('textColor');
+        }
+        if ($request->filled('muted_text_color') || $request->filled('mutedTextColor')) {
+            $config->muted_text_color = $request->input('muted_text_color') ?? $request->input('mutedTextColor');
+        }
+        if ($request->filled('border_color') || $request->filled('borderColor')) {
+            $config->border_color = $request->input('border_color') ?? $request->input('borderColor');
+        }
+
+        // Campos opcionales de Hero (conservados por retrocompatibilidad)
+        if ($request->filled('hero_title') || $request->filled('heroTitle')) {
+            $config->hero_title = $request->input('hero_title') ?? $request->input('heroTitle');
+        }
+        if ($request->filled('hero_subtitle') || $request->filled('heroSubtitle')) {
+            $config->hero_subtitle = $request->input('hero_subtitle') ?? $request->input('heroSubtitle');
+        }
+        if ($request->filled('hero_cta_text') || $request->filled('heroCtaText')) {
+            $config->hero_cta_text = $request->input('hero_cta_text') ?? $request->input('heroCtaText');
+        }
+        if ($request->filled('hero_cta_url') || $request->filled('heroCtaUrl')) {
+            $config->hero_cta_url = $request->input('hero_cta_url') ?? $request->input('heroCtaUrl');
+        }
+        if ($request->has('custom_css') || $request->has('customCss')) {
+            $config->custom_css = $request->input('custom_css') ?? $request->input('customCss');
+        }
+        if ($request->has('custom_js') || $request->has('customJs')) {
+            $config->custom_js = $request->input('custom_js') ?? $request->input('customJs');
+        }
+
+        $config->save();
+
+        $cached = [
+            'name' => $config->brand_name,
+            'brandName' => $config->brand_name,
+            'kicker' => $config->kicker,
+            'logoUrl' => $config->logo_url,
+            'logoMobileUrl' => $config->logo_mobile_url,
+            'faviconUrl' => $config->favicon_url,
+            'primaryColor' => $config->primary_color,
+            'secondaryColor' => $config->secondary_color,
+            'accentColor' => $config->accent_color,
+            'backgroundColor' => $config->background_color,
+            'surfaceColor' => $config->surface_color,
+            'textColor' => $config->text_color,
+            'mutedTextColor' => $config->muted_text_color,
+            'borderColor' => $config->border_color,
+            'heroTitle' => $config->hero_title,
+            'heroSubtitle' => $config->hero_subtitle,
+            'heroCtaText' => $config->hero_cta_text,
+            'heroCtaUrl' => $config->hero_cta_url,
+            'customCss' => $config->custom_css,
+            'customJs' => $config->custom_js,
+        ];
+        Cache::forever('cms_storefront_' . $universe, $cached);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'storefront' => $merged]);
+            return response()->json(['success' => true, 'universe' => $universe, 'storefront' => $cached, 'message' => "Configuración de vitrina {$universe} guardada exitosamente."]);
         }
 
         return back()->with('success', "Configuración visual de vitrina {$universe} actualizada exitosamente.");
+    }
+
+    /**
+     * Create a new modular storefront section.
+     */
+    public function storeSection(Request $request)
+    {
+        $validated = $request->validate([
+            'universe' => 'required|string|in:all,marte,venus,tiresias,terra',
+            'name' => 'required|string|max:120',
+            'type' => 'required|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner,promo_modal',
+            'title' => 'nullable|string|max:200',
+            'subtitle' => 'nullable|string|max:500',
+            'badge' => 'nullable|string|max:80',
+            'query_rules' => 'nullable|array',
+            'custom_html' => 'nullable|string',
+            'custom_css' => 'nullable|string',
+            'custom_js' => 'nullable|string',
+            'settings' => 'nullable|array',
+            'status' => 'nullable|string|in:active,draft,archived',
+            'background_image_file' => 'nullable|image|max:5120',
+        ]);
+
+        $settings = $request->input('settings', []);
+
+        // Manejo de imagen de fondo subida
+        if ($request->hasFile('background_image_file')) {
+            $file = $request->file('background_image_file');
+            $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sections'), $filename);
+            $settings['background_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->filled('background_image_url')) {
+            $settings['background_image'] = $request->input('background_image_url');
+        }
+
+        $validated['settings'] = $settings;
+
+        $maxOrder = CmsSection::max('sort_order') ?? 0;
+        $validated['sort_order'] = $maxOrder + 1;
+        $validated['status'] = $validated['status'] ?? 'active';
+
+        // Regla de Negocio: Las secciones de tarjetas de catálogo NO permiten código custom.
+        // Solo las secciones de contenido/hero/carrusel/modal/botones pueden tener HTML/CSS/JS.
+        $productCardTypes = ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'subcategories_slider'];
+        if (in_array($validated['type'], $productCardTypes)) {
+            $validated['custom_html'] = null;
+            $validated['custom_css'] = null;
+            $validated['custom_js'] = null;
+        }
+
+        $section = CmsSection::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'section' => $section, 'message' => "Sección '{$section->name}' creada exitosamente."]);
+        }
+
+        return back()->with('success', "Sección '{$section->name}' creada exitosamente.");
+    }
+
+    /**
+     * Update an existing modular section.
+     */
+    public function updateSection(Request $request, $id)
+    {
+        $section = CmsSection::findOrFail($id);
+
+        $validated = $request->validate([
+            'universe' => 'required|string|in:all,marte,venus,tiresias,terra',
+            'name' => 'required|string|max:120',
+            'type' => 'nullable|string|in:hero_carousel,brand_pillars,categories_grid,family_showcase,subcategories_slider,tags_cloud,custom_html_css_js,curated_products,editorial_banner,promo_modal',
+            'status' => 'required|string|in:active,draft,archived',
+            'title' => 'nullable|string|max:200',
+            'subtitle' => 'nullable|string|max:500',
+            'badge' => 'nullable|string|max:80',
+            'query_rules' => 'nullable|array',
+            'custom_html' => 'nullable|string',
+            'custom_css' => 'nullable|string',
+            'custom_js' => 'nullable|string',
+            'settings' => 'nullable|array',
+            'background_image_file' => 'nullable|image|max:5120',
+        ]);
+
+        if (empty($validated['type'])) {
+            $validated['type'] = $section->type;
+        }
+
+        $currentSettings = $section->settings ?? [];
+        $newSettings = $request->input('settings', []);
+        $mergedSettings = array_merge($currentSettings, $newSettings);
+
+        // Manejo de imagen de fondo subida
+        if ($request->hasFile('background_image_file')) {
+            $file = $request->file('background_image_file');
+            $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sections'), $filename);
+            $mergedSettings['background_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->filled('background_image_url')) {
+            $mergedSettings['background_image'] = $request->input('background_image_url');
+        }
+
+        $validated['settings'] = $mergedSettings;
+
+        $productCardTypes = ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'subcategories_slider'];
+        if (in_array($validated['type'], $productCardTypes)) {
+            $validated['custom_html'] = null;
+            $validated['custom_css'] = null;
+            $validated['custom_js'] = null;
+        }
+
+        $section->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'section' => $section, 'message' => "Sección '{$section->name}' actualizada correctamente."]);
+        }
+
+        return back()->with('success', "Sección '{$section->name}' actualizada correctamente.");
+    }
+
+    /**
+     * Archive an existing modular section (status = 'archived').
+     */
+    public function archiveSection(Request $request, $id)
+    {
+        $section = CmsSection::findOrFail($id);
+        $section->status = 'archived';
+        $section->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'archived', 'message' => "Sección '{$section->name}' archivada correctamente."]);
+        }
+
+        return back()->with('success', "Sección '{$section->name}' archivada correctamente.");
+    }
+
+    /**
+     * Atomically reorder sections using SortableJS order array.
+     */
+    public function reorderSections(Request $request)
+    {
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'required|integer',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['order'] as $index => $id) {
+                CmsSection::where('id', $id)->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Orden de secciones actualizado correctamente.']);
+    }
+
+    /**
+     * Toggle section status between active and draft.
+     */
+    public function toggleSection(Request $request, $id)
+    {
+        $section = CmsSection::findOrFail($id);
+        $section->status = $section->status === 'active' ? 'draft' : 'active';
+        $section->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'status' => $section->status]);
+        }
+
+        return back()->with('success', "Estado de la sección '{$section->name}' actualizado a {$section->status}.");
+    }
+
+    /**
+     * Delete/archive a section.
+     */
+    public function destroySection(Request $request, $id)
+    {
+        $section = CmsSection::findOrFail($id);
+        $name = $section->name;
+        $section->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', "Sección '{$name}' eliminada correctamente.");
+    }
+
+    /**
+     * Update an official document payload (Guía Torzo, Cuidados, PROFECO).
+     */
+    public function updateDocument(Request $request, $code)
+    {
+        $doc = CmsOfficialDocument::where('code', $code)->firstOrFail();
+        $payload = $request->input('payload');
+
+        if (is_string($payload)) {
+            $decoded = json_decode($payload, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $payload = $decoded;
+            }
+        }
+
+        $doc->payload = $payload;
+        if ($request->filled('title')) {
+            $doc->title = $request->input('title');
+        }
+        $doc->save();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'document' => $doc]);
+        }
+
+        return back()->with('success', "Documento oficial '{$doc->title}' actualizado correctamente.");
+    }
+
+    /**
+     * Crear una página CMS.
+     */
+    public function storePage(Request $request)
+    {
+        if ($request->filled('content') && ! $request->filled('content_html')) {
+            $request->merge(['content_html' => $request->input('content')]);
+        }
+        if (! $request->filled('slug') && $request->filled('title')) {
+            $request->merge(['slug' => \Illuminate\Support\Str::slug($request->input('title'))]);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_pages,slug',
+            'icon' => 'nullable|string|max:50',
+            'image_url' => 'nullable|string|max:500',
+            'overlay_gradient' => 'nullable|string|max:255',
+            'text_color' => 'nullable|string|max:30',
+            'image_source_mode' => 'nullable|string|in:custom,catalog',
+            'overlay_color_start' => 'nullable|string|max:30',
+            'overlay_color_end' => 'nullable|string|max:30',
+            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
+            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
+            'gallery_images_urls' => 'nullable|string',
+            'filter_universe' => 'nullable|string|max:40',
+            'filter_category' => 'nullable|string|max:80',
+            'filter_tags' => 'nullable|string|max:255',
+            'filter_supplier' => 'nullable|string|max:100',
+            'content_html' => 'required|string',
+            'show_in_navbar' => 'nullable|boolean',
+            'show_in_mobile' => 'nullable|boolean',
+            'navbar_order' => 'nullable|integer',
+            'show_in_footer' => 'nullable|boolean',
+            'footer_order' => 'nullable|integer',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string',
+            'status' => 'nullable|in:active,paused,draft,archived',
+            'image_file' => 'nullable|image|max:5120',
+            'gallery_files.*' => 'nullable|image|max:5120',
+        ]);
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = 'page_explore_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pages'), $filename);
+            $validated['image_url'] = '/uploads/pages/' . $filename;
+        }
+
+        // Galería de imágenes para carrusel automático
+        $gallery = [];
+        if (!empty($validated['image_url'])) {
+            $gallery[] = $validated['image_url'];
+        }
+        if ($request->filled('gallery_images_urls')) {
+            $lines = preg_split('/[\r\n,]+/', $request->input('gallery_images_urls'));
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/'))) {
+                    $gallery[] = $line;
+                }
+            }
+        }
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                if ($gFile && $gFile->isValid()) {
+                    $gName = 'page_gallery_' . time() . '_' . uniqid() . '.' . $gFile->getClientOriginalExtension();
+                    $gFile->move(public_path('uploads/pages'), $gName);
+                    $gallery[] = '/uploads/pages/' . $gName;
+                }
+            }
+        }
+        if (!empty($gallery)) {
+            $validated['gallery_images'] = array_values(array_unique($gallery));
+            if (empty($validated['image_url'])) {
+                $validated['image_url'] = $gallery[0];
+            }
+        }
+
+        $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
+        $validated['show_in_mobile'] = $request->boolean('show_in_mobile', true);
+        $validated['show_in_footer'] = $request->boolean('show_in_footer');
+        $validated['status'] = in_array($validated['status'] ?? 'active', ['active', 'paused', 'draft', 'archived']) ? $validated['status'] : 'active';
+        $validated['text_color'] = $validated['text_color'] ?? '#ffffff';
+        $validated['image_source_mode'] = $validated['image_source_mode'] ?? 'custom';
+
+        $page = CmsPage::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'page' => $page]);
+        }
+
+        return back()->with('success', "Página de Explorar '{$page->title}' creada exitosamente.");
+    }
+
+    /**
+     * Actualizar una página CMS.
+     */
+    public function updatePage(Request $request, CmsPage $page)
+    {
+        if ($request->filled('content') && ! $request->filled('content_html')) {
+            $request->merge(['content_html' => $request->input('content')]);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_pages,slug,' . $page->id,
+            'icon' => 'nullable|string|max:50',
+            'image_url' => 'nullable|string|max:500',
+            'overlay_gradient' => 'nullable|string|max:255',
+            'text_color' => 'nullable|string|max:30',
+            'image_source_mode' => 'nullable|string|in:custom,catalog',
+            'overlay_color_start' => 'nullable|string|max:30',
+            'overlay_color_end' => 'nullable|string|max:30',
+            'overlay_opacity_start' => 'nullable|integer|min:0|max:100',
+            'overlay_opacity_end' => 'nullable|integer|min:0|max:100',
+            'gallery_images_urls' => 'nullable|string',
+            'filter_universe' => 'nullable|string|max:40',
+            'filter_category' => 'nullable|string|max:80',
+            'filter_tags' => 'nullable|string|max:255',
+            'filter_supplier' => 'nullable|string|max:100',
+            'content_html' => 'required|string',
+            'show_in_navbar' => 'nullable|boolean',
+            'show_in_mobile' => 'nullable|boolean',
+            'navbar_order' => 'nullable|integer',
+            'show_in_footer' => 'nullable|boolean',
+            'footer_order' => 'nullable|integer',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string',
+            'status' => 'nullable|in:active,paused,draft,archived',
+            'image_file' => 'nullable|image|max:5120',
+            'gallery_files.*' => 'nullable|image|max:5120',
+        ]);
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = 'page_explore_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pages'), $filename);
+            $validated['image_url'] = '/uploads/pages/' . $filename;
+        }
+
+        // Galería de imágenes para carrusel automático
+        $gallery = is_array($page->gallery_images) ? $page->gallery_images : [];
+        if (!empty($validated['image_url']) && !in_array($validated['image_url'], $gallery)) {
+            $gallery[] = $validated['image_url'];
+        }
+        if ($request->filled('gallery_images_urls')) {
+            $lines = preg_split('/[\r\n,]+/', $request->input('gallery_images_urls'));
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (!empty($line) && (filter_var($line, FILTER_VALIDATE_URL) || str_starts_with($line, '/uploads/'))) {
+                    $gallery[] = $line;
+                }
+            }
+        }
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $gFile) {
+                if ($gFile && $gFile->isValid()) {
+                    $gName = 'page_gallery_' . time() . '_' . uniqid() . '.' . $gFile->getClientOriginalExtension();
+                    $gFile->move(public_path('uploads/pages'), $gName);
+                    $gallery[] = '/uploads/pages/' . $gName;
+                }
+            }
+        }
+        if (!empty($gallery)) {
+            $validated['gallery_images'] = array_values(array_unique($gallery));
+            if (empty($validated['image_url'])) {
+                $validated['image_url'] = $gallery[0];
+            }
+        }
+
+        $validated['show_in_navbar'] = $request->boolean('show_in_navbar');
+        $validated['show_in_mobile'] = $request->boolean('show_in_mobile');
+        $validated['show_in_footer'] = $request->boolean('show_in_footer');
+        if (!empty($validated['status'])) {
+            $validated['status'] = in_array($validated['status'], ['active', 'paused', 'draft', 'archived']) ? $validated['status'] : 'active';
+        }
+        if (isset($validated['text_color'])) {
+            $validated['text_color'] = $validated['text_color'] ?: '#ffffff';
+        }
+        if (isset($validated['image_source_mode'])) {
+            $validated['image_source_mode'] = $validated['image_source_mode'] ?: 'custom';
+        }
+
+        $page->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'page' => $page]);
+        }
+
+        return back()->with('success', "Página CMS '{$page->title}' actualizada exitosamente.");
+    }
+
+    /**
+     * Reordenar páginas de explorar con Drag & Drop.
+     */
+    public function reorderPages(Request $request)
+    {
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'required|integer',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['order'] as $index => $id) {
+                CmsPage::where('id', $id)->update(['navbar_order' => $index + 1]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Orden de páginas de explorar sincronizado correctamente.']);
+    }
+
+    /**
+     * Alternar estado activo / pausado de una página CMS.
+     */
+    public function togglePageStatus(CmsPage $page)
+    {
+        $newStatus = $page->status === 'active' ? 'paused' : 'active';
+        $page->update(['status' => $newStatus]);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'status' => $newStatus]);
+        }
+
+        return back()->with('success', "Estado de página '{$page->title}' cambiado a " . strtoupper($newStatus) . '.');
+    }
+
+    /**
+     * Archivar una página CMS.
+     */
+    public function archivePage(CmsPage $page)
+    {
+        $page->update(['status' => 'archived']);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'status' => 'archived']);
+        }
+
+        return back()->with('success', "Página CMS '{$page->title}' archivada exitosamente.");
+    }
+
+    /**
+     * Eliminar una página CMS.
+     */
+    public function destroyPage(CmsPage $page)
+    {
+        $page->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Página CMS eliminada.');
+    }
+
+    /**
+     * Actualizar los anuncios de la cinta banner (Marquesina).
+     */
+    public function updateAnnouncements(Request $request)
+    {
+        $rawAnnouncements = $request->input('announcements', []);
+        $announcementsList = [];
+
+        if (is_array($rawAnnouncements)) {
+            foreach ($rawAnnouncements as $index => $item) {
+                $text = trim(is_array($item) ? ($item['text'] ?? '') : (string) $item);
+                if ($text !== '') {
+                    $announcementsList[] = [
+                        'id' => $index + 1,
+                        'text' => $text,
+                        'link' => is_array($item) ? ($item['link'] ?? '#') : '#',
+                        'badge' => is_array($item) ? ($item['badge'] ?? 'INFO') : 'INFO',
+                        'active' => is_array($item) ? filter_var($item['active'] ?? true, FILTER_VALIDATE_BOOLEAN) : true,
+                    ];
+                }
+            }
+        }
+
+        if (empty($announcementsList)) {
+            $announcementsList = [
+                ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'link' => '#', 'badge' => 'LOGÍSTICA', 'active' => true],
+                ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'link' => '#', 'badge' => 'FINANZAS', 'active' => true],
+                ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'link' => '#', 'badge' => 'INVENTARIO', 'active' => true],
+                ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'link' => '#', 'badge' => 'PROMO', 'active' => true],
+                ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'link' => '#', 'badge' => 'SOPORTE', 'active' => true],
+            ];
+        }
+
+        Cache::forever('cms_announcements', $announcementsList);
+        Cache::forever('cms_announcement_active', $request->boolean('announcement_active', true));
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'announcements' => $announcementsList]);
+        }
+
+        return back()->with('success', 'Cinta banner de anuncios del navbar actualizada exitosamente.');
+    }
+
+    /**
+     * Crear artículo del blog para Revista Digital.
+     */
+    public function storeBlogPost(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_blog_posts,slug',
+            'category_name' => 'required|string|max:100',
+            'tags' => 'nullable',
+            'author_name' => 'nullable|string|max:100',
+            'reading_time_minutes' => 'nullable|integer|min:1',
+            'excerpt' => 'required|string',
+            'body' => 'required|string',
+            'status' => 'nullable|in:published,draft',
+        ]);
+
+        if (is_string($request->input('tags'))) {
+            $validated['tags'] = array_filter(array_map('trim', explode(',', $request->input('tags'))));
+        }
+        $validated['status'] = $validated['status'] ?? 'published';
+        if ($validated['status'] === 'published') {
+            $validated['published_at'] = now();
+        }
+
+        $post = CmsBlogPost::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'post' => $post]);
+        }
+
+        return back()->with('success', "Artículo '{$post->title}' publicado exitosamente.");
+    }
+
+    /**
+     * Actualizar artículo del blog.
+     */
+    public function updateBlogPost(Request $request, CmsBlogPost $post)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:cms_blog_posts,slug,' . $post->id,
+            'category_name' => 'required|string|max:100',
+            'tags' => 'nullable',
+            'author_name' => 'nullable|string|max:100',
+            'reading_time_minutes' => 'nullable|integer|min:1',
+            'excerpt' => 'required|string',
+            'body' => 'required|string',
+            'status' => 'nullable|in:published,draft',
+        ]);
+
+        if (is_string($request->input('tags'))) {
+            $validated['tags'] = array_filter(array_map('trim', explode(',', $request->input('tags'))));
+        }
+
+        $post->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'post' => $post]);
+        }
+
+        return back()->with('success', "Artículo '{$post->title}' actualizado exitosamente.");
+    }
+
+    /**
+     * Eliminar artículo del blog.
+     */
+    public function destroyBlogPost(CmsBlogPost $post)
+    {
+        $post->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Artículo del blog eliminado.');
+    }
+
+    /**
+     * Actualizar configuración de tracking (GTM, GA4, Meta Pixel & CAPI).
+     */
+    public function updateTracking(Request $request)
+    {
+        $validated = $request->validate([
+            'gtm_id' => 'nullable|string|max:50',
+            'ga4_measurement_id' => 'nullable|string|max:50',
+            'facebook_pixel_id' => 'nullable|string|max:50',
+            'facebook_capi_token' => 'nullable|string',
+            'facebook_test_event_code' => 'nullable|string|max:50',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $tracking = CmsTrackingSetting::current();
+        $validated['is_active'] = $request->boolean('is_active');
+        $tracking->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'tracking' => $tracking]);
+        }
+
+        return back()->with('success', 'Configuración de tracking y analítica actualizada.');
+    }
+
+    /**
+     * Actualizar configuración y orden de filtros del catálogo.
+     */
+    public function updateFilters(Request $request)
+    {
+        $filtersData = $request->input('filters', []);
+
+        foreach ($filtersData as $id => $data) {
+            $filter = CmsCatalogFilter::find($id);
+            if ($filter) {
+                $filter->update([
+                    'label' => $data['label'] ?? $filter->label,
+                    'sort_order' => isset($data['sort_order']) ? (int) $data['sort_order'] : $filter->sort_order,
+                    'is_visible' => !empty($data['is_visible']),
+                ]);
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Filtros del catálogo actualizados correctamente.');
     }
 }

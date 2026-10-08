@@ -13,6 +13,7 @@ use App\Models\Cart;
 use App\Models\SystemEnvironmentConfig;
 use App\Models\EnvironmentAuditLog;
 use App\Models\AiCopilotChatMessage;
+use App\Services\Ai\GeminiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -673,7 +674,10 @@ class DashboardApiController extends Controller
     /**
      * Procesa una consulta contextual para el Copiloto IA (TASK-DSH-07).
      */
-    public function copilotChat(Request $request): JsonResponse
+    /**
+     * Procesa una consulta contextual para el Copiloto IA (TASK-DSH-07).
+     */
+    public function copilotChat(Request $request, GeminiService $gemini): JsonResponse
     {
         $validated = $request->validate([
             'message' => 'required|string|max:1000',
@@ -688,40 +692,78 @@ class DashboardApiController extends Controller
             'message' => $userMsg,
         ]);
 
-        $msgLower = mb_strtolower($userMsg);
+        $reply = null;
+        $aiProvider = 'heuristic_fallback';
 
-        if (str_contains($msgLower, 'ebitda') || str_contains($msgLower, 'margen') || str_contains($msgLower, 'financier')) {
-            $reply = "El Margen EBITDA Neto Real se ubica en 35.5% (MXN $125,610) sobre ventas brutas de MXN $353,800. Los costos se desglosan en: COGS 40%, logística y empaque 12%, pasarelas 4.5% e impuestos netos 8%.";
+        // 1. Intentar resolver mediante Google Gemini AI con memoria de conversación
+        if ($gemini->isConfigured()) {
+            $systemInstruction = "Eres el Copiloto IA Ejecutivo de RevOps y Estrategia de 'Mi Tienda Online', una plataforma e-commerce de moda íntima masculina y suscripciones multiverso.
+Tu rol es asesorar con máxima precisión a directores, gerentes y operadores sobre ventas, márgenes financieros (EBITDA), logística de almacén (cortes de paquetería DHL/FedEx a las 14:00 hrs), inventario (ROP y quiebres de stock en racks) y rescate de carritos abandonados.
+Responde siempre en español, con un tono ejecutivo, analítico, conciso y altamente accionable (máximo 2 a 3 oraciones contundentes).";
+
+            $recentHistory = AiCopilotChatMessage::orderBy('created_at', 'desc')
+                ->take(6)
+                ->get()
+                ->reverse()
+                ->map(fn($m) => [
+                    'sender' => $m->sender,
+                    'message' => $m->message,
+                ])
+                ->values()
+                ->toArray();
+
+            $aiReply = $gemini->chat($recentHistory, $systemInstruction);
+            if (!empty($aiReply)) {
+                $reply = $aiReply;
+                $aiProvider = 'gemini-flash';
+            }
+        }
+
+        // 2. Determinar chips de acción contextuales según la temática y aplicar fallback si no hay respuesta de IA
+        $msgLower = mb_strtolower($userMsg . ' ' . ($reply ?? ''));
+        if (str_contains($msgLower, 'ebitda') || str_contains($msgLower, 'margen') || str_contains($msgLower, 'financier') || str_contains($msgLower, 'utilidad')) {
             $actionChips = [
                 ['label' => 'Ver Gráfica Cascada', 'action' => 'goto_ebitda_chart'],
                 ['label' => 'Auditar Gastos Operativos', 'action' => 'goto_costs_breakdown'],
             ];
-        } elseif (str_contains($msgLower, 'dhl') || str_contains($msgLower, 'corte') || str_contains($msgLower, 'sla') || str_contains($msgLower, 'empaque')) {
-            $reply = "El corte diario DHL Express está programado para las 14:00 hrs. Faltan tareas de empaque prioritarias en la mesa de trabajo (Pedido #MIX-1048 y Manifiesto de 12 paquetes).";
+            if (!$reply) {
+                $reply = "El Margen EBITDA Neto Real se ubica en 35.5% (MXN $125,610) sobre ventas brutas de MXN $353,800. Los costos se desglosan en: COGS 40%, logística y empaque 12%, pasarelas 4.5% e impuestos netos 8%.";
+            }
+        } elseif (str_contains($msgLower, 'dhl') || str_contains($msgLower, 'corte') || str_contains($msgLower, 'sla') || str_contains($msgLower, 'empaque') || str_contains($msgLower, 'envío')) {
             $actionChips = [
                 ['label' => 'Ir a Mesa de Empaque', 'action' => 'goto_warehouse_tab'],
                 ['label' => 'Inspeccionar Manifiesto DHL', 'action' => 'open_task_manifest'],
             ];
-        } elseif (str_contains($msgLower, 'rop') || str_contains($msgLower, 'inventario') || str_contains($msgLower, 'stock')) {
-            $reply = "Se detectó quiebre inminente en Boxer Modal Negro (Talla M) con solo 4 unidades en anaquel rápido. Se recomienda generar Orden de Compra a Torzo B2B o activar movimiento de reserva Rack R-04.";
+            if (!$reply) {
+                $reply = "El corte diario DHL Express está programado para las 14:00 hrs. Faltan tareas de empaque prioritarias en la mesa de trabajo (Pedido #MIX-1048 y Manifiesto de 12 paquetes).";
+            }
+        } elseif (str_contains($msgLower, 'rop') || str_contains($msgLower, 'inventario') || str_contains($msgLower, 'stock') || str_contains($msgLower, 'quiebre')) {
             $actionChips = [
                 ['label' => 'Generar PO Torzo', 'action' => 'goto_inventory_po'],
                 ['label' => 'Mover Stock de Reserva', 'action' => 'open_task_rop'],
             ];
+            if (!$reply) {
+                $reply = "Se detectó quiebre inminente en Boxer Modal Negro (Talla M) con solo 4 unidades en anaquel rápido. Se recomienda generar Orden de Compra a Torzo B2B o activar movimiento de reserva Rack R-04.";
+            }
         } elseif (str_contains($msgLower, 'carrito') || str_contains($msgLower, 'whatsapp') || str_contains($msgLower, 'ventas') || str_contains($msgLower, 'lead')) {
-            $reply = "Hay carritos abandonados con alta probabilidad de rescate vía WhatsApp (ej. Andrea Ruiz con MXN $1,450.00). El cupón RESCUE10 incrementa la conversión en un 28%.";
             $actionChips = [
                 ['label' => 'Abrir Bandeja de Ventas', 'action' => 'goto_sales_tab'],
                 ['label' => 'Disparar Rescate WhatsApp', 'action' => 'open_rescue_first'],
             ];
+            if (!$reply) {
+                $reply = "Hay carritos abandonados con alta probabilidad de rescate vía WhatsApp (ej. Andrea Ruiz con MXN $1,450.00). El cupón RESCUE10 incrementa la conversión en un 28%.";
+            }
         } else {
-            $reply = "Analizando métricas del ecosistema Multiverso: El ROAS Neto Real promedio se sitúa en 3.42x. Hay 3 productos cerca del punto de reorden (ROP) y el balance de cámara con aliados presenta un saldo neto acumulado saludable.";
             $actionChips = [
                 ['label' => 'Ver Inventario Bajo ROP', 'action' => 'goto_inventory_rop'],
                 ['label' => 'Auditar Liquidación SPEI', 'action' => 'goto_allies_clearing'],
             ];
+            if (!$reply) {
+                $reply = "Analizando métricas del ecosistema Multiverso: El ROAS Neto Real promedio se sitúa en 3.42x. Hay 3 productos cerca del punto de reorden (ROP) y el balance de cámara con aliados presenta un saldo neto acumulado saludable.";
+            }
         }
 
+        // Guardar respuesta del asistente
         AiCopilotChatMessage::create([
             'user_id' => auth()->id(),
             'sender' => 'assistant',
@@ -733,6 +775,35 @@ class DashboardApiController extends Controller
             'success' => true,
             'reply' => $reply,
             'action_chips' => $actionChips,
+            'ai_provider' => $aiProvider,
+        ]);
+    }
+
+    /**
+     * Retorna el estado de conectividad y telemetría de Google Gemini AI.
+     */
+    public function getCopilotStatus(GeminiService $gemini): JsonResponse
+    {
+        $test = $gemini->testConnection();
+
+        return response()->json([
+            'success' => true,
+            'status' => $test['status'] ?? 'unknown',
+            'data' => [
+                'provider' => 'Google Generative AI (Gemini)',
+                'model' => config('services.gemini.model'),
+                'project_name' => config('services.gemini.project_name'),
+                'project_number' => config('services.gemini.project_number'),
+                'is_connected' => $test['success'] ?? false,
+                'latency_ms' => $test['latency_ms'] ?? null,
+                'reply' => $test['reply'] ?? null,
+                'error' => $test['error'] ?? null,
+                'active_features' => [
+                    'product_description_generator' => 'Activo (Gemini Flash + Fallback)',
+                    'executive_chat_copilot' => 'Activo (Gemini Flash Multi-Turn)',
+                    'seo_smart_tagging' => 'Activo (Gemini Structured JSON)',
+                ],
+            ],
         ]);
     }
 
@@ -852,9 +923,9 @@ class DashboardApiController extends Controller
      */
     public function ensureDefaultOperationalTasksExist(): void
     {
-        if (OperationalTask::count() === 0) {
-            $today = today();
+        $today = today();
 
+        if (OperationalTask::where('assigned_role', 'warehouse')->count() === 0) {
             OperationalTask::create([
                 'title' => 'Empaque: Pedido #MIX-1048',
                 'reference_code' => '#MIX-1048',
@@ -956,6 +1027,97 @@ class DashboardApiController extends Controller
                         ['label' => 'Impresión de 2 tantos de manifiesto con firma autógrafa', 'checked' => false],
                         ['label' => 'Entrega física de bultos a unidad de recolección DHL', 'checked' => false],
                     ],
+                ],
+            ]);
+        }
+
+        if (OperationalTask::where('assigned_role', 'purchases')->count() === 0) {
+            OperationalTask::create([
+                'title' => 'Validar Cumplimiento de Entrega: Torzo B2B #OC-2026-003',
+                'reference_code' => '#OC-2026-003',
+                'category' => 'inbound',
+                'priority' => 'critical',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Recepción física concluida en rampa con reporte de discrepancia. Validar cumplimiento y formalizar acta mercantil.',
+                'due_at' => $today->copy()->setTime(15, 0),
+                'sla_minutes_limit' => 60,
+                'action_payload' => [
+                    'po_number' => 'OC-2026-003',
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                    'contact' => 'Carlos Mendoza (Torzo)',
+                    'phone' => '+52 55 4192 8820',
+                    'discrepancy' => 'Diferencia de 10 piezas en talla M. Requiere emisión de Nota de Crédito.',
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Reabastecimiento ROP: Playera Oversize Blanca (Lote +60 pzs)',
+                'reference_code' => 'SKU: TEE-OVS-WHT',
+                'category' => 'compras',
+                'priority' => 'high',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Stock disponible (12 pzs) cayó por debajo del punto de reorden (25 pzs). Lead time del taller: 5 días hábiles.',
+                'due_at' => $today->copy()->setTime(16, 0),
+                'sla_minutes_limit' => 120,
+                'action_payload' => [
+                    'sku' => 'TEE-OVS-WHT',
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                    'current_stock' => 12,
+                    'rop_threshold' => 25,
+                    'suggested_batch' => 60,
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Bandeja MOQ: Torzo B2B al 85% de cobertura de lote',
+                'reference_code' => 'MOQ-TORZO-01',
+                'category' => 'compras',
+                'priority' => 'medium',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Faltan 15 prendas para saltar a escala de 100 pzs y obtener ahorro del 12% ($75.00/u en lugar de $85.00/u).',
+                'due_at' => $today->copy()->setTime(17, 0),
+                'sla_minutes_limit' => 180,
+                'action_payload' => [
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                    'current_units' => 85,
+                    'target_moq' => 100,
+                    'potential_savings' => 1000.00,
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Conciliar Acuerdo NC-TORZO-2026-001 ($950.00 MXN)',
+                'reference_code' => 'NC-TORZO-2026-001',
+                'category' => 'compras',
+                'priority' => 'medium',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => 'Acuerdo compensatorio por faltante en rampa. Seleccionar y aplicar como deducción en la próxima orden de compra.',
+                'due_at' => $today->copy()->setTime(18, 0),
+                'sla_minutes_limit' => 240,
+                'action_payload' => [
+                    'ref' => 'NC-TORZO-2026-001',
+                    'amount' => 950.00,
+                    'supplier' => 'Torzo Textil B2B SA de CV',
+                ],
+            ]);
+
+            OperationalTask::create([
+                'title' => 'Pedidos On-Demand: 4 solicitudes D2C listas para compra',
+                'reference_code' => 'ON-DEMAND-04',
+                'category' => 'procurement',
+                'priority' => 'high',
+                'assigned_role' => 'purchases',
+                'status' => 'pending',
+                'description' => '4 pedidos de clientes especiales pagados en espera de colocación de orden a taller de confección.',
+                'due_at' => $today->copy()->setTime(16, 30),
+                'sla_minutes_limit' => 90,
+                'action_payload' => [
+                    'requests_count' => 4,
+                    'suppliers' => ['Torzo B2B', 'Silk & Cotton Iberia SL'],
                 ],
             ]);
         }

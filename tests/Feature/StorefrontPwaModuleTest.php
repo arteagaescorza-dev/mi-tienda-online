@@ -335,6 +335,7 @@ class StorefrontPwaModuleTest extends TestCase
             public_path('css/store-pwa.css'),
             public_path('sw.js'),
             resource_path('views/layouts/store-pwa.blade.php'),
+            resource_path('views/portal/store.blade.php'),
             app_path('Services/CustomerAccountService.php'),
             app_path('Services/WebPushNotificationService.php'),
             app_path('Http/Controllers/Api/StorefrontApiController.php'),
@@ -348,5 +349,37 @@ class StorefrontPwaModuleTest extends TestCase
             $hasEmoji = preg_match($emojiRegex, $content, $matches);
             $this->assertFalse((bool) $hasEmoji, "Se encontro un emoji en {$file}: " . ($matches[0] ?? ''));
         }
+    }
+
+    public function test_storefront_renders_custom_footer_config(): void
+    {
+        \App\Models\CmsOfficialDocument::updateOrCreate(
+            ['code' => 'STORE_FOOTER_CONFIG'],
+            [
+                'title' => 'Editor Oficial de Pie de Página (Footer de Tienda)',
+                'payload' => [
+                    'brand_summary' => 'Narrativa corporativa única de prueba footer',
+                    'whatsapp_contact' => '+52 55 9988 7766',
+                    'support_email' => 'concierge@multiverso.test',
+                    'shipping_badge_text' => 'Flete express 24h garantizado',
+                    'packaging_badge_text' => 'Caja discreta sin logotipos externos',
+                    'payments_badge_text' => 'Procesamiento encriptado bancario',
+                    'copyright_text' => '(C) 2026 Multiverso Test Corp.',
+                    'show_revops_link' => true,
+                    'show_zero_emojis_badge' => true,
+                ],
+                'version' => '1.0',
+                'is_active' => true,
+            ]
+        );
+
+        $response = $this->get('/');
+        $response->assertStatus(200)
+            ->assertSee('Narrativa corporativa única de prueba footer')
+            ->assertSee('+52 55 9988 7766')
+            ->assertSee('concierge@multiverso.test')
+            ->assertSee('Flete express 24h garantizado')
+            ->assertSee('(C) 2026 Multiverso Test Corp.')
+            ->assertSee('Consola RevOps');
     }
 }

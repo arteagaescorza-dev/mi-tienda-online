@@ -15,6 +15,31 @@
     })" 
     class="w-full text-slate-800 font-sans antialiased"
 >
+    {{-- ========================================================================= --}}
+    {{-- CONMUTADOR DE MODO: CONSOLA REVOPS vs EXTRANET SOCIO vs EXTRANET PROVEEDOR --}}
+    {{-- ========================================================================= --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="allies-mode-switcher flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <a href="{{ route('portal.allies') }}" class="allies-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-slate-900">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Vista Administrador RevOps</span>
+            </a>
+            <a href="{{ route('portal.allies', ['mode' => 'partner']) }}" class="allies-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-slate-900">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+                <span>Pantalla Extranet del Aliado (Partner Portal)</span>
+            </a>
+            <button class="allies-mode-btn active bg-white shadow-xs px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-900" type="button">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <span>Pantalla Extranet del Proveedor (B2B Supplier)</span>
+            </button>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500 font-medium">Modo activo:</span>
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-indigo-900 text-white font-mono">
+                Extranet B2B Proveedor
+            </span>
+        </div>
+    </div>
 
     {{-- ALERTAS DE SESIÓN --}}
     @if(session('success'))

@@ -35,6 +35,11 @@ class PurchaseOrder extends Model
         return $this->belongsTo(SupplierCreditAgreement::class, 'credit_agreement_id');
     }
 
+    public function moqSheet(): BelongsTo
+    {
+        return $this->belongsTo(SupplierMoqSheet::class, 'moq_sheet_id');
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);

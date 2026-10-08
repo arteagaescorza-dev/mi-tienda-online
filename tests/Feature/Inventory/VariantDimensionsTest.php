@@ -280,4 +280,92 @@ class VariantDimensionsTest extends TestCase
         $response->assertViewHas('portalFragranceVolumes');
         $response->assertViewHas('portalCategories');
     }
+
+    /**
+     * Regla: Las curvas de tallas se pueden asociar a marcas y proveedores y editar correctamente.
+     */
+    public function test_size_curves_can_be_associated_to_suppliers_and_brands_and_updated(): void
+    {
+        $supplier = \App\Models\Supplier::create([
+            'name' => 'Torzo Textil',
+            'legal_name' => 'Torzo Ropa S.A.',
+            'vendor_code' => 'SUP-TRZ-CURV',
+            'origin' => 'manual',
+            'status' => 'connected',
+        ]);
+
+        $brand = \App\Models\Brand::create([
+            'name' => 'Torzo Underwear',
+            'slug' => 'torzo-underwear',
+            'supplier_id' => $supplier->id,
+            'is_active' => true,
+        ]);
+
+        // 1. Crear curva asociada a proveedor y marca
+        $createRes = $this->actingAs($this->adminUser)
+            ->postJson('/api/v1/inventory/settings/size-curves', [
+                'name' => 'Curva Torzo Fit',
+                'category_scope' => 'textil',
+                'supplier_id' => $supplier->id,
+                'brand_id' => $brand->id,
+                'description' => 'Curva ajustada para Torzo Underwear',
+                'is_default' => false,
+                'is_active' => true,
+                'sizes' => [
+                    ['code' => 'CH', 'label' => 'Chica Torzo', 'sort_order' => 1],
+                    ['code' => 'M', 'label' => 'Mediana Torzo', 'sort_order' => 2],
+                ],
+            ]);
+
+        $createRes->assertStatus(201)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.supplier_id', $supplier->id)
+            ->assertJsonPath('data.brand_id', $brand->id)
+            ->assertJsonPath('data.supplier.name', 'Torzo Textil')
+            ->assertJsonPath('data.brand.name', 'Torzo Underwear');
+
+        $curveId = $createRes->json('data.id');
+        $this->assertDatabaseHas('apparel_size_curves', [
+            'id' => $curveId,
+            'name' => 'Curva Torzo Fit',
+            'supplier_id' => $supplier->id,
+            'brand_id' => $brand->id,
+        ]);
+
+        // 2. Actualizar la curva (cambiar nombre y desasociar marca / reasociar)
+        $updateRes = $this->actingAs($this->adminUser)
+            ->putJson("/api/v1/inventory/settings/size-curves/{$curveId}", [
+                'name' => 'Curva Torzo Ultra Stretch 2026',
+                'category_scope' => 'textil',
+                'supplier_id' => $supplier->id,
+                'brand_id' => null,
+                'description' => 'Actualizada para abarcar todas las marcas del proveedor',
+            ]);
+
+        $updateRes->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('data.name', 'Curva Torzo Ultra Stretch 2026')
+            ->assertJsonPath('data.supplier_id', $supplier->id)
+            ->assertJsonPath('data.brand_id', null);
+
+        $this->assertDatabaseHas('apparel_size_curves', [
+            'id' => $curveId,
+            'name' => 'Curva Torzo Ultra Stretch 2026',
+            'supplier_id' => $supplier->id,
+            'brand_id' => null,
+        ]);
+
+        // 3. Consultar listado y verificar carga de relaciones
+        $listRes = $this->actingAs($this->adminUser)
+            ->getJson('/api/v1/inventory/settings/size-curves');
+
+        $listRes->assertStatus(200);
+        $found = collect($listRes->json('data'))->firstWhere('id', $curveId);
+        $this->assertNotNull($found);
+        $this->assertEquals('Curva Torzo Ultra Stretch 2026', $found['name']);
+        $this->assertEquals($supplier->id, $found['supplier_id']);
+        $this->assertNotNull($found['supplier']);
+        $this->assertEquals('Torzo Textil', $found['supplier']['name']);
+    }
 }
+

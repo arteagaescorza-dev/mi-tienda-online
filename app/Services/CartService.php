@@ -116,8 +116,8 @@ class CartService
             $size = strtoupper(trim((string) data_get($variant->attributes, 'size', 'M')));
             $color = data_get($variant->attributes, 'color', 'Unico');
 
-            $image = data_get($product->meta, 'image') ?: (data_get($product->meta, 'images.0') ?: '/user-avatar.png');
-            $image = str_replace('/./', '/', $image);
+            $rawImage = data_get($product->meta, 'image') ?: (data_get($product->meta, 'images.0') ?: '/user-avatar.png');
+            $image = \App\Http\Controllers\StorefrontController::cleanStoreImageUrl($rawImage);
 
             $itemData = [
                 'id' => $item->id,

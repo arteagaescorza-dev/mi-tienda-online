@@ -1253,7 +1253,7 @@
       var nextPageButton = $('[data-page-next]');
       var pageStatus = $('[data-page-status]');
 
-      var filterKeys = ['brand', 'size', 'fit', 'color', 'category', 'garment_type'];
+      var filterKeys = ['brand', 'supplier', 'size', 'fit', 'color', 'category', 'garment_type'];
       var currentSourceFilter = 'all';
       var currentPerPage = 25;
       var currentPage = 1;
@@ -1388,7 +1388,10 @@
           return false;
         }
 
-        if (filters.brand.length && filters.brand.indexOf(normalize(card.getAttribute('data-brand'))) === -1) {
+        if (filters.brand && filters.brand.length && filters.brand.indexOf(normalize(card.getAttribute('data-brand'))) === -1) {
+          return false;
+        }
+        if (filters.supplier && filters.supplier.length && filters.supplier.indexOf(normalize(card.getAttribute('data-supplier') || card.getAttribute('data-brand'))) === -1) {
           return false;
         }
         if (filters.size.length && filters.size.indexOf(normalize(card.getAttribute('data-size'))) === -1) {

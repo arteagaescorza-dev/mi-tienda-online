@@ -54,6 +54,13 @@
 | `TASK-INV-13` | Gestor Integral de Proveedores (Híbridos Scrapeados vs Locales/Manuales) y Control de Estados | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Pestaña Proveedores, Modal CRUD, Tag v1.2 |
 | `TASK-INV-14` | Gestor Configurable de Tallas Textiles y Volúmenes de Perfumería en Matriz de Variantes | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-02`, Modal Curvas & Volúmenes, Tag v1.6 |
 | `TASK-INV-15` | Drawer de Producto Full-Width con Auto-SKU, Asistente IA de Descripción y Detección de Duplicados | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta Producto, Auto-SKU, Copiloto IA, Duplicados, Tag v1.6 |
+| `TASK-INV-19` | Gobernanza de Catálogo Operativo: Archivo Directo, Curaduría Scraping Homologada, Copiloto Comercial Gemini, Ajustes de IA y Pre-guardado en Borrador (Reglas 1-5) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Curaduría Scraping, Gemini AI, Borradores, Archivados |
+| `TASK-INV-20` | Rediseño Workstation Alta de Producto: Tipificación Liso/Diseño, Vitrina In Situ, Multicolor Nativo, Wizard Paginado 4 Pasos, Eliminación Color Principal Paso 3 y Preview 30/70 (Reglas UX 1-4 & Sistema) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Workstation Alta, Wizard 4 Pasos, Multicolor, Live Preview 30/70 |
+| `TASK-INV-21` | Fidelidad Taxonómica Estricta en Workstation y Copiloto IA (Sincronización Dinámica de Telas, Eliminación de 'Modal Seamless' Fijo y Prompt Estricto Gemini) | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, `ProductAiCopilotService`, `inventory-module.js`, Regla 6.74 |
+| `TASK-INV-22` | Carga Múltiple de Fotografías, Curaduría Secuencial 1 a 1 en Recorte 4:5 y Armonización Visual de Pricing | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-INV-20`, Dropzone `multiple`, `inventory-module.js`, Regla 6.75 |
+| `TASK-INV-23` | Paridad Estructural y Taxonómica en Curaduría de Scraping con Modales In Situ, Vitrina Web, Logística, Stock, Precios y Copiloto IA | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Curaduría Scraping, Workstation Alta, Modales In Situ, Copiloto IA, Regla 6.64 |
+| `TASK-INV-24` | Sincronización Fidedigna de Atributos Cromáticos y Textiles en Catálogo y Persistencia sin Fricción de Claves Foráneas | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Catálogo Operativo, Drawer Producto, Swatches Cromáticos, Fabric FK, Reglas 1, 6.57, 6.64 |
+| `TASK-AUTH-01` | Rediseño Minimalista Aislado de Login para el Panel RevOps & Erradicación Total de Chrome del Storefront | **Transversal (Autenticación)** | **Alta** | **Completada (Fullstack End-to-End)** | `user-login.blade.php`, `PortalAuthorizationTest.php`, Regla 6.76 |
 | `TASK-INT-06` | Gestor de Carritos Simultáneos y Reserva Temporal de Stock (TTL Configurable) | **Transversal (H2 $\leftrightarrow$ H4)** | **Media** | **Completada (Fullstack End-to-End)** | Carrito, Stock Disponible, Tag v1.1 |
 | `TASK-FIN-01` | Calculadora de Margen Neto Real por Pedido (Deducción Pasarela, Empaque y Fletes) | **Hub 5 (Finanzas)** | **Media** | **Completada (Fullstack End-to-End)** | Stripe, `TASK-LOG-06`, Skydropx, Tag v1.1 |
 | `TASK-SYS-ENV` | Conmutador Visual de Entornos (Sandbox / Pruebas vs Producción Real) | **Transversal (Seguridad)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Navbar, Stripe Keys, Skydropx, Tag v1.5 |
@@ -64,6 +71,8 @@
 | `TASK-PUR-02` | Reasignación de Modales Físicos (Rampa y Surtido Interno) a Almacén y Segregación de Compras | **Hub 1 $\leftrightarrow$ Hub 4 (Compras / Almacén)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Rampa Almacén, Modal Surtido Carlos, Exclusión Purchases, Tag v1.7 |
 | `TASK-PUR-03` | Depuración y Especialización del Catálogo para Compras (Existencias, DOH, Costos y Botón PO) | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (Fullstack End-to-End)** | DOH, Alertas ROP, Costos CPP, Ocultar Auditoría Ciegas, Tag v1.7 |
 | `TASK-PUR-04` | Generador de PO con Impresión PDF Multi-Página, Compensación de Notas de Crédito & Edición de Costo/Prioridad | **Hub 4 (Inventario / Compras)** | **Alta** | **Completada (Fullstack End-to-End)** | Motor @media print Letter, Panel Compensación Discrepancias, Recálculo ROP, Tag v1.7 |
+| `TASK-PUR-05` | Gobernanza de Compras por Ciclos Operativos: Árbol Consolidado Proveedor-Marcas, Reactividad MOQ y Acuerdos de Crédito | **Hub 4 (Inventario / Compras / Ajustes)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Árbol Consolidado, Reactividad MOQ en Caliente, Fallback Matriz, DB Real, Regla 10 & 12 |
+| `TASK-PUR-06` | Ahorro Real en MOQ, Multi-Selección de Acuerdos por Proveedor en PO y Segregación RBAC en Hub 1 (Almacén vs Compras) | **Hub 4 / Hub 1 / Hub 5 / Hub 7** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Ahorro Real MOQ, Multi-Acuerdos PO, Segregación Hub 1, Hub 5/7, Reglas 12.3.6, 12.4.4, 12.6.1, 12.7 |
 | `TASK-DSH-07` | Cabina Ejecutiva con Gráficas Analíticas y Copiloto IA (Resumen & Chat Estratégico) | **Hub 1 (Dashboard)** | **Alta** | **Completada (Full-Stack)** | Analítica RevOps, LLM API, Chat UI, Tag v1.3 |
 | `TASK-HUB-VND` | Portal Extranet de Proveedores y Fabricantes (B2B Inbound & Órdenes) | **Hub 7 / B2B (Proveedores)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 4 Compras, Recepción Inbound, Tag v1.7 |
 | `TASK-SUB-DUN` | Motor de Dunning y Recuperación de Cobros Fallidos en Suscripciones (MRR) | **Transversal (H5 $\leftrightarrow$ H3)** | **Media** | **Completada (UI)** | MRR, Stripe Webhooks, WhatsApp |
@@ -95,12 +104,43 @@
 | `TASK-STR-04` | Conexión de la Tienda con Nuevos Hubs (Cupones/Banners Hub 7 y CMS Hub 2) | **Transversal (Tienda $\leftrightarrow$ H7 $\leftrightarrow$ H2)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-ALY-02`, `TASK-ALY-03`, `TASK-CMS-01`, Tag v1.1 |
 | `TASK-STR-05` | Portal del Comprador: Mi Cuenta, Mis Pedidos, Membresías MRR & Perfil Anatómico | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `TASK-STR-01`, Hub 6 (Logística), Hub 5 (MRR), Tag v1.1 |
 | `TASK-STR-06` | Motor de Notificaciones Web Push PWA (VAPID, Alertas Stock 5m, Courier Tracking & MRR) | **Transversal (PWA $\leftrightarrow$ H6 $\leftrightarrow$ H5 $\leftrightarrow$ H1)** | **Alta** | **Completada (Fullstack End-to-End)** | `sw.js`, VAPID RFC 8292, Hub 6, Hub 5, Tag v1.1 |
+| `TASK-STR-07` | Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `resources/views/store/pwa/product-detail.blade.php`, `PROJECT_RULES.md` |
+| `TASK-STR-08` | Gobernanza Storefront: Filtros Drawer Izquierdo, Reserva en Checkout, Supresión SPEI y Norma UTF-8 | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.css`, `store-pwa.js`, `store-pwa.blade.php`, `PROJECT_RULES.md` |
+| `TASK-STR-09` | Navbar Sticky Permanente, Editor de Marquesina & Páginas Desktop/Móvil con SEO Integral | **Tienda Pública / Hub 2 (CMS)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.blade.php`, `PortalStoreController`, `StorefrontController`, `PROJECT_RULES.md` |
 | `TASK-INV-16` | Refactorización de Bandeja de Compras y Solicitudes On-Demand | **Hub 4 (Inventario)** | **Alta** | **Completada (UI)** | Hub 4 Compras, PDF POs, `purchase_kardex` |
 | `TASK-INV-17` | CRUD Integral y Gestor de Fórmulas para Recetas BOM & Combos Virtuales | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Ajustes Inventario, Catálogo Operativo, Tag v1.3 |
 | `TASK-INV-18` | Modal Panorámico de Edición de SKU (`max-w-7xl`) & Reactividad Integral | **Hub 4 (Inventario)** | **Alta** | **Completada (Fullstack End-to-End)** | Modal Panorámico max-w-7xl, 4 KPIs Live, Margen Real, Tag v1.6 |
 | `TASK-DSH-09` | Master Kardex Global y Log de Auditoría Omnicanal para Superadministradores | **Hub 1 (Dashboard)** | **Alta** | **Completada (Fullstack End-to-End)** | Hub 1 Auditoría, `system_audit_logs`, Tag v1.5 |
 | `TASK-SYS-01` | Centro de Ajustes del Sistema a Pantalla Completa y Gobernanza Global | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | Sidebar Footer, Hub 8 Pantalla Completa, Tag v1.5 |
 | `TASK-COM-01` | Mensajería Interdepartamental Operativa con Detección Automática de Folios | **Transversal (Gobernanza / Core)** | **Alta** | **Completada (Fullstack End-to-End)** | `interdepartmental_messages`, Chat Drawer, Tag v1.5 |
+| `TASK-H2-01` | DDL & Capa de Persistencia Relacional CMS (Base de Datos) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | Migraciones MySQL, Eloquent |
+| `TASK-H2-02` | Motor Drag & Drop de Secciones en Hub 2 (Categorías, Tags, Custom) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `SortableJS`, `TASK-H2-01` |
+| `TASK-H2-03` | Gestor de Documentos Oficiales (Tallas Torzo, Cuidados, PROFECO) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-01` |
+| `TASK-H2-04` | CMS de Páginas Dinámicas & Sincronización Navbar | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-01`, View Composers |
+| `TASK-H2-05` | Motor de Paletas Globales & Variables CSS (`:root`) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-01`, Estilos Globales |
+| `TASK-H2-06` | Renderizador Modular de Secciones en Storefront PWA | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | `TASK-H2-02`, `TASK-H2-05` |
+| `TASK-H2-07` | CMS de Blog / Revista Digital & SEO Schema | **Hub 2 (CMS & Tienda Real)** | **Media** | **Planificada** | `TASK-H2-01`, Schema JSON-LD |
+| `TASK-H2-08` | Ficha de Producto (PDP) a Pantalla Completa Dedicada (Sin Drawers) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | Hub 4 Inventario, Blade Standalone |
+| `TASK-H2-09` | Editor Dinámico de Filtros & Taxonomías de Catálogo | **Hub 2 (CMS & Tienda Real)** | **Media** | **Planificada** | Hub 4 Categorías & Familias |
+| `TASK-H2-10` | Suite de Tracking & Analítica (GTM, GA4, Meta Pixel & CAPI) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | DataLayer, Meta Graph API |
+| `TASK-H2-11` | Batería de Pruebas Automatizadas & Auditoría QA Lighthouse | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Planificada** | PHPUnit, Core Web Vitals |
+| `TASK-H2-12` | Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (UI & SortableJS)** | SortableJS, Layout W-Full, Feedback Háptico |
+| `TASK-H2-13` | Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2 | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | Subnav JS, TabPanels, DOM State |
+| `TASK-H2-14` | Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real | **Tienda Pública (Storefront D2C)** | **Alta** | **Completada (Fullstack End-to-End)** | `store-pwa.js`, Tarjetas Catálogo, Rutas PDP |
+| `TASK-H2-15` | Bifurcación Funcional de Creación de Secciones (Catálogo vs Contenido Custom/Modales) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | `#createSectionModal`, Blade, Backend Sanitization |
+| `TASK-H2-16` | Persistencia y Bidireccionalidad de Cambios de Vitrina (`Guardar Cambios de Vitrina`) | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | AJAX, `CmsStorefrontConfig`, Caché Storefront |
+| `TASK-H2-17` | Suite de Edición, Reasignación de Vitrina, Archivado y Estado de Secciones | **Hub 2 (CMS & Tienda Real)** | **Alta** | **Completada (Fullstack End-to-End)** | `#editSectionModal`, RESTful PUT/POST, Badges |
+| `TASK-H2-18` | Paleta Cromática Completa (8 Tokens), Logos/Favicon, Subnavegación 2 Filas y Desacoplamiento Hero | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | DDL Migration, PWA `:root`, Drag & Drop Hero |
+| `TASK-H2-19` | Especificación Técnica y Manual de Workflows de la Aplicación (Interconexión Cross-Hub & PDF Imprimible) | **Transversal (Gobernanza / Core)** | **Alta (Regla de Proyecto)** | **Completada (Fullstack End-to-End)** | `APPLICATION_WORKFLOW_SPEC.md`, `APPLICATION_WORKFLOW_MANUAL.pdf` |
+| `TASK-H2-20` | Motor Modular de Hero: Full-Width 100vw, Conmutación Excluyente (Cero Duplicados), Fondos, Degradados Overlay y Generador de Rutas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Viewport Breakout, Blade Bifurcation, Route Helper, PHPUnit |
+| `TASK-H2-21` | Corrección Crítica de Renderizado Móvil (< 769px) en Storefront PWA y Control de Caché | **Tienda Pública (Storefront D2C)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Breakpoints PWA, Cache Busting, Hero Contrast |
+| `TASK-H2-22` | Conmutador Global de Vitrinas, Reestructuración a 6 Pestañas y Acordeón de Contenidos & Reglas | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Universe Selector Bar, Subnav 6 Tabs, Accordion |
+| `TASK-H2-23` | Aislamiento Estructural de Paneles y Desbloqueo Definitivo del Modal Crear Nueva Sección | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | Balance de Divs Blade, CDP Headless Verification, Modales Globales |
+| `TASK-H2-24` | Sección 4 Acordeón Submódulo 2 Hub 2: Editor Oficial de Pie de Página (Footer & Contacto) | **Hub 2 (CMS & Tienda Real)** | **Alta (Prioridad Inmediata)** | **Completada (Fullstack End-to-End)** | CmsOfficialDocument `STORE_FOOTER_CONFIG`, View Composer, Storefront PWA |
+| `TASK-BRD-06` | Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | `newProductPanoramicModal`, `skuPanoramicModal`, `inventory-module.js` |
+| `TASK-BRD-08` | Asociación Mandatoria de Marcas a Proveedores, Fotos con Color y Taxonomías In Situ | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | Árbol Proveedores, Galería Fotos, QuickTaxonomies, Tag v1.6 |
+| `TASK-BRD-09` | Gobernanza Textil Integral: Asignación de Color por Foto, WebP 1080x1350, SKU Dinámico, Telas & Secciones E-Commerce | **Hub 4 (Inventario) $\leftrightarrow$ Hub 2** | **Alta (Reglas de Oro)** | **Completada (Fullstack End-to-End)** | Catálogo, Ajustes Telas/Secciones, SkuGenerator, ImageNormalization, Tag v1.6 |
+| `TASK-BRD-10` | Poblado Real de la Bandeja de Curaduría de Scraping (259 Prendas Torzo, Cero Mocks y Persistencia End-to-End) | **Hub 4 (Inventario) $\leftrightarrow$ Scraping B2B** | **Alta (Regla de Oro)** | **Completada (Fullstack End-to-End)** | `scraped_pending_items`, Torzo B2B, End-to-End Curation API, Tag v1.6 |
 
 ---
 
@@ -474,6 +514,123 @@ $$\text{Base de Datos (MySQL)} \longrightarrow \text{Modelos Eloquent} \longrigh
   - **Reactividad Instantánea & Guardado Directo:** Al modificar cualquier input (tallas, tonos, precios, descuento), todos los KPIs, totales y badges reaccionan en tiempo real. Al pulsar "Guardar Cambios", los datos se actualizan directamente en el catálogo activo con toast de confirmación sin interrupciones intrusivas.
 * **Destino de Distribución:** [INVENTORY_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/INVENTORY_ROADMAP.md) $\rightarrow$ [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md).
 * **Impacto en Backend:** Endpoints `GET /api/v1/inventory/products/{sku}` y `PUT /api/v1/inventory/products/{sku}` (campos de precio efectivo, descuento, tallas extendidas, slotting y atributos de catálogo).
+
+### `TASK-INV-19`: Gobernanza de Catálogo Operativo: Archivo Directo, Curaduría Scraping Homologada, Copiloto Comercial Gemini, Ajustes de IA y Pre-guardado en Borrador (Reglas 1 a 5)
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  1. **Regla 1:** El catálogo operativo carecía de una acción directa en fila para archivar prendas sin tener que ingresar a discrepancias de scraping, enviándolas a la herramienta de *Archivados y Descontinuados*.
+  2. **Regla 2:** La bandeja de curaduría de scraping (`curateItemModalOpen`) utilizaba formularios rudimentarios de color y tela aislados, sin los mismos campos ni los botones de alta in situ del Workstation de alta de producto.
+  3. **Regla 3:** El Workstation y la Curaduría requerían redacción persuasiva de descripciones comerciales para moda íntima masculina y confort B2C, bullets y tags SEO impulsados por IA.
+  4. **Regla 4:** Los ajustes de la Inteligencia Artificial (Gemini) debían residir formalmente en los Ajustes del Sistema (`moduleSettingsModalOpen`) con telemetría en vivo, conmutador de visibilidad de API Key y pruebas de conectividad.
+  5. **Regla 5:** El Workstation de alta de producto permitía guardar pero no pre-guardar en borrador; el producto debe poder pre-guardarse para aprobarlo después, y solo tras ser aprobado pasar oficialmente al catálogo operativo activo.
+* **Solución de UI/UX & Backend Implementada:**
+  - **Acción de Archivo en Catálogo (Regla 1):** Botón con ícono de archivo en cada fila del catálogo operativo que invoca `archiveProduct(prod)` $\rightarrow$ `POST /api/v1/inventory/products/{id}/resolve-discontinued` con `action: 'archive'`. El producto se transfiere de inmediato de `products` a `archivedProducts`.
+  - **Paridad Taxonómica e In Situ en Curaduría (Regla 2):** Se homologaron los modales in situ de Categoría (`openQuickCategoryModal`), Tipo de Tela (`openQuickFabricModal`) y Color (`openQuickColorModal`) tanto en el Workstation como en Curaduría, permitiendo agregar colores y telas con z-index corregido (`z-[150]`) y asignación individual por fotografía.
+  - **Copiloto Comercial IA con Google Gemini (Regla 3):** Función `generateAiDescription(context)` que admite `context === 'newProduct'` y `context === 'curating'`, conectándose a Gemini vía `/api/v1/inventory/products/generate-description` para redactar copy B2C persuasivo, viñetas de ajuste anatómico y etiquetas SEO.
+  - **Pestaña Ajustes de IA en Ajustes del Sistema (Regla 4):** Pestaña *Inteligencia Artificial (Gemini)* en `moduleSettingsModalOpen`, con gestión de API Key, Project ID, selector de modelo principal (`gemini-flash-lite-latest`) y fallback (`gemini-flash-latest`), slider de temperatura (0.1 - 1.0), telemetría de latencia y botón para probar conectividad en vivo (`testGeminiConnection`).
+  - **Pre-guardado en Borrador y Aprobación Oficial (Regla 5):**
+    - En Workstation: Botón "Pre-guardar Borrador" (`saveNewProductAsDraft`) y "Aprobar y Publicar en Catálogo" (`saveNewProduct(true)`).
+    - El backend (`ProductSkuAndDuplicateApiController@storeProduct`) almacena `approval_status` (`draft` o `approved`). Los borradores se guardan con `visible = false` y se excluyen del catálogo operativo (`StorefrontController@portalInventory`).
+    - Modal de Borradores (`draftsModalOpen`): Accesible desde la barra superior y el menú de herramientas con buscador reactivo, tabla de borradores y acciones para Aprobar (`approveDraftProduct` $\rightarrow$ `POST /api/v1/inventory/products/{id}/approve`), Editar en Workstation (`loadDraftIntoWorkstation`) o Descartar (`discardDraftProduct`).
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Reglas 6.63 a 6.67) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/laragon/www/mi-tienda-online/docs/BACKEND_INTEGRATION_SPEC.md).
+### `TASK-INV-20`: Rediseño Workstation Alta de Producto: Tipificación Liso/Diseño, Vitrina In Situ, Multicolor Nativo, Wizard Paginado 4 Pasos, Eliminación Color Principal Paso 3 y Preview 30/70 (Reglas UX 1-4 & Sistema)
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - El modal de alta de producto desbordaba verticalmente (`max-h-screen`) acumulando fotos, taxonomías, tallas, bodega, pricing e IA en un solo bloque con scroll difícil de operar.
+  - La Columna 2 de previsualización no separaba adecuadamente las fotografías cargadas de los datos en tiempo real, careciendo de visualización destacada para la portada.
+  - Se requería tipificar si la prenda era Lisa o con Diseño, crear vitrinas web in situ sin recargar, y admitir color Multicolor oficial con degradado arcoíris.
+* **Solución de UI/UX & Backend Implementada:**
+  - **Wizard Paginado en Columna 1 (Regla 6.71):** Cuatro pasos estructurados (`workstationStep` 1 a 4) con stepper superior y navegación *Paso Anterior* / *Siguiente Paso*.
+  - **Eliminación de Color Principal en Paso 3 (Regla 6.72):** Asignación cromática descentralizada directamente en cada fotografía en el Paso 1.
+  - **División Vertical 30/70 en Columna 2 (Regla 6.73):** Galería horizontal superior (30% de altura) con la imagen de portada destacada al 110% (`scale-110`), y sección inferior (70% de altura) con ficha técnica completa reactiva en tiempo real.
+  - **Tipificación Liso / Con Diseño & Vitrina In Situ (Reglas 6.68 y 6.69):** Selector en Paso 2 y modal emergente `+ Vitrina` con persistencia en API.
+  - **Multicolor Arcoíris Inmutable (Regla 6.70):** Opción nativa que activa degradado 6 colores `linear-gradient(135deg, ...)`.
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Reglas 6.68 a 6.73).
+
+### `TASK-INV-21`: Fidelidad Taxonómica Estricta en Workstation y Copiloto IA
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - En el Workstation de Alta de Producto, la Columna 2 mostraba "Modal Seamless" como tela fija incluso cuando el usuario tenía seleccionada una composición distinta (ej. "Poliéster 95%, Elastano 5%").
+  - El Copiloto IA de Gemini inventaba copy alusivo a "modal seamless" sin que el usuario hubiera seleccionado dicha tela.
+* **Causa Raíz Diagnosticada:**
+  1. En `inventory-module.js`, `openCreateProductDrawer()` inicializaba `fabricType: 'Modal Seamless'`, valor que ni siquiera existía en la tabla `apparel_fabrics`.
+  2. En `inventory.blade.php`, el `<select>` de telas contenía `:selected="newProduct.fabricType === fab.name"`, lo que provocaba que el navegador mostrara la primera opción visualmente pero Alpine no disparara el evento `change`, manteniendo el valor en memoria.
+  3. Al generar la descripción con IA, se transmitía el `fabric_type` residual y el prompt de Gemini carecía de restricción explícita de inventar telas o fibras no especificadas.
+* **Solución Fullstack Implementada:**
+  1. **Inicialización Dinámica en JS (`inventory-module.js`):** `fabricType` se inicializa dinámicamente al primer elemento de `this.apparelFabrics` si existe, o al valor por defecto correspondiente de base de datos.
+  2. **Limpieza del Select en Blade (`inventory.blade.php`):** Eliminación de directivas fijas `:selected` incompatibles con el binding reactivo bidireccional `x-model="newProduct.fabricType"`.
+  3. **Regla de Fidelidad Taxonómica en Gemini (`ProductAiCopilotService.php`):** Incorporación de la regla estricta en el prompt del sistema:
+     `REGLA CRÍTICA DE FIDELIDAD TAXONÓMICA: La descripción comercial ('commercial_description') y viñetas DEBEN basarse ESTRICTAMENTE en el Tipo de Tela / Composición provisto ('{$fabric}') y en el acabado ('{$designType}'). Queda TERMINANTEMENTE PROHIBIDO inventar o mencionar telas o fibras no provistas (como modal, seda o algodón) si no forman parte explícita de '{$fabric}'.`
+  4. **Fallback Heurístico Sincronizado:** Interpolación dinámica de `$fabric` y `$designType` en `buildCommercialDescription()`.
+  5. **Pruebas Automatizadas:** 100% verde en `ProductAiCopilotEndpointTest` y `InventoryHub4ModuleTest`.
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.74).
+
+### `TASK-INV-22`: Carga Múltiple de Fotografías, Curaduría Secuencial 1 a 1 en Recorte 4:5 y Armonización Visual de Pricing
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - El cargador de fotos interactivo solo permitía subir 1 foto por interacción en el input de archivo, impidiendo subir varias fotos a la vez.
+  - Al cargar varias imágenes, se requería una experiencia de curaduría donde el usuario pueda acomodar y recortar a formato 4:5 (1080×1350 px) una por una hasta curar todas las imágenes seleccionadas.
+  - La tarjeta de Margen Comercial & Pricing presentaba un estilo visual oscuro discordante, con botones y textos difíciles de leer y baja jerarquía.
+* **Solución de UI/UX & Frontend Implementada:**
+  - **Soporte Multi-Archivo Nativo:** Se habilitó el atributo `multiple` en el input de archivo de Step 1 del Workstation de Alta de Producto.
+  - **Cola Secuencial de Curaduría 4:5 (`startCropQueue`):** Función en `inventory-module.js` que recibe el lote de archivos seleccionados, valida formatos (JPG, PNG, WebP, AVIF) y peso (&le;15 MB), encola hasta el cupo disponible (máx. 10 fotos) y despacha la primera imagen al modal de encuadre.
+  - **Encuadre y Recorte Secuencial 1 a 1 (`applyCrop45`):** Al recortar la imagen en curso, se persiste en la galería del producto y automáticamente se extrae la siguiente foto en cola (`imageCropQueue.shift()`) actualizando el badge indicador (*"Foto X de Y"*) y el botón de acción (*"Guardar y Continuar (X/Y)"*), hasta completar la totalidad de fotos cargadas con confirmación global.
+  - **Rediseño Armónico de Margen Comercial & Pricing:** Transformación de la tarjeta a un diseño limpio en tarjeta índigo suave (`bg-indigo-50/50`, borde perimetral nítido, inputs con fondo blanco puro y tipografía oscura `text-slate-900` de alta legibilidad, etiquetas accesibles y badges de margen con contraste WCAG AA).
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.75).
+
+### `TASK-INV-23`: Paridad Estructural, Visual y Taxonómica en Curaduría de Scraping con Workstation de Alta (Regla 6.64)
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Situación Reportada:**
+  - La bandeja de curaduría de scraping (`curateItemModalOpen` / `scrapingCurationModalOpen`) presentaba una estructura divergente y desalineada con el Workstation de Alta de Producto:
+  - Faltaba el flujo guiado por wizard stepper de 4 pasos interactivo.
+  - Faltaba el panel lateral Live Preview 30/70 (30% galería oscura de ficha con dot verde pulsante y 70% ficha técnica dinámica completa).
+  - Faltaban los botones in situ para crear nuevas taxonomías sin perder contexto (`openQuickCategoryModal`, `openQuickFabricModal`, `openQuickColorModal`, `openQuickStoreSectionModal`).
+  - No permitía gestionar la modalidad logística (`propio` vs `dropship`), el inventario disponible ni el costo unitario de compra de forma interactiva y reactiva con el margen comercial.
+  - Faltaba la integración completa del Copiloto IA con viñetas técnicas y chips de tags SEO editables.
+* **Solución Fullstack Implementada:**
+  - **Backend (`InventoryApiController.php` y migración de base de datos):**
+    1. Agregada la columna `curated_description` (nullable text) a la tabla `scraped_pending_items`.
+    2. Extensión del endpoint `POST /api/v1/inventory/scraping/pending/{id}/curate` con validación y persistencia de `curated_cost`, `curated_stock`, `curated_type`, `curated_description`, `bullet_points` y `seo_tags`, sincronizando tanto el registro del scraping como el modelo `Product` y sus metadatos.
+  - **Frontend (`inventory-module.js`):**
+    1. Implementado el estado de navegación por pasos (`curatingStep`: 1, 2, 3, 4) con funciones `setCuratingStep(step)`, `nextCuratingStep()`, `prevCuratingStep()`.
+    2. Agregada la función `generateCuratingAutoSku()` para generación automática de SKU estandarizado a partir de proveedor, categoría y color.
+    3. Implementado soporte completo de drag & drop para carga de fotos adicionales (`handleCuratingImageDrop`, `handleCuratingFiles`, etc.).
+    4. Sincronización de `saveQuickStoreSection()` con el contexto `'curating'` para enlazar `curatingItem.suggestedSection`, inicialización completa en `openScrapingCuration()` con fallback de stock, costo mayorista, viñetas y tags SEO, junto con los métodos auxiliares `addCuratingSeoTag()` y `removeCuratingSeoTag()`.
+  - **UI/UX Blade (`inventory.blade.php`):**
+    1. **Estructura en 2 Columnas idéntica al Workstation (7 cols / 5 cols):**
+       - **Columna Izquierda (7 cols):** Stepper horizontal de 4 pasos idéntico al Workstation:
+         - **Paso 1: Fotos & Colores:** Dropzone interactivo 4:5, input de URL externa, galería de fotos 4:5 con insignia de foto principal, asignación de variante de color individual con botón `+ Color` in situ y paleta de color principal.
+         - **Paso 2: Datos & Diseño:** Nombre de modelo, grid de Proveedor y Marca con botones in situ (`+ Proveedor`, `+ Marca`), Categoría y Subcategoría con botón in situ (`+ Categoría`), selector de Acabado/Diseño (Color Liso vs Con Diseño con botón circular), y Modalidad Logística (Propio vs Dropship) junto con Vitrina Comercial (`+ Vitrina`).
+         - **Paso 3: Tela & Stock:** Selector de Tipo de Tela con botón in situ (`+ Tipo de Tela`) y campo de inventario/stock disponible (`curatingItem.stock`).
+         - **Paso 4: Copiloto & Pricing:** Disparador del Copiloto IA de Gemini con feedback visual de carga, área de redacción persuasiva B2C, viñetas de especificaciones técnicas, chips interactivos de tags SEO, tarjeta reactiva de PVP, Costo mayorista, Margen Bruto y Utilidad con semáforo de badges (Saludable / Aceptable / Riesgo), y selector de SKU con botón `Auto-SKU`.
+       - **Columna Derecha (5 cols):** Live Preview con división 30/70 idéntica al Workstation:
+         - **Top 30%:** Galería oscura `#020617` con dot verde pulsante, selector de fotos, pills de Modalidad y Estado de Publicación.
+         - **Bottom 70%:** Ficha técnica reactiva completa con pills de taxonomía, título, marca/proveedor, vitrina, tela, swatches de colores, card oscuro de pricing con margen porcentual, descripción persuasiva y chips de tags SEO.
+    2. **Header y Footer Armónicos:** Header con badge `REVOPS CATALOGO`, botón `Auto-SKU` y cierre; Footer con contador de unidades preparadas, botón `Descartar Prenda`, `Cancelar` y `Aprobar y Publicar en Catálogo` (`bg-indigo-600`).
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Regla 6.64).
+
+### `TASK-INV-24`: Sincronización Fidedigna de Atributos Cromáticos y Textiles en Catálogo y Persistencia sin Fricción de Claves Foráneas (Reglas 1, 6.57 y 6.64)
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Punto Ciego / Causa Raíz Identificada:**
+  - Los productos en la tabla principal de inventario (por ejemplo, Tanga Licra Roja) no reflejaban su color real (mostrando *"Negro Profundo"* en vez de *"Rojo Pasión"* con swatch negro) ni su tipo de tela curada.
+  - Al intentar editar los atributos desde el Drawer lateral y hacer clic en *"Guardar Cambios"*, la petición `PUT /api/v1/inventory/products/{sku}/update-complete` fallaba silenciosamente con error 500 (`SQLSTATE[23000] Integrity constraint violation` en `products_fabric_id_foreign`) debido a que la tela no resolvía su ID o heredaba un `fabric_id` huérfano de metadatos anteriores, el cual violaba la integridad referencial en `apparel_fabrics`.
+  - En la curaduría de scraping (`curatePendingItem`), no se persistía el `color_hex` ni `color_type` en los metadatos del producto, provocando que la tabla recurriera al fallback genérico `#0f172a` (punto negro).
+* **Solución Fullstack Implementada:**
+  - **Backend (`ProductSkuAndDuplicateApiController.php`):**
+    1. Resolución dinámica segura de `fabric_id` y `fabricName`: si el tipo de tela no existe en `apparel_fabrics`, se crea automáticamente de forma transparente (`ApparelFabric::create`). Si no es válida o está huérfana, se establece en `null` para cumplir con `ON DELETE SET NULL` sin bloquear transacciones.
+    2. Sincronización cromática integral: resolución de `color_hex` y `color_type` consultando `ApparelColor` si no vienen especificados o son genéricos oscuros.
+    3. Mapeo estricto de color en la galería de imágenes del producto al actualizarse.
+  - **Backend (`InventoryApiController.php`):**
+    1. Inclusión de `color_hex` y `color_type` en `$productMeta` dentro de `curatePendingItem`.
+    2. Resolución y creación automática de `ApparelFabric` para evitar IDs nulos o inconsistentes al aprobar scraping.
+  - **Backend (`StorefrontController.php`):**
+    1. Sincronización de fallback en `portalProducts` para enlazar el color y tela de la prenda curada si el producto en base de datos quedó con el valor por defecto (`Negro Profundo` o `Modal Seamless`).
+    2. Resolución dinámica de `colorHex` con el catálogo maestro `ApparelColor` si el hex del producto estaba ausente o en `#0f172a` teniendo un nombre de color explícito como *Rojo Pasión* o *Azul Rey*.
+  - **Frontend (`inventory-module.js` & `inventory.blade.php`):**
+    1. Sincronización reactiva del mapa de color de la imagen (`drawerImageColorMap`) al cambiar la paleta en el drawer para productos de imagen única.
+    2. Manejo y reporte claro de errores del servidor en `saveDrawerChanges` en lugar de enmascararlos silenciosamente.
+    3. Bump de versión de scripts a `?v=20261007_v3`.
+* **Destino de Distribución:** [PROJECT_RULES.md](file:///c:/laragon/www/mi-tienda-online/docs/PROJECT_RULES.md) (Reglas 1, 6.57 y 6.64).
 
 ### `TASK-MOB-01`: Modo Móvil / Escáner de Bodega para Conteo y Verificación con Códigos de Alto Contraste
 * **Prioridad:** **Alta** | **Estado:** **Pendiente**
@@ -1538,6 +1695,106 @@ graph TD
   - **Servicio de Dominio:** `WebPushNotificationService` compatible con el estándar VAPID (RFC 8292) mediante `minishlink/web-push` y colas de base de datos cPanel (`queue:work --stop-when-empty`).
   - **Endpoints RESTful:** `POST /api/v1/store/push-subscribe`, `DELETE /api/v1/store/push-unsubscribe/{id}`, `POST /api/v1/store/push-test`.
 
+### `TASK-STR-07`: Ficha Independiente de Producto (PDP): Supresión de WhatsApp & Visor Modal con Swipe
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Normativa de Gobierno:** `PROJECT_RULES.md` (Reglas 6.7.1 y 6.7.2).
+* **Punto Ciego / Solicitud del Usuario Resuelta:**
+  1. **Fuga de Conversión por WhatsApp:** La ficha independiente de producto mostraba un botón directo a WhatsApp Concierge (`.pdp-btn-whatsapp`, `#pdpWhatsappLink`) que desviaba a los clientes fuera del carrito y checkout transaccional del PWA.
+  2. **Imágenes Estáticas:** Las prendas íntimas y de alta moda requieren inspección minuciosa de textiles, costuras y detalles. No se contaba con un visor de imágenes ampliado a pantalla completa ni soporte táctil para alternar fotos en dispositivos móviles.
+* **Solución Implementada:**
+  - **1. Supresión Absoluta de WhatsApp en PDP:** Eliminación del enlace `#pdpWhatsappLink`, de las clases `.pdp-btn-whatsapp` y de la reactividad JavaScript asociada en `product-detail.blade.php`. Toda la conversión queda canalizada exclusivamente a través de `submitPdpToCart()`.
+  - **2. Modal Interactivo `#pdpGalleryModal`:** Visor a pantalla completa con backdrop desenfocado (`backdrop-filter: blur(16px)`), cabecera con contador (`1 / N`), botón de cierre y dot indicators inferiores. Cumple con la regla anti-anidamiento (Regla 5.1).
+  - **3. Gestor de Gestos Swipe Táctiles:** Soporte táctil nativo (`touchstart`, `touchmove`, `touchend`) con prevención de scroll vertical parásito, arrastre con ratón en escritorio (`mousedown`/`mousemove`), flechas de navegación y atajos de teclado (`ArrowLeft`, `ArrowRight`, `Escape`).
+  - **4. Matriz de Pruebas Automatizadas:** 9 pruebas en `StorefrontPwaPdpTest` validando la ausencia del botón de WhatsApp y la correcta inicialización del modal de galería y el controlador de swipe.
+* **Archivos Modificados:**
+  - `resources/views/store/pwa/product-detail.blade.php`
+  - `tests/Feature/StorefrontPwaPdpTest.php`
+  - `docs/PROJECT_RULES.md`
+  - `docs/PROJECT_RULES.html`
+  - `docs/PROJECT_RULES.pdf`
+  - `docs/PENDING_TASKS.md`
+
+### `TASK-STR-08`: Gobernanza Storefront: Filtros Drawer Izquierdo, Reserva en Checkout, Supresión SPEI y Norma UTF-8
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Normativa de Gobierno:** `PROJECT_RULES.md` (Reglas 1.3, 6.8, 6.9, 6.10).
+* **Puntos Ciegos / Nuevas Reglas Solicitadas:**
+  1. **Filtros Invasivos en Storefront:** Los filtros de catálogo requerían un despliegue ergonómico off-canvas en drawer lateral izquierdo, tanto en móvil como en escritorio, sin desplazar el grid de productos ni saturar la pantalla.
+  2. **Reserva Prematura y Vaciado Indeseado del Carrito:** La cuenta regresiva de 5 minutos y la reserva de stock se disparaban de forma anticipada. Si el tiempo expiraba, se requería que los productos permanecieran en el carrito (sin vaciarse), y que si un producto se agotaba o descontinuaba, se presentara explícitamente la leyenda *"Ya no hay existencias"*.
+  3. **Fricción Operativa con SPEI:** La opción de pago por transferencia SPEI generaba fricción operativa en conciliación bancaria y validación manual de comprobantes, requiriéndose su retiro total para concentrarse en Tarjetas y OXXO Pay.
+  4. **Declaración Universal UTF-8:** Necesidad de formalizar y blindar UTF-8 universal en todo el proyecto (Blade, headers HTTP, MySQL utf8mb4, archivos de código).
+* **Solución Implementada:**
+  - **1. Filtros en Drawer Izquierdo (`#filterDrawer`, `.drawer-left`):**
+    * Configurado en `public/css/store-pwa.css` con anclaje lateral `left: 0 !important; right: auto !important; transform: translateX(-100%);` y apertura fluida a `translateX(0) !important;`.
+    * En `resources/views/layouts/store-pwa.blade.php`: Actualizado `<aside id="filterDrawer" class="bottom-sheet-drawer drawer-left" ...>` con botones de cierre, limpiar filtros y confirmación.
+  - **2. Reserva de Stock Exclusiva en Checkout & Preservación de Carrito:**
+    * En `public/js/storefront/store-pwa.js`: Creada función `startCheckoutStockLockTimer()` activada únicamente al invocar `openCheckoutModal()`.
+    * Modificado `handleStockLockExpiry()`: Libera el lock del backend pero **preserva intacto `storeState.cart`** (no vacía el carrito).
+    * Función `isItemOutOfStock(item)` y `renderCartSheetContent()`: Muestra la leyenda en rojo con badge e icono **"Ya no hay existencias"** para prendas con `stock <= 0` o descontinuadas, inhabilitando el avance al checkout hasta que el usuario las retire.
+  - **3. Supresión Total de SPEI en Storefront:**
+    * Eliminado SPEI del Marquee ticker y pie de beneficios en `store-pwa.blade.php` y `product-detail.blade.php` (reemplazado por Tarjetas Bancarias & OXXO Pay).
+    * Eliminada la opción 1 (SPEI BBVA Directo) del Paso 2 de Checkout en `store-pwa.blade.php`.
+    * Establecido Tarjetas de Débito/Crédito como método activo predeterminado (`checked`, `.active`), seguido de OXXO Pay con apartado por 48 horas.
+  - **4. Norma Universal UTF-8:**
+    * Formalizada como Regla 1.3 de gobernanza técnica en `PROJECT_RULES.md` y `PROJECT_RULES.html`.
+    * Validada en layouts Blade (`<meta charset="utf-8">`) y cabeceras de respuesta.
+* **Archivos Modificados:**
+  - `public/css/store-pwa.css`
+  - `public/js/storefront/store-pwa.js`
+  - `resources/views/layouts/store-pwa.blade.php`
+  - `resources/views/store/pwa/product-detail.blade.php`
+  - `tests/Feature/PortalAuthorizationTest.php`
+  - `docs/PROJECT_RULES.md`
+  - `docs/PROJECT_RULES.html`
+  - `docs/PROJECT_RULES.pdf`
+  - `docs/PENDING_TASKS.md`
+
+### `TASK-STR-09`: Navbar Sticky Permanente, Editor de Marquesina & Páginas Desktop/Móvil con SEO Integral
+* **Prioridad:** **Alta** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Normativa de Gobierno:** `PROJECT_RULES.md` (Reglas 6.11, 6.12, 6.13, 6.14).
+* **Puntos Ciegos / Nuevas Reglas Solicitadas:**
+  1. **Navbar Sticky Permanente:** El storefront debe disponer de un navbar visible todo el tiempo (`position: sticky; top: 0; z-index: 999;`), sin perderse en el scroll, tanto en Desktop como en Móvil.
+  2. **Edición Centralizada desde Hub 2:** El navbar y la cinta banner superior (marquesina de anuncios arriba del navbar) deben poder editarse directamente desde Hub 2 (Pestaña Páginas & Navbar), suprimiendo textos hardcodeados o referencias a WhatsApp.
+  3. **Gestión Dual de Páginas Institucionales (Desktop & Móvil):** La sección de páginas institucionales sincronizadas en el navbar debe permitir configurar y conmutar de forma independiente la versión Desktop y la versión Móvil, además de proveer el ciclo CRUD completo: Crear nuevas páginas, editarlas, activarlas y pausarlas, archivarlas y eliminarlas.
+  4. **Optimización SEO Integral:** Todo el storefront debe contar con optimización SEO rigurosa: OpenGraph completo, Twitter Cards, datos estructurados JSON-LD Schema.org (`Organization`, `WebSite`, `Product`, `WebPage`), canonical dinámico y mapa del sitio XML dinámico (`/sitemap.xml`).
+* **Solución Implementada:**
+  - **1. Navbar Sticky Visible en Todo Momento:**
+    * En `resources/views/layouts/store-pwa.blade.php`: Configurado `.sticky-header-wrapper` con `position: sticky !important; top: 0 !important; z-index: 999 !important; background: rgba(255, 255, 255, 0.96) !important; backdrop-filter: blur(16px) !important;`.
+    * En `public/css/store-pwa.css`: Actualizado `.sticky-header-wrapper` a `z-index: 999;`.
+  - **2. Editor de Marquesina & Navbar en Hub 2 (Tab 4):**
+    * En `resources/views/portal/store.blade.php` (`storePagesPanel`): Añadido bloque superior de configuración de la marquesina con interruptor on/off (`announcement_active`), editor dinámico de frases y links, y botón de guardado hacia `portal.store.announcements.update`.
+    * En `PortalStoreController.php`: Método `updateAnnouncements` guarda en caché `cms_announcements` y `cms_announcement_active`.
+    * En `store-pwa.blade.php`: Marquesina dinámica que consume `$announcements` sin textos estáticos repetidos ni WhatsApp.
+  - **3. Gestión Dual Desktop/Móvil de Páginas Institucionales con CRUD:**
+    * Migración `2026_10_01_201411_add_show_in_mobile_to_cms_pages_table.php` agregando columna booleana `show_in_mobile`.
+    * Modelo `CmsPage`: Atributo `show_in_mobile` en `$fillable` y `$casts`, y scopes `scopeInNavbar`, `scopeInMobileNavbar`, `scopeInFooter`.
+    * En `PortalStoreController.php`: Métodos `storePage`, `updatePage`, `togglePageStatus`, `archivePage`, `destroyPage`.
+    * En `routes/web.php`: Rutas RESTful para actualización, toggle, archivar y eliminar páginas.
+    * En `store.blade.php`: Tabla con columnas explícitas Desktop (`show_in_navbar`), Móvil (`show_in_mobile`), Footer (`show_in_footer`), Estado (`ACTIVO`, `PAUSADO`, `ARCHIVADO`) y botones de Ver, Editar, Activar/Pausar, Archivar y Eliminar.
+    * Modal `#createPageModal`: Actualizado con selector tri-canal (Desktop, Móvil, Footer).
+    * Modal `#editPageModal`: Implementado como hijo directo bajo `#storeAppRoot` (`depth = 2`, Regla 5.1 anti-anidamiento) con función JS `window.openEditPageModal(page)`.
+    * En Storefront: `$navbarPages` renderizado en navbar desktop; `$mobilePages` renderizado en barra rápida horizontal móvil y en el drawer de filtros lateral.
+  - **4. Optimización SEO Integral:**
+    * En `store-pwa.blade.php`: Tags `<meta name="robots">`, `<link rel="canonical">`, OpenGraph (`og:site_name`, `og:type`, `og:locale="es_MX"`, `og:title`, `og:description`, `og:url`, `og:image`), Twitter Cards (`summary_large_image`), y bloque JSON-LD estructurado Schema.org (`Organization`, `WebSite` con `SearchAction`).
+    * En `resources/views/store/pwa/page.blade.php`: Schema.org JSON-LD estructurado tipo `WebPage`.
+    * En `app/Http/Controllers/StorefrontController.php`: Método `sitemap()` que genera `/sitemap.xml` dinámico con URLs de Home, universos, revista digital, artículos de blog, páginas CMS y productos con `lastmod`, `changefreq` y `priority`.
+    * En `routes/web.php`: Ruta pública `GET /sitemap.xml`.
+* **Pruebas Automatizadas:**
+  - `tests/Feature/StorefrontNavbarSeoTest.php`: 5 pruebas completas con 40 aserciones validando visibilidad del navbar, sitemap XML, visibilidad desktop vs móvil de páginas institucionales, actualización de anuncios y CRUD con toggle/archivo de páginas.
+* **Archivos Modificados:**
+  - `database/migrations/2026_10_01_201411_add_show_in_mobile_to_cms_pages_table.php`
+  - `app/Models/CmsPage.php`
+  - `app/Http/Controllers/PortalStoreController.php`
+  - `app/Http/Controllers/StorefrontController.php`
+  - `routes/web.php`
+  - `resources/views/layouts/store-pwa.blade.php`
+  - `resources/views/portal/store.blade.php`
+  - `resources/views/store/pwa/page.blade.php`
+  - `tests/Feature/StorefrontNavbarSeoTest.php`
+  - `docs/PROJECT_RULES.md`
+  - `docs/PROJECT_RULES.html`
+  - `docs/PROJECT_RULES.pdf`
+  - `docs/PENDING_TASKS.md`
+
 ### `TASK-PUR-01`: Proceso de Notificación de Discrepancia Inbound, Minuta de Negociación y Formalización IA (PDF/Email)
 * **Prioridad:** **Alta** | **Estado:** **Pendiente (Diseño Normativo Aprobado)**
 * **Prioridad:** **Alta** | **Estado:** **Completada (UI)**
@@ -1622,3 +1879,546 @@ graph TD
   - **5. Edición en Línea de Costo Unitario y Prioridad ROP:**
     * Celdas editables en Tree View y Flat View con recálculo dinámico de subtotales, totales de proveedor y prioridad reactiva según quiebre de stock.
 * **Destino de Distribución:** [MASTER_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/MASTER_ROADMAP.md) $\rightarrow$ [INVENTORY_ROADMAP.md](file:///c:/Users/Mickey/Documents/export/INVENTORY_ROADMAP.md) (Item 18) $\rightarrow$ [BACKEND_INTEGRATION_SPEC.md](file:///c:/Users/Mickey/Documents/export/BACKEND_INTEGRATION_SPEC.md) (Sección 3.4 y 3.4c).
+
+---
+
+### `TASK-PUR-05`: Gobernanza de Compras por Ciclos Operativos: Árbol Consolidado Proveedor-Marcas, Reactividad MOQ en Caliente y Matriz de Acuerdos Mercantiles por Discrepancias
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 4 (Inventario & Cadena de Suministro) - Submódulos *Compras*, *Ajustes de Tabuladores MOQ* y *Acuerdos Mercantiles*
+* **Reglas Formales del Canon:** Regla 10 (Gobernanza y Tríptico Documental), Regla 12 (Reglas por Ciclos Operativos 12.1 a 12.5).
+* **Diagnóstico & Puntos Críticos Reportados:**
+  1. **Dispersión de Marcas en Órdenes Distintas:** En la Bandeja MOQ se separaban las marcas filiales (ej. *Torzo Sexywear* y *Mazho*) como si fueran proveedores distintos, generando órdenes fragmentadas en lugar de consolidar el volumen del fabricante matriz.
+  2. **Falla de Reactividad al Guardar Tabuladores MOQ:** Al dar de alta o guardar un tabulador de escalas MOQ (ej. Dajo B2B), la Bandeja MOQ no recalculaba las escalas ni los subtotales, mostrando *"Sin Tabulador MOQ configurado para este proveedor"*, debido a mutación directa por índice en arrays de Alpine (`this.moqSheets[idx] = saved`) y desalineación con la instancia global `window.inventoryAppInstance`.
+  3. **Ausencia de Ubicación en UI para Acuerdos y Notas de Crédito:** No existía una pantalla donde residieran, se consultaran o se modificaran los acuerdos compensatorios generados por discrepancias en muelle.
+  4. **Pérdida de Tabulación por Incompatibilidad Categórica:** Si el tabulador MOQ del proveedor tenía una categoría ("Bikini") y los ítems planificados tenían otra ("Tanga"), el ítem quedaba sin tabular perdiendo la escala de costos del proveedor.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - **1. Árbol Único Consolidado por Fabricante y Marcas (Regla 12.3.1):** Las marcas filiales se agrupan dentro del árbol del proveedor padre. El badge de marcas en la cabecera enumera las submarcas (`Marcas: Torzo Sexywear, Mazho` o `Dajo B2B, Dajo Underwear`), acumulando conjuntamente el progreso hacia el MOQ y emitiendo una sola PO unificada.
+  - **2. Reactividad Instantánea con Contador de Revisión (`moqRevision`) (Regla 12.3.2):** Se introdujo `moqRevision` como dependencia reactiva explícita en `getPlannedOrdersBySupplier()`. Al guardar, editar o eliminar tabuladores en `saveCurrentMoqSheet()` y `deleteCurrentMoqSheet()`, se reasignan arrays inmutables (`[...cleanList]`), se sincroniza `window.inventoryAppInstance.moqSheets` y se dispara `this.getPlannedOrdersBySupplier()`, recalculando inmediatamente los porcentajes de avance y costos.
+  - **3. Fallback Jerárquico en Matriz MOQ (Regla 12.3.4):** Si la categoría específica no coincide, el sistema aplica fallback hacia la fila "General" o hacia la fila única configurada en el tabulador, garantizando que todas las prendas del fabricante reciban el costo tabulado.
+  - **4. Pestaña de Acuerdos Mercantiles y Notas de Crédito en UI (Regla 12.4.1):** Sub-pestaña permanente en Compras con tabla auditable, búsqueda reactiva, modal interactivo de creación/edición, cálculo automático de importes y trazabilidad de estados (`pendiente`, `aplicado`, `cancelado`).
+  - **5. Erradicación Total de Mocks y Datos Reales de Base de Datos (Regla 12.3.5):** Purga de proveedores y órdenes ficticias, reemplazados con datos persistidos en MySQL (`suppliers`, `products`, `supplier_credit_agreements`, `supplier_moq_sheets`).
+  - **6. Formalización en Tríptico Documental por Ciclos Operativos (Regla 10):** Documentado íntegramente en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html`, `docs/PROJECT_RULES.pdf` y `docs/PLAN_IMPLEMENTACION_COMPRAS_HUB4.md`.
+
+---
+
+### `TASK-H2-12`: Reingeniería Visual & Ergonómica del Drag & Drop de Secciones (Submódulo 1 Hub 2)
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (UI & SortableJS)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 1):**
+  1. **Layout Estrecho y Desbordado:** El bloque de "Secciones Modulares del Home" se está renderizando constreñido a una columna lateral estrecha (`max-w` insuficiente o jerarquía flex/grid anidada en el contenedor izquierdo), provocando que la tabla se colapse horizontalmente a menos del 25% del ancho de pantalla.
+  2. **Truncamiento de Cabeceras:** La columna de posición se recorta a "POSICI", ocultando el resto de datos clave (Nombre, Tipo, Vitrina, Estado, Acciones) detrás de una barra de desplazamiento horizontal anti-ergonómica.
+  3. **Falta de Reactividad e Interactividad Drag & Drop:** Las filas no ofrecen drag handles intuitivos con cursor de agarre (`grab`/`grabbing`), ni interacción táctil/ratón fluida (SortableJS real con animación de desplazamiento y feedback visual), dependiendo únicamente de botones discretos con flechas.
+* **Solución de UI/UX & Arquitectura Requerida:**
+  - Extraer el gestor de secciones fuera de la columna izquierda y ubicarlo como una sección de **ancho completo (`w-full max-w-7xl mx-auto`)** con separación visual clara y tarjetas volumétricas.
+  - Implementar drag handles dedicados (icono de 6 puntos `dots-six-vertical`) con librería SortableJS nativa inicializada sobre `#sectionsSortableBody`.
+  - Animación de arrastre (`ghostClass`, `chosenClass`), persistencia asíncrona automática debounced al soltar la fila hacia `/admin/tienda-cms/secciones/reorder`, con toast de confirmación instantáneo.
+
+---
+
+### `TASK-H2-13`: Reactividad y Visualización Garantizada de las 7 Pestañas Restantes de Hub 2
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulos 2 al 8
+* **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 2):**
+  1. **Pantallas en Blanco al Conmutar:** Al hacer clic en cualquiera de las siguientes 7 pestañas (*2. Banners & Marquesinas*, *3. Reglas Comerciales & Fletes*, *4. Contenido Editorial & Tallas*, *5. Páginas & Navbar*, *6. Revista Digital*, *7. Tracking & Analítica*, *8. Filtros Catálogo*), el área de trabajo se mostraba vacía.
+  2. **Falla en la Alternancia de Estados:** Conflicto de clases CSS con Tailwind CDN y estilo en línea.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Inyección de reglas CSS explícitas `.tab-panel.hidden { display: none !important; }` y `.tab-panel:not(.hidden) { display: block !important; }`.
+  - Conmutador JavaScript `switchTab()` en `resources/views/portal/store.blade.php` con manipulación directa de estilo `style.display = 'block' / 'none'`.
+  - Estilos activos para botones de subnav `.store-subnav-btn.active` con background formal índigo y texto blanco.
+  - Sincronización bidireccional con parámetro URL `?tab=` y hash history.
+
+---
+
+### `TASK-H2-14`: Desactivación de Modales/Drawers y Enrutamiento Nativo a PDP Dedicada en Storefront Real
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Tienda Pública D2C PWA (`storefront`)
+* **Diagnóstico & Punto Crítico Reportado (Evidencia: Captura 3):**
+  1. **Persistencia de Ficha Modal en Desktop:** Al hacer clic sobre cualquier tarjeta de prenda en el catálogo o vitrina pública (ej. *Tanga Licra Azul Rey*), el sistema continuaba abriendo una ventana modal superpuesta.
+  2. **Persistencia de Drawer en Móvil:** En viewports móviles, la interacción levantaba un bottom sheet deslizable.
+  3. **Desconexión con la Ruta Canónica:** No se ejecutaba la redirección nativa hacia la vista a pantalla completa dedicada `/productos/{slug}`.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - En `resources/views/store/pwa/home.blade.php`, todas las tarjetas de prendas (secciones curadas, fallback catalog feed) fueron reescritas con enlaces nativos directos `<a href="{{ url('/productos/' . ($prod['slug'] ?? $prod['id'])) }}">`.
+  - En `public/js/storefront/store-pwa.js`, la función `openProductModal(productId)` redirige directamente vía `window.location.href = '/productos/' + slug`.
+  - Eliminación de todo código muerto de renderizado de modal/drawer en el cliente, dejando navegación estándar e indexable para SEO.
+
+---
+
+### `TASK-H2-15`: Bifurcación Funcional de Creación de Secciones (Modo A: Catálogo de Prendas vs Modo B: Contenido/Hero/Carrusel/Modal/Custom) y Creación de Modales
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado:**
+  1. El botón `+ Crear Nueva Sección` no abría el modal en la interfaz.
+  2. El sistema no permitía crear modales promocionales ni filtrado taxonómico avanzado por familias textiles, prendas, marcas o descuentos.
+  3. Faltaba la regla de negocio estricta: Secciones de tarjetas de productos son 100% catálogo (sin código custom), mientras que banners, carruseles, modales y botones permiten HTML/CSS/JS.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Creación de `#createSectionModal` con selector conmutable de modo:
+    * **Modo A (Catálogo de Prendas):** Controles guiados para universo, categorías, subcategorías, marcas de Hub 4, familias textiles, tipos de prenda, etiquetas de estilo, filtros de descuento, límite de productos (4 a 24) y layout (grid / carrusel). **Estrictamente sin áreas de código custom**.
+    * **Modo B (Contenido / Hero / Carrusel / Modal Promocional / Botones Custom):** Soporta `hero_carousel`, `brand_pillars`, `editorial_banner`, `promo_modal`, `custom_html_css_js`. Incluye editores de código HTML, CSS y JS con sanitización en backend (`storeSection` y `updateSection`).
+  - Validación en backend (`PortalStoreController@storeSection`) que limpia y anula `custom_html`, `custom_css` y `custom_js` en tipos de catálogo de productos.
+
+---
+
+### `TASK-H2-16`: Persistencia y Bidireccionalidad de Cambios de Vitrina (`Guardar Cambios de Vitrina`) con Caché y Storefront Real
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado:**
+  1. El botón `Guardar Cambios de Vitrina` no guardaba los cambios en base de datos ni los reflejaba en la tienda pública.
+  2. Discrepancias de nombres de campos (`brand_name` vs `name`, `accent_color` vs `accentColor`).
+  3. Falta de sincronización con la caché del storefront `cms_storefront_{$universe}`.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Estandarización de inputs en `#vitrinaConfigForm` en `resources/views/portal/store.blade.php`.
+  - Normalización de parámetros en `PortalStoreController@updateStorefront` con soporte para snake_case y camelCase, escritura en `CmsStorefrontConfig::forUniverse()` y renovación atómica de `Cache::forever('cms_storefront_' . $universe, $cached)`.
+  - Respuesta AJAX JSON con botón con indicador de carga (*Guardando...*), animación de checkmark y feedback visual.
+  - Actualización inmediata en el objeto JavaScript de previsualización en vivo (`STOREFRONTS[currentUniverse]`).
+  - Mapeo directo en `resources/views/layouts/store-pwa.blade.php` en `#hub2DynamicTheme` para propagar `--brand-accent`, `--accent-indigo`, `--brand-bg` y `--bg-secondary` a todos los botones y fondos de la tienda real.
+
+---
+
+### `TASK-H2-17`: Suite de Edición, Reasignación de Vitrina, Archivado y Estado de Secciones
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*)
+* **Diagnóstico & Punto Crítico Reportado:**
+  1. Las secciones existentes no se podían editar (ni vitrina de destino, ni estado, ni parámetros).
+  2. No existía la capacidad de archivar secciones.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - Adición de rutas RESTful en `routes/web.php`:
+    * `PUT /admin/tienda-cms/secciones/{section}` (`portal.store.sections.update`).
+    * `POST /admin/tienda-cms/secciones/{section}/archivar` (`portal.store.sections.archive`).
+  - Modal `#editSectionModal` con pre-población dinámica (`window.openEditSectionModal(id)`).
+  - Formulario y botón de archivado atómico `[Archivar]` con confirmación previa y transición a estado `archived`.
+  - Badges visuales de estado en la tabla: verde esmeralda para `active`, gris pizarra para `draft`, ámbar para `archived`.
+  - Suite de pruebas automatizadas en `tests/Feature/Hub2AdminStoreControllerTest.php` con cobertura al 100%.
+
+---
+
+### `TASK-H2-18`: Paleta Cromática Completa (8 Tokens), Logos/Favicon, Subnavegación en 2 Filas y Desacoplamiento de Hero
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*) & Storefront PWA
+* **Diagnóstico & Requerimientos de Usuario:**
+  1. Subnavegación de 8 pestañas generaba scroll horizontal en desktop.
+  2. Paleta cromática limitada a solo 2 colores (acento y fondo), impidiendo control tipográfico y de jerarquía.
+  3. Campos Hero estáticos duplicados en el formulario de vitrina, cuando el Hero debe gestionarse desde el Drag & Drop modular inferior.
+  4. Carencia de campos para configurar y cargar logos (desktop y móvil) y favicon del sitio.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - **Subnavegación en 2 Filas:** Grid responsivo `grid-cols-2 md:grid-cols-4 gap-2.5` eliminando al 100% el scroll horizontal.
+  - **Paleta Cromática de 8 Tokens:** Implementación completa de `primary_color`, `secondary_color`, `accent_color`, `background_color`, `surface_color`, `text_color`, `muted_text_color`, `border_color` con pickers e inputs hexadecimales.
+  - **Logos & Favicon:** Campos para URL y carga de archivos (`logo_file`, `logo_mobile_file`, `favicon_file`) a `public/uploads/branding/`, inyectados dinámicamente en `<link rel="icon">`, `<link rel="apple-touch-icon">` y `<header>` de la tienda.
+  - **Desacoplamiento de Hero:** Retiro de inputs fijos de Hero de Tab 1 e inclusión de banner explicativo; el Hero se construye con Drag & Drop en la tabla modular.
+  - **Persistencia & Reactividad en Vivo:** `window.switchStoreUniverse` y listeners `input` sincronizan de inmediato el marco de previsualización a escala y las muestras KPI en tiempo real.
+  - **Pruebas Automatizadas:** 17 pruebas aprobadas con 75 aserciones en `Hub2AdminStoreControllerTest` y `StorefrontDynamicSectionsTest`.
+
+---
+
+### `TASK-H2-20`: Motor Modular de Hero: Full-Width 100vw, Conmutación Excluyente (Cero Duplicados), Fondos, Degradados Overlay y Generador de Rutas
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Submódulo 1 (*Editor Visual*) & Submódulo 5 (*Páginas & Navbar*) & Storefront PWA
+* **Diagnóstico & Requerimientos del Usuario:**
+  1. *Gestión del Ancho de Pantalla:* El Hero comenzaba ~20% a la derecha o constreñido dentro del `.container` estándar. Debe tener la opción de abarcar el 100% de la pantalla (Full-Width / Edge-to-Edge bleed) o mantenerse en contenedor boxed estándar.
+  2. *Eliminación de Hero Duplicado:* Al editar el Hero se renderizaba de forma duplicada tanto lo propuesto por el formulario (tarjeta estructurada) como lo propuesto por el código custom. Debe ser conmutable y opcional (`hero_mode`: Estructurado vs Código Scoped).
+  3. *Carga de Imagen de Fondo:* Ambos modos deben permitir subir una imagen de fondo o ingresar URL externa con previsualización en vivo.
+  4. *Capas de Degradados Superpuestos:* Ambos modos deben permitir conmutar diferentes colores para formar degradados sobre/después de la imagen de fondo (color inicial, color final, dirección, opacidad).
+  5. *Botones del Hero y Generador de Rutas:* La opción predefinida debe permitir crear y personalizar los botones del Hero (Primario y Secundario) y asignar la ruta a la que llevan. En la pestaña de Secciones Modulares cada bloque debe generar y mostrar su ruta ancla (`#section-{id}`) con botón de copia en 1 clic; en Páginas & Navbar cada página debe generar su ruta pública (`/pagina/{slug}`) con botón de copia en 1 clic; y en el modal de configuración del Hero debe proveerse un selector desplegable asistido para autocompletar estas rutas en los botones.
+* **Solución de UI/UX & Arquitectura Implementada:**
+  - **Sangrado Edge-to-Edge (`.hero-full-width`):** Viewport breakout con `width: 100vw !important; margin-left: -50vw !important; left: 50% !important; right: 50% !important;` y padding ergonómico que preserva la alineación tipográfica con la cuadrícula de productos en cualquier resolución.
+  - **Bifurcación Mutuamente Excluyente de Renderizado:** El motor Blade evalúa `$sec->settings['hero_mode']`. Si es `custom`, renderiza únicamente el bloque aislado Scoped HTML/CSS/JS. Si es `structured`, renderiza la tarjeta `.hero-banner-card` con títulos, subtítulos, badges y botones. Erradicación total de elementos duplicados.
+  - **Subida de Imágenes & Background:** Soporte de carga de archivos `background_image_file` procesados hacia `public/uploads/sections/` y campo `background_image` con visor reactivo thumbnail `FileReader` y botón de eliminación.
+  - **Capa de Degradados Overlay:** Controles reactivos de degradado (`enable_gradient`, `gradient_color_start`, `gradient_color_end`, `gradient_direction`, `gradient_opacity` slider 10-100%) y barra de muestra en vivo, renderizados como `linear-gradient(...)` combinado con `url(...)`.
+  - **Generador de Rutas & Anclas Modulares:**
+    - Identificadores DOM únicos `id="section-{{ $sec->id }}"` inyectados en cada sección modular del Storefront.
+    - Badges `#section-{{ $sec->id }}` con botón interactivo de 1 clic "Copiar Ruta" en la tabla de secciones CMS.
+    - Badges `/pagina/{{ $pg->slug }}` con botón interactivo de 1 clic "Copiar Ruta" en la tabla de páginas institucionales.
+    - Selector integrado `+ Insertar Ruta` en los campos de URL de los botones CTA para autocompletar anclas de secciones, páginas o vitrinas multiverso.
+  - **Pruebas Automatizadas:** 19 pruebas de integración y renderizado aprobadas con 89 aserciones (`StorefrontDynamicSectionsTest` y `Hub2AdminStoreControllerTest`). Test suite completa de 353 pruebas aprobada con 2,212 aserciones sin ninguna regresión.
+  - **Documentación & Versión PDF:** `APPLICATION_WORKFLOW_SPEC.md` y `APPLICATION_WORKFLOW_MANUAL.html` actualizados, y `APPLICATION_WORKFLOW_MANUAL.pdf` compilado y generado exitosamente.
+
+---
+
+### `TASK-H2-21`: Corrección Crítica de Renderizado Móvil (< 769px) en Storefront PWA y Control de Caché
+* **Prioridad:** **Crítica (Hotfix Inmediato)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) & Storefront PWA (`public/css/store-pwa.css`, `resources/views/layouts/store-pwa.blade.php`)
+* **Diagnóstico & Requerimientos del Usuario:**
+  1. *Rotura de Interfaz en Móvil:* Al visualizar la tienda en dispositivos móviles (< 769px), los botones aparecían sin estilos (`[Filtros]`, selector de tallas con bordes negros nativos HTML, enlaces morados sin formato, tarjetas sin sombreado y tipografías desalineadas).
+  2. *Causa Raíz:* En `public/css/store-pwa.css` (línea 353), la media query `@media (min-width: 769px) { .hero-editorial-section { padding: 36px 0 28px; }` carecía de su llave de cierre `}`. Esto causó que las ~3,500 líneas subsecuentes de la hoja de estilos quedaran atrapadas dentro de la regla desktop, siendo ignoradas completamente por los navegadores móviles.
+  3. *Invalidez de Caché Móvil:* Los navegadores móviles persistían la hoja de estilos rota en caché.
+  4. *Contraste de Texto en Hero:* En ciertas configuraciones de vitrinas con texto negro, la regla global `h1, h2 { color: var(--brand-text) !important; }` reducía la legibilidad sobre fondos oscuros o con imágenes de fondo del Hero.
+* **Solución Técnica & Arquitectura Implementada:**
+  - **Cierre y Balance de Media Queries:** Se añadió la llave de cierre faltante en `public/css/store-pwa.css`. Se auditó la paridad sintáctica global con PowerShell, verificando exactamente 495 llaves de apertura `{` y 495 llaves de cierre `}`.
+  - **Invalidez de Caché Dinámica (Cache Busting):** Se incorporó parámetro de versionamiento dinámico en `resources/views/layouts/store-pwa.blade.php`: `store-pwa.css?v={{ filemtime(...) }}`, forzando la descarga inmediata del CSS corregido en navegadores móviles y clientes PWA sin intervención del usuario.
+  - **Protección de Contraste en Hero Banner:** Se reforzaron reglas de especificidad para `.hero-banner-card .hero-title { color: #ffffff !important; }`, `.hero-banner-card .hero-desc` y `.hero-banner-card .hero-tag-pill`, garantizando máxima legibilidad sobre cualquier imagen o degradado.
+  - **Purga de Caché de Vistas & Framework:** Ejecución de `php artisan view:clear` y `php artisan cache:clear`.
+  - **Verificación Automatizada:** Suite de pruebas pasando al 100% (19 pruebas, 89 aserciones en `Hub2AdminStoreControllerTest` y `StorefrontDynamicSectionsTest`).
+  - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado y compilado en PDF.
+
+---
+
+### `TASK-H2-22`: Conmutador Global de Vitrinas Persistente, Reestructuración a 6 Pestañas, Acordeón de Contenidos & Reglas y Desacoplamiento de Revista Digital
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Vista de Control `resources/views/portal/store.blade.php` & Controller `Hub2AdminStoreController`
+* **Diagnóstico & Requerimientos del Usuario:**
+  1. *Conmutador Global de Vitrinas:* Los botones de seleccionar vitrina (`Marte`, `Venus`, `Tiresias`, `Terra`) deben conmutar a las características de cada sitio o universo, y este conmutador debe estar presente y visible en cada una de las pestañas del módulo.
+  2. *Corrección de Anidamiento en Acordeón:* "Guía oficial de tallas se muestra dentro de reglas de flete". Se identificó omisión de etiquetas de cierre `</div>` en la columna derecha del simulador financiero de fletes (`lg:col-span-7`, `simulator-card`, `grid`), provocando que la cabecera y el contenido de `accordionSecEditorial` quedaran atrapados e incrustados visualmente dentro de la tarjeta blanca del simulador de flete.
+  3. *Revista Digital como Pestaña Independiente:* "CMS Blog y Revista Digital sí es una pestaña del módulo". No debe formar parte del acordeón colapsable de la pestaña 2, sino disponer de su propio panel dedicado (`#storeMagazinePanel`) accesible desde la barra superior.
+  4. *Confinamiento de Secciones Modulares:* La sección "Secciones modulares del home" no debe estar presente en todas las pestañas; debe ubicarse estricta y únicamente dentro de *Editor Visual* (Tab 1).
+* **Solución Técnica & Arquitectura Implementada:**
+  - **Barra Global de Vitrinas (`.universe-selector-bar`):** Ubicada en la zona transversal superior con persistencia en todas las pestañas. Incorpora badge reactivo `#activeUniverseContextBadge` con color dinámico según la vitrina activa.
+  - **Reorganización Subnav a 6 Pestañas Principales (2 filas de 3 columnas sin scroll):**
+    1. `1. Editor Visual` (`data-tab="visual"`): Personalización cromática de 8 tokens, logos, favicon, live preview frame desktop/móvil y Gestor de Secciones Modulares Drag & Drop.
+    2. `2. Contenido & Reglas` (`data-tab="content_rules"`): Acordeón unificado con 3 submódulos interactivos (Banners, Fletes, Guía de Tallas).
+    3. `3. Blog & Revista` (`data-tab="magazine"`): CMS editorial con tabla de notas técnicas, categorías, lectura y acciones de borrado/publicación.
+    4. `4. Páginas & Navbar` (`data-tab="pages"`): CMS de páginas institucionales con enlaces en cabecera/footer y generador de rutas.
+    5. `5. Tracking & Pixels` (`data-tab="tracking"`): GTM, GA4, Meta Pixel y Meta Conversions API (CAPI).
+    6. `6. Filtros Catálogo` (`data-tab="filters"`): Editor de facetas, taxonomías y jerarquías del catálogo público.
+  - **Corrección Estructural y Cierre Estricto de Divs en Acordeón:**
+    - Cierre hermético de `diag-box`, `simulator-card`, `lg:col-span-7`, `grid lg:grid-cols-12`, `accordionSecShippingBody` y `accordionSecShipping`.
+    - La Sección 3 (`accordionSecEditorial`) se renderiza como tarjeta de acordeón independiente al mismo nivel jerárquico que la Sección 1 y 2.
+    - Controles globales de encabezado: `Expandir Todo` y `Contraer Todo` (`window.toggleAllStoreAccordions`).
+  - **Enrutamiento Retrocompatible (`subSectionMap`):** Al navegar hacia `?tab=banners`, `?tab=shipping` o `?tab=editorial`, el script conmuta de inmediato a `content_rules`, expande el acordeón respectivo y realiza auto-scroll al bloque correspondiente.
+  - **Confinamiento de Secciones Modulares en Tab 1:** Estructura de cierre verificada; `#sectionsTable` reside exclusivamente dentro de `#storeVisualPanel`.
+  - **Pruebas Automatizadas:** 27 pruebas pasando al 100% con 134 aserciones en `Hub2AdminStoreControllerTest`, incluyendo `test_admin_store_cms_unified_accordion_and_global_universe_selector`.
+  - **Documentación & Versión PDF:** Manual técnico y pliego de flujos actualizado en HTML y compilado a PDF.
+
+---
+
+### `TASK-H2-23`: Aislamiento Estructural de Paneles y Desbloqueo Definitivo del Modal Crear Nueva Sección en Editor Visual
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub Destino:** Hub 2 (Tienda & CMS Multiverso) - Vista de Control `resources/views/portal/store.blade.php`
+* **Diagnóstico & Causa Raíz Detectada:**
+  1. *Falla Reportada:* El botón `Crear Nueva Sección` (`data-action="open-create-section-modal"`) en el Gestor de Secciones Modulares del Home (Tab 1, Editor Visual) "se rompió otra vez" y no abría el modal interactivo `#createSectionModal`.
+  2. *Diagnóstico Profundo con Chrome DevTools Protocol (CDP Headless):* Se ejecutó una auditoría en vivo del árbol DOM usando Chrome Headless. Al disparar el evento click sobre el botón, el modal `#createSectionModal` recibía las clases correctas y `style.display = 'flex'`, pero sus dimensiones computadas arrojaban:
+     - `offsetHeight: 0`
+     - `offsetWidth: 0`
+     - `boundingClientRect: { top: 0, left: 0, width: 0, height: 0 }`
+  3. *Inspección de Ancestros:* La inspección de la cadena de padres (`modalParentChain`) reveló que `#createSectionModal` tenía como ancestros:
+     $$\text{createSectionModal} \subset \text{accordionSecShippingBody} \subset \text{accordionSecBanners} \subset \text{storeContentRulesPanel}$$
+     Debido a que `storeContentRulesPanel` (Pestaña 2) permanece con `display: none !important` cuando el usuario se encuentra en el Tab 1 (Editor Visual), ningún elemento hijo dentro de él puede renderizarse en pantalla, sin importar que tenga `fixed inset-0 z-50`.
+  4. *Causa Raíz de HTML Blade:* 
+     - Omisión de etiqueta de cierre `</div>` en `accordionSecBanners` (Línea 895).
+     - Omisión de dos etiquetas de cierre `</div>` en `accordionSecShippingBody` y `accordionSecShipping` (Línea 1035).
+     - Omisión de etiqueta de cierre `</div>` en `storeContentRulesPanel` (Línea 1144).
+     Esto causó que las pestañas 3 (`storeMagazinePanel`), 4 (`storePagesPanel`), 5 (`storeTrackingPanel`), 6 (`storeFiltersPanel`) y TODOS los modales quedaran atrapados dentro de la pestaña 2.
+* **Solución Técnica & Arquitectura Implementada:**
+  - **Saneamiento y Balance Estricto de Divs:**
+    - Cierre hermético de `accordionSecBanners` (`depth = 3` $\rightarrow$ `depth = 2`).
+    - Cierre hermético de `accordionSecShippingBody` y `accordionSecShipping` (`depth = 4` $\rightarrow$ `depth = 2`).
+    - Cierre hermético de `accordionSecEditorialBody`, `accordionSecEditorial` y `storeContentRulesPanel` (`depth = 2` $\rightarrow$ `depth = 1`).
+    - Verificación matemática por árbol sintáctico (`verify_div_tree.cjs`): Los 6 tab panels (`storeVisualPanel`, `storeContentRulesPanel`, `storeMagazinePanel`, `storePagesPanel`, `storeTrackingPanel`, `storeFiltersPanel`) y todos los modales de control operativo (`createSectionModal`, `editSectionModal`, etc.) son ahora hijos directos independientes de `#storeAppRoot` (`depth = 2`).
+  - **Limpieza de Propiedades Inline en Modales:**
+    - Se actualizó `window.openStoreModal(modalId)` para ejecutar `modal.style.removeProperty('display')` previo a `modal.style.display = 'flex'`, garantizando que cualquier override de Tailwind sea limpiado sin conflictos.
+    - Se optimizó `window.openCreateSectionModal()` para invocar de forma predeterminada `window.switchCreateSectionMode('catalog')`, asegurando que el modal abra siempre en su estado más limpio e intuitivo.
+  - **Verificación Automatizada End-to-End con Chrome Headless:**
+    - Tras la corrección, el click en `[data-action="open-create-section-modal"]` arrojó en Chrome Headless:
+      - `computedDisplay: "flex"`
+      - `computedVisibility: "visible"`
+      - `offsetHeight: 429`
+      - `offsetWidth: 764`
+      - `modalParentChain[0]: div#storeAppRoot`
+    - Cierre comprobado mediante `[data-action="close-modal"]`: `computedDisplay: "none"`, `offsetHeight: 0`.
+  - **Pruebas de Regresión:** 27 pruebas pasando al 100% (134 aserciones) en `Hub2AdminStoreControllerTest`.
+
+---
+
+### `TASK-H2-24`: Sección 4 Acordeón Submódulo 2 Hub 2: Editor Oficial de Pie de Página (Footer & Contacto)
+* **Prioridad:** **Alta (Prioridad Inmediata)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 2 (CMS & Contenidos) $\leftrightarrow$ Storefront PWA (`layouts.store-pwa.blade.php`) $\leftrightarrow$ `CmsOfficialDocument`
+* **Requerimiento Solicitado:**
+  - El submódulo de contenido y reglas del Hub 2 ("2. Contenido & Reglas") debe contener una sección extra (4º módulo del acordeón) que permita editar el footer de la tienda.
+  - Actualizar el contador de la subnavegación de `3 Módulos` a `4 Módulos`.
+  - Conectar los campos editables del footer (narrativa de marca, WhatsApp concierge, email de soporte, badges de paquetería/empaque/pasarelas, copyright y toggles de acceso RevOps y política cero emojis) con el modelo persistente `CmsOfficialDocument` bajo el código `STORE_FOOTER_CONFIG`.
+  - Asegurar reactividad y sincronización con el layout de la tienda online (`store-pwa.blade.php`).
+* **Implementación Realizada:**
+  1. *Subnavegación Hub 2 (`resources/views/portal/store.blade.php`):*
+     - Actualizado badge a `<span class="store-subnav-count">4 Módulos</span>`.
+     - Actualizado tooltip descriptivo: "Panel unificado con 4 módulos expandibles: Banners & Marquesinas, Reglas de Flete, Guía Oficial de Tallas y Editor de Pie de Página (Footer)."
+  2. *Sección 4 de Acordeón (`accordionSecFooter`):*
+     - Encabezado con icono SVG, badge `Storefront PWA` y toggle con chevron interactivo.
+     - Formulario directo con action `route('portal.store.documents.update', 'STORE_FOOTER_CONFIG')`:
+       - Textarea de narrativa de marca (`payload[brand_summary]`).
+       - Inputs para WhatsApp de concierge (`payload[whatsapp_contact]`), email de soporte (`payload[support_email]`) y texto de copyright (`payload[copyright_text]`).
+       - Badges de seguridad/políticas: paquetería express (`payload[shipping_badge_text]`), empaque neutro (`payload[packaging_badge_text]`) y pagos SSL (`payload[payments_badge_text]`).
+       - Switches de configuración opcional para visibilidad de tarjeta Consola RevOps (`payload[show_revops_link]`) y badge de política estricta cero emojis (`payload[show_zero_emojis_badge]`).
+  3. *Controladores & View Composers:*
+     - `PortalStoreController.php`: Carga y pasa `$footerConfig` a la vista `portal.store` extrayéndolo de `$officialDocs['STORE_FOOTER_CONFIG']->payload`.
+     - `AppServiceProvider.php`: Inyección mediante `View::composer('layouts.store-pwa', ...)` garantizando que el Storefront y cualquier vista hija disponga de `$footerConfig` con fallbacks seguros.
+     - `resources/views/layouts/store-pwa.blade.php`: Vinculación dinámica de todos los elementos del `<footer class="store-footer">` con `$footerConfig` preservando retrocompatibilidad total.
+  4. *JavaScript de Acordeón:*
+     - Actualizado `subSectionMap['footer'] = { tab: 'content_rules', accordionId: 'accordionSecFooter' }`.
+     - Incluido `'accordionSecFooter'` en `toggleAllStoreAccordions()`.
+  5. *Política Estricta Cero Emojis & Validación:*
+     - Verificación automatizada sin emojis (PASS).
+     - 424 pruebas de la suite completa pasando al 100% (2,789 aserciones, 0 fallos).
+
+---
+
+### `TASK-BRD-06`: Vinculación Obligatoria de Proveedor y Marca en Fichas de Alta, Edición y Curaduría con Alta Rápida In Situ (Regla 6.47)
+* **Prioridad:** **Alta (Regla de Oro del Catálogo)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 4 (Inventario, Alta de Producto y Curaduría de Scraping) $\leftrightarrow$ Hub 2 (CMS & Storefront) $\leftrightarrow$ API REST RevOps
+* **Requerimiento & Regla 6.47:**
+  - Garantizar que en cada punto donde se dé de alta, edite o cure un producto del catálogo existan selectores interactivos y sincronizados de Proveedor y Marca Comercial.
+  - Proveer botones de alta instantánea `+ Nuevo Proveedor` y `+ Nueva Marca` en cada uno de estos formularios para registrar entidades inexistentes sin perder la captura activa.
+* **Componentes Actualizados:**
+  1. *Alta de Nuevo Producto (`newProductPanoramicModal`):* Reemplazado input de texto plano por selectores reactivos de Proveedor (`supplier_id`) y Marca Comercial (`brand`) con botones `+ Nuevo Proveedor` (`openCreateProviderModal`, `z-[120]`) y `+ Nueva Marca` (`openCreateBrandModal`, `z-[130]`).
+  2. *Curaduría Previa de Scraping (`scrapingCurationModalOpen`):* Incorporado bloque de asignación de Proveedor y Marca oficial con botones de alta rápida `+ Proveedor` y `+ Marca`, permitiendo catalogar con precisión antes de conceder la aprobación a stock.
+  3. *Ficha de Edición / Drawer de Producto (`skuPanoramicModal`):* Sección *Catalogación & Proveedor* modernizada con selectores vinculados de Proveedor (`drawerSupplierId`) y Marca Comercial (`drawerBrand`) y botones de creación instantánea.
+  4. *Lógica Alpine en `inventory-module.js`:*
+     - Métodos auxiliares `getBrandsForSupplier(supplierId)`, `onNewProductSupplierChange()`, `onDrawerSupplierChange()` y `onCuratingSupplierChange()`.
+     - Auto-selección reactiva en caliente en los 3 formularios cuando se completa el guardado en `saveProvider()` o `saveBrand()`.
+  5. *Persistencia Backend (`ProductSkuAndDuplicateApiController.php`):*
+     - Soporte y validación de `supplier_id` en `storeProduct` y `updateComplete`, persistiendo en los metadatos del producto y enlazando con la gobernanza de inventario.
+* **Documentación & Tríptico:**
+  - Codificada la **Regla 6.47** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y recompilado `docs/PROJECT_RULES.pdf` (427 KB vía Chrome Headless).
+* **Verificación de Calidad:**
+  - **377 pruebas superadas, 2,455 aserciones en verde (100% pasando sin regresiones)**.
+
+---
+
+### `TASK-BRD-08`: Asociación Mandatoria de Marcas a Proveedores, Fotografías Manuales con Variante de Color y Alta In Situ de Taxonomías (Reglas 6.50, 6.51 y 6.52)
+* **Prioridad:** **Crítica / Alta (Gobernanza de Catálogo e Inventario)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 4 (Gestor de Marcas, Árbol de Proveedores, Workstation Alta de Producto, Curaduría Scraping) $\leftrightarrow$ Hub 2 $\leftrightarrow$ Storefront $\leftrightarrow$ API REST RevOps
+* **Requerimientos Formalizados:**
+  1. *Regla 1 (Regla 6.50):* Toda marca de producto se debe asociar a un proveedor obligatoriamente. Sincronización bidireccional y actualización reactiva inmediata en memoria de `prov.brands`, `prov.brandsTree` y la tabla principal de proveedores en Alpine.js sin recargar pantalla.
+  2. *Regla 2 (Regla 6.51):* Tanto en el Workstation de Alta de Producto como en la Curaduría de Scraping, el operador puede añadir manualmente más fotografías de la prenda mediante URLs y asignarles un tipo de color de prenda (`color_name`) de la paleta oficial, además de definir la imagen principal (`is_primary`) para conmutación precisa de variantes por filtros y catálogo.
+  3. *Regla 3 (Regla 6.52):* Tanto desde el Workstation como desde la Curaduría Scraping, se puede añadir una categoría o subcategoría in situ si no existe (`+ Categoría`, `+ Subcategoría`) mediante modal liviano (`quickCategoryModalOpen`) sin abandonar la captura de datos ni recargar la pantalla.
+* **Componentes Implementados:**
+  1. *Migración de Gobernanza:* `2026_10_02_160000_enforce_supplier_brands_association.php` asoció marcas existentes huérfanas (*Mazho*, *Torzo Sexywear*) al proveedor fabricante Torzo (`supplier_id = 4`) y sincronizó `suppliers.brands`.
+  2. *Backend API (`BrandApiController`, `SupplierApiController`, `ProductSkuAndDuplicateApiController`, `InventoryApiController`):*
+     - `supplier_id` requerido con validación de existencia en `BrandApiController@store`.
+     - Exclusión preventiva de tipos de prenda (`Supplier::isProductLineCategory`) antes de la validación del request.
+     - Sincronización bidireccional de `Supplier` y `Brand` en `addBrand()` y `removeBrand()`.
+     - Soporte para `images` y `curated_images` con `color_name` y `is_primary` persistidas en `meta.gallery` y `meta.images`.
+     - Retorno de `supplier_brands_tree` enriquecido en respuestas JSON.
+  3. *Frontend Alpine.js (`inventory-module.js`):*
+     - Corregida la concordancia de IDs de proveedor en `saveBrandModal()` y `addAndPersistBrandToProvider()` (`supId` normalizado vs `'prov_' + supId`).
+     - Actualización reactiva en memoria de `prov.brands`, `prov.brandsTree` y la fila de la tabla en caliente.
+     - Métodos de fotos manuales con variante de color: `addManualImageUrlToNewProduct()`, `removeNewProductImage()`, `setPrimaryNewProductImage()`, `addManualImageToCuratingItem()`, `removeImageFromCuratingItem()`, `setPrimaryCuratingImage()`.
+     - Métodos de alta in situ de categorías y subcategorías: `openQuickCategoryModal(type, context)` y `saveQuickCategory()`.
+  4. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Selector mandatorio de proveedor en `brandModalOpen` con indicador "Obligatorio (Regla 1)".
+     - Workstation y Curaduría Scraping equipados con selectores de color de prenda por foto, botones de portada, eliminación y captura de URL manual.
+     - Botones in situ `+ Categoría` y `+ Subcategoría` con modal interactivo rápido (`quickCategoryModalOpen`, `z-[140]`).
+* **Documentación & Tríptico:**
+  - Registradas las **Reglas 6.50, 6.51 y 6.52** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf` (472 KB vía Chrome headless).
+* **Verificación de Calidad:**
+  - **382 pruebas automatizadas en verde (100% passing test suite, 2,504 aserciones).**
+
+---
+
+### `TASK-BRD-09`: Gobernanza Textil Integral: Asignación de Color por Fotografía, Normalización WebP Universal (1080x1350), SKU Dinámico Reactivo, CRUD y Alta In Situ de Telas y Colores, y Gestión de Secciones E-Commerce (Reglas 6.53 a 6.59)
+* **Prioridad:** **Crítica / Alta (Gobernanza de Catálogo & Arquitectura Textil)** | **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulos Involucrados:** Hub 4 (Workstation de Alta de Producto, Ficha / Drawer de Producto, Ajustes de Inventario) $\leftrightarrow$ Hub 2 (CMS & Home Multiverso) $\leftrightarrow$ Storefront PWA $\leftrightarrow$ API REST RevOps
+* **Requerimientos Formalizados (7 Reglas Obligatorias):**
+  1. *Regla 1 (Regla 6.53):* Desde la ficha de producto / drawer (`skuPanoramicModal`), el operador puede subir o agregar fotografías, asociar a cada una una variante de color oficial (`color_name`), definir foto de portada (&starf;) y registrar nuevos colores in situ para conmutación reactiva en vitrinas y PDP.
+  2. *Regla 2 (Regla 6.54):* Todas las imágenes subidas al sistema se convierten obligatoriamente al formato WebP (`.webp`) y se normalizan al tamaño estándar universal e-commerce de 1080 &times; 1350 píxeles (proporción 4:5, fondo blanco neutral `#FFFFFF` centrado con antialiasing) para desktop y móvil.
+  3. *Regla 3 (Regla 6.55):* El Workstation de Alta de Producto permite dar de alta un nuevo color de producto in situ (`+ Color`) con modal liviano (`quickColorModalOpen`) sin abandonar el workstation ni recargar la pantalla.
+  4. *Regla 4 (Regla 6.56):* El código SKU es dinámico y reactivo: se recalcula en caliente conforme a las cualidades del producto (proveedor, marca, categoría, tela y color) invocando a `SkuGeneratorService`.
+  5. *Regla 5 (Regla 6.57):* El tipo de tela se selecciona dinámicamente de lo registrado en el CRUD maestro de telas de ajustes de inventario. Si no existe, el Workstation cuenta con un botón in situ `+ Tipo de Tela` (`quickFabricModalOpen`) para registrarla sin salir.
+  6. *Regla 6 (Regla 6.58):* El tipo de tela se asocia de forma directa y formal con los productos mediante columnas dedicadas `fabric` y `fabric_id` en la tabla `products`, con relaciones Eloquent en `Product` y `ApparelFabric`.
+  7. *Regla 7 (Regla 6.59):* CRUD integral de secciones del sitio web de e-commerce (`cms_sections`) en Ajustes de Inventario (crear, editar, activar/pausar, archivar/restaurar, eliminar). Se vincula modularmente al Home de Hub 2 (`store.blade.php`, `products.section_name`) y conforma dimensiones activas para los filtros facetados.
+* **Componentes Implementados:**
+  1. *Base de Datos & Migración:*
+     - Migración `2026_10_02_211249_enhance_products_fabrics_and_sections.php` agregó columnas `fabric`, `fabric_id` y `section_name` a `products`, indexó claves y sembró registros canónicos en `apparel_fabrics` y `cms_sections`.
+  2. *Modelos Eloquent:*
+     - `Product`: `$fillable` enriquecido (`fabric`, `fabric_id`, `section_name`), relaciones formales `fabricRelation()` y `fabric()`, accessors `getImagesAttribute()` y `getImagesByColorAttribute()`.
+     - `ApparelFabric`: relación inversa `products() -> hasMany(Product::class)`.
+     - `ApparelColor`: soporte ampliado para `name`, `hex_code`, `color_type`, `gradient_css`, `is_active`.
+     - `CmsSection`: soporte de vitrina, tipo, orden y estados (`is_active`, `is_archived`).
+  3. *Servicio de Normalización de Imágenes:*
+     - `App\Services\ImageNormalizationService`: procesamiento gráfico con GD (`imagecreatefromstring`), canvas estándar 1080x1350 px centrado con padding blanco e-commerce, antialiasing y exportación WebP (`imagewebp(..., 85)`) en `storage/app/public/products/` y `public/storage/products/`.
+  4. *Backend API (`InventorySettingsApiController`, `InventoryApiController`, `ProductSkuAndDuplicateApiController`):*
+     - Endpoint `POST /api/v1/inventory/upload-image` para normalización de archivos y URLs remotas a WebP.
+     - CRUD completo de Telas (`/api/v1/inventory/settings/fabrics`).
+     - CRUD completo de Colores (`/api/v1/inventory/settings/colors`).
+     - CRUD completo de Secciones Web (`/api/v1/inventory/settings/store-sections`).
+     - Persistencia de `fabric`, `fabric_id`, `section_name`, `images`, `gallery`, `images_by_color` e `image_color_map` en `storeProduct` y `updateComplete`.
+     - Generación reactiva de SKU con resolutores dinámicos de tela y color en `SkuGeneratorService`.
+  5. *Frontend Alpine.js (`inventory-module.js`):*
+     - Estado reactivo para `apparelFabrics`, `apparelColors`, `storeSections`.
+     - Modales rápidos in situ: `openQuickFabricModal(context)`, `saveQuickFabric()`, `openQuickColorModal(context, targetImg)`, `saveQuickColor()`.
+     - Métodos de subida y normalización: `uploadImageFile(event, context, targetImg)`, `addManualImageToDrawer()`, `removeDrawerImage()`.
+     - Métodos para CRUD de Secciones: `addNewStoreSection()`, `editStoreSection()`, `saveStoreSection()`, `toggleStoreSectionActive()`, `archiveStoreSection()`, `deleteStoreSection()`.
+     - Recálculo reactivo de SKU: `updateDynamicSku(silent)`.
+  6. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Ficha de Producto (Drawer): botón `+ Subir Foto (WebP)`, input manual, selector de color por foto, botón `+ Color` in situ, botón de portada ★, selector de tela con `+ Nueva Tela` in situ, selector de secciones dinámico.
+     - Workstation: selectores con botones `+ Tipo de Tela` y `+ Color`, dropzone con normalización WebP, miniaturas con asignación de color y SKU dinámico reactivo.
+     - Pestaña 7 de Ajustes: CRUD visual de Secciones Web con badges de estado y acciones completas.
+     - Modales rápidos `quickFabricModalOpen` y `quickColorModalOpen` (`z-[140]`).
+* **Documentación & Tríptico:**
+  - Registradas las **Reglas 6.53 a 6.59** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `ProductFabricsSectionsAndWebpRulesTest.php`: 7/7 tests pasando (100% verde, 31 aserciones).**
+  - **No-regresión en `BrandCrudAndFiltersRulesTest.php`: 8/8 tests pasando (87 aserciones).**
+  - **No-regresión en `EndToEndProjectRulesTest.php`: 7/7 tests pasando (53 aserciones).**
+
+---
+
+### `TASK-BRD-10`: Poblado Real de la Bandeja de Curaduría de Scraping (259 Prendas Torzo, Cero Mocks y Persistencia End-to-End)
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Hub 4 (Inventario) $\leftrightarrow$ Scraping B2B**
+* **Prioridad:** **Alta (Regla de Oro)**
+* **Solicitud del Usuario:**
+  > "Pasemos todos los productos scrapeados al estado donde se cura. 'La bandeja de curaduria de scraping', todavia no esta poblada con datos reales, ya dejar de usar ejemplos."
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Migración DDL (`database/migrations/2026_10_02_230000_enhance_scraped_pending_items_table.php`):*
+     - Columnas añadidas a `scraped_pending_items`: `supplier_product_id`, `suggested_category`, `suggested_subcategory`, `suggested_fabric`, `detected_color_name`, `detected_color_hex`, `color_type`, `origin_url`, `scraped_cost`, `supplier_stock`, `sizes` (JSON), `images` (JSON), `raw_snapshot` (JSON) y `scraped_description`.
+  2. *Modelo Eloquent (`App\Models\ScrapedPendingItem`):*
+     - Casts tipados: `sizes` (array/json), `images` (array/json), `raw_snapshot` (array/json), `external_price` (decimal:2), `scraped_cost` (decimal:2), `curated_price` (decimal:2).
+     - Relaciones formales: `supplier()` vinculada a `Supplier` y `supplierProduct()` vinculada a `SupplierProduct`.
+  3. *Seeder de Poblado Masivo (`database/seeders/PopulateScrapedPendingItemsSeeder.php`):*
+     - Migró 259 registros reales de Torzo B2B (`supplier_products`) al staging canónico `scraped_pending_items` en estado `curation_status = 'pending'`.
+     - Normalizó URLs directas de imágenes de alta resolución en CDN de Torzo (`https://torzo.kexe.mx/imagenes_productos/...`).
+     - Detectó automáticamente categorías (Tanga, Bikini, Jockstraps, Boxers, Arneses), telas (Microfibra Spandex / Licra, Algodón & Modal), colores cromáticos oficiales con su código `#hex`, costos reales de proveedor y curvas de tallas (`sizes`).
+  4. *Controladores Backend:*
+     - `StorefrontController@portalInventory`: Consulta en caliente los 259 ítems pendientes reales (`ScrapedPendingItem::where('curation_status', 'pending')`) y los inyecta en la vista Blade como `portalScrapedPendingItems`.
+     - `InventoryApiController@curateScrapedItem`: Soporte completo para `action: 'approve'` y `action: 'reject'`, resolviendo relacionalmente `fabric_id` (`ApparelFabric`), sección web (`cms_sections`), galería de imágenes por color y creación/actualización transaccional en el catálogo maestro (`products`).
+  5. *Frontend Alpine.js (`inventory-module.js`):*
+     - Eliminados definitivamente los mocks estáticos (`TOR-RAW-019` y `TOR-RAW-020`).
+     - Estado reactivo alimentado por `window.serverScrapedPendingItems`.
+     - Filtro reactivo en tiempo real por búsqueda de texto (`scrapedSearchQuery`) y por categoría de prenda (`scrapedCategoryFilter`).
+     - `approveScrapedItem()` y `discardScrapedItem()` integrados mediante llamadas asíncronas con token CSRF contra el endpoint `/api/v1/inventory/scraping/pending/{id}/curate`.
+  6. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Contenedor ergonómico con scroll vertical (`max-h-[780px] overflow-y-auto`) para navegar cómodamente las 259 prendas.
+     - Barra de herramientas con buscador y selector de categorías.
+     - Miniaturas de 56×64 px con bordes redondeados y badge de margen comercial en vivo.
+* **Documentación & Tríptico:**
+  - Registrada la **Regla 6.60** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `ScrapedPendingItemsCurationTest.php`: 3/3 tests pasando (100% verde, 15 aserciones).**
+  - **Pruebas de no-regresión: `ProductFabricsSectionsAndWebpRulesTest.php` (7/7 tests), `BrandCrudAndFiltersRulesTest.php` (8/8 tests), `SupplierSyncTest.php` (11/11 tests) y `EndToEndProjectRulesTest.php` (7/7 tests). Total de suite: 36 tests pasando, 226 aserciones en verde.**
+
+---
+
+### `TASK-BRD-11`: Gobernanza del Ciclo de Scraping, Descontinuación en Origen y Herramienta de Productos Archivados
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Hub 4 (Inventario) $\leftrightarrow$ RevOps $\leftrightarrow$ Centro de Auditoría B2B**
+* **Prioridad:** **Alta (Regla Operativa Fundamental)**
+* **Solicitud del Usuario:**
+  > "¿por que si estan normalizados y en estado de curaduria scraping, los productos se siguen viendo en el catalogo operativo?
+  > Regla: proceso de scraping en 5 fases (1. Mapeo en VSC; 2. Visto bueno VSC e inserción en curaduría previa al catálogo real, prohibida validación automática; 3. Frecuencia de actualización en tabla de proveedores; 4. Notificación y modal de discrepancia por descontinuados en origen ofreciendo retirar, archivar o eliminar; 5. Herramienta de productos archivados y descontinuados con reactivación o eliminación)."
+* **Causa Raíz Diagnosticada y Subsanada:**
+  - Los 259 productos de Torzo se veían en el catálogo operativo porque un seeder legacy del 26 de septiembre había insertado directamente los 259 registros en la tabla `products` (`Product::count() = 259`), además de estar en `supplier_products`.
+  - Se saneó la base de datos con `SanitizeCatalogAndPendingScrapesSeeder`, limpiando de `products` los ítems no curados, dejando en el catálogo activo únicamente 3 modelos de confección local propia y 1 producto archivado de demostración, manteniendo las 259 prendas de Torzo exclusivamente en `scraped_pending_items` (`pending`).
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Migración DDL (`database/migrations/2026_10_02_240000_enhance_products_archived_and_supplier_frequency.php`):*
+     - Añadidos a `products`: `is_archived` (boolean default false), `archived_at` (timestamp nullable), `discontinued_reason` (string nullable).
+     - Añadido a `suppliers`: `scrape_frequency` (string default 'every_6_hours').
+  2. *Modelos Eloquent:*
+     - `Product`: `$fillable` y `$casts` para `is_archived` (boolean), `archived_at` (datetime), `discontinued_reason` (string).
+     - `Supplier`: `$fillable` para `scrape_frequency`.
+  3. *Endpoints RESTful en `app/Http/Controllers/Api/RevOps/`:*
+     - `PATCH /api/v1/inventory/suppliers/{id}/frequency`: Actualiza y persiste la frecuencia (`SupplierApiController@updateFrequency`).
+     - `GET /api/v1/inventory/archived-products`: Lista prendas archivadas/descontinuadas (`InventoryApiController@getArchivedProducts`).
+     - `POST /api/v1/inventory/products/{id}/resolve-discontinued`: Resuelve la discrepancia con opciones `hide`, `archive`, `delete` (`InventoryApiController@resolveDiscontinuedProduct`).
+     - `POST /api/v1/inventory/products/{id}/reactivate`: Reactiva una prenda archivada devolviéndola al catálogo operativo (`InventoryApiController@reactivateArchivedProduct`).
+     - `DELETE /api/v1/inventory/products/{id}`: Eliminación física definitiva (`InventoryApiController@destroyProduct`).
+  4. *Frontend Alpine.js (`inventory-module.js`):*
+     - Variables de estado: `archivedProducts`, `archivedProductsModalOpen`, `archivedSearchQuery`, `discontinuedProductModalOpen`, `selectedDiscontinuedAlert`, `discontinuedActionReason`.
+     - Métodos integrados: `updateSupplierFrequency()`, `openDiscontinuedModal(alert)`, `resolveDiscontinuedProduct(action)`, `reactivateArchivedProduct(id)`, `deleteArchivedProduct(id)` y getter `filteredArchivedProducts`.
+  5. *Vistas Blade (`resources/views/portal/inventory.blade.php`):*
+     - Filtro estricto en catálogo operativo: `is_archived = false` y `visible = true`.
+     - Pestaña Proveedores: selector `<select>` interactivo para cambiar la frecuencia en 1 clic.
+     - Centro de Auditoría y Discrepancias B2B: tarjeta de alerta descontinuada con botón para abrir modal de discrepancia (Regla 4).
+     - Barra de herramientas del Catálogo Operativo: botón *"Archivados & Descontinuados"* con badge de conteo y opción 4 en el menú *"Herramientas de Stock"*.
+     - Modal de Discrepancia B2B por Producto Descontinuado (`discontinuedProductModalOpen`, `z-[130]`) con las 3 opciones requeridas: Retirar del Catálogo, Archivar Producto, Eliminar Producto.
+     - Modal / Herramienta de Productos Archivados y Descontinuados (`archivedProductsModalOpen`, `z-[130]`) con buscador reactivo, tabla y botones *"Volver a Activar"* y *"Eliminar"*.
+* **Documentación & Tríptico:**
+  - Registrada la **Regla 6.61** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `ScrapedLifecycleAndArchivedProductsTest.php`: 6/6 tests pasando (100% verde, 24 aserciones).**
+  - **Pruebas de no-regresión: `ScrapedPendingItemsCurationTest.php` (3/3 tests), `ProductApiTest.php` y `InventoryMovementTest.php` (9/9 tests). Total 100% verde.**
+
+---
+
+### `TASK-AI-01`: Integración Nativa con Google Gemini AI (Copiloto de Producto, Chat Estratégico Ejecutivo y Telemetría de Salud)
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Transversal (Hub 1 Dashboard $\leftrightarrow$ Hub 4 Inventario $\leftrightarrow$ Google Generative AI)**
+* **Prioridad:** **Alta (Inteligencia Artificial y Copilotos)**
+* **Solicitud del Usuario:**
+  > "ok, conectemos la ia y sus funcionalidades. Guiame para conectarlo con gemini esta es la api key ... nombre Gemini API Key nombre del proyecto projects/506510812817 numero del proyecto 506510812817"
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Variables de Entorno y Configuración:*
+     - `.env`: `GEMINI_API_KEY`, `GEMINI_MODEL="gemini-flash-lite-latest"`, `GEMINI_FALLBACK_MODEL="gemini-flash-latest"`, `GEMINI_PROJECT_NAME="projects/506510812817"`, `GEMINI_PROJECT_NUMBER="506510812817"`, `GEMINI_BASE_URL` y `GEMINI_TIMEOUT=25`.
+     - `config/services.php`: Clave `'gemini'` con resolución de entorno y timeout.
+  2. *Servicio Centralizado de IA (`App\Services\Ai\GeminiService`):*
+     - Métodos de alto rendimiento: `generateText`, `generateJson` (con `responseMimeType: "application/json"`) y `chat` multi-turno.
+     - Mecanismo de reintentos (`retry(2, 500)`) con conmutación transparente a modelo fallback en caso de 503/429.
+     - Método de diagnóstico en vivo: `testConnection()`.
+  3. *Copiloto IA de Producto (`ProductAiCopilotService`):*
+     - Genera dinámicamente descripciones comerciales en dos párrafos enfocadas en ergonomía, soporte anatómico, durabilidad y transpirabilidad.
+     - Genera bullets técnicos y tags SEO en JSON parseable.
+     - Conserva fallback determinístico local si la red estuviese interrumpida.
+  4. *Chat Estratégico del Dashboard Ejecutivo (`DashboardApiController@copilotChat`):*
+     - Integra memoria conversacional de los últimos mensajes (`AiCopilotChatMessage`).
+     - System prompt ejecutivo como Director de RevOps / Asesor de Negocios para *Mi Tienda Online*.
+     - Genera chips de acción interactiva contextuales (gráfica cascada EBITDA, mesa de empaque DHL, ROP, carritos abandonados).
+  5. *Monitor de Salud y Estado de IA:*
+     - Endpoint `GET /api/v1/dashboard/copilot/status` exponiendo latencia en milisegundos, estado de conexión y módulos activos.
+  6. *Frontend:*
+     - `public/js/revops-panel/app.js`: `sendCopilotChatMessage` conectado asíncronamente con token CSRF contra el endpoint del chat ejecutivo.
+     - `public/js/revops-panel/inventory-module.js`: `generateAiDescription()` conectado al workstation para auto-redacción comercial en 1 clic.
+* **Documentación & Tríptico:**
+  - Registrada la **Regla 6.62** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf`.
+* **Verificación de Calidad:**
+  - **Suite específica `GeminiAiIntegrationTest.php`: 6/6 tests pasando contra Google Gemini API real (100% verde, 30 aserciones).**
+  - **Pruebas de no-regresión: `ScrapedLifecycleAndArchivedProductsTest.php` y `ScrapedPendingItemsCurationTest.php` (9/9 tests pasando, 39 aserciones).**
+
+---
+
+### `TASK-AUTH-01`: Rediseño Minimalista Aislado de Login para el Panel RevOps & Erradicación de Chrome del Storefront
+* **Estado:** **Completada (Fullstack UI/UX End-to-End)**
+* **Módulo / Hub:** **Transversal (Autenticación Administrativa / Panel RevOps)**
+* **Prioridad:** **Alta (Seguridad y Experiencia Administrativa)**
+* **Solicitud del Usuario:**
+  > "Rediseña toda la pantalla de login para el panel. Elimina todo lo que no es necesario. solo sección de ingreso."
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Desacoplamiento Estructural Total:*
+     - Eliminada la herencia de `@extends('layouts.app')` en `resources/views/auth/user-login.blade.php`.
+     - Erradicados al 100% todos los elementos de la tienda pública (storefront navbar con Inicio, Ofertas, Novedades, Marcas, Catálogo, Guía de tallas, Carrito, WhatsApp, drawer móvil, buscador de productos y barra lateral de "Filtro rápido / Categorías, tallas y más").
+  2. *Diseño Dedicado y Ergonómico:*
+     - Vista HTML5 autónoma, centrada en viewport completo (`min-h-screen flex items-center justify-center`).
+     - Fondo deep slate/obsidian sobrio con sutiles auras indigo/sky y patrón de cuadrícula técnica.
+     - Tarjeta ejecutiva RevOps con monograma "M", badge de versión de sistema operativo, tipografía Plus Jakarta Sans y acentos limpios.
+     - Campo de correo corporativo (`name="email"`) con icono SVG de correo.
+     - Campo de contraseña (`name="password"`) con icono SVG y botón toggle para mostrar/ocultar contraseña (ojo/ojo tachado SVG).
+     - Checkbox "Mantener sesión activa" (`name="remember"`) y badge de cifrado TLS.
+     - Botón de submit "Entrar al panel" de alto contraste con flecha SVG.
+     - Alertas accesibles de error (`$errors->first()`) y estatus de sesión sin emojis informales.
+  3. *Regla UX/UI & Tríptico Documental:*
+     - Registrada formalmente la **Regla 6.76** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y `docs/PROJECT_RULES.pdf`.
+  4. *Pruebas Automatizadas:*
+     - Actualizada suite `PortalAuthorizationTest.php` con aserciones explícitas de presencia del formulario de login y aserciones estrictas `assertDontSee` para "Filtro rápido", "Guia de tallas" y "data-store-search".
+     - Suite 20/20 tests pasando (100% verde).
+
+
+
+
+
+
+---
+
+### `TASK-PUR-06`: Visualización de Ahorro Real en MOQ, Multi-Selección de Acuerdos por Proveedor en PO y Segregación RBAC en Hub 1 (Almacén vs Compras)
+* **Estado:** **Completada (Fullstack End-to-End)**
+* **Módulo / Hub:** **Hub 4 (Inventario & Compras) $\leftrightarrow$ Hub 1 (Dashboard Operativo) $\leftrightarrow$ Hub 5 (Finanzas) $\leftrightarrow$ Hub 7 (Extranet B2B)**
+* **Prioridad:** **Alta (Prioridad Inmediata)**
+* **Solicitudes del Usuario:**
+  > "Error: acabo de guardar un tabulador y no se actualiza su nivel de MOQs. Regla: la bandeja moqs, debe actualizarse simpre que se de alta nuevos tabuladores MOQs. has estado formalizando estas nuevas reglas? Actualizalas! Regla: cada nueva regla debe formalizarse en los documentos correspondientes conforme a la regla 10. Regla: estas reglas estan seccionadas conforme a modulo y ciclo al que correspondan, (un ciclo de alta de producto, un ciclo de compras, etc) la finalidad es identificar que no se ha reglado con respecto a los ciclos operativos."  
+  > "Regla: Esta sección, dentro de la bandeja de MOQs, debe mostrar el porcentaje y el dinero real ahorrado cada vez que se salta a un nuevo tabulador dentro de la orden de compra, así como el nivel de tabulación en el que se encuentra. Regla: esta lista desplegable, debe conmutar solamente a los acuerdos que corresponden al proveedor al que refiere la orden de compra, e incluso se pueden seleccionar uno o más acuerdos que se tengan pendientes por consiliar. el hub 1 todavia no esta dividida correspondientemente con las reglas de RBAC, debemos a empezar a ver las tareas del area de compras y del area de inventario/almacén. si hay dudas consultar la info de la carpeta import, sobre el tipo de notificaciones, que recibe cada rol. ya no se observa el hub 5 de finanzas. en el hub 7 no se muestra el portal extranet de proveedor, anteriormente ya habiamos acordado que ahi residiría todo lo que tenga que ver con extranet."
+* **Alcance Técnico & Vertical Slice Implementado:**
+  1. *Bandeja MOQ - Ahorro Real ($ y %) y Nivel de Tabulación Activo (Regla 12.3.6):*
+     - En `inventory-module.js` (`getPlannedOrdersBySupplier()`), se calcula el subtotal de costo base minorista/unitario (`baseCostSubtotal`), el costo tabulado según la matriz activa (`totalCost`), la diferencia en pesos (`savingsAmount = baseCost - totalCost`) y el porcentaje de ahorro conseguido (`savingsPercent`).
+     - En `inventory.blade.php`, se renderiza en la cabecera del árbol del fabricante el badge del nivel de tabulación activo (`Nivel Tabulación Activo: 100 prendas ($75.00/u)`), junto con el badge de ahorro real `-$1,000.00 MXN (12% de ahorro)` y el desglose de subtotal base vs costo tabulado.
+  2. *Selector de Acuerdos por Discrepancias en Modal de PO (Regla 12.4.4):*
+     - Filtro estricto en `getPendingAgreementsForCurrentPo()` por ID de proveedor, nombre de proveedor y marcas vinculadas, erradicando filtraciones entre proveedores distintos.
+     - Multi-selección mediante casillas de verificación (checkboxes) con funciones `toggleCreditAgreementSelection()`, `selectAllPendingAgreements()` y `clearSelectedAgreements()`.
+     - Deducción acumulada de todos los acuerdos seleccionados en el total a pagar y concatenación de folios en la Cláusula 4 del PDF formal y en la base de datos al timbrar la PO.
+  3. *Segregación RBAC en Hub 1: Almacén vs Compras & Abastecimiento B2B (Regla 12.6.1):*
+     - Selector conmutativo en la parte superior de la bandeja operativa (`operativeArea: 'almacen' | 'compras'`).
+     - Sector Almacén & Empaque Físico (Carlos Almacén): corte DHL 14:00 hrs, empaque, recepción en rampa 2, surtido de racks y manifiesto de transporte. Cero visibilidad financiera.
+     - Sector Compras & Abastecimiento B2B (Elena Compras): semáforo de lead times y cumplimiento, tareas operativas filtrables por categoría (Discrepancias Rampa, Reorden ROP, Bandeja MOQ, Acuerdos NC, Quiebre On-Demand), directorio de proveedores clave y accesos directos a Hub 4 y Hub 7.
+     - Modal dedicado de Compras (`purchases_task`) con expediente del proveedor, reporte de discrepancia emitido desde muelle de almacén, protocolo de validación y notas para la bitácora inmutable.
+  4. *Preservación de Enlace a Hub 5 Finanzas en Sidebar (Regla 12.7.1):*
+     - En `resources/views/layouts/portal-panel.blade.php`, se removió la directiva Blade `@canViewFinancials` que extirpaba el elemento `<a>` del DOM, permitiendo que la capa de control RBAC gobierne la visibilidad y accesos sin alterar la estructura de navegación.
+  5. *Unificación de Extranet de Proveedores en Hub 7 (Regla 12.7.2):*
+     - En `resources/views/portal/allies.blade.php` y `resources/views/portal/hub7-vendor-extranet.blade.php`, se implementó la barra conmutadora de 3 modalidades: Administración RevOps, Portal de Aliados Comerciales y Pantalla Extranet de Proveedores B2B (`route('portal.vendor.extranet')`).
+  6. *Gobernanza & Tríptico Documental:*
+     - Formalizadas las **Reglas 12.3.6, 12.4.4, 12.6.1, 12.7.1 y 12.7.2** en `docs/PROJECT_RULES.md`, `docs/PROJECT_RULES.html` y compilado `docs/PROJECT_RULES.pdf` mediante Chrome Headless.
+* **Verificación Automatizada:**
+  - **421/421 pruebas pasando al 100% (2,772 aserciones, 0 fallos).**

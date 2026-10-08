@@ -8,12 +8,128 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  <!-- Anti-FOUC Theme Switcher Engine (Regla 2: Dark / Light / System) -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('app_theme') || 'system';
+        var d = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (d) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch(e) {}
+    })();
+  </script>
+
   <title>{{ $currentStorefront['pageTitle'] ?? 'MARTE — Universo Masculino & Multiverso Store' }}</title>
-  <meta name="description" content="Colección exclusiva de moda y prendas contemporáneas. Envíos express a todo México. Stock físico y bajo pedido.">
+  <meta name="description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- OpenGraph / Redes Sociales Oficiales -->
+  <meta property="og:site_name" content="{{ $currentStorefront['brandName'] ?? 'Multiverso Store' }}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="{{ $currentStorefront['pageTitle'] ?? 'Multiverso Store' }}">
+  <meta property="og:description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
+  <meta property="og:url" content="{{ url()->current() }}">
+  @if(!empty($currentStorefront['logoUrl']))
+    <meta property="og:image" content="{{ $currentStorefront['logoUrl'] }}">
+  @endif
+
+  <!-- Twitter Cards Oficiales -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ $currentStorefront['pageTitle'] ?? 'Multiverso Store' }}">
+  <meta name="twitter:description" content="Colección exclusiva de moda contemporánea, lencería y prendas de confort anatómico. Envíos express a todo México.">
+  @if(!empty($currentStorefront['logoUrl']))
+    <meta name="twitter:image" content="{{ $currentStorefront['logoUrl'] }}">
+  @endif
+
+  <!-- JSON-LD Schema.org Structured Data (Organization & WebSite) -->
+  <script type="application/ld+json">
+  {!! json_encode([
+    '@context' => 'https://schema.org',
+    '@graph' => array_values(array_filter([
+      [
+        '@type' => 'Organization',
+        '@id' => url('/') . '#organization',
+        'name' => $currentStorefront['brandName'] ?? 'Multiverso Store',
+        'url' => url('/'),
+        'logo' => !empty($currentStorefront['logoUrl']) ? $currentStorefront['logoUrl'] : null,
+        'sameAs' => [],
+      ],
+      [
+        '@type' => 'WebSite',
+        '@id' => url('/') . '#website',
+        'url' => url('/'),
+        'name' => $currentStorefront['brandName'] ?? 'Multiverso Store',
+        'inLanguage' => 'es-MX',
+        'potentialAction' => [
+          '@type' => 'SearchAction',
+          'target' => url('/search') . '?q={search_term_string}',
+          'query-input' => 'required name=search_term_string',
+        ],
+      ],
+    ])),
+  ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+  </script>
+
+  @yield('seo')
+
+  @if(!empty($currentStorefront['faviconUrl']))
+    <link rel="icon" type="image/x-icon" href="{{ $currentStorefront['faviconUrl'] }}">
+    <link rel="shortcut icon" href="{{ $currentStorefront['faviconUrl'] }}">
+  @else
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+  @endif
+  @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
+    <link rel="apple-touch-icon" href="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}">
+  @endif
+
+  @if(isset($tracking) && $tracking->is_active)
+    @if(!empty($tracking->gtm_id))
+      <!-- Google Tag Manager -->
+      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','{{ $tracking->gtm_id }}');</script>
+      <!-- End Google Tag Manager -->
+    @endif
+    @if(!empty($tracking->ga4_measurement_id))
+      <!-- Google Analytics 4 -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id={{ $tracking->ga4_measurement_id }}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ $tracking->ga4_measurement_id }}');
+      </script>
+    @endif
+    @if(!empty($tracking->facebook_pixel_id))
+      <!-- Meta Pixel Code -->
+      <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '{{ $tracking->facebook_pixel_id }}');
+      fbq('track', 'PageView');
+      </script>
+      <!-- End Meta Pixel Code -->
+    @endif
+  @endif
 
   <!-- Manifest PWA Oficial -->
   <link rel="manifest" href="{{ asset('manifest.json') }}">
-  <link rel="icon" type="image/png" href="{{ asset('user-avatar.png') }}">
 
   <!-- Google Fonts: Plus Jakarta Sans & Outfit (Minimalist Luxury) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,10 +137,371 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Estilos Mobile-First & Desktop Adaptive Namespaced -->
-  <link rel="stylesheet" href="{{ asset('css/store-pwa.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/store-pwa.css') }}?v={{ file_exists(public_path('css/store-pwa.css')) ? filemtime(public_path('css/store-pwa.css')) : time() }}">
+
+  <!-- Variables CSS Semánticas de Marca y Colores de Hub 2 -->
+  <style id="hub2DynamicTheme">
+    :root {
+      @if(!empty($currentStorefront['primaryColor']))
+        --brand-primary: {{ $currentStorefront['primaryColor'] }};
+        --accent-primary: {{ $currentStorefront['primaryColor'] }};
+      @endif
+      @if(!empty($currentStorefront['secondaryColor']))
+        --brand-secondary: {{ $currentStorefront['secondaryColor'] }};
+        --accent-emerald: {{ $currentStorefront['secondaryColor'] }};
+        --accent-emerald-border: {{ $currentStorefront['secondaryColor'] }};
+      @endif
+      @if(!empty($currentStorefront['accentColor']))
+        --brand-accent: {{ $currentStorefront['accentColor'] }};
+        --accent-indigo: {{ $currentStorefront['accentColor'] }};
+        --accent-cta: {{ $currentStorefront['accentColor'] }};
+      @endif
+      @if(!empty($currentStorefront['backgroundColor']))
+        --brand-bg: {{ $currentStorefront['backgroundColor'] }};
+        --bg-primary: {{ $currentStorefront['backgroundColor'] }};
+        --bg-secondary: {{ $currentStorefront['backgroundColor'] }};
+      @endif
+      @if(!empty($currentStorefront['surfaceColor']))
+        --brand-surface: {{ $currentStorefront['surfaceColor'] }};
+        --bg-surface: {{ $currentStorefront['surfaceColor'] }};
+      @endif
+      @if(!empty($currentStorefront['textColor']))
+        --brand-text: {{ $currentStorefront['textColor'] }};
+        --text-primary: {{ $currentStorefront['textColor'] }};
+        --accent-black: {{ $currentStorefront['textColor'] }};
+      @endif
+      @if(!empty($currentStorefront['mutedTextColor']))
+        --brand-muted: {{ $currentStorefront['mutedTextColor'] }};
+        --text-secondary: {{ $currentStorefront['mutedTextColor'] }};
+        --text-muted: {{ $currentStorefront['mutedTextColor'] }};
+      @endif
+      @if(!empty($currentStorefront['borderColor']))
+        --brand-border: {{ $currentStorefront['borderColor'] }};
+        --border-color: {{ $currentStorefront['borderColor'] }};
+        --border-subtle: {{ $currentStorefront['borderColor'] }};
+        --border-medium: {{ $currentStorefront['borderColor'] }};
+      @endif
+    }
+
+    /* Mapeo Concreto y Forzado de los 8 Tokens al Storefront */
+    @if(!empty($currentStorefront['backgroundColor']))
+      body.store-body {
+        background-color: var(--brand-bg) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['surfaceColor']))
+      .product-card,
+      .sticky-header-wrapper,
+      .navbar-desktop,
+      .navbar-mobile,
+      .bottom-sheet-content,
+      .modal-card,
+      .dock-tab {
+        background-color: var(--brand-surface) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['textColor']))
+      body.store-body,
+      .product-title,
+      .nav-link-item,
+      .brand-name,
+      .dock-tab-label,
+      .store-heading,
+      .filter-group-title,
+      .universe-pill,
+      h1, h2, h3, h4 {
+        color: var(--brand-text) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['mutedTextColor']))
+      .product-category-label,
+      .brand-sub,
+      .marquee-sep,
+      .text-muted,
+      .product-desc,
+      .product-sku-code {
+        color: var(--brand-muted) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['borderColor']))
+      .product-card,
+      .sticky-header-wrapper,
+      .size-pill-btn,
+      .btn-pill-action,
+      .navbar-desktop,
+      .universe-pill,
+      .minimal-marquee-bar,
+      .brand-border {
+        border-color: var(--brand-border) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['secondaryColor']))
+      .product-stock-badge,
+      .product-stock-badge.ready {
+        color: var(--brand-secondary) !important;
+        border-color: var(--brand-secondary) !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+      }
+    @endif
+
+    @if(!empty($currentStorefront['accentColor']))
+      .product-price,
+      .price-highlight,
+      .accent-price {
+        color: var(--brand-accent) !important;
+      }
+      .btn-add-cart,
+      .btn-primary,
+      .btn-checkout,
+      .hero-cta-btn,
+      .size-pill-btn.selected,
+      .universe-tab-btn.active {
+        background-color: var(--brand-accent) !important;
+        border-color: var(--brand-accent) !important;
+        color: #ffffff !important;
+      }
+      .btn-add-cart:hover,
+      .hero-cta-btn:hover {
+        filter: brightness(0.9);
+      }
+      .nav-link-item.active::after {
+        background-color: var(--brand-accent) !important;
+      }
+      .nav-link-item:hover,
+      .nav-link-item.active {
+        color: var(--brand-accent) !important;
+      }
+    @endif
+
+    /* Corrección Ergonómica de Logo y Encabezado */
+    .brand-logo-box {
+      width: auto !important;
+      height: auto !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .brand-logo-box img {
+      max-height: 38px !important;
+      width: auto !important;
+      max-width: 170px !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+    .nav-brand-group {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      text-decoration: none !important;
+    }
+    .brand-titles {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+    }
+
+    /* Hero Full Width & Edge-to-Edge Bleed (TASK-H2-HERO-FULLWIDTH) */
+    html, body.store-body {
+      overflow-x: hidden !important;
+    }
+    .hero-editorial-section.hero-full-width {
+      width: 100vw !important;
+      position: relative !important;
+      left: 50% !important;
+      right: 50% !important;
+      margin-left: -50vw !important;
+      margin-right: -50vw !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    .hero-editorial-section.hero-full-width .hero-banner-card {
+      border-radius: 0 !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+      padding-left: max(20px, calc((100vw - 1280px) / 2 + 24px)) !important;
+      padding-right: max(20px, calc((100vw - 1280px) / 2 + 24px)) !important;
+    }
+    .hero-editorial-section.hero-full-width .hero-custom-container {
+      width: 100% !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+    }
+    .hero-banner-card .hero-title {
+      color: #ffffff !important;
+    }
+    .hero-banner-card .hero-desc {
+      color: #a1a1aa !important;
+    }
+    .hero-banner-card .hero-tag-pill {
+      color: #ffffff !important;
+    }
+
+    /* Navbar Sticky Visible Todo el Tiempo (Regla 1) */
+    .sticky-header-wrapper {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 999 !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+
+    /* Barra Móvil de Páginas Institucionales Sincronizadas */
+    .mobile-institutional-bar {
+      display: none;
+      background: var(--brand-surface, #ffffff);
+      border-bottom: 1px solid var(--border-subtle, #e4e4e7);
+      padding: 6px 0;
+    }
+    @media (max-width: 768px) {
+      .mobile-institutional-bar {
+        display: block;
+      }
+    }
+    .mobile-institutional-scroll {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 0 16px;
+    }
+    .mobile-institutional-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .mobile-inst-link {
+      font-family: var(--font-heading, sans-serif);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #71717a);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .mobile-inst-link:hover, .mobile-inst-link:active {
+      color: var(--brand-accent, #4f46e5);
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    /* REGLAS 2 & 3: Acordeones, Árbol Taxonómico y Checkboxes Facetados */
+    .filter-accordion-block {
+      border-bottom: 1px solid var(--border-subtle, #e4e4e7);
+      padding: 10px 0;
+    }
+    .filter-accordion-block:last-child {
+      border-bottom: none;
+    }
+    .filter-accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 6px 0;
+      cursor: pointer;
+      font-family: var(--font-heading);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--text-primary, #09090b);
+      text-transform: uppercase;
+    }
+    .filter-accordion-header .accordion-chevron {
+      transition: transform 0.25s ease;
+      stroke: var(--text-muted, #71717a);
+    }
+    .filter-accordion-block.is-collapsed .filter-accordion-content {
+      display: none;
+    }
+    .filter-accordion-block.is-collapsed .accordion-chevron {
+      transform: rotate(-90deg);
+    }
+    .filter-accordion-content {
+      padding-top: 8px;
+      padding-bottom: 4px;
+    }
+    .filter-tree-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .filter-tree-node {
+      display: flex;
+      flex-direction: column;
+    }
+    .filter-tree-children {
+      padding-left: 18px;
+      margin-top: 3px;
+      margin-bottom: 5px;
+      border-left: 2px solid var(--border-subtle, #e4e4e7);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .filter-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-primary, #18181b);
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+    .filter-checkbox-label:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .filter-facet-checkbox {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--brand-primary, #09090b);
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+    .filter-checkbox-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    @if(!empty($currentStorefront['customCss']))
+      {!! $currentStorefront['customCss'] !!}
+    @endif
+  </style>
   @stack('styles')
 </head>
 <body class="store-body">
+  @if(isset($tracking) && $tracking->is_active && !empty($tracking->gtm_id))
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $tracking->gtm_id }}"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+  @endif
 
   <div class="sticky-header-wrapper">
     <!-- Banner de Bienvenida de Aliados / UTM Atribución (Hub 7 TASK-STR-04) -->
@@ -42,28 +519,30 @@
       </div>
     </div>
 
-    <!-- Marquesina Superior de Avisos Minimalista (Courier Exclusivo, Cero Metro) -->
-    <div class="minimal-marquee-bar" aria-label="Avisos importantes de envío y pago">
-      <div class="marquee-track">
-        @if(!empty($announcements))
-          @foreach($announcements as $announcement)
-            @if(is_array($announcement) && ($announcement['active'] ?? true))
-              <span>{{ strtoupper($announcement['text'] ?? '') }}</span>
+    <!-- Marquesina Superior de Avisos Dinámica (Hub 2) -->
+    @php
+      $activeAnnouncements = collect($announcements ?? [])
+        ->filter(fn($item) => is_array($item) && ($item['active'] ?? true) && !empty($item['text']))
+        ->values();
+    @endphp
+    @if($activeAnnouncements->isNotEmpty())
+      <div class="minimal-marquee-bar" aria-label="Avisos importantes de la tienda">
+        <div class="marquee-track">
+          @for($i = 0; $i < 2; $i++)
+            @foreach($activeAnnouncements as $announcement)
+              @if(!empty($announcement['url']))
+                <a href="{{ $announcement['url'] }}" style="color: inherit; text-decoration: none;">
+                  <span>{{ strtoupper($announcement['text']) }}</span>
+                </a>
+              @else
+                <span>{{ strtoupper($announcement['text']) }}</span>
+              @endif
               <span class="marquee-sep">/</span>
-            @endif
-          @endforeach
-        @endif
-        <span>ENVÍOS EXPRESS A TODO MÉXICO</span>
-        <span class="marquee-sep">/</span>
-        <span>TRANSFERENCIAS SPEI SIN COMISIÓN</span>
-        <span class="marquee-sep">/</span>
-        <span>STOCK FÍSICO CON ENTREGA INMEDIATA</span>
-        <span class="marquee-sep">/</span>
-        <span>ENVÍO GRATIS EN COMPRAS MAYORES A ${{ number_format((float)($shippingRule['freeShippingThreshold'] ?? 999), 0) }}</span>
-        <span class="marquee-sep">/</span>
-        <span>ATENCIÓN PERSONALIZADA POR WHATSAPP</span>
+            @endforeach
+          @endfor
+        </div>
       </div>
-    </div>
+    @endif
 
     <!-- 1. Header de Escritorio (Estilo DEV/pop) -->
     <header class="navbar-desktop">
@@ -71,79 +550,96 @@
         <!-- Logo de Marca Adaptativo por Universo -->
         <a href="{{ route('store.home') }}" class="nav-brand-group">
           <div class="brand-logo-box">
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            @if(!empty($currentStorefront['logoUrl']))
+              <img src="{{ $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
+            @else
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            @endif
           </div>
           <div class="brand-titles">
-            <span class="brand-name" id="desktopBrandName">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
-            <span class="brand-sub" id="desktopBrandSub">{{ $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
+            @if(empty($currentStorefront['logoUrl']))
+              <span class="brand-name" id="desktopBrandName">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
+            @endif
+            <span class="brand-sub" id="desktopBrandSub">{{ $currentStorefront['kicker'] ?? $currentStorefront['subTitle'] ?? 'UNIVERSO MASCULINO' }}</span>
           </div>
         </a>
 
-        <!-- Enlaces Centrales -->
+        <!-- Enlaces Oficiales Canónicos (Regla 4.13: Inicio, Explorar, Catálogo, Carrito, Cuenta) -->
         <nav class="nav-links-desktop">
-          <a href="#" class="nav-link-item active" data-action="switch-dock-tab" data-dock-tab="home">INICIO</a>
-          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">CATÁLOGO</a>
-          <a href="#" class="nav-link-item" data-action="open-filter-drawer" style="color: #dc2626;">OFERTAS</a>
-          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">NOVEDADES</a>
+          <a href="{{ route('store.home', ['tab' => 'home']) }}" class="nav-link-item active" data-action="switch-dock-tab" data-dock-tab="home">INICIO</a>
+          <a href="{{ route('store.home', ['tab' => 'explore']) }}" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="explore">EXPLORAR</a>
+          <a href="{{ route('store.home', ['tab' => 'catalog']) }}" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="catalog">CATÁLOGO</a>
+          <a href="#" class="nav-link-item" data-action="open-cart">
+            <span>CARRITO</span>
+            <span id="desktopNavCartCount" class="cart-count-badge" style="display:inline-flex;">0</span>
+          </a>
+          <a href="#" class="nav-link-item" data-action="switch-dock-tab" data-dock-tab="account">CUENTA</a>
         </nav>
 
-        <!-- Acciones Desktop -->
+        <!-- Botones de Acción Desktop: Búsqueda, Wishlist y Tema (Reglas 1, 2 y 5) -->
         <div class="nav-actions-desktop">
-          <button type="button" class="btn-pill-action" data-action="open-size-guide" title="Guía de Tallas Torzo">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="10" rx="2"></rect><line x1="6" y1="7" x2="6" y2="11"></line><line x1="10" y1="7" x2="10" y2="12"></line><line x1="14" y1="7" x2="14" y2="11"></line><line x1="18" y1="7" x2="18" y2="12"></line></svg>
-            <span>GUÍA DE TALLAS</span>
+          <button type="button" class="btn-pill-action" data-action="toggle-search" title="Buscar prendas" aria-label="Buscar prendas">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>BUSCAR</span>
           </button>
-
-          <button type="button" class="btn-pill-action" data-action="open-wishlist" title="Ver Lista de Deseos / Favoritos">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <button type="button" class="btn-pill-action" data-action="open-wishlist" title="Mis deseos" aria-label="Ver deseos">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             <span>DESEOS</span>
-            <span id="desktopWishlistCount" class="cart-count-badge">0</span>
+            <span id="desktopWishlistCount" class="cart-count-badge" style="display:none;">0</span>
           </button>
-
-          <button type="button" class="btn-pill-action" data-action="open-cart" title="Ver Carrito">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-            <span>CARRITO</span>
-            <span id="desktopCartCount" class="cart-count-badge">0</span>
+          <button type="button" class="btn-pill-action" data-action="toggle-app-theme-quick" title="Alternar Modo Claro / Oscuro" aria-label="Cambiar tema">
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span>TEMA</span>
           </button>
-
-          <a href="{{ route('portal.dashboard') }}" class="btn-pill-action" style="background: #09090b; color: #ffffff; border-color: #09090b;" title="Ir al Panel RevOps">
-            <span>RevOps Admin</span>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
         </div>
       </div>
     </header>
 
     <!-- 2. Header Móvil App (Compacto & Táctil) -->
     <header class="navbar-mobile">
-      <button type="button" class="mobile-icon-btn" data-action="open-filter-drawer" aria-label="Abrir filtros">
+      <button type="button" class="mobile-icon-btn" id="mobileFilterToggleBtn" data-action="open-filter-drawer" aria-label="Abrir filtros" style="display: none;">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
       </button>
 
+      <!-- Logo de Marca (Sin Slogan ni Subtítulo según Regla 2) -->
       <a href="{{ route('store.home') }}" class="nav-brand-group">
-        <div class="brand-logo-box" style="width: 28px; height: 28px;">
-          <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#050505"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="brand-logo-box">
+          @if(!empty($currentStorefront['logoMobileUrl']) || !empty($currentStorefront['logoUrl']))
+            <img src="{{ $currentStorefront['logoMobileUrl'] ?? $currentStorefront['logoUrl'] }}" alt="{{ $currentStorefront['brandName'] ?? 'Logo' }}">
+          @else
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="var(--text-primary, #050505)"/><path d="M8 22V10L16 16L24 10V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          @endif
         </div>
-        <span class="brand-name" id="mobileBrandName" style="font-size: 0.95rem;">{{ $currentStorefront['brandName'] ?? 'MARTE' }}</span>
       </a>
 
+      <!-- Iconos de Acción Móvil: Búsqueda, Wishlist y Tema (Reglas 1, 2 y 5) -->
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button type="button" class="mobile-icon-btn" data-action="open-wishlist" aria-label="Ver deseos">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <button type="button" class="mobile-icon-btn" data-action="toggle-app-theme-quick" aria-label="Cambiar tema" title="Modo Claro / Oscuro">
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button type="button" class="mobile-icon-btn" data-action="open-cart" aria-label="Ver carrito">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <button type="button" class="mobile-icon-btn" data-action="toggle-search" aria-label="Buscar prendas">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <button type="button" class="mobile-icon-btn" data-action="open-wishlist" aria-label="Ver deseos" style="position: relative;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span id="mobileWishlistCount" class="cart-count-badge" style="position: absolute; top: 6px; right: 4px; font-size: 0.6rem; min-width: 14px; padding: 1px 4px; display: none;">0</span>
         </button>
       </div>
     </header>
 
-    <!-- 3. Selector de Universos Multiverso (Barra Superior Táctil) -->
-    <div class="universe-selector-bar">
-      <div class="container universe-scroll-container">
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'marte' ? 'active' : '' }}" data-action="switch-universe" data-universe="marte">MARTE // MASCULINO</button>
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'venus' ? 'active' : '' }}" data-action="switch-universe" data-universe="venus">VENUS // LENCERÍA & BEAUTY</button>
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'tiresias' ? 'active' : '' }}" data-action="switch-universe" data-universe="tiresias">TIRESIAS // AFIRMATIVO</button>
-        <button type="button" class="universe-tab-btn {{ ($activeUniverse ?? 'marte') === 'terra' ? 'active' : '' }}" data-action="switch-universe" data-universe="terra">TERRA // GLOBAL</button>
+    <!-- Barra Desplegable de Búsqueda Conmutable (Regla 5) -->
+    <div id="storeSearchBar" class="store-search-bar" style="display: none; padding: 10px 16px; background: var(--bg-primary, #ffffff); border-bottom: 1px solid var(--border-subtle, #e4e4e7); transition: all 0.2s ease;">
+      <div class="container" style="display: flex; align-items: center; gap: 8px;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: var(--text-muted, #71717a);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="storeLiveSearchInput" placeholder="Buscar prendas, estilos, categorías..." style="flex: 1; border: none; outline: none; background: transparent; font-family: var(--font-heading, sans-serif); font-size: 0.85rem; padding: 8px 4px; color: var(--text-primary, #09090b);" autocomplete="off">
+        <button type="button" id="clearSearchBtn" data-action="clear-search" style="background: none; border: none; cursor: pointer; color: var(--text-muted, #71717a); padding: 4px; display: none;" aria-label="Limpiar búsqueda">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <button type="button" data-action="toggle-search" style="background: none; border: none; cursor: pointer; color: var(--text-primary, #09090b); padding: 4px; font-size: 0.75rem; font-weight: 700; font-family: var(--font-heading, sans-serif);" aria-label="Cerrar búsqueda">
+          CERRAR
+        </button>
       </div>
     </div>
   </div>
@@ -160,11 +656,23 @@
         <div>
           <div class="footer-brand-name">{{ $currentStorefront['brandName'] ?? 'MARTE' }} // Contemporary fashion studio</div>
           <p style="line-height: 1.6; max-width: 420px; margin-bottom: 16px;">
-            Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.
+            {{ $footerConfig['brand_summary'] ?? 'Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.' }}
           </p>
           <div style="font-size: 0.75rem; color: #71717a;">
-            Escribenos por WhatsApp: <strong>+52 55 7510 2015</strong>
+            Escribenos por WhatsApp: <strong>{{ $footerConfig['whatsapp_contact'] ?? '+52 55 7510 2015' }}</strong>
+            @if(!empty($footerConfig['support_email']))
+              <div style="margin-top: 4px;">Email: <strong>{{ $footerConfig['support_email'] }}</strong></div>
+            @endif
           </div>
+        </div>
+
+        <div>
+          <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Pagos y envios</strong>
+          <ul class="footer-link-list">
+            <li><span>{{ $footerConfig['shipping_badge_text'] ?? 'Paqueteria nacional express ($149 / Gratis +$999)' }}</span></li>
+            <li><span>{{ $footerConfig['packaging_badge_text'] ?? 'Entrega personal discreta y segura' }}</span></li>
+            <li><span>{{ $footerConfig['payments_badge_text'] ?? 'Pagos 100% seguros con Tarjeta & OXXO Pay' }}</span></li>
+          </ul>
         </div>
 
         <div>
@@ -179,15 +687,21 @@
         </div>
 
         <div>
-          <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Pagos y envios</strong>
+          <strong style="display: block; color: #ffffff; margin-bottom: 12px; font-family: var(--font-heading); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Información &amp; Legal</strong>
           <ul class="footer-link-list">
-            <li><span>Paqueteria nacional</span></li>
-            <li><span>Entrega personal</span></li>
-            <li><span>BBVA CLABE: 012180004708283787</span></li>
-            <li><span>Guía de Tallas Anatómicas</span></li>
+            @if(!empty($footerPages) && $footerPages->isNotEmpty())
+              @foreach($footerPages as $fp)
+                <li><a href="{{ url('/pagina/' . $fp->slug) }}" style="color: inherit; text-decoration: none;">{{ $fp->title }}</a></li>
+              @endforeach
+            @else
+              <li><a href="/privacidad" style="color: inherit; text-decoration: none;">Aviso de Privacidad</a></li>
+              <li><a href="/cookies" style="color: inherit; text-decoration: none;">Política de Cookies</a></li>
+              <li><a href="#" data-action="open-size-guide" style="color: inherit; text-decoration: none;">Guía de Tallas Anatómicas</a></li>
+            @endif
           </ul>
 
           <!-- Acceso al Panel RevOps -->
+          @if(filter_var($footerConfig['show_revops_link'] ?? true, FILTER_VALIDATE_BOOLEAN))
           <div class="footer-revops-card">
             <div>
               <span style="font-size: 0.7rem; color: #d4d4d8; display: block; font-weight: 700;">Consola RevOps</span>
@@ -198,24 +712,32 @@
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
+          @endif
         </div>
       </div>
 
       <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap-2; font-size: 0.7rem; color: #71717a;">
-        <span>(C) 2026 MULTIVERSO STORE. Todos los derechos reservados. <a href="/privacidad" style="color: inherit; text-decoration: underline; margin-left: 8px;">Aviso de Privacidad</a> <a href="/cookies" style="color: inherit; text-decoration: underline; margin-left: 8px;">Política de Cookies</a></span>
-        <span>Política Estricta Cero Emojis // Vectorial Only</span>
+        <span>{{ $footerConfig['copyright_text'] ?? '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.' }} <a href="/privacidad" style="color: inherit; text-decoration: underline; margin-left: 8px;">Aviso de Privacidad</a> <a href="/cookies" style="color: inherit; text-decoration: underline; margin-left: 8px;">Política de Cookies</a></span>
+        @if(filter_var($footerConfig['show_zero_emojis_badge'] ?? true, FILTER_VALIDATE_BOOLEAN))
+          <span>Política Estricta Cero Emojis // Vectorial Only</span>
+        @endif
       </div>
     </div>
   </footer>
 
   <!-- ============================================================================
-       BOTTOM NAVIGATION DOCK (EXACTAMENTE 4 BOTONES - MÓVIL ONLY)
-       1. Inicio | 2. Catálogo | 3. Carrito | 4. Cuenta
+       BOTTOM NAVIGATION DOCK (EXACTAMENTE 5 BOTONES - MÓVIL ONLY)
+       1. Inicio | 2. Explorar | 3. Catálogo | 4. Carrito | 5. Cuenta
        ============================================================================ -->
   <nav class="bottom-app-dock" aria-label="Navegación principal de la aplicación">
     <button type="button" class="dock-tab-btn active" data-action="switch-dock-tab" data-dock-tab="home">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       <span class="dock-tab-label">Inicio</span>
+    </button>
+
+    <button type="button" class="dock-tab-btn" data-action="switch-dock-tab" data-dock-tab="explore">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+      <span class="dock-tab-label">Explorar</span>
     </button>
 
     <button type="button" class="dock-tab-btn" data-action="switch-dock-tab" data-dock-tab="catalog">
@@ -241,8 +763,8 @@
   <!-- Backdrop Compartido -->
   <div id="drawerBackdrop" class="drawer-backdrop" data-mobile-nav-backdrop></div>
 
-  <!-- A. Drawer de Filtros con Switcher Tipo ZARA -->
-  <aside id="filterDrawer" class="bottom-sheet-drawer" data-mobile-nav-drawer aria-label="Filtros del catálogo">
+  <!-- A. Drawer de Filtros Lateral Izquierdo con Switcher Tipo ZARA (Regla 1) -->
+  <aside id="filterDrawer" class="bottom-sheet-drawer drawer-left" data-mobile-nav-drawer aria-label="Filtros del catálogo">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header">
       <span class="sheet-title">Filtros & Universos</span>
@@ -268,38 +790,186 @@
         </div>
       </div>
 
-      <!-- Filtro por Categoría Oficial Torzo -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Categorías de Prenda</div>
-        <div class="filter-category-pills">
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="jocks">Jockstraps ($250)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="boxers">Boxers ($280)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tangas">Tangas ($180)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="bikinis">Bikinis ($220)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="tanktops">Tank Tops ($320)</button>
-          <button type="button" class="category-filter-pill" data-action="filter-category" data-category="swimwear">Trajes de Baño ($460)</button>
+      <!-- 1. Categorías & Familias en Formato Árbol Jerárquico (Reglas 1 & 3) -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar categorías">
+          <span>Categorías &amp; Familias</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-tree-container">
+            @if(!empty($categoriesTree) && $categoriesTree->isNotEmpty())
+              @foreach($categoriesTree as $pCat)
+                <div class="filter-tree-node filter-tree-parent">
+                  <label class="filter-checkbox-label">
+                    <input type="checkbox" name="filter_category" value="{{ $pCat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $pCat->slug }}">
+                    <strong style="font-size: 0.8rem;">{{ $pCat->name }}</strong>
+                  </label>
+                  @if($pCat->children && $pCat->children->isNotEmpty())
+                    <div class="filter-tree-children">
+                      @foreach($pCat->children as $cCat)
+                        <div class="filter-tree-node filter-tree-child">
+                          <label class="filter-checkbox-label">
+                            <input type="checkbox" name="filter_category" value="{{ $cCat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cCat->slug }}">
+                            <span>{{ $cCat->name }}</span>
+                          </label>
+                        </div>
+                      @endforeach
+                    </div>
+                  @endif
+                </div>
+              @endforeach
+            @elseif(!empty($categories) && $categories->isNotEmpty())
+              @foreach($categories as $cat)
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" name="filter_category" value="{{ $cat->slug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cat->slug }}">
+                  <span>{{ $cat->name }}</span>
+                </label>
+              @endforeach
+            @else
+              @foreach(['jocks' => 'Jockstraps', 'boxers' => 'Boxers', 'tangas' => 'Tangas', 'bikinis' => 'Bikinis', 'tanktops' => 'Tank Tops', 'swimwear' => 'Trajes de Baño'] as $cSlug => $cName)
+                <label class="filter-checkbox-label">
+                  <input type="checkbox" name="filter_category" value="{{ $cSlug }}" class="filter-facet-checkbox filter-cat-checkbox" data-action="filter-facet" data-facet-type="category" data-val="{{ $cSlug }}">
+                  <span>{{ $cName }}</span>
+                </label>
+              @endforeach
+            @endif
+          </div>
         </div>
       </div>
 
-      <!-- Guía de Tallas Rápida -->
-      <div class="filter-group-block">
-        <div class="filter-group-title">Curva de Tallas Anatómicas</div>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">CH</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">28-30</span>
+      <!-- 2. Proveedores & Marcas (Regla 2: los nombres de los proveedores forman parte de los filtros) -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar proveedores">
+          <span>Proveedores &amp; Marcas</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach(($suppliers ?? ['Torzo B2B', 'ModaIntima Textil MX', 'Silk & Cotton Iberia SL', 'Lingerie Drop Global', 'Seamless Tech Apparel']) as $sup)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_supplier" value="{{ $sup }}" class="filter-facet-checkbox filter-supplier-checkbox" data-action="filter-facet" data-facet-type="supplier" data-val="{{ $sup }}">
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $sup }}</span>
+              </label>
+            @endforeach
           </div>
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">M</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">31-32</span>
+        </div>
+      </div>
+
+      <!-- 3. Curva de Tallas Anatómicas -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar tallas">
+          <span>Curva de Tallas Anatómicas</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+            @foreach([
+              'CH' => '28-30',
+              'M' => '31-32',
+              'G' => '33-34',
+              'XG' => '35-36',
+              '2XL' => '38-40',
+              '3XL' => '42-44'
+            ] as $talla => $medida)
+              <label class="filter-checkbox-label" style="border: 1px solid var(--border-subtle, #e4e4e7); padding: 5px 8px; border-radius: 6px;">
+                <input type="checkbox" name="filter_size" value="{{ $talla }}" class="filter-facet-checkbox filter-size-checkbox" data-action="filter-facet" data-facet-type="size" data-val="{{ $talla }}">
+                <span style="display: flex; justify-content: space-between; width: 100%;">
+                  <strong>{{ $talla }}</strong>
+                  <span style="font-size: 0.7rem; color: var(--text-muted);">{{ $medida }}</span>
+                </span>
+              </label>
+            @endforeach
           </div>
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">G</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">33-34</span>
+        </div>
+      </div>
+
+      <!-- 4. Telas & Fibras Textiles -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar telas">
+          <span>Telas &amp; Fibras Textiles</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach([
+              'algodon' => 'Algodón Pima',
+              'modal' => 'Modal Seamless',
+              'spandex' => 'Elastano / Spandex',
+              'malla' => 'Malla / Mesh',
+              'microfibra' => 'Microfibra Velvet',
+              'bambu' => 'Bambú Eco Air',
+              'seda' => 'Seda / Satín Premium'
+            ] as $fKey => $fLabel)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_fabric" value="{{ $fKey }}" class="filter-facet-checkbox filter-fabric-checkbox" data-action="filter-facet" data-facet-type="fabric" data-val="{{ $fKey }}">
+                <span>{{ $fLabel }}</span>
+              </label>
+            @endforeach
           </div>
-          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
-            <strong style="display: block; font-family: var(--font-heading); font-size: 0.8rem;">XG</strong>
-            <span style="font-size: 0.65rem; color: var(--text-muted);">35-36</span>
+        </div>
+      </div>
+
+      <!-- 5. Colores & Tornasoles Iridiscentes -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar colores">
+          <span>Colores &amp; Tornasoles</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach([
+              ['key' => 'negro', 'name' => 'Negro', 'hex' => '#0f172a'],
+              ['key' => 'blanco', 'name' => 'Blanco', 'hex' => '#f8fafc', 'border' => true],
+              ['key' => 'gris', 'name' => 'Gris', 'hex' => '#475569'],
+              ['key' => 'azul', 'name' => 'Azul', 'hex' => '#1e3a8a'],
+              ['key' => 'rojo', 'name' => 'Rojo', 'hex' => '#881337'],
+              ['key' => 'verde', 'name' => 'Verde', 'hex' => '#365314'],
+              ['key' => 'galaxia', 'name' => 'Galaxia Holo', 'grad' => 'linear-gradient(135deg, #6366f1, #ec4899, #f59e0b)'],
+              ['key' => 'aurora', 'name' => 'Aurora Boreal', 'grad' => 'linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)'],
+            ] as $cItem)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_color" value="{{ $cItem['key'] }}" class="filter-facet-checkbox filter-color-checkbox" data-action="filter-facet" data-facet-type="color" data-val="{{ $cItem['key'] }}">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: {{ $cItem['grad'] ?? $cItem['hex'] }}; border: 1px solid {{ !empty($cItem['border']) ? '#cbd5e1' : 'rgba(0,0,0,0.15)' }}; display: inline-block;"></span>
+                <span>{{ $cItem['name'] }}</span>
+              </label>
+            @endforeach
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Volúmenes de Perfumería -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar volúmenes">
+          <span>Volúmenes de Perfumería</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach(['30ml' => '30ml Travel', '50ml' => '50ml EdP', '100ml' => '100ml Standard', '200ml' => '200ml Refill'] as $vKey => $vLabel)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_volume" value="{{ $vKey }}" class="filter-facet-checkbox filter-volume-checkbox" data-action="filter-facet" data-facet-type="volume" data-val="{{ $vKey }}">
+                <span>{{ $vLabel }}</span>
+              </label>
+            @endforeach
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Tonos Cosméticos & Shading -->
+      <div class="filter-accordion-block">
+        <button type="button" class="filter-accordion-toggle filter-accordion-header" onclick="this.closest('.filter-accordion-block').classList.toggle('is-collapsed')" aria-label="Alternar tonos">
+          <span>Tonos Cosméticos</span>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="filter-accordion-content">
+          <div class="filter-checkbox-grid">
+            @foreach(['claro' => 'Tono 01 Claro', 'medio' => 'Tono 02 Medio', 'bronce' => 'Tono 03 Bronce', 'profundo' => 'Tono 04 Profundo'] as $tKey => $tLabel)
+              <label class="filter-checkbox-label">
+                <input type="checkbox" name="filter_shade" value="{{ $tKey }}" class="filter-facet-checkbox filter-shade-checkbox" data-action="filter-facet" data-facet-type="shade" data-val="{{ $tKey }}">
+                <span>{{ $tLabel }}</span>
+              </label>
+            @endforeach
           </div>
         </div>
       </div>
@@ -326,10 +996,7 @@
     </div>
 
     <div class="sheet-footer-actions" id="cartFooterActions" style="flex-direction: column; gap: 8px;">
-      <!-- Caja de Cupón de Descuento (Hub 7 TASK-STR-04) -->
-      <div class="cart-coupon-box" id="cartCouponBox">
-        <!-- Inyectado dinámicamente desde store-pwa.js -->
-      </div>
+      <!-- Regla 8: El formulario de cupón reside únicamente en el Paso 1 de Checkout -->
 
       <div style="display: flex; justify-content: space-between; width: 100%; font-family: var(--font-heading); font-size: 0.95rem; font-weight: 800;">
         <span>Subtotal</span>
@@ -414,9 +1081,15 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         <span class="sheet-title">Mi Cuenta // Portal del Comprador</span>
       </div>
-      <button type="button" class="sheet-close-btn" data-action="close-drawer" aria-label="Cerrar cuenta">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="quick-theme-toggle-btn" data-action="toggle-app-theme-quick" title="Alternar Modo Oscuro / Claro" aria-label="Cambiar tema">
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button type="button" class="sheet-close-btn" data-action="close-drawer" aria-label="Cerrar cuenta">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
     </div>
 
     <div class="sheet-content-scroll" id="accountSheetScroll">
@@ -425,52 +1098,206 @@
         <!-- Renderizado dinámico desde store-pwa.js -->
       </div>
 
-      <!-- Barra de Pestañas Táctiles del Portal -->
+      <!-- Barra de Pestañas Táctiles del Portal (5 Pestañas Oficiales en Grid sin Scroll) -->
       <div class="account-tabs-nav" id="accountTabsNav">
         <button type="button" class="account-tab-btn active" data-action="switch-account-tab" data-tab="orders">
-          <span>Mis Pedidos</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span class="account-tab-text">Pedidos</span>
           <span id="accountOrdersBadge" class="account-tab-badge">0</span>
         </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="anatomy">
-          <span>Perfil Anatómico</span>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="account">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="account-tab-text">Cuenta</span>
         </button>
-        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="address">
-          <span>Dirección</span>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="discounts">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <path d="M7 15h.01M17 15h.01"></path>
+          </svg>
+          <span class="account-tab-text">Descuentos</span>
         </button>
         <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="subscription">
-          <span>Club MRR</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          </svg>
+          <span class="account-tab-text">Club MRR</span>
+        </button>
+        <button type="button" class="account-tab-btn" data-action="switch-account-tab" data-tab="settings">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="account-tab-text">Ajustes</span>
         </button>
       </div>
 
       <!-- Paneles de Contenido por Pestaña -->
-      <!-- Pestaña 1: Mis Pedidos & Rastreo -->
+
+      <!-- Pestaña 1: Mis Pedidos & Rastreo + Wishlist -->
       <div id="accountTabOrders" class="account-tab-panel active">
-        <div class="account-lookup-box">
-          <span class="account-section-tag">Rastreo de Pedido por Folio</span>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="accountLookupFolioInput" placeholder="Ej: #MIX-2026-1048 o #ORD-2026-..." class="account-input">
-            <button type="button" class="btn-account-action" data-action="account-lookup-folio">Buscar</button>
-          </div>
+        <!-- Vista de Detalle de Pedido (oculta inicialmente, se abre al pulsar un pedido) -->
+        <div id="orderDetailViewContainer" style="display: none; margin-bottom: 20px;">
+          <!-- Renderizado dinámico desde store-pwa.js -->
         </div>
 
-        <div id="accountLookupResult" style="display: none; margin-bottom: 16px;"></div>
+        <div id="orderListViewContainer">
+          <div id="accountOrdersList">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
 
-        <div id="accountOrdersList">
-          <!-- Renderizado dinámico desde store-pwa.js -->
+          <!-- Sección Integrada de Wishlist en Mis Pedidos -->
+          <div class="account-wishlist-integrated" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--border-medium);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none" style="color: #e11d48;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <h4 class="account-subheading" style="margin: 0;">Mis Deseos &amp; Favoritos</h4>
+              </div>
+              <span id="accountWishlistCountBadge" style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted);">0 prendas</span>
+            </div>
+            <div id="accountWishlistItemsList" class="account-wishlist-grid">
+              <!-- Renderizado dinámico desde store-pwa.js -->
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Pestaña 2: Perfil Anatómico -->
-      <div id="accountTabAnatomy" class="account-tab-panel" style="display: none;">
-        <div class="anatomy-panel-content">
+      <!-- Pestaña 2: Cuenta (Datos Personales, Google, Direcciones Casa/Trabajo, Perfil Anatómico) -->
+      <div id="accountTabAccount" class="account-tab-panel" style="display: none;">
+        <!-- Sección 1: Datos Personales & Google Link -->
+        <div class="account-section-card" style="margin-bottom: 18px;">
+          <div class="account-section-header" style="margin-bottom: 12px;">
+            <h4 class="account-subheading">Datos del Perfil</h4>
+            <p class="account-subheading-desc">Administra tu información de contacto y métodos de acceso.</p>
+          </div>
+
+          <div class="acc-form-group">
+            <label class="checkout-label">Nombre Completo</label>
+            <input type="text" id="accProfileName" class="checkout-input" placeholder="Tu nombre">
+          </div>
+          <div class="checkout-form-row">
+            <div class="checkout-form-group" style="flex: 1;">
+              <label class="checkout-label">Correo Electrónico</label>
+              <input type="email" id="accProfileEmail" class="checkout-input" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="checkout-form-group" style="flex: 1;">
+              <label class="checkout-label">Teléfono Móvil</label>
+              <input type="tel" id="accProfilePhone" class="checkout-input font-mono" placeholder="55 1234 5678">
+            </div>
+          </div>
+
+          <!-- Vinculación con Cuenta de Google -->
+          <div id="accGoogleLinkCard" style="background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: 8px; padding: 12px; margin: 12px 0;">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <!-- Preferencia de Empaque Discreto 100% Anónimo (Recomendación 1) -->
+          <div id="accDiscretePackagingContainer" style="margin: 12px 0;">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <button type="button" class="btn-account-primary" data-action="save-profile-info" style="width: 100%; margin-top: 6px;">
+            <span>GUARDAR INFORMACIÓN</span>
+          </button>
+        </div>
+
+        <!-- Libreta de Direcciones (Casa / Trabajo) -->
+        <div class="account-section-card" style="margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <h4 class="account-subheading">Libreta de Direcciones</h4>
+              <p class="account-subheading-desc">Guarda direcciones para casa y trabajo con prellenado rápido.</p>
+            </div>
+            <button type="button" class="btn-account-action" data-action="show-add-address-form" style="font-size: 0.72rem; padding: 4px 10px; white-space: nowrap;">
+              + Nueva
+            </button>
+          </div>
+
+          <!-- Lista de Direcciones Guardadas -->
+          <div id="accountAddressList">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <!-- Formulario Añadir / Editar Dirección -->
+          <div id="accountAddressEditForm" class="address-edit-form" style="display: none; margin-top: 12px; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: 8px;">
+            <div style="font-size: 0.76rem; font-weight: 800; color: var(--text-primary); margin-bottom: 10px;" id="accAddressFormTitle">
+              Añadir Dirección de Entrega
+            </div>
+            <input type="hidden" id="accAddressEditId" value="">
+
+            <!-- Selector de Tipo de Dirección: Casa o Trabajo -->
+            <div class="checkout-form-group">
+              <label class="checkout-label">Tipo de Ubicación *</label>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="address-type-pill active" id="addrTypeCasaBtn" data-action="select-address-type" data-type="casa">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                  <span>Casa</span>
+                </button>
+                <button type="button" class="address-type-pill" id="addrTypeTrabajoBtn" data-action="select-address-type" data-type="trabajo">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                  <span>Trabajo</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="checkout-form-group">
+              <label for="accShippingStreet" class="checkout-label">Calle y Número Exterior / Interior *</label>
+              <input type="text" id="accShippingStreet" class="checkout-input" placeholder="Ej: Calle Génova 42 Depto 301">
+            </div>
+            <div class="checkout-form-row">
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingZip" class="checkout-label">Código Postal (5 dígitos) *</label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="accShippingZip" class="checkout-input font-mono" placeholder="06600" maxlength="5">
+                  <button type="button" class="btn-zip-lookup" data-action="acc-lookup-postal-code" title="Validar SEPOMEX">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingState" class="checkout-label">Estado *</label>
+                <input type="text" id="accShippingState" class="checkout-input" placeholder="Ciudad de México">
+              </div>
+            </div>
+            <div class="checkout-form-row">
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingCity" class="checkout-label">Alcaldía / Municipio *</label>
+                <input type="text" id="accShippingCity" class="checkout-input" placeholder="Cuauhtémoc">
+              </div>
+              <div class="checkout-form-group" style="flex: 1;">
+                <label for="accShippingColony" class="checkout-label">Colonia *</label>
+                <input type="text" id="accShippingColony" class="checkout-input" placeholder="Juárez">
+              </div>
+            </div>
+            <div class="checkout-form-group">
+              <label for="accShippingRefs" class="checkout-label">Referencias de Entrega</label>
+              <input type="text" id="accShippingRefs" class="checkout-input" placeholder="Ej: Portón café, timbre 301">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+              <button type="button" class="btn-account-secondary" data-action="cancel-edit-address" style="flex: 1;">Cancelar</button>
+              <button type="button" class="btn-account-primary" data-action="save-acc-address" style="flex: 1;">Guardar Dirección</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección 2: Perfil Anatómico & Preferencias -->
+        <div class="account-section-card">
           <div class="anatomy-header">
-            <h4 class="anatomy-title">Configuración de Perfil Anatómico</h4>
+            <h4 class="anatomy-title">Perfil Anatómico y Preferencias</h4>
             <p class="anatomy-desc">Ajusta tu medida de cintura para que la tienda preseleccione tu talla recomendada en cada prenda.</p>
           </div>
 
           <div class="anatomy-slider-card">
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-              <span style="font-size: 0.78rem; font-weight: 700; color: #050505;">Medida de Cintura</span>
+              <span class="acc-slider-label">Medida de Cintura</span>
               <strong id="anatomyWaistValueDisplay" style="font-family: monospace; font-size: 1.1rem; color: #2563eb;">82 cm</strong>
             </div>
             <input type="range" id="anatomyWaistSlider" min="70" max="102" value="82" step="1" class="anatomy-slider" data-action="anatomy-slider-change">
@@ -518,56 +1345,47 @@
         </div>
       </div>
 
-      <!-- Pestaña 3: Dirección de Entrega -->
-      <div id="accountTabAddress" class="account-tab-panel" style="display: none;">
-        <div class="address-panel-content">
-          <div class="address-header">
-            <h4 class="address-title">Libreta de Direcciones</h4>
-            <p class="address-desc">Tu dirección guardada se utiliza para prellenar el checkout en 1 solo tap.</p>
-          </div>
-
-          <div id="accountAddressSummary" class="address-summary-card">
+      <!-- Pestaña 3: Mis Descuentos (Códigos Aliados, Estado Redimido/Disponible, Dinero Ahorrado, Wallet & Referidos) -->
+      <div id="accountTabDiscounts" class="account-tab-panel" style="display: none;">
+        <div class="discounts-panel-content">
+          <!-- Monedero Wallet Cashback (Recomendación 8) -->
+          <div id="accWalletCardContainer" style="margin-bottom: 14px;">
             <!-- Renderizado dinámico desde store-pwa.js -->
           </div>
 
-          <div id="accountAddressEditForm" class="address-edit-form" style="display: none;">
-            <div class="checkout-form-group">
-              <label for="accShippingStreet" class="checkout-label">Calle y Número Exterior/Interior *</label>
-              <input type="text" id="accShippingStreet" class="checkout-input" placeholder="Ej: Calle Génova 42 Depto 301">
+          <!-- Programa de Referidos Invita a un Amigo (Recomendación 7) -->
+          <div id="accReferralCardContainer" style="margin-bottom: 14px;">
+            <!-- Renderizado dinámico desde store-pwa.js -->
+          </div>
+
+          <!-- KPI Banner de Dinero Ahorrado -->
+          <div class="discounts-kpi-banner">
+            <div class="kpi-banner-item">
+              <span class="kpi-banner-label">Total Ahorrado con Aliados</span>
+              <strong class="kpi-banner-value" id="kpiTotalDiscountsSaved">MXN $450.00</strong>
             </div>
-            <div class="checkout-form-row">
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingZip" class="checkout-label">Código Postal (5 dígitos) *</label>
-                <div style="display: flex; gap: 6px;">
-                  <input type="text" id="accShippingZip" class="checkout-input font-mono" placeholder="06600" maxlength="5">
-                  <button type="button" class="btn-zip-lookup" data-action="acc-lookup-postal-code" title="Validar SEPOMEX">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingState" class="checkout-label">Estado *</label>
-                <input type="text" id="accShippingState" class="checkout-input" placeholder="Ciudad de México">
-              </div>
+            <div class="kpi-banner-divider"></div>
+            <div class="kpi-banner-item">
+              <span class="kpi-banner-label">Cupones Disponibles</span>
+              <strong class="kpi-banner-value" id="kpiActiveDiscountsCount">3 Activos</strong>
             </div>
-            <div class="checkout-form-row">
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingCity" class="checkout-label">Alcaldía / Municipio *</label>
-                <input type="text" id="accShippingCity" class="checkout-input" placeholder="Cuauhtémoc">
-              </div>
-              <div class="checkout-form-group" style="flex: 1;">
-                <label for="accShippingColony" class="checkout-label">Colonia *</label>
-                <input type="text" id="accShippingColony" class="checkout-input" placeholder="Juárez">
-              </div>
-            </div>
-            <div class="checkout-form-group">
-              <label for="accShippingRefs" class="checkout-label">Referencias de Entrega</label>
-              <input type="text" id="accShippingRefs" class="checkout-input" placeholder="Ej: Portón café, entre Reforma y Hamburgo">
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-              <button type="button" class="btn-account-secondary" data-action="cancel-edit-address" style="flex: 1;">Cancelar</button>
-              <button type="button" class="btn-account-primary" data-action="save-acc-address" style="flex: 1;">Guardar Dirección</button>
-            </div>
+          </div>
+
+          <div class="discounts-header" style="margin: 16px 0 10px;">
+            <h4 class="account-subheading">Códigos de Descuento &amp; Aliados</h4>
+            <p class="account-subheading-desc">Beneficios exclusivos con marcas y eventos aliados en formato 4:5.</p>
+          </div>
+
+          <!-- Filtro Conmutador de Cupones Activos y Redimidos (Requerimiento 5) -->
+          <div class="discounts-filter-bar" id="accDiscountsFilterBar">
+            <button type="button" class="discount-filter-btn active" data-action="set-discount-filter" data-filter="all">Todos (<span id="countDiscountsAll">5</span>)</button>
+            <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="active">Disponibles (<span id="countDiscountsActive">3</span>)</button>
+            <button type="button" class="discount-filter-btn" data-action="set-discount-filter" data-filter="redeemed">Redimidos (<span id="countDiscountsRedeemed">2</span>)</button>
+          </div>
+
+          <!-- Grid de Cupones 3x3 en formato 4:5 -->
+          <div id="accountDiscountsList" class="discounts-grid-3x3">
+            <!-- Renderizado dinámico desde store-pwa.js -->
           </div>
         </div>
       </div>
@@ -586,21 +1404,112 @@
         </div>
       </div>
 
-      <!-- Centro de Notificaciones Web Push PWA (TASK-STR-06) -->
-      <div class="push-notifications-card" id="accountPushCenter">
-        <!-- Renderizado dinámicamente desde store-pwa.js -->
-      </div>
+      <!-- Pestaña 5: Configuración & Preferencias (Tema, Web Push, 2FA WhatsApp/Authenticator, Gestión de Cuenta) -->
+      <div id="accountTabSettings" class="account-tab-panel" style="display: none;">
+        <div class="settings-panel-content" style="padding: 4px 0;">
+          <div class="settings-header" style="margin-bottom: 16px;">
+            <h4 class="account-subheading">Configuración de la Cuenta</h4>
+            <p class="account-subheading-desc">Personaliza la apariencia visual, seguridad 2FA y canales de comunicación directa.</p>
+          </div>
 
-      <!-- Acceso a Consola RevOps para Operadores -->
-      <div class="admin-console-shortcut">
-        <div style="font-family: var(--font-heading); font-size: 0.78rem; font-weight: 800; margin-bottom: 4px;">Consola RevOps Interna</div>
-        <p style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.35;">
-          Acceso reservado a operadores y administradores de los 7 Hubs operativos.
-        </p>
-        <a href="{{ route('portal.dashboard') }}" class="btn-revops-shortcut">
-          <span>Ir a Consola RevOps</span>
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
+          <!-- Selector de Modo Oscuro / Claro / Sistema -->
+          <div class="theme-selector-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <div>
+                  <strong class="settings-card-title">Apariencia Visual</strong>
+                  <span style="font-size: 0.68rem; color: var(--text-muted);">Soporte Dark Mode &amp; Light Mode</span>
+                </div>
+              </div>
+              <span id="currentThemeBadge" class="theme-active-badge" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 9999px; background: rgba(79, 70, 229, 0.1); color: var(--brand-accent, #4f46e5); border: 1px solid rgba(79, 70, 229, 0.2);">SISTEMA</span>
+            </div>
+
+            <div class="theme-options-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="light" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Claro</span>
+              </button>
+
+              <button type="button" class="theme-option-btn" data-action="set-app-theme" data-theme-mode="dark" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Oscuro</span>
+              </button>
+
+              <button type="button" class="theme-option-btn active" data-action="set-app-theme" data-theme-mode="system" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--brand-accent, #4f46e5); background: var(--bg-primary); color: var(--brand-accent, #4f46e5); cursor: pointer; transition: all 0.2s;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span style="font-size: 0.72rem; font-weight: 700;">Sistema</span>
+              </button>
+            </div>
+            <p style="font-size: 0.68rem; color: var(--text-muted); margin: 8px 0 0; text-align: center;">
+              El modo "Sistema" sincroniza automáticamente la tienda con la configuración de apariencia de tu dispositivo.
+            </p>
+          </div>
+
+          <!-- Centro de Notificaciones Web Push PWA (REGLA 2: RESIDE EN CONFIGURACIÓN) -->
+          <div class="push-notifications-card" id="accountPushCenter">
+            <!-- Renderizado dinámicamente desde store-pwa.js -->
+          </div>
+
+          <!-- Seguridad y Autenticación de Dos Factores (2FA) -->
+          <div class="security-2fa-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-accent, #4f46e5);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <strong class="settings-card-title">Seguridad en Dos Pasos (2FA)</strong>
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Protege tus compras y datos de cuenta mediante códigos temporales de un solo uso.</p>
+
+            <!-- 2FA WhatsApp -->
+            <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(34, 197, 94, 0.12); color: #16a34a; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+                </div>
+                <div>
+                  <div class="twofa-title" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">Verificación por WhatsApp</div>
+                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Códigos de seguridad vía WhatsApp al celular registrado.</div>
+                </div>
+              </div>
+              <button type="button" class="btn-account-secondary" id="btnToggle2FAWhatsApp" data-action="toggle-2fa-whatsapp" style="font-size: 0.7rem; padding: 4px 10px;">
+                Activar
+              </button>
+            </div>
+
+            <!-- 2FA Authenticator App -->
+            <div class="twofa-option-row" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(79, 70, 229, 0.12); color: #4f46e5; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="1" y1="12" x2="4" y2="12"/></svg>
+                </div>
+                <div>
+                  <div class="twofa-title" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary);">Google Authenticator / Authy</div>
+                  <div class="twofa-desc" style="font-size: 0.68rem; color: var(--text-muted);">Clave temporal TOTP de 6 dígitos sin depender de señal celular.</div>
+                </div>
+              </div>
+              <button type="button" class="btn-account-secondary" id="btnToggle2FAApp" data-action="toggle-2fa-app" style="font-size: 0.7rem; padding: 4px 10px;">
+                Configurar
+              </button>
+            </div>
+          </div>
+
+          <!-- Gestión y Privacidad de la Cuenta -->
+          <div class="account-management-card" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; margin-top: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444;"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <strong class="settings-card-title">Gestión de la Cuenta &amp; Privacidad</strong>
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.35;">Controla la vinculación con servicios de terceros y tus derechos ARCO de cancelación de datos.</p>
+
+            <div id="accGoogleUnlinkRow" style="margin-bottom: 10px;">
+              <!-- Renderizado dinámicamente: botón de desvincular Google si aplica -->
+            </div>
+
+            <button type="button" class="btn-danger-account" data-action="delete-customer-account" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 12px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Eliminar Mi Cuenta y Datos Personales</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </aside>
@@ -849,7 +1758,7 @@
         </form>
       </div>
 
-      <!-- PASO 2: MÉTODOS DE PAGO MÚLTIPLES (SPEI BBVA, TARJETAS, OXXO PAY) -->
+      <!-- PASO 2: MÉTODOS DE PAGO (TARJETAS BANCARIAS & OXXO PAY - REGLA 3 CERO SPEI) -->
       <div id="checkoutStep2" class="checkout-step-panel" style="display: none;">
         <div class="checkout-section-header">
           <h3 class="checkout-section-title">2. Selecciona tu Forma de Pago</h3>
@@ -857,45 +1766,11 @@
         </div>
 
         <div class="payment-methods-grid">
-          <!-- Opción 1: SPEI BBVA Directo -->
-          <label class="payment-method-card active" for="payMethodSpei">
+          <!-- Opción 1: Tarjetas de Débito y Crédito (Predeterminada) -->
+          <label class="payment-method-card active" for="payMethodCard">
             <div class="payment-card-top">
               <div class="payment-radio-wrap">
-                <input type="radio" name="checkoutPaymentMethod" id="payMethodSpei" value="spei_bbva" checked>
-                <span class="payment-method-name">Transferencia Directa SPEI (BBVA)</span>
-              </div>
-              <span class="payment-badge-rec">0% COMISIÓN</span>
-            </div>
-            <div class="payment-card-body" id="speiDetailsArea">
-              <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
-                Transfiere desde cualquier banco de México hacia nuestra cuenta oficial. Tu pedido se reserva y se envía el comprobante vía WhatsApp.
-              </p>
-              <div class="bank-details-box">
-                <div class="bank-detail-row">
-                  <span class="bank-label">Banco:</span>
-                  <strong class="bank-value">BBVA México</strong>
-                </div>
-                <div class="bank-detail-row">
-                  <span class="bank-label">Beneficiario:</span>
-                  <strong class="bank-value">Miguel Arteaga</strong>
-                </div>
-                <div class="bank-detail-row">
-                  <span class="bank-label">CLABE Interbancaria:</span>
-                  <strong class="bank-value mono-clabe" id="bbvaClabeDisplay">012180004708283787</strong>
-                </div>
-                <button type="button" class="btn-copy-clabe" data-action="copy-clabe">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  <span id="copyClabeLabel">Copiar CLABE en 1 Tap</span>
-                </button>
-              </div>
-            </div>
-          </label>
-
-          <!-- Opción 2: Tarjetas de Débito y Crédito -->
-          <label class="payment-method-card" for="payMethodCard">
-            <div class="payment-card-top">
-              <div class="payment-radio-wrap">
-                <input type="radio" name="checkoutPaymentMethod" id="payMethodCard" value="credit_debit_card">
+                <input type="radio" name="checkoutPaymentMethod" id="payMethodCard" value="credit_debit_card" checked>
                 <span class="payment-method-name">Tarjetas de Débito / Crédito</span>
               </div>
               <div class="card-brand-logos">
@@ -904,7 +1779,7 @@
                 <span class="card-tag">AMEX</span>
               </div>
             </div>
-            <div class="payment-card-body" id="cardDetailsArea" style="display: none;">
+            <div class="payment-card-body" id="cardDetailsArea" style="display: block;">
               <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
                 Procesamiento seguro mediante tokenización SSL de 256 bits.
               </p>
@@ -1143,6 +2018,7 @@
   <script>
     window.__INITIAL_STORE_PRODUCTS__ = @json($initialProducts ?? []);
     window.__ACTIVE_UNIVERSE__ = @json($activeUniverse ?? 'marte');
+    window.__UNIVERSE_META__ = @json($universeMeta ?? [], JSON_UNESCAPED_UNICODE);
     window.__STORE_CSRF_TOKEN__ = "{{ csrf_token() }}";
     window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
   </script>

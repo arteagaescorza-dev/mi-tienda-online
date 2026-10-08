@@ -8,11 +8,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/revops-panel.css') }}?v=20260910">
+  <link rel="stylesheet" href="{{ asset('css/revops-panel.css') }}?v=20261001_v3">
   {{-- Tailwind CDN con preflight desactivado para coexistir con revops-panel.css (paridad con el prototipo UI-first) --}}
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { corePlugins: { preflight: false } };</script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+  <!-- Anti-FOUC Theme Switcher Engine (Regla 2: Dark / Light / System) -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('app_theme') || 'system';
+        var d = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (d) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </head>
 <body class="collapsed">
   @php($authUser = auth()->user())
@@ -71,6 +88,10 @@
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
+      <!-- CONMUTADOR MODO OSCURO / CLARO / SISTEMA (REGLA 2) -->
+      <button class="topbar-icon-btn" data-action="toggle-portal-theme" aria-label="Cambiar tema" title="Modo Claro / Oscuro / Sistema" onclick="window.togglePortalTheme()">
+        <svg id="portalThemeSun" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="portalThemeMoon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
 
       <a href="{{ route('store.home') }}" class="button button-light flex items-center gap-1.5" style="text-decoration:none;" target="_blank" rel="noopener" title="Ver Tienda">
@@ -121,12 +142,10 @@
               <svg viewBox="0 0 24 24"><path d="m12 3 8 4v10l-8 4-8-4V7l8-4ZM4 7l8 4 8-4M12 11v10"/></svg>
               <span>4. Inventario &amp; Compras</span>
             </a>
-            @canViewFinancials
             <a class="module-link {{ request()->routeIs('portal.finance') ? 'active' : '' }}" href="{{ route('portal.finance') }}" data-screen="finance" title="Hub 5: Finanzas &amp; Conciliacion">
               <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
               <span>5. Finanzas &amp; Conciliacion</span>
             </a>
-            @endcanViewFinancials
             <a class="module-link {{ request()->routeIs('portal.logistics') ? 'active' : '' }}" href="{{ route('portal.logistics') }}" data-screen="logistics" title="Hub 6: Logística &amp; Post-Venta">
               <svg viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14v10Z"/><circle cx="17" cy="18.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/></svg>
               <span>6. Logística &amp; Envíos</span>
@@ -159,7 +178,7 @@
       </div>
     </aside>
 
-    <main class="main" data-main>
+    <main class="main" data-main @if(request()->routeIs('portal.store')) data-screen="store" @endif>
       @if(session('success'))
         <div class="alert alert-success" role="status">{{ session('success') }}</div>
       @endif
@@ -399,7 +418,36 @@
   <div class="toast" data-toast role="status"></div>
   <div id="global-toast-container" class="toast-container fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full" aria-live="polite"></div>
 
-  <script src="{{ asset('js/revops-panel/app.js') }}?v=20260926"></script>
+  <script src="{{ asset('js/revops-panel/app.js') }}?v=20261007_v2"></script>
+  <script>
+    window.togglePortalTheme = function() {
+      var isDark = document.documentElement.classList.contains('dark');
+      var next = isDark ? 'light' : 'dark';
+      try { localStorage.setItem('app_theme', next); } catch(e) {}
+      if (next === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      window.syncPortalThemeIcons();
+    };
+
+    window.syncPortalThemeIcons = function() {
+      var isDark = document.documentElement.classList.contains('dark');
+      var sun = document.getElementById('portalThemeSun');
+      var moon = document.getElementById('portalThemeMoon');
+      if (sun) sun.classList.toggle('hidden', isDark);
+      if (moon) moon.classList.toggle('hidden', !isDark);
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', window.syncPortalThemeIcons);
+    } else {
+      window.syncPortalThemeIcons();
+    }
+  </script>
   @stack('scripts')
 </body>
 </html>

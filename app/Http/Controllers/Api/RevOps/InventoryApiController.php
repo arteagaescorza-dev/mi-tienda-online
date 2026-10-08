@@ -42,10 +42,10 @@ class InventoryApiController extends Controller
             $query->where('supplier_id', $request->integer('supplier_id'));
         }
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->string('status')->toString() !== 'all') {
             $query->where('status', $request->string('status')->toString());
-        } else {
-            $query->where('status', 'pending');
+        } elseif (!$request->has('status')) {
+            // Si no se especifica, por defecto devolver todos para la bitácora administrativa
         }
 
         $agreements = $query->latest()->get()->map(fn ($ca) => [
@@ -201,6 +201,121 @@ class InventoryApiController extends Controller
     }
 
     /**
+     * Modifica los datos de un Acuerdo / Nota de Crédito pendiente y audita en Kardex (TASK-PUR-02).
+     */
+    public function updateCreditAgreement(Request $request, int $id): JsonResponse
+    {
+        $agreement = SupplierCreditAgreement::with('supplier')->findOrFail($id);
+
+        if ($agreement->status === 'applied') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No es posible modificar un acuerdo que ya fue aplicado y compensado en una orden de compra.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'reference_folio' => 'nullable|string|max:50',
+            'agreement_type' => 'nullable|string|max:40',
+            'discrepancy_type' => 'nullable|string|max:50',
+            'missing_units_count' => 'nullable|integer|min:0',
+            'damaged_units_count' => 'nullable|integer|min:0',
+            'unit_cost_applied' => 'nullable|numeric|min:0',
+            'amount' => 'nullable|numeric|min:0',
+            'status' => 'nullable|string|in:pending,applied,void',
+            'authorized_by_vendor_contact' => 'nullable|string|max:150',
+            'discrepancy_minutes' => 'nullable|string|max:2000',
+            'resolution_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $oldAmount = (float) $agreement->amount;
+
+        if (isset($validated['supplier_id'])) {
+            $agreement->supplier_id = $validated['supplier_id'];
+        }
+        if (isset($validated['reference_folio'])) {
+            $agreement->reference_folio = $validated['reference_folio'];
+        }
+        if (isset($validated['agreement_type'])) {
+            $agreement->agreement_type = $validated['agreement_type'];
+        }
+        if (isset($validated['discrepancy_type'])) {
+            $agreement->discrepancy_type = $validated['discrepancy_type'];
+        }
+        if (isset($validated['missing_units_count'])) {
+            $agreement->missing_units_count = (int) $validated['missing_units_count'];
+        }
+        if (isset($validated['damaged_units_count'])) {
+            $agreement->damaged_units_count = (int) $validated['damaged_units_count'];
+        }
+        if (isset($validated['unit_cost_applied'])) {
+            $agreement->unit_cost_applied = (float) $validated['unit_cost_applied'];
+        }
+        if (isset($validated['amount'])) {
+            $agreement->amount = (float) $validated['amount'];
+        } elseif (($agreement->missing_units_count + $agreement->damaged_units_count) > 0 && $agreement->unit_cost_applied > 0) {
+            $agreement->amount = round(($agreement->missing_units_count + $agreement->damaged_units_count) * $agreement->unit_cost_applied, 2);
+        }
+        if (isset($validated['authorized_by_vendor_contact'])) {
+            $agreement->authorized_by_vendor_contact = $validated['authorized_by_vendor_contact'];
+        }
+        if (isset($validated['discrepancy_minutes'])) {
+            $agreement->discrepancy_minutes = $validated['discrepancy_minutes'];
+        }
+        if (isset($validated['resolution_notes'])) {
+            $agreement->resolution_notes = $validated['resolution_notes'];
+        }
+        if (isset($validated['status'])) {
+            $agreement->status = $validated['status'];
+        }
+
+        $agreement->save();
+        $agreement->refresh();
+
+        // Trazabilidad inmutable en PurchaseKardex
+        PurchaseKardex::create([
+            'purchase_order_id' => $agreement->purchase_order_id,
+            'supplier_id' => $agreement->supplier_id,
+            'movement_type' => 'DISCREPANCY_UPDATED',
+            'description' => sprintf(
+                'Actualización de Minuta de Discrepancia %s: Monto anterior $%.2f MXN -> Nuevo monto $%.2f MXN (%s)',
+                $agreement->reference_folio,
+                $oldAmount,
+                $agreement->amount,
+                $agreement->resolution_notes ?: 'Modificación de parámetros mercantiles'
+            ),
+            'total_amount' => $agreement->amount,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Acuerdo compensatorio actualizado exitosamente con trazabilidad en Kardex.',
+            'agreement' => [
+                'id' => $agreement->id,
+                'supplier_id' => $agreement->supplier_id,
+                'supplier' => $agreement->supplier?->name ?? 'Proveedor',
+                'ref' => $agreement->reference_folio,
+                'amount' => (float) $agreement->amount,
+                'status' => match ($agreement->status) {
+                    'pending' => 'Pendiente de Aplicar',
+                    'applied' => 'Aplicada',
+                    'void', 'cancelled' => 'Anulada',
+                    default => ucfirst($agreement->status),
+                },
+                'discrepancy_type' => $agreement->discrepancy_type,
+                'missing_units' => $agreement->missing_units_count,
+                'damaged_units' => $agreement->damaged_units_count,
+                'unit_cost' => (float) $agreement->unit_cost_applied,
+                'authorized_by' => $agreement->authorized_by_vendor_contact,
+                'minutes' => $agreement->discrepancy_minutes,
+                'reason' => $agreement->resolution_notes,
+                'date' => $agreement->created_at ? $agreement->created_at->format('d/m/Y') : now()->format('d/m/Y'),
+            ],
+        ]);
+    }
+
+    /**
      * Anula una Minuta de Discrepancia si se subsano de forma fisica (TASK-PUR-01).
      */
     public function voidCreditAgreement(Request $request, int $id): JsonResponse
@@ -349,6 +464,8 @@ class InventoryApiController extends Controller
             'items.*.unit_cost' => 'nullable|numeric|min:0',
             'items.*.sizes' => 'nullable|array',
             'items.*.priority' => 'nullable|string|max:30',
+            'moq_sheet_id' => 'nullable|integer',
+            'moq_tier_label' => 'nullable|string|max:100',
             'po_snapshot' => 'nullable|array',
         ]);
 
@@ -514,6 +631,8 @@ class InventoryApiController extends Controller
             $po = PurchaseOrder::create([
                 'po_number' => $poNumber,
                 'supplier_id' => $supplier->id,
+                'moq_sheet_id' => $validated['moq_sheet_id'] ?? null,
+                'moq_tier_label' => $validated['moq_tier_label'] ?? null,
                 'credit_agreement_id' => $appliedAgreement?->id,
                 'status' => 'confirmed',
                 'priority' => $poPriority,
@@ -673,9 +792,15 @@ class InventoryApiController extends Controller
             'expiration_date' => 'nullable|string|max:30',
             'pao_months' => 'nullable|integer|min:0|max:120',
             'sanitary_data' => 'nullable|array',
+            'moq_tier_label' => 'nullable|string|max:100',
         ]);
 
         $po = PurchaseOrder::with('items.variant')->findOrFail($id);
+
+        if (!empty($validated['moq_tier_label'])) {
+            $po->moq_tier_label = $validated['moq_tier_label'];
+            $po->save();
+        }
 
         $sanitaryPayload = [
             'batch_number' => $validated['batch_number'] ?? null,
@@ -704,11 +829,22 @@ class InventoryApiController extends Controller
             'action' => 'required|in:approve,reject',
             'curated_title' => 'required_if:action,approve|string|max:200',
             'curated_brand' => 'nullable|string|max:80',
+            'supplier_id' => 'nullable',
+            'curated_category' => 'nullable|string|max:100',
+            'curated_subcategory' => 'nullable|string|max:100',
             'curated_fabric' => 'nullable|string|max:80',
             'curated_color' => 'nullable|string|max:80',
             'curated_design_type' => 'nullable|string|in:sin_diseno,con_diseno',
-            'curated_website_section' => 'nullable|string|in:basicos,disenador,temporada,general',
+            'curated_website_section' => 'nullable|string|max:120',
             'curated_price' => 'required_if:action,approve|numeric|min:0',
+            'curated_cost' => 'nullable|numeric|min:0',
+            'curated_stock' => 'nullable|integer|min:0',
+            'curated_type' => 'nullable|string|in:propio,dropship',
+            'curated_description' => 'nullable|string',
+            'bullet_points' => 'nullable|array',
+            'seo_tags' => 'nullable|array',
+            'curated_images' => 'nullable|array',
+            'image_color_map' => 'nullable|array',
             'rejection_reason' => 'required_if:action,reject|string|max:500',
         ]);
 
@@ -717,13 +853,122 @@ class InventoryApiController extends Controller
         if ($validated['action'] === 'approve') {
             $item->curated_title = $validated['curated_title'];
             $item->curated_brand = $validated['curated_brand'] ?? 'Torzo';
-            $item->curated_fabric = $validated['curated_fabric'] ?? 'Algodón Pima';
-            $item->curated_color = $validated['curated_color'] ?? 'Negro Ónix';
+            $item->curated_fabric = $validated['curated_fabric'] ?? 'Microfibra Spandex / Licra';
+            $item->curated_color = $validated['curated_color'] ?? 'Negro Profundo';
             $item->curated_design_type = $validated['curated_design_type'] ?? 'sin_diseno';
             $item->curated_website_section = $validated['curated_website_section'] ?? 'basicos';
             $item->curated_price = $validated['curated_price'];
+            if (!empty($validated['curated_cost'])) {
+                $item->scraped_cost = $validated['curated_cost'];
+            }
+            if (!empty($validated['curated_stock'])) {
+                $item->supplier_stock = (int)$validated['curated_stock'];
+            }
+            if (!empty($validated['curated_description'])) {
+                $item->curated_description = $validated['curated_description'];
+                $item->scraped_description = $validated['curated_description'];
+            }
             $item->curation_status = 'approved';
             $item->save();
+
+            // Procesar galería de fotos con variantes de color asignadas (Regla 2)
+            $gallery = [];
+            $primaryImg = null;
+            $rawImages = $validated['curated_images'] ?? (is_array($item->images) ? $item->images : []);
+            $colorMap = $validated['image_color_map'] ?? [];
+
+            foreach ($rawImages as $idx => $imgEntry) {
+                $imgUrl = is_array($imgEntry) ? ($imgEntry['url'] ?? '') : (string)$imgEntry;
+                if (empty($imgUrl)) continue;
+
+                $colorName = is_array($imgEntry) && !empty($imgEntry['color_name']) 
+                    ? $imgEntry['color_name'] 
+                    : ($colorMap[$imgUrl] ?? $item->curated_color);
+                
+                $isPrimary = is_array($imgEntry) && isset($imgEntry['is_primary']) 
+                    ? (bool)$imgEntry['is_primary'] 
+                    : ($idx === 0);
+
+                $gallery[] = [
+                    'url' => $imgUrl,
+                    'color_name' => $colorName,
+                    'is_primary' => $isPrimary,
+                ];
+
+                if ($isPrimary || !$primaryImg) {
+                    $primaryImg = $imgUrl;
+                }
+            }
+
+            // Resolver Fabric (Reglas 6.57 y 6.58) y Sección (Regla 6.59)
+            $fabricName = $item->curated_fabric;
+            $fabricId = null;
+            if (!empty($fabricName)) {
+                $fabricModel = \App\Models\ApparelFabric::where('name', $fabricName)->orWhere('slug', \Illuminate\Support\Str::slug($fabricName))->first();
+                if (!$fabricModel) {
+                    $fabricModel = \App\Models\ApparelFabric::where('name', 'like', '%' . explode(' ', $fabricName)[0] . '%')->first()
+                        ?: \App\Models\ApparelFabric::where('is_active', true)->first();
+                }
+                if ($fabricModel) {
+                    $fabricId = $fabricModel->id;
+                    $fabricName = $fabricModel->name;
+                }
+            } else {
+                $defaultFabric = \App\Models\ApparelFabric::where('is_active', true)->first();
+                if ($defaultFabric) {
+                    $fabricId = $defaultFabric->id;
+                    $fabricName = $defaultFabric->name;
+                }
+            }
+
+            if ($fabricId && !\App\Models\ApparelFabric::where('id', $fabricId)->exists()) {
+                $fabricId = null;
+            }
+
+            $sectionName = $item->curated_website_section ?: 'basicos';
+
+            // Resolver Color y Hex Cromático vinculados estrictamente a la Paleta Maestra (Regla 1)
+            $colorName = $item->curated_color ?: 'Rojo';
+            $matchedColor = \App\Models\ApparelColor::where('name', $colorName)->first()
+                ?: \App\Models\ApparelColor::where('name', 'like', '%' . explode(' ', $colorName)[0] . '%')->first()
+                ?: \App\Models\ApparelColor::where('is_active', true)->first();
+
+            if ($matchedColor) {
+                $colorName = $matchedColor->name;
+                $colorHex = $matchedColor->hex;
+                $colorType = $matchedColor->type;
+            } else {
+                $colorHex = '#dc2626';
+                $colorType = 'solid';
+            }
+
+            $productMeta = [
+                'category' => $validated['curated_category'] ?? ($item->suggested_category ?? 'General'),
+                'subcategory' => $validated['curated_subcategory'] ?? ($item->suggested_subcategory ?? ''),
+                'fabric_type' => $fabricName,
+                'fabric' => $fabricName,
+                'fabric_id' => $fabricId,
+                'color_name' => $colorName,
+                'color_hex' => $colorHex,
+                'color_type' => $colorType,
+                'design_type' => $item->curated_design_type,
+                'website_section' => $sectionName,
+                'section_name' => $sectionName,
+                'supplier_id' => $validated['supplier_id'] ?? $item->supplier_id,
+                'images' => array_column($gallery, 'url'),
+                'gallery' => $gallery,
+                'images_by_color' => $colorMap ?: array_column($gallery, 'color_name', 'url'),
+                'image_color_map' => $colorMap ?: array_column($gallery, 'color_name', 'url'),
+                'image' => $primaryImg,
+                'description' => $validated['curated_description'] ?? ($item->curated_description ?? ($item->scraped_description ?? '')),
+                'bullet_points' => $validated['bullet_points'] ?? [],
+                'seo_tags' => $validated['seo_tags'] ?? [],
+                'stock' => isset($validated['curated_stock']) ? (int)$validated['curated_stock'] : (int)($item->supplier_stock ?: 50),
+            ];
+
+            $productCost = isset($validated['curated_cost']) ? (float)$validated['curated_cost'] : (float)($item->scraped_cost ?: $item->external_price);
+            $productType = $validated['curated_type'] ?? 'dropship';
+            $productDesc = $validated['curated_description'] ?? ($item->curated_description ?? ($item->scraped_description ?? null));
 
             // Insertar o sincronizar en catálogo de productos
             $product = Product::firstOrCreate(
@@ -731,17 +976,48 @@ class InventoryApiController extends Controller
                 [
                     'title' => $item->curated_title,
                     'slug' => \Illuminate\Support\Str::slug($item->curated_title),
+                    'description' => $productDesc,
                     'brand' => $item->curated_brand,
-                    'type' => 'dropship',
+                    'fabric' => $fabricName,
+                    'fabric_id' => $fabricId,
+                    'section_name' => $sectionName,
+                    'type' => $productType,
                     'price' => $item->curated_price,
-                    'cost' => $item->external_price,
+                    'cost' => $productCost,
                     'visible' => true,
+                    'meta' => $productMeta,
                 ]
             );
 
+            // Actualizar meta si ya existía
+            if (!$product->wasRecentlyCreated) {
+                $product->update([
+                    'title' => $item->curated_title,
+                    'description' => $productDesc,
+                    'brand' => $item->curated_brand,
+                    'fabric' => $fabricName,
+                    'fabric_id' => $fabricId,
+                    'section_name' => $sectionName,
+                    'type' => $productType,
+                    'cost' => $productCost,
+                    'price' => $item->curated_price,
+                    'visible' => true,
+                    'meta' => array_merge((array)$product->meta, $productMeta),
+                ]);
+            }
+
+            // Vincular a categoría oficial
+            if (!empty($productMeta['category'])) {
+                $catModel = \App\Models\Category::firstOrCreate(
+                    ['name' => trim($productMeta['category'])],
+                    ['slug' => \Illuminate\Support\Str::slug(trim($productMeta['category'])), 'is_active' => true]
+                );
+                $product->categories()->syncWithoutDetaching([$catModel->id]);
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Producto aprobado e insertado en catálogo maestro',
+                'message' => 'Producto aprobado e insertado en catálogo maestro con su galería y categorización.',
                 'product_id' => $product->id,
                 'status' => 'approved',
             ]);
@@ -1419,6 +1695,175 @@ class InventoryApiController extends Controller
                 'purchase_orders' => $createdPurchaseOrders,
             ], 200);
         });
+    }
+
+    /**
+     * Subida y normalización de imágenes: conversión mandatoria a WebP y normalización uniforme de dimensiones (Regla 2).
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,webp,avif,bmp|max:15360',
+            'image_url' => 'nullable|string|url|max:1000',
+        ]);
+
+        $file = $request->file('image');
+        $url = $request->input('image_url');
+
+        if (!$file && empty($url)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Debes proporcionar un archivo de imagen o una URL válida.',
+            ], 422);
+        }
+
+        try {
+            $normalizationService = app(\App\Services\ImageNormalizationService::class);
+            $result = $normalizationService->normalizeToWebp($file ?: $url);
+
+            return response()->json(array_merge([
+                'status' => 'success',
+                'success' => true,
+                'message' => 'Imagen convertida a WebP y normalizada exitosamente para catálogo web.',
+                'data' => $result,
+            ], $result), 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al procesar y normalizar la imagen: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Listado de productos archivados y descontinuados (Regla 5).
+     */
+    public function getArchivedProducts(Request $request): JsonResponse
+    {
+        $products = Product::query()
+            ->where('is_archived', true)
+            ->orWhere('visible', false)
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($p) {
+                $mainImage = data_get($p->meta, 'image')
+                    ?: (data_get($p->meta, 'images.0') ?: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80');
+                return [
+                    'id' => $p->id,
+                    'sku' => $p->sku,
+                    'name' => $p->title,
+                    'brand' => $p->brand ?: 'Torzo',
+                    'category' => data_get($p->meta, 'category', 'Ropa Interior'),
+                    'price' => (float)$p->price,
+                    'cost' => (float)$p->cost,
+                    'image' => $mainImage,
+                    'isArchived' => (bool)$p->is_archived,
+                    'isVisible' => (bool)$p->visible,
+                    'discontinuedReason' => $p->discontinued_reason ?: ($p->is_archived ? 'Archivado por operador' : 'Retirado de vitrina'),
+                    'archivedAt' => $p->archived_at ? $p->archived_at->format('d/m/Y H:i') : ($p->updated_at ? $p->updated_at->format('d/m/Y H:i') : 'Reciente'),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    }
+
+    /**
+     * Resuelve una discrepancia de producto descontinuado por proveedor (Regla 4: Retirar, Archivar o Eliminar).
+     */
+    public function resolveDiscontinuedProduct(Request $request, int $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $validated = $request->validate([
+            'action' => 'required|in:hide,archive,delete',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $action = $validated['action'];
+        $reason = $validated['reason'] ?? 'Descontinuado por proveedor en origen tras barrido de scraping';
+
+        if ($action === 'hide') {
+            $product->update([
+                'visible' => false,
+                'discontinued_reason' => $reason,
+            ]);
+            $msg = "Producto {$product->sku} retirado del catálogo (oculto de la vitrina).";
+        } elseif ($action === 'archive') {
+            $product->update([
+                'is_archived' => true,
+                'visible' => false,
+                'archived_at' => now(),
+                'discontinued_reason' => $reason,
+            ]);
+            $msg = "Producto {$product->sku} archivado en la herramienta de productos archivados/descontinuados.";
+        } else {
+            $sku = $product->sku;
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'action' => 'delete',
+                'message' => "Producto {$sku} eliminado definitivamente de la base de datos.",
+                'product_id' => $id,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'action' => $action,
+            'message' => $msg,
+            'product' => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->title,
+                'is_archived' => (bool)$product->is_archived,
+                'visible' => (bool)$product->visible,
+                'discontinued_reason' => $product->discontinued_reason,
+            ],
+        ]);
+    }
+
+    /**
+     * Reactiva un producto archivado/descontinuado devolviéndolo al catálogo operativo (Regla 5).
+     */
+    public function reactivateArchivedProduct(Request $request, int $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $product->update([
+            'is_archived' => false,
+            'visible' => true,
+            'archived_at' => null,
+            'discontinued_reason' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Producto {$product->sku} reactivado exitosamente en el catálogo operativo.",
+            'product' => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->title,
+                'is_archived' => false,
+                'visible' => true,
+            ],
+        ]);
+    }
+
+    /**
+     * Elimina definitivamente un producto del catálogo (Regla 5).
+     */
+    public function destroyProduct(Request $request, int $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $sku = $product->sku;
+        $product->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Producto {$sku} eliminado definitivamente.",
+            'product_id' => $id,
+        ]);
     }
 }
 
