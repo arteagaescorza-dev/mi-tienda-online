@@ -1185,7 +1185,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block font-semibold text-slate-700 mb-1">Narrativa de Marca / Resumen Corporativo</label>
-                                <textarea name="payload[brand_summary]" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">{{ $footerConfig['brand_summary'] ?? '' }}</textarea>
+                                <textarea style="resize: vertical !important;" name="payload[brand_summary]" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">{{ $footerConfig['brand_summary'] ?? '' }}</textarea>
                                 <span class="text-[10px] text-slate-400 block mt-1">Párrafo institucional descriptivo visible debajo del nombre de marca en la primera columna del footer.</span>
                             </div>
 
@@ -1537,7 +1537,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Meta Conversions API (CAPI Access Token)</label>
-                    <textarea name="facebook_capi_token" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="EAA... Token de acceso de larga duración">{{ old('facebook_capi_token', $tracking->facebook_capi_token ?? '') }}</textarea>
+                    <textarea style="resize: vertical !important;" name="facebook_capi_token" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="EAA... Token de acceso de larga duración">{{ old('facebook_capi_token', $tracking->facebook_capi_token ?? '') }}</textarea>
                     <small class="text-[10px] text-slate-400">Utilizado por el backend en CheckoutController para registrar Purchase sin bloqueadores de anuncios.</small>
                 </div>
 
@@ -2016,16 +2016,16 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
-                            <textarea name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<div class='custom-hero'>...</div>"></textarea>
+                            <textarea style="resize: vertical !important;" name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<div class='custom-hero'>...</div>"></textarea>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
-                                <textarea name="custom_css" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder=".custom-hero { padding: 24px; }"></textarea>
+                                <textarea style="resize: vertical !important;" name="custom_css" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder=".custom-hero { padding: 24px; }"></textarea>
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
-                                <textarea name="custom_js" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="console.log('Sección iniciada');"></textarea>
+                                <textarea style="resize: vertical !important;" name="custom_js" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="console.log('Sección iniciada');"></textarea>
                             </div>
                         </div>
                     </div>
@@ -2399,16 +2399,16 @@
                         <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
                         <div>
                             <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
-                            <textarea name="custom_html" id="editCustomHtml" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                            <textarea style="resize: vertical !important;" name="custom_html" id="editCustomHtml" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
-                                <textarea name="custom_css" id="editCustomCss" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                                <textarea style="resize: vertical !important;" name="custom_css" id="editCustomCss" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
-                                <textarea name="custom_js" id="editCustomJs" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                                <textarea style="resize: vertical !important;" name="custom_js" id="editCustomJs" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
                             </div>
                         </div>
                     </div>
@@ -2490,7 +2490,7 @@
                             </div>
                             <div>
                                 <label class="block text-slate-700 mb-1">Regla de Lavado</label>
-                                <textarea name="payload[{{ $idx }}][rule]" rows="2" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs">{{ $c['rule'] }}</textarea>
+                                <textarea style="resize: vertical !important;" name="payload[{{ $idx }}][rule]" rows="2" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs">{{ $c['rule'] }}</textarea>
                             </div>
                             <div>
                                 <label class="block text-amber-800 font-semibold mb-1">Advertencia de Cuidado</label>
@@ -2524,7 +2524,7 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Declaración de Higiene / No Retorno</label>
-                    <textarea name="payload[statement]" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs leading-relaxed">{{ $profecoNotice['statement'] ?? '' }}</textarea>
+                    <textarea style="resize: vertical !important;" name="payload[statement]" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs leading-relaxed">{{ $profecoNotice['statement'] ?? '' }}</textarea>
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Garantía de Empaque Discreto</label>
@@ -2597,7 +2597,7 @@
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imágenes Adicionales para Carrusel Automático (URLs por línea o comas)</label>
-                                <textarea name="gallery_images_urls" rows="2" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg"></textarea>
+                                <textarea style="resize: vertical !important;" name="gallery_images_urls" rows="2" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg"></textarea>
                                 <p class="text-[10px] text-slate-400 mt-0.5">Si se configuran 2 o más imágenes, rotarán en carrusel automático suave cada 3.5 segundos.</p>
                             </div>
                         </div>
@@ -2740,7 +2740,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Contenido de la Página (HTML o Texto)</label>
-                    <textarea name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="<p>Explora nuestras colecciones curadas con materiales sostenibles...</p>"></textarea>
+                    <textarea style="resize: vertical !important;" name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono" placeholder="<p>Explora nuestras colecciones curadas con materiales sostenibles...</p>"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
@@ -2789,7 +2789,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Meta Descripción (SEO)</label>
-                    <textarea name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve resumen optimizado para Google (máx 160 caracteres)"></textarea>
+                    <textarea style="resize: vertical !important;" name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve resumen optimizado para Google (máx 160 caracteres)"></textarea>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
@@ -2859,7 +2859,7 @@
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imágenes Adicionales para Carrusel Automático (URLs por línea o comas)</label>
-                                <textarea name="gallery_images_urls" id="edit_page_gallery_images_urls" rows="2" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg"></textarea>
+                                <textarea style="resize: vertical !important;" name="gallery_images_urls" id="edit_page_gallery_images_urls" rows="2" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://.../foto2.jpg&#10;https://.../foto3.jpg"></textarea>
                                 <p class="text-[10px] text-slate-400 mt-0.5">Si se configuran 2 o más imágenes, rotarán en carrusel automático suave cada 3.5 segundos.</p>
                             </div>
                         </div>
@@ -3002,7 +3002,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Contenido de la Página (HTML o Texto)</label>
-                    <textarea id="edit_page_content" name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono"></textarea>
+                    <textarea style="resize: vertical !important;" id="edit_page_content" name="content" rows="6" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
@@ -3052,7 +3052,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Meta Descripción (SEO)</label>
-                    <textarea id="edit_page_meta_description" name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve resumen optimizado para Google (máx 160 caracteres)"></textarea>
+                    <textarea style="resize: vertical !important;" id="edit_page_meta_description" name="meta_description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Breve resumen optimizado para Google (máx 160 caracteres)"></textarea>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">

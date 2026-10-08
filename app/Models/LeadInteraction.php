@@ -11,7 +11,9 @@ class LeadInteraction extends Model
     use HasFactory;
 
     public $timestamps = false;
-    protected $guarded = ['id'];
+        protected $fillable = [
+        'lead_id', 'channel', 'interaction_type', 'summary', 'payload'
+    ];
 
     protected $casts = [
         'payload' => 'array',

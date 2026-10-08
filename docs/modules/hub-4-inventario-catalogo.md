@@ -2,19 +2,17 @@
 ## Plataforma RevOps E-Commerce Multiverso & ERP (Mi Tienda Online)
 
 **Módulo:** Hub 4 (Gestor Central de Catálogo, Almacén & Cadena de Suministro)  
-**Versión de Especificación:** 3.0 (SSOT)  
-**Vistas Principales:** `resources/views/portal/inventory.blade.php`  
-**Controladores:** `app/Http/Controllers/ProductController.php`, `app/Http/Controllers/InventoryController.php`, `app/Http/Controllers/Api/RevOps/BrandApiController.php`
+**Versión de Especificación:** 3.1 (SSOT - Auditada con Código Real)  
 
 ---
 
 ## 1. Propósito & Alcance del Módulo
 
 El **Hub 4** es el núcleo de persistencia transaccional y catálogo físico de la plataforma. Gobierna:
-1. **Catálogo Maestro Textil & Curvas de Talla:** Normalización bajo la matriz fija de 6 tallas (`CH`, `M`, `G`, `XL`, `2XL`, `3XL`).
-2. **Kardex Transaccional ACID Inmutable:** Registro de entradas de compra, apartados de checkout, mermas, ensamblados BOM y retornos RMA.
-3. **Control de Ubicaciones Físicas (Slotting):** Nomenclatura normalizada `Pasillo-Rack-Nivel/Gaveta` optimizada para recorridos de picking.
-4. **Escandallos y Recetas BOM:** Definición de listas de materiales para combos, multipacks y cajas de suscripción mensual (MRR).
+1. **Catálogo Maestro Textil & Curvas de Talla:** Normalización bajo la matriz de tallas de la empresa.
+2. **Kardex Transaccional ACID Inmutable:** Registro de entradas de compra, apartados de checkout, mermas, ensamblados y retornos RMA.
+3. **Control de Ubicaciones Físicas (Slotting):** Nomenclatura normalizada optimizada para recorridos de picking.
+4. **Escandallos y Bundles (BOM):** Definición de listas de materiales para combos, multipacks y cajas de suscripción mensual (MRR).
 5. **Gobernanza de Proveedores & Marcas:** Vinculación estricta de marcas a fabricantes, acuerdos de crédito y tabuladores MOQ escalonados.
 6. **Bandeja de Curaduría de Scraping:** Normalización e importación controlada de catálogos mayoristas externos (Torzo B2B).
 
@@ -29,54 +27,101 @@ erDiagram
     BRANDS ||--o{ PRODUCTS : catalogs
     PRODUCTS ||--o{ PRODUCT_VARIANTS : has
     PRODUCT_VARIANTS ||--o{ INVENTORIES : tracks
-    INVENTORIES ||--o{ KARDEX_MOVEMENTS : records
-    PRODUCTS ||--o{ RECIPES_BOM : composed_of
+    INVENTORIES ||--o{ INVENTORY_MOVEMENTS : records
+    PRODUCT_BUNDLES ||--o{ BUNDLE_ITEMS : composed_of
 ```
 
-### Tablas MySQL Principales:
-* `products`: SKU maestro, nombre, descripción, marca (`brand`), tipo de catálogo (`propio`, `dropship`, `mixto`), imágenes WebP, status.
-* `product_variants`: SKU de variante (ej. `TRZ-BX-M-AZU`), talla (`CH`..`3XL`), color (`color_id`), código de barras (EAN/Code128).
-* `inventories`: `local_stock` (físico), `committed_stock` (apartado), `reorder_point` (ROP), `bin_location` (slotting).
-* `kardex_movements`: Tipo de movimiento (`ENTRADA_COMPRA`, `SALIDA_VENTA`, `APARTADO_CHECKOUT`, `LIBERACION_EXPIRADA`, `ENSAMBLE_BOM`, `AJUSTE_AUDITORIA`), cantidad, costo unitario, costo promedio ponderado resultante (CPP).
-* `suppliers`: Razón social, RFC fiscal, días de crédito, estado.
-* `brands`: Nombre de marca comercial, slug, proveedor asociado (`supplier_id`).
-* `supplier_moq_sheets`: Tabuladores de compra mínima (`tier_name`, `min_quantity`, `unit_cost_discount`).
-* `scraped_pending_items`: Prendas importadas por bot en espera de aprobación de curaduría.
+---
+
+## 3. Lógica de Negocio, File Scope & Contratos de Datos
+
+### 3.1. Catálogo Maestro Textil & Curvas de Talla
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\Product`, `App\Models\ProductVariant`
+  - **Estructura MySQL:** 
+    - `products` (`id`, `sku`, `title`, `slug`, `brand`, `type` enum: `'physical','dropship','both'`, `price`, `cost`)
+    - `product_variants` (`id`, `product_id`, `sku`, `attributes`, `price`)
+- **File Scope:**
+  - `app/Http/Controllers/Api/ProductController.php`
+  - `app/Services/Inventory/VariantDimensionService.php`
+  - `app/Services/Inventory/SkuGeneratorService.php`
+- **Flujos y Casos Límite:**
+  - Garantía de unicidad en SKU impuesta directamente en el Blueprint de la migración (`$table->string('sku')->unique()`).
+
+### 3.2. Kardex Transaccional ACID Inmutable
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\Inventory`, `App\Models\InventoryMovement`, `App\Models\PurchaseKardex`
+  - **Estructura MySQL:** 
+    - `inventories` (`variant_id`, `location` default: `'warehouse-1'`, `quantity`, `reserved`, `type`)
+    - `inventory_movements` (`inventory_id`, `user_id`, `quantity`, `quantity_before`, `quantity_after`, `reason`)
+- **File Scope:**
+  - `app/Services/StockReservationService.php`
+  - `app/Services/InboundReceiptService.php`
+- **Flujos y Casos Límite:**
+  - **Fórmula de Stock Real:** `Stock Disponible = quantity - reserved`.
+  - Si no existe inventario, el sistema arroja: `Exception("No existe registro de inventario para la variante #{$variantId}")`.
+  - Si el stock es insuficiente para un apartado, el sistema arroja: `Exception("Stock disponible insuficiente ({$available} unidades disponibles, se solicitaron {$quantityDelta} adicionales)")`.
+  - **Flujos Cross-Hub (Event-Driven):**
+    - `InboundReceiptService` emite el evento `App\Events\Inventory\PurchaseOrderReceived` para delegar la actualización de Tareas Operativas (Hub 1), Liberación de Rampa (Hub 6) y Cuentas por Pagar / VendorBills (Hub 5).
+    - `StockReservationService` emite el evento `App\Events\Inventory\OrderStockCommitted` al confirmarse el checkout para disparar el flujo de recolección física (Hub 6) y asentar ingresos (Hub 5).
+
+### 3.3. Gobernanza de Proveedores & Marcas
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\Supplier`, `App\Models\Brand`, `App\Models\SupplierMoqSheet`
+  - **Estructura MySQL:**
+    - `suppliers` (`name`, `type` enum: `'dropship_api','dropship_scrape','wholesale','local'`)
+    - `brands` (`supplier_id`, `name`, `slug`)
+    - `supplier_moq_sheets` (`supplier_id`, `tiers` JSON, `rows` JSON)
+- **File Scope:**
+  - `app/Http/Controllers/Api/RevOps/BrandApiController.php`
+- **Flujos y Casos Límite:**
+  - Implementación estricta de Regla 6.47 (integridad relacional de Marcas a Proveedores) respaldada por llaves foráneas y eliminación en cascada (`nullOnDelete` / `cascadeOnDelete`).
+
+### 3.4. Escandallos y Recetas BOM (Bundles)
+- **Estado:** `[IMPLEMENTADO]` *(Arquitecturado como Bundles en el código base).*
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\ProductBundle`
+  - **Estructura MySQL:**
+    - `product_bundles` (`name`, `slug`, `bundle_type` enum: `'box_subscription','pack_multiple','combo_cross'`, `bundle_price`)
+    - `bundle_items` (`product_bundle_id`, `product_id`, `product_variant_id`, `quantity`)
+    - `bom_deficit_procurements` (`bundle_id`, `component_product_id`, `deficit_units`, `status`)
+- **File Scope:**
+  - Mapeado nativamente en base de datos. Rutas de controlador y servicios específicos de ensamble en progreso de estabilización.
+- **Flujos y Casos Límite:**
+  - Gestión explícita de MRR (Suscripciones Mensuales recurrentes) mediante el tipo `box_subscription`.
+  - Sistema reactivo de déficit: Genera registros en `bom_deficit_procurements` con estado inicial `detected` cuando falta stock físico para ensamblar el bundle.
+
+### 3.5. Bandeja de Curaduría de Scraping
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\ScrapedPendingItem`
+  - **Estructura MySQL:**
+    - `scraped_pending_items` (`supplier_id`, `curated_color`, `curated_design_type`, `curation_status` enum: `'pending','approved','rejected'`, `rejection_reason`)
+- **File Scope:**
+  - `app/Services/SupplierCatalogSyncService.php`
+  - `app/Services/Inventory/DuplicateDetectionService.php`
+  - `app/Services/Inventory/ProductAiCopilotService.php`
+- **Flujos y Casos Límite:**
+  - Un ítem rechazado por curaduría DEBE poblar la columna `rejection_reason`.
 
 ---
 
-## 3. Lógica de Negocio & Algoritmos
-
-### 3.1. Fórmula del Stock de Tres Estados
-Para cada variante y talla:
-$$\text{Stock Disponible} = \text{local\_stock} - \text{committed\_stock}$$
-* Si $\text{Stock Disponible} \le 0$, el Storefront PWA bloquea la adición inmediata al carrito y muestra la etiqueta *"Agotado en Tienda / Disponible bajo pedido"*.
-
-### 3.2. Cálculo del Punto de Reorden (ROP)
-$$\text{ROP} = (\text{VMD} \times \text{Lead Time Días}) + \text{Stock de Seguridad}$$
-* **VMD (Venta Media Diaria):** Unidades vendidas en los últimos 30 días / 30.
-* **Lead Time:** Días promedio que tarda el taller o mayorista en entregar en rampa.
-* **Stock de Seguridad:** Días de cobertura amortiguadora ante picos de demanda.
-
-### 3.3. Gobernanza de Marcas en Alta de Producto (Regla 6.47)
-Queda prohibido registrar o actualizar un producto sin vincularlo a un `supplier_id` válido y seleccionar una `brand` autorizada para dicho proveedor. Las interfaces de alta, edición y curaduría incorporan botones de creación rápida in situ (`+ Nuevo Proveedor` y `+ Nueva Marca`) para no interrumpir el flujo del operador.
-
----
-
-## 4. Endpoints RESTful Principales
-
-| Método | Endpoint | Acción |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/inventory/adjust` | Registra ajuste manual de existencias con asiento formal en Kardex. |
-| `POST` | `/api/v1/inventory/products` | Alta de nueva prenda textil con generación automática de matriz 6 tallas. |
-| `POST` | `/api/v1/suppliers/{id}/brands` | Registra marca comercial vinculada al proveedor. |
-| `POST` | `/api/v1/scraper/curate/{id}/approve` | Aprueba prenda de scraping, convierte imágenes a WebP y publica a catálogo. |
-
----
-
-## 5. [TODO: Definir regla exacta]
+## 4. [TODO: Definir regla exacta]
 
 1. `[TODO: Definir regla exacta]` **Criterio de redondeo en decimales para el cálculo de Costo Promedio Ponderado (CPP).**  
    *Nota actual:* El sistema trunca a 4 decimales en base de datos (`decimal(12,4)`) y redondea a 2 decimales para la visualización en pantalla.
 2. `[TODO: Definir regla exacta]` **Tratamiento contable para mermas de empaque dañadas en rampa.**  
    *Nota actual:* El movimiento `MERMA_RAMPA` descuenta del conteo físico sin afectar el saldo por cobrar al taller hasta que se emite la nota de crédito formal.
+
+---
+
+## 5. Security & Data Privacy (DoD Compliance)
+- **Protección de PII y Costos (Ciberseguridad):**
+  - Los modelos `Product` y `ProductVariant` ocultan explícitamente el atributo `cost` (`$hidden = ['cost']`).
+  - La capa de presentación RESTful utiliza `ProductResource` y `ProductVariantResource` para filtrar la historia financiera (`meta.moq_cost_layers`), mostrándola exclusivamente a peticiones autenticadas bajo el Gate `view-financials`.
+- **Sanitización y Autorización Restrictiva (RevOps):**
+  - `BrandApiController` (y controladores homólogos) requiere el Gate `manage-catalog` para lectura y escritura.
+  - La captura de datos de inventario pasa por `FormRequests` estrictos (`StoreBrandRequest`, `UpdateBrandRequest`) equipados con `strip_tags` para mitigar vectores de inyección XSS.

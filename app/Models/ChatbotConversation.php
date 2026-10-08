@@ -10,7 +10,9 @@ class ChatbotConversation extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+        protected $fillable = [
+        'channel', 'customer_name', 'session_status', 'messages_json'
+    ];
 
     protected $casts = [
         'messages_json' => 'array',

@@ -2,9 +2,7 @@
 ## Plataforma RevOps E-Commerce Multiverso & ERP (Mi Tienda Online)
 
 **Módulo:** Hub 6 (Fulfillment, Expedición Courier & Logística Inversa)  
-**Versión de Especificación:** 3.0 (SSOT)  
-**Vistas Principales:** `resources/views/portal/logistics.blade.php`  
-**Controladores:** `app/Http/Controllers/LogisticsController.php`, `app/Http/Controllers/ShipmentController.php`
+**Versión de Especificación:** 3.1 (SSOT - Auditada con Código Real)  
 
 ---
 
@@ -12,10 +10,10 @@
 
 El **Hub 6** opera la estación física de empaque y la interfaz con empresas de paquetería express. Es responsable de:
 1. **Mesa de Expedición y Balanzas:** Pesaje, validación de prendas por código de barras y selección volumétrica de cajas.
-2. **Emisión de Guías Térmicas SVG (100x150mm):** Impresión en 1 clic optimizada para impresoras térmicas Zebra/Xprinter sin dependencias de servicios de pago.
-3. **Protocolo de Privacidad y Remitente Neutro:** Rotulación con remitente corporativo discreto para salvaguardar la intimidad de los clientes de ropa interior.
-4. **Cierre de Manifiestos Diarios de Salida:** Acta formal de entrega a choferes de paquetería (DHL, FedEx, Estafeta, 99Minutos).
-5. **Portal de Garantías & Matriz Sanitaria RMA (PROFECO):** Gestión de devoluciones bajo el Artículo 53 de la Ley Federal de Protección al Consumidor.
+2. **Emisión de Guías Térmicas:** Impresión optimizada sin dependencias de servicios de pago para transportistas (DHL, Estafeta, FedEx).
+3. **Protocolo de Privacidad y Remitente Neutro:** Rotulación con remitente corporativo discreto para salvaguardar la intimidad de los clientes.
+4. **Cierre de Manifiestos Diarios de Salida:** Acta formal de entrega a choferes de paquetería consolidando los bultos en rampa.
+5. **Portal de Garantías & Matriz Sanitaria RMA (PROFECO):** Gestión estricta de devoluciones bajo normativas de higiene de ropa interior.
 
 ---
 
@@ -24,42 +22,56 @@ El **Hub 6** opera la estación física de empaque y la interfaz con empresas de
 ```mermaid
 erDiagram
     ORDERS ||--o{ SHIPMENTS : packed_in
-    SHIPMENTS ||--o{ SHIPPING_MANIFESTS : consolidated_in
-    SHIPMENTS ||--o{ RMA_REQUESTS : returned_through
-    BOXES_VOLUMETRIC ||--o{ SHIPMENTS : uses_packaging
+    SHIPMENTS ||--o| SHIPPING_MANIFESTS : consolidated_in
+    SHIPMENTS ||--o| RMA_REQUESTS : returned_through
+    PACKAGE_TYPES ||--o{ SHIPMENTS : uses_packaging
 ```
 
-### Tablas MySQL Principales:
-* `shipments`: Tracking number, paquetería (`courier`), peso real (g), dimensiones (Largo x Ancho x Alto cm), costo de flete, estado (`manifested`, `in_transit`, `delivered`, `exception`).
-* `shipping_manifests`: Folio de manifiesto, transportista, chofer receptor, total de bultos entregados, firma digital.
-* `boxes_volumetric`: Catálogo de cajas (`caja_chica`, `caja_mediana`, `caja_regalo`, `sobre_kraft`) con peso tara y costo BOM.
-* `rma_requests`: Folio de devolución, motivo, estado del precinto de higiene (`intact`, `broken`), dictamen sanitario.
+---
+
+## 3. Lógica de Negocio, File Scope & Contratos de Datos
+
+### 3.1. Mesa de Expedición & Asignación Volumétrica
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\Shipment`, `App\Models\PackageType` *(referido anteriormente como `boxes_volumetric`)*
+  - **Estructura MySQL:** 
+    - `shipments` (`tracking_number`, `courier`, `weight_actual_kg`, `weight_volumetric_kg`, `status` enum: `'label_created', 'in_transit', 'delivered', 'returned'`)
+    - `package_types` (`code`, `type` enum: `'box', 'polymailer'`, `length_cm`, `max_weight_kg`)
+- **File Scope:**
+  - `app\Http\Controllers\PortalLogisticsController.php`
+  - `app\Services\RevOps\PackagingFulfillmentService.php`
+- **Flujos y Casos Límite:**
+  - Bultos en rampa se calculan en base a las dimensiones reales del `PackageType` asignado al `Shipment`.
+
+### 3.2. Cierre de Manifiestos Diarios de Salida
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelo Eloquent:** `App\Models\ShippingManifest`
+  - **Estructura MySQL:** 
+    - `shipping_manifests` (`manifest_number`, `courier`, `total_packages`, `driver_name`, `status`)
+- **File Scope:**
+  - `PortalLogisticsController.php` (Método `closeManifest`)
+- **Flujos y Casos Límite:**
+  - Generación automática de folio con formato `MAN-[COURIER]-[Ymd-His]`.
+  - Asignación masiva en cascada del `manifest_id` a todos los `shipments` en status `label_created` o `packed` que correspondan al transportista, bloqueando su edición.
+
+### 3.3. Portal de Garantías & Matriz Sanitaria RMA (PROFECO)
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\RmaRequest`, `App\Models\RmaInspectionLog`, `App\Models\RmaResolution`
+  - **Estructura MySQL:** 
+    - `rma_requests` (`rma_number`, `sanitary_status` enum: `'pending_inspection', 'approved_replacement', 'approved_store_credit', 'rejected_used_hygiene'`)
+    - `rma_inspection_logs` (`verdict`, `has_hygiene_seal_intact`)
+- **File Scope:**
+  - `app\Services\RevOps\RmaResolutionService.php`
+- **Flujos y Casos Límite:**
+  - **Prendas con Precinto Intacto:** Flujo `issueStoreCredit()` genera un saldo a favor y un cupón tokenizado enviado por WhatsApp al cliente.
+  - **Prendas con Precinto Vulnerado:** Flujo estricto `rejectRma()`. El sistema asienta un dictamen de rechazo citando explícitamente *"violacion a protocolo de salubridad e higiene PROFECO"*, cerrando el folio sin reembolso ni retorno a stock comercial.
 
 ---
 
-## 3. Lógica de Negocio & Algoritmos
-
-### 3.1. Matriz de Devoluciones por Criterio Sanitario (Regla PROFECO)
-Por motivos estrictos de salud pública e higiene:
-* **Prendas con Precinto Intacto:** Elegibles para cambio de talla o reembolso a monedero electrónico. Al ingresar, el sistema asienta `ENTRADA_RMA` en Kardex y devuelve las unidades al stock disponible.
-* **Prendas con Precinto Vulnerado o Retirado:** Rechazo automático de retorno a stock comercial. Si la empresa concede reposición por cortesía comercial, las prendas vulneradas se clasifican como `MERMA_SANITARIA_DESTRUIDA` y no vuelven a estantes.
-
-### 3.2. Aislamiento Estricto de Impresión Térmica
-La emisión de guías se gobierna mediante `@media print` en `100mm x 150mm` a 203 DPI, forzando márgenes en 0 (`@page { margin: 0; size: 100mm 150mm; }`) y renderizando códigos de barra Code128 en SVG vectorial de alto contraste para lectura instantánea con escáner láser.
-
----
-
-## 4. Endpoints RESTful Principales
-
-| Método | Endpoint | Acción |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/shipments/create` | Genera registro de envío, asigna caja y calcula peso volumétrico. |
-| `GET` | `/admin/logistica/guias/{id}/termica` | Renderiza guía en SVG puro para impresión inmediata. |
-| `POST` | `/admin/logistica/manifiestos/cerrar` | Cierra lote diario de recolección y bloquea modificaciones en guías. |
-
----
-
-## 5. [TODO: Definir regla exacta]
+## 4. [TODO: Definir regla exacta]
 
 1. `[TODO: Definir regla exacta]` **Tiempo máximo de custodia de paquetes devueltos no reclamados por el cliente.**  
    *Nota actual:* El almacén resguarda paquetes retornados en el rack de incidencias por 30 días naturales antes de destruirlos o donarlos.

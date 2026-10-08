@@ -134,3 +134,4 @@ graph TD
    *Nota actual:* El sistema bloquea la orden una vez que el estado cambia a `packing`. Se debe definir si el cliente dispone de una ventana de gracia fija (ej. 15 minutos posteriores al pago).
 2. `[TODO: Definir regla exacta]` **Umbral de discrepancia permitido en cubicaje volumétrico de cajas de empaque frente a la báscula física de paquetería.**  
    *Nota actual:* Se asume tolerancia estándar del 5% antes de disparar alerta de sobrecosto courier.
+

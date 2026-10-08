@@ -10,6 +10,8 @@ use App\Services\OrderProcessingService;
 use App\Services\WebPushNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\Storefront\PushSubscribeRequest;
+use App\Http\Requests\Api\Storefront\PushEndpointRequest;
 use Illuminate\Support\Str;
 
 class StorefrontApiController extends Controller
@@ -160,7 +162,6 @@ class StorefrontApiController extends Controller
                 'category_name' => $product->brand ?: (data_get($product->meta, 'category', 'Prenda')),
                 'price' => (float) $product->price,
                 'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
-                'cost' => (float) ($product->cost ?: 0),
                 'fabric_composition' => $fabricComposition,
                 'stock_type' => $totalAvailable > 0 ? 'ready' : 'on_demand',
                 'stock_label' => $totalAvailable > 0 ? 'Stock Físico' : 'Bajo Pedido',
@@ -311,10 +312,10 @@ class StorefrontApiController extends Controller
     /**
      * Procesa la transaccion de compra integral con creacion de Orden y Kardex.
      */
-    public function checkout(Request $request): JsonResponse
+    public function checkout(\App\Http\Requests\Api\Storefront\CheckoutRequest $request): JsonResponse
     {
         $cartSessionId = $this->getCartSessionId($request);
-        $payload = $request->all();
+        $payload = $request->validated();
         $payload['cart_id'] = $cartSessionId;
 
         try {
@@ -443,15 +444,9 @@ class StorefrontApiController extends Controller
     /**
      * Formaliza una nueva suscripcion mensual MRR.
      */
-    public function subscribe(Request $request): JsonResponse
+    public function subscribe(\App\Http\Requests\Api\Storefront\SubscribeRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'tier_name' => 'nullable|string',
-            'monthly_amount' => 'nullable|numeric|min:0',
-            'universe' => 'nullable|string',
-            'card_last4' => 'nullable|string|max:4',
-            'card_brand' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $subscription = $this->customerAccountService->subscribe($validated, auth()->id());
 
@@ -465,13 +460,9 @@ class StorefrontApiController extends Controller
     /**
      * Actualiza el perfil anatomico del comprador.
      */
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(\App\Http\Requests\Api\Storefront\UpdateProfileRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'waist_cm' => 'required|integer|min:50|max:160',
-            'preferred_cut' => 'nullable|string',
-            'silhouettes' => 'nullable|array',
-        ]);
+        $validated = $request->validated();
 
         $result = $this->customerAccountService->updateProfile($validated, auth()->id());
 
@@ -481,15 +472,9 @@ class StorefrontApiController extends Controller
     /**
      * Registra suscripcion a notificaciones Web Push PWA (TASK-STR-06).
      */
-    public function pushSubscribe(Request $request): JsonResponse
+    public function pushSubscribe(PushSubscribeRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'endpoint' => 'required|string',
-            'keys' => 'nullable|array',
-            'p256dh_key' => 'nullable|string',
-            'auth_token' => 'nullable|string',
-            'topics' => 'nullable|array',
-        ]);
+        $validated = $request->validated();
 
         $cartSessionId = $this->getCartSessionId($request);
         $subscription = $this->pushService->subscribe($validated, auth()->id(), $cartSessionId);
@@ -509,11 +494,9 @@ class StorefrontApiController extends Controller
     /**
      * Da de baja suscripcion a notificaciones Web Push PWA.
      */
-    public function pushUnsubscribe(Request $request): JsonResponse
+    public function pushUnsubscribe(PushEndpointRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'endpoint' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
         $success = $this->pushService->unsubscribe($validated['endpoint']);
 
@@ -526,11 +509,9 @@ class StorefrontApiController extends Controller
     /**
      * Envia notificacion de prueba y asienta registro auditable en BD.
      */
-    public function pushTest(Request $request): JsonResponse
+    public function pushTest(PushEndpointRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'endpoint' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
         $log = $this->pushService->sendTestNotification($validated['endpoint']);
 

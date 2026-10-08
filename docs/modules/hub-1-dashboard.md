@@ -2,19 +2,17 @@
 ## Plataforma RevOps E-Commerce Multiverso & ERP (Mi Tienda Online)
 
 **Módulo:** Hub 1 (Cabina Ejecutiva & Centro de Acción Inmediata)  
-**Versión de Especificación:** 3.0 (SSOT)  
-**Vistas Principales:** `resources/views/portal/dashboard.blade.php`  
-**Controlador:** `app/Http/Controllers/PortalController.php`
+**Versión de Especificación:** 3.1 (SSOT - Auditada con Código Real)  
 
 ---
 
 ## 1. Propósito & Alcance del Módulo
 
 El **Hub 1** centraliza la supervisión estratégica y operativa del negocio en tiempo real. Actúa como el centro de mando de la plataforma, coordinando:
-1. **Centro de Acción Inmediata (Action Center):** Generación automática de tareas operativas priorizadas disparadas por eventos reales (pedidos estancados, stock crítico, discrepancias en rampa).
-2. **Semáforo de Envejecimiento de Pedidos (Aging SLA):** Clasificación visual de órdenes por horas transcurridas desde el pago para prevenir cancelaciones y quejas ante PROFECO.
-3. **Monitor de Salud del Ecosistema (System Health):** Telemetría de latencia y estado de conectividad con pasarelas (Stripe/Openpay), transportistas (DHL/FedEx), WhatsApp Cloud API y Torzo Bot Scraper.
-4. **Embudo Comercial Multiverso:** Visualización del ciclo de vida del cliente desde la visita anónima hasta la membresía recurrente (MRR).
+1. **Centro de Acción Inmediata (Action Center):** Generación automática de tareas operativas priorizadas con SLAs dinámicos.
+2. **Semáforo de Envejecimiento de Pedidos (Aging SLA):** Clasificación visual de órdenes para prevenir cancelaciones.
+3. **Monitor de Salud del Ecosistema (System Health):** Telemetría de latencia y estado de conectividad con pasarelas (Stripe) y transportistas (DHL).
+4. **Asistente de IA (AI Copilot):** Motor conversacional integrado al dashboard con `action_chips` que sugieren acciones proactivas sobre el ecosistema.
 
 ---
 
@@ -22,52 +20,63 @@ El **Hub 1** centraliza la supervisión estratégica y operativa del negocio en 
 
 ```mermaid
 erDiagram
-    ORDERS ||--o{ ORDER_ITEMS : contains
-    ORDERS ||--o{ SHIPMENTS : generates
-    ORDERS ||--o{ AUDIT_LOGS : tracks
-    USERS ||--o{ ORDERS : places
-    SYSTEM_HEALTH_CHECKS ||--|| LOGS : reports
+    OPERATIONAL_TASKS ||--o{ USERS : assigned_to
+    SYSTEM_HEALTH_CHECKS ||--|| API_HEALTH_LOGS : records
+    DASHBOARD ||--o{ AI_COPILOT_CHAT_MESSAGES : interacts
+    DASHBOARD ||--o{ SYSTEM_AUDIT_LOGS : tracks
 ```
 
-### Tablas MySQL Principales:
-* `orders`: Estado de pago (`paid`, `pending`, `failed`), estado logístico (`pending_fulfillment`, `packing`, `shipped`, `delivered`), total, fecha de creación.
-* `order_items`: SKUs adquiridos, cantidad, precio unitario, estatus individual de reserva.
-* `cms_tracking_settings`: Credenciales y estado de integración de telemetría (GTM, GA4, Meta Pixel).
-* `kardex_movements`: Asientos para calcular velocidad de venta y productos Top 10 en tiempo real.
+*(Nota de Auditoría: El sistema se fundamenta nativamente en el motor de tareas operativas y telemetría, prescindiendo de tablas temporales no persistentes).*
 
 ---
 
-## 3. Lógica de Negocio & Algoritmos
+## 3. Lógica de Negocio, File Scope & Contratos de Datos
 
-### 3.1. Semáforo de Envejecimiento de Pedidos (Aging SLA)
-Calculado dinámicamente mediante la diferencia en horas entre el momento del pago confirmado y el tiempo actual:
-$$\text{Aging (Horas)} = \frac{\text{now}() - \text{order.paid\_at}}{3600}$$
+### 3.1. Centro de Acción Dinámico (Operational Tasks)
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelo Eloquent:** `App\Models\OperationalTask`
+  - **Estructura MySQL:** 
+    - `operational_tasks` (`title`, `priority`, `assigned_role`, `status` enum: `'pending', 'in_progress', 'completed', 'dismissed'`, `sla_minutes_limit`, `action_payload` JSON)
+- **File Scope:**
+  - `app\Http\Controllers\Api\RevOps\DashboardApiController.php`
+- **Flujos y Casos Límite:**
+  - Creación dinámica con `action_payload`. Por ejemplo, inyectar el JSON de la acción permite crear botones contextuales en el dashboard que redirigen exactamente a la vista necesaria (ej. `goto_warehouse_tab`, `open_task_manifest`, `open_rescue_first`).
 
-* **Verde (Óptimo / 0 a 12h):** Pedido en tiempo de surtido estándar.
-* **Amarillo (Alerta / 12h a 24h):** Próximo a vencer la promesa de despacho express en el mismo día.
-* **Rojo (Crítico / > 24h):** Pedido retrasado. Dispara notificación push y tarea de alta prioridad en la mesa de empaque.
+### 3.2. Monitor de Salud del Ecosistema (System Health)
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelo Eloquent:** `App\Models\ApiHealthLog`
+  - **Estructura MySQL:** 
+    - `api_health_logs` (`service_name`, `status_code`, `response_time_ms`, `status_verdict` enum: `'healthy', 'degraded', 'down'`, `error_message`)
+- **File Scope:**
+  - `app\Http\Controllers\Api\RevOps\DashboardApiController.php` (Método `getSystemHealth`)
+- **Flujos y Casos Límite:**
+  - Telemetría persistente de latencias externas y degradaciones (`degraded` o `down`).
 
-### 3.2. Centro de Acción Dinámico (Dynamic Action Triggers)
-El sistema analiza eventos de dominio y genera acciones automáticas:
-* Si `unfulfilled_orders_count > 10`: Acción `Liberar Lote de Surtido en Mesa de Empaque`.
-* Si existen ítems con `stock <= rop_threshold`: Acción `Emitir PO de Reorden a Taller`.
-* Si hay carritos abandonados con `updated_at > 2h`: Acción `Disparar Campaña WhatsApp Concierge`.
+### 3.3. Asistente AI Copilot y Atajos Operativos
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\AiCopilotChatMessage`, `App\Models\AiCopilotInsight`
+  - **Estructura MySQL:** 
+    - `ai_copilot_chat_messages` (`message`, `action_chips_json`)
+- **File Scope:**
+  - `app\Http\Controllers\Api\RevOps\DashboardApiController.php`
+- **Flujos y Casos Límite:**
+  - Análisis de intenciones semánticas: Cuando un operador escribe algo con las palabras "dhl" o "corte", el sistema devuelve un chip de acción dinámico como `Inspeccionar Manifiesto DHL`.
+
+### 3.4. Semáforo de Envejecimiento de Pedidos (Aging SLA)
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:** `App\Models\Order`
+- **File Scope:**
+  - `app\Http\Controllers\StorefrontController.php` (Pipeline general y `dashboardAlerts()`).
+- **Flujos y Casos Límite:**
+  - *SLA Minutes Limit* incrustado en la creación de las tareas operativas asociadas a rescates.
+  - El aging previene multas ante PROFECO alertando si el pedido supera las ventanas establecidas de surtido (Verde, Amarillo, Rojo).
 
 ---
 
-## 4. Endpoints RESTful & Contratos de API
-
-### `GET /admin/dashboard`
-* **Descripción:** Renderiza la vista principal con KPIs consolidados.
-* **Acceso:** Roles autorizados vía `access-hub:dashboard`.
-* **Datos Inyectados:**
-  - `kpis`: GMV del día, pedidos pendientes, stock crítico, MRR activo.
-  - `agingOrders`: Colección de órdenes agrupadas por franjas de SLA.
-  - `systemHealth`: Estado binario (online/degraded/offline) de los servicios externos.
-
----
-
-## 5. [TODO: Definir regla exacta]
+## 4. [TODO: Definir regla exacta]
 
 1. `[TODO: Definir regla exacta]` **Tiempo de retención de telemetría histórica de APIs externas.**  
-   *Nota actual:* Los logs de latencia se conservan en la base de datos por 30 días. Se debe definir si después se depuran automáticamente vía Scheduled Task o se archivan en frío.
+   *Nota de Auditoría Actual:* A nivel base de datos, la tabla `api_health_logs` acumula registros de forma indefinida y no cuenta con política de eliminación en cascada. Se debe definir si configuramos un Cron (Scheduled Task) en Laravel Forge que ejecute un borrado automático de registros más antiguos a 30 días, o si los exportamos en frío a Amazon S3.

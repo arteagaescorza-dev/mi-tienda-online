@@ -29,6 +29,10 @@ class Product extends Model
         'meta',
     ];
 
+    protected $hidden = [
+        'cost',
+    ];
+
     protected $casts = [
         'meta' => 'array',
         'visible' => 'boolean',

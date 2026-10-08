@@ -9,7 +9,9 @@ class AdCampaign extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+        protected $fillable = [
+        'name', 'universe', 'status', 'daily_budget', 'spend_today', 'platform_roas', 'net_real_roas', 'cpa', 'ctr', 'fatigue_alert', 'campaign_id_external'
+    ];
 
     protected $casts = [
         'fatigue_alert' => 'boolean',

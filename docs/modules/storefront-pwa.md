@@ -2,22 +2,19 @@
 ## Plataforma RevOps E-Commerce Multiverso & ERP (Mi Tienda Online)
 
 **Módulo:** Canal Público de Venta Directa (Storefront PWA)  
-**Versión de Especificación:** 3.0 (SSOT)  
-**Vistas Principales:** `resources/views/layouts/store-pwa.blade.php`, `resources/views/store/pwa/*.blade.php`  
-**Controlador Principal:** `app/Http/Controllers/StorefrontController.php`  
-**Assets Principales:** `public/js/storefront/store-pwa.js`, `public/css/store-pwa.css`, `public/sw.js`
+**Versión de Especificación:** 3.1 (SSOT - Auditada con Código Real)  
 
 ---
 
 ## 1. Propósito & Alcance del Módulo
 
-El **Storefront PWA** es la aplicación web progresiva orientada al consumidor final (D2C). Diseñada bajo la filosofía Mobile-First y lujo minimalista, entrega:
-1. **Multiverso Conmutable en 4 Universos:** Experiencia de marca adaptada para Marte (Hombre), Venus (Lencería), Tiresias (Afirmativo) y Terra (Unisex/Matriz).
-2. **Navegación Móvil de 5 Botones (Bottom App Dock):** Exactamente 5 pestañas fijas (`Inicio`, `Explorar`, `Catálogo`, `Carrito`, `Cuenta`).
-3. **Ficha de Producto (PDP) a Pantalla Completa:** Eliminación total de modales o drawers deslizables; renderizado nativo en URL canónica `/producto/{slug}`.
-4. **Reserva de Stock en Carrito con Cuenta Regresiva (Stock Locks):** Bloqueo transaccional de prendas por 5 minutos (300 segundos) para inducir urgencia de compra y liberar inventario automáticamente si se abandona el carrito.
-5. **Instalabilidad PWA & Modo Offline:** Service Worker con precaché de assets, manifest interactivo y funcionamiento standalone en iOS y Android.
-6. **Motor Anti-FOUC de Modo Oscuro / Claro / Sistema:** Sincronización instantánea con preferencias del sistema operativo sin parpadeos visuales al cargar.
+El **Storefront PWA** es la aplicación web progresiva orientada al consumidor final (D2C). Diseñada bajo la filosofía Mobile-First, entrega:
+1. **Multiverso Conmutable en 4 Universos:** Experiencia de marca adaptada para Marte, Venus, Tiresias y Terra.
+2. **Navegación Móvil de 5 Botones (Bottom App Dock):** Pestañas fijas (`Inicio`, `Explorar`, `Catálogo`, `Carrito`, `Cuenta`).
+3. **Ficha de Producto (PDP) a Pantalla Completa:** Eliminación de modales deslizables; renderizado nativo en URL canónica `/producto/{slug}`.
+4. **Reserva de Stock en Carrito con Cuenta Regresiva (Stock Locks):** Bloqueo transaccional de prendas por 5 minutos (300 segundos) para inducir urgencia de compra y prevenir sobreventa concurrente.
+5. **Instalabilidad PWA & Modo Offline:** Service Worker con precaché de assets.
+6. **Motor Anti-FOUC:** Sincronización cromática inmediata con el SO del cliente.
 
 ---
 
@@ -27,51 +24,57 @@ El **Storefront PWA** es la aplicación web progresiva orientada al consumidor f
 graph TD
     SW[Service Worker: sw.js] -->|Caché de Shell| UI[Interfaz PWA]
     UI -->|Persistencia Local| LS[(LocalStorage: Carrito & Wishlist)]
-    UI -->|Heartbeat de Reserva| API[POST /api/v1/cart/lock]
-    API -->|Bloqueo en MySQL| DB[(Tabla: stock_locks)]
-    DB -->|Expiración tras 300s| CRON[Liberación Automática a Kardex]
+    UI -->|Heartbeat de Reserva| API[POST /api/v1/store/cart/lock]
+    API -->|Bloqueo Transaccional| DB[(Tabla: stock_locks)]
+    DB -->|Limpieza Cron| CRON[Liberación de Stock Reservado]
 ```
 
-### Llaves en `localStorage`:
-* `pwa_cart_items`: Array JSON con items agregados, variantes, tallas y cantidades.
-* `pwa_cart_lock_expires`: Marca de tiempo Unix que gobierna el temporizador visible en checkout.
-* `pwa_wishlist`: Colección de SKUs guardados en lista de deseos.
-* `app_theme`: Estado cromático forzado (`dark`, `light`, `system`).
-* `last_active_universe`: Universo guardado para retener la experiencia de marca preferida.
+---
+
+## 3. Lógica de Negocio, File Scope & Contratos de Datos
+
+### 3.1. Bloqueo Transaccional de Stock (Stock Locks)
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\StockLock`, `App\Models\Inventory`
+  - **Estructura MySQL:** 
+    - `stock_locks` (`cart_id`, `product_variant_id`, `quantity`, `expires_at`, `status` enum: `'active', 'released', 'purchased'`)
+- **File Scope:**
+  - `app\Services\StockReservationService.php`
+  - `app\Http\Controllers\Api\StorefrontApiController.php`
+- **Flujos y Casos Límite:**
+  - Prevención estricta de *race conditions* usando bloqueos a nivel base de datos (`->lockForUpdate()`) al momento de retener stock.
+  - Al bloquear, se incrementa temporalmente la columna `reserved` en `inventories`.
+  - Excepción operativa: Lanza error si se rebasa el inventario disponible: `Exception("Stock disponible insuficiente ({$available} unidades disponibles, se solicitaron {$quantityDelta} adicionales)")`.
+
+### 3.2. Conmutación Dinámica en Ficha de Producto (PDP)
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:** Lógica de presentación (Frontend/Blade).
+- **File Scope:**
+  - `resources/views/store/pwa/product-detail.blade.php`
+- **Flujos y Casos Límite:**
+  - Al pulsar una píldora de color, JS filtra la galería fotográfica usando el atributo `data-color-id` sin recargar la vista, actualizando en caliente la disponibilidad de tallas.
 
 ---
 
-## 3. Lógica de Negocio & Algoritmos
+## 4. Endpoints RESTful Principales (Realidad de Código)
 
-### 3.1. Bloqueo Transaccional de Stock con TTL (Stock Locks)
-Cuando el cliente agrega un producto al carrito:
-1. Se invoca `POST /api/v1/cart/lock`.
-2. Laravel incrementa `committed_stock` en la tabla `inventories` para la variante y talla.
-3. Se inserta un registro en `stock_locks` con `expires_at = now() + 300s`.
-4. El frontend renderiza un banner flotante de urgencia:
-   > *"Tus prendas están reservadas por 04:59. Completa tu pedido antes de que se liberen para otros compradores."*
-5. Si el temporizador llega a `00:00` o la sesión expira, un comando de Laravel o evento de limpieza restaura `committed_stock` a 0 y disuelve la reserva.
-
-### 3.2. Conmutación de Color e Imágenes en PDP
-En la ficha del producto (`resources/views/store/pwa/product-detail.blade.php`), al pulsar sobre una píldora de color:
-* El script filtra la galería fotográfica mostrando exclusivamente las tomas asociadas a dicho tono (`data-color-id`).
-* La imagen principal cambia al primer plano de dicha silueta sin recargar la página.
-* Las opciones de talla se actualizan en caliente mostrando sólo las existencias disponibles para dicho color.
-
----
-
-## 4. Endpoints RESTful Principales
-
-| Método | Endpoint | Acción |
-| :--- | :--- | :--- |
-| `GET` | `/api/v1/store/products` | Catálogo filtrado por universo, categoría, talla y color. |
-| `GET` | `/api/v1/store/products/{slug}` | Ficha técnica con matriz anatómica, composición y fotos. |
-| `POST` | `/api/v1/cart/lock` | Bloquea unidades en almacén con TTL de 300 segundos. |
-| `POST` | `/api/v1/cart/release` | Libera unidades retenidas voluntariamente por el cliente. |
+| Método | Endpoint | Controlador | Acción |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/store/products/{slug}` | `StorefrontApiController@productDetail` | Despacha la ficha técnica con matriz anatómica y variantes. |
+| `POST` | `/api/v1/store/cart/lock` | `StorefrontApiController@lockCart` | Invoca a `StockReservationService` para retener unidades por 5 min. |
+| `POST` | `/api/v1/store/cart/release` | `StorefrontApiController@releaseCartLock` | Libera unidades retenidas voluntariamente antes del TTL. |
+| `POST` | `/api/v1/store/cart/checkout` | `StorefrontApiController@checkout` | Transforma un candado (Lock) activo a estado `purchased` consolidando la orden. |
 
 ---
 
 ## 5. [TODO: Definir regla exacta]
 
 1. `[TODO: Definir regla exacta]` **Límite máximo de renovaciones de reserva de stock permitidas por sesión.**  
-   *Nota actual:* El cliente puede extender el temporizador volviendo a tocar el selector de talla. Debe definirse si se limita a un máximo de 2 extensiones (15 minutos totales) para evitar acaparamiento desleal de prendas de alta demanda.
+   *Nota de Auditoría Actual:* En el código, el método `reserveStock` del `StockReservationService` **no tiene límite de renovaciones**. Actualmente, cada vez que se envía un latido al API, se sobreescribe `expires_at` infinitamente. El negocio debe decidir si se impone un tope técnico (ej. máximo 3 extensiones o 15 minutos totales) para evitar acaparamiento malicioso.
+
+
+## Security & Data Privacy (DoD Compliance)
+- **FormRequests**: Removed inline validation and `$request->all()` usage. Implemented strict FormRequests (`CheckoutRequest`, `UpdateProfileRequest`, `SubscribeRequest`, `PushSubscribeRequest`, `PushEndpointRequest`) with XSS sanitization (`strip_tags`) via `prepareForValidation()`.
+- **Data Leaks Prevented**: Removed `cost` property exposure in `StorefrontApiController@productDetail`.
+- **UX/UI Compliance**: Enforced `resize: vertical !important;` on all CMS `<textarea>` fields, verified modal depths (`#storeAppRoot` architecture compliance), and ensured emoji-free UI elements (SVG replacements where needed).

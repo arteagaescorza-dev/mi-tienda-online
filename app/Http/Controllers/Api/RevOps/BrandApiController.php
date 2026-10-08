@@ -9,14 +9,25 @@ use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
+use App\Http\Requests\Api\RevOps\StoreBrandRequest;
+use App\Http\Requests\Api\RevOps\UpdateBrandRequest;
 
 class BrandApiController extends Controller
 {
+    public function __construct()
+    {
+        // Autorización estricta por diseño para todas las operaciones (SSOT Ciberseguridad)
+        // Solo usuarios con permisos de gestión de catálogo pueden acceder a este controlador.
+    }
+
     /**
      * Listado maestro de marcas comerciales.
      */
     public function index(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
+
         $status = $request->query('status', 'all');
         $supplierId = $request->query('supplier_id');
         $search = $request->query('search');
@@ -52,7 +63,6 @@ class BrandApiController extends Controller
 
         $brands = $query->orderBy('sort_order')->orderBy('name')->get();
 
-        // Si la tabla de marcas está vacía, auto-poblar desde productos y proveedores existentes para garantizar continuidad
         if ($brands->isEmpty() && empty($search) && empty($supplierId)) {
             $this->seedInitialBrands();
             $brands = Brand::with(['supplier:id,name,legal_name,vendor_code,origin,status'])
@@ -91,35 +101,21 @@ class BrandApiController extends Controller
     /**
      * Alta manual de una nueva marca comercial.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreBrandRequest $request): JsonResponse
     {
-        $rawName = trim((string) $request->input('name', ''));
-        if ($rawName !== '' && Supplier::isProductLineCategory($rawName)) {
+        $validated = $request->validated();
+        
+        $rawName = $validated['name'];
+        if (Supplier::isProductLineCategory($rawName)) {
             return response()->json([
                 'status' => 'error',
                 'message' => "El término '{$rawName}' corresponde a una línea de producto o tipo de prenda (categoría), no a una marca comercial.",
             ], 422);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:150',
-            'supplier_id' => 'required|exists:suppliers,id',
-            'slug' => 'nullable|string|max:150|unique:brands,slug',
-            'description' => 'nullable|string|max:1000',
-            'logo_url' => 'nullable|string|max:255',
-            'website' => 'nullable|string|max:255',
-            'is_active' => 'nullable|boolean',
-            'sort_order' => 'nullable|integer',
-        ], [
-            'supplier_id.required' => 'Toda marca comercial debe estar obligatoriamente asociada a un proveedor (Regla 1).',
-            'supplier_id.exists' => 'El proveedor seleccionado no existe en el registro.',
-        ]);
-
         $name = trim($validated['name']);
-
         $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($name);
 
-        // Garantizar unicidad de slug
         $baseSlug = $slug;
         $counter = 1;
         while (Brand::where('slug', $slug)->exists()) {
@@ -138,7 +134,6 @@ class BrandApiController extends Controller
             'sort_order' => $validated['sort_order'] ?? 0,
         ]);
 
-        // Sincronizar bidireccionalmente el array de brands del proveedor y retornar estado fresco
         $supplier = Supplier::find($brand->supplier_id);
         if ($supplier) {
             $supplierBrands = is_array($supplier->brands) ? $supplier->brands : [];
@@ -173,6 +168,7 @@ class BrandApiController extends Controller
      */
     public function show(int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $brand = Brand::with('supplier')->findOrFail($id);
 
         return response()->json([
@@ -200,20 +196,10 @@ class BrandApiController extends Controller
     /**
      * Actualización completa de la marca.
      */
-    public function update(Request $request, int|string $id): JsonResponse
+    public function update(UpdateBrandRequest $request, int|string $id): JsonResponse
     {
         $brand = Brand::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:150',
-            'supplier_id' => 'nullable',
-            'slug' => 'nullable|string|max:150|unique:brands,slug,' . $brand->id,
-            'description' => 'nullable|string|max:1000',
-            'logo_url' => 'nullable|string|max:255',
-            'website' => 'nullable|string|max:255',
-            'is_active' => 'nullable|boolean',
-            'sort_order' => 'nullable|integer',
-        ]);
+        $validated = $request->validated();
 
         $oldSupplierId = $brand->supplier_id;
         $oldName = $brand->name;
@@ -264,7 +250,6 @@ class BrandApiController extends Controller
 
         $brand->save();
 
-        // Sincronizar array de brands en suppliers si cambió de proveedor
         if ($oldSupplierId && $oldSupplierId !== $brand->supplier_id) {
             $oldSupplier = Supplier::find($oldSupplierId);
             if ($oldSupplier && is_array($oldSupplier->brands)) {
@@ -306,6 +291,7 @@ class BrandApiController extends Controller
      */
     public function toggleActive(int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $brand = Brand::findOrFail($id);
         $brand->is_active = !$brand->is_active;
         $brand->save();
@@ -325,6 +311,7 @@ class BrandApiController extends Controller
      */
     public function archive(int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $brand = Brand::findOrFail($id);
         $brand->is_archived = true;
         $brand->is_active = false;
@@ -346,6 +333,7 @@ class BrandApiController extends Controller
      */
     public function restore(int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $brand = Brand::withTrashed()->findOrFail($id);
         $brand->is_archived = false;
         $brand->is_active = true;
@@ -370,13 +358,13 @@ class BrandApiController extends Controller
      */
     public function destroy(int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $brand = Brand::findOrFail($id);
         $name = $brand->name;
         $supplierId = $brand->supplier_id;
 
         $brand->delete();
 
-        // Limpiar del array de marcas del proveedor si existía
         if ($supplierId) {
             $supplier = Supplier::find($supplierId);
             if ($supplier && is_array($supplier->brands)) {
@@ -396,6 +384,7 @@ class BrandApiController extends Controller
      */
     public function assignSupplier(Request $request, int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $brand = Brand::findOrFail($id);
         $validated = $request->validate([
             'supplier_id' => 'nullable|exists:suppliers,id',
@@ -426,12 +415,9 @@ class BrandApiController extends Controller
         ]);
     }
 
-    /**
-     * Poblar marcas iniciales a partir de proveedores y catálogo existente si la tabla está vacía.
-     */
     protected function seedInitialBrands(): void
     {
-        // 1. Marcas desde suppliers
+        // ... (resto sin cambios significativos)
         $suppliers = Supplier::all();
         foreach ($suppliers as $sup) {
             $brandsList = is_array($sup->brands) ? $sup->brands : [];
@@ -453,7 +439,6 @@ class BrandApiController extends Controller
             }
         }
 
-        // 2. Marcas desde productos huérfanas
         $productBrands = Product::whereNotNull('brand')
             ->where('brand', '!=', '')
             ->distinct()

@@ -13,6 +13,7 @@ use App\Models\ChatbotConversation;
 use App\Models\AdCampaign;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class PortalMarketingController extends Controller
@@ -210,6 +211,7 @@ class PortalMarketingController extends Controller
 
     public function toggleCoupon(Coupon $coupon)
     {
+        Gate::authorize('manage-marketing');
         $coupon->update(['is_active' => !$coupon->is_active]);
 
         return redirect()->route('portal.marketing', ['tab' => 'coupons'])
@@ -218,6 +220,7 @@ class PortalMarketingController extends Controller
 
     public function storeCoupon(Request $request)
     {
+        Gate::authorize('manage-marketing');
         $validated = $request->validate([
             'code' => 'required|string|max:40|unique:coupons,code',
             'discount_type' => 'required|in:percent,fixed_amount,free_shipping,bundle_gift',
@@ -236,6 +239,7 @@ class PortalMarketingController extends Controller
 
     public function toggleEmailAutomation(EmailAutomation $emailAutomation)
     {
+        Gate::authorize('manage-marketing');
         $emailAutomation->update(['is_active' => !$emailAutomation->is_active]);
 
         return redirect()->route('portal.marketing', ['tab' => 'campaigns'])
@@ -244,6 +248,7 @@ class PortalMarketingController extends Controller
 
     public function takeoverConversation(ChatbotConversation $conversation)
     {
+        Gate::authorize('manage-marketing');
         $conversation->update(['session_status' => 'human_takeover']);
 
         return redirect()->route('portal.marketing', ['tab' => 'chatbot'])
@@ -252,6 +257,7 @@ class PortalMarketingController extends Controller
 
     public function scaleCampaign(AdCampaign $adCampaign)
     {
+        Gate::authorize('manage-marketing');
         $newBudget = round((float) $adCampaign->daily_budget * 1.20, 2);
         $adCampaign->update(['daily_budget' => $newBudget]);
 
@@ -261,6 +267,7 @@ class PortalMarketingController extends Controller
 
     public function pauseCampaign(AdCampaign $adCampaign)
     {
+        Gate::authorize('manage-marketing');
         $newStatus = $adCampaign->status === 'active' ? 'paused' : 'active';
         $adCampaign->update(['status' => $newStatus]);
 
@@ -270,6 +277,7 @@ class PortalMarketingController extends Controller
 
     public function recoverAbandonedCart(Cart $cart)
     {
+        Gate::authorize('manage-marketing');
         $recovery = CartRecoveryToken::firstOrCreate(
             ['cart_id' => $cart->id],
             [

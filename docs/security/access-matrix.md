@@ -119,3 +119,4 @@ Los operadores con perfil `all_roles` disponen de un selector en el footer del S
    *Nota actual:* Laravel opera con el valor estándar `SESSION_LIFETIME=120` (2 horas). Debe definirse si para roles directivos/financieros se acorta a 15 minutos de inactividad por estándar bancario.
 2. `[TODO: Definir regla exacta]` **Auditoría de exportaciones masivas de base de datos de clientes.**  
    *Nota actual:* El rol `sales` puede exportar listados de leads a CSV; se debe definir si requiere aprobación previa por token de dos factores (`2FA`) enviada al Administrador.
+

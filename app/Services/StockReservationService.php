@@ -211,6 +211,8 @@ class StockReservationService
                 $lock->status = 'purchased';
                 $lock->save();
             }
+
+            event(new \App\Events\Inventory\OrderStockCommitted($cartId, $orderId, $userId));
         });
     }
 

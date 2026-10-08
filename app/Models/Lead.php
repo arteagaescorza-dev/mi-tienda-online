@@ -35,7 +35,7 @@ class Lead extends Model
     ];
 
     protected $fillable = [
-        'name', 'email', 'phone', 'source', 'status', 'notes', 'metadata', 'last_contacted_at',
+        'name', 'email', 'phone', 'source', 'status', 'notes', 'metadata', 'last_contacted_at', 'universe', 'lifecycle_stage', 'lead_score', 'last_interaction_at'
     ];
 
     protected $casts = [

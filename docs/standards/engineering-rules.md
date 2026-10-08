@@ -121,3 +121,4 @@ La arquitectura de la aplicación debe operar de forma óptima en entornos sin d
    *Nota actual:* Los productos archivados conservan sus fotos WebP en `storage/app/public/products/`. Debe definirse si se eliminan tras 90 días de inactividad o si se preservan indefinidamente.
 2. `[TODO: Definir regla exacta]` **Estrategia de respaldo off-site diario para base de datos MySQL.**  
    *Nota actual:* El script actual genera dump local vía mysqldump; se debe formalizar el destino de réplica externa (S3, Cloudflare R2 o SFTP remoto).
+

@@ -1,74 +1,67 @@
-# Especificación Técnica: Hub 3 - Marketing, CRM & Fidelización
-## Plataforma RevOps E-Commerce Multiverso & ERP (Mi Tienda Online)
+# Hub 3: CRM & Marketing
 
-**Módulo:** Hub 3 (Gestión de Relaciones con Clientes, Atribución & Automatización)  
-**Versión de Especificación:** 3.0 (SSOT)  
-**Vistas Principales:** `resources/views/portal/crm.blade.php`, `resources/views/portal/leads.blade.php`  
-**Controladores:** `app/Http/Controllers/LeadController.php`, `app/Http/Controllers/CrmController.php`
+Este documento define la arquitectura, contratos de datos y reglas de negocio para el Hub de CRM y Marketing. Refleja la realidad actual de la base de código.
 
----
+## 1. Propósito
+Gestionar clientes potenciales (leads), automatizar el marketing, recuperar carritos abandonados, manejar interacciones de chatbots y rastrear la atribución de ventas.
 
-## 1. Propósito & Alcance del Módulo
+## 2. Modelo de Datos (Contratos de Datos)
 
-El **Hub 3** convierte prospectos anónimos en clientes fidelizados de alto valor de vida (LTV). Orquesta:
-1. **Atribución de Tráfico Multicanal:** Captura transparente de parámetros UTM (`utm_source`, `utm_medium`, `utm_campaign`) y convenios de aliados (Hub 7).
-2. **Motor de Puntuación Predictiva (Lead Scoring):** Clasificación algorítmica de prospectos en caliente basada en eventos de navegación y compra.
-3. **Recuperación Activa de Carritos Abandonados:** Automatización de enlaces tokenizados en 1 clic para reactivación de checkout mediante WhatsApp Concierge.
-4. **Telemetría de Conversión CAPI:** Envío redundante de eventos de servidor a Meta Conversions API y Google Analytics 4 (Measurement Protocol).
+### Leads y CRM
+*   **Modelo:** `App\Models\Lead`
+*   **Tabla:** `leads`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Almacena la información principal de los clientes potenciales.
 
----
+*   **Modelo:** `App\Models\LeadInteraction`
+*   **Tabla:** `lead_interactions`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Registra cada interacción (toque) con un lead. Reemplaza la funcionalidad aislada de *lead scoring*, integrando la evaluación del comportamiento directamente en el historial de interacciones o metadatos JSON.
 
-## 2. Modelo de Datos & Entidades Clave
+### Marketing y Atribución
+*   **Modelo:** `App\Models\Attribution`
+*   **Tabla:** `attributions`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Rastrea el origen y la campaña que generó una conversión o interacción (UTMs, referidos).
 
-```mermaid
-erDiagram
-    LEADS ||--o{ ATTRIBUTIONS : tracked_by
-    LEADS ||--o{ LEAD_SCORES : scored_with
-    LEADS ||--o{ CARTS : creates
-    LEADS ||--o{ ORDERS : converts_to
-```
+*   **Modelo:** `App\Models\EmailAutomation`
+*   **Tabla:** `email_automations`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Gestiona las campañas de correo electrónico automatizadas.
 
-### Tablas MySQL Principales:
-* `leads`: Nombre, email, teléfono/WhatsApp, estado (`new`, `contacted`, `nurturing`, `opportunity`, `converted`, `lost`), score total acumulado.
-* `attributions`: Sesión, dirección IP anonimizada, URL de aterrizaje, fuente UTM, campaña y token de alianza.
-* `lead_scores`: Bitácora inmutable de variaciones de puntuación (evento detonador, delta de puntos, marca temporal).
-* `carts`: Carrito activo o abandonado con `is_abandoned` (booleano), `session_id`, items seleccionados y token de reactivación.
+### Carritos y Recuperación
+*   **Modelo:** `App\Models\Cart`
+*   **Tabla:** `carts`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Almacena los carritos de compra activos (y abandonados).
 
----
+*   **Modelo:** `App\Models\CartRecoveryToken`
+*   **Tabla:** `cart_recovery_tokens`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Tokens seguros generados para enlaces enviados a clientes con carritos abandonados, permitiendo su recuperación directa.
 
-## 3. Lógica de Negocio & Algoritmos
+### Chatbots
+*   **Modelo:** `App\Models\ChatbotConversation`
+*   **Tabla:** `chatbot_conversations`
+*   **Estado:** `[IMPLEMENTADO]`
+*   **Descripción:** Registro de las interacciones automatizadas de soporte o ventas vía chatbot.
 
-### 3.1. Matriz de Puntuación (Lead Scoring Engine)
-El sistema actualiza el score del lead en función de micro-conversiones observadas:
+## 3. Lógica de Negocio y File Scope
 
-| Evento de Usuario | Puntos Asignados | Explicación Operativa |
-| :--- | :---: | :--- |
-| Visita a Ficha de Producto (PDP) | `+1` | Interés pasivo en catálogo. |
-| Agregar prenda a Carrito | `+5` | Intención de compra evidente. |
-| Abandono de Carrito en Checkout | `+10` | Fricción en pago; candidato para recuperación inmediata. |
-| Registro de Formulario / Lead Magnet | `+20` | Captura de datos personales consentidos. |
-| Apertura / Clic en enlace WhatsApp | `+15` | Interacción directa con concierge. |
+### Controladores
+*   **`App\Http\Controllers\PortalMarketingController`** `[IMPLEMENTADO]`
+    *   Gestiona la interfaz de administración del portal para campañas, leads y configuraciones generales de marketing.
+*   **`App\Http\Controllers\MarketingApiController`** `[IMPLEMENTADO]`
+    *   Provee los endpoints para integraciones externas, webhooks y el frontend para registrar interacciones, atribuciones o suscripciones.
+*   **`App\Http\Controllers\LeadController`** `[IMPLEMENTADO]`
+    *   Maneja el CRUD y la lógica de estado específicamente para la entidad `Lead`.
 
-Cuando el puntaje acumulado supera el umbral de **30 puntos**, el lead transiciona automáticamente a estado `opportunity` y aparece resaltado en el dashboard de ventas de Ana (Hub 1).
+### Flujos y Casos Límite
+*   **Lead Scoring:** La tabla `lead_scores` heredada ya no existe. El cálculo de score actual debe inferirse a través de las interacciones en `lead_interactions` o consultarse en las lógicas dentro de los servicios asociados a `LeadController` / `PortalMarketingController`.
+*   **Recuperación de Carritos:** La tabla `cart_recovery_tokens` es fundamental. Los correos automatizados generan un registro en esta tabla. El token debe tener tiempo de expiración y debe invalidarse una vez que el carrito se convierte en orden. `[IMPLEMENTADO]`
+*   **Atribución Múltiple:** Las `attributions` se vinculan tanto a `leads` como potencialmente a órdenes (ventas). Es clave manejar correctamente si el sistema usa "first-click", "last-click" o atribución lineal.
 
-### 3.2. Mecanismo de Reactivación de Carrito Tokenizado
-Cuando un carrito supera 120 minutos sin concretar pago:
-1. Se genera un token criptográfico único (`hash_hmac`).
-2. Se ensambla un enlace profundo: `https://tienda.com/carrito?resume={token}`.
-3. La asesora comercial puede pulsar el botón **"Contactar por WhatsApp"** en Hub 1 o Hub 3, abriendo la API de WhatsApp con el mensaje pre-redactado:
-   > *"Hola [Nombre], vimos que dejaste tus prendas en carrito. Tu reserva expira pronto, puedes retomarla directamente aquí: [Enlace Tokenizado]"*
-
----
-
-## 4. Endpoints RESTful & Servicios
-
-### `POST /api/v1/crm/lead/track-event`
-* **Payload:** `{ lead_id: 124, event_type: "cart_abandoned", metadata: { cart_id: 562 } }`
-* **Respuesta:** `{ success: true, new_score: 35, status: "opportunity" }`
-
----
-
-## 5. [TODO: Definir regla exacta]
-
-1. `[TODO: Definir regla exacta]` **Límite de mensajes de reactivación por WhatsApp por cliente al mes.**  
-   *Nota actual:* El sistema no restringe el reenvío si hay múltiples carritos. Debe establecerse una política de no-spam (máximo 2 contactos por semana por número telefónico).
+## 4. TODOs y Decisiones Pendientes
+*   `[TODO: Definir regla exacta]` - Especificar el mecanismo exacto y el algoritmo para calcular el *Lead Score* en la vista o en procesos en segundo plano ahora que la tabla estática fue eliminada.
+*   `[TODO: Definir regla exacta]` - Aclarar la ventana de tiempo para la expiración de los `cart_recovery_tokens`.
+*   `[TODO: Definir regla exacta]` - Documentar el modelo de atribución exacto (First-click, Last-click, etc.) que gobierna la tabla `attributions`.

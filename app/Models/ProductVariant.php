@@ -11,6 +11,8 @@ class ProductVariant extends Model
 
     protected $fillable = ['product_id','sku','attributes','price','cost','visible'];
 
+    protected $hidden = ['cost'];
+
     protected $casts = [
         'attributes' => 'array',
         'price' => 'decimal:2',
