@@ -8,6 +8,13 @@ use App\Models\ShippingManifest;
 use App\Services\RevOps\RmaResolutionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\GenerateManifestRequest;
+use App\Http\Requests\Api\RevOps\InspectRmaRequest;
+use App\Http\Requests\Api\RevOps\ResolveRmaRequest;
+use App\Http\Requests\Api\RevOps\IssueReplacementOrderRequest;
+use App\Http\Requests\Api\RevOps\IssueStoreCreditRequest;
+use Illuminate\Support\Facades\Gate;
+
 
 class LogisticsApiController extends Controller
 {
@@ -18,14 +25,11 @@ class LogisticsApiController extends Controller
     /**
      * Genera y cierra un manifiesto diario de recolección (TASK-LOG-01).
      */
-    public function generateManifest(Request $request): JsonResponse
+    public function generateManifest(GenerateManifestRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'courier' => 'required|string|in:dhl_express,estafeta,fedex,paquetexpress',
-            'driver_name' => 'nullable|string|max:100',
-            'driver_badge' => 'nullable|string|max:50',
-            'shipment_ids' => 'nullable|array',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $manifest = ShippingManifest::create([
             'manifest_number' => 'MAN-' . strtoupper(substr($validated['courier'], 0, 3)) . '-' . date('YmdHis'),
@@ -48,17 +52,11 @@ class LogisticsApiController extends Controller
     /**
      * Dictamina la inspección sanitaria de una garantía RMA (TASK-LOG-04, TASK-INT-09).
      */
-    public function inspectRma(Request $request, int $id): JsonResponse
+    public function inspectRma(InspectRmaRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'verdict' => 'required|in:approved_replacement,approved_store_credit,rejected_sanitary_violation,approved',
-            'has_hygiene_seal_intact' => 'required|boolean',
-            'has_factory_tag' => 'required|boolean',
-            'inspector_name' => 'nullable|string|max:100',
-            'technical_notes' => 'nullable|string|max:500',
-            'replacement_sku' => 'nullable|string|max:60',
-            'credit_amount' => 'nullable|numeric|min:0',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $rma = RmaRequest::findOrFail($id);
 
@@ -95,17 +93,11 @@ class LogisticsApiController extends Controller
     /**
      * Resuelve una solicitud RMA mediante generador automatico de reemplazo o credito (TASK-INT-09).
      */
-    public function resolveRma(Request $request, int $id): JsonResponse
+    public function resolveRma(ResolveRmaRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'resolution_type' => 'required|in:replacement_order,store_credit,rejected_sanitary_violation',
-            'has_hygiene_seal_intact' => 'nullable|boolean',
-            'has_factory_tag' => 'nullable|boolean',
-            'inspector_name' => 'nullable|string|max:100',
-            'technical_notes' => 'nullable|string|max:500',
-            'replacement_sku' => 'nullable|string|max:60',
-            'credit_amount' => 'nullable|numeric|min:0',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $rma = RmaRequest::findOrFail($id);
 
@@ -126,13 +118,11 @@ class LogisticsApiController extends Controller
     /**
      * Emite especificamente una orden de reemplazo #ORD-XXXX-RMA (TASK-INT-09).
      */
-    public function issueReplacementOrder(Request $request, int $id): JsonResponse
+    public function issueReplacementOrder(IssueReplacementOrderRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'replacement_sku' => 'nullable|string|max:60',
-            'replacement_variant_id' => 'nullable|integer',
-            'technical_notes' => 'nullable|string|max:500',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $rma = RmaRequest::findOrFail($id);
         $result = $this->rmaService->issueReplacementOrder($rma, $validated, auth()->user());
@@ -143,12 +133,11 @@ class LogisticsApiController extends Controller
     /**
      * Emite especificamente un credito de tienda en cupon para WhatsApp (TASK-INT-09).
      */
-    public function issueStoreCredit(Request $request, int $id): JsonResponse
+    public function issueStoreCredit(IssueStoreCreditRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'credit_amount' => 'nullable|numeric|min:0',
-            'technical_notes' => 'nullable|string|max:500',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $rma = RmaRequest::findOrFail($id);
         $result = $this->rmaService->issueStoreCredit($rma, $validated, auth()->user());

@@ -13,6 +13,14 @@ use App\Models\PackagingMovement;
 use App\Services\RevOps\PackagingFulfillmentService;
 use App\Services\RevOps\RmaResolutionService;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\Logistics\IndexRequest;
+use App\Http\Requests\Portal\Logistics\CloseManifestRequest;
+use App\Http\Requests\Portal\Logistics\InspectRmaRequest;
+use App\Http\Requests\Portal\Logistics\UpdatePackageStockRequest;
+use App\Http\Requests\Portal\Logistics\FulfillPackagingRequest;
+use App\Http\Requests\Portal\Logistics\UpdateShipmentStatusRequest;
+use Illuminate\Support\Facades\Gate;
+
 
 class PortalLogisticsController extends Controller
 {
@@ -21,8 +29,10 @@ class PortalLogisticsController extends Controller
         protected RmaResolutionService $rmaResolutionService = new RmaResolutionService()
     ) {}
 
-    public function index(Request $request)
+    public function index(IndexRequest $request)
     {
+        Gate::authorize('manage-logistics');
+
         $ordersCount = Order::count();
 
         // 1. Mesa de Expedición: Bultos en espera de recolección (status 'label_created' o 'packed')
@@ -174,15 +184,11 @@ class PortalLogisticsController extends Controller
         ]);
     }
 
-    public function closeManifest(Request $request)
+    public function closeManifest(CloseManifestRequest $request)
     {
-        $validated = $request->validate([
-            'courier' => 'required|string',
-            'driver_name' => 'required|string|max:100',
-            'driver_badge_or_truck' => 'required|string|max:50',
-            'shipment_ids' => 'required|array|min:1',
-            'shipment_ids.*' => 'integer|exists:shipments,id',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $courierPrefix = match ($validated['courier']) {
             'dhl_express' => 'DHL',
@@ -227,18 +233,11 @@ class PortalLogisticsController extends Controller
             ->with('success', "Manifiesto {$manifestNumber} cerrado con éxito ({$manifest->total_packages} bultos entregados al chofer {$validated['driver_name']}{$packagingNote}).");
     }
 
-    public function inspectRma(Request $request, RmaRequest $rmaRequest)
+    public function inspectRma(InspectRmaRequest $request, RmaRequest $rmaRequest)
     {
-        $validated = $request->validate([
-            'inspector_name' => 'required|string|max:100',
-            'has_hygiene_seal_intact' => 'nullable',
-            'has_factory_tag' => 'nullable',
-            'verdict' => 'required|in:approved,rejected_sanitary_violation',
-            'technical_notes' => 'nullable|string|max:500',
-            'resolution_type' => 'nullable|string|in:replacement_shipped,store_credit_wallet,replacement_order,store_credit,refund',
-            'replacement_sku' => 'nullable|string|max:60',
-            'credit_amount' => 'nullable|numeric|min:0',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $resType = match ($validated['resolution_type'] ?? 'replacement_order') {
             'store_credit_wallet', 'store_credit' => 'store_credit',
@@ -261,13 +260,11 @@ class PortalLogisticsController extends Controller
             ->with('success', $result['message']);
     }
 
-    public function updatePackageStock(Request $request, PackageType $packageType)
+    public function updatePackageStock(UpdatePackageStockRequest $request, PackageType $packageType)
     {
-        $validated = $request->validate([
-            'stock_available' => 'required|integer|min:0',
-            'unit_cost' => 'required|numeric|min:0',
-            'reorder_point' => 'nullable|integer|min:0',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $this->packagingService->adjustStock(
             $packageType,
@@ -283,11 +280,11 @@ class PortalLogisticsController extends Controller
             ->with('success', "Inventario de insumo {$packageType->name} ({$packageType->code}) actualizado a {$validated['stock_available']} unidades (ROP: {$rop}). Asiento registrado en Kardex.");
     }
 
-    public function fulfillPackaging(Request $request, Shipment $shipment)
+    public function fulfillPackaging(FulfillPackagingRequest $request, Shipment $shipment)
     {
-        $validated = $request->validate([
-            'package_type_id' => 'nullable|exists:package_types,id',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $packageType = !empty($validated['package_type_id']) 
             ? PackageType::find($validated['package_type_id']) 
@@ -304,11 +301,11 @@ class PortalLogisticsController extends Controller
             ->with('success', "Empaque asignado y deducido en Kardex: 1 unidad de {$movement->packageType->name} para {$shipment->tracking_number}. Stock restante: {$movement->stock_after}.");
     }
 
-    public function updateShipmentStatus(Request $request, Shipment $shipment)
+    public function updateShipmentStatus(UpdateShipmentStatusRequest $request, Shipment $shipment)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:label_created,packed,in_transit,out_for_delivery,delivered,failed_attempt,returned',
-        ]);
+        Gate::authorize('manage-logistics');
+
+        $validated = 
 
         $data = ['status' => $validated['status']];
         if ($validated['status'] === 'delivered') {

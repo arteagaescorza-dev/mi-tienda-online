@@ -71,7 +71,10 @@ erDiagram
 
 ---
 
-## 4. [TODO: Definir regla exacta]
+## 4. Custodia de Paquetes No Reclamados
+
+1. **Tiempo máximo de custodia de paquetes devueltos no reclamados por el cliente:**  
+   *Regla de Negocio:* El tiempo de resguardo (en días naturales) antes de su destrucción o donación **es parametrizable**. Este valor debe ser gestionado desde los ajustes del módulo de logística (Settings del Hub 6), brindando flexibilidad operativa según la temporada o volumen de incidencias.
 
 1. `[TODO: Definir regla exacta]` **Tiempo máximo de custodia de paquetes devueltos no reclamados por el cliente.**  
    *Nota actual:* El almacén resguarda paquetes retornados en el rack de incidencias por 30 días naturales antes de destruirlos o donarlos.

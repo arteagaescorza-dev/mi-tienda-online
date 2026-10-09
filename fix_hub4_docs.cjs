@@ -14,3 +14,4 @@ const newText = `## 4. Reglas de Negocio Específicas
 content = content.replace(todoRegex, newText);
 fs.writeFileSync(path, content, 'utf8');
 console.log("Updated hub-4 docs");
+
