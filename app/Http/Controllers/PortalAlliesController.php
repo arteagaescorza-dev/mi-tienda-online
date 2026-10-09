@@ -9,14 +9,22 @@ use App\Models\AllyCouponDirB;
 use App\Models\AllyLeadCapture;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\B2b\PortalAlliesIndexRequest;
+use App\Http\Requests\Portal\B2b\PortalAlliesPartnerPortalRequest;
+use App\Http\Requests\Portal\B2b\PortalAlliesValidateTicketRequest;
+use App\Http\Requests\Portal\B2b\PortalAlliesExecuteSettlementRequest;
+use Illuminate\Support\Facades\Gate;
+
 
 class PortalAlliesController extends Controller
 {
     /**
      * Display the Allies Directory, Campaigns Dir A, Attribution Dir B and Clearing House.
      */
-    public function index(Request $request)
+    public function index(PortalAlliesIndexRequest $request)
     {
+        Gate::authorize('manage-b2b');
+
         if (Ally::count() === 0) {
             (new \Database\Seeders\AlliesSeeder())->run();
         }
@@ -203,8 +211,10 @@ class PortalAlliesController extends Controller
     /**
      * Extranet for Commercial Partners (Partner Portal via cryptographic token).
      */
-    public function partnerPortal(Request $request, $token = null)
+    public function partnerPortal(PortalAlliesPartnerPortalRequest $request, $token = null)
     {
+        Gate::authorize('manage-b2b');
+
         $allies = Ally::with(['campaignsDirA', 'couponsDirB', 'leadCaptures', 'settlements'])->get();
         $selectedAllyModel = null;
 
@@ -237,11 +247,11 @@ class PortalAlliesController extends Controller
     /**
      * Validate and redeem a voucher at door / box office (TASK-ALY-05).
      */
-    public function validateTicket(Request $request)
+    public function validateTicket(PortalAlliesValidateTicketRequest $request)
     {
-        $request->validate([
-            'voucher_code' => 'required|string|max:50',
-        ]);
+        Gate::authorize('manage-b2b');
+
+        
 
         $code = strtoupper(trim($request->input('voucher_code')));
         $lead = AllyLeadCapture::where('voucher_code', $code)->first();
@@ -286,11 +296,11 @@ class PortalAlliesController extends Controller
     /**
      * Execute a clearing settlement for an ally (SPEI or in-kind apparel) (TASK-ALY-04).
      */
-    public function executeSettlement(Request $request, Ally $ally)
+    public function executeSettlement(PortalAlliesExecuteSettlementRequest $request, Ally $ally)
     {
-        $validated = $request->validate([
-            'settlement_type' => 'nullable|string|in:spei_transfer,in_kind_apparel,sponsorship_vip',
-        ]);
+        Gate::authorize('manage-b2b');
+
+        $validated = 
 
         $type = $validated['settlement_type'] ?? 'spei_transfer';
 

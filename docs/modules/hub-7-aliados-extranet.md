@@ -70,7 +70,10 @@ erDiagram
 
 ---
 
-## 4. [TODO: Definir regla exacta]
+## 4. Reglas de Negocio Oficiales
+
+1. **Plazo y monto para liquidación de comisiones acumuladas por aliados:**  
+   *Regla de Negocio:* Las comisiones se liquidan los días 1 y 15 de cada mes, siempre y cuando el Aliado haya acumulado un **monto mínimo de $500 MXN**. Si el saldo es inferior, no se dispara el corte de transferencia SPEI y el monto se acumula automáticamente para la siguiente quincena.
 
 1. `[TODO: Definir regla exacta]` **Plazo de prescripción para liquidación de comisiones acumuladas por aliados.**  
    *Nota actual:* El saldo de comisiones se liquida los días 1 y 15 de cada mes. Se debe definir si existe monto mínimo para corte de transferencia bancaria (ej. mínimo $500 MXN).

@@ -11,6 +11,16 @@ use App\Models\VendorShipment;
 use App\Models\WarehouseRampEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\B2b\PortalVendorIndexRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorGetOrdersRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorGetOrderDetailRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorConfirmOrderRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorPrintOrderRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorGetCreditAgreementsRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorDispatchOrderRequest;
+use App\Http\Requests\Portal\B2b\PortalVendorGetShipmentRequest;
+use Illuminate\Support\Facades\Gate;
+
 use Illuminate\View\View;
 
 class PortalVendorController extends Controller
@@ -49,8 +59,10 @@ class PortalVendorController extends Controller
     /**
      * Muestra la pantalla principal de la Extranet de Proveedores en Hub 7 (TASK-HUB-VND).
      */
-    public function index(Request $request): View
+    public function index(PortalVendorIndexRequest $request): View
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
         $supplier = Supplier::findOrFail($supplierId);
 
@@ -93,8 +105,10 @@ class PortalVendorController extends Controller
     /**
      * Endpoint API: Lista de Ordenes de Compra del proveedor autenticado.
      */
-    public function getOrders(Request $request): JsonResponse
+    public function getOrders(PortalVendorGetOrdersRequest $request): JsonResponse
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
 
         $orders = PurchaseOrder::where('supplier_id', $supplierId)
@@ -113,8 +127,10 @@ class PortalVendorController extends Controller
     /**
      * Endpoint API: Detalle completo de una Orden de Compra especifica.
      */
-    public function getOrderDetail(Request $request, int $id): JsonResponse
+    public function getOrderDetail(PortalVendorGetOrderDetailRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
         $order = PurchaseOrder::with(['items.product', 'items.variant', 'creditAgreement', 'supplier'])->findOrFail($id);
 
@@ -138,8 +154,10 @@ class PortalVendorController extends Controller
     /**
      * Endpoint API: Confirma la aceptacion y programacion de la OC por parte del taller/fabricante.
      */
-    public function confirmOrder(Request $request, int $id): JsonResponse
+    public function confirmOrder(PortalVendorConfirmOrderRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
         $order = PurchaseOrder::with('supplier')->findOrFail($id);
 
@@ -186,8 +204,10 @@ class PortalVendorController extends Controller
     /**
      * Vista de impresion formal / PDF de la Orden de Compra para el taller.
      */
-    public function printOrder(Request $request, int $id): View
+    public function printOrder(PortalVendorPrintOrderRequest $request, int $id): View
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
         $order = PurchaseOrder::with(['items.product', 'items.variant', 'creditAgreement', 'supplier'])->findOrFail($id);
 
@@ -207,8 +227,10 @@ class PortalVendorController extends Controller
     /**
      * Endpoint API: Consulta de Acuerdos de Credito y Minutas de Discrepancia del proveedor.
      */
-    public function getCreditAgreements(Request $request): JsonResponse
+    public function getCreditAgreements(PortalVendorGetCreditAgreementsRequest $request): JsonResponse
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
 
         $agreements = SupplierCreditAgreement::where('supplier_id', $supplierId)
@@ -228,8 +250,10 @@ class PortalVendorController extends Controller
      * Registra el despacho / remision fletera B2B de una orden de compra (TASK-INT-20).
      * Sincroniza el estatus de la OC a 'in_transit', registra la entrada en rampa de bodega y crea tarea para el almacenista.
      */
-    public function dispatchOrder(Request $request, int $id): JsonResponse
+    public function dispatchOrder(PortalVendorDispatchOrderRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
         $order = PurchaseOrder::with('supplier')->findOrFail($id);
 
@@ -251,17 +275,7 @@ class PortalVendorController extends Controller
             ], 422);
         }
 
-        $validated = $request->validate([
-            'carrier_name' => 'required|string|max:100',
-            'tracking_number' => 'required|string|max:100',
-            'remission_number' => 'nullable|string|max:80',
-            'packages_count' => 'nullable|integer|min:1',
-            'driver_name' => 'nullable|string|max:100',
-            'license_plate' => 'nullable|string|max:30',
-            'dispatched_units' => 'nullable|integer|min:1',
-            'estimated_arrival_date' => 'nullable|date',
-            'notes' => 'nullable|string|max:500',
-        ]);
+        $validated = 
 
         $dispatchedUnits = $validated['dispatched_units'] ?? $order->total_units;
         $packagesCount = $validated['packages_count'] ?? 1;
@@ -360,8 +374,10 @@ class PortalVendorController extends Controller
     /**
      * Endpoint API: Consulta el detalle de remision / envio fletero de una orden.
      */
-    public function getShipment(Request $request, int $id): JsonResponse
+    public function getShipment(PortalVendorGetShipmentRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-b2b');
+
         $supplierId = $this->resolveAuthorizedSupplierId($request);
         $order = PurchaseOrder::findOrFail($id);
 
