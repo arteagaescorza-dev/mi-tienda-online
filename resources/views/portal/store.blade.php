@@ -1677,39 +1677,36 @@
 
 
 
-                        <div id="createTypeContentWrap">
+                        <div id="createTypeWrap" class="mb-4">
                             <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Contenido</label>
-                            <select name="type" id="createSectionTypeContent" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                                <option value="hero_carousel">Hero Principal de Vitrina</option>
-                                <option value="hero_carousel">Carrusel de Banners Promocionales</option>
-                                <option value="editorial_banner">Banner Editorial / Promoción</option>
-                                <option value="brand_pillars">Pilares de Marca (Garantías & Courier)</option>
-                                <option value="promo_modal">Modal Promocional / Pop-up Flotante</option>
-                                <option value="custom_html_css_js">Botones CTA / Bloque Personalizado</option>
+                            <select name="type" id="createSectionType" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="hero">Hero Principal de Vitrina</option>
+                                <option value="carousel">Carrusel de Banners Promocionales</option>
+                                <option value="pop_up">Modal Promocional / Pop-up Flotante</option>
+                                <option value="buttons">Botones CTA / Bloque Personalizado</option>
                             </select>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4">
-                            <div>
-                                <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
-                                <input type="text" name="title" id="inpCreateTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS">
+                        <!-- CAMPOS COMUNES -->
+                        <div id="createCommonFieldsWrap" class="space-y-4 mb-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
+                                    <input type="text" name="title" id="inpCreateTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
+                                    <input type="text" name="badge" id="inpCreateBadge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO">
+                                </div>
                             </div>
                             <div>
-                                <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
-                                <input type="text" name="badge" id="inpCreateBadge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO">
+                                <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
+                                <input type="text" name="subtitle" id="inpCreateSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
-                            <input type="text" name="subtitle" id="inpCreateSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
-                        </div>
-
-
-
-                        <!-- CONFIGURACIÓN DE CONTENIDO & CÓDIGO CUSTOM (SOLO MODO CONTENIDO) -->
-                        <div id="createContentOptions" class="space-y-4">
-                            
+                        <!-- 1. MODO HERO -->
+                        <div id="createHeroWrap" class="space-y-4">
                             <!-- BLOQUE MOTOR DE HERO DINÁMICO -->
                             <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
                                 <div class="flex items-center justify-between border-b border-slate-200 pb-2">
@@ -1895,15 +1892,58 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
+                        <!-- 2. MODO CAROUSEL -->
+                        <div id="createCarouselWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block font-bold text-slate-700 mb-1 text-xs">Añadir Banners (Boceto)</label>
+                                <div class="p-6 bg-white border-2 border-dashed border-slate-300 rounded-xl text-center text-slate-500 text-xs hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition">
+                                    <div class="mb-2">
+                                        <svg class="mx-auto h-8 w-8 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </div>
+                                    + Subir Imágenes para Carrusel
+                                </div>
+                                <div class="flex items-center gap-2 mt-4">
+                                    <input type="checkbox" id="carouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                    <label class="text-xs text-slate-700 font-bold cursor-pointer" for="carouselAutoPlay">Autoplay (Transición automática)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. MODO POP UP -->
+                        <div id="createPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Pop-up</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Imagen del Modal (Opcional)</label>
+                                    <input type="file" name="settings[popup_image]" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Comportamiento de Cierre</label>
+                                    <select name="settings[popup_close_behavior]" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                        <option value="outside">Permitir cerrar al hacer clic fuera (Overlay)</option>
+                                        <option value="button">Requerir acción (Solo Botón Cerrar)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. MODO BOTONES / BLOQUE PERSONALIZADO -->
+                        <div id="createButtonsWrap" class="space-y-4 hidden">
                             <!-- EDITOR DE CÓDIGO CUSTOM -->
                             <div id="createCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
                                 <div class="flex items-center justify-between">
-                                    <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom</span>
+                                    <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Bloque Custom / HTML Libre</span>
                                 </div>
                                 <div>
-                                    <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
-                                    <textarea name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                                    <label class="block font-semibold text-slate-300 mb-1 text-xs">Ingresa tu código HTML / CSS</label>
+                                    <textarea name="custom_html" rows="5" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<!-- Tu código HTML aquí -->&#10;<div class='flex gap-2 justify-center'>&#10;  <button class='btn'>Botón 1</button>&#10;</div>"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1978,6 +2018,29 @@
             
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
+                    const createSectionType = document.getElementById('createSectionType');
+                    const createHeroWrap = document.getElementById('createHeroWrap');
+                    const createCarouselWrap = document.getElementById('createCarouselWrap');
+                    const createPopUpWrap = document.getElementById('createPopUpWrap');
+                    const createButtonsWrap = document.getElementById('createButtonsWrap');
+
+                    function switchSectionType() {
+                        if (!createSectionType) return;
+                        const val = createSectionType.value;
+                        if(createHeroWrap) createHeroWrap.style.display = val === 'hero' ? 'block' : 'none';
+                        if(createCarouselWrap) createCarouselWrap.style.display = val === 'carousel' ? 'block' : 'none';
+                        if(createPopUpWrap) createPopUpWrap.style.display = val === 'pop_up' ? 'block' : 'none';
+                        if(createButtonsWrap) createButtonsWrap.style.display = val === 'buttons' ? 'block' : 'none';
+                    }
+
+                    if (createSectionType) {
+                        createSectionType.addEventListener('change', () => {
+                            switchSectionType();
+                            if(typeof updatePreview === 'function') updatePreview();
+                        });
+                        switchSectionType(); // Init state
+                    }
+
                     const titleInput = document.getElementById('inpCreateTitle');
                     const subtitleInput = document.getElementById('inpCreateSubtitle');
                     const badgeInput = document.getElementById('inpCreateBadge');
