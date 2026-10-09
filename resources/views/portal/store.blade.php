@@ -1636,13 +1636,13 @@
     <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
     <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
     <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
-        <div class="bg-white rounded-2xl max-w-7xl w-full flex flex-col md:flex-row shadow-2xl h-[95vh] md:h-[90vh] overflow-hidden relative">
+        <div class="bg-white rounded-2xl w-full max-w-[1100px] flex flex-col md:flex-row shadow-2xl h-[95vh] md:h-[85vh] overflow-hidden relative">
             
             <!-- Botón de cerrar general (Solo visible en Desktop, en mobile va en el header) -->
             <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-8 h-8 items-center justify-center bg-white rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 shadow-md transition font-bold text-xl cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
 
             <!-- COLUMNA IZQUIERDA: CONFIGURACIONES (1/3) -->
-            <div class="w-full md:w-1/3 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20">
+            <div class="w-full md:w-[380px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -2129,22 +2129,62 @@
                             previewGrid.innerHTML = boxes;
                             
                             // Estilo cabecera catálogo
-                            previewHeroArea.classList.remove('min-h-[400px]', 'bg-slate-900', 'text-white');
+                            previewHeroArea.classList.remove('min-h-[400px]', 'bg-slate-900', 'text-white', 'bg-cover', 'bg-center');
                             previewHeroArea.classList.add('bg-white', 'text-slate-900', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
-                            previewTitle.className = 'text-2xl md:text-3xl font-extrabold tracking-tight';
-                            previewSubtitle.className = 'text-slate-500 mt-2 text-sm';
+                            previewHeroArea.style.backgroundImage = 'none';
+                            previewTitle.className = 'text-xl md:text-2xl font-extrabold tracking-tight relative z-10';
+                            previewSubtitle.className = 'text-slate-500 mt-2 text-sm relative z-10';
                         } else {
                             previewCatalogArea.style.display = 'none';
                             
                             // Estilo Hero Completo
                             previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
-                            previewHeroArea.classList.add('bg-slate-900', 'text-white', 'min-h-[450px]', 'p-12');
-                            previewTitle.className = 'text-3xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-md';
-                            previewSubtitle.className = 'text-slate-200 md:text-lg max-w-xl mx-auto mt-4 drop-shadow-sm block';
+                            previewHeroArea.classList.add('bg-slate-900', 'text-white', 'min-h-[400px]', 'p-8');
+                            
+                            if (window._currentHeroPreviewBg) {
+                                previewHeroArea.style.backgroundImage = window._currentHeroPreviewBg;
+                                previewHeroArea.classList.add('bg-cover', 'bg-center');
+                            } else {
+                                previewHeroArea.style.backgroundImage = 'none';
+                            }
+
+                            previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-md relative z-10';
+                            previewSubtitle.className = 'text-slate-200 md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
                         }
                     }
 
-                    // Attach event listeners
+                    // Handlers para la imagen de fondo
+                    const bgFileInput = document.querySelector('#createSectionModal input[name="background_image_file"]');
+                    const bgUrlInput = document.getElementById('createHeroBgUrl');
+
+                    if (bgFileInput) {
+                        bgFileInput.addEventListener('change', function(e) {
+                            if (this.files && this.files[0]) {
+                                const reader = new FileReader();
+                                reader.onload = function(evt) {
+                                    window._currentHeroPreviewBg = `url('${evt.target.result}')`;
+                                    updatePreview();
+                                }
+                                reader.readAsDataURL(this.files[0]);
+                            } else {
+                                window._currentHeroPreviewBg = '';
+                                updatePreview();
+                            }
+                        });
+                    }
+
+                    if (bgUrlInput) {
+                        bgUrlInput.addEventListener('input', function(e) {
+                            if (this.value) {
+                                window._currentHeroPreviewBg = `url('${this.value}')`;
+                            } else {
+                                window._currentHeroPreviewBg = '';
+                            }
+                            updatePreview();
+                        });
+                    }
+
+                    // Attach event listeners para el resto de inputs
                     const inputs = [titleInput, subtitleInput, badgeInput, layoutInput, limitInput, ctaPrimaryInput, ctaSecondaryInput];
                     inputs.forEach(el => {
                         if (el) el.addEventListener('input', updatePreview);
@@ -2213,6 +2253,43 @@
                             }
                         });
                     });
+
+                    // Overlay / Degradado interactivo
+                    const gradEnableInput = document.getElementById('createEnableGradient');
+                    const gradStartInput = document.getElementById('createGradColorStartPicker');
+                    const gradEndInput = document.getElementById('createGradColorEndPicker');
+                    const gradDirInput = document.getElementById('createGradDir');
+                    const gradOpacityInput = document.getElementById('createGradOpacity');
+                    const previewOverlay = document.getElementById('previewOverlay');
+
+                    function updateOverlay() {
+                        if (!isCatalogMode && gradEnableInput && gradEnableInput.checked && previewOverlay) {
+                            previewOverlay.style.display = 'block';
+                            previewOverlay.className = "absolute inset-0 z-0";
+                            
+                            let dir = gradDirInput ? gradDirInput.value : 'to bottom';
+                            let start = gradStartInput ? gradStartInput.value : '#0f172a';
+                            let end = gradEndInput ? gradEndInput.value : '#1e1b4b';
+                            let opacity = gradOpacityInput ? gradOpacityInput.value / 100 : 0.8;
+                            
+                            previewOverlay.style.background = `linear-gradient(${dir}, ${start}, ${end})`;
+                            previewOverlay.style.opacity = opacity;
+                        } else {
+                            if (previewOverlay) previewOverlay.style.display = 'none';
+                        }
+                    }
+
+                    const gradInputs = [gradEnableInput, gradStartInput, gradEndInput, gradDirInput, gradOpacityInput];
+                    gradInputs.forEach(el => {
+                        if (el) el.addEventListener('input', updateOverlay);
+                        if (el) el.addEventListener('change', updateOverlay);
+                    });
+
+                    const origUpdatePreview = updatePreview;
+                    updatePreview = function() {
+                        origUpdatePreview();
+                        updateOverlay();
+                    };
 
                     // Trigger initial paint
                     setTimeout(updatePreview, 100);
