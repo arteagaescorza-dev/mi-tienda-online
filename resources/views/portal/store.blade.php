@@ -1634,414 +1634,590 @@
     <!-- ========================================================================= -->
 
     <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
+    <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
     <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span>Crear Nueva Sección Modular para el Home</span>
-                </h3>
-                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
-            </div>
+        <div class="bg-white rounded-2xl max-w-7xl w-full flex flex-col md:flex-row shadow-2xl h-[95vh] md:h-[90vh] overflow-hidden relative">
+            
+            <!-- Botón de cerrar general (Solo visible en Desktop, en mobile va en el header) -->
+            <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-8 h-8 items-center justify-center bg-white rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 shadow-md transition font-bold text-xl cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
 
-            <!-- Bifurcador de Modo: Catálogo vs Contenido -->
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl mb-4 text-xs font-bold">
-                <button type="button" id="createModeCatalogBtn" class="flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition">
-                    Prendas / Catálogo (Hub 4)
-                </button>
-                <button type="button" id="createModeContentBtn" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition">
-                    Hero / Carrusel / Modal / Custom
-                </button>
-            </div>
-
-            <form method="POST" action="{{ route('portal.store.sections.store') }}" id="createSectionForm" enctype="multipart/form-data" class="space-y-4 text-xs">
-                @csrf
-                <input type="hidden" name="status" value="active">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nombre Interno (Gestión CMS)</label>
-                        <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Colección Verano Jocks">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Vitrina Destino</label>
-                        <select name="universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="all">Todas las vitrinas (Global / Multiverso)</option>
-                            <option value="marte">Marte (Masculino)</option>
-                            <option value="venus">Venus (Femenino)</option>
-                            <option value="tiresias">Tiresias (Afirmativo)</option>
-                            <option value="terra">Terra (Unisex / Matriz)</option>
-                        </select>
-                    </div>
+            <!-- COLUMNA IZQUIERDA: CONFIGURACIONES (1/3) -->
+            <div class="w-full md:w-1/3 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Crear Nueva Sección Modular</span>
+                    </h3>
+                    <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer md:hidden" data-action="close-modal" data-modal="createSectionModal">&times;</button>
                 </div>
 
-                <!-- SELECTOR DE TIPO CONDICIONADO AL MODO -->
-                <div id="createTypeCatalogWrap">
-                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Catálogo</label>
-                    <select name="type" id="createSectionTypeCatalog" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                        <option value="curated_products">Tarjetas de Prendas Destacadas / Colección</option>
-                        <option value="categories_grid">Cuadrícula de Categorías (Hub 4)</option>
-                        <option value="family_showcase">Vitrina de Familias Textiles</option>
-                        <option value="tags_cloud">Nube de Tags / Estilos</option>
-                        <option value="subcategories_slider">Slider de Subcategorías</option>
-                    </select>
-                </div>
-
-                <div id="createTypeContentWrap" class="hidden" style="display: none;">
-                    <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Contenido</label>
-                    <select name="type_content" id="createSectionTypeContent" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                        <option value="hero_carousel">Hero Principal de Vitrina</option>
-                        <option value="hero_carousel">Carrusel de Banners Promocionales</option>
-                        <option value="editorial_banner">Banner Editorial / Promoción</option>
-                        <option value="brand_pillars">Pilares de Marca (Garantías & Courier)</option>
-                        <option value="promo_modal">Modal Promocional / Pop-up Flotante</option>
-                        <option value="custom_html_css_js">Botones CTA / Bloque Personalizado</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
-                        <input type="text" name="title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
-                        <input type="text" name="badge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
-                    <input type="text" name="subtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
-                </div>
-
-                <!-- TAXONOMÍAS HUB 4 (SOLO MODO CATÁLOGO) -->
-                <div id="createCatalogTaxonomies" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Reglas de Catálogo (Hub 4)</span>
-                        <span class="text-[10px] text-slate-500 font-medium">Filtrado dinámico</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Categoría Principal</label>
-                            <select name="query_rules[category_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todas las categorías</option>
-                                @foreach($categories as $cat)
-                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Subcategoría</label>
-                            <select name="query_rules[subcategory_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todas las subcategorías</option>
-                                @foreach($subcategories as $scat)
-                                    <option value="{{ $scat->id }}">{{ $scat->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Proveedor</label>
-                            <select name="query_rules[supplier]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todos los proveedores</option>
-                                @foreach($suppliers as $sup)
-                                    <option value="{{ $sup->trade_name ?? $sup->name }}">{{ $sup->trade_name ?? $sup->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Marca</label>
-                            <select name="query_rules[brand]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todas las marcas</option>
-                                @foreach($brands as $br)
-                                    <option value="{{ $br }}">{{ $br }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Familia Textil</label>
-                            <select name="query_rules[family]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Cualquier fibra</option>
-                                @foreach($textileFamilies as $tf)
-                                    <option value="{{ $tf }}">{{ $tf }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Tipo de Prenda</label>
-                            <select name="query_rules[garment_type]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Cualquier tipo</option>
-                                @foreach($garmentTypes as $gt)
-                                    <option value="{{ $gt }}">{{ $gt }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Tag de Estilo</label>
-                            <select name="query_rules[tag]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Cualquier estilo</option>
-                                @foreach($styleTags as $st)
-                                    <option value="{{ $st }}">{{ $st }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Filtro de Descuento</label>
-                            <select name="query_rules[discount]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                @foreach($discountOptions as $dVal => $dLabel)
-                                    <option value="{{ $dVal }}">{{ $dLabel }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Límite de Prendas</label>
-                            <select name="query_rules[limit]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="4">4 Prendas</option>
-                                <option value="8" selected>8 Prendas</option>
-                                <option value="12">12 Prendas</option>
-                                <option value="16">16 Prendas</option>
-                                <option value="24">24 Prendas</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-600 mb-1">Disposición Visual</label>
-                        <select name="query_rules[layout]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                            <option value="grid_4">Cuadrícula 4 Columnas (Desktop) / 2 Columnas (Mobile)</option>
-                            <option value="grid_3">Cuadrícula 3 Columnas</option>
-                            <option value="grid_2">Cuadrícula 2 Columnas</option>
-                            <option value="carousel">Carrusel Deslizable Horizontal (Swipe)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- CONFIGURACIÓN DE CONTENIDO & CÓDIGO CUSTOM (SOLO MODO CONTENIDO) -->
-                <!-- CONFIGURACIÓN DE CONTENIDO & MOTOR DE HERO (SOLO MODO CONTENIDO) -->
-                <div id="createContentOptions" class="space-y-4 hidden" style="display: none;">
-                    
-                    <!-- BLOQUE MOTOR DE HERO DINÁMICO (CUANDO ES HERO_CAROUSEL) -->
-                    <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                Motor de Hero Dinámico &amp; Vitrina
-                            </span>
-                            <span class="text-[10px] text-slate-500 font-medium">Bifurcación Visual / Código &amp; Sangrado</span>
-                        </div>
-
-                        <!-- 1. BIFURCADOR DE MODO: ESTRUCTURADO VS CÓDIGO CUSTOM -->
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado del Hero</label>
-                            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
-                                <label id="createHeroModeStructuredLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition bg-white text-indigo-700 shadow-xs text-center">
-                                    <input type="radio" name="settings[hero_mode]" value="structured" checked class="hidden" onchange="window.toggleHeroModeCreate(this.value)">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
-                                    <span>Visual Estructurado</span>
-                                </label>
-                                <label id="createHeroModeCustomLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition text-slate-600 hover:text-slate-900 text-center">
-                                    <input type="radio" name="settings[hero_mode]" value="custom" class="hidden" onchange="window.toggleHeroModeCreate(this.value)">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                    <span>Código Custom</span>
-                                </label>
-                            </div>
-                            <p class="text-[11px] text-slate-500 mt-1">Conmuta de forma mutuamente excluyente qué contenido se renderiza en la tienda para evitar duplicados.</p>
-                        </div>
-
-                        <!-- 2. ANCHO DE PANTALLA: FULL WIDTH VS BOXED -->
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Ancho en Pantalla (Sangrado Edge-to-Edge)</label>
-                            <input type="hidden" name="settings[full_width]" value="0">
-                            <label class="flex items-center gap-2.5 cursor-pointer p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
-                                <input type="checkbox" name="settings[full_width]" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                                <div>
-                                    <span class="font-bold text-slate-800 block text-xs">Abarcar 100% del Ancho de Pantalla (Full-Width)</span>
-                                    <span class="text-[11px] text-slate-500">Expande el hero de borde a borde rompiendo los límites del contenedor principal de la tienda.</span>
-                                </div>
-                            </label>
-                        </div>
-
-                        <!-- 3. IMAGEN DE FONDO (AMBOS MODOS) -->
-                        <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
-                            <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo (Background Image)</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
-                                    <input type="file" name="background_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'createHeroBgPreview')">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL Externa</label>
-                                    <input type="text" name="settings[background_image]" id="createHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'createHeroBgPreview')">
-                                </div>
-                            </div>
-                            <div id="createHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
-                                <img src="" alt="Vista previa fondo" class="w-16 h-10 object-cover rounded shadow-xs bg-slate-200">
-                                <span class="text-[11px] text-slate-600 truncate flex-1 font-mono"></span>
-                                <button type="button" onclick="window.clearHeroBgPreview('createSectionModal', 'createHeroBgPreview', 'createHeroBgUrl')" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">Eliminar</button>
-                            </div>
-                        </div>
-
-                        <!-- 4. CAPA DE DEGRADADOS OVERLAY (AMBOS MODOS) -->
-                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-                            <input type="hidden" name="settings[enable_gradient]" value="0">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="settings[enable_gradient]" id="createEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createGradientControls').style.display = this.checked ? 'block' : 'none'">
-                                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado / Overlay sobre el Fondo</span>
-                            </label>
-
-                            <div id="createGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
-                                            <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
-                                            <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección</label>
-                                        <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
-                                            <option value="to bottom">Vertical ↓</option>
-                                            <option value="to right">Horizontal →</option>
-                                            <option value="135deg">Diagonal ↘</option>
-                                            <option value="to top">Invertido ↑</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Opacidad: <span id="createGradOpacityVal">80%</span></label>
-                                        <input type="range" name="settings[gradient_opacity]" id="createGradOpacity" min="10" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
-                                    </div>
-                                </div>
-
-                                <div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
-                            </div>
-                        </div>
-
-                        <!-- 5. ACCIONES Y BOTONES DEL HERO (SOLO MODO ESTRUCTURADO) -->
-                        <div id="createHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-                            <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
-
-                            <!-- Botón Primario -->
-                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-                                <span class="block font-bold text-indigo-700 text-[11px]">Botón Primario (Destacado)</span>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
-                                        <input type="text" name="settings[cta_primary_text]" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: EXPLORAR CATÁLOGO" value="EXPLORAR CATÁLOGO">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="text" name="settings[cta_primary_url]" id="createCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
-                                            <select onchange="if(this.value){ document.getElementById('createCtaPrimaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
-                                                <option value="">+ Insertar Ruta</option>
-                                                <optgroup label="Secciones Modulares">
-                                                    @foreach($sections as $s)
-                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Páginas Institucionales">
-                                                    @foreach($pages as $p)
-                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Vitrinas Multiverso">
-                                                    <option value="/marte">/marte (Masculino)</option>
-                                                    <option value="/venus">/venus (Femenino)</option>
-                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
-                                                    <option value="/terra">/terra (Unisex)</option>
-                                                    <option value="/catalogo">/catalogo (General)</option>
-                                                </optgroup>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botón Secundario -->
-                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-                                <span class="block font-bold text-slate-700 text-[11px]">Botón Secundario (Opcional)</span>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
-                                        <input type="text" name="settings[cta_secondary_text]" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: GUÍA DE TALLAS TORZO" value="GUÍA DE TALLAS TORZO">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="text" name="settings[cta_secondary_url]" id="createCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas o #section-3">
-                                            <select onchange="if(this.value){ document.getElementById('createCtaSecondaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
-                                                <option value="">+ Insertar Ruta</option>
-                                                <optgroup label="Secciones Modulares">
-                                                    @foreach($sections as $s)
-                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Páginas Institucionales">
-                                                    @foreach($pages as $p)
-                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Vitrinas Multiverso">
-                                                    <option value="/marte">/marte (Masculino)</option>
-                                                    <option value="/venus">/venus (Femenino)</option>
-                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
-                                                    <option value="/terra">/terra (Unisex)</option>
-                                                    <option value="/catalogo">/catalogo (General)</option>
-                                                </optgroup>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EDITOR DE CÓDIGO CUSTOM (SCOPED) -->
-                    <div id="createCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
-                            <span class="text-[10px] text-slate-400 font-mono">Scoped HTML / CSS / JS</span>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
-                            <textarea style="resize: vertical !important;" name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<div class='custom-hero'>...</div>"></textarea>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
-                                <textarea style="resize: vertical !important;" name="custom_css" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder=".custom-hero { padding: 24px; }"></textarea>
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
-                                <textarea style="resize: vertical !important;" name="custom_js" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="console.log('Sección iniciada');"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createSectionModal">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm">
-                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Guardar y Añadir Sección</span>
+                <!-- Bifurcador de Modo: Catálogo vs Contenido -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl mb-4 text-xs font-bold shrink-0">
+                    <button type="button" id="createModeCatalogBtn" class="flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition">
+                        Catálogo (Hub 4)
+                    </button>
+                    <button type="button" id="createModeContentBtn" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition">
+                        Hero / Custom
                     </button>
                 </div>
-            </form>
+
+                <form method="POST" action="{{ route('portal.store.sections.store') }}" id="createSectionForm" enctype="multipart/form-data" class="space-y-4 text-xs flex-1 flex flex-col">
+                    @csrf
+                    <input type="hidden" name="status" value="active">
+                    
+                    <div class="flex-1 space-y-4">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Nombre Interno (Gestión CMS)</label>
+                                <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Colección Verano Jocks">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Vitrina Destino</label>
+                                <select name="universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                                    <option value="all">Todas las vitrinas (Global / Multiverso)</option>
+                                    <option value="marte">Marte (Masculino)</option>
+                                    <option value="venus">Venus (Femenino)</option>
+                                    <option value="tiresias">Tiresias (Afirmativo)</option>
+                                    <option value="terra">Terra (Unisex / Matriz)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- SELECTOR DE TIPO CONDICIONADO AL MODO -->
+                        <div id="createTypeCatalogWrap">
+                            <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Catálogo</label>
+                            <select name="type" id="createSectionTypeCatalog" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                                <option value="curated_products">Tarjetas de Prendas Destacadas / Colección</option>
+                                <option value="categories_grid">Cuadrícula de Categorías (Hub 4)</option>
+                                <option value="family_showcase">Vitrina de Familias Textiles</option>
+                                <option value="tags_cloud">Nube de Tags / Estilos</option>
+                                <option value="subcategories_slider">Slider de Subcategorías</option>
+                            </select>
+                        </div>
+
+                        <div id="createTypeContentWrap" class="hidden" style="display: none;">
+                            <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Contenido</label>
+                            <select name="type_content" id="createSectionTypeContent" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                                <option value="hero_carousel">Hero Principal de Vitrina</option>
+                                <option value="hero_carousel">Carrusel de Banners Promocionales</option>
+                                <option value="editorial_banner">Banner Editorial / Promoción</option>
+                                <option value="brand_pillars">Pilares de Marca (Garantías & Courier)</option>
+                                <option value="promo_modal">Modal Promocional / Pop-up Flotante</option>
+                                <option value="custom_html_css_js">Botones CTA / Bloque Personalizado</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
+                                <input type="text" name="title" id="inpCreateTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
+                                <input type="text" name="badge" id="inpCreateBadge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
+                            <input type="text" name="subtitle" id="inpCreateSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
+                        </div>
+
+                        <!-- TAXONOMÍAS HUB 4 (SOLO MODO CATÁLOGO) -->
+                        <div id="createCatalogTaxonomies" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Reglas de Catálogo (Hub 4)</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Categoría Principal</label>
+                                    <select name="query_rules[category_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Todas las categorías</option>
+                                        @foreach($categories as $cat)
+                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Subcategoría</label>
+                                    <select name="query_rules[subcategory_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Todas las subcategorías</option>
+                                        @foreach($subcategories as $scat)
+                                            <option value="{{ $scat->id }}">{{ $scat->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Proveedor</label>
+                                    <select name="query_rules[supplier]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Todos los proveedores</option>
+                                        @foreach($suppliers as $sup)
+                                            <option value="{{ $sup->trade_name ?? $sup->name }}">{{ $sup->trade_name ?? $sup->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Marca</label>
+                                    <select name="query_rules[brand]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Todas las marcas</option>
+                                        @foreach($brands as $br)
+                                            <option value="{{ $br }}">{{ $br }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Familia Textil</label>
+                                    <select name="query_rules[family]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Cualquier fibra</option>
+                                        @foreach($textileFamilies as $tf)
+                                            <option value="{{ $tf }}">{{ $tf }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Tipo de Prenda</label>
+                                    <select name="query_rules[garment_type]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Cualquier tipo</option>
+                                        @foreach($garmentTypes as $gt)
+                                            <option value="{{ $gt }}">{{ $gt }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Tag de Estilo</label>
+                                    <select name="query_rules[tag]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="">Cualquier estilo</option>
+                                        @foreach($styleTags as $st)
+                                            <option value="{{ $st }}">{{ $st }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Filtro de Descuento</label>
+                                    <select name="query_rules[discount]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        @foreach($discountOptions as $dVal => $dLabel)
+                                            <option value="{{ $dVal }}">{{ $dLabel }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Límite de Prendas</label>
+                                    <select name="query_rules[limit]" id="inpCreateLimit" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="4">4 Prendas</option>
+                                        <option value="8" selected>8 Prendas</option>
+                                        <option value="12">12 Prendas</option>
+                                        <option value="16">16 Prendas</option>
+                                        <option value="24">24 Prendas</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-600 mb-1">Disposición Visual</label>
+                                    <select name="query_rules[layout]" id="inpCreateLayout" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
+                                        <option value="grid_4">Cuadrícula 4 Columnas (Desktop) / 2 Columnas (Mobile)</option>
+                                        <option value="grid_3">Cuadrícula 3 Columnas</option>
+                                        <option value="grid_2">Cuadrícula 2 Columnas</option>
+                                        <option value="carousel">Carrusel Horizontal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONFIGURACIÓN DE CONTENIDO & CÓDIGO CUSTOM (SOLO MODO CONTENIDO) -->
+                        <div id="createContentOptions" class="space-y-4 hidden" style="display: none;">
+                            
+                            <!-- BLOQUE MOTOR DE HERO DINÁMICO -->
+                            <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                    <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                        Motor de Hero Dinámico
+                                    </span>
+                                </div>
+
+                                <!-- 1. BIFURCADOR DE MODO -->
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado</label>
+                                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
+                                        <label id="createHeroModeStructuredLbl" class="flex items-center justify-center py-2 px-3 rounded-lg cursor-pointer transition bg-white text-indigo-700 shadow-xs text-center">
+                                            <input type="radio" name="settings[hero_mode]" value="structured" checked class="hidden" onchange="window.toggleHeroModeCreate(this.value)">
+                                            <span>Visual Estructurado</span>
+                                        </label>
+                                        <label id="createHeroModeCustomLbl" class="flex items-center justify-center py-2 px-3 rounded-lg cursor-pointer transition text-slate-600 hover:text-slate-900 text-center">
+                                            <input type="radio" name="settings[hero_mode]" value="custom" class="hidden" onchange="window.toggleHeroModeCreate(this.value)">
+                                            <span>Código Custom</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- 2. ANCHO DE PANTALLA -->
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Ancho en Pantalla</label>
+                                    <input type="hidden" name="settings[full_width]" value="0">
+                                    <label class="flex items-center gap-2.5 cursor-pointer p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                                        <input type="checkbox" name="settings[full_width]" id="inpCreateFullWidth" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                        <span class="font-bold text-slate-800 block text-xs">Full-Width</span>
+                                    </label>
+                                </div>
+
+                                <!-- 3. IMAGEN DE FONDO -->
+                                <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
+                                    <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo</label>
+                                    <div class="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
+                                            <input type="file" name="background_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'createHeroBgPreview')">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL Externa</label>
+                                            <input type="text" name="settings[background_image]" id="createHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'createHeroBgPreview')">
+                                        </div>
+                                    </div>
+                                    <div id="createHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
+                                        <img src="" alt="Vista previa fondo" class="w-16 h-10 object-cover rounded shadow-xs bg-slate-200">
+                                        <span class="text-[11px] text-slate-600 truncate flex-1 font-mono"></span>
+                                        <button type="button" onclick="window.clearHeroBgPreview('createSectionModal', 'createHeroBgPreview', 'createHeroBgUrl')" class="text-rose-600 font-bold text-xs cursor-pointer">Eliminar</button>
+                                    </div>
+                                </div>
+
+                                <!-- 4. CAPA DE DEGRADADOS OVERLAY -->
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                    <input type="hidden" name="settings[enable_gradient]" value="0">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="settings[enable_gradient]" id="createEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createGradientControls').style.display = this.checked ? 'block' : 'none'">
+                                        <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
+                                    </label>
+
+                                    <div id="createGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
+                                                <div class="flex items-center gap-1.5">
+                                                    <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
+                                                    <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
+                                                <div class="flex items-center gap-1.5">
+                                                    <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
+                                                    <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección</label>
+                                                <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
+                                                    <option value="to bottom">Vertical ↓</option>
+                                                    <option value="to right">Horizontal →</option>
+                                                    <option value="135deg">Diagonal ↘</option>
+                                                    <option value="to top">Invertido ↑</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Opacidad: <span id="createGradOpacityVal">80%</span></label>
+                                                <input type="range" name="settings[gradient_opacity]" id="createGradOpacity" min="10" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+                                            </div>
+                                        </div>
+                                        <div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
+                                    </div>
+                                </div>
+
+                                <!-- 5. ACCIONES Y BOTONES DEL HERO -->
+                                <div id="createHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                    <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
+
+                                    <!-- Botón Primario -->
+                                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                        <span class="block font-bold text-indigo-700 text-[11px]">Botón Primario</span>
+                                        <div class="grid grid-cols-1 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                                <input type="text" name="settings[cta_primary_text]" id="inpCreateCtaPrimary" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: EXPLORAR CATÁLOGO" value="EXPLORAR CATÁLOGO">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                                <div class="flex flex-col gap-1.5">
+                                                    <input type="text" name="settings[cta_primary_url]" id="createCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botón Secundario -->
+                                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                        <span class="block font-bold text-slate-700 text-[11px]">Botón Secundario</span>
+                                        <div class="grid grid-cols-1 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                                <input type="text" name="settings[cta_secondary_text]" id="inpCreateCtaSecondary" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: GUÍA DE TALLAS" value="">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                                <div class="flex flex-col gap-1.5">
+                                                    <input type="text" name="settings[cta_secondary_url]" id="createCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- EDITOR DE CÓDIGO CUSTOM -->
+                            <div id="createCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom</span>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
+                                    <textarea name="custom_html" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer del Formulario Flotante en la parte inferior de la columna -->
+                    <div class="flex items-center justify-between gap-3 pt-4 pb-2 border-t border-slate-100 mt-auto bg-white sticky bottom-0 z-30">
+                        <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="createSectionModal">Cancelar</button>
+                        <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Guardar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- COLUMNA DERECHA: PREVIEW EN VIVO (2/3) -->
+            <div class="w-full md:w-2/3 bg-slate-100 p-0 sm:p-6 flex flex-col relative z-10">
+                <!-- Toggle de Dispositivo -->
+                <div class="absolute top-6 left-6 z-20 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200">
+                    <button type="button" class="preview-device-btn active px-3 py-1.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 cursor-pointer" data-device="desktop">Desktop</button>
+                    <button type="button" class="preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
+                </div>
+                
+                <!-- Contenedor del Preview Visual -->
+                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-12 md:mt-0">
+                    <div id="livePreviewContainer" class="w-full h-full max-h-[800px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                        <!-- Skeleton Header de la tienda -->
+                        <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
+                            <div class="w-24 h-6 bg-slate-200 rounded"></div>
+                            <div class="hidden md:flex gap-4">
+                                <div class="w-12 h-2 bg-slate-200 rounded"></div>
+                                <div class="w-12 h-2 bg-slate-200 rounded"></div>
+                                <div class="w-12 h-2 bg-slate-200 rounded"></div>
+                            </div>
+                            <div class="w-8 h-8 bg-slate-200 rounded-full md:hidden"></div>
+                        </div>
+                        
+                        <!-- Contenido Renderizado en Vivo -->
+                        <div id="livePreviewContent" class="w-full min-h-[400px] flex flex-col">
+                            
+                            <!-- Hero / Sección Preview -->
+                            <div id="previewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-50 min-h-[150px] overflow-hidden transition-all duration-300">
+                                
+                                <div class="relative z-10 max-w-2xl mx-auto space-y-4 w-full">
+                                    <span id="previewBadge" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full uppercase tracking-widest hidden"></span>
+                                    
+                                    <h2 id="previewTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Tu Título Aquí</h2>
+                                    
+                                    <p id="previewSubtitle" class="text-slate-600 md:text-lg max-w-xl mx-auto hidden">Tu bajada o subtítulo aquí.</p>
+                                    
+                                    <div id="previewActions" class="flex flex-wrap justify-center gap-3 pt-4 hidden">
+                                        <button id="previewBtnPrimary" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-sm shadow-sm hidden"></button>
+                                        <button id="previewBtnSecondary" class="px-6 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-lg font-bold text-sm hidden"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Grid de Catálogo Preview -->
+                            <div id="previewCatalogArea" class="w-full p-6 bg-white hidden">
+                                <div id="previewGrid" class="grid gap-4 w-full">
+                                    <!-- Items generados por JS -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const titleInput = document.getElementById('inpCreateTitle');
+                    const subtitleInput = document.getElementById('inpCreateSubtitle');
+                    const badgeInput = document.getElementById('inpCreateBadge');
+                    const layoutInput = document.getElementById('inpCreateLayout');
+                    const limitInput = document.getElementById('inpCreateLimit');
+                    
+                    const previewTitle = document.getElementById('previewTitle');
+                    const previewSubtitle = document.getElementById('previewSubtitle');
+                    const previewBadge = document.getElementById('previewBadge');
+                    const previewGrid = document.getElementById('previewGrid');
+                    
+                    const previewHeroArea = document.getElementById('previewHeroArea');
+                    const previewCatalogArea = document.getElementById('previewCatalogArea');
+                    
+                    const ctaPrimaryInput = document.getElementById('inpCreateCtaPrimary');
+                    const ctaSecondaryInput = document.getElementById('inpCreateCtaSecondary');
+                    
+                    const previewBtnPrimary = document.getElementById('previewBtnPrimary');
+                    const previewBtnSecondary = document.getElementById('previewBtnSecondary');
+                    const previewActions = document.getElementById('previewActions');
+
+                    const modeCatalogBtn = document.getElementById('createModeCatalogBtn');
+                    const modeContentBtn = document.getElementById('createModeContentBtn');
+                    const customHeroWrap = document.getElementById('createContentOptions');
+                    const catalogWrap = document.getElementById('createCatalogTaxonomies');
+                    const typeCatalogWrap = document.getElementById('createTypeCatalogWrap');
+                    const typeContentWrap = document.getElementById('createTypeContentWrap');
+
+                    let isCatalogMode = true;
+
+                    function updatePreview() {
+                        // Textos
+                        if (titleInput && previewTitle) {
+                            previewTitle.textContent = titleInput.value || (isCatalogMode ? 'Nueva Colección' : 'Tu Hero Principal');
+                        }
+                        if (subtitleInput && previewSubtitle) {
+                            previewSubtitle.textContent = subtitleInput.value;
+                            previewSubtitle.style.display = subtitleInput.value ? 'block' : 'none';
+                        }
+                        if (badgeInput && previewBadge) {
+                            previewBadge.textContent = badgeInput.value;
+                            previewBadge.style.display = badgeInput.value ? 'inline-block' : 'none';
+                        }
+                        
+                        // Botones
+                        let hasBtn = false;
+                        if (ctaPrimaryInput && previewBtnPrimary && !isCatalogMode) {
+                            previewBtnPrimary.textContent = ctaPrimaryInput.value;
+                            previewBtnPrimary.style.display = ctaPrimaryInput.value ? 'inline-block' : 'none';
+                            if(ctaPrimaryInput.value) hasBtn = true;
+                        } else {
+                            if(previewBtnPrimary) previewBtnPrimary.style.display = 'none';
+                        }
+
+                        if (ctaSecondaryInput && previewBtnSecondary && !isCatalogMode) {
+                            previewBtnSecondary.textContent = ctaSecondaryInput.value;
+                            previewBtnSecondary.style.display = ctaSecondaryInput.value ? 'inline-block' : 'none';
+                            if(ctaSecondaryInput.value) hasBtn = true;
+                        } else {
+                            if(previewBtnSecondary) previewBtnSecondary.style.display = 'none';
+                        }
+                        
+                        if (previewActions) {
+                            previewActions.style.display = hasBtn ? 'flex' : 'none';
+                        }
+
+                        // Modo Visual Toggle
+                        if (isCatalogMode) {
+                            previewCatalogArea.style.display = 'block';
+                            
+                            // Crear Esqueletos de Grid
+                            let limit = limitInput ? parseInt(limitInput.value) : 4;
+                            let cols = 'grid-cols-2 md:grid-cols-4';
+                            if(layoutInput && layoutInput.value === 'grid_3') cols = 'grid-cols-2 md:grid-cols-3';
+                            if(layoutInput && layoutInput.value === 'grid_2') cols = 'grid-cols-1 md:grid-cols-2';
+                            if(layoutInput && layoutInput.value === 'carousel') cols = 'flex overflow-hidden gap-4';
+                            
+                            previewGrid.className = `grid gap-4 w-full ${cols}`;
+                            if(layoutInput && layoutInput.value === 'carousel') previewGrid.className = 'flex overflow-hidden gap-4 w-full';
+
+                            let boxes = '';
+                            let maxBoxes = Math.min(limit, 8); // No mostrar más de 8 en preview por performance
+                            for(let i=0; i<maxBoxes; i++) {
+                                boxes += `<div class="${layoutInput.value==='carousel' ? 'w-48 shrink-0' : ''} aspect-[3/4] bg-slate-50 rounded-lg border border-slate-100 flex flex-col p-3 shadow-sm"><div class="w-full bg-slate-200 rounded flex-1 mb-3"></div><div class="h-3 bg-slate-300 rounded w-3/4 mb-1.5"></div><div class="h-3 bg-slate-200 rounded w-1/2"></div></div>`;
+                            }
+                            previewGrid.innerHTML = boxes;
+                            
+                            // Estilo cabecera catálogo
+                            previewHeroArea.classList.remove('min-h-[400px]', 'bg-slate-900', 'text-white');
+                            previewHeroArea.classList.add('bg-white', 'text-slate-900', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
+                            previewTitle.className = 'text-2xl md:text-3xl font-extrabold tracking-tight';
+                            previewSubtitle.className = 'text-slate-500 mt-2 text-sm';
+                        } else {
+                            previewCatalogArea.style.display = 'none';
+                            
+                            // Estilo Hero Completo
+                            previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
+                            previewHeroArea.classList.add('bg-slate-900', 'text-white', 'min-h-[450px]', 'p-12');
+                            previewTitle.className = 'text-3xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-md';
+                            previewSubtitle.className = 'text-slate-200 md:text-lg max-w-xl mx-auto mt-4 drop-shadow-sm block';
+                        }
+                    }
+
+                    // Attach event listeners
+                    const inputs = [titleInput, subtitleInput, badgeInput, layoutInput, limitInput, ctaPrimaryInput, ctaSecondaryInput];
+                    inputs.forEach(el => {
+                        if (el) el.addEventListener('input', updatePreview);
+                        if (el && el.tagName === 'SELECT') el.addEventListener('change', updatePreview);
+                    });
+
+                    // Eventos de botones de modo para UI y Preview
+                    if (modeCatalogBtn) {
+                        modeCatalogBtn.addEventListener('click', () => { 
+                            isCatalogMode = true;
+                            
+                            modeCatalogBtn.classList.replace('text-slate-600', 'text-indigo-700');
+                            modeCatalogBtn.classList.replace('hover:text-slate-900', 'bg-white');
+                            modeCatalogBtn.classList.add('shadow-xs');
+                            
+                            modeContentBtn.classList.replace('text-indigo-700', 'text-slate-600');
+                            modeContentBtn.classList.replace('bg-white', 'hover:text-slate-900');
+                            modeContentBtn.classList.remove('shadow-xs');
+
+                            if(catalogWrap) catalogWrap.style.display = 'block';
+                            if(typeCatalogWrap) typeCatalogWrap.style.display = 'block';
+                            if(customHeroWrap) customHeroWrap.style.display = 'none';
+                            if(typeContentWrap) typeContentWrap.style.display = 'none';
+                            
+                            setTimeout(updatePreview, 50); 
+                        });
+                    }
+                    if (modeContentBtn) {
+                        modeContentBtn.addEventListener('click', () => { 
+                            isCatalogMode = false;
+
+                            modeContentBtn.classList.replace('text-slate-600', 'text-indigo-700');
+                            modeContentBtn.classList.replace('hover:text-slate-900', 'bg-white');
+                            modeContentBtn.classList.add('shadow-xs');
+                            
+                            modeCatalogBtn.classList.replace('text-indigo-700', 'text-slate-600');
+                            modeCatalogBtn.classList.replace('bg-white', 'hover:text-slate-900');
+                            modeCatalogBtn.classList.remove('shadow-xs');
+                            
+                            if(catalogWrap) catalogWrap.style.display = 'none';
+                            if(typeCatalogWrap) typeCatalogWrap.style.display = 'none';
+                            if(customHeroWrap) customHeroWrap.style.display = 'block';
+                            if(typeContentWrap) typeContentWrap.style.display = 'block';
+
+                            setTimeout(updatePreview, 50); 
+                        });
+                    }
+
+                    // Device toggles
+                    document.querySelectorAll('.preview-device-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            document.querySelectorAll('.preview-device-btn').forEach(b => {
+                                b.classList.remove('bg-indigo-50', 'text-indigo-700', 'active');
+                                b.classList.add('text-slate-500');
+                            });
+                            e.target.classList.add('bg-indigo-50', 'text-indigo-700', 'active');
+                            e.target.classList.remove('text-slate-500');
+                            
+                            const container = document.getElementById('livePreviewContainer');
+                            if (e.target.dataset.device === 'mobile') {
+                                container.style.maxWidth = '375px';
+                                container.classList.add('mx-auto');
+                            } else {
+                                container.style.maxWidth = '100%';
+                                container.classList.remove('mx-auto');
+                            }
+                        });
+                    });
+
+                    // Trigger initial paint
+                    setTimeout(updatePreview, 100);
+                });
+            </script>
         </div>
     </div>
 
