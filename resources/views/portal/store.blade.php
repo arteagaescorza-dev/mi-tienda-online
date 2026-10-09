@@ -1641,8 +1641,8 @@
             <!-- Botón de cerrar general (Solo visible en Desktop, en mobile va en el header) -->
             <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-10 h-10 items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 shadow-md transition font-bold text-2xl cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
 
-            <!-- COLUMNA IZQUIERDA: CONFIGURACIONES (1/3) -->
-            <div class="w-full md:w-[420px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
+            <!-- COLUMNA IZQUIERDA: CONFIGURACIONES -->
+            <div class="w-full md:w-[520px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -1960,8 +1960,8 @@
                 </form>
             </div>
 
-            <!-- COLUMNA DERECHA: PREVIEW EN VIVO (2/3) -->
-            <div class="w-full md:w-2/3 bg-slate-100 p-0 sm:p-6 flex flex-col relative z-10">
+            <!-- COLUMNA DERECHA: PREVIEW EN VIVO -->
+            <div class="flex-1 bg-slate-100 p-0 sm:p-6 flex flex-col relative z-10">
                 <!-- Toggle de Dispositivo -->
                 <div class="absolute top-6 left-6 z-40 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200">
                     <button type="button" class="preview-device-btn active px-3 py-1.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 cursor-pointer" data-device="desktop">Desktop</button>
