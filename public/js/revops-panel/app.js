@@ -23141,3 +23141,24 @@ if (typeof window !== 'undefined') {
   window.sendFormalDiscrepancyEmail = sendFormalDiscrepancyEmail;
   window.getAllowedTaskCategoriesForRole = getAllowedTaskCategoriesForRole;
 }
+
+// REGLA 6.77: Inicialización de Tablas Responsivas (Inyección de data-label)
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('table').forEach(table => {
+    // Si la tabla no tiene la clase responsive-table, se la añadimos automáticamente
+    if (!table.classList.contains('responsive-table')) {
+      table.classList.add('responsive-table');
+    }
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => {
+      // Remover "Arrastra para reordenar" u otros tooltips del innerText
+      return th.innerText.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+    });
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      Array.from(tr.children).forEach((td, index) => {
+        if (headers[index] && !td.hasAttribute('data-label')) {
+          td.setAttribute('data-label', headers[index]);
+        }
+      });
+    });
+  });
+});

@@ -5090,3 +5090,56 @@ html.dark .drag-handle-page {
 html.dark .drag-handle-page:hover {
   color: #ffffff !important;
 }
+
+
+/* RESPONSIVE TABLES REGLA 6.77 */
+@media (max-width: 760px) {
+  .responsive-table, .responsive-table thead, .responsive-table tbody, .responsive-table th, .responsive-table td, .responsive-table tr {
+    display: block !important;
+  }
+  .responsive-table thead tr {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+  }
+  .responsive-table tr {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+    background: #fff !important;
+    padding: 8px !important;
+    position: relative !important;
+  }
+  .responsive-table td {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    position: relative !important;
+    padding-left: 45% !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+    font-size: 11px !important;
+  }
+  .responsive-table td:last-child {
+    border-bottom: 0 !important;
+  }
+  .responsive-table td:before {
+    position: absolute !important;
+    left: 10px !important;
+    width: 40% !important;
+    padding-right: 10px !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+    font-weight: 800 !important;
+    color: #94a3b8 !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    content: attr(data-label) !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+}
