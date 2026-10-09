@@ -645,6 +645,10 @@ Bajo ninguna circunstancia se calculará el margen con costos teóricos o precio
   3. **Seguridad y Auditoría:** Alerta clara de errores de validación (`$errors->first()`), token CSRF obligatorio y nota de pie indicando entorno seguro cifrado TLS y registro en bitácora de auditoría.
   4. **Iconografía Profesional:** Cero emojis informales; uso exclusivo de iconos vectoriales SVG.
 
+### Regla 6.77: Optimización Responsiva del Panel de Administración (Tablets y Móviles)
+* **Responsividad Obligatoria:** El panel de administración (RevOps) debe estar completamente optimizado para dispositivos móviles y tablets. Las tablas, formularios de datos, sidebars y paneles de configuración deben adaptar su diseño (`layout`) de forma fluida (e.g. usando diseño adaptable, menús colapsables o `overflow` adecuado).
+* **Paridad Funcional:** El administrador debe poder realizar el 100% de las funciones operativas, de curaduría y configuración desde un dispositivo móvil o tablet, sin pérdida de contexto, garantizando una UX ergonómica en pantallas táctiles.
+
 ---
 
 ## 7. Reglas de Merchandising, CMS y Motor de Secciones Modulares (Hub 2)
