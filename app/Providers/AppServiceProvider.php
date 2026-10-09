@@ -34,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
             return $user->canAccessHub($hub);
         });
 
+        // Gate para ver el dashboard
+        \Illuminate\Support\Facades\Gate::define('view-dashboard', function ($user) {
+            return $user->canAccessHub('dashboard');
+        });
+
         // Compartir footerConfig globalmente en el layout Storefront PWA
         \Illuminate\Support\Facades\View::composer('layouts.store-pwa', function ($view) {
             $defaultFooterConfig = [
