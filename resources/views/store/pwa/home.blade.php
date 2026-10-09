@@ -140,7 +140,7 @@
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
               </div>
               <div>
-                <div class="pillar-title">TRANSFERENCIAS SPEI BBVA</div>
+                <div class="pillar-title">TRANSFERENCIAS Tarjetas BBVA</div>
                 <div class="pillar-sub">Sin comisión bancaria directa</div>
               </div>
             </div>
@@ -492,7 +492,7 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h3M15 15h2"/></svg>
           </div>
           <div>
-            <div class="pillar-title">TRANSFERENCIAS SPEI BBVA</div>
+            <div class="pillar-title">TRANSFERENCIAS Tarjetas BBVA</div>
             <div class="pillar-sub">Sin comisión bancaria directa</div>
           </div>
         </div>

@@ -1758,7 +1758,7 @@
         </form>
       </div>
 
-      <!-- PASO 2: MÉTODOS DE PAGO (TARJETAS BANCARIAS & OXXO PAY - REGLA 3 CERO SPEI) -->
+      <!-- PASO 2: MÉTODOS DE PAGO (TARJETAS BANCARIAS & OXXO PAY - REGLA 3 CERO Tarjetas) -->
       <div id="checkoutStep2" class="checkout-step-panel" style="display: none;">
         <div class="checkout-section-header">
           <h3 class="checkout-section-title">2. Selecciona tu Forma de Pago</h3>

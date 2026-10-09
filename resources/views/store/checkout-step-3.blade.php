@@ -31,7 +31,7 @@
                 <div class="checkout-payment-options" role="radiogroup" aria-label="Metodo de pago">
                     <label class="checkout-payment-option">
                         <input type="radio" name="payment_method" value="spei" checked>
-                        <span><strong>Transferencia SPEI</strong><small>Confirmacion mediante comprobante de pago.</small></span>
+                        <span><strong>Tarjetas de Débito/Crédito</strong><small>Confirmacion mediante comprobante de pago.</small></span>
                         <b>Recomendado</b>
                     </label>
                     <label class="checkout-payment-option">
