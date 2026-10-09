@@ -1651,15 +1651,7 @@
                     <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer md:hidden" data-action="close-modal" data-modal="createSectionModal">&times;</button>
                 </div>
 
-                <!-- Bifurcador de Modo: Catálogo vs Contenido -->
-                <div class="flex items-center bg-slate-100 p-1 rounded-xl mb-4 text-xs font-bold shrink-0">
-                    <button type="button" id="createModeCatalogBtn" class="flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition">
-                        Catálogo (Hub 4)
-                    </button>
-                    <button type="button" id="createModeContentBtn" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition">
-                        Hero / Custom
-                    </button>
-                </div>
+
 
                 <form method="POST" action="{{ route('portal.store.sections.store') }}" id="createSectionForm" enctype="multipart/form-data" class="space-y-4 text-xs flex-1 flex flex-col">
                     @csrf
@@ -1683,21 +1675,11 @@
                             </div>
                         </div>
 
-                        <!-- SELECTOR DE TIPO CONDICIONADO AL MODO -->
-                        <div id="createTypeCatalogWrap">
-                            <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Catálogo</label>
-                            <select name="type" id="createSectionTypeCatalog" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                                <option value="curated_products">Tarjetas de Prendas Destacadas / Colección</option>
-                                <option value="categories_grid">Cuadrícula de Categorías (Hub 4)</option>
-                                <option value="family_showcase">Vitrina de Familias Textiles</option>
-                                <option value="tags_cloud">Nube de Tags / Estilos</option>
-                                <option value="subcategories_slider">Slider de Subcategorías</option>
-                            </select>
-                        </div>
 
-                        <div id="createTypeContentWrap" class="hidden" style="display: none;">
+
+                        <div id="createTypeContentWrap">
                             <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Contenido</label>
-                            <select name="type_content" id="createSectionTypeContent" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                            <select name="type" id="createSectionTypeContent" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
                                 <option value="hero_carousel">Hero Principal de Vitrina</option>
                                 <option value="hero_carousel">Carrusel de Banners Promocionales</option>
                                 <option value="editorial_banner">Banner Editorial / Promoción</option>
@@ -1723,108 +1705,10 @@
                             <input type="text" name="subtitle" id="inpCreateSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
                         </div>
 
-                        <!-- TAXONOMÍAS HUB 4 (SOLO MODO CATÁLOGO) -->
-                        <div id="createCatalogTaxonomies" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Reglas de Catálogo (Hub 4)</span>
-                            </div>
 
-                            <div class="grid grid-cols-1 gap-3">
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Categoría Principal</label>
-                                    <select name="query_rules[category_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Todas las categorías</option>
-                                        @foreach($categories as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Subcategoría</label>
-                                    <select name="query_rules[subcategory_id]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Todas las subcategorías</option>
-                                        @foreach($subcategories as $scat)
-                                            <option value="{{ $scat->id }}">{{ $scat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Proveedor</label>
-                                    <select name="query_rules[supplier]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Todos los proveedores</option>
-                                        @foreach($suppliers as $sup)
-                                            <option value="{{ $sup->trade_name ?? $sup->name }}">{{ $sup->trade_name ?? $sup->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Marca</label>
-                                    <select name="query_rules[brand]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Todas las marcas</option>
-                                        @foreach($brands as $br)
-                                            <option value="{{ $br }}">{{ $br }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Familia Textil</label>
-                                    <select name="query_rules[family]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Cualquier fibra</option>
-                                        @foreach($textileFamilies as $tf)
-                                            <option value="{{ $tf }}">{{ $tf }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Tipo de Prenda</label>
-                                    <select name="query_rules[garment_type]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Cualquier tipo</option>
-                                        @foreach($garmentTypes as $gt)
-                                            <option value="{{ $gt }}">{{ $gt }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Tag de Estilo</label>
-                                    <select name="query_rules[tag]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="">Cualquier estilo</option>
-                                        @foreach($styleTags as $st)
-                                            <option value="{{ $st }}">{{ $st }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Filtro de Descuento</label>
-                                    <select name="query_rules[discount]" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        @foreach($discountOptions as $dVal => $dLabel)
-                                            <option value="{{ $dVal }}">{{ $dLabel }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Límite de Prendas</label>
-                                    <select name="query_rules[limit]" id="inpCreateLimit" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="4">4 Prendas</option>
-                                        <option value="8" selected>8 Prendas</option>
-                                        <option value="12">12 Prendas</option>
-                                        <option value="16">16 Prendas</option>
-                                        <option value="24">24 Prendas</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-600 mb-1">Disposición Visual</label>
-                                    <select name="query_rules[layout]" id="inpCreateLayout" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                        <option value="grid_4">Cuadrícula 4 Columnas (Desktop) / 2 Columnas (Mobile)</option>
-                                        <option value="grid_3">Cuadrícula 3 Columnas</option>
-                                        <option value="grid_2">Cuadrícula 2 Columnas</option>
-                                        <option value="carousel">Carrusel Horizontal</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- CONFIGURACIÓN DE CONTENIDO & CÓDIGO CUSTOM (SOLO MODO CONTENIDO) -->
-                        <div id="createContentOptions" class="space-y-4 hidden" style="display: none;">
+                        <div id="createContentOptions" class="space-y-4">
                             
                             <!-- BLOQUE MOTOR DE HERO DINÁMICO -->
                             <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
@@ -2097,16 +1981,12 @@
                     const titleInput = document.getElementById('inpCreateTitle');
                     const subtitleInput = document.getElementById('inpCreateSubtitle');
                     const badgeInput = document.getElementById('inpCreateBadge');
-                    const layoutInput = document.getElementById('inpCreateLayout');
-                    const limitInput = document.getElementById('inpCreateLimit');
                     
                     const previewTitle = document.getElementById('previewTitle');
                     const previewSubtitle = document.getElementById('previewSubtitle');
                     const previewBadge = document.getElementById('previewBadge');
-                    const previewGrid = document.getElementById('previewGrid');
                     
                     const previewHeroArea = document.getElementById('previewHeroArea');
-                    const previewCatalogArea = document.getElementById('previewCatalogArea');
                     
                     const ctaPrimaryInput = document.getElementById('inpCreateCtaPrimary');
                     const ctaSecondaryInput = document.getElementById('inpCreateCtaSecondary');
@@ -2115,13 +1995,6 @@
                     const previewBtnSecondary = document.getElementById('previewBtnSecondary');
                     const previewActions = document.getElementById('previewActions');
 
-                    const modeCatalogBtn = document.getElementById('createModeCatalogBtn');
-                    const modeContentBtn = document.getElementById('createModeContentBtn');
-                    const customHeroWrap = document.getElementById('createContentOptions');
-                    const catalogWrap = document.getElementById('createCatalogTaxonomies');
-                    const typeCatalogWrap = document.getElementById('createTypeCatalogWrap');
-                    const typeContentWrap = document.getElementById('createTypeContentWrap');
-                    
                     const inpCreateTitleColor = document.getElementById('inpCreateTitleColor');
                     const inpCreateSubtitleColor = document.getElementById('inpCreateSubtitleColor');
                     const inpCreateTextAlign = document.getElementById('inpCreateTextAlign');
@@ -2131,13 +2004,11 @@
                     const inpCreateCtaSecondaryBg = document.getElementById('inpCreateCtaSecondaryBg');
                     const inpCreateCtaSecondaryColor = document.getElementById('inpCreateCtaSecondaryColor');
 
-                    let isCatalogMode = true;
-
                     function updatePreview() {
                         // Textos
                         if (titleInput && previewTitle) {
-                            previewTitle.textContent = titleInput.value || (isCatalogMode ? 'Nueva Colección' : 'Tu Hero Principal');
-                            if (!isCatalogMode && inpCreateTitleColor) {
+                            previewTitle.textContent = titleInput.value || 'Tu Hero Principal';
+                            if (inpCreateTitleColor) {
                                 previewTitle.style.color = inpCreateTitleColor.value;
                             } else {
                                 previewTitle.style.color = '';
@@ -2146,7 +2017,7 @@
                         if (subtitleInput && previewSubtitle) {
                             previewSubtitle.textContent = subtitleInput.value;
                             previewSubtitle.style.display = subtitleInput.value ? 'block' : 'none';
-                            if (!isCatalogMode && inpCreateSubtitleColor) {
+                            if (inpCreateSubtitleColor) {
                                 previewSubtitle.style.color = inpCreateSubtitleColor.value;
                             } else {
                                 previewSubtitle.style.color = '';
@@ -2160,17 +2031,13 @@
                         // Alineación y tipografía del contenedor de texto
                         if (previewHeroArea) {
                             previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'font-sans', 'font-serif', 'font-mono');
-                            if (!isCatalogMode) {
-                                if (inpCreateTextAlign) previewHeroArea.classList.add(inpCreateTextAlign.value);
-                                if (inpCreateFontFamily) previewHeroArea.classList.add(inpCreateFontFamily.value);
-                            } else {
-                                previewHeroArea.classList.add('text-center', 'font-sans');
-                            }
+                            if (inpCreateTextAlign) previewHeroArea.classList.add(inpCreateTextAlign.value);
+                            if (inpCreateFontFamily) previewHeroArea.classList.add(inpCreateFontFamily.value);
                         }
 
                         // Botones
                         let hasBtn = false;
-                        if (ctaPrimaryInput && previewBtnPrimary && !isCatalogMode) {
+                        if (ctaPrimaryInput && previewBtnPrimary) {
                             previewBtnPrimary.textContent = ctaPrimaryInput.value;
                             previewBtnPrimary.style.display = ctaPrimaryInput.value ? 'inline-block' : 'none';
                             if(ctaPrimaryInput.value) {
@@ -2183,7 +2050,7 @@
                             if(previewBtnPrimary) previewBtnPrimary.style.display = 'none';
                         }
 
-                        if (ctaSecondaryInput && previewBtnSecondary && !isCatalogMode) {
+                        if (ctaSecondaryInput && previewBtnSecondary) {
                             previewBtnSecondary.textContent = ctaSecondaryInput.value;
                             previewBtnSecondary.style.display = ctaSecondaryInput.value ? 'inline-block' : 'none';
                             if(ctaSecondaryInput.value) {
@@ -2200,37 +2067,8 @@
                             previewActions.style.display = hasBtn ? 'flex' : 'none';
                         }
 
-                        // Modo Visual Toggle
-                        if (isCatalogMode) {
-                            previewCatalogArea.style.display = 'block';
-                            
-                            // Crear Esqueletos de Grid
-                            let limit = limitInput ? parseInt(limitInput.value) : 4;
-                            let cols = 'grid-cols-2 md:grid-cols-4';
-                            if(layoutInput && layoutInput.value === 'grid_3') cols = 'grid-cols-2 md:grid-cols-3';
-                            if(layoutInput && layoutInput.value === 'grid_2') cols = 'grid-cols-1 md:grid-cols-2';
-                            if(layoutInput && layoutInput.value === 'carousel') cols = 'flex overflow-hidden gap-4';
-                            
-                            previewGrid.className = `grid gap-4 w-full ${cols}`;
-                            if(layoutInput && layoutInput.value === 'carousel') previewGrid.className = 'flex overflow-hidden gap-4 w-full';
-
-                            let boxes = '';
-                            let maxBoxes = Math.min(limit, 8); // No mostrar más de 8 en preview por performance
-                            for(let i=0; i<maxBoxes; i++) {
-                                boxes += `<div class="${layoutInput.value==='carousel' ? 'w-48 shrink-0' : ''} aspect-[3/4] bg-slate-50 rounded-lg border border-slate-100 flex flex-col p-3 shadow-sm"><div class="w-full bg-slate-200 rounded flex-1 mb-3"></div><div class="h-3 bg-slate-300 rounded w-3/4 mb-1.5"></div><div class="h-3 bg-slate-200 rounded w-1/2"></div></div>`;
-                            }
-                            previewGrid.innerHTML = boxes;
-                            
-                            // Estilo cabecera catálogo
-                            previewHeroArea.classList.remove('min-h-[250px]', 'bg-slate-900', 'text-white', 'bg-cover', 'bg-center');
-                            previewHeroArea.classList.add('bg-white', 'text-slate-900', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
-                            previewHeroArea.style.backgroundImage = 'none';
-                            previewTitle.className = 'text-xl md:text-2xl font-extrabold tracking-tight relative z-10';
-                            previewSubtitle.className = 'text-slate-500 mt-2 text-sm relative z-10';
-                        } else {
-                            previewCatalogArea.style.display = 'none';
-                            
-                            // Estilo Hero Completo
+                        // Estilo Hero Completo
+                        if (previewHeroArea) {
                             previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6', 'text-slate-900');
                             previewHeroArea.classList.add('bg-slate-900', 'min-h-[250px]', 'p-8');
                             
@@ -2240,10 +2078,10 @@
                             } else {
                                 previewHeroArea.style.backgroundImage = 'none';
                             }
-
-                            previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
-                            previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
                         }
+
+                        if (previewTitle) previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
+                        if (previewSubtitle) previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
                     }
 
                     // Handlers para la imagen de fondo
@@ -2279,7 +2117,7 @@
 
                     // Attach event listeners para el resto de inputs
                     const inputs = [
-                        titleInput, subtitleInput, badgeInput, layoutInput, limitInput, ctaPrimaryInput, ctaSecondaryInput,
+                        titleInput, subtitleInput, badgeInput, ctaPrimaryInput, ctaSecondaryInput,
                         inpCreateTitleColor, inpCreateSubtitleColor, inpCreateTextAlign, inpCreateFontFamily,
                         inpCreateCtaPrimaryBg, inpCreateCtaPrimaryColor, inpCreateCtaSecondaryBg, inpCreateCtaSecondaryColor
                     ];
@@ -2287,48 +2125,6 @@
                         if (el) el.addEventListener('input', updatePreview);
                         if (el && el.tagName === 'SELECT') el.addEventListener('change', updatePreview);
                     });
-
-                    // Eventos de botones de modo para UI y Preview
-                    if (modeCatalogBtn) {
-                        modeCatalogBtn.addEventListener('click', () => { 
-                            isCatalogMode = true;
-                            
-                            modeCatalogBtn.classList.replace('text-slate-600', 'text-indigo-700');
-                            modeCatalogBtn.classList.replace('hover:text-slate-900', 'bg-white');
-                            modeCatalogBtn.classList.add('shadow-xs');
-                            
-                            modeContentBtn.classList.replace('text-indigo-700', 'text-slate-600');
-                            modeContentBtn.classList.replace('bg-white', 'hover:text-slate-900');
-                            modeContentBtn.classList.remove('shadow-xs');
-
-                            if(catalogWrap) catalogWrap.style.display = 'block';
-                            if(typeCatalogWrap) typeCatalogWrap.style.display = 'block';
-                            if(customHeroWrap) customHeroWrap.style.display = 'none';
-                            if(typeContentWrap) typeContentWrap.style.display = 'none';
-                            
-                            setTimeout(updatePreview, 50); 
-                        });
-                    }
-                    if (modeContentBtn) {
-                        modeContentBtn.addEventListener('click', () => { 
-                            isCatalogMode = false;
-
-                            modeContentBtn.classList.replace('text-slate-600', 'text-indigo-700');
-                            modeContentBtn.classList.replace('hover:text-slate-900', 'bg-white');
-                            modeContentBtn.classList.add('shadow-xs');
-                            
-                            modeCatalogBtn.classList.replace('text-indigo-700', 'text-slate-600');
-                            modeCatalogBtn.classList.replace('bg-white', 'hover:text-slate-900');
-                            modeCatalogBtn.classList.remove('shadow-xs');
-                            
-                            if(catalogWrap) catalogWrap.style.display = 'none';
-                            if(typeCatalogWrap) typeCatalogWrap.style.display = 'none';
-                            if(customHeroWrap) customHeroWrap.style.display = 'block';
-                            if(typeContentWrap) typeContentWrap.style.display = 'block';
-
-                            setTimeout(updatePreview, 50); 
-                        });
-                    }
 
                     // Device toggles
                     document.querySelectorAll('.preview-device-btn').forEach(btn => {
@@ -2360,7 +2156,7 @@
                     const previewOverlay = document.getElementById('previewOverlay');
 
                     function updateOverlay() {
-                        if (!isCatalogMode && gradEnableInput && gradEnableInput.checked && previewOverlay) {
+                        if (gradEnableInput && gradEnableInput.checked && previewOverlay) {
                             previewOverlay.style.display = 'block';
                             previewOverlay.className = "absolute inset-0 z-0";
                             
@@ -4105,49 +3901,7 @@
         }
     };
 
-    // ==========================================
-    // 4. BIFURCADOR EN MODAL CREAR SECCIÓN
-    // ==========================================
-    window.switchCreateSectionMode = function(mode) {
-        const btnModeCat = document.getElementById('createModeCatalogBtn');
-        const btnModeCont = document.getElementById('createModeContentBtn');
-        const wrapCatTax = document.getElementById('createCatalogTaxonomies');
-        const wrapCatType = document.getElementById('createTypeCatalogWrap');
-        const wrapContOpt = document.getElementById('createContentOptions');
-        const wrapContType = document.getElementById('createTypeContentWrap');
-        const selCatType = document.getElementById('createSectionTypeCatalog');
-        const selContType = document.getElementById('createSectionTypeContent');
-        const createHeroWrap = document.getElementById('createHeroEngineWrap');
 
-        if (mode === 'catalog') {
-            if (btnModeCat) btnModeCat.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-            if (btnModeCont) btnModeCont.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-            if (wrapCatTax) { wrapCatTax.classList.remove('hidden'); wrapCatTax.style.display = 'block'; }
-            if (wrapCatType) { wrapCatType.classList.remove('hidden'); wrapCatType.style.display = 'block'; }
-            if (wrapContOpt) { wrapContOpt.classList.add('hidden'); wrapContOpt.style.display = 'none'; }
-            if (wrapContType) { wrapContType.classList.add('hidden'); wrapContType.style.display = 'none'; }
-            if (selCatType) selCatType.name = 'type';
-            if (selContType) selContType.name = 'type_disabled';
-        } else {
-            if (btnModeCont) btnModeCont.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-            if (btnModeCat) btnModeCat.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-            if (wrapCatTax) { wrapCatTax.classList.add('hidden'); wrapCatTax.style.display = 'none'; }
-            if (wrapCatType) { wrapCatType.classList.add('hidden'); wrapCatType.style.display = 'none'; }
-            if (wrapContOpt) { wrapContOpt.classList.remove('hidden'); wrapContOpt.style.display = 'block'; }
-            if (wrapContType) { wrapContType.classList.remove('hidden'); wrapContType.style.display = 'block'; }
-            if (selContType) selContType.name = 'type';
-            if (selCatType) selCatType.name = 'type_disabled';
-            if (createHeroWrap && selContType) {
-                if (selContType.value === 'hero_carousel') {
-                    createHeroWrap.classList.remove('hidden');
-                    createHeroWrap.style.display = 'block';
-                } else {
-                    createHeroWrap.classList.add('hidden');
-                    createHeroWrap.style.display = 'none';
-                }
-            }
-        }
-    };
 
     window.toggleEditTypePanels = function(typeVal) {
         const contentTypes = ['hero_carousel', 'editorial_banner', 'brand_pillars', 'promo_modal', 'custom_html_css_js'];
@@ -4175,9 +3929,6 @@
     };
 
     window.openCreateSectionModal = function() {
-        if (typeof window.switchCreateSectionMode === 'function') {
-            window.switchCreateSectionMode('catalog');
-        }
         window.openStoreModal('createSectionModal');
     };
 
@@ -4484,16 +4235,6 @@
         const initialUniverse = urlParams.get('universe') || activeUniverse;
         window.switchStoreTab(initialTab);
         window.switchStoreUniverse(initialUniverse);
-
-        // Bifurcador en Modal Crear
-        const btnModeCat = document.getElementById('createModeCatalogBtn');
-        const btnModeCont = document.getElementById('createModeContentBtn');
-        if (btnModeCat) {
-            btnModeCat.addEventListener('click', () => window.switchCreateSectionMode('catalog'));
-        }
-        if (btnModeCont) {
-            btnModeCont.addEventListener('click', () => window.switchCreateSectionMode('content'));
-        }
 
         // Listener en select de tipo en Modal Editar
         const editTypeSelect = document.getElementById('editTypeSelect');
