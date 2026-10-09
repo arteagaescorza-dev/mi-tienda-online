@@ -1769,36 +1769,50 @@
                                     </label>
 
                                     <div id="createGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
-                                                <div class="flex items-center gap-1.5">
-                                                    <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
-                                                    <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
-                                                <div class="flex items-center gap-1.5">
-                                                    <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
-                                                    <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección</label>
-                                                <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
-                                                    <option value="to bottom">Vertical ↓</option>
-                                                    <option value="to right">Horizontal →</option>
-                                                    <option value="135deg">Diagonal ↘</option>
-                                                    <option value="to top">Invertido ↑</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Opacidad: <span id="createGradOpacityVal">80%</span></label>
-                                                <input type="range" name="settings[gradient_opacity]" id="createGradOpacity" min="10" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
-                                            </div>
-                                        </div>
-                                        <div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
+                                        <div class="grid grid-cols-2 gap-3 mb-3">
+    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+        <div>
+            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
+            <div class="flex items-center gap-1.5">
+                <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
+                <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
+            </div>
+        </div>
+        <div>
+            <label class="flex justify-between block text-[10px] font-semibold text-slate-600 mb-1">
+                <span>Opacidad Inicio</span>
+                <span id="createGradOpacityStartVal">80%</span>
+            </label>
+            <input type="range" name="settings[gradient_opacity_start]" id="createGradOpacityStart" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityStartVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+        </div>
+    </div>
+    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+        <div>
+            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
+            <div class="flex items-center gap-1.5">
+                <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
+                <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
+            </div>
+        </div>
+        <div>
+            <label class="flex justify-between block text-[10px] font-semibold text-slate-600 mb-1">
+                <span>Opacidad Fin</span>
+                <span id="createGradOpacityEndVal">80%</span>
+            </label>
+            <input type="range" name="settings[gradient_opacity_end]" id="createGradOpacityEnd" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityEndVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+        </div>
+    </div>
+    <div class="col-span-2">
+        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección del Degradado</label>
+        <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
+            <option value="to bottom">Vertical</option>
+            <option value="to right">Horizontal</option>
+            <option value="135deg">Diagonal</option>
+            <option value="to top">Invertido</option>
+        </select>
+    </div>
+</div>
+<div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
                                     </div>
                                 </div>
 
@@ -1816,11 +1830,23 @@
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Alineación</label>
-                                            <select name="settings[text_align]" id="inpCreateTextAlign" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded">
-                                                <option value="text-center">Centrado</option>
-                                                <option value="text-left">Izquierda</option>
-                                                <option value="text-right">Derecha</option>
-                                            </select>
+                                            <div class="grid grid-cols-3 gap-1 p-0.5 bg-slate-100 rounded border border-slate-200" id="inpCreateTextAlignGroup">
+    <label class="relative flex items-center justify-center py-1 rounded cursor-pointer text-slate-500 transition">
+        <input type="radio" name="settings[text_align]" value="text-left" class="peer hidden" onchange="window.updatePreview()">
+        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded transition"></div>
+        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"/></svg>
+    </label>
+    <label class="relative flex items-center justify-center py-1 rounded cursor-pointer text-slate-500 transition">
+        <input type="radio" name="settings[text_align]" value="text-center" class="peer hidden" checked onchange="window.updatePreview()">
+        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded transition"></div>
+        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"/></svg>
+    </label>
+    <label class="relative flex items-center justify-center py-1 rounded cursor-pointer text-slate-500 transition">
+        <input type="radio" name="settings[text_align]" value="text-right" class="peer hidden" onchange="window.updatePreview()">
+        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded transition"></div>
+        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M4 18h16"/></svg>
+    </label>
+</div>
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Tipografía</label>
@@ -1970,7 +1996,7 @@
                 
                 <!-- Contenedor del Preview Visual -->
                 <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-16">
-                    <div id="livePreviewContainer" class="w-full h-full bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                    <div id="livePreviewContainer" class="w-full h-[60vh] md:h-[65vh] 2xl:h-[70vh] lg:max-h-[600px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
                         <!-- Skeleton Header de la tienda -->
                         <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
                             <div class="w-24 h-6 bg-slate-200 rounded"></div>
@@ -2148,11 +2174,40 @@
                         }
                         
                         // Alineación y tipografía del contenedor de texto
-                        if (previewHeroArea) {
-                            previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'font-sans', 'font-serif', 'font-mono');
-                            if (inpCreateTextAlign) previewHeroArea.classList.add(inpCreateTextAlign.value);
-                            if (inpCreateFontFamily) previewHeroArea.classList.add(inpCreateFontFamily.value);
-                        }
+if (previewHeroArea) {
+    const inpAlign = document.querySelector('#createSectionModal:not(.hidden) input[name="settings[text_align]"]:checked') || 
+                     document.querySelector('#editSectionModal:not(.hidden) input[name="settings[text_align]"]:checked') ||
+                     document.querySelector('input[name="settings[text_align]"]:checked');
+    const alignVal = inpAlign ? inpAlign.value : 'text-center';
+    
+    const innerWrapper = previewHeroArea.querySelector('.relative.z-10');
+    
+    previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'items-center', 'items-start', 'items-end');
+    if (innerWrapper) innerWrapper.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
+    if (previewSubtitle) previewSubtitle.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
+    if (previewActions) previewActions.classList.remove('justify-center', 'justify-start', 'justify-end');
+    
+    if (alignVal === 'text-left') {
+        previewHeroArea.classList.add('text-left', 'items-start');
+        if (innerWrapper) innerWrapper.classList.add('ml-0', 'mr-auto');
+        if (previewSubtitle) previewSubtitle.classList.add('ml-0', 'mr-auto');
+        if (previewActions) previewActions.classList.add('justify-start');
+    } else if (alignVal === 'text-right') {
+        previewHeroArea.classList.add('text-right', 'items-end');
+        if (innerWrapper) innerWrapper.classList.add('ml-auto', 'mr-0');
+        if (previewSubtitle) previewSubtitle.classList.add('ml-auto', 'mr-0');
+        if (previewActions) previewActions.classList.add('justify-end');
+    } else {
+        previewHeroArea.classList.add('text-center', 'items-center');
+        if (innerWrapper) innerWrapper.classList.add('mx-auto');
+        if (previewSubtitle) previewSubtitle.classList.add('mx-auto');
+        if (previewActions) previewActions.classList.add('justify-center');
+    }
+
+    const inpFont = document.getElementById('inpCreateFontFamily') || document.getElementById('editFontFamily');
+    previewHeroArea.classList.remove('font-sans', 'font-serif', 'font-mono');
+    if (inpFont) previewHeroArea.classList.add(inpFont.value);
+}
 
                         // Botones
                         let hasBtn = false;
@@ -3916,46 +3971,74 @@
     };
 
     window.toggleHeroModeCreate = function(mode) {
-        const lblStruct = document.getElementById('createHeroModeStructuredLbl');
-        const lblCustom = document.getElementById('createHeroModeCustomLbl');
-        const buttonsWrap = document.getElementById('createHeroButtonsWrap');
-        const customCodeWrap = document.getElementById('createCustomCodeWrap');
-
-        if (mode === 'custom') {
-            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-            if (buttonsWrap) { buttonsWrap.classList.add('hidden'); buttonsWrap.style.display = 'none'; }
-            if (customCodeWrap) { customCodeWrap.classList.remove('hidden'); customCodeWrap.style.display = 'block'; }
+    const lblStruct = document.getElementById('createHeroModeStructuredLbl');
+    const lblCustom = document.getElementById('createHeroModeCustomLbl');
+    
+    const bgImgWrap = document.getElementById('createHeroBgUrl')?.closest('div.space-y-2');
+    const gradientWrap = document.getElementById('createEnableGradient')?.closest('div.p-3');
+    const fullWidthWrap = document.getElementById('inpCreateFullWidth')?.closest('div');
+    const textStyleWrap = document.getElementById('inpCreateTextAlign')?.closest('.p-3') || document.getElementById('inpCreateTextAlignGroup')?.closest('.p-3');
+    const buttonsWrap = document.getElementById('createHeroButtonsWrap');
+    
+    const customCodeWrap = document.getElementById('createCustomCodeWrap');
+    
+    const isCustom = mode === 'custom';
+    
+    if (lblCustom) lblCustom.className = isCustom ? 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+    if (lblStruct) lblStruct.className = isCustom ? 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+    
+    const structuredWrappers = [bgImgWrap, gradientWrap, fullWidthWrap, textStyleWrap, buttonsWrap];
+    structuredWrappers.forEach(w => {
+        if (w) w.style.display = isCustom ? 'none' : 'block';
+    });
+    
+    if (customCodeWrap) {
+        if (isCustom) {
+            customCodeWrap.classList.remove('hidden');
+            customCodeWrap.style.display = 'block';
         } else {
-            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-            if (buttonsWrap) { buttonsWrap.classList.remove('hidden'); buttonsWrap.style.display = 'block'; }
-            if (customCodeWrap) { customCodeWrap.classList.add('hidden'); customCodeWrap.style.display = 'none'; }
+            customCodeWrap.classList.add('hidden');
+            customCodeWrap.style.display = 'none';
         }
-    };
+    }
+};
 
     window.toggleHeroModeEdit = function(mode) {
-        const lblStruct = document.getElementById('editHeroModeStructuredLbl');
-        const lblCustom = document.getElementById('editHeroModeCustomLbl');
-        const buttonsWrap = document.getElementById('editHeroButtonsWrap');
-        const customCodeWrap = document.getElementById('editCustomCodeWrap');
-        const radioStruct = document.getElementById('editHeroModeStructured');
-        const radioCustom = document.getElementById('editHeroModeCustom');
-
-        if (mode === 'custom') {
-            if (radioCustom) radioCustom.checked = true;
-            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-            if (buttonsWrap) { buttonsWrap.classList.add('hidden'); buttonsWrap.style.display = 'none'; }
-            if (customCodeWrap) { customCodeWrap.classList.remove('hidden'); customCodeWrap.style.display = 'block'; }
+    const lblStruct = document.getElementById('editHeroModeStructuredLbl');
+    const lblCustom = document.getElementById('editHeroModeCustomLbl');
+    const radioStruct = document.getElementById('editHeroModeStructured');
+    const radioCustom = document.getElementById('editHeroModeCustom');
+    
+    const bgImgWrap = document.getElementById('editHeroBgFile')?.closest('div.space-y-2');
+    const gradientWrap = document.getElementById('editEnableGradient')?.closest('div.p-3');
+    const fullWidthWrap = document.getElementById('editFullWidth')?.closest('div');
+    const textStyleWrap = document.getElementById('editTextAlign')?.closest('.p-3') || document.getElementById('editTextAlignGroup')?.closest('.p-3');
+    const buttonsWrap = document.getElementById('editHeroButtonsWrap');
+    const customCodeWrap = document.getElementById('editCustomCodeWrap');
+    
+    const isCustom = mode === 'custom';
+    
+    if (radioCustom && isCustom) radioCustom.checked = true;
+    if (radioStruct && !isCustom) radioStruct.checked = true;
+    
+    if (lblCustom) lblCustom.className = isCustom ? 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+    if (lblStruct) lblStruct.className = isCustom ? 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+    
+    const structuredWrappers = [bgImgWrap, gradientWrap, fullWidthWrap, textStyleWrap, buttonsWrap];
+    structuredWrappers.forEach(w => {
+        if (w) w.style.display = isCustom ? 'none' : 'block';
+    });
+    
+    if (customCodeWrap) {
+        if (isCustom) {
+            customCodeWrap.classList.remove('hidden');
+            customCodeWrap.style.display = 'block';
         } else {
-            if (radioStruct) radioStruct.checked = true;
-            if (lblStruct) lblStruct.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-            if (lblCustom) lblCustom.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-            if (buttonsWrap) { buttonsWrap.classList.remove('hidden'); buttonsWrap.style.display = 'block'; }
-            if (customCodeWrap) { customCodeWrap.classList.add('hidden'); customCodeWrap.style.display = 'none'; }
+            customCodeWrap.classList.add('hidden');
+            customCodeWrap.style.display = 'none';
         }
-    };
+    }
+};
 
     window.previewHeroBgImage = function(fileInput, previewContainerId) {
         if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
@@ -4011,14 +4094,27 @@
     };
 
     window.updateHeroGradientPreview = function(prefix) {
-        const start = document.getElementById(prefix + 'GradColorStart')?.value || '#0f172a';
-        const end = document.getElementById(prefix + 'GradColorEnd')?.value || '#1e1b4b';
-        const dir = document.getElementById(prefix + 'GradDir')?.value || 'to bottom';
-        const bar = document.getElementById(prefix + 'GradPreviewBar');
-        if (bar) {
-            bar.style.background = `linear-gradient(${dir}, ${start}, ${end})`;
-        }
-    };
+    const startHex = document.getElementById(prefix + 'GradColorStart')?.value || '#0f172a';
+    const endHex = document.getElementById(prefix + 'GradColorEnd')?.value || '#1e1b4b';
+    const dir = document.getElementById(prefix + 'GradDir')?.value || 'to bottom';
+    const opStartStr = document.getElementById(prefix + 'GradOpacityStart')?.value || '80';
+    const opEndStr = document.getElementById(prefix + 'GradOpacityEnd')?.value || '80';
+    
+    function hexToRgba(hex, alpha) {
+        let c = (hex || '#000000').replace('#', '');
+        if (c.length === 3) c = c.split('').map(x => x + x).join('');
+        const num = parseInt(c, 16) || 0;
+        return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+    }
+
+    const startRgba = hexToRgba(startHex, parseInt(opStartStr, 10) / 100);
+    const endRgba = hexToRgba(endHex, parseInt(opEndStr, 10) / 100);
+
+    const bar = document.getElementById(prefix + 'GradPreviewBar');
+    if (bar) {
+        bar.style.background = `linear-gradient(${dir}, ${startRgba}, ${endRgba})`;
+    }
+};
 
 
 
@@ -4191,11 +4287,18 @@
         const editGradDir = document.getElementById('editGradDir');
         if (editGradDir) editGradDir.value = st.gradient_direction || 'to bottom';
 
-        const editGradOpacity = document.getElementById('editGradOpacity');
-        const editGradOpacityVal = document.getElementById('editGradOpacityVal');
-        const opVal = st.gradient_opacity || 80;
-        if (editGradOpacity) editGradOpacity.value = opVal;
-        if (editGradOpacityVal) editGradOpacityVal.textContent = opVal + '%';
+        const opStartVal = (st.gradient_opacity_start !== undefined) ? st.gradient_opacity_start : (st.gradient_opacity || 80);
+const opEndVal = (st.gradient_opacity_end !== undefined) ? st.gradient_opacity_end : (st.gradient_opacity || 80);
+
+const editGradOpacityStart = document.getElementById('editGradOpacityStart');
+const editGradOpacityStartVal = document.getElementById('editGradOpacityStartVal');
+if (editGradOpacityStart) editGradOpacityStart.value = opStartVal;
+if (editGradOpacityStartVal) editGradOpacityStartVal.textContent = opStartVal + '%';
+
+const editGradOpacityEnd = document.getElementById('editGradOpacityEnd');
+const editGradOpacityEndVal = document.getElementById('editGradOpacityEndVal');
+if (editGradOpacityEnd) editGradOpacityEnd.value = opEndVal;
+if (editGradOpacityEndVal) editGradOpacityEndVal.textContent = opEndVal + '%';
         window.updateHeroGradientPreview('edit');
 
         // Botones CTA
