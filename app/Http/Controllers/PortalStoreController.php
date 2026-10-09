@@ -12,6 +12,19 @@ use App\Models\CmsStorefrontConfig;
 use App\Models\CmsTrackingSetting;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\Store\IndexRequest;
+use App\Http\Requests\Portal\Store\ToggleBannerRequest;
+use App\Http\Requests\Portal\Store\ToggleAnnouncementRequest;
+use App\Http\Requests\Portal\Store\ArchiveSectionRequest;
+use App\Http\Requests\Portal\Store\ReorderSectionsRequest;
+use App\Http\Requests\Portal\Store\ToggleSectionRequest;
+use App\Http\Requests\Portal\Store\DestroySectionRequest;
+use App\Http\Requests\Portal\Store\ReorderPagesRequest;
+use App\Http\Requests\Portal\Store\UpdateAnnouncementsRequest;
+use App\Http\Requests\Portal\Store\StoreBlogPostRequest;
+use App\Http\Requests\Portal\Store\UpdateBlogPostRequest;
+use App\Http\Requests\Portal\Store\UpdateTrackingRequest;
+use App\Http\Requests\Portal\Store\UpdateFiltersRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +34,7 @@ class PortalStoreController extends Controller
     /**
      * Display the Storefront CMS and Multiverse vitrinas dashboard.
      */
-    public function index(Request $request)
+    public function index(IndexRequest $request)
     {
         Gate::authorize('manage-cms');
         // 1. Live Catalog Queries per Universe (Single Inventory Pool decoupling)
@@ -382,7 +395,7 @@ class PortalStoreController extends Controller
     /**
      * Toggle banner active / paused status.
      */
-    public function toggleBanner(Request $request, $bannerId)
+    public function toggleBanner(ToggleBannerRequest $request, $bannerId)
     {
         Gate::authorize('manage-cms');
         $defaultBanners = [
@@ -419,7 +432,7 @@ class PortalStoreController extends Controller
     /**
      * Toggle announcement bar on / off.
      */
-    public function toggleAnnouncement(Request $request)
+    public function toggleAnnouncement(ToggleAnnouncementRequest $request)
     {
         Gate::authorize('manage-cms');
         $current = Cache::get('cms_announcement_active', true);
@@ -596,6 +609,18 @@ class PortalStoreController extends Controller
         $validated['sort_order'] = $maxOrder + 1;
         $validated['status'] = $validated['status'] ?? 'active';
 
+        if (($validated['status'] ?? 'active') === 'active') {
+            $universe = $validated['universe'] ?? null;
+            $query = \App\Models\CmsSection::where('status', 'active');
+            if ($universe) {
+                $query->where('universe', $universe);
+            }
+            if ($query->count() >= 8) {
+                return back()->withErrors(['error' => 'Límite máximo de 8 secciones activas alcanzado para preservar el rendimiento SEO.']);
+            }
+        }
+
+
         // Regla de Negocio: Las secciones de tarjetas de catálogo NO permiten código custom.
         // Solo las secciones de contenido/hero/carrusel/modal/botones pueden tener HTML/CSS/JS.
         $productCardTypes = ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'subcategories_slider'];
@@ -663,7 +688,7 @@ class PortalStoreController extends Controller
     /**
      * Archive an existing modular section (status = 'archived').
      */
-    public function archiveSection(Request $request, $id)
+    public function archiveSection(ArchiveSectionRequest $request, $id)
     {
         Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
@@ -680,7 +705,7 @@ class PortalStoreController extends Controller
     /**
      * Atomically reorder sections using SortableJS order array.
      */
-    public function reorderSections(Request $request)
+    public function reorderSections(ReorderSectionsRequest $request)
     {
         Gate::authorize('manage-cms');
         $validated = $request->validated();
@@ -697,11 +722,28 @@ class PortalStoreController extends Controller
     /**
      * Toggle section status between active and draft.
      */
-    public function toggleSection(Request $request, $id)
+    public function toggleSection(ToggleSectionRequest $request, $id)
     {
         Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
-        $section->status = $section->status === 'active' ? 'draft' : 'active';
+        
+        if ($section->status === 'active') {
+            // It will become draft, which is fine.
+            $section->status = 'draft';
+        } else {
+            // It will become active. Check limit.
+            $universe = $section->universe ?? null;
+            $query = \App\Models\CmsSection::where('status', 'active');
+            if ($universe) {
+                $query->where('universe', $universe);
+            }
+            if ($query->count() >= 8) {
+                return back()->withErrors(['error' => 'Límite máximo de 8 secciones activas alcanzado para preservar el rendimiento SEO.']);
+            }
+            $section->status = 'active';
+        }
+
+        // $section->status = $section->status === 'active' ? 'draft' : 'active';
         $section->save();
 
         if ($request->wantsJson()) {
@@ -714,7 +756,7 @@ class PortalStoreController extends Controller
     /**
      * Delete/archive a section.
      */
-    public function destroySection(Request $request, $id)
+    public function destroySection(DestroySectionRequest $request, $id)
     {
         Gate::authorize('manage-cms');
         $section = CmsSection::findOrFail($id);
@@ -899,7 +941,7 @@ class PortalStoreController extends Controller
     /**
      * Reordenar páginas de explorar con Drag & Drop.
      */
-    public function reorderPages(Request $request)
+    public function reorderPages(ReorderPagesRequest $request)
     {
         Gate::authorize('manage-cms');
         $validated = $request->validated();
@@ -962,7 +1004,7 @@ class PortalStoreController extends Controller
     /**
      * Actualizar los anuncios de la cinta banner (Marquesina).
      */
-    public function updateAnnouncements(Request $request)
+    public function updateAnnouncements(UpdateAnnouncementsRequest $request)
     {
         Gate::authorize('manage-cms');
         $rawAnnouncements = $request->input('announcements', []);
@@ -1006,7 +1048,7 @@ class PortalStoreController extends Controller
     /**
      * Crear artículo del blog para Revista Digital.
      */
-    public function storeBlogPost(Request $request)
+    public function storeBlogPost(StoreBlogPostRequest $request)
     {
         Gate::authorize('manage-cms');
         $validated = $request->validated();
@@ -1031,7 +1073,7 @@ class PortalStoreController extends Controller
     /**
      * Actualizar artículo del blog.
      */
-    public function updateBlogPost(Request $request, CmsBlogPost $post)
+    public function updateBlogPost(UpdateBlogPostRequest $request, CmsBlogPost $post)
     {
         Gate::authorize('manage-cms');
         $validated = $request->validated();
@@ -1067,7 +1109,7 @@ class PortalStoreController extends Controller
     /**
      * Actualizar configuración de tracking (GTM, GA4, Meta Pixel & CAPI).
      */
-    public function updateTracking(Request $request)
+    public function updateTracking(UpdateTrackingRequest $request)
     {
         Gate::authorize('manage-cms');
         $validated = $request->validated();
@@ -1086,7 +1128,7 @@ class PortalStoreController extends Controller
     /**
      * Actualizar configuración y orden de filtros del catálogo.
      */
-    public function updateFilters(Request $request)
+    public function updateFilters(UpdateFiltersRequest $request)
     {
         Gate::authorize('manage-cms');
         $filtersData = $request->input('filters', []);

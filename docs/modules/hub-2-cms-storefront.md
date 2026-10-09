@@ -76,7 +76,10 @@ erDiagram
 
 ---
 
-## 5. [TODO: Definir regla exacta]
+## 5. Reglas de Negocio Oficiales
+
+1. **Límite máximo de secciones modulares activas simultáneas en el Home Feed PWA:**  
+   *Regla de Negocio:* El límite estricto es de **8 secciones** (diseño ultra-rápido y minimalista). Esto protege la hidratación DOM y maximiza la puntuación SEO de Web Vitals en dispositivos móviles de gama baja. El backend debe rechazar la creación o activación de una 9na sección simultánea.
 
 1. `[TODO: Definir regla exacta]` **Límite máximo de secciones modulares activas simultáneas en el Home Feed PWA.**  
    *Nota de Auditoría Actual:* Tras auditar `PortalStoreController`, se confirma que **no existe** ningún límite codificado en backend para frenar la creación de nuevas `cms_sections`. Queda a nivel de negocio y UX decidir si imponemos un límite (ej. 12 secciones) para evitar un impacto severo en la hidratación DOM y SEO en móviles de gama baja.
