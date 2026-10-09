@@ -1635,14 +1635,14 @@
 
     <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
     <!-- 1. MODAL CREAR SECCIÓN MODULAR BIFURCADO -->
-    <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
-        <div class="bg-white rounded-2xl w-full max-w-[1100px] flex flex-col md:flex-row shadow-2xl h-[95vh] md:h-[85vh] overflow-hidden relative">
+    <div id="createSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-0 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
+        <div class="bg-white w-full h-full flex flex-col md:flex-row shadow-2xl overflow-hidden relative">
             
             <!-- Botón de cerrar general (Solo visible en Desktop, en mobile va en el header) -->
-            <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-8 h-8 items-center justify-center bg-white rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 shadow-md transition font-bold text-xl cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
+            <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-10 h-10 items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 shadow-md transition font-bold text-2xl cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
 
             <!-- COLUMNA IZQUIERDA: CONFIGURACIONES (1/3) -->
-            <div class="w-full md:w-[380px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
+            <div class="w-full md:w-[420px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -1921,7 +1921,38 @@
                                     </div>
                                 </div>
 
-                                <!-- 5. ACCIONES Y BOTONES DEL HERO -->
+                                <!-- 5. ESTILOS DE TEXTO Y TIPOGRAFÍA -->
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                    <label class="block font-bold text-slate-800 text-xs">Estilos de Texto (Hero)</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Título</label>
+                                            <input type="color" name="settings[title_color]" id="inpCreateTitleColor" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Bajada</label>
+                                            <input type="color" name="settings[subtitle_color]" id="inpCreateSubtitleColor" value="#e2e8f0" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Alineación</label>
+                                            <select name="settings[text_align]" id="inpCreateTextAlign" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded">
+                                                <option value="text-center">Centrado</option>
+                                                <option value="text-left">Izquierda</option>
+                                                <option value="text-right">Derecha</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Tipografía</label>
+                                            <select name="settings[font_family]" id="inpCreateFontFamily" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded">
+                                                <option value="font-sans">Sans (Default)</option>
+                                                <option value="font-serif">Serif</option>
+                                                <option value="font-mono">Monospace</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6. ACCIONES Y BOTONES DEL HERO -->
                                 <div id="createHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
                                     <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
 
@@ -1939,6 +1970,16 @@
                                                     <input type="text" name="settings[cta_primary_url]" id="createCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
                                                 </div>
                                             </div>
+                                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Fondo</label>
+                                                    <input type="color" name="settings[cta_primary_bg]" id="inpCreateCtaPrimaryBg" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Texto</label>
+                                                    <input type="color" name="settings[cta_primary_color]" id="inpCreateCtaPrimaryColor" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1954,6 +1995,16 @@
                                                 <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
                                                 <div class="flex flex-col gap-1.5">
                                                     <input type="text" name="settings[cta_secondary_url]" id="createCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas">
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Fondo</label>
+                                                    <input type="color" name="settings[cta_secondary_bg]" id="inpCreateCtaSecondaryBg" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Texto</label>
+                                                    <input type="color" name="settings[cta_secondary_color]" id="inpCreateCtaSecondaryColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
                                                 </div>
                                             </div>
                                         </div>
@@ -1995,7 +2046,7 @@
                 
                 <!-- Contenedor del Preview Visual -->
                 <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-12 md:mt-0">
-                    <div id="livePreviewContainer" class="w-full h-full max-h-[800px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                    <div id="livePreviewContainer" class="w-full h-full bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
                         <!-- Skeleton Header de la tienda -->
                         <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
                             <div class="w-24 h-6 bg-slate-200 rounded"></div>
@@ -2013,6 +2064,8 @@
                             <!-- Hero / Sección Preview -->
                             <div id="previewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-50 min-h-[150px] overflow-hidden transition-all duration-300">
                                 
+                                <div id="previewOverlay" class="absolute inset-0 z-0 hidden"></div>
+
                                 <div class="relative z-10 max-w-2xl mx-auto space-y-4 w-full">
                                     <span id="previewBadge" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full uppercase tracking-widest hidden"></span>
                                     
@@ -2021,8 +2074,8 @@
                                     <p id="previewSubtitle" class="text-slate-600 md:text-lg max-w-xl mx-auto hidden">Tu bajada o subtítulo aquí.</p>
                                     
                                     <div id="previewActions" class="flex flex-wrap justify-center gap-3 pt-4 hidden">
-                                        <button id="previewBtnPrimary" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-sm shadow-sm hidden"></button>
-                                        <button id="previewBtnSecondary" class="px-6 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-lg font-bold text-sm hidden"></button>
+                                        <button id="previewBtnPrimary" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-sm shadow-sm hidden transition-colors"></button>
+                                        <button id="previewBtnSecondary" class="px-6 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-lg font-bold text-sm hidden transition-colors"></button>
                                     </div>
                                 </div>
                             </div>
@@ -2068,6 +2121,15 @@
                     const catalogWrap = document.getElementById('createCatalogTaxonomies');
                     const typeCatalogWrap = document.getElementById('createTypeCatalogWrap');
                     const typeContentWrap = document.getElementById('createTypeContentWrap');
+                    
+                    const inpCreateTitleColor = document.getElementById('inpCreateTitleColor');
+                    const inpCreateSubtitleColor = document.getElementById('inpCreateSubtitleColor');
+                    const inpCreateTextAlign = document.getElementById('inpCreateTextAlign');
+                    const inpCreateFontFamily = document.getElementById('inpCreateFontFamily');
+                    const inpCreateCtaPrimaryBg = document.getElementById('inpCreateCtaPrimaryBg');
+                    const inpCreateCtaPrimaryColor = document.getElementById('inpCreateCtaPrimaryColor');
+                    const inpCreateCtaSecondaryBg = document.getElementById('inpCreateCtaSecondaryBg');
+                    const inpCreateCtaSecondaryColor = document.getElementById('inpCreateCtaSecondaryColor');
 
                     let isCatalogMode = true;
 
@@ -2075,22 +2137,48 @@
                         // Textos
                         if (titleInput && previewTitle) {
                             previewTitle.textContent = titleInput.value || (isCatalogMode ? 'Nueva Colección' : 'Tu Hero Principal');
+                            if (!isCatalogMode && inpCreateTitleColor) {
+                                previewTitle.style.color = inpCreateTitleColor.value;
+                            } else {
+                                previewTitle.style.color = '';
+                            }
                         }
                         if (subtitleInput && previewSubtitle) {
                             previewSubtitle.textContent = subtitleInput.value;
                             previewSubtitle.style.display = subtitleInput.value ? 'block' : 'none';
+                            if (!isCatalogMode && inpCreateSubtitleColor) {
+                                previewSubtitle.style.color = inpCreateSubtitleColor.value;
+                            } else {
+                                previewSubtitle.style.color = '';
+                            }
                         }
                         if (badgeInput && previewBadge) {
                             previewBadge.textContent = badgeInput.value;
                             previewBadge.style.display = badgeInput.value ? 'inline-block' : 'none';
                         }
                         
+                        // Alineación y tipografía del contenedor de texto
+                        if (previewHeroArea) {
+                            previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'font-sans', 'font-serif', 'font-mono');
+                            if (!isCatalogMode) {
+                                if (inpCreateTextAlign) previewHeroArea.classList.add(inpCreateTextAlign.value);
+                                if (inpCreateFontFamily) previewHeroArea.classList.add(inpCreateFontFamily.value);
+                            } else {
+                                previewHeroArea.classList.add('text-center', 'font-sans');
+                            }
+                        }
+
                         // Botones
                         let hasBtn = false;
                         if (ctaPrimaryInput && previewBtnPrimary && !isCatalogMode) {
                             previewBtnPrimary.textContent = ctaPrimaryInput.value;
                             previewBtnPrimary.style.display = ctaPrimaryInput.value ? 'inline-block' : 'none';
-                            if(ctaPrimaryInput.value) hasBtn = true;
+                            if(ctaPrimaryInput.value) {
+                                hasBtn = true;
+                                if(inpCreateCtaPrimaryBg) previewBtnPrimary.style.backgroundColor = inpCreateCtaPrimaryBg.value;
+                                if(inpCreateCtaPrimaryColor) previewBtnPrimary.style.color = inpCreateCtaPrimaryColor.value;
+                                previewBtnPrimary.style.borderColor = inpCreateCtaPrimaryBg ? inpCreateCtaPrimaryBg.value : '';
+                            }
                         } else {
                             if(previewBtnPrimary) previewBtnPrimary.style.display = 'none';
                         }
@@ -2098,7 +2186,12 @@
                         if (ctaSecondaryInput && previewBtnSecondary && !isCatalogMode) {
                             previewBtnSecondary.textContent = ctaSecondaryInput.value;
                             previewBtnSecondary.style.display = ctaSecondaryInput.value ? 'inline-block' : 'none';
-                            if(ctaSecondaryInput.value) hasBtn = true;
+                            if(ctaSecondaryInput.value) {
+                                hasBtn = true;
+                                if(inpCreateCtaSecondaryBg) previewBtnSecondary.style.backgroundColor = inpCreateCtaSecondaryBg.value;
+                                if(inpCreateCtaSecondaryColor) previewBtnSecondary.style.color = inpCreateCtaSecondaryColor.value;
+                                if(inpCreateCtaSecondaryColor) previewBtnSecondary.style.borderColor = inpCreateCtaSecondaryColor.value; // Assuming border is text color
+                            }
                         } else {
                             if(previewBtnSecondary) previewBtnSecondary.style.display = 'none';
                         }
@@ -2138,8 +2231,8 @@
                             previewCatalogArea.style.display = 'none';
                             
                             // Estilo Hero Completo
-                            previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
-                            previewHeroArea.classList.add('bg-slate-900', 'text-white', 'min-h-[400px]', 'p-8');
+                            previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6', 'text-slate-900');
+                            previewHeroArea.classList.add('bg-slate-900', 'min-h-[400px]', 'p-8');
                             
                             if (window._currentHeroPreviewBg) {
                                 previewHeroArea.style.backgroundImage = window._currentHeroPreviewBg;
@@ -2148,8 +2241,8 @@
                                 previewHeroArea.style.backgroundImage = 'none';
                             }
 
-                            previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-md relative z-10';
-                            previewSubtitle.className = 'text-slate-200 md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
+                            previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
+                            previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
                         }
                     }
 
@@ -2185,7 +2278,11 @@
                     }
 
                     // Attach event listeners para el resto de inputs
-                    const inputs = [titleInput, subtitleInput, badgeInput, layoutInput, limitInput, ctaPrimaryInput, ctaSecondaryInput];
+                    const inputs = [
+                        titleInput, subtitleInput, badgeInput, layoutInput, limitInput, ctaPrimaryInput, ctaSecondaryInput,
+                        inpCreateTitleColor, inpCreateSubtitleColor, inpCreateTextAlign, inpCreateFontFamily,
+                        inpCreateCtaPrimaryBg, inpCreateCtaPrimaryColor, inpCreateCtaSecondaryBg, inpCreateCtaSecondaryColor
+                    ];
                     inputs.forEach(el => {
                         if (el) el.addEventListener('input', updatePreview);
                         if (el && el.tagName === 'SELECT') el.addEventListener('change', updatePreview);
