@@ -890,8 +890,11 @@ class StorefrontController extends Controller
             ->latest('id')
             ->get();
 
-        $analyticsCharts = $dashboardApi->getAnalyticsCharts($request)->getData(true);
-        $systemHealth = $dashboardApi->getSystemHealth($request)->getData(true);
+        $analyticsRequest = \App\Http\Requests\Api\RevOps\DashboardGetAnalyticsChartsRequest::createFrom($request);
+        $analyticsCharts = $dashboardApi->getAnalyticsCharts($analyticsRequest)->getData(true);
+        
+        $healthRequest = \App\Http\Requests\Api\RevOps\DashboardGetSystemHealthRequest::createFrom($request);
+        $systemHealth = $dashboardApi->getSystemHealth($healthRequest)->getData(true);
 
         $serverDashboardData = [
             'userRole' => $userRole,
