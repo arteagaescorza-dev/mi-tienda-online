@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Http\Requests\Portal\Marketing;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
+
+class LeadUpdateRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return Gate::allows('manage-marketing');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'status' => 'required|in:new,contacted,qualified,proposal,won,lost',
+        ];
+    }
+}

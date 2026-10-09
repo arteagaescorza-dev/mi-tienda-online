@@ -13,13 +13,17 @@ use App\Models\ChatbotConversation;
 use App\Models\AdCampaign;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\Marketing\PortalMarketingIndexRequest;
+use App\Http\Requests\Portal\Marketing\PortalMarketingStoreCouponRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class PortalMarketingController extends Controller
 {
-    public function index(Request $request)
+    public function index(PortalMarketingIndexRequest $request)
     {
+        Gate::authorize('manage-marketing');
+
         $dbLeads = Lead::with('interactions')->latest()->get();
 
         $leads = $dbLeads->map(function (Lead $l) {
@@ -218,18 +222,10 @@ class PortalMarketingController extends Controller
             ->with('success', "Cupón {$coupon->code} " . ($coupon->is_active ? 'activado' : 'pausado') . ' exitosamente.');
     }
 
-    public function storeCoupon(Request $request)
+    public function storeCoupon(PortalMarketingStoreCouponRequest $request)
     {
         Gate::authorize('manage-marketing');
-        $validated = $request->validate([
-            'code' => 'required|string|max:40|unique:coupons,code',
-            'discount_type' => 'required|in:percent,fixed_amount,free_shipping,bundle_gift',
-            'discount_value' => 'required|numeric|min:0',
-            'min_order_amount' => 'nullable|numeric|min:0',
-            'target_universe' => 'required|string|max:30',
-            'max_uses' => 'nullable|integer|min:1',
-            'expires_at' => 'nullable|date',
-        ]);
+        $validated = 
 
         Coupon::create($validated);
 

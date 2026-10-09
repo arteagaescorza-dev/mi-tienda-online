@@ -19,3 +19,4 @@ class UpdateLogisticsSettingsRequest extends FormRequest
         ];
     }
 }
+

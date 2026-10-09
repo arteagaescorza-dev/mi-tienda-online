@@ -61,7 +61,13 @@ Gestionar clientes potenciales (leads), automatizar el marketing, recuperar carr
 *   **Recuperación de Carritos:** La tabla `cart_recovery_tokens` es fundamental. Los correos automatizados generan un registro en esta tabla. El token debe tener tiempo de expiración y debe invalidarse una vez que el carrito se convierte en orden. `[IMPLEMENTADO]`
 *   **Atribución Múltiple:** Las `attributions` se vinculan tanto a `leads` como potencialmente a órdenes (ventas). Es clave manejar correctamente si el sistema usa "first-click", "last-click" o atribución lineal.
 
-## 4. TODOs y Decisiones Pendientes
-*   `[TODO: Definir regla exacta]` - Especificar el mecanismo exacto y el algoritmo para calcular el *Lead Score* en la vista o en procesos en segundo plano ahora que la tabla estática fue eliminada.
-*   `[TODO: Definir regla exacta]` - Aclarar la ventana de tiempo para la expiración de los `cart_recovery_tokens`.
-*   `[TODO: Definir regla exacta]` - Documentar el modelo de atribución exacto (First-click, Last-click, etc.) que gobierna la tabla `attributions`.
+## 4. Reglas de Negocio Oficiales
+
+1. **Mecanismo de Lead Score:**  
+   *Regla:* Cálculo **Dinámico (On-the-fly)**. El score se determina en tiempo real sumando los pesos estipulados de las interacciones guardadas en `lead_interactions`. No existe campo estático de score precalculado.
+
+2. **Expiración de Tokens de Recuperación (Carritos):**  
+   *Regla:* La ventana de tiempo de validez de los `cart_recovery_tokens` es de **7 días naturales**. Pasado este tiempo, el token se invalida automáticamente.
+
+3. **Modelo de Atribución de Ventas:**  
+   *Regla:* Se utilizará un modelo de atribución **Last-click** (último clic antes de la compra). Esto significa que el 100% de la conversión se atribuye a la campaña o canal final del cual provino la interacción inmediata previa al cierre del pedido.

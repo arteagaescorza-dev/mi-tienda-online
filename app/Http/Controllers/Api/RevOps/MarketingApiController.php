@@ -11,6 +11,7 @@ use App\Services\OrderProcessingService;
 use App\Models\AdCampaign;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\MarketingApiToggleCampaignRequest;
 use Illuminate\Support\Facades\Gate;
 
 class MarketingApiController extends Controller
@@ -45,7 +46,7 @@ class MarketingApiController extends Controller
     /**
      * Pausa o reanuda una campaña de Meta Ads / Google Ads.
      */
-    public function toggleCampaign(Request $request, int $id): JsonResponse
+    public function toggleCampaign(MarketingApiToggleCampaignRequest $request, int $id): JsonResponse
     {
         Gate::authorize('manage-marketing');
 

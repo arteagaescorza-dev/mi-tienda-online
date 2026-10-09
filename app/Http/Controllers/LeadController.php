@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\Marketing\LeadStoreRequest;
+use App\Http\Requests\Portal\Marketing\LeadUpdateRequest;
+use App\Http\Requests\Portal\Marketing\LeadImportProcessRequest;
+use Illuminate\Support\Facades\Gate;
+
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,16 +27,11 @@ class LeadController extends Controller
         return view('leads.create');
     }
 
-    public function store(Request $request)
+    public function store(LeadStoreRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'source' => 'nullable|string|max:100',
-            'notes' => 'nullable|string',
-            'status' => 'nullable|in:new,contacted,qualified,proposal,won,lost',
-        ]);
+        Gate::authorize('manage-marketing');
+
+        $data = 
 
         $data['status'] = $data['status'] ?? Lead::STATUS_NEW;
 
@@ -46,11 +46,11 @@ class LeadController extends Controller
         return view('leads.show', compact('lead', 'statuses'));
     }
 
-    public function update(Request $request, Lead $lead)
+    public function update(LeadUpdateRequest $request, Lead $lead)
     {
-        $data = $request->validate([
-            'status' => 'required|in:new,contacted,qualified,proposal,won,lost',
-        ]);
+        Gate::authorize('manage-marketing');
+
+        $data = 
 
         $lead->status = $data['status'];
         $lead->save();
@@ -107,11 +107,11 @@ class LeadController extends Controller
         ]);
     }
 
-    public function importProcess(Request $request)
+    public function importProcess(LeadImportProcessRequest $request)
     {
-        $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
-        ]);
+        Gate::authorize('manage-marketing');
+
+        
 
         $file = $request->file('csv_file');
         $path = $file->getRealPath();

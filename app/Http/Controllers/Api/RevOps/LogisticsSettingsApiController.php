@@ -42,3 +42,4 @@ class LogisticsSettingsApiController extends Controller
         ]);
     }
 }
+
