@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\RevOps;
 
+use Illuminate\Support\Facades\Gate;
+
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -20,6 +22,19 @@ use App\Models\BomDeficitProcurement;
 use App\Services\InboundReceiptService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\ResolveDiscontinuedProductRequest;
+use App\Http\Requests\Api\RevOps\UploadImageRequest;
+use App\Http\Requests\Api\RevOps\AuditBomDeficitRequest;
+use App\Http\Requests\Api\RevOps\StoreBundleRequest;
+use App\Http\Requests\Api\RevOps\AdjustStockRequest;
+use App\Http\Requests\Api\RevOps\RecordCycleCountRequest;
+use App\Http\Requests\Api\RevOps\CurateScrapedItemRequest;
+use App\Http\Requests\Api\RevOps\ReceivePurchaseOrderRequest;
+use App\Http\Requests\Api\RevOps\DispatchPurchaseOrderRequest;
+use App\Http\Requests\Api\RevOps\StorePurchaseOrderRequest;
+use App\Http\Requests\Api\RevOps\VoidCreditAgreementRequest;
+use App\Http\Requests\Api\RevOps\UpdateCreditAgreementRequest;
+use App\Http\Requests\Api\RevOps\StoreCreditAgreementRequest;
 use Illuminate\Support\Facades\DB;
 
 class InventoryApiController extends Controller
@@ -36,6 +51,7 @@ class InventoryApiController extends Controller
      */
     public function getCreditAgreements(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $query = SupplierCreditAgreement::query()->with('supplier');
 
         if ($request->filled('supplier_id')) {
@@ -81,22 +97,10 @@ class InventoryApiController extends Controller
     /**
      * Formaliza el registro de una Minuta de Discrepancia Inbound / Nota de Credito (TASK-PUR-01).
      */
-    public function storeCreditAgreement(Request $request): JsonResponse
+    public function storeCreditAgreement(StoreCreditAgreementRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'supplier_id' => 'required|integer|exists:suppliers,id',
-            'purchase_order_id' => 'nullable|integer|exists:purchase_orders,id',
-            'reference_folio' => 'nullable|string|max:50',
-            'agreement_type' => 'nullable|string|max:40',
-            'discrepancy_type' => 'nullable|string|max:50',
-            'missing_units_count' => 'nullable|integer|min:0',
-            'damaged_units_count' => 'nullable|integer|min:0',
-            'unit_cost_applied' => 'nullable|numeric|min:0',
-            'amount' => 'nullable|numeric|min:0',
-            'authorized_by_vendor_contact' => 'nullable|string|max:150',
-            'discrepancy_minutes' => 'nullable|string|max:2000',
-            'resolution_notes' => 'nullable|string|max:1000',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $supplier = Supplier::findOrFail($validated['supplier_id']);
 
@@ -192,6 +196,7 @@ class InventoryApiController extends Controller
      */
     public function getCreditAgreementDetail(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $agreement = SupplierCreditAgreement::with(['supplier', 'purchaseOrder', 'appliedToPurchaseOrder'])->findOrFail($id);
 
         return response()->json([
@@ -203,8 +208,9 @@ class InventoryApiController extends Controller
     /**
      * Modifica los datos de un Acuerdo / Nota de Crédito pendiente y audita en Kardex (TASK-PUR-02).
      */
-    public function updateCreditAgreement(Request $request, int $id): JsonResponse
+    public function updateCreditAgreement(UpdateCreditAgreementRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $agreement = SupplierCreditAgreement::with('supplier')->findOrFail($id);
 
         if ($agreement->status === 'applied') {
@@ -214,20 +220,7 @@ class InventoryApiController extends Controller
             ], 422);
         }
 
-        $validated = $request->validate([
-            'supplier_id' => 'nullable|integer|exists:suppliers,id',
-            'reference_folio' => 'nullable|string|max:50',
-            'agreement_type' => 'nullable|string|max:40',
-            'discrepancy_type' => 'nullable|string|max:50',
-            'missing_units_count' => 'nullable|integer|min:0',
-            'damaged_units_count' => 'nullable|integer|min:0',
-            'unit_cost_applied' => 'nullable|numeric|min:0',
-            'amount' => 'nullable|numeric|min:0',
-            'status' => 'nullable|string|in:pending,applied,void',
-            'authorized_by_vendor_contact' => 'nullable|string|max:150',
-            'discrepancy_minutes' => 'nullable|string|max:2000',
-            'resolution_notes' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $oldAmount = (float) $agreement->amount;
 
@@ -318,11 +311,10 @@ class InventoryApiController extends Controller
     /**
      * Anula una Minuta de Discrepancia si se subsano de forma fisica (TASK-PUR-01).
      */
-    public function voidCreditAgreement(Request $request, int $id): JsonResponse
+    public function voidCreditAgreement(VoidCreditAgreementRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'void_reason' => 'nullable|string|max:500',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $agreement = SupplierCreditAgreement::with('supplier')->findOrFail($id);
 
@@ -363,6 +355,7 @@ class InventoryApiController extends Controller
      */
     public function getPurchaseOrders(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $query = PurchaseOrder::query()
             ->with(['supplier', 'items.product', 'items.variant', 'creditAgreement'])
             ->latest();
@@ -400,6 +393,7 @@ class InventoryApiController extends Controller
      */
     public function getPurchaseOrderDetail(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $po = PurchaseOrder::with(['supplier', 'items.product', 'items.variant', 'creditAgreement', 'kardex'])->findOrFail($id);
 
         return response()->json([
@@ -413,6 +407,7 @@ class InventoryApiController extends Controller
      */
     public function getPurchaseKardex(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $query = PurchaseKardex::query()
             ->with(['supplier', 'purchaseOrder'])
             ->latest();
@@ -439,35 +434,10 @@ class InventoryApiController extends Controller
     /**
      * Emite formalmente una Orden de Compra con deduccion de notas de credito y Kardex (TASK-INV-16 / TASK-PUR-04).
      */
-    public function storePurchaseOrder(Request $request): JsonResponse
+    public function storePurchaseOrder(StorePurchaseOrderRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'po_number' => 'nullable|string|max:50',
-            'supplier_id' => 'nullable|integer',
-            'supplier' => 'nullable|string|max:150',
-            'notes' => 'nullable|string|max:1000',
-            'delivery_commitment_date' => 'nullable|string|max:100',
-            'payment_terms' => 'nullable|string|max:100',
-            'priority' => 'nullable|string|max:30',
-            'has_credit_deduction' => 'nullable|boolean',
-            'credit_agreement_id' => 'nullable|integer',
-            'credit_note_ref' => 'nullable|string|max:50',
-            'credit_note_amount' => 'nullable|numeric|min:0',
-            'credit_note_reason' => 'nullable|string|max:500',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'nullable|integer',
-            'items.*.variant_id' => 'nullable|integer',
-            'items.*.sku' => 'nullable|string|max:100',
-            'items.*.product_name' => 'nullable|string|max:200',
-            'items.*.qty' => 'nullable|integer|min:0',
-            'items.*.cost_unit' => 'nullable|numeric|min:0',
-            'items.*.unit_cost' => 'nullable|numeric|min:0',
-            'items.*.sizes' => 'nullable|array',
-            'items.*.priority' => 'nullable|string|max:30',
-            'moq_sheet_id' => 'nullable|integer',
-            'moq_tier_label' => 'nullable|string|max:100',
-            'po_snapshot' => 'nullable|array',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated) {
             // 1. Resolver o asociar Proveedor
@@ -723,14 +693,10 @@ class InventoryApiController extends Controller
     /**
      * Notifica y despacha formalmente una Orden de Compra por correo o fletera (TASK-INV-16 / TASK-PUR-01).
      */
-    public function dispatchPurchaseOrder(Request $request, int $id): JsonResponse
+    public function dispatchPurchaseOrder(DispatchPurchaseOrderRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'carrier' => 'nullable|string|max:100',
-            'tracking_number' => 'nullable|string|max:100',
-            'recipient_email' => 'nullable|email|max:150',
-            'notes' => 'nullable|string|max:500',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $po = PurchaseOrder::with(['supplier', 'items'])->findOrFail($id);
 
@@ -783,17 +749,10 @@ class InventoryApiController extends Controller
     /**
      * Procesa la recepción física Inbound de una Orden de Compra (TASK-INV-04).
      */
-    public function receivePurchaseOrder(Request $request, int $id): JsonResponse
+    public function receivePurchaseOrder(ReceivePurchaseOrderRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'items' => 'nullable|array',
-            'notes' => 'nullable|string|max:500',
-            'batch_number' => 'nullable|string|max:80',
-            'expiration_date' => 'nullable|string|max:30',
-            'pao_months' => 'nullable|integer|min:0|max:120',
-            'sanitary_data' => 'nullable|array',
-            'moq_tier_label' => 'nullable|string|max:100',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $po = PurchaseOrder::with('items.variant')->findOrFail($id);
 
@@ -823,30 +782,10 @@ class InventoryApiController extends Controller
     /**
      * Aprueba o rechaza un ítem extraído por el Scraper de Torzo (TASK-INV-08).
      */
-    public function curateScrapedItem(Request $request, int $id): JsonResponse
+    public function curateScrapedItem(CurateScrapedItemRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'action' => 'required|in:approve,reject',
-            'curated_title' => 'required_if:action,approve|string|max:200',
-            'curated_brand' => 'nullable|string|max:80',
-            'supplier_id' => 'nullable',
-            'curated_category' => 'nullable|string|max:100',
-            'curated_subcategory' => 'nullable|string|max:100',
-            'curated_fabric' => 'nullable|string|max:80',
-            'curated_color' => 'nullable|string|max:80',
-            'curated_design_type' => 'nullable|string|in:sin_diseno,con_diseno',
-            'curated_website_section' => 'nullable|string|max:120',
-            'curated_price' => 'required_if:action,approve|numeric|min:0',
-            'curated_cost' => 'nullable|numeric|min:0',
-            'curated_stock' => 'nullable|integer|min:0',
-            'curated_type' => 'nullable|string|in:propio,dropship',
-            'curated_description' => 'nullable|string',
-            'bullet_points' => 'nullable|array',
-            'seo_tags' => 'nullable|array',
-            'curated_images' => 'nullable|array',
-            'image_color_map' => 'nullable|array',
-            'rejection_reason' => 'required_if:action,reject|string|max:500',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $item = ScrapedPendingItem::findOrFail($id);
 
@@ -1037,16 +976,10 @@ class InventoryApiController extends Controller
     /**
      * Registra el resultado de una auditoría cíclica a ciegas (TASK-INV-07).
      */
-    public function recordCycleCount(Request $request): JsonResponse
+    public function recordCycleCount(RecordCycleCountRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'counts' => 'required|array|min:1',
-            'counts.*.variant_id' => 'nullable|integer',
-            'counts.*.sku' => 'nullable|string|max:100',
-            'counts.*.physical_counted' => 'required|integer|min:0',
-            'counts.*.reason' => 'nullable|string|max:255',
-            'reconcile_kardex' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated, $request) {
             $totalCounted = 0;
@@ -1156,16 +1089,10 @@ class InventoryApiController extends Controller
     /**
      * Ajuste rapido de stock con persistencia inmutable en Kardex (TASK-INV-02 / SLICE 3).
      */
-    public function adjustStock(Request $request): JsonResponse
+    public function adjustStock(AdjustStockRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'sku' => 'required|string|max:100',
-            'type' => 'required|string|in:add,sub,increase,decrease',
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'nullable|string|max:255',
-            'variant_id' => 'nullable|integer',
-            'size' => 'nullable|string|max:20',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated, $request) {
             $sku = trim((string) $validated['sku']);
@@ -1309,6 +1236,7 @@ class InventoryApiController extends Controller
      */
     public function getBundles(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $bundles = ProductBundle::with(['items.product.variants.inventories', 'items.variant.inventories'])
             ->get()
             ->map(function ($bundle) {
@@ -1380,27 +1308,10 @@ class InventoryApiController extends Controller
     /**
      * Guarda o actualiza una receta BOM de ensamble con sus componentes (TASK-INV-03 / TASK-INV-17).
      */
-    public function storeBundle(Request $request): JsonResponse
+    public function storeBundle(StoreBundleRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'id' => 'nullable',
-            'bundle_id' => 'nullable',
-            'sku' => 'required|string|max:150',
-            'name' => 'required|string|max:150',
-            'type' => 'nullable|string|max:40',
-            'bundle_type' => 'nullable|string|max:40',
-            'subscription_price' => 'nullable|numeric|min:0',
-            'subscriptionPrice' => 'nullable|numeric|min:0',
-            'bundle_price' => 'nullable|numeric|min:0',
-            'regular_price' => 'nullable|numeric|min:0',
-            'regularPrice' => 'nullable|numeric|min:0',
-            'is_active' => 'nullable|boolean',
-            'isActive' => 'nullable|boolean',
-            'components' => 'required|array|min:1',
-            'components.*.sku' => 'required|string|max:100',
-            'components.*.size' => 'nullable|string|max:20',
-            'components.*.qty' => 'required|integer|min:1',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated) {
             $cleanSku = strtoupper(trim($validated['sku']));
@@ -1499,15 +1410,10 @@ class InventoryApiController extends Controller
     /**
      * Audita déficit de insumos BOM contra un lote objetivo y dispara borradores de OC (TASK-INT-11).
      */
-    public function auditBomDeficit(Request $request): JsonResponse
+    public function auditBomDeficit(AuditBomDeficitRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'bundle_id' => 'nullable',
-            'bundle_sku' => 'nullable|string',
-            'target_units' => 'nullable|integer|min:1',
-            'target_qty' => 'nullable|integer|min:1',
-            'batch_reference' => 'nullable|string|max:100',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $targetUnits = (int) ($validated['target_units'] ?? $validated['target_qty'] ?? 1);
         $bundleIdentifier = $validated['bundle_id'] ?? $validated['bundle_sku'] ?? null;
@@ -1700,12 +1606,10 @@ class InventoryApiController extends Controller
     /**
      * Subida y normalización de imágenes: conversión mandatoria a WebP y normalización uniforme de dimensiones (Regla 2).
      */
-    public function uploadImage(Request $request): JsonResponse
+    public function uploadImage(UploadImageRequest $request): JsonResponse
     {
-        $request->validate([
-            'image' => 'nullable|file|mimes:jpeg,jpg,png,webp,avif,bmp|max:15360',
-            'image_url' => 'nullable|string|url|max:1000',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $file = $request->file('image');
         $url = $request->input('image_url');
@@ -1740,6 +1644,7 @@ class InventoryApiController extends Controller
      */
     public function getArchivedProducts(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $products = Product::query()
             ->where('is_archived', true)
             ->orWhere('visible', false)
@@ -1773,13 +1678,11 @@ class InventoryApiController extends Controller
     /**
      * Resuelve una discrepancia de producto descontinuado por proveedor (Regla 4: Retirar, Archivar o Eliminar).
      */
-    public function resolveDiscontinuedProduct(Request $request, int $id): JsonResponse
+    public function resolveDiscontinuedProduct(ResolveDiscontinuedProductRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $product = Product::findOrFail($id);
-        $validated = $request->validate([
-            'action' => 'required|in:hide,archive,delete',
-            'reason' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $action = $validated['action'];
         $reason = $validated['reason'] ?? 'Descontinuado por proveedor en origen tras barrido de scraping';
@@ -1829,6 +1732,7 @@ class InventoryApiController extends Controller
      */
     public function reactivateArchivedProduct(Request $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $product = Product::findOrFail($id);
         $product->update([
             'is_archived' => false,
@@ -1855,6 +1759,7 @@ class InventoryApiController extends Controller
      */
     public function destroyProduct(Request $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $product = Product::findOrFail($id);
         $sku = $product->sku;
         $product->delete();

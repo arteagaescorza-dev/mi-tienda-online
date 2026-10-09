@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Api\RevOps;
 
+use Illuminate\Support\Facades\Gate;
+
 use App\Http\Controllers\Controller;
 use App\Services\StockReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\ReleaseRequest;
+use App\Http\Requests\Api\RevOps\ReserveRequest;
 use Exception;
 
 class StockReservationApiController extends Controller
@@ -20,14 +24,10 @@ class StockReservationApiController extends Controller
     /**
      * Bloquea stock para una variante durante el checkout activo (TASK-INT-06).
      */
-    public function reserve(Request $request): JsonResponse
+    public function reserve(ReserveRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'cart_id' => 'required|string|max:100',
-            'variant_id' => 'required|integer',
-            'quantity' => 'nullable|integer|min:1',
-            'duration_minutes' => 'nullable|integer|min:5|max:60',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         try {
             $lock = $this->reservationService->reserveStock(
@@ -56,11 +56,10 @@ class StockReservationApiController extends Controller
     /**
      * Libera un bloqueo de stock cuando el usuario cancela o vacía su carrito.
      */
-    public function release(Request $request): JsonResponse
+    public function release(ReleaseRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'lock_id' => 'required|integer',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $released = $this->reservationService->releaseStockLock($validated['lock_id']);
 
@@ -75,6 +74,7 @@ class StockReservationApiController extends Controller
      */
     public function cleanupExpired(): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $count = $this->reservationService->cleanupExpiredLocks();
 
         return response()->json([

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\AssignSupplierRequest;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\Api\RevOps\StoreBrandRequest;
@@ -382,13 +383,11 @@ class BrandApiController extends Controller
     /**
      * Asociar / Reasignar marca a un proveedor específico.
      */
-    public function assignSupplier(Request $request, int|string $id): JsonResponse
+    public function assignSupplier(AssignSupplierRequest $request, int|string $id): JsonResponse
     {
         Gate::authorize('manage-catalog');
         $brand = Brand::findOrFail($id);
-        $validated = $request->validate([
-            'supplier_id' => 'nullable|exists:suppliers,id',
-        ]);
+        $validated = $request->validated();
 
         $brand->supplier_id = $validated['supplier_id'] ?? null;
         $brand->save();

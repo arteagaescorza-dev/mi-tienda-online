@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\RevOps;
 
+use Illuminate\Support\Facades\Gate;
+
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -12,6 +14,11 @@ use App\Services\Inventory\ProductAiCopilotService;
 use App\Services\Inventory\SkuGeneratorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\UpdateCompleteRequest;
+use App\Http\Requests\Api\RevOps\StoreProductRequest;
+use App\Http\Requests\Api\RevOps\GenerateDescriptionRequest;
+use App\Http\Requests\Api\RevOps\CheckDuplicateRequest;
+use App\Http\Requests\Api\RevOps\GenerateSkuRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -26,22 +33,10 @@ class ProductSkuAndDuplicateApiController extends Controller
     /**
      * Genera un codigo SKU estructurado y garantizado como unico.
      */
-    public function generateSku(Request $request): JsonResponse
+    public function generateSku(GenerateSkuRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'category' => 'nullable',
-            'brand' => 'nullable|string|max:100',
-            'supplier_id' => 'nullable',
-            'supplier' => 'nullable|string|max:100',
-            'fabric' => 'nullable|string|max:100',
-            'fabric_type' => 'nullable|string|max:100',
-            'color_name' => 'nullable|string|max:100',
-            'title' => 'nullable|string|max:255',
-            'name' => 'nullable|string|max:255',
-            'variant_code' => 'nullable',
-            'variant' => 'nullable',
-            'prefix_override' => 'nullable|string|max:10',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $result = $this->skuGenerator->generateSku($validated);
 
@@ -52,21 +47,10 @@ class ProductSkuAndDuplicateApiController extends Controller
         ]);
     }
 
-    public function checkDuplicate(Request $request): JsonResponse
+    public function checkDuplicate(CheckDuplicateRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'name' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:100',
-            'category_id' => 'nullable|integer',
-            'category' => 'nullable',
-            'price' => 'nullable|numeric|min:0',
-            'pvp' => 'nullable|numeric|min:0',
-            'sku' => 'nullable|string|max:100',
-            'exclude_product_id' => 'nullable|integer',
-            'threshold_warning' => 'nullable|integer|min:1|max:100',
-            'threshold_match' => 'nullable|integer|min:1|max:100',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         if (empty($validated['title']) && !empty($validated['name'])) {
             $validated['title'] = $validated['name'];
@@ -89,19 +73,10 @@ class ProductSkuAndDuplicateApiController extends Controller
     /**
      * Genera descripcion comercial y tags SEO con el Copiloto IA de Producto.
      */
-    public function generateDescription(Request $request): JsonResponse
+    public function generateDescription(GenerateDescriptionRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'title' => 'nullable|string|max:255',
-            'category' => 'nullable|string|max:100',
-            'brand' => 'nullable|string|max:100',
-            'fabric_type' => 'nullable|string|max:100',
-            'color_name' => 'nullable|string|max:100',
-            'design_type' => 'nullable|string|max:50',
-            'target_audience' => 'nullable|string|max:50',
-            'pvp' => 'nullable|numeric|min:0',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $result = $this->aiCopilot->generateCommercialContent($validated);
 
@@ -117,6 +92,7 @@ class ProductSkuAndDuplicateApiController extends Controller
      */
     public function getSkuDetail(string $sku): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $cleanSku = trim(strtoupper($sku));
         $product = Product::with(['categories', 'variants.inventory', 'variants.optionValues'])
             ->where('sku', $cleanSku)
@@ -221,51 +197,10 @@ class ProductSkuAndDuplicateApiController extends Controller
     /**
      * Da de alta un nuevo producto comercial en el catalogo con sus variantes e inventario fisico inicial (TASK-INV-15 / SLICE 6).
      */
-    public function storeProduct(Request $request): JsonResponse
+    public function storeProduct(StoreProductRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'sku' => 'required|string|max:100|unique:products,sku',
-            'title' => 'nullable|string|max:255',
-            'name' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:100',
-            'supplier_id' => 'nullable',
-            'category' => 'nullable|string|max:100',
-            'subcategory' => 'nullable|string|max:100',
-            'type' => 'nullable|string|in:propio,physical,dropship,both',
-            'pvp' => 'required|numeric|min:0',
-            'regular_price' => 'nullable|numeric|min:0',
-            'discount_pct' => 'nullable|numeric|min:0|max:100',
-            'cost' => 'required|numeric|min:0',
-            'weighted_average_cost' => 'nullable|numeric|min:0',
-            'sizes' => 'nullable|array',
-            'shades' => 'nullable|array',
-            'volumes' => 'nullable|array',
-            'location' => 'nullable|string|max:100',
-            'fabric_type' => 'nullable|string|max:100',
-            'fabric' => 'nullable|string|max:120',
-            'fabric_id' => 'nullable|integer',
-            'color_name' => 'nullable|string|max:100',
-            'color_hex' => 'nullable|string|max:20',
-            'color_type' => 'nullable|string|max:50',
-            'design_type' => 'nullable|string|max:50',
-            'website_section' => 'nullable|string|max:120',
-            'section_name' => 'nullable|string|max:120',
-            'is_published' => 'nullable|boolean',
-            'description' => 'nullable|string',
-            'bullet_points' => 'nullable|array',
-            'seo_tags' => 'nullable|array',
-            'requires_sanitary_control' => 'nullable|boolean',
-            'batch_number' => 'nullable|string|max:100',
-            'expiration_date' => 'nullable|string|max:50',
-            'pao_months' => 'nullable|integer|min:0',
-            'provider' => 'nullable|string|max:100',
-            'provider_url' => 'nullable|string|max:255',
-            'approval_status' => 'nullable|string|in:draft,approved',
-            'images' => 'nullable|array',
-            'images.*.url' => 'nullable|string|max:1000',
-            'images.*.color_name' => 'nullable|string|max:100',
-            'images.*.is_primary' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $cleanSku = trim(strtoupper($validated['sku']));
         $title = $validated['title'] ?? ($validated['name'] ?? 'Nuevo Producto');
@@ -491,6 +426,7 @@ class ProductSkuAndDuplicateApiController extends Controller
      */
     public function approveProduct(Request $request, int|string $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $product = is_numeric($id) ? Product::find((int) $id) : Product::where('sku', strtoupper(trim($id)))->first();
         if (!$product) {
             return response()->json([
@@ -527,48 +463,11 @@ class ProductSkuAndDuplicateApiController extends Controller
     /**
      * Actualiza integralmente los datos comerciales, existencias y costos de un SKU (TASK-INV-18).
      */
-    public function updateComplete(Request $request, string $sku): JsonResponse
+    public function updateComplete(UpdateCompleteRequest $request, string $sku): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $cleanSku = trim(strtoupper($sku));
-        $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'name' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:100',
-            'category' => 'nullable|string|max:100',
-            'subcategory' => 'nullable|string|max:100',
-            'type' => 'nullable|string|in:propio,physical,dropship,both',
-            'pvp' => 'required|numeric|min:0',
-            'regular_price' => 'nullable|numeric|min:0',
-            'discount_pct' => 'nullable|numeric|min:0|max:100',
-            'cost' => 'required|numeric|min:0',
-            'weighted_average_cost' => 'nullable|numeric|min:0',
-            'sizes' => 'nullable|array',
-            'shades' => 'nullable|array',
-            'volumes' => 'nullable|array',
-            'location' => 'nullable|string|max:100',
-            'fabric_type' => 'nullable|string|max:100',
-            'fabric' => 'nullable|string|max:120',
-            'fabric_id' => 'nullable|integer',
-            'color_name' => 'nullable|string|max:100',
-            'color_hex' => 'nullable|string|max:20',
-            'color_type' => 'nullable|string|max:50',
-            'design_type' => 'nullable|string|max:50',
-            'website_section' => 'nullable|string|max:120',
-            'section_name' => 'nullable|string|max:120',
-            'is_published' => 'nullable|boolean',
-            'description' => 'nullable|string',
-            'requires_sanitary_control' => 'nullable|boolean',
-            'batch_number' => 'nullable|string|max:100',
-            'expiration_date' => 'nullable|string|max:50',
-            'pao_months' => 'nullable|integer|min:0',
-            'supplier_id' => 'nullable',
-            'provider' => 'nullable|string|max:100',
-            'provider_url' => 'nullable|string|max:255',
-            'image' => 'nullable|string|max:1000',
-            'images' => 'nullable|array',
-            'images_by_color' => 'nullable|array',
-            'image_color_map' => 'nullable|array',
-        ]);
+        $validated = $request->validated();
 
         $product = Product::where('sku', $cleanSku)->first();
 

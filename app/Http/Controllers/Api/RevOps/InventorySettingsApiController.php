@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\RevOps;
 
+use Illuminate\Support\Facades\Gate;
+
 use App\Http\Controllers\Controller;
 use App\Models\ApparelColor;
 use App\Models\ApparelFabric;
@@ -11,6 +13,22 @@ use App\Models\SupplierMoqSheet;
 use App\Services\Inventory\VariantDimensionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\UpdateMoqSheetRequest;
+use App\Http\Requests\Api\RevOps\StoreMoqSheetRequest;
+use App\Http\Requests\Api\RevOps\UpdateStoreSectionRequest;
+use App\Http\Requests\Api\RevOps\StoreStoreSectionRequest;
+use App\Http\Requests\Api\RevOps\UpdateColorRequest;
+use App\Http\Requests\Api\RevOps\StoreColorRequest;
+use App\Http\Requests\Api\RevOps\UpdateFabricRequest;
+use App\Http\Requests\Api\RevOps\StoreFabricRequest;
+use App\Http\Requests\Api\RevOps\UpdateCategoryRequest;
+use App\Http\Requests\Api\RevOps\StoreCategoryRequest;
+use App\Http\Requests\Api\RevOps\UpdateFragranceVolumeRequest;
+use App\Http\Requests\Api\RevOps\StoreFragranceVolumeRequest;
+use App\Http\Requests\Api\RevOps\UpdateSizeRequest;
+use App\Http\Requests\Api\RevOps\StoreSizeRequest;
+use App\Http\Requests\Api\RevOps\UpdateSizeCurveRequest;
+use App\Http\Requests\Api\RevOps\StoreSizeCurveRequest;
 use Illuminate\Support\Str;
 
 class InventorySettingsApiController extends Controller
@@ -25,6 +43,7 @@ class InventorySettingsApiController extends Controller
 
     public function getSizeCurves(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $includeArchived = $request->boolean('include_archived', true);
         $this->dimensionService->ensureBootstrapDefaults();
         $curves = $this->dimensionService->getAllCurves($includeArchived);
@@ -35,24 +54,10 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeSizeCurve(Request $request): JsonResponse
+    public function storeSizeCurve(StoreSizeCurveRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'category_scope' => 'nullable|string|max:50',
-            'supplier_id' => 'nullable',
-            'brand_id' => 'nullable',
-            'description' => 'nullable|string|max:500',
-            'is_default' => 'nullable|boolean',
-            'is_active' => 'nullable|boolean',
-            'sizes' => 'nullable|array',
-            'sizes.*.code' => 'required|string|max:20',
-            'sizes.*.label' => 'nullable|string|max:100',
-            'sizes.*.sort_order' => 'nullable|integer',
-            'sizes.*.waist_min_cm' => 'nullable|numeric|min:0',
-            'sizes.*.waist_max_cm' => 'nullable|numeric|min:0',
-            'sizes.*.is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $curve = $this->dimensionService->createCurve($validated);
 
@@ -63,17 +68,10 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateSizeCurve(Request $request, int $id): JsonResponse
+    public function updateSizeCurve(UpdateSizeCurveRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:100',
-            'category_scope' => 'nullable|string|max:50',
-            'supplier_id' => 'nullable',
-            'brand_id' => 'nullable',
-            'description' => 'nullable|string|max:500',
-            'is_default' => 'nullable|boolean',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $curve = $this->dimensionService->updateCurve($id, $validated);
 
@@ -86,6 +84,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleSizeCurveActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $curve = $this->dimensionService->toggleActiveCurve($id);
 
         return response()->json([
@@ -97,6 +96,7 @@ class InventorySettingsApiController extends Controller
 
     public function archiveSizeCurve(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->archiveCurve($id);
 
         return response()->json([
@@ -107,6 +107,7 @@ class InventorySettingsApiController extends Controller
 
     public function restoreSizeCurve(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $curve = $this->dimensionService->restoreCurve($id);
 
         return response()->json([
@@ -118,6 +119,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroySizeCurve(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->deleteCurve($id);
 
         return response()->json([
@@ -130,16 +132,10 @@ class InventorySettingsApiController extends Controller
     // TALLAS INDIVIDUALES
     // =========================================================================
 
-    public function storeSize(Request $request, int $curveId): JsonResponse
+    public function storeSize(StoreSizeRequest $request, int $curveId): JsonResponse
     {
-        $validated = $request->validate([
-            'code' => 'required|string|max:20',
-            'label' => 'nullable|string|max:100',
-            'sort_order' => 'nullable|integer',
-            'waist_min_cm' => 'nullable|numeric|min:0',
-            'waist_max_cm' => 'nullable|numeric|min:0',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $size = $this->dimensionService->addSizeToCurve($curveId, $validated);
 
@@ -150,16 +146,10 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateSize(Request $request, int $sizeId): JsonResponse
+    public function updateSize(UpdateSizeRequest $request, int $sizeId): JsonResponse
     {
-        $validated = $request->validate([
-            'code' => 'sometimes|required|string|max:20',
-            'label' => 'nullable|string|max:100',
-            'sort_order' => 'nullable|integer',
-            'waist_min_cm' => 'nullable|numeric|min:0',
-            'waist_max_cm' => 'nullable|numeric|min:0',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $size = $this->dimensionService->updateSize($sizeId, $validated);
 
@@ -172,6 +162,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleSizeActive(int $sizeId): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $size = $this->dimensionService->toggleActiveSize($sizeId);
 
         return response()->json([
@@ -183,6 +174,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroySize(int $sizeId): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->deleteSize($sizeId);
 
         return response()->json([
@@ -197,6 +189,7 @@ class InventorySettingsApiController extends Controller
 
     public function getFragranceVolumes(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $includeArchived = $request->boolean('include_archived', true);
         $this->dimensionService->ensureBootstrapDefaults();
         $volumes = $this->dimensionService->getAllVolumes($includeArchived);
@@ -207,16 +200,10 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeFragranceVolume(Request $request): JsonResponse
+    public function storeFragranceVolume(StoreFragranceVolumeRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'value' => 'required|numeric|min:0.1',
-            'unit' => 'nullable|string|max:20',
-            'label' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:255',
-            'sort_order' => 'nullable|integer',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $volume = $this->dimensionService->createVolume($validated);
 
@@ -227,16 +214,10 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateFragranceVolume(Request $request, int $id): JsonResponse
+    public function updateFragranceVolume(UpdateFragranceVolumeRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'value' => 'sometimes|required|numeric|min:0.1',
-            'unit' => 'nullable|string|max:20',
-            'label' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:255',
-            'sort_order' => 'nullable|integer',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $volume = $this->dimensionService->updateVolume($id, $validated);
 
@@ -249,6 +230,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleFragranceVolumeActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $volume = $this->dimensionService->toggleActiveVolume($id);
 
         return response()->json([
@@ -260,6 +242,7 @@ class InventorySettingsApiController extends Controller
 
     public function archiveFragranceVolume(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->archiveVolume($id);
 
         return response()->json([
@@ -270,6 +253,7 @@ class InventorySettingsApiController extends Controller
 
     public function restoreFragranceVolume(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $volume = $this->dimensionService->restoreVolume($id);
 
         return response()->json([
@@ -281,6 +265,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroyFragranceVolume(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->deleteVolume($id);
 
         return response()->json([
@@ -295,6 +280,7 @@ class InventorySettingsApiController extends Controller
 
     public function getCategories(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $includeArchived = $request->boolean('include_archived', true);
         $this->dimensionService->ensureBootstrapDefaults();
         $categories = $this->dimensionService->getAllCategories($includeArchived);
@@ -305,14 +291,10 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeCategory(Request $request): JsonResponse
+    public function storeCategory(StoreCategoryRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string|max:500',
-            'parent_id' => 'nullable|integer|exists:categories,id',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $category = $this->dimensionService->createCategory($validated);
 
@@ -323,15 +305,10 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateCategory(Request $request, int $id): JsonResponse
+    public function updateCategory(UpdateCategoryRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:100',
-            'slug' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:500',
-            'parent_id' => 'nullable|integer',
-            'is_active' => 'nullable|boolean',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $category = $this->dimensionService->updateCategory($id, $validated);
 
@@ -344,6 +321,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleCategoryActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $category = $this->dimensionService->toggleActiveCategory($id);
 
         return response()->json([
@@ -355,6 +333,7 @@ class InventorySettingsApiController extends Controller
 
     public function archiveCategory(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->archiveCategory($id);
 
         return response()->json([
@@ -365,6 +344,7 @@ class InventorySettingsApiController extends Controller
 
     public function restoreCategory(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $category = $this->dimensionService->restoreCategory($id);
 
         return response()->json([
@@ -376,6 +356,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroyCategory(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $this->dimensionService->deleteCategory($id);
 
         return response()->json([
@@ -390,6 +371,7 @@ class InventorySettingsApiController extends Controller
 
     public function getFabrics(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $query = ApparelFabric::query();
         if (!$request->boolean('include_archived', true)) {
             $query->where('is_active', true);
@@ -402,16 +384,10 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeFabric(Request $request): JsonResponse
+    public function storeFabric(StoreFabricRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:80|unique:apparel_fabrics,name',
-            'description' => 'nullable|string|max:500',
-            'is_active' => 'nullable|boolean',
-        ], [
-            'name.required' => 'El nombre del tipo de tela es obligatorio.',
-            'name.unique' => 'Ya existe un tipo de tela registrado con este nombre.',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $slug = Str::slug($validated['name']);
         $baseSlug = $slug;
@@ -434,15 +410,12 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateFabric(Request $request, int $id): JsonResponse
+    public function updateFabric(UpdateFabricRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $fabric = ApparelFabric::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:80|unique:apparel_fabrics,name,' . $id,
-            'description' => 'nullable|string|max:500',
-            'is_active' => 'nullable|boolean',
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['name'])) {
             $fabric->name = trim($validated['name']);
@@ -465,6 +438,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleFabricActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $fabric = ApparelFabric::findOrFail($id);
         $fabric->is_active = !$fabric->is_active;
         $fabric->save();
@@ -478,6 +452,7 @@ class InventorySettingsApiController extends Controller
 
     public function archiveFabric(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $fabric = ApparelFabric::findOrFail($id);
         $fabric->is_active = false;
         $fabric->save();
@@ -491,6 +466,7 @@ class InventorySettingsApiController extends Controller
 
     public function restoreFabric(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $fabric = ApparelFabric::findOrFail($id);
         $fabric->is_active = true;
         $fabric->save();
@@ -504,6 +480,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroyFabric(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $fabric = ApparelFabric::findOrFail($id);
         $name = $fabric->name;
         $fabric->delete();
@@ -520,6 +497,7 @@ class InventorySettingsApiController extends Controller
 
     public function getColors(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $colors = ApparelColor::orderBy('name')->get();
         if (!$colors->contains(fn($c) => strtolower($c->name) === 'multicolor')) {
             ApparelColor::firstOrCreate(
@@ -540,8 +518,9 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeColor(Request $request): JsonResponse
+    public function storeColor(StoreColorRequest $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         if (strtolower(trim($request->input('name', ''))) === 'multicolor') {
             return response()->json([
                 'status' => 'error',
@@ -549,17 +528,7 @@ class InventorySettingsApiController extends Controller
             ], 422);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:80|unique:apparel_colors,name',
-            'hex_code' => 'nullable|string|max:250',
-            'hex' => 'nullable|string|max:250',
-            'color_type' => 'nullable|string|max:30',
-            'type' => 'nullable|string|max:30',
-            'gradient_css' => 'nullable|string|max:250',
-        ], [
-            'name.required' => 'El nombre del color es obligatorio.',
-            'name.unique' => 'Este color ya se encuentra registrado.',
-        ]);
+        $validated = $request->validated();
 
         $rawHex = $request->input('hex_code', $request->input('hex', '#000000'));
         $colorType = $request->input('color_type', $request->input('type', 'solid'));
@@ -591,19 +560,12 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateColor(Request $request, int $id): JsonResponse
+    public function updateColor(UpdateColorRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $color = ApparelColor::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:80|unique:apparel_colors,name,' . $id,
-            'hex_code' => 'nullable|string|max:250',
-            'hex' => 'nullable|string|max:250',
-            'color_type' => 'nullable|string|max:30',
-            'type' => 'nullable|string|max:30',
-            'gradient_css' => 'nullable|string|max:250',
-            'is_active' => 'nullable|boolean',
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['name'])) $color->name = trim($validated['name']);
         
@@ -631,6 +593,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleColorActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $color = ApparelColor::findOrFail($id);
         $color->is_active = !$color->is_active;
         $color->save();
@@ -644,6 +607,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroyColor(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $color = ApparelColor::findOrFail($id);
         if (strtolower($color->name) === 'multicolor') {
             return response()->json([
@@ -666,6 +630,7 @@ class InventorySettingsApiController extends Controller
 
     public function getStoreSections(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $sections = CmsSection::orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -676,23 +641,10 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeStoreSection(Request $request): JsonResponse
+    public function storeStoreSection(StoreStoreSectionRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-            'slug' => 'nullable|string|max:120',
-            'description' => 'nullable|string|max:500',
-            'title' => 'nullable|string|max:200',
-            'subtitle' => 'nullable|string|max:500',
-            'universe' => 'nullable|string|max:32',
-            'type' => 'nullable|string|max:60',
-            'badge' => 'nullable|string|max:80',
-            'sort_order' => 'nullable|integer',
-            'status' => 'nullable|string|in:active,draft,archived',
-            'is_active' => 'nullable|boolean',
-        ], [
-            'name.required' => 'El nombre de la sección de tienda es obligatorio.',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $status = $validated['status'] ?? ($request->has('is_active') ? ($request->boolean('is_active') ? 'active' : 'draft') : 'active');
         $subtitle = $validated['subtitle'] ?? ($validated['description'] ?? null);
@@ -724,23 +676,12 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateStoreSection(Request $request, int $id): JsonResponse
+    public function updateStoreSection(UpdateStoreSectionRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $section = CmsSection::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:120',
-            'slug' => 'nullable|string|max:120',
-            'description' => 'nullable|string|max:500',
-            'title' => 'nullable|string|max:200',
-            'subtitle' => 'nullable|string|max:500',
-            'universe' => 'nullable|string|max:32',
-            'type' => 'nullable|string|max:60',
-            'badge' => 'nullable|string|max:80',
-            'sort_order' => 'nullable|integer',
-            'status' => 'nullable|string|in:active,draft,archived',
-            'is_active' => 'nullable|boolean',
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['name'])) {
             $section->name = trim($validated['name']);
@@ -782,6 +723,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleStoreSectionActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $section = CmsSection::findOrFail($id);
         $section->status = ($section->status === 'active') ? 'draft' : 'active';
         $section->save();
@@ -795,6 +737,7 @@ class InventorySettingsApiController extends Controller
 
     public function archiveStoreSection(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $section = CmsSection::findOrFail($id);
         $section->status = 'archived';
         $section->save();
@@ -808,6 +751,7 @@ class InventorySettingsApiController extends Controller
 
     public function restoreStoreSection(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $section = CmsSection::findOrFail($id);
         $section->status = 'active';
         $section->save();
@@ -821,6 +765,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroyStoreSection(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $section = CmsSection::findOrFail($id);
         $name = $section->name;
         $section->delete();
@@ -837,6 +782,7 @@ class InventorySettingsApiController extends Controller
 
     public function getMoqSheets(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         if (SupplierMoqSheet::count() === 0) {
             SupplierMoqSheet::ensureTorzoDefault();
         }
@@ -859,26 +805,10 @@ class InventorySettingsApiController extends Controller
         ]);
     }
 
-    public function storeMoqSheet(Request $request): JsonResponse
+    public function storeMoqSheet(StoreMoqSheetRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'supplier_name' => 'nullable|string|max:150',
-            'title' => 'required|string|max:200',
-            'validity' => 'nullable|string|max:100',
-            'currency' => 'nullable|string|max:10',
-            'tiers' => 'required|array|min:1',
-            'tiers.*.key' => 'required|string|max:50',
-            'tiers.*.label' => 'required|string|max:100',
-            'tiers.*.min_qty' => 'required|integer|min:1',
-            'tiers.*.color' => 'nullable|string|max:30',
-            'tiers.*.badge_class' => 'nullable|string|max:100',
-            'rows' => 'required|array|min:1',
-            'rows.*.category' => 'required|string|max:150',
-            'rows.*.prices' => 'required|array',
-            'is_active' => 'nullable|boolean',
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         // Regla: Los tabuladores MOQ son independientes y se asocian obligatoriamente a un proveedor registrado
         $supplier = null;
@@ -914,21 +844,12 @@ class InventorySettingsApiController extends Controller
         ], 201);
     }
 
-    public function updateMoqSheet(Request $request, int $id): JsonResponse
+    public function updateMoqSheet(UpdateMoqSheetRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $sheet = SupplierMoqSheet::findOrFail($id);
 
-        $validated = $request->validate([
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'supplier_name' => 'nullable|string|max:150',
-            'title' => 'sometimes|required|string|max:200',
-            'validity' => 'nullable|string|max:100',
-            'currency' => 'nullable|string|max:10',
-            'tiers' => 'sometimes|required|array|min:1',
-            'rows' => 'sometimes|required|array|min:1',
-            'is_active' => 'nullable|boolean',
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['supplier_id'])) {
             $supplier = Supplier::find($validated['supplier_id']);
@@ -954,6 +875,7 @@ class InventorySettingsApiController extends Controller
 
     public function toggleMoqSheetActive(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $sheet = SupplierMoqSheet::findOrFail($id);
         $sheet->is_active = !$sheet->is_active;
         $sheet->save();
@@ -967,6 +889,7 @@ class InventorySettingsApiController extends Controller
 
     public function destroyMoqSheet(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $sheet = SupplierMoqSheet::findOrFail($id);
         $title = $sheet->title;
         $sheet->delete();

@@ -109,15 +109,12 @@ erDiagram
 
 ---
 
-## 4. [TODO: Definir regla exacta]
+## 4. Reglas de Negocio Específicas
 
-1. `[TODO: Definir regla exacta]` **Criterio de redondeo en decimales para el cálculo de Costo Promedio Ponderado (CPP).**  
-   *Nota actual:* El sistema trunca a 4 decimales en base de datos (`decimal(12,4)`) y redondea a 2 decimales para la visualización en pantalla.
-2. `[TODO: Definir regla exacta]` **Tratamiento contable para mermas de empaque dañadas en rampa.**  
-   *Nota actual:* El movimiento `MERMA_RAMPA` descuenta del conteo físico sin afectar el saldo por cobrar al taller hasta que se emite la nota de crédito formal.
-
----
-
+1. **Criterio de Redondeo (Costo Promedio Ponderado - CPP):**
+   - **Regla SSOT:** El sistema calcula y almacena obligatoriamente los costos con **4 decimales** de precisión (`decimal(12,4)`) en la base de datos para evitar micro-fugas contables en grandes volúmenes. El redondeo a 2 decimales se aplica *únicamente* en la capa de presentación (UI) del Dashboard.
+2. **Tratamiento Contable de Mermas (MERMA_RAMPA):**
+   - **Regla SSOT:** Cuando se declara una merma física en rampa, el sistema descuenta inmediatamente el inventario físico para evitar sobreventas. Sin embargo, el impacto financiero contra el proveedor es **Manual**. El sistema NO emite notas de crédito automáticamente; el equipo de Finanzas/Compras debe emitir y conciliar la deuda con el taller de forma independiente.
 ## 5. Security & Data Privacy (DoD Compliance)
 - **Protección de PII y Costos (Ciberseguridad):**
   - Los modelos `Product` y `ProductVariant` ocultan explícitamente el atributo `cost` (`$hidden = ['cost']`).

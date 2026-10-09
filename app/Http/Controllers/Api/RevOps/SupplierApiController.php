@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers\Api\RevOps;
 
+use Illuminate\Support\Facades\Gate;
+
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\UpdateFrequencyRequest;
+use App\Http\Requests\Api\RevOps\RemoveBrandRequest;
+use App\Http\Requests\Api\RevOps\AddBrandRequest;
+use App\Http\Requests\Api\RevOps\ToggleStatusRequest;
+use App\Http\Requests\Api\RevOps\UpdateRequest;
+use App\Http\Requests\Api\RevOps\StoreRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -17,6 +25,7 @@ class SupplierApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $query = Supplier::query()
             ->withCount(['supplierProducts', 'users'])
             ->orderBy('name');
@@ -40,39 +49,10 @@ class SupplierApiController extends Controller
     /**
      * Registra un nuevo proveedor en la base de datos (TASK-PUR-02 / SLICE 4).
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'tradeName' => 'nullable|string|max:255',
-            'legalName' => 'nullable|string|max:255',
-            'legal_name' => 'nullable|string|max:255',
-            'vendorCode' => 'nullable|string|max:50',
-            'taxId' => 'nullable|string|max:50',
-            'tax_id' => 'nullable|string|max:50',
-            'fiscalRegime' => 'nullable|string|max:150',
-            'fiscal_regime' => 'nullable|string|max:150',
-            'fiscalAddress' => 'nullable|string|max:500',
-            'fiscal_address' => 'nullable|string|max:500',
-            'fiscalZip' => 'nullable|string|max:20',
-            'fiscal_zip' => 'nullable|string|max:20',
-            'invoiceEmail' => 'nullable|email|max:150',
-            'invoice_email' => 'nullable|email|max:150',
-            'website' => 'nullable|string|max:255',
-            'type' => 'nullable|string|max:50',
-            'city' => 'nullable|string|max:100',
-            'contactName' => 'required|string|max:150',
-            'phone' => 'required|string|max:50',
-            'email' => 'nullable|email|max:150',
-            'leadTimeDays' => 'nullable|integer|min:1',
-            'paymentTerms' => 'nullable|string|max:50',
-            'extractionMethod' => 'nullable|string|max:100',
-            'status' => 'nullable|string|in:connected,paused,maintenance,archived',
-            'origin' => 'nullable|string|in:manual,scraping',
-            'brands' => 'nullable|array',
-            'brands.*' => 'nullable|string|max:100',
-            'notes' => 'nullable|string',
-        ]);
+        Gate::authorize('manage-catalog');
+        $validated = $request->validated();
 
         $name = trim($validated['name']);
         $tradeName = ! empty($validated['tradeName']) ? trim($validated['tradeName']) : $name;
@@ -147,6 +127,7 @@ class SupplierApiController extends Controller
      */
     public function show(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::withCount(['supplierProducts', 'users'])
             ->with(['users:id,name,email,role,supplier_id'])
             ->findOrFail($id);
@@ -160,41 +141,12 @@ class SupplierApiController extends Controller
     /**
      * Actualiza las condiciones comerciales, contacto, datos fiscales y marcas de un proveedor.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'tradeName' => 'nullable|string|max:255',
-            'legalName' => 'nullable|string|max:255',
-            'legal_name' => 'nullable|string|max:255',
-            'vendorCode' => 'nullable|string|max:50',
-            'taxId' => 'nullable|string|max:50',
-            'tax_id' => 'nullable|string|max:50',
-            'fiscalRegime' => 'nullable|string|max:150',
-            'fiscal_regime' => 'nullable|string|max:150',
-            'fiscalAddress' => 'nullable|string|max:500',
-            'fiscal_address' => 'nullable|string|max:500',
-            'fiscalZip' => 'nullable|string|max:20',
-            'fiscal_zip' => 'nullable|string|max:20',
-            'invoiceEmail' => 'nullable|email|max:150',
-            'invoice_email' => 'nullable|email|max:150',
-            'website' => 'nullable|string|max:255',
-            'type' => 'nullable|string|max:50',
-            'city' => 'nullable|string|max:100',
-            'contactName' => 'nullable|string|max:150',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:150',
-            'leadTimeDays' => 'nullable|integer|min:1',
-            'paymentTerms' => 'nullable|string|max:50',
-            'extractionMethod' => 'nullable|string|max:100',
-            'status' => 'nullable|string|in:connected,paused,maintenance,archived',
-            'origin' => 'nullable|string|in:manual,scraping',
-            'brands' => 'nullable|array',
-            'brands.*' => 'nullable|string|max:100',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $updateData = [];
 
@@ -280,13 +232,12 @@ class SupplierApiController extends Controller
     /**
      * Alterna el estatus operativo del proveedor (connected, paused, maintenance, archived).
      */
-    public function toggleStatus(Request $request, int $id): JsonResponse
+    public function toggleStatus(ToggleStatusRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::findOrFail($id);
 
-        $validated = $request->validate([
-            'status' => 'required|string|in:connected,paused,maintenance,archived',
-        ]);
+        $validated = $request->validated();
 
         $supplier->update(['status' => $validated['status']]);
 
@@ -312,6 +263,7 @@ class SupplierApiController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::withCount(['supplierProducts', 'purchaseOrders'])->findOrFail($id);
 
         if ($supplier->supplier_products_count > 0 || $supplier->purchase_orders_count > 0) {
@@ -343,6 +295,7 @@ class SupplierApiController extends Controller
      */
     public function inviteExtranet(Request $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::findOrFail($id);
 
         $email = $supplier->contact_email ?: ('b2b@' . Str::slug($supplier->name) . '.com');
@@ -436,12 +389,11 @@ class SupplierApiController extends Controller
     /**
      * Asocia una nueva marca al arbol de marcas del proveedor.
      */
-    public function addBrand(Request $request, int $id): JsonResponse
+    public function addBrand(AddBrandRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::findOrFail($id);
-        $validated = $request->validate([
-            'brand' => 'required|string|max:100',
-        ]);
+        $validated = $request->validated();
 
         $brand = trim($validated['brand']);
         if (Supplier::isProductLineCategory($brand)) {
@@ -483,12 +435,11 @@ class SupplierApiController extends Controller
     /**
      * Desvincula una marca del proveedor.
      */
-    public function removeBrand(Request $request, int $id): JsonResponse
+    public function removeBrand(RemoveBrandRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::findOrFail($id);
-        $validated = $request->validate([
-            'brand' => 'required|string|max:100',
-        ]);
+        $validated = $request->validated();
 
         $brand = trim($validated['brand']);
         $brands = is_array($supplier->brands) ? $supplier->brands : [];
@@ -509,12 +460,11 @@ class SupplierApiController extends Controller
     /**
      * Actualiza la frecuencia de scrapeo del proveedor (Regla 3).
      */
-    public function updateFrequency(Request $request, int $id): JsonResponse
+    public function updateFrequency(UpdateFrequencyRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-catalog');
         $supplier = Supplier::findOrFail($id);
-        $validated = $request->validate([
-            'frequency' => 'required|string|max:60',
-        ]);
+        $validated = $request->validated();
 
         $supplier->update(['scrape_frequency' => $validated['frequency']]);
 
