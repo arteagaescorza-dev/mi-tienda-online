@@ -83,7 +83,8 @@ erDiagram
 
 ---
 
-## 5. [TODO: Definir regla exacta]
+## 5. Reglas de Negocio Contable
 
-1. `[TODO: Definir regla exacta]` **Tratamiento de contracargos bancarios (chargebacks) en el cálculo de margen histórico.**  
-   *Nota actual:* El contracargo se registra como egreso del mes en que ocurre. Se debe definir si reclasifica negativamente la orden original del mes previo.
+1. **Tratamiento de Contracargos Bancarios (Chargebacks):**
+   - **Regla SSOT:** Los contracargos se registran estrictamente como un **gasto operativo en el mes actual** (fecha en la que el banco efectúa el débito). 
+   - **Inmutabilidad Histórica:** Bajo ninguna circunstancia se modificará retroactivamente el `net_margin_percent` o el `margin_health_level` de la orden original en meses contables ya cerrados. Lo hecho, hecho está.

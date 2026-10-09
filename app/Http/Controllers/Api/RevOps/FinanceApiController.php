@@ -17,6 +17,9 @@ use App\Services\Finance\TaxCalculationEngineService;
 use App\Services\Finance\ThreeWayMatchingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\AuthorizeSpeiPayoutRequest;
+use App\Http\Requests\Api\RevOps\GetTaxSummaryRequest;
+use App\Http\Requests\Api\RevOps\MarkDunningRecoveredRequest;
 use Illuminate\Support\Facades\Gate;
 
 class FinanceApiController extends Controller
@@ -56,12 +59,13 @@ class FinanceApiController extends Controller
     /**
      * Marca la suscripción como recuperada tras pago exitoso.
      */
-    public function markDunningRecovered(Request $request, int $subscriptionId): JsonResponse
+    public function markDunningRecovered(MarkDunningRecoveredRequest $request, int $subscriptionId): JsonResponse
     {
         Gate::authorize('manage-finance');
 
         $sub = CustomerSubscription::findOrFail($subscriptionId);
-        $amount = (float) $request->input('amount_recovered', $sub->monthly_amount);
+        $validated = $request->validated();
+        $amount = (float) ($validated['amount_recovered'] ?? $sub->monthly_amount);
         $log = $this->dunningService->markAsRecovered($sub, $amount);
 
         return response()->json([
@@ -299,11 +303,12 @@ class FinanceApiController extends Controller
     /**
      * Autoriza la dispersion SPEI del saldo solventado en Cuentas por Pagar.
      */
-    public function authorizeSpeiPayout(Request $request, int $id): JsonResponse
+    public function authorizeSpeiPayout(AuthorizeSpeiPayoutRequest $request, int $id): JsonResponse
     {
         Gate::authorize('manage-finance');
 
-        $paymentRef = $request->input('payment_reference');
+        $validated = $request->validated();
+        $paymentRef = $validated['payment_reference'];
         try {
             $matching = $this->threeWayMatchingService->authorizeSpeiPayout($id, $paymentRef);
 
@@ -323,11 +328,12 @@ class FinanceApiController extends Controller
     /**
      * Consulta consolidada del Motor Fiscal SAT (TASK-FIN-02, Subseccion EE).
      */
-    public function getTaxSummary(Request $request): JsonResponse
+    public function getTaxSummary(GetTaxSummaryRequest $request): JsonResponse
     {
         Gate::authorize('manage-finance');
 
-        $period = $request->input('period', date('Y-m'));
+        $validated = $request->validated();
+        $period = $validated['period'] ?? date('Y-m');
         $summary = $this->taxEngineService->getPeriodTaxSummary($period);
 
         return response()->json(array_merge(['success' => true], $summary));

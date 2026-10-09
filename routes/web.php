@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:portal'])->group(function () {
 
 	Route::middleware('financial.privacy')->group(function () {
+		Route::get('/admin/finanzas', [\App\Http\Controllers\PortalFinanceController::class, 'index'])->name('portal.finance');
 	});
 	Route::post('/admin/marketing/cupones', [PortalMarketingController::class, 'storeCoupon'])->name('portal.marketing.coupons.store');
 	Route::post('/admin/marketing/cupones/{coupon}/toggle', [PortalMarketingController::class, 'toggleCoupon'])->name('portal.marketing.coupons.toggle');
