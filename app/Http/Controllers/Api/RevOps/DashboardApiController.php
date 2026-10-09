@@ -16,14 +16,29 @@ use App\Models\AiCopilotChatMessage;
 use App\Services\Ai\GeminiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\DashboardGetOperationalTasksRequest;
+use App\Http\Requests\Api\RevOps\DashboardCompleteTaskRequest;
+use App\Http\Requests\Api\RevOps\DashboardGetSalesIncidentsRequest;
+use App\Http\Requests\Api\RevOps\DashboardRescueAbandonedCartViaWhatsAppRequest;
+use App\Http\Requests\Api\RevOps\DashboardValidateOrderAddressRequest;
+use App\Http\Requests\Api\RevOps\DashboardLookupSepomexRequest;
+use App\Http\Requests\Api\RevOps\DashboardSwitchEnvironmentRequest;
+use App\Http\Requests\Api\RevOps\DashboardGetAnalyticsChartsRequest;
+use App\Http\Requests\Api\RevOps\DashboardGetSystemHealthRequest;
+use App\Http\Requests\Api\RevOps\DashboardPingSystemHealthRequest;
+use App\Http\Requests\Api\RevOps\DashboardCopilotChatRequest;
+use Illuminate\Support\Facades\Gate;
+
 
 class DashboardApiController extends Controller
 {
     /**
      * Obtiene el listado de tareas operativas con cálculo dinámico de SLA (TASK-DSH-04, TASK-DSH-05).
      */
-    public function getOperationalTasks(Request $request): JsonResponse
+    public function getOperationalTasks(DashboardGetOperationalTasksRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $this->ensureDefaultOperationalTasksExist();
 
         $category = $request->query('category');
@@ -58,8 +73,10 @@ class DashboardApiController extends Controller
     /**
      * Marca una tarea operativa como completada y registra en la bitácora inmutable del turno (TASK-DSH-04).
      */
-    public function completeTask(Request $request, int $id): JsonResponse
+    public function completeTask(DashboardCompleteTaskRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $task = OperationalTask::findOrFail($id);
         $task->status = 'completed';
         $task->completed_at = now();
@@ -140,8 +157,10 @@ class DashboardApiController extends Controller
     /**
      * Obtiene los incidentes y casos comerciales de la bandeja de ventas.
      */
-    public function getSalesIncidents(Request $request): JsonResponse
+    public function getSalesIncidents(DashboardGetSalesIncidentsRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $this->ensureDefaultSalesIncidentsExist();
 
         $type = $request->query('type', 'all');
@@ -181,16 +200,11 @@ class DashboardApiController extends Controller
     /**
      * Rescate de carrito abandonado con generación de enlace tokenizado y gatillo WhatsApp.
      */
-    public function rescueAbandonedCartViaWhatsApp(Request $request): JsonResponse
+    public function rescueAbandonedCartViaWhatsApp(DashboardRescueAbandonedCartViaWhatsAppRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'case_id' => 'nullable|integer',
-            'phone' => 'nullable|string',
-            'customer_name' => 'nullable|string',
-            'cart_token' => 'nullable|string',
-            'discount_code' => 'nullable|string',
-            'custom_message' => 'nullable|string',
-        ]);
+        Gate::authorize('view-dashboard');
+
+        $validated = 
 
         $case = null;
         if (!empty($validated['case_id'])) {
@@ -254,8 +268,10 @@ class DashboardApiController extends Controller
     /**
      * Valida la dirección postal de una orden detenida y la libera a la bandeja de almacén.
      */
-    public function validateOrderAddress(Request $request): JsonResponse
+    public function validateOrderAddress(DashboardValidateOrderAddressRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         if ($request->has('ext_number') && !$request->has('exterior_number')) {
             $request->merge(['exterior_number' => $request->input('ext_number')]);
         }
@@ -263,18 +279,7 @@ class DashboardApiController extends Controller
             $request->merge(['interior_number' => $request->input('int_number')]);
         }
 
-        $validated = $request->validate([
-            'case_id' => 'nullable|integer',
-            'order_number' => 'nullable|string',
-            'postal_code' => 'required|string|size:5',
-            'state' => 'required|string',
-            'city' => 'required|string',
-            'colonia' => 'required|string',
-            'street' => 'required|string',
-            'exterior_number' => 'required|string',
-            'interior_number' => 'nullable|string',
-            'references' => 'nullable|string',
-        ]);
+        $validated = 
 
         $intNum = !empty($validated['interior_number']) ? " Int. {$validated['interior_number']}" : '';
         $refText = !empty($validated['references']) ? " (Ref: {$validated['references']})" : '';
@@ -333,8 +338,10 @@ class DashboardApiController extends Controller
     /**
      * Validador predictivo de Código Postal con catálogo de colonias Sepomex.
      */
-    public function lookupSepomex(Request $request): JsonResponse
+    public function lookupSepomex(DashboardLookupSepomexRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $cp = preg_replace('/\D/', '', (string) $request->query('cp', ''));
         if (strlen($cp) !== 5) {
             return response()->json([
@@ -393,12 +400,11 @@ class DashboardApiController extends Controller
     /**
      * Alterna el entorno del sistema entre Sandbox y Producción con auditoría (TASK-SYS-ENV).
      */
-    public function switchEnvironment(Request $request): JsonResponse
+    public function switchEnvironment(DashboardSwitchEnvironmentRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'module' => 'required|string|max:50',
-            'target_environment' => 'required|in:sandbox,production',
-        ]);
+        Gate::authorize('view-dashboard');
+
+        $validated = 
 
         $config = SystemEnvironmentConfig::firstOrCreate(
             ['module' => $validated['module']],
@@ -432,8 +438,10 @@ class DashboardApiController extends Controller
     /**
      * Obtiene los conjuntos de datos para las 3 gráficas analíticas SVG nativas (TASK-DSH-02).
      */
-    public function getAnalyticsCharts(Request $request): JsonResponse
+    public function getAnalyticsCharts(DashboardGetAnalyticsChartsRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $period = $request->query('period', '7d');
         if (!in_array($period, ['7d', '14d', '30d'])) {
             $period = '7d';
@@ -562,8 +570,10 @@ class DashboardApiController extends Controller
     /**
      * Obtiene la telemetría en tiempo real de conectores y APIs del ecosistema (TASK-DSH-03).
      */
-    public function getSystemHealth(Request $request): JsonResponse
+    public function getSystemHealth(DashboardGetSystemHealthRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $connectors = $this->buildEcosystemConnectors();
 
         return response()->json([
@@ -579,8 +589,10 @@ class DashboardApiController extends Controller
     /**
      * Ejecuta un ping de diagnóstico global en caliente para todos los conectores (TASK-DSH-03).
      */
-    public function pingSystemHealth(Request $request): JsonResponse
+    public function pingSystemHealth(DashboardPingSystemHealthRequest $request): JsonResponse
     {
+        Gate::authorize('view-dashboard');
+
         $connectors = $this->buildEcosystemConnectors(true);
         $operatorName = auth()->user()?->name ?: 'Sistema';
 
@@ -677,11 +689,11 @@ class DashboardApiController extends Controller
     /**
      * Procesa una consulta contextual para el Copiloto IA (TASK-DSH-07).
      */
-    public function copilotChat(Request $request, GeminiService $gemini): JsonResponse
+    public function copilotChat(DashboardCopilotChatRequest $request, GeminiService $gemini): JsonResponse
     {
-        $validated = $request->validate([
-            'message' => 'required|string|max:1000',
-        ]);
+        Gate::authorize('view-dashboard');
+
+        $validated = 
 
         $userMsg = $validated['message'];
 

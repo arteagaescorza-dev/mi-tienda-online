@@ -76,7 +76,10 @@ erDiagram
 
 ---
 
-## 4. [TODO: Definir regla exacta]
+## 4. Reglas de Negocio Oficiales
+
+1. **Tiempo de retención de telemetría histórica de APIs externas:**  
+   *Regla de Negocio:* Borrado automático (Cron) de registros más antiguos a **30 días**. Se implementará un Schedule command de Laravel para purgar la tabla `api_health_logs` diariamente y optimizar la base de datos.
 
 1. `[TODO: Definir regla exacta]` **Tiempo de retención de telemetría histórica de APIs externas.**  
    *Nota de Auditoría Actual:* A nivel base de datos, la tabla `api_health_logs` acumula registros de forma indefinida y no cuenta con política de eliminación en cascada. Se debe definir si configuramos un Cron (Scheduled Task) en Laravel Forge que ejecute un borrado automático de registros más antiguos a 30 días, o si los exportamos en frío a Amazon S3.
