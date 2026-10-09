@@ -8,24 +8,25 @@ use App\Models\CartItem;
 use App\Models\ProductVariant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Storefront\CartShowRequest;
+use App\Http\Requests\Storefront\CartAddItemRequest;
+use App\Http\Requests\Storefront\CartSyncRequest;
+use App\Http\Requests\Storefront\CartUpdateItemRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
-    public function show(Request $request): JsonResponse
+    public function show(CartShowRequest $request): JsonResponse
     {
         $cart = $this->resolveCart($request);
 
         return response()->json($cart->load('items.variant.product'));
     }
 
-    public function addItem(Request $request): JsonResponse
+    public function addItem(CartAddItemRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'variant_id' => 'required|exists:product_variants,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+        $validated = 
 
         $cart = $this->resolveCart($request);
 
@@ -39,13 +40,9 @@ class CartController extends Controller
         return response()->json($item->load('variant'));
     }
 
-    public function sync(Request $request): JsonResponse
+    public function sync(CartSyncRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'items' => ['required', 'array'],
-            'items.*.variant_id' => ['required', 'integer', 'exists:product_variants,id'],
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
-        ]);
+        $validated = 
 
         $cart = DB::transaction(function () use ($request, $validated): Cart {
             $cart = $this->resolveCart($request);
@@ -66,11 +63,9 @@ class CartController extends Controller
         return response()->json($cart);
     }
 
-    public function updateItem(Request $request, CartItem $item): JsonResponse
+    public function updateItem(CartUpdateItemRequest $request, CartItem $item): JsonResponse
     {
-        $validated = $request->validate([
-            'quantity' => 'required|integer|min:1',
-        ]);
+        $validated = 
 
         $item->update($validated);
 

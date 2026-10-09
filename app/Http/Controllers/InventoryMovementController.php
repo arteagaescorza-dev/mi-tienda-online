@@ -6,18 +6,19 @@ use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\Inventory\InventoryMovementStoreRequest;
+use Illuminate\Support\Facades\Gate;
+
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class InventoryMovementController extends Controller
 {
-    public function store(Request $request, Inventory $inventory): Response
+    public function store(InventoryMovementStoreRequest $request, Inventory $inventory): Response
     {
-        $validated = $request->validate([
-            'type' => ['required', 'in:increase,decrease'],
-            'quantity' => ['required', 'integer', 'min:1'],
-            'reason' => ['required', 'string', 'max:255'],
-        ]);
+        Gate::authorize('manage-inventory');
+
+        $validated = 
 
         $movement = DB::transaction(function () use ($request, $inventory, $validated): InventoryMovement {
             $lockedInventory = Inventory::query()->lockForUpdate()->findOrFail($inventory->id);

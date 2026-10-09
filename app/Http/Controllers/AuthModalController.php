@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Storefront\AuthModalGoogleLoginRequest;
+use App\Http\Requests\Storefront\AuthModalGoogleRegisterRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -62,7 +64,7 @@ class AuthModalController extends Controller
         return redirect()->route('login');
     }
 
-    public function googleLogin(Request $request): JsonResponse
+    public function googleLogin(AuthModalGoogleLoginRequest $request): JsonResponse
     {
         $user = User::query()->firstOrCreate(
             ['email' => 'google.user@mitienda.com'],
@@ -82,7 +84,7 @@ class AuthModalController extends Controller
         ]);
     }
 
-    public function googleRegister(Request $request): JsonResponse
+    public function googleRegister(AuthModalGoogleRegisterRequest $request): JsonResponse
     {
         $suffix = random_int(1000, 9999);
 

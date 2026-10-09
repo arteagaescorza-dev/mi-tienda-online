@@ -12,6 +12,10 @@ use App\Services\Governance\InterdepartmentalChatService;
 use App\Services\Governance\NotificationDispatcherService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Portal\Governance\PortalGovernanceIndexRequest;
+use App\Http\Requests\Portal\Governance\PortalGovernanceUpdateEnvironmentRequest;
+use Illuminate\Support\Facades\Gate;
+
 use Illuminate\View\View;
 
 class PortalGovernanceController extends Controller
@@ -25,8 +29,10 @@ class PortalGovernanceController extends Controller
     /**
      * Vista de pantalla completa del Centro de Gobernanza, Auditoria y RBAC (Hub 8 - TASK-SYS-01).
      */
-    public function index(Request $request): View
+    public function index(PortalGovernanceIndexRequest $request): View
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         $activeRole = session('active_role') ?: ($user ? $user->active_role : 'admin');
         $currentTab = $request->query('tab', 'privacidad-rbac');
@@ -171,13 +177,11 @@ class PortalGovernanceController extends Controller
     /**
      * Actualiza el entorno de un modulo especifico o global (TASK-SYS-ENV).
      */
-    public function updateEnvironment(Request $request): RedirectResponse
+    public function updateEnvironment(PortalGovernanceUpdateEnvironmentRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'module' => ['required', 'string', 'max:50'],
-            'target_environment' => ['required', 'string', 'in:sandbox,production'],
-            'lock_mock_payments' => ['nullable', 'boolean'],
-        ]);
+        Gate::authorize('manage-governance');
+
+        $validated = 
 
         $config = SystemEnvironmentConfig::firstOrCreate(
             ['module' => $validated['module']],

@@ -8,6 +8,18 @@ use App\Services\Governance\InterdepartmentalChatService;
 use App\Services\Governance\NotificationDispatcherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\RevOps\GovernanceApiGetAuditLogsRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiRecordCustomActionRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiGetNotificationsRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiMarkNotificationReadRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiMarkAllNotificationsReadRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiDispatchNotificationRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiGetChatMessagesRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiSendChatMessageRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiResolveChatMessageRequest;
+use App\Http\Requests\Api\RevOps\GovernanceApiGetChatSummaryRequest;
+use Illuminate\Support\Facades\Gate;
+
 
 class GovernanceApiController extends Controller
 {
@@ -20,8 +32,10 @@ class GovernanceApiController extends Controller
     /**
      * Consulta paginada y filtrada del Master Log de Auditoria Omnicanal (TASK-DSH-09).
      */
-    public function getAuditLogs(Request $request): JsonResponse
+    public function getAuditLogs(GovernanceApiGetAuditLogsRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         $role = $user ? (session('active_role') ?: $user->role) : null;
 
@@ -70,8 +84,10 @@ class GovernanceApiController extends Controller
     /**
      * Registra una accion manual de auditoria solicitada desde la consola directiva.
      */
-    public function recordCustomAction(Request $request): JsonResponse
+    public function recordCustomAction(GovernanceApiRecordCustomActionRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         if (!$user || !in_array($user->active_role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
             return response()->json([
@@ -79,14 +95,7 @@ class GovernanceApiController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'action' => ['required', 'string', 'max:50'],
-            'module' => ['required', 'string', 'max:50'],
-            'reference_code' => ['nullable', 'string', 'max:100'],
-            'description' => ['required', 'string', 'max:500'],
-            'old_values' => ['nullable', 'array'],
-            'new_values' => ['nullable', 'array'],
-        ]);
+        $validated = 
 
         $log = $this->auditService->logAction(
             action: $validated['action'],
@@ -108,8 +117,10 @@ class GovernanceApiController extends Controller
     /**
      * Obtiene el feed de notificaciones operativas filtrado por rol y permisos del usuario (TASK-UX-03).
      */
-    public function getNotifications(Request $request): JsonResponse
+    public function getNotifications(GovernanceApiGetNotificationsRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
 
         // En caso de invocacion no autenticada en entorno de pruebas, asociar al primer usuario portal
@@ -147,8 +158,10 @@ class GovernanceApiController extends Controller
     /**
      * Marca una notificacion especifica como leida (TASK-UX-03).
      */
-    public function markNotificationRead(Request $request, int $id): JsonResponse
+    public function markNotificationRead(GovernanceApiMarkNotificationReadRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         if (!$user) {
             $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
@@ -177,8 +190,10 @@ class GovernanceApiController extends Controller
     /**
      * Marca todas las notificaciones pendientes del usuario como leidas.
      */
-    public function markAllNotificationsRead(Request $request): JsonResponse
+    public function markAllNotificationsRead(GovernanceApiMarkAllNotificationsReadRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         if (!$user) {
             $user = \App\Models\User::whereIn('role', ['portal', 'admin', 'superadmin'])->first();
@@ -201,8 +216,10 @@ class GovernanceApiController extends Controller
     /**
      * Despacha una notificacion operativa manual o automatizada.
      */
-    public function dispatchNotification(Request $request): JsonResponse
+    public function dispatchNotification(GovernanceApiDispatchNotificationRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         $role = $user ? (session('active_role') ?: $user->role) : null;
 
@@ -213,17 +230,7 @@ class GovernanceApiController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:150'],
-            'message' => ['required', 'string', 'max:1000'],
-            'type' => ['nullable', 'string', 'in:critical,urgent,warning,info,success'],
-            'category' => ['nullable', 'string', 'max:50'],
-            'target_role' => ['nullable', 'string', 'max:50'],
-            'reference_code' => ['nullable', 'string', 'max:50'],
-            'deep_link' => ['nullable', 'string', 'max:255'],
-            'action_label' => ['nullable', 'string', 'max:50'],
-            'metadata' => ['nullable', 'array'],
-        ]);
+        $validated = 
 
         $notification = $this->notificationService->dispatch($validated);
 
@@ -237,8 +244,10 @@ class GovernanceApiController extends Controller
     /**
      * Consulta el timeline de mensajes del chat interdepartamental (TASK-COM-01).
      */
-    public function getChatMessages(Request $request): JsonResponse
+    public function getChatMessages(GovernanceApiGetChatMessagesRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $channel = $request->query('channel', 'almacen');
         $limit = (int) $request->query('limit', 50);
         $user = $request->user();
@@ -259,18 +268,11 @@ class GovernanceApiController extends Controller
     /**
      * Envia una nueva nota formal en el canal del chat inter-areas.
      */
-    public function sendChatMessage(Request $request): JsonResponse
+    public function sendChatMessage(GovernanceApiSendChatMessageRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'channel' => ['required', 'string', 'in:almacen,ventas,logistica,general'],
-            'message' => ['required', 'string', 'max:2000'],
-            'reference_type' => ['nullable', 'string', 'max:50'],
-            'reference_code' => ['nullable', 'string', 'max:100'],
-            'priority' => ['nullable', 'string', 'in:normal,high,urgent'],
-            'target_role' => ['nullable', 'string', 'max:50'],
-            'sender_name' => ['nullable', 'string', 'max:120'],
-            'sender_role' => ['nullable', 'string', 'max:50'],
-        ]);
+        Gate::authorize('manage-governance');
+
+        $validated = 
 
         $user = $request->user();
 
@@ -299,8 +301,10 @@ class GovernanceApiController extends Controller
     /**
      * Marca un mensaje operativo como resuelto.
      */
-    public function resolveChatMessage(Request $request, int $id): JsonResponse
+    public function resolveChatMessage(GovernanceApiResolveChatMessageRequest $request, int $id): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $user = $request->user();
         $success = $this->chatService->resolveMessage($id, $user);
 
@@ -323,8 +327,10 @@ class GovernanceApiController extends Controller
     /**
      * Resumen de mensajes pendientes y contadores de canales para la barra superior.
      */
-    public function getChatSummary(Request $request): JsonResponse
+    public function getChatSummary(GovernanceApiGetChatSummaryRequest $request): JsonResponse
     {
+        Gate::authorize('manage-governance');
+
         $summary = $this->chatService->getChannelsSummary();
 
         return response()->json([
