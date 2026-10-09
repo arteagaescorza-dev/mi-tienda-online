@@ -1983,18 +1983,14 @@
                         </div>
                         
                         <!-- Contenido Renderizado en Vivo -->
-                        <div id="livePreviewContent" class="w-full min-h-[250px] flex flex-col">
+                        <div id="livePreviewContent" class="w-full min-h-[250px] flex flex-col bg-white">
                             
-                            <!-- Hero / Sección Preview -->
+                            <!-- 1. Hero / Sección Preview -->
                             <div id="previewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-50 min-h-[150px] overflow-hidden transition-all duration-300">
-                                
                                 <div id="previewOverlay" class="absolute inset-0 z-0 hidden"></div>
-
                                 <div class="relative z-10 max-w-2xl mx-auto space-y-4 w-full">
                                     <span id="previewBadge" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full uppercase tracking-widest hidden"></span>
-                                    
                                     <h2 id="previewTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Tu Título Aquí</h2>
-                                    
                                     <p id="previewSubtitle" class="text-slate-600 md:text-lg max-w-xl mx-auto hidden">Tu bajada o subtítulo aquí.</p>
                                     
                                     <div id="previewActions" class="flex flex-wrap justify-center gap-3 pt-4 hidden">
@@ -2004,10 +2000,49 @@
                                 </div>
                             </div>
                             
-                            <!-- Grid de Catálogo Preview -->
-                            <div id="previewCatalogArea" class="w-full p-6 bg-white hidden">
-                                <div id="previewGrid" class="grid gap-4 w-full">
-                                    <!-- Items generados por JS -->
+                            <!-- 2. Carrusel Preview -->
+                            <div id="previewCarouselArea" class="hidden w-full h-[300px] bg-slate-100 relative flex flex-col items-center justify-center overflow-hidden">
+                                <div class="absolute inset-0 bg-slate-200/50"></div>
+                                <div class="relative z-10 text-center px-8">
+                                    <h2 class="preview-common-title text-2xl md:text-3xl font-bold text-slate-800 drop-shadow-sm"></h2>
+                                    <p class="preview-common-subtitle text-slate-600 mt-2 max-w-md mx-auto"></p>
+                                </div>
+                                <div class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </div>
+                                <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </div>
+                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-800"></div>
+                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
+                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Pop-up Preview -->
+                            <div id="previewPopUpArea" class="hidden w-full min-h-[400px] bg-slate-800/40 relative flex items-center justify-center p-4">
+                                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform scale-95 transition-transform">
+                                    <div class="h-40 bg-slate-100 border-b border-slate-100 w-full flex items-center justify-center text-slate-400 text-xs relative">
+                                        <svg class="w-8 h-8 text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <button class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 bg-white/80 rounded-full p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                                    </div>
+                                    <div class="p-6 text-center">
+                                        <h2 class="preview-common-title text-xl font-bold text-slate-900 mb-2 leading-tight"></h2>
+                                        <p class="preview-common-subtitle text-sm text-slate-500 mb-6 leading-relaxed"></p>
+                                        <button class="w-full py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm">Acción Principal</button>
+                                        <button class="w-full py-2 mt-2 text-slate-400 text-xs font-semibold hover:text-slate-600 transition">Cerrar / No gracias</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Botones / Custom Preview -->
+                            <div id="previewButtonsArea" class="hidden w-full p-8 md:p-12 flex flex-col items-center text-center bg-white">
+                                <h2 class="preview-common-title text-2xl font-bold text-slate-900 mb-3"></h2>
+                                <p class="preview-common-subtitle text-slate-600 mb-8 max-w-lg mx-auto"></p>
+                                <div class="p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl w-full text-slate-400 text-xs flex items-center justify-center flex-col gap-2">
+                                    <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    Área de Bloque Personalizado / Código HTML Inyectado
                                 </div>
                             </div>
 
@@ -2050,6 +2085,9 @@
                     const previewBadge = document.getElementById('previewBadge');
                     
                     const previewHeroArea = document.getElementById('previewHeroArea');
+                    const previewCarouselArea = document.getElementById('previewCarouselArea');
+                    const previewPopUpArea = document.getElementById('previewPopUpArea');
+                    const previewButtonsArea = document.getElementById('previewButtonsArea');
                     
                     const ctaPrimaryInput = document.getElementById('inpCreateCtaPrimary');
                     const ctaSecondaryInput = document.getElementById('inpCreateCtaSecondary');
@@ -2068,7 +2106,25 @@
                     const inpCreateCtaSecondaryColor = document.getElementById('inpCreateCtaSecondaryColor');
 
                     function updatePreview() {
-                        // Textos
+                        const typeVal = createSectionType ? createSectionType.value : 'hero';
+
+                        // Toggle preview areas
+                        if (previewHeroArea) previewHeroArea.style.display = typeVal === 'hero' ? 'flex' : 'none';
+                        if (previewCarouselArea) previewCarouselArea.style.display = typeVal === 'carousel' ? 'flex' : 'none';
+                        if (previewPopUpArea) previewPopUpArea.style.display = typeVal === 'pop_up' ? 'flex' : 'none';
+                        if (previewButtonsArea) previewButtonsArea.style.display = typeVal === 'buttons' ? 'flex' : 'none';
+
+                        // Actualizar textos globales para las nuevas áreas
+                        const defaultTitle = typeVal === 'buttons' ? 'Bloque Personalizado' : 'Tu Título Aquí';
+                        document.querySelectorAll('.preview-common-title').forEach(el => {
+                            el.textContent = titleInput && titleInput.value ? titleInput.value : defaultTitle;
+                        });
+                        document.querySelectorAll('.preview-common-subtitle').forEach(el => {
+                            el.textContent = subtitleInput && subtitleInput.value ? subtitleInput.value : 'Tu bajada o subtítulo aquí.';
+                            el.style.display = subtitleInput && subtitleInput.value ? 'block' : 'none';
+                        });
+
+                        // Textos (Legacy para Hero)
                         if (titleInput && previewTitle) {
                             previewTitle.textContent = titleInput.value || 'Tu Hero Principal';
                             if (inpCreateTitleColor) {
