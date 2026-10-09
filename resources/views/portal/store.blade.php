@@ -2039,13 +2039,13 @@
             <!-- COLUMNA DERECHA: PREVIEW EN VIVO (2/3) -->
             <div class="w-full md:w-2/3 bg-slate-100 p-0 sm:p-6 flex flex-col relative z-10">
                 <!-- Toggle de Dispositivo -->
-                <div class="absolute top-6 left-6 z-20 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200">
+                <div class="absolute top-6 left-6 z-40 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200">
                     <button type="button" class="preview-device-btn active px-3 py-1.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 cursor-pointer" data-device="desktop">Desktop</button>
                     <button type="button" class="preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
                 </div>
                 
                 <!-- Contenedor del Preview Visual -->
-                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-12 md:mt-0">
+                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-16">
                     <div id="livePreviewContainer" class="w-full h-full bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
                         <!-- Skeleton Header de la tienda -->
                         <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
