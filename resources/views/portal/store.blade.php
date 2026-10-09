@@ -2059,7 +2059,7 @@
                         </div>
                         
                         <!-- Contenido Renderizado en Vivo -->
-                        <div id="livePreviewContent" class="w-full min-h-[400px] flex flex-col">
+                        <div id="livePreviewContent" class="w-full min-h-[250px] flex flex-col">
                             
                             <!-- Hero / Sección Preview -->
                             <div id="previewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-50 min-h-[150px] overflow-hidden transition-all duration-300">
@@ -2222,7 +2222,7 @@
                             previewGrid.innerHTML = boxes;
                             
                             // Estilo cabecera catálogo
-                            previewHeroArea.classList.remove('min-h-[400px]', 'bg-slate-900', 'text-white', 'bg-cover', 'bg-center');
+                            previewHeroArea.classList.remove('min-h-[250px]', 'bg-slate-900', 'text-white', 'bg-cover', 'bg-center');
                             previewHeroArea.classList.add('bg-white', 'text-slate-900', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6');
                             previewHeroArea.style.backgroundImage = 'none';
                             previewTitle.className = 'text-xl md:text-2xl font-extrabold tracking-tight relative z-10';
@@ -2232,7 +2232,7 @@
                             
                             // Estilo Hero Completo
                             previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6', 'text-slate-900');
-                            previewHeroArea.classList.add('bg-slate-900', 'min-h-[400px]', 'p-8');
+                            previewHeroArea.classList.add('bg-slate-900', 'min-h-[250px]', 'p-8');
                             
                             if (window._currentHeroPreviewBg) {
                                 previewHeroArea.style.backgroundImage = window._currentHeroPreviewBg;
