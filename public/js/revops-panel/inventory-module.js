@@ -275,10 +275,14 @@ function hybridInventoryModule() {
 
         fragranceVolumes: [],
         newVolumeForm: { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true },
+        volumeForm: { id: null, value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true },
+        isEditingVolume: false,
         volumeEditState: { isEditing: false, editingId: null, form: { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true } },
 
         categoriesTree: [],
         newCategoryForm: { name: '', description: '', parent_id: '', is_active: true },
+        categoryForm: { id: null, name: '', description: '', parent_id: '', is_active: true },
+        isEditingCategory: false,
         categoryEditState: { isEditing: false, editingId: null, form: { name: '', description: '', parent_id: '', is_active: true } },
 
         // Regla 3: Alta in situ de Categoría y Subcategoría (Workstation & Curaduría)
@@ -8795,6 +8799,19 @@ function hybridInventoryModule() {
             }));
         },
 
+        get availableParentCategories() {
+            const currentId = (this.isEditingCategory || this.categoryEditState?.isEditing) 
+                ? (this.categoryForm?.id || this.categoryEditState?.editingId) 
+                : null;
+            return (this.categoriesTree || [])
+                .filter(cat => !currentId || cat.id !== currentId)
+                .map(cat => ({
+                    id: cat.id,
+                    name: cat.name,
+                    slug: cat.slug
+                }));
+        },
+
         selectCurve(curveId) {
             this.selectedCurveId = curveId;
             if (this.isEditingCurve && this.curveForm.id !== curveId) {
@@ -9173,17 +9190,19 @@ function hybridInventoryModule() {
 
         // --- VOLUMENES DE PERFUMERIA CRUD ---
         async addNewVolume() {
-            const val = parseFloat(this.newVolumeForm.value);
+            const rawVal = this.volumeForm?.value !== undefined ? this.volumeForm.value : this.newVolumeForm.value;
+            const val = parseFloat(rawVal);
             if (!val || val <= 0) {
                 this.showToast('Ingresa un valor numerico valido para el volumen (ej: 50, 100).', 'warning');
                 return;
             }
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const formObj = this.volumeForm?.id ? this.newVolumeForm : (this.volumeForm || this.newVolumeForm);
                 const payload = {
-                    ...this.newVolumeForm,
+                    ...formObj,
                     value: val,
-                    label: (this.newVolumeForm.label || '').trim() || `${val}${this.newVolumeForm.unit || 'ml'}`
+                    label: (formObj.label || '').trim() || `${val}${formObj.unit || 'ml'}`
                 };
                 const res = await fetch('/api/v1/inventory/settings/volumes', {
                     method: 'POST',
@@ -9197,7 +9216,10 @@ function hybridInventoryModule() {
                 }
                 this.fragranceVolumes.push(data.data);
                 this.fragranceVolumes.sort((a, b) => a.sort_order - b.sort_order || a.value - b.value);
+                this.volumeForm = { id: null, value: 100, unit: 'ml', label: '', description: '', sort_order: this.fragranceVolumes.length + 1, is_active: true };
                 this.newVolumeForm = { value: 100, unit: 'ml', label: '', description: '', sort_order: this.fragranceVolumes.length + 1, is_active: true };
+                this.isEditingVolume = false;
+                this.volumeEditState.isEditing = false;
                 this.showToast(`Volumen "${data.data.label}" registrado con exito.`, 'success');
             } catch (err) {
                 this.showToast('Error al crear volumen.', 'warning');
@@ -9205,9 +9227,9 @@ function hybridInventoryModule() {
         },
 
         editVolume(vol) {
-            this.volumeEditState.isEditing = true;
-            this.volumeEditState.editingId = vol.id;
-            this.volumeEditState.form = {
+            this.isEditingVolume = true;
+            this.volumeForm = {
+                id: vol.id,
                 value: vol.value,
                 unit: vol.unit || 'ml',
                 label: vol.label || '',
@@ -9215,28 +9237,40 @@ function hybridInventoryModule() {
                 sort_order: vol.sort_order || 1,
                 is_active: vol.is_active !== false
             };
+            this.volumeEditState.isEditing = true;
+            this.volumeEditState.editingId = vol.id;
+            this.volumeEditState.form = { ...this.volumeForm };
         },
 
         cancelEditVolume() {
+            this.isEditingVolume = false;
+            this.volumeForm = { id: null, value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true };
             this.volumeEditState.isEditing = false;
             this.volumeEditState.editingId = null;
             this.volumeEditState.form = { value: 100, unit: 'ml', label: '', description: '', sort_order: 1, is_active: true };
         },
 
         async saveVolume() {
-            const val = parseFloat(this.volumeEditState.form.value);
+            const rawVal = this.volumeForm?.value !== undefined ? this.volumeForm.value : this.volumeEditState.form.value;
+            const val = parseFloat(rawVal);
+            const editingId = this.volumeForm?.id || this.volumeEditState.editingId;
             if (!val || val <= 0) {
                 this.showToast('El volumen debe ser un numero mayor a 0.', 'warning');
                 return;
             }
+            if (!editingId) {
+                this.showToast('No se encontró el ID del volumen a actualizar.', 'warning');
+                return;
+            }
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const formObj = this.volumeForm?.id ? this.volumeForm : this.volumeEditState.form;
                 const payload = {
-                    ...this.volumeEditState.form,
+                    ...formObj,
                     value: val,
-                    label: (this.volumeEditState.form.label || '').trim() || `${val}${this.volumeEditState.form.unit || 'ml'}`
+                    label: (formObj.label || '').trim() || `${val}${formObj.unit || 'ml'}`
                 };
-                const res = await fetch(`/api/v1/inventory/settings/volumes/${this.volumeEditState.editingId}`, {
+                const res = await fetch(`/api/v1/inventory/settings/volumes/${editingId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
                     body: JSON.stringify(payload)
@@ -9246,7 +9280,7 @@ function hybridInventoryModule() {
                     this.showToast(data.message || 'Error al actualizar volumen.', 'warning');
                     return;
                 }
-                const idx = this.fragranceVolumes.findIndex(v => v.id === this.volumeEditState.editingId);
+                const idx = this.fragranceVolumes.findIndex(v => v.id === editingId);
                 if (idx !== -1) {
                     this.fragranceVolumes[idx] = data.data;
                     this.fragranceVolumes.sort((a, b) => a.sort_order - b.sort_order || a.value - b.value);
@@ -9315,18 +9349,24 @@ function hybridInventoryModule() {
 
         // --- CATEGORIAS & SUBCATEGORIAS CRUD ---
         async addNewCategory() {
-            const name = (this.newCategoryForm.name || '').trim();
+            const name = ((this.categoryForm && this.categoryForm.name) || (this.newCategoryForm && this.newCategoryForm.name) || '').trim();
             if (!name) {
                 this.showToast('Ingresa un nombre para la categoria o subcategoria.', 'warning');
                 return;
             }
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const parentIdVal = this.categoryForm?.parent_id !== undefined && this.categoryForm?.parent_id !== '' 
+                    ? this.categoryForm.parent_id 
+                    : this.newCategoryForm?.parent_id;
+                const descVal = (this.categoryForm?.description !== undefined ? this.categoryForm.description : this.newCategoryForm?.description) || '';
+                const isActiveVal = this.categoryForm?.is_active !== undefined ? this.categoryForm.is_active : (this.newCategoryForm?.is_active !== false);
+
                 const payload = {
                     name: name,
-                    description: (this.newCategoryForm.description || '').trim() || null,
-                    parent_id: this.newCategoryForm.parent_id ? parseInt(this.newCategoryForm.parent_id) : null,
-                    is_active: this.newCategoryForm.is_active !== false
+                    description: descVal.trim() || null,
+                    parent_id: parentIdVal ? parseInt(parentIdVal) : null,
+                    is_active: isActiveVal !== false
                 };
                 const res = await fetch('/api/v1/inventory/settings/categories', {
                     method: 'POST',
@@ -9350,7 +9390,12 @@ function hybridInventoryModule() {
                     data.data.children = [];
                     this.categoriesTree.push(data.data);
                 }
+                this.categoryForm = { id: null, name: '', description: '', parent_id: '', is_active: true };
                 this.newCategoryForm = { name: '', description: '', parent_id: '', is_active: true };
+                this.isEditingCategory = false;
+                this.categoryEditState.isEditing = false;
+                this.categoryEditState.editingId = null;
+                this.categoryEditState.form = { name: '', description: '', parent_id: '', is_active: true };
                 this.showToast(`Categoria "${data.data.name}" registrada con exito.`, 'success');
             } catch (err) {
                 this.showToast('Error al crear categoria.', 'warning');
@@ -9459,37 +9504,58 @@ function hybridInventoryModule() {
         },
 
         editCategory(cat) {
-            this.categoryEditState.isEditing = true;
-            this.categoryEditState.editingId = cat.id;
-            this.categoryEditState.form = {
-                name: cat.name,
+            this.isEditingCategory = true;
+            this.categoryForm = {
+                id: cat.id,
+                name: cat.name || '',
                 description: cat.description || '',
                 parent_id: cat.parent_id ? String(cat.parent_id) : '',
                 is_active: cat.is_active !== false
             };
+            this.categoryEditState.isEditing = true;
+            this.categoryEditState.editingId = cat.id;
+            this.categoryEditState.form = { ...this.categoryForm };
+
+            this.$nextTick(() => {
+                const el = document.getElementById('categoryManagementFormCard');
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
         },
 
         cancelEditCategory() {
+            this.isEditingCategory = false;
+            this.categoryForm = { id: null, name: '', description: '', parent_id: '', is_active: true };
             this.categoryEditState.isEditing = false;
             this.categoryEditState.editingId = null;
             this.categoryEditState.form = { name: '', description: '', parent_id: '', is_active: true };
         },
 
         async saveCategory() {
-            const name = (this.categoryEditState.form.name || '').trim();
+            const name = ((this.categoryForm && this.categoryForm.name) || (this.categoryEditState && this.categoryEditState.form.name) || '').trim();
+            const editingId = (this.categoryForm && this.categoryForm.id) || (this.categoryEditState && this.categoryEditState.editingId);
             if (!name) {
                 this.showToast('El nombre de la categoria no puede estar vacio.', 'warning');
                 return;
             }
+            if (!editingId) {
+                this.showToast('No se encontró el ID de la categoría a actualizar.', 'warning');
+                return;
+            }
             try {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const parentIdVal = this.categoryForm?.parent_id !== undefined ? this.categoryForm.parent_id : this.categoryEditState?.form.parent_id;
+                const descVal = this.categoryForm?.description !== undefined ? this.categoryForm.description : this.categoryEditState?.form.description;
+                const isActiveVal = this.categoryForm?.is_active !== undefined ? this.categoryForm.is_active : this.categoryEditState?.form.is_active;
+
                 const payload = {
                     name: name,
-                    description: (this.categoryEditState.form.description || '').trim() || null,
-                    parent_id: this.categoryEditState.form.parent_id ? parseInt(this.categoryEditState.form.parent_id) : null,
-                    is_active: this.categoryEditState.form.is_active !== false
+                    description: (descVal || '').trim() || null,
+                    parent_id: parentIdVal ? parseInt(parentIdVal) : null,
+                    is_active: isActiveVal !== false
                 };
-                const res = await fetch(`/api/v1/inventory/settings/categories/${this.categoryEditState.editingId}`, {
+                const res = await fetch(`/api/v1/inventory/settings/categories/${editingId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
                     body: JSON.stringify(payload)

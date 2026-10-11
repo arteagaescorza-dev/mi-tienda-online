@@ -11095,20 +11095,20 @@
                             <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
                                 <div class="flex items-center justify-between flex-wrap gap-2">
                                     <div>
-                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="volumeEditState.isEditing ? 'Editar Volumen: ' + volumeEditState.form.label : 'Registrar Nuevo Volumen de Perfumería / Decant'"></h4>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingVolume ? 'Editar Volumen: ' + volumeForm.label : 'Registrar Nuevo Volumen de Perfumería / Decant'"></h4>
                                         <p class="text-[11px] text-slate-600">Control de cubicaje, frascos comerciales, viales de muestra y decants de autor.</p>
                                     </div>
-                                    <span x-show="volumeEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Volumen</span>
+                                    <span x-show="isEditingVolume" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Volumen</span>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Capacidad Numérica</label>
-                                        <input type="number" step="0.1" x-model.number="volumeEditState.isEditing ? volumeEditState.form.value : newVolumeForm.value" placeholder="100" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold">
+                                        <input type="number" step="0.1" x-model.number="volumeForm.value" placeholder="100" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Unidad de Medida</label>
-                                        <select x-model="volumeEditState.isEditing ? volumeEditState.form.unit : newVolumeForm.unit" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                        <select x-model="volumeForm.unit" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
                                             <option value="ml">Mililitros (ml)</option>
                                             <option value="oz">Onzas líquidas (fl oz)</option>
                                             <option value="gr">Gramos (gr)</option>
@@ -11116,32 +11116,32 @@
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Etiqueta Comercial</label>
-                                        <input type="text" x-model="volumeEditState.isEditing ? volumeEditState.form.label : newVolumeForm.label" placeholder="Ej: 100ml Standard" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="volumeForm.label" placeholder="Ej: 100ml Standard" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Orden de Visualización</label>
-                                        <input type="number" x-model.number="volumeEditState.isEditing ? volumeEditState.form.sort_order : newVolumeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
+                                        <input type="number" x-model.number="volumeForm.sort_order" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono">
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Propósito</label>
-                                    <input type="text" x-model="volumeEditState.isEditing ? volumeEditState.form.description : newVolumeForm.description" placeholder="Ej: Frasco de cristal regular para venta al público" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    <input type="text" x-model="volumeForm.description" placeholder="Ej: Frasco de cristal regular para venta al público" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                 </div>
 
                                 <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
                                     <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
-                                        <input type="checkbox" x-model="volumeEditState.isEditing ? volumeEditState.form.is_active : newVolumeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <input type="checkbox" x-model="volumeForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
                                         <span class="font-medium text-slate-700">Volumen Activo en Catálogo</span>
                                     </label>
 
                                     <div class="flex items-center gap-2">
-                                        <template x-if="!volumeEditState.isEditing">
+                                        <template x-if="!isEditingVolume">
                                             <button type="button" @click="addNewVolume()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Registrar Volumen
                                             </button>
                                         </template>
-                                        <template x-if="volumeEditState.isEditing">
+                                        <template x-if="isEditingVolume">
                                             <div class="flex items-center gap-2">
                                                 <button type="button" @click="saveVolume()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                     Actualizar Volumen
@@ -11289,48 +11289,48 @@
                     <template x-if="activeSettingsTab === 'categories'">
                         <div class="space-y-6">
                             <!-- Formulario Alta / Edición de Categoría / Subcategoría -->
-                            <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
+                            <div id="categoryManagementFormCard" class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-200 space-y-4">
                                 <div class="flex items-center justify-between flex-wrap gap-2">
                                     <div>
-                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="categoryEditState.isEditing ? 'Editar Categoría: ' + categoryEditState.form.name : 'Crear Nueva Categoría o Subcategoría'"></h4>
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-900" x-text="isEditingCategory ? 'Editar Categoría: ' + categoryForm.name : 'Crear Nueva Categoría o Subcategoría'"></h4>
                                         <p class="text-[11px] text-slate-600">Jerarquía y familias de producto para catálogo, navegación web y taxonomía.</p>
                                     </div>
-                                    <span x-show="categoryEditState.isEditing" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Categoría</span>
+                                    <span x-show="isEditingCategory" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">Modo Edición Categoría</span>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Categoría</label>
-                                        <input type="text" x-model="categoryEditState.isEditing ? categoryEditState.form.name : newCategoryForm.name" placeholder="Ej: Ropa Interior Deportiva" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="categoryForm.name" placeholder="Ej: Ropa Interior Deportiva" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Categoría Padre (Nivel Jerárquico)</label>
-                                        <select x-model="categoryEditState.isEditing ? categoryEditState.form.parent_id : newCategoryForm.parent_id" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
+                                        <select x-model="categoryForm.parent_id" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold text-slate-700">
                                             <option value="">-- Ninguna (Categoría Raíz / Familia Principal) --</option>
-                                            <template x-for="parentCat in flatCategories" :key="parentCat.id">
+                                            <template x-for="parentCat in availableParentCategories" :key="parentCat.id">
                                                 <option :value="parentCat.id" x-text="parentCat.name"></option>
                                             </template>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Descripción / Taxonomía</label>
-                                        <input type="text" x-model="categoryEditState.isEditing ? categoryEditState.form.description : newCategoryForm.description" placeholder="Ej: Siluetas anatómicas masculinas de alto rendimiento" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" x-model="categoryForm.description" placeholder="Ej: Siluetas anatómicas masculinas de alto rendimiento" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                 </div>
 
                                 <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-indigo-100">
                                     <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs">
-                                        <input type="checkbox" x-model="categoryEditState.isEditing ? categoryEditState.form.is_active : newCategoryForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <input type="checkbox" x-model="categoryForm.is_active" class="rounded text-indigo-600 focus:ring-indigo-500">
                                         <span class="font-medium text-slate-700">Categoría Activa en E-Commerce</span>
                                     </label>
 
                                     <div class="flex items-center gap-2">
-                                        <template x-if="!categoryEditState.isEditing">
+                                        <template x-if="!isEditingCategory">
                                             <button type="button" @click="addNewCategory()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                 Guardar Categoría
                                             </button>
                                         </template>
-                                        <template x-if="categoryEditState.isEditing">
+                                        <template x-if="isEditingCategory">
                                             <div class="flex items-center gap-2">
                                                 <button type="button" @click="saveCategory()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer">
                                                     Actualizar Categoría
@@ -11385,7 +11385,7 @@
                                                 <div class="flex items-center gap-1.5 shrink-0">
                                                     <button 
                                                         type="button" 
-                                                        @click="newCategoryForm.parent_id = String(rootCat.id); newCategoryForm.name = '';" 
+                                                        @click="categoryForm.parent_id = String(rootCat.id); categoryForm.name = ''; newCategoryForm.parent_id = String(rootCat.id); newCategoryForm.name = ''; isEditingCategory = false; categoryEditState.isEditing = false; $nextTick(() => { document.getElementById('categoryManagementFormCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });" 
                                                         class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold transition cursor-pointer"
                                                         title="Añadir subcategoría"
                                                     >
