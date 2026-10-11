@@ -35,32 +35,41 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Gates especificos de cada Hub basados en los permisos de User::canAccessHub
-        \Illuminate\Support\Facades\Gate::define('view-dashboard', function ($user) {
-            return $user->canAccessHub('dashboard');
+        \Illuminate\Support\Facades\Gate::define('view-dashboard', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('dashboard');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-cms', function ($user) {
-            return $user->canAccessHub('store');
+        \Illuminate\Support\Facades\Gate::define('manage-cms', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('store');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-marketing', function ($user) {
-            return $user->canAccessHub('marketing');
+        \Illuminate\Support\Facades\Gate::define('manage-marketing', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('marketing');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-catalog', function ($user) {
-            return $user->canAccessHub('inventory');
+        \Illuminate\Support\Facades\Gate::define('manage-catalog', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('inventory');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-inventory', function ($user) {
-            return $user->canAccessHub('inventory');
+        \Illuminate\Support\Facades\Gate::define('manage-inventory', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('inventory');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-logistics', function ($user) {
-            return $user->canAccessHub('logistics');
+        \Illuminate\Support\Facades\Gate::define('manage-logistics', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('logistics');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-finance', function ($user) {
-            return $user->canAccessHub('finance');
+        \Illuminate\Support\Facades\Gate::define('manage-finance', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('finance');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-b2b', function ($user) {
-            return $user->canAccessHub('allies');
+        \Illuminate\Support\Facades\Gate::define('manage-b2b', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('allies');
         });
-        \Illuminate\Support\Facades\Gate::define('manage-governance', function ($user) {
-            return $user->canAccessHub('governance');
+        \Illuminate\Support\Facades\Gate::define('manage-governance', function ($user = null) {
+            $user = $user ?? auth()->user();
+            return $user && $user->canAccessHub('governance');
         });
 
         // Compartir footerConfig globalmente en el layout Storefront PWA

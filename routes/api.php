@@ -32,7 +32,7 @@ Route::delete('/cart/items/{item}', [CartController::class, 'removeItem']);
 // =========================================================================
 // REVOPS V1 RESTFUL API ENDPOINTS (CONTRACT-DRIVEN)
 // =========================================================================
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware(['web'])->group(function () {
     // 1. INVENTARIO & COMPRAS (HUB 4)
     Route::prefix('inventory')->group(function () {
         Route::get('/purchases/credit-agreements', [InventoryApiController::class, 'getCreditAgreements']);
