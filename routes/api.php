@@ -93,8 +93,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/size-curves', [InventorySettingsApiController::class, 'storeSizeCurve']);
             Route::put('/size-curves/{id}', [InventorySettingsApiController::class, 'updateSizeCurve']);
             Route::patch('/size-curves/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleSizeCurveActive']);
-            Route::post('/size-curves/{id}/archive', [InventorySettingsApiController::class, 'archiveSizeCurve']);
-            Route::post('/size-curves/{id}/restore', [InventorySettingsApiController::class, 'restoreSizeCurve']);
+            Route::match(['post', 'delete', 'patch'], '/size-curves/{id}/archive', [InventorySettingsApiController::class, 'archiveSizeCurve']);
+            Route::match(['post', 'patch'], '/size-curves/{id}/restore', [InventorySettingsApiController::class, 'restoreSizeCurve']);
             Route::delete('/size-curves/{id}', [InventorySettingsApiController::class, 'destroySizeCurve']);
 
             Route::post('/size-curves/{curveId}/sizes', [InventorySettingsApiController::class, 'storeSize']);
@@ -106,16 +106,16 @@ Route::prefix('v1')->group(function () {
             Route::post('/fragrance-volumes', [InventorySettingsApiController::class, 'storeFragranceVolume']);
             Route::put('/fragrance-volumes/{id}', [InventorySettingsApiController::class, 'updateFragranceVolume']);
             Route::patch('/fragrance-volumes/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleFragranceVolumeActive']);
-            Route::post('/fragrance-volumes/{id}/archive', [InventorySettingsApiController::class, 'archiveFragranceVolume']);
-            Route::post('/fragrance-volumes/{id}/restore', [InventorySettingsApiController::class, 'restoreFragranceVolume']);
+            Route::match(['post', 'delete', 'patch'], '/fragrance-volumes/{id}/archive', [InventorySettingsApiController::class, 'archiveFragranceVolume']);
+            Route::match(['post', 'patch'], '/fragrance-volumes/{id}/restore', [InventorySettingsApiController::class, 'restoreFragranceVolume']);
             Route::delete('/fragrance-volumes/{id}', [InventorySettingsApiController::class, 'destroyFragranceVolume']);
 
             Route::get('/categories', [InventorySettingsApiController::class, 'getCategories']);
             Route::post('/categories', [InventorySettingsApiController::class, 'storeCategory']);
             Route::put('/categories/{id}', [InventorySettingsApiController::class, 'updateCategory']);
             Route::patch('/categories/{id}/toggle-active', [InventorySettingsApiController::class, 'toggleCategoryActive']);
-            Route::post('/categories/{id}/archive', [InventorySettingsApiController::class, 'archiveCategory']);
-            Route::post('/categories/{id}/restore', [InventorySettingsApiController::class, 'restoreCategory']);
+            Route::match(['post', 'delete', 'patch'], '/categories/{id}/archive', [InventorySettingsApiController::class, 'archiveCategory']);
+            Route::match(['post', 'patch'], '/categories/{id}/restore', [InventorySettingsApiController::class, 'restoreCategory']);
             Route::delete('/categories/{id}', [InventorySettingsApiController::class, 'destroyCategory']);
 
             // GESTOR DE TELAS & FIBRAS (REGLA 5 Y 6)

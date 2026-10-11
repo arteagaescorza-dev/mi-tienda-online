@@ -9316,10 +9316,9 @@ function hybridInventoryModule() {
                 const url = isArchived 
                     ? `/api/v1/inventory/settings/volumes/${vol.id}/restore`
                     : `/api/v1/inventory/settings/volumes/${vol.id}/archive`;
-                const method = isArchived ? 'POST' : 'DELETE';
                 const res = await fetch(url, {
-                    method: method,
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
                 });
                 if (res.ok) {
                     vol.deleted_at = isArchived ? null : new Date().toISOString();
@@ -9516,10 +9515,21 @@ function hybridInventoryModule() {
             this.categoryEditState.editingId = cat.id;
             this.categoryEditState.form = { ...this.categoryForm };
 
+            this.showToast(`Modo edición: Editando categoría "${cat.name}" en el formulario superior.`, 'info');
+
             this.$nextTick(() => {
-                const el = document.getElementById('categoryManagementFormCard');
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const card = document.getElementById('categoryManagementFormCard');
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const scrollParent = card.closest('.overflow-y-auto') || card.closest('[class*="overflow"]');
+                    if (scrollParent) {
+                        scrollParent.scrollTo({ top: Math.max(0, card.offsetTop - 20), behavior: 'smooth' });
+                    }
+                }
+                const input = document.getElementById('categoryNameInput');
+                if (input) {
+                    input.focus();
+                    input.select();
                 }
             });
         },
@@ -9578,12 +9588,14 @@ function hybridInventoryModule() {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch(`/api/v1/inventory/settings/categories/${cat.id}/toggle-active`, {
                     method: 'PATCH',
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    cat.is_active = data.data.is_active;
-                    this.showToast(`Categoria "${cat.name}" ${cat.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                    await this.reloadCategoriesTree();
+                    this.showToast(`Categoria "${cat.name}" ${data.data?.is_active ? 'activada' : 'desactivada'}.`, 'info');
+                } else {
+                    this.showToast(data.message || 'Error al alternar estado de categoria.', 'warning');
                 }
             } catch (err) {
                 this.showToast('Error al alternar estado de categoria.', 'warning');
@@ -9597,14 +9609,16 @@ function hybridInventoryModule() {
                 const url = isArchived 
                     ? `/api/v1/inventory/settings/categories/${cat.id}/restore`
                     : `/api/v1/inventory/settings/categories/${cat.id}/archive`;
-                const method = isArchived ? 'POST' : 'DELETE';
                 const res = await fetch(url, {
-                    method: method,
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
                 });
+                const data = await res.json();
                 if (res.ok) {
-                    cat.deleted_at = isArchived ? null : new Date().toISOString();
+                    await this.reloadCategoriesTree();
                     this.showToast(`Categoria "${cat.name}" ${isArchived ? 'restaurada' : 'archivada'}.`, 'info');
+                } else {
+                    this.showToast(data.message || 'Error al archivar/restaurar categoría.', 'warning');
                 }
             } catch (err) {
                 this.showToast('Error al archivar categoria.', 'warning');
@@ -9617,11 +9631,14 @@ function hybridInventoryModule() {
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch(`/api/v1/inventory/settings/categories/${catId}`, {
                     method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
                 });
+                const data = await res.json();
                 if (res.ok) {
                     await this.reloadCategoriesTree();
                     this.showToast('Categoria eliminada permanentemente.', 'success');
+                } else {
+                    this.showToast(data.message || 'Error al eliminar categoría.', 'warning');
                 }
             } catch (err) {
                 this.showToast('Error al eliminar categoria.', 'warning');
@@ -11420,6 +11437,10 @@ function hybridInventoryModule() {
         },
 
         handleCategoryDragStart(event, index) {
+            if (event.target && event.target.closest && event.target.closest('button, a, input, select, textarea')) {
+                event.preventDefault();
+                return false;
+            }
             this.draggedCategoryIndex = index;
             if (event.dataTransfer) {
                 event.dataTransfer.effectAllowed = 'move';

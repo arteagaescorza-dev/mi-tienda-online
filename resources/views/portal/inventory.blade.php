@@ -11301,7 +11301,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nombre de la Categoría</label>
-                                        <input type="text" x-model="categoryForm.name" placeholder="Ej: Ropa Interior Deportiva" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <input type="text" id="categoryNameInput" x-model="categoryForm.name" placeholder="Ej: Ropa Interior Deportiva" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-700 block mb-1">Categoría Padre (Nivel Jerárquico)</label>
@@ -11350,14 +11350,18 @@
                                  <div class="space-y-3">
                                     <template x-for="(rootCat, catIdx) in categoriesTree" :key="rootCat.id">
                                         <div 
-                                            class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs transition-shadow"
+                                            class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs transition-all"
+                                            :class="(isEditingCategory && categoryForm.id === rootCat.id) ? 'ring-2 ring-indigo-500 shadow-md' : ''"
                                             draggable="true" 
                                             @dragstart="handleCategoryDragStart($event, catIdx)" 
                                             @dragover="handleCategoryDragOver($event)" 
                                             @drop="handleCategoryDrop($event, catIdx)"
                                         >
                                             <!-- Fila Padre (Categoría Raíz) -->
-                                            <div class="p-3.5 bg-slate-50 flex items-center justify-between gap-3 border-b border-slate-200/80">
+                                            <div 
+                                                class="p-3.5 flex items-center justify-between gap-3 border-b transition-colors"
+                                                :class="(isEditingCategory && categoryForm.id === rootCat.id) ? 'bg-indigo-50/80 border-indigo-200' : 'bg-slate-50 border-slate-200/80'"
+                                            >
                                                 <div class="flex items-center gap-2.5 min-w-0">
                                                     <!-- Drag handle icon -->
                                                     <span class="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1 -ml-1 rounded select-none" title="Arrastra para reordenar esta categoría jerárquicamente">
@@ -11376,27 +11380,61 @@
                                                                 :class="rootCat.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (rootCat.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
                                                                 x-text="rootCat.deleted_at ? 'Archivada' : (rootCat.is_active !== false ? 'Activa' : 'Inactiva')"
                                                             ></span>
+
+                                                            <span x-show="isEditingCategory && categoryForm.id === rootCat.id" class="px-2 py-0.2 rounded-full text-[9px] font-bold bg-indigo-600 text-white animate-pulse">Editando arriba</span>
                                                         </div>
                                                         <p class="text-[11px] text-slate-500 mt-0.5 truncate" x-text="rootCat.description || 'Sin descripcion adicional'"></p>
                                                     </div>
                                                 </div>
 
                                                 <!-- Acciones Categoría Raíz -->
-                                                <div class="flex items-center gap-1.5 shrink-0">
+                                                <div class="flex items-center gap-1.5 shrink-0" @click.stop draggable="false">
                                                     <button 
                                                         type="button" 
-                                                        @click="categoryForm.parent_id = String(rootCat.id); categoryForm.name = ''; newCategoryForm.parent_id = String(rootCat.id); newCategoryForm.name = ''; isEditingCategory = false; categoryEditState.isEditing = false; $nextTick(() => { document.getElementById('categoryManagementFormCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });" 
+                                                        draggable="false"
+                                                        @click.stop="categoryForm.parent_id = String(rootCat.id); categoryForm.name = ''; newCategoryForm.parent_id = String(rootCat.id); newCategoryForm.name = ''; isEditingCategory = false; categoryEditState.isEditing = false; $nextTick(() => { document.getElementById('categoryManagementFormCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); document.getElementById('categoryNameInput')?.focus(); });" 
                                                         class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold transition cursor-pointer"
                                                         title="Añadir subcategoría"
                                                     >
                                                         + Subcategoría
                                                     </button>
-                                                    <button type="button" @click="editCategory(rootCat)" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar">
-                                                        Editar
+                                                    <button 
+                                                        type="button" 
+                                                        draggable="false"
+                                                        @click.stop="editCategory(rootCat)" 
+                                                        class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                        :class="(isEditingCategory && categoryForm.id === rootCat.id) ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'"
+                                                        title="Editar categoría"
+                                                        x-text="(isEditingCategory && categoryForm.id === rootCat.id) ? 'Editando...' : 'Editar'"
+                                                    >
                                                     </button>
-                                                    <button type="button" @click="toggleActiveCategory(rootCat)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="rootCat.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="rootCat.is_active !== false ? 'Desactivar' : 'Activar'" x-text="rootCat.is_active !== false ? 'Desactivar' : 'Activar'"></button>
-                                                    <button type="button" @click="archiveCategory(rootCat)" class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" :class="rootCat.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="rootCat.deleted_at ? 'Restaurar' : 'Archivar'" x-text="rootCat.deleted_at ? 'Restaurar' : 'Archivar'"></button>
-                                                    <button type="button" @click="deleteCategory(rootCat.id)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                    <button 
+                                                        type="button" 
+                                                        draggable="false"
+                                                        @click.stop="toggleActiveCategory(rootCat)" 
+                                                        class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                        :class="rootCat.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" 
+                                                        :title="rootCat.is_active !== false ? 'Desactivar' : 'Activar'" 
+                                                        x-text="rootCat.is_active !== false ? 'Desactivar' : 'Activar'"
+                                                    >
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        draggable="false"
+                                                        @click.stop="archiveCategory(rootCat)" 
+                                                        class="px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                        :class="rootCat.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" 
+                                                        :title="rootCat.deleted_at ? 'Restaurar' : 'Archivar'" 
+                                                        x-text="rootCat.deleted_at ? 'Restaurar' : 'Archivar'"
+                                                    >
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        draggable="false"
+                                                        @click.stop="deleteCategory(rootCat.id)" 
+                                                        class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                        title="Eliminar permanentemente"
+                                                    >
                                                         Eliminar
                                                     </button>
                                                 </div>
@@ -11411,7 +11449,10 @@
                                                 </template>
 
                                                 <template x-for="child in (rootCat.children || [])" :key="child.id">
-                                                    <div class="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/80 transition -mx-4 px-4 rounded-lg" :class="child.deleted_at ? 'opacity-50' : (child.is_active === false ? 'opacity-60' : '')">
+                                                    <div 
+                                                        class="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/80 transition -mx-4 px-4 rounded-lg" 
+                                                        :class="child.deleted_at ? 'opacity-50' : ((isEditingCategory && categoryForm.id === child.id) ? 'bg-indigo-50/80 ring-1 ring-indigo-400' : (child.is_active === false ? 'opacity-60' : ''))"
+                                                    >
                                                         <div class="flex items-center gap-2 min-w-0">
                                                             <span class="text-slate-300 font-mono text-xs select-none">&bull;</span>
                                                             <div class="min-w-0">
@@ -11423,19 +11464,51 @@
                                                                         :class="child.deleted_at ? 'bg-rose-100 text-rose-800 border-rose-200' : (child.is_active !== false ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300')"
                                                                         x-text="child.deleted_at ? 'Archivada' : (child.is_active !== false ? 'Activa' : 'Inactiva')"
                                                                     ></span>
+                                                                    <span x-show="isEditingCategory && categoryForm.id === child.id" class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-600 text-white animate-pulse">Editando</span>
                                                                 </div>
                                                                 <p class="text-[11px] text-slate-500 truncate" x-text="child.description || 'Sin descripcion adicional'"></p>
                                                             </div>
                                                         </div>
 
                                                         <!-- Acciones Subcategoría -->
-                                                        <div class="flex items-center gap-1.5 shrink-0">
-                                                            <button type="button" @click="editCategory(child)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-bold transition cursor-pointer" title="Editar">
-                                                                Editar
+                                                        <div class="flex items-center gap-1.5 shrink-0" @click.stop draggable="false">
+                                                            <button 
+                                                                type="button" 
+                                                                draggable="false"
+                                                                @click.stop="editCategory(child)" 
+                                                                class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                                :class="(isEditingCategory && categoryForm.id === child.id) ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                                                title="Editar subcategoría"
+                                                                x-text="(isEditingCategory && categoryForm.id === child.id) ? 'Editando...' : 'Editar'"
+                                                            >
                                                             </button>
-                                                            <button type="button" @click="toggleActiveCategory(child)" class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" :class="child.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" :title="child.is_active !== false ? 'Desactivar' : 'Activar'" x-text="child.is_active !== false ? 'Desactivar' : 'Activar'"></button>
-                                                            <button type="button" @click="archiveCategory(child)" class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" :class="child.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" :title="child.deleted_at ? 'Restaurar' : 'Archivar'" x-text="child.deleted_at ? 'Restaurar' : 'Archivar'"></button>
-                                                            <button type="button" @click="deleteCategory(child.id)" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" title="Eliminar permanentemente">
+                                                            <button 
+                                                                type="button" 
+                                                                draggable="false"
+                                                                @click.stop="toggleActiveCategory(child)" 
+                                                                class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                                :class="child.is_active !== false ? 'bg-amber-50 hover:bg-amber-100 text-amber-800' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'" 
+                                                                :title="child.is_active !== false ? 'Desactivar' : 'Activar'" 
+                                                                x-text="child.is_active !== false ? 'Desactivar' : 'Activar'"
+                                                            >
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                draggable="false"
+                                                                @click.stop="archiveCategory(child)" 
+                                                                class="px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                                :class="child.deleted_at ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800' : 'bg-amber-50 hover:bg-amber-100 text-amber-800'" 
+                                                                :title="child.deleted_at ? 'Restaurar' : 'Archivar'" 
+                                                                x-text="child.deleted_at ? 'Restaurar' : 'Archivar'"
+                                                            >
+                                                            </button>
+                                                            <button 
+                                                                type="button" 
+                                                                draggable="false"
+                                                                @click.stop="deleteCategory(child.id)" 
+                                                                class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[10px] font-bold transition cursor-pointer" 
+                                                                title="Eliminar permanentemente"
+                                                            >
                                                                 Eliminar
                                                             </button>
                                                         </div>
@@ -16240,5 +16313,5 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v=20261007_v11"></script>
+    <script src="{{ asset('js/revops-panel/inventory-module.js') }}?v={{ filemtime(public_path('js/revops-panel/inventory-module.js')) }}"></script>
 @endpush
