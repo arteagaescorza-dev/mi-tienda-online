@@ -701,7 +701,7 @@
     padding: 16px;
   }
   .pdp-info-modal.active {
-    display: flex;
+    display: flex !important;
   }
   .pdp-info-backdrop {
     position: absolute;
@@ -1327,6 +1327,9 @@
         @endforeach
       </div>
     @endif
+  </div>
+</div>
+
 <!-- MODAL 1: GUÍA DE TALLAS DESCENTRALIZADA DE MARCA / PROVEEDOR (HUB 4) -->
 @if(!empty($brandSizeCurve) && $brandSizeCurve->activeSizes->count() > 0)
 <div id="pdpSizeGuideModal" class="pdp-info-modal" aria-hidden="true" role="dialog" aria-modal="true">
@@ -1758,20 +1761,26 @@
     }
   }
 
-  function openPdpInfoModal(modalId) {
+  window.openPdpInfoModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+  };
+  function openPdpInfoModal(modalId) {
+    window.openPdpInfoModal(modalId);
   }
 
-  function closePdpInfoModal(modalId) {
+  window.closePdpInfoModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+  };
+  function closePdpInfoModal(modalId) {
+    window.closePdpInfoModal(modalId);
   }
 
   window.addEventListener('keydown', (e) => {

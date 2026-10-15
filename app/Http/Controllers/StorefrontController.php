@@ -616,7 +616,7 @@ class StorefrontController extends Controller
         // 2. Resolución de Protocolo de Cuidado Textil sincronizado con Fibras de Hub 4
         $careProtocol = null;
         $careDocs = CmsOfficialDocument::forDocument('care_protocol');
-        $allCareProtocols = is_array($careDocs?->payload) ? $careDocs->payload : [];
+        $allCareProtocols = is_array($careDocs?->payload) ? array_values($careDocs->payload) : [];
         $productFabricName = $dbProduct->fabricRelation?->name ?? $dbProduct->fabric ?? null;
 
         if (!empty($allCareProtocols)) {
@@ -645,6 +645,15 @@ class StorefrontController extends Controller
             if (!$careProtocol && !empty($allCareProtocols[0])) {
                 $careProtocol = $allCareProtocols[0];
             }
+        }
+
+        if (!$careProtocol && $productFabricName) {
+            $careProtocol = [
+                'fiber' => $productFabricName,
+                'rule' => 'Lavar con agua fría (< 30°C) en ciclo delicado.',
+                'warning' => 'Secar a la sombra en superficie horizontal plana. Evitar calor directo.',
+                'symbols' => ['wash_30', 'no_bleach', 'dry_shade', 'no_tumble'],
+            ];
         }
 
         $standardCareSymbols = CmsOfficialDocument::getStandardCareSymbols();

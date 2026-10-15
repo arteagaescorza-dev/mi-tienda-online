@@ -280,11 +280,34 @@ class PortalStoreController extends Controller
         ];
 
         // 7. Care Protocols & PROFECO Health Notice
-        $careProtocols = $officialDocs['CARE_PROTOCOLS']->payload ?? [
-            ['fiber' => 'Modal & Viscosa de Bambú', 'rule' => 'Lavar con agua fría (< 30°C) en ciclo delicado dentro de la Bolsa de Malla Protectora Terra.', 'warning' => 'Nunca usar secadora ni blanqueadores clorados; secar a la sombra en superficie plana.'],
-            ['fiber' => 'Microfibra Velvet & Elásticos de Jockstraps', 'rule' => 'Lavar a mano o máquina en bolsa cerrada para evitar que los elásticos se enganchen con cremalleras.', 'warning' => 'El calor excesivo degrada el elastano; no planchar directamente sobre los elásticos.'],
-            ['fiber' => 'Binders de Compresión Médica', 'rule' => 'Lavar cada 2-3 puestas con jabón líquido suave. Secar al aire sin retorcer la tela de compresión.', 'warning' => 'No estirar de forma asimétrica al escurrir para preservar la memoria elástica del tejido.']
-        ];
+        $fabrics = \App\Models\ApparelFabric::where('is_active', true)->orderBy('name')->get();
+        $rawCareProtocols = $officialDocs['CARE_PROTOCOLS']->payload ?? [];
+        if (!is_array($rawCareProtocols)) {
+            $rawCareProtocols = [];
+        }
+        $careProtocols = array_values($rawCareProtocols);
+        if (empty($careProtocols)) {
+            $careProtocols = [
+                ['fiber' => 'Modal & Viscosa de Bambú', 'rule' => 'Lavar con agua fría (< 30°C) en ciclo delicado dentro de la Bolsa de Malla Protectora Terra.', 'warning' => 'Nunca usar secadora ni blanqueadores clorados; secar a la sombra en superficie plana.', 'symbols' => ['wash_30', 'no_bleach', 'dry_shade', 'no_tumble']],
+                ['fiber' => 'Microfibra Velvet & Elásticos de Jockstraps', 'rule' => 'Lavar a mano o máquina en bolsa cerrada para evitar que los elásticos se enganchen con cremalleras.', 'warning' => 'El calor excesivo degrada el elastano; no planchar directamente sobre los elásticos.', 'symbols' => ['wash_30', 'wash_hand', 'no_bleach', 'dry_shade']],
+                ['fiber' => 'Binders de Compresión Médica', 'rule' => 'Lavar cada 2-3 puestas con jabón líquido suave. Secar al aire sin retorcer la tela de compresión.', 'warning' => 'No estirar de forma asimétrica al escurrir para preservar la memoria elástica del tejido.', 'symbols' => ['wash_hand', 'no_bleach', 'dry_flat', 'no_tumble', 'no_iron']]
+            ];
+        }
+
+        // Sincronizar automáticamente cualquier fibra de Hub 4 activa que no esté aún en la lista de protocolos
+        $registeredFibers = collect($careProtocols)->pluck('fiber')->map(fn($f) => strtolower(trim((string)$f)))->all();
+        foreach ($fabrics as $fab) {
+            $cleanFabName = strtolower(trim($fab->name));
+            if (!in_array($cleanFabName, $registeredFibers)) {
+                $careProtocols[] = [
+                    'fiber' => $fab->name,
+                    'rule' => 'Lavar con agua fría (< 30°C) en ciclo delicado.',
+                    'warning' => 'Secar a la sombra en superficie horizontal plana. Evitar secadora térmica.',
+                    'symbols' => ['wash_30', 'no_bleach', 'dry_shade', 'no_tumble'],
+                ];
+                $registeredFibers[] = $cleanFabName;
+            }
+        }
 
         $profecoNotice = $officialDocs['PROFECO_SANITARY_NOTICE']->payload ?? [
             'legal_basis' => 'Artículo 53 de la Ley Federal de Protección al Consumidor.',
@@ -904,6 +927,10 @@ class PortalStoreController extends Controller
             if (json_last_error() === JSON_ERROR_NONE) {
                 $payload = $decoded;
             }
+        }
+
+        if (is_array($payload) && in_array($code, ['CARE_PROTOCOLS', 'care_protocol'])) {
+            $payload = array_values($payload);
         }
 
         $doc->payload = $payload;

@@ -5388,9 +5388,9 @@ $curatedGoogleFonts = [
 
         const symsHtml = syms.map(s => `
             <label class="flex items-center gap-2 p-1.5 rounded-md hover:bg-slate-50 border border-slate-100 cursor-pointer transition text-[11px]">
-                <input type="checkbox" name="payload[\${newIdx}][symbols][]" value="\${s.key}" class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5">
-                <span class="text-slate-700">\${s.svg}</span>
-                <span class="text-slate-800 font-medium truncate">\${s.name}</span>
+                <input type="checkbox" name="payload[${newIdx}][symbols][]" value="${s.key}" class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5">
+                <span class="text-slate-700">${s.svg}</span>
+                <span class="text-slate-800 font-medium truncate">${s.name}</span>
             </label>
         `).join('');
 
@@ -5399,29 +5399,29 @@ $curatedGoogleFonts = [
         card.dataset.index = newIdx;
         card.innerHTML = `
             <div class="flex items-center justify-between">
-                <span class="font-bold text-xs text-indigo-900 uppercase tracking-wide">Protocolo de Fibra #\${newIdx + 1}</span>
+                <span class="font-bold text-xs text-indigo-900 uppercase tracking-wide">Protocolo de Fibra #${newIdx + 1}</span>
                 <button type="button" class="text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer" onclick="this.closest('.care-protocol-card').remove()">Eliminar</button>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Tela / Fibra (Hub 4)</label>
-                    <select name="payload[\${newIdx}][fiber]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-semibold text-xs focus:ring-1 focus:ring-indigo-500">
-                        \${fabricsOpts}
+                    <select name="payload[${newIdx}][fiber]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-semibold text-xs focus:ring-1 focus:ring-indigo-500">
+                        ${fabricsOpts}
                     </select>
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Regla Resumen de Lavado</label>
-                    <input type="text" name="payload[\${newIdx}][rule]" value="Lavar con agua fría en ciclo delicado." class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" placeholder="Ej: Lavar con agua fría (< 30°C) en ciclo delicado">
+                    <input type="text" name="payload[${newIdx}][rule]" value="Lavar con agua fría en ciclo delicado." class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" placeholder="Ej: Lavar con agua fría (< 30°C) en ciclo delicado">
                 </div>
             </div>
             <div>
                 <label class="block text-amber-900 font-bold mb-1">Advertencia Especial de Cuidado (Texto Libre)</label>
-                <textarea name="payload[\${newIdx}][warning]" rows="2" class="w-full px-3 py-1.5 border border-amber-300 bg-amber-50/50 rounded-lg text-xs text-amber-950 font-medium placeholder-amber-800/50" placeholder="Ej: Nunca usar secadora térmica ni blanqueadores clorados; secar a la sombra en superficie horizontal plana."></textarea>
+                <textarea name="payload[${newIdx}][warning]" rows="2" class="w-full px-3 py-1.5 border border-amber-300 bg-amber-50/50 rounded-lg text-xs text-amber-950 font-medium placeholder-amber-800/50" placeholder="Ej: Nunca usar secadora térmica ni blanqueadores clorados; secar a la sombra en superficie horizontal plana."></textarea>
             </div>
             <div>
                 <label class="block text-slate-800 font-bold mb-1.5">Simbología Oficial de Cuidado (Selecciona para mostrar en Storefront PDP)</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-2.5 bg-white border border-slate-200 rounded-lg">
-                    \${symsHtml}
+                    ${symsHtml}
                 </div>
             </div>
         `;

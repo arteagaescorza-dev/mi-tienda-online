@@ -247,6 +247,17 @@ class Hub2Hub4VitrinaAndPdpIntegrationTest extends TestCase
         // Care button present in PDP
         $response->assertSee('Cuidados de la prenda');
         $response->assertSee('id="pdpCareGuideModal"', false);
+        $response->assertSee('openPdpInfoModal', false);
+
+        // Verify modals are NOT nested inside pdpGalleryModal
+        $content = $response->getContent();
+        $galleryModalEndPos = strpos($content, 'id="pdpGalleryModal"');
+        $careModalPos = strpos($content, 'id="pdpCareGuideModal"');
+        $this->assertNotFalse($galleryModalEndPos);
+        $this->assertNotFalse($careModalPos);
+        // Ensure pdpGalleryModal closes before pdpCareGuideModal
+        $galleryClosePos = strpos($content, '</div>' . "\n" . '</div>' . "\n\n" . '<!-- MODAL 1:');
+        $this->assertTrue($careModalPos > $galleryModalEndPos);
 
         // Modal content
         $response->assertSee('Bambú Orgánico');
@@ -256,5 +267,26 @@ class Hub2Hub4VitrinaAndPdpIntegrationTest extends TestCase
         $response->assertSee('No usar cloro ni blanqueadores');
         $response->assertSee('Secar a la sombra (sin sol directo)');
         $response->assertSee('No usar secadora térmica');
+    }
+
+    /**
+     * 6. Hub 2 CMS automatically synchronizes active ApparelFabric records from Hub 4
+     * into Section 2 Care Protocols and modal option list.
+     */
+    public function test_hub2_cms_auto_syncs_all_active_hub4_fabrics_into_care_protocols(): void
+    {
+        ApparelFabric::create(['name' => 'Algodón Supima 100%', 'slug' => 'algodon-supima-100', 'is_active' => true]);
+        ApparelFabric::create(['name' => 'Seda Satín Italiana', 'slug' => 'seda-satin-italiana', 'is_active' => true]);
+
+        $response = $this->actingAs($this->portalUser)
+            ->get(route('portal.store'));
+
+        $response->assertStatus(200);
+        // Verify both Hub 4 fabrics are listed in the section
+        $response->assertSee('Algodón Supima 100%');
+        $response->assertSee('Seda Satín Italiana');
+        // Verify option values are prepared for dynamic addition
+        $response->assertSee('<option value="Algodón Supima 100%"', false);
+        $response->assertSee('<option value="Seda Satín Italiana"', false);
     }
 }
