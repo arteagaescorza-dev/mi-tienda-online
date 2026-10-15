@@ -732,7 +732,11 @@ class StorefrontController extends Controller
             'images_by_color' => $colorData['images_by_color'],
             'supplier' => $supplierName,
             'description' => $dbProduct->description ?: 'Prenda anatómica confeccionada con textiles transpirables de alta elasticidad y costuras planas flatlock para confort total.',
-            'fabricComposition' => data_get($dbProduct->meta, 'fabric_composition', 'Modal Pima peruano / Spandex / Microfibra transpirable.'),
+            'fabricComposition' => $dbProduct->fabricRelation?->name
+                ?? data_get($dbProduct->meta, 'fabric_composition')
+                ?? data_get($dbProduct->meta, 'fabric')
+                ?? $dbProduct->fabric
+                ?? 'Modal Pima peruano / Spandex / Microfibra transpirable.',
             'sizes' => $variantList->pluck('size')->unique()->values()->all() ?: ['CH', 'M', 'G', 'XG'],
             'variants' => $variantList->all(),
         ];

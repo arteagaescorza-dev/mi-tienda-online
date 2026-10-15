@@ -289,4 +289,84 @@ class Hub2Hub4VitrinaAndPdpIntegrationTest extends TestCase
         $response->assertSee('<option value="Algodón Supima 100%"', false);
         $response->assertSee('<option value="Seda Satín Italiana"', false);
     }
+
+    /**
+     * 7. Multi-fabric Care Protocol Resolution and Composition:
+     * When multiple fabrics are configured in Hub 2 / Hub 4, each product dynamically displays
+     * its own official textile composition and matched care protocol.
+     */
+    public function test_multiple_fabrics_each_resolve_correct_care_protocol_and_composition(): void
+    {
+        $fabricLicra = ApparelFabric::create(['name' => 'Licra Test', 'slug' => 'licra-test', 'is_active' => true]);
+        $fabricPoliester = ApparelFabric::create(['name' => 'Poliester Test', 'slug' => 'poliester-test', 'is_active' => true]);
+
+        // Save two distinct care protocols
+        $doc = CmsOfficialDocument::updateOrCreate(
+            ['code' => 'CARE_PROTOCOLS'],
+            [
+                'title' => 'Protocolos Oficiales de Cuidado Textil',
+                'is_active' => true,
+                'payload' => [
+                    [
+                        'fiber' => 'Licra Test',
+                        'rule' => 'Cuidado especial para prendas elásticas de Licra.',
+                        'warning' => 'Advertencia elástica para licra.',
+                        'symbols' => ['wash_30', 'wash_hand'],
+                    ],
+                    [
+                        'fiber' => 'Poliester Test',
+                        'rule' => 'Lavar con agua fría en ciclo delicado para Poliester.',
+                        'warning' => 'Advertencia especial poliester.',
+                        'symbols' => ['no_bleach', 'dry_flat', 'dry_shade'],
+                    ],
+                ],
+            ]
+        );
+
+        $prodLicra = Product::create([
+            'title' => 'Prenda Licra Especial',
+            'sku' => 'SKU-LIC-01',
+            'slug' => 'prenda-licra-especial',
+            'fabric_id' => $fabricLicra->id,
+            'price' => 250.00,
+            'visible' => true,
+        ]);
+        ProductVariant::create([
+            'product_id' => $prodLicra->id,
+            'sku' => 'SKU-LIC-01-M',
+            'price' => 250.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        $prodPoli = Product::create([
+            'title' => 'Prenda Poliester Especial',
+            'sku' => 'SKU-POL-01',
+            'slug' => 'prenda-poliester-especial',
+            'fabric_id' => $fabricPoliester->id,
+            'price' => 280.00,
+            'visible' => true,
+        ]);
+        ProductVariant::create([
+            'product_id' => $prodPoli->id,
+            'sku' => 'SKU-POL-01-M',
+            'price' => 280.00,
+            'attributes' => ['size' => 'M'],
+        ]);
+
+        // Visit Licra product
+        $resLicra = $this->get('/productos/prenda-licra-especial');
+        $resLicra->assertStatus(200);
+        $resLicra->assertSee('Licra Test');
+        $resLicra->assertSee('Cuidado especial para prendas elásticas de Licra.');
+        $resLicra->assertSee('Advertencia elástica para licra.');
+        $resLicra->assertDontSee('Lavar con agua fría en ciclo delicado para Poliester.');
+
+        // Visit Poliester product
+        $resPoli = $this->get('/productos/prenda-poliester-especial');
+        $resPoli->assertStatus(200);
+        $resPoli->assertSee('Poliester Test');
+        $resPoli->assertSee('Lavar con agua fría en ciclo delicado para Poliester.');
+        $resPoli->assertSee('Advertencia especial poliester.');
+        $resPoli->assertDontSee('Cuidado especial para prendas elásticas de Licra.');
+    }
 }
