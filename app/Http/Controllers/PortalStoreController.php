@@ -387,6 +387,7 @@ class PortalStoreController extends Controller
             'simulator' => $simulator,
             'sizeGuide' => $sizeGuide,
             'careProtocols' => $careProtocols,
+            'fabrics' => \App\Models\ApparelFabric::where('is_active', true)->orderBy('name')->get(),
             'profecoNotice' => $profecoNotice,
             'pages' => $pages,
             'blogPosts' => $blogPosts,

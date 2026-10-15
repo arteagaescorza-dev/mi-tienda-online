@@ -184,7 +184,8 @@ function hybridInventoryModule() {
                     description: finalDesc,
                     is_active: isActive,
                     is_archived: isArchived,
-                    status: s.status || (isActive ? 'active' : 'draft')
+                    status: s.status || (isActive ? 'active' : 'draft'),
+                    query_rules: s.query_rules || {}
                 };
             })
             : [
@@ -373,9 +374,9 @@ function hybridInventoryModule() {
 
         // Regla 7: Estado de Edición y Alta de Secciones de Tienda Web
         isEditingStoreSection: false,
-        storeSectionForm: { id: null, name: '', slug: '', description: '', is_active: true },
-        newStoreSectionForm: { name: '', slug: '', description: '', is_active: true },
-        storeSectionEditState: { isEditing: false, editingId: null, form: { name: '', slug: '', description: '', is_active: true } },
+        storeSectionForm: { id: null, name: '', slug: '', description: '', is_active: true, is_new: false, has_discount: false, fabric_id: '', category_id: '' },
+        newStoreSectionForm: { name: '', slug: '', description: '', is_active: true, is_new: false, has_discount: false, fabric_id: '', category_id: '' },
+        storeSectionEditState: { isEditing: false, editingId: null, form: { name: '', slug: '', description: '', is_active: true, is_new: false, has_discount: false, fabric_id: '', category_id: '' } },
 
         // REGLA 1: Tabuladores de Precios MOQ por Proveedor & Trazabilidad de Costos
         moqRevision: 0,
@@ -4632,6 +4633,27 @@ function hybridInventoryModule() {
                 }, 600);
             }
             this.initRevOpsMetrics();
+
+            // Sincronización contextual Hub 2 -> Hub 4 (Apertura de vitrina para edición)
+            if (typeof window !== 'undefined' && window.location) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetTab = urlParams.get('tab');
+                const editSecId = urlParams.get('edit_section_id');
+                if (targetTab === 'sections' || editSecId) {
+                    setTimeout(() => {
+                        this.openModuleSettings('sections');
+                        if (editSecId) {
+                            setTimeout(() => {
+                                const sec = (this.storeSections || []).find(s => String(s.id) === String(editSecId));
+                                if (sec) {
+                                    this.editStoreSection(sec);
+                                }
+                            }, 350);
+                        }
+                    }, 450);
+                }
+            }
+
             if (typeof window !== 'undefined') {
                 window.inventoryAppInstance = this;
                 window.recordOrderDispatchedStock = (payload) => {
@@ -8289,6 +8311,19 @@ function hybridInventoryModule() {
             }
             const desc = (this.storeSectionForm.description !== undefined ? this.storeSectionForm.description : this.newStoreSectionForm.description || '').trim();
             const isActive = this.storeSectionForm.is_active !== undefined ? this.storeSectionForm.is_active : (this.newStoreSectionForm.is_active !== false);
+            const isNew = !!this.storeSectionForm.is_new;
+            const hasDiscount = !!this.storeSectionForm.has_discount;
+            const fabricId = this.storeSectionForm.fabric_id ? parseInt(this.storeSectionForm.fabric_id) : null;
+            const categoryId = this.storeSectionForm.category_id ? parseInt(this.storeSectionForm.category_id) : null;
+
+            const queryRules = {
+                section: name,
+                slug: slug,
+                is_new: isNew,
+                has_discount: hasDiscount,
+                fabric_id: fabricId,
+                category_id: categoryId
+            };
 
             const newSec = {
                 id: Date.now(),
@@ -8297,7 +8332,12 @@ function hybridInventoryModule() {
                 description: desc,
                 is_active: isActive,
                 is_archived: false,
-                status: isActive ? 'active' : 'draft'
+                status: isActive ? 'active' : 'draft',
+                query_rules: queryRules,
+                is_new: isNew,
+                has_discount: hasDiscount,
+                fabric_id: fabricId,
+                category_id: categoryId
             };
             this.storeSections = [...this.storeSections, newSec];
             this.cancelEditStoreSection();
@@ -8316,7 +8356,12 @@ function hybridInventoryModule() {
                         name: name,
                         slug: slug,
                         description: desc,
-                        is_active: isActive
+                        is_active: isActive,
+                        is_new: isNew,
+                        has_discount: hasDiscount,
+                        fabric_id: fabricId,
+                        category_id: categoryId,
+                        query_rules: queryRules
                     })
                 });
                 if (res.ok) {
@@ -8335,12 +8380,17 @@ function hybridInventoryModule() {
             this.isEditingStoreSection = true;
             this.storeSectionEditState.isEditing = true;
             this.storeSectionEditState.editingId = sec.id;
+            const qr = sec.query_rules || {};
             this.storeSectionForm = {
                 id: sec.id,
                 name: sec.name || '',
                 slug: sec.slug || '',
                 description: sec.description || '',
-                is_active: sec.is_active !== false
+                is_active: sec.is_active !== false,
+                is_new: !!(sec.is_new !== undefined ? sec.is_new : qr.is_new),
+                has_discount: !!(sec.has_discount !== undefined ? sec.has_discount : qr.has_discount),
+                fabric_id: (sec.fabric_id !== undefined ? sec.fabric_id : qr.fabric_id) || '',
+                category_id: (sec.category_id !== undefined ? sec.category_id : qr.category_id) || ''
             };
             this.storeSectionEditState.form = { ...this.storeSectionForm };
         },
@@ -8349,7 +8399,7 @@ function hybridInventoryModule() {
             this.isEditingStoreSection = false;
             this.storeSectionEditState.isEditing = false;
             this.storeSectionEditState.editingId = null;
-            this.storeSectionForm = { id: null, name: '', slug: '', description: '', is_active: true };
+            this.storeSectionForm = { id: null, name: '', slug: '', description: '', is_active: true, is_new: false, has_discount: false, fabric_id: '', category_id: '' };
             this.storeSectionEditState.form = { ...this.storeSectionForm };
             this.newStoreSectionForm = { ...this.storeSectionForm };
         },
@@ -8367,15 +8417,34 @@ function hybridInventoryModule() {
             const slug = (this.storeSectionForm.slug || this.storeSectionEditState.form.slug || sec.slug || '').trim();
             const desc = (this.storeSectionForm.description !== undefined ? this.storeSectionForm.description : this.storeSectionEditState.form.description || '').trim();
             const isActive = this.storeSectionForm.is_active !== undefined ? this.storeSectionForm.is_active : (this.storeSectionEditState.form.is_active !== false);
+            const isNew = !!this.storeSectionForm.is_new;
+            const hasDiscount = !!this.storeSectionForm.has_discount;
+            const fabricId = this.storeSectionForm.fabric_id ? parseInt(this.storeSectionForm.fabric_id) : null;
+            const categoryId = this.storeSectionForm.category_id ? parseInt(this.storeSectionForm.category_id) : null;
 
             const oldSlug = sec.slug;
             const oldName = sec.name;
+
+            const qr = {
+                ...(sec.query_rules || {}),
+                section: name,
+                slug: slug,
+                is_new: isNew,
+                has_discount: hasDiscount,
+                fabric_id: fabricId,
+                category_id: categoryId
+            };
 
             sec.name = name;
             sec.slug = slug;
             sec.description = desc;
             sec.is_active = isActive;
             sec.status = isActive ? 'active' : 'draft';
+            sec.query_rules = qr;
+            sec.is_new = isNew;
+            sec.has_discount = hasDiscount;
+            sec.fabric_id = fabricId;
+            sec.category_id = categoryId;
 
             this.storeSections = [...this.storeSections];
 
@@ -8393,7 +8462,12 @@ function hybridInventoryModule() {
                 name: name,
                 slug: slug,
                 description: desc,
-                is_active: isActive
+                is_active: isActive,
+                is_new: isNew,
+                has_discount: hasDiscount,
+                fabric_id: fabricId,
+                category_id: categoryId,
+                query_rules: qr
             };
             this.cancelEditStoreSection();
             this.showToast(`Sección "${name}" actualizada.`, 'success');

@@ -12302,6 +12302,52 @@
                                         >
                                     </div>
                                 </div>
+
+                                <!-- LÓGICA Y REGLAS DE CATÁLOGO (FILTROS DE VITRINA HUB 4) -->
+                                <div class="p-3 bg-white/90 rounded-lg border border-indigo-100 mb-3 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] font-bold text-indigo-900 uppercase tracking-wide flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                                            Filtros de Catálogo &amp; Dimensión de Productos
+                                        </span>
+                                        <span class="text-[10px] text-slate-400 font-medium">Define qué productos poblarán esta vitrina en el storefront</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <!-- Toggle Novedades -->
+                                        <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition">
+                                            <input type="checkbox" x-model="storeSectionForm.is_new" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                            <span class="text-xs font-semibold text-slate-700">Solo Novedades</span>
+                                        </label>
+
+                                        <!-- Toggle Descuentos -->
+                                        <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition">
+                                            <input type="checkbox" x-model="storeSectionForm.has_discount" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                            <span class="text-xs font-semibold text-slate-700">Solo con Descuento</span>
+                                        </label>
+
+                                        <!-- Filtro Telas & Fibras -->
+                                        <div>
+                                            <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Tela / Fibra</label>
+                                            <select x-model="storeSectionForm.fabric_id" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="">Todas las telas</option>
+                                                <template x-for="fab in (apparelFabrics || []).filter(f => f.is_active)" :key="fab.id">
+                                                    <option :value="fab.id" x-text="fab.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <!-- Filtro Categoría -->
+                                        <div>
+                                            <label class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Categoría</label>
+                                            <select x-model="storeSectionForm.category_id" class="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="">Todas las categorías</option>
+                                                <template x-for="cat in (categoriesTree || [])" :key="cat.id">
+                                                    <option :value="cat.id" x-text="cat.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="flex items-center gap-2">
                                     <template x-if="!isEditingStoreSection">
                                         <button 

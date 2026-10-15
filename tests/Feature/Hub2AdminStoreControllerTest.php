@@ -259,6 +259,8 @@ class Hub2AdminStoreControllerTest extends TestCase
      */
     public function test_product_card_section_strips_custom_code(): void
     {
+        CmsSection::where('universe', 'all')->first()?->delete();
+
         $payload = [
             'universe' => 'all',
             'name' => 'Catálogo Curado Seguro',
@@ -387,11 +389,12 @@ class Hub2AdminStoreControllerTest extends TestCase
         $response->assertSee('data-tab="filters"', false);
         $response->assertDontSee('data-tab="magazine"', false);
 
-        // 3. Panel de Contenido & Reglas Unificado con 3 Secciones de Acordeón
+        // 3. Panel de Contenido & Reglas Unificado (Sin Banners obsoletos)
         $response->assertSee('id="storeContentRulesPanel"', false);
-        $response->assertSee('id="accordionSecBanners"', false);
+        $response->assertDontSee('id="accordionSecBanners"', false);
         $response->assertSee('id="accordionSecShipping"', false);
         $response->assertSee('id="accordionSecEditorial"', false);
+        $response->assertSee('id="accordionSecFooter"', false);
 
         // 4. Panel de Páginas de Explorar & Navbar
         $response->assertSee('id="storePagesPanel"', false);

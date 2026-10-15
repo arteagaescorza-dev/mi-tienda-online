@@ -25,6 +25,7 @@ class StoreSectionRequest extends FormRequest
             'custom_css' => 'nullable|string',
             'custom_js' => 'nullable|string',
             'settings' => 'nullable|array',
+            'query_rules' => 'nullable|array',
             'background_image_file' => 'nullable|image|max:5120',
             'background_image_url' => 'nullable|string',
         ];

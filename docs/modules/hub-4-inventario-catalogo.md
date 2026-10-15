@@ -107,6 +107,41 @@ erDiagram
 - **Flujos y Casos Límite:**
   - Un ítem rechazado por curaduría DEBE poblar la columna `rejection_reason`.
 
+### 3.6. Vitrinas Web E-Commerce & Reglas de Catálogo
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\CmsSection`
+  - **Estructura MySQL:**
+    - `cms_sections` (`title`, `slug`, `type: 'catalog_section'`, `status`, `sort_order`, `query_rules` JSON: `is_new`, `has_discount`, `fabric_id`, `category_id`, `subcategory_id`)
+- **File Scope:**
+  - `app/Http/Controllers/Api/RevOps/InventorySettingsApiController.php` (`getStoreSections`, `storeStoreSection`, `updateStoreSection`, etc.)
+  - `public/js/revops-panel/inventory-module.js`
+  - `resources/views/portal/inventory.blade.php` (Pestaña 7: Vitrinas Web)
+- **Flujos y Casos Límite:**
+  - Creación o actualización en Hub 4 registra automáticamente la sección modular en `cms_sections`, insertándola al final de la secuencia (`sort_order = max + 1`).
+  - Las vitrinas se reflejan de inmediato en la lista Drag & Drop del Hub 2.
+  - Soporte de apertura reactiva directa por URL (`/admin/inventario-catalogo?tab=sections&edit_section_id={id}`), activando la pestaña de vitrinas y cargando automáticamente el formulario de edición.
+
+### 3.7. Gobernanza de Curvas de Talla Descentralizadas
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelos Eloquent:** `App\Models\ApparelSizeCurve`, `App\Models\ApparelSize`
+  - **Estructura MySQL:**
+    - `apparel_size_curves` (`brand_id`, `supplier_id`, `name`, `gender`, `is_active`)
+    - `apparel_sizes` (`size_curve_id`, `code`, `label`, `waist_min_cm`, `waist_max_cm`, `sort_order`, `is_active`)
+- **Flujos y Casos Límite:**
+  - **Regla Estricta de Marca:** Cada curva de tallas pertenece exclusivamente a una Marca (`Brand`) o a un Proveedor (`Supplier`).
+  - Si un producto no tiene curva asociada a su marca o proveedor, el sistema no sintetiza curvas genéricas ni fallbacks; en la tienda pública simplemente no existe curva y el botón "Guía de tallas" se omite.
+
+### 3.8. Telas y Fibras Textiles
+- **Estado:** `[IMPLEMENTADO]`
+- **Contrato de Datos:**
+  - **Modelo Eloquent:** `App\Models\ApparelFabric`
+  - **Estructura MySQL:**
+    - `apparel_fabrics` (`name`, `slug`, `code`, `composition`, `care_instructions`, `is_active`)
+- **Flujos y Casos Límite:**
+  - Las telas dadas de alta en Hub 4 se sincronizan con el selector de fibras en Hub 2 (Protocolos de Cuidado Textil) y alimentan la Ficha Técnica Oficial en la PDP del Storefront.
+
 ---
 
 ## 4. Reglas de Negocio Específicas

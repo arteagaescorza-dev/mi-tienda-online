@@ -815,9 +815,15 @@ $curatedGoogleFonts = [
                                 </div>
                             </td>
                             <td class="py-3 px-3">
-                                <span class="px-2 py-1 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                    {{ $sec->type }}
-                                </span>
+                                @if(in_array($sec->type, ['catalog_section', 'curated_products', 'vitrina_web']))
+                                    <span class="px-2 py-1 rounded text-[10px] font-bold font-mono bg-purple-50 text-purple-700 border border-purple-200">
+                                        Vitrina Web Hub 4
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 rounded text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        {{ $sec->type }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="py-3 px-3">
                                 <span class="px-2 py-1 rounded text-[10px] font-bold uppercase {{
@@ -841,9 +847,16 @@ $curatedGoogleFonts = [
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                                    <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section-id="{{ $sec->id }}" onclick="window.openEditSectionModal({{ $sec->id }})" type="button" title="Editar información, vitrina y contenido">
-                                        Editar
-                                    </button>
+                                    @if(in_array($sec->type, ['catalog_section', 'curated_products', 'vitrina_web']))
+                                        <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg shadow-2xs cursor-pointer inline-flex items-center gap-1" data-action="open-edit-section-modal" data-section-id="{{ $sec->id }}" onclick="window.openEditSectionModal({{ $sec->id }})" type="button" title="Configurar vitrina y filtros de catálogo en Hub 4 (Abre en nueva pestaña)">
+                                            <span>Editar Vitrina</span>
+                                            <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </button>
+                                    @else
+                                        <button class="button button-light py-1 px-2 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg shadow-2xs cursor-pointer" data-action="open-edit-section-modal" data-section-id="{{ $sec->id }}" onclick="window.openEditSectionModal({{ $sec->id }})" type="button" title="Editar información, diseño visual y contenido">
+                                            Editar
+                                        </button>
+                                    @endif
                                     @if($sec->status !== 'archived')
                                         <button class="button button-light py-1 px-2 text-[11px] font-semibold text-amber-700 hover:bg-amber-50 rounded-lg shadow-2xs cursor-pointer" data-action="archive-section" data-section-id="{{ $sec->id }}" data-section-name="{{ $sec->name }}" onclick="window.archiveStoreSection(this.dataset.sectionId, this.dataset.sectionName)" type="button" title="Archivar sección (no se muestra en tienda)">
                                             Archivar
@@ -893,116 +906,7 @@ $curatedGoogleFonts = [
             </div>
         </div>
 
-        <!-- SECCIÓN 1 ACORDEÓN: BANNERS & MARQUESINAS -->
-        <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecBanners">
-            <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecBanners')">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-sm font-bold text-slate-900">1. Banners Promocionales &amp; Marquesinas Superiores</div>
-                        <div class="text-[11px] text-slate-500">Avisos destacados en cabecera y carruseles hero segmentados por vitrina.</div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono">{{ count($banners) }} Banners</span>
-                    <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-            </button>
-            <div class="store-accordion-body p-6 border-t border-slate-100" id="accordionSecBannersBody">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg>
-                        <span>Marquesina Superior de Anuncios (Announcement Bar)</span>
-                    </h3>
-                    <p class="text-xs text-slate-500">Avisos destacados en el encabezado global de la tienda para promociones, envíos y puntos de entrega.</p>
-                </div>
-                <button class="button button-light py-1.5 px-3 text-xs font-semibold rounded-lg cursor-pointer" data-action="toggle-announcement-bar" type="button">
-                    {{ $announcementActive ? 'Pausar Marquesina' : 'Activar Marquesina' }}
-                </button>
-            </div>
-
-            <div class="space-y-2 mb-6">
-                @foreach($announcements as $index => $a)
-                    <div class="flex items-center justify-between p-3 border border-slate-200 rounded-xl bg-slate-50 text-xs">
-                        <div class="flex items-center gap-3">
-                            <span class="w-6 h-6 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-[10px] font-mono">{{ $index + 1 }}</span>
-                            <div>
-                                <span class="font-bold text-slate-800">{{ $a['text'] }}</span>
-                                <span class="text-[10px] text-slate-400 block mt-0.5 font-mono">Enlace: {{ $a['link'] }}</span>
-                            </div>
-                        </div>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">{{ $a['badge'] }}</span>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="border-t border-slate-100 pt-5">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900">Carruseles Hero &amp; Banners de Colección (Regla 14 WebP)</h3>
-                        <p class="text-xs text-slate-500">Imágenes editoriales segmentadas por vitrina multiverso con orden de aparición.</p>
-                    </div>
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Banners Hero" data-help-title="Banners Hero" data-help-desc="Banners de portada con relación de aspecto 16:9 optimizados para dispositivos móviles y escritorio.">?</button>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                                <th class="p-3 font-semibold">Orden</th>
-                                <th class="p-3 font-semibold">Título del Banner</th>
-                                <th class="p-3 font-semibold">Vitrina / Badge</th>
-                                <th class="p-3 font-semibold">Ubicación</th>
-                                <th class="p-3 font-semibold">Archivo WebP</th>
-                                <th class="p-3 font-semibold">Estado</th>
-                                <th class="p-3 font-semibold text-right">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @foreach($banners as $b)
-                                <tr class="hover:bg-slate-50/70 transition-colors">
-                                    <td class="p-3 font-mono font-bold text-slate-700">#{{ $b['sortOrder'] }}</td>
-                                    <td class="p-3">
-                                        <strong class="text-slate-900 block">{{ $b['title'] }}</strong>
-                                        <span class="text-slate-500 text-[11px] block mt-0.5 truncate max-w-sm">{{ $b['subtitle'] }}</span>
-                                    </td>
-                                    <td class="p-3">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold {{
-                                            $b['universe'] === 'marte' ? 'bg-blue-100 text-blue-800' :
-                                            ($b['universe'] === 'venus' ? 'bg-pink-100 text-pink-800' :
-                                            ($b['universe'] === 'tiresias' ? 'bg-purple-100 text-purple-800' :
-                                            ($b['universe'] === 'terra' ? 'bg-sky-100 text-sky-800' :
-                                            'bg-slate-100 text-slate-800')))
-                                        }}">{{ $b['badge'] }}</span>
-                                    </td>
-                                    <td class="p-3 font-mono text-[11px] text-slate-600">{{ $b['placement'] }}</td>
-                                    <td class="p-3 font-mono text-[11px] text-slate-500">{{ $b['imageUrl'] }}</td>
-                                    <td class="p-3">
-                                        @if($b['active'])
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Activo</span>
-                                        @else
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600">Pausado</span>
-                                        @endif
-                                    </td>
-                                    <td class="p-3 text-right">
-                                        <button class="button button-light py-1 px-2.5 text-[11px] rounded shadow-2xs cursor-pointer" data-action="toggle-banner-status" data-banner-id="{{ $b['id'] }}" type="button">
-                                            {{ $b['active'] ? 'Pausar' : 'Activar' }}
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- FIN SECCIÓN 1 ACORDEÓN -->
-
-        <!-- SECCIÓN 2 ACORDEÓN: REGLAS DE FLETE & SIMULADOR FINANCIERO -->
+        <!-- SECCIÓN 1 ACORDEÓN: REGLAS DE FLETE & SIMULADOR FINANCIERO -->
         <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecShipping">
             <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecShipping')">
                 <div class="flex items-center gap-3">
@@ -1010,7 +914,7 @@ $curatedGoogleFonts = [
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div>
-                        <div class="text-sm font-bold text-slate-900">2. Reglas de Flete, Despacho &amp; Simulador Financiero (TASK-INT-18)</div>
+                        <div class="text-sm font-bold text-slate-900">1. Reglas de Flete, Despacho &amp; Simulador Financiero (TASK-INT-18)</div>
                         <div class="text-[11px] text-slate-500">Umbrales de envío gratis, tarifas fijas, punto físico y simulador de elasticidad.</div>
                     </div>
                 </div>
@@ -1143,7 +1047,7 @@ $curatedGoogleFonts = [
 </div>
 <!-- FIN SECCIÓN 2 ACORDEÓN -->
 
-        <!-- SECCIÓN 3 ACORDEÓN: CONTENIDO EDITORIAL & TALLAS -->
+        <!-- SECCIÓN 2 ACORDEÓN: PROTOCOLOS DE CUIDADO TEXTIL & AVISO PROFECO -->
         <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecEditorial">
             <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecEditorial')">
                 <div class="flex items-center gap-3">
@@ -1151,61 +1055,16 @@ $curatedGoogleFonts = [
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                     </div>
                     <div>
-                        <div class="text-sm font-bold text-slate-900">3. Guía Oficial de Tallas &amp; Protocolos de Cuidado (TASK-INT-10)</div>
-                        <div class="text-[11px] text-slate-500">Matriz de medidas anatómicas en PDP, lavado de fibras y leyendas sanitarias PROFECO.</div>
+                        <div class="text-sm font-bold text-slate-900">2. Protocolos de Cuidado Textil &amp; Aviso Normativo PROFECO</div>
+                        <div class="text-[11px] text-slate-500">Protocolos de lavado de fibras sincronizados con Hub 4 y leyendas sanitarias PROFECO.</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-mono">{{ count($sizeGuide) }} Tallas</span>
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-mono">{{ count($careProtocols) }} Fibras</span>
                     <svg class="store-accordion-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
             </button>
             <div class="store-accordion-body p-6 border-t border-slate-100 hidden" id="accordionSecEditorialBody" style="display: none;">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                        <span>Guía Oficial de Tallas Textiles Torzo (TASK-INT-10)</span>
-                    </h3>
-                    <p class="text-xs text-slate-500">Matriz interactiva de medidas anatómicas desplegada en la ficha de producto (PDP) de boxers, jocks y bralettes.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="button button-quiet py-1 px-3 text-xs font-semibold bg-slate-900 text-white rounded-lg cursor-pointer" data-action="open-edit-size-guide-modal" type="button">
-                        Editar Guía
-                    </button>
-                    <button class="section-help-btn" type="button" aria-label="Ayuda Guía de Tallas" data-help-title="Guía de Tallas" data-help-desc="Medidas de cintura y cadera tomadas en reposo sobre cinta métrica flexible.">?</button>
-                </div>
-            </div>
-
-        <div class="overflow-x-auto mb-6">
-            <table class="size-guide-table w-full text-xs text-left">
-                <thead>
-                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                        <th class="p-3">Talla</th>
-                        <th class="p-3">Cintura (cm)</th>
-                        <th class="p-3">Cadera (cm)</th>
-                        <th class="p-3">Equivalencia Pantalón</th>
-                        <th class="p-3">Recomendación de Calce</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @foreach($sizeGuide as $s)
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="p-3">
-                                <strong class="font-bold text-slate-900">{{ $s['size'] }}</strong>
-                                @if($s['isCore'])
-                                    <span class="size-core-pill ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">Talla Core</span>
-                                @endif
-                            </td>
-                            <td class="p-3 font-mono text-slate-700">{{ $s['waistCm'] }}</td>
-                            <td class="p-3 font-mono text-slate-700">{{ $s['hipsCm'] }}</td>
-                            <td class="p-3 font-mono font-bold text-slate-800">{{ $s['pantsSize'] }}</td>
-                            <td class="p-3 text-slate-600 text-[11px]">{{ $s['advice'] }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
             <!-- Cuidados de Lavado -->
@@ -1215,13 +1074,38 @@ $curatedGoogleFonts = [
                     <button class="text-indigo-600 hover:text-indigo-800 text-[11px] font-bold cursor-pointer" data-action="open-edit-care-modal" type="button">Editar Protocolos</button>
                 </div>
                 <div class="space-y-2.5 text-xs">
+                    @php
+                        $careSymbolsLookup = \App\Models\CmsOfficialDocument::getStandardCareSymbols();
+                    @endphp
                     @foreach($careProtocols as $c)
-                        <div class="p-2.5 bg-white border border-slate-200/80 rounded-lg">
-                            <strong class="text-slate-900 block font-bold">{{ $c['fiber'] }}</strong>
-                            <p class="text-slate-600 text-[11px] mt-0.5">{{ $c['rule'] }}</p>
-                            <span class="text-[10px] text-amber-800 font-semibold block bg-amber-50 p-1.5 rounded border border-amber-200 mt-1.5">
-                                Advertencia: {{ $c['warning'] }}
-                            </span>
+                        @php
+                            $cSymbols = is_array($c['symbols'] ?? null) ? $c['symbols'] : [];
+                        @endphp
+                        <div class="p-3 bg-white border border-slate-200/80 rounded-lg shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <strong class="text-slate-900 font-bold text-xs">{{ $c['fiber'] }}</strong>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
+                                    {{ count($cSymbols) }} {{ count($cSymbols) === 1 ? 'regla SVG' : 'reglas SVG' }}
+                                </span>
+                            </div>
+                            <p class="text-slate-600 text-[11px] mt-1">{{ $c['rule'] }}</p>
+                            @if(!empty($c['warning']))
+                                <span class="text-[10px] text-amber-900 font-semibold block bg-amber-50 p-1.5 rounded border border-amber-200 mt-2">
+                                    ⚠️ Advertencia: {{ $c['warning'] }}
+                                </span>
+                            @endif
+                            @if(!empty($cSymbols))
+                                <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-slate-100">
+                                    @foreach($cSymbols as $sKey)
+                                        @if(isset($careSymbolsLookup[$sKey]))
+                                            <span class="inline-flex items-center gap-1 text-[10px] bg-slate-50 border border-slate-200 px-2 py-0.5 rounded text-slate-700 font-medium">
+                                                <span class="text-indigo-600 scale-75 origin-center">{!! $careSymbolsLookup[$sKey]['svg'] !!}</span>
+                                                <span>{{ $careSymbolsLookup[$sKey]['name'] }}</span>
+                                            </span>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -1249,7 +1133,7 @@ $curatedGoogleFonts = [
         </div>
         <!-- FIN SECCIÓN 3 ACORDEÓN -->
 
-        <!-- SECCIÓN 4 ACORDEÓN: EDITOR OFICIAL DE PIE DE PÁGINA (FOOTER DE TIENDA) -->
+        <!-- SECCIÓN 3 ACORDEÓN: EDITOR OFICIAL DE PIE DE PÁGINA (FOOTER DE TIENDA) -->
         <div class="store-accordion-section border border-slate-200/80 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden" id="accordionSecFooter">
             <button type="button" class="store-accordion-header w-full flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/70 transition cursor-pointer text-left" onclick="window.toggleStoreAccordion('accordionSecFooter')">
                 <div class="flex items-center gap-3">
@@ -1257,7 +1141,7 @@ $curatedGoogleFonts = [
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
                     </div>
                     <div>
-                        <div class="text-sm font-bold text-slate-900">4. Editor Oficial de Pie de Página (Footer &amp; Contacto)</div>
+                        <div class="text-sm font-bold text-slate-900">3. Editor Oficial de Pie de Página (Footer &amp; Contacto)</div>
                         <div class="text-[11px] text-slate-500">Configuración global del pie de página del Storefront: narrativa corporativa, canales de soporte, badges de confianza y derechos.</div>
                     </div>
                 </div>
@@ -1502,7 +1386,9 @@ $curatedGoogleFonts = [
                                 </td>
                                 <td class="py-3 px-3">
                                     <div class="flex items-center gap-3">
-                                        @php($imgCover = !empty($pg->image_url) ? $pg->image_url : null)
+                                        @php
+                                            $imgCover = !empty($pg->image_url) ? $pg->image_url : null;
+                                        @endphp
                                         <div class="w-10 h-12 rounded-lg overflow-hidden bg-slate-900 border border-slate-200 shrink-0 relative flex items-center justify-center">
                                             @if($imgCover)
                                                 <img src="{{ $imgCover }}" alt="{{ $pg->title }}" class="w-full h-full object-cover">
@@ -4689,84 +4575,85 @@ $curatedGoogleFonts = [
         </div>
     </div>
 
-    <!-- 2. MODAL EDITAR GUÍA DE TALLAS TORZO -->
-    <div id="editSizeGuideModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+    <!-- 2. MODAL EDITAR PROTOCOLOS DE CUIDADO DE TELAS & FIBRAS (REGLAS SVG + ADVERTENCIAS) -->
+    <div id="editCareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-sm font-bold text-slate-900">Editar Guía Oficial de Tallas Textiles Torzo</h3>
-                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editSizeGuideModal">&times;</button>
-            </div>
-
-            <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'SIZE_GUIDE_TORZO']) }}" class="space-y-4 text-xs">
-                @csrf
-                <div class="space-y-3">
-                    @foreach($sizeGuide as $idx => $s)
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-5 gap-2 items-center">
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-0.5">Talla</label>
-                                <input type="text" name="payload[{{ $idx }}][size]" value="{{ $s['size'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded font-bold text-xs">
-                                <input type="hidden" name="payload[{{ $idx }}][isCore]" value="{{ !empty($s['isCore']) ? 1 : 0 }}">
-                            </div>
-                            <div>
-                                <label class="block text-slate-600 mb-0.5">Cintura (cm)</label>
-                                <input type="text" name="payload[{{ $idx }}][waistCm]" value="{{ $s['waistCm'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-xs font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-slate-600 mb-0.5">Cadera (cm)</label>
-                                <input type="text" name="payload[{{ $idx }}][hipsCm]" value="{{ $s['hipsCm'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-xs font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-slate-600 mb-0.5">Pantalón</label>
-                                <input type="text" name="payload[{{ $idx }}][pantsSize]" value="{{ $s['pantsSize'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-xs font-mono font-bold">
-                            </div>
-                            <div>
-                                <label class="block text-slate-600 mb-0.5">Consejo Calce</label>
-                                <input type="text" name="payload[{{ $idx }}][advice]" value="{{ $s['advice'] }}" class="w-full px-2 py-1.5 border border-slate-200 rounded text-[11px]">
-                            </div>
-                        </div>
-                    @endforeach
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Protocolos de Cuidado Textil &amp; Simbología SVG (Sincronizado con Hub 4)</h3>
+                    <p class="text-[11px] text-slate-500">Configura advertencias y simbología oficial de lavado por fibra registrada en Telas &amp; Fibras de Hub 4.</p>
                 </div>
-
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editSizeGuideModal">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg cursor-pointer">Guardar Matriz de Tallas</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 3. MODAL EDITAR PROTOCOLOS DE CUIDADO -->
-    <div id="editCareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-sm font-bold text-slate-900">Editar Protocolos Oficiales de Preservación Textil</h3>
                 <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editCareModal">&times;</button>
             </div>
 
-            <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'CARE_PROTOCOLS']) }}" class="space-y-4 text-xs">
+            <form method="POST" action="{{ route('portal.store.documents.update', ['code' => 'CARE_PROTOCOLS']) }}" class="space-y-4 text-xs" id="careProtocolsForm">
                 @csrf
-                <div class="space-y-3">
+                <div class="space-y-4" id="careProtocolsList">
+                    @php
+                        $standardCareSymbols = \App\Models\CmsOfficialDocument::getStandardCareSymbols();
+                    @endphp
+
                     @foreach($careProtocols as $idx => $c)
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                            <div>
-                                <label class="block font-bold text-slate-800 mb-1">Fibra / Prenda</label>
-                                <input type="text" name="payload[{{ $idx }}][fiber]" value="{{ $c['fiber'] }}" class="w-full px-3 py-1.5 border border-slate-200 rounded font-bold text-xs">
+                        @php
+                            $selectedSymbols = is_array($c['symbols'] ?? null) ? $c['symbols'] : [];
+                        @endphp
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 care-protocol-card" data-index="{{ $idx }}">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-indigo-900 uppercase tracking-wide">Protocolo de Fibra #{{ $idx + 1 }}</span>
+                                <button type="button" class="text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer" onclick="this.closest('.care-protocol-card').remove()">Eliminar</button>
                             </div>
-                            <div>
-                                <label class="block text-slate-700 mb-1">Regla de Lavado</label>
-                                <textarea style="resize: vertical !important;" name="payload[{{ $idx }}][rule]" rows="2" class="w-full px-3 py-1.5 border border-slate-200 rounded text-xs">{{ $c['rule'] }}</textarea>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Tela / Fibra (Hub 4)</label>
+                                    <div class="flex items-center gap-2">
+                                        <select name="payload[{{ $idx }}][fiber]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-semibold text-xs focus:ring-1 focus:ring-indigo-500">
+                                            @foreach($fabrics as $fab)
+                                                <option value="{{ $fab->name }}" {{ ($c['fiber'] ?? '') === $fab->name ? 'selected' : '' }}>{{ $fab->name }}</option>
+                                            @endforeach
+                                            @if(!empty($c['fiber']) && !$fabrics->contains('name', $c['fiber']))
+                                                <option value="{{ $c['fiber'] }}" selected>{{ $c['fiber'] }} (Manual)</option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Regla Resumen de Lavado</label>
+                                    <input type="text" name="payload[{{ $idx }}][rule]" value="{{ $c['rule'] ?? 'Lavar con agua fría en ciclo delicado.' }}" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" placeholder="Ej: Lavar con agua fría (< 30°C) en ciclo delicado">
+                                </div>
                             </div>
+
+                            <!-- Campo de Texto Libre para Advertencias de Cuidado -->
                             <div>
-                                <label class="block text-amber-800 font-semibold mb-1">Advertencia de Cuidado</label>
-                                <input type="text" name="payload[{{ $idx }}][warning]" value="{{ $c['warning'] }}" class="w-full px-3 py-1.5 border border-amber-200 bg-amber-50/50 rounded text-xs text-amber-900">
+                                <label class="block text-amber-900 font-bold mb-1">Advertencia Especial de Cuidado (Texto Libre)</label>
+                                <textarea name="payload[{{ $idx }}][warning]" rows="2" class="w-full px-3 py-1.5 border border-amber-300 bg-amber-50/50 rounded-lg text-xs text-amber-950 font-medium placeholder-amber-800/50" placeholder="Ej: Nunca usar secadora térmica ni blanqueadores clorados; secar a la sombra en superficie horizontal plana.">{{ $c['warning'] ?? '' }}</textarea>
+                            </div>
+
+                            <!-- Matriz de Checkboxes con Reglas Típicas y Simbología SVG -->
+                            <div>
+                                <label class="block text-slate-800 font-bold mb-1.5">Simbología Oficial de Cuidado (Selecciona para mostrar en Storefront PDP)</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-2.5 bg-white border border-slate-200 rounded-lg">
+                                    @foreach($standardCareSymbols as $symKey => $symData)
+                                        <label class="flex items-center gap-2 p-1.5 rounded-md hover:bg-slate-50 border border-slate-100 cursor-pointer transition text-[11px]">
+                                            <input type="checkbox" name="payload[{{ $idx }}][symbols][]" value="{{ $symKey }}" {{ in_array($symKey, $selectedSymbols) ? 'checked' : '' }} class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5">
+                                            <span class="text-slate-700">{!! $symData['svg'] !!}</span>
+                                            <span class="text-slate-800 font-medium truncate">{{ $symData['name'] }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
 
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editCareModal">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg cursor-pointer">Guardar Protocolos</button>
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <button type="button" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-lg cursor-pointer" onclick="window.addCareProtocolRow()">
+                        + Añadir Otra Fibra
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editCareModal">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer shadow-xs">Guardar Protocolos</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -5474,6 +5361,71 @@ $curatedGoogleFonts = [
         modal.classList.add('hidden');
         modal.style.display = 'none';
         document.body.classList.remove('overflow-hidden');
+    };
+
+    window.addCareProtocolRow = function() {
+        const list = document.getElementById('careProtocolsList');
+        if (!list) return;
+        const count = list.querySelectorAll('.care-protocol-card').length;
+        const newIdx = count;
+        const fabricsOpts = [
+            @foreach($fabrics as $fab)
+                `<option value="{{ addslashes($fab->name) }}">{{ addslashes($fab->name) }}</option>`,
+            @endforeach
+        ].join('');
+
+        const syms = [
+            { key: 'wash_30', name: 'Lavado frío (máx 30°C)', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h18l-2 10a3 3 0 01-3 3H8a3 3 0 01-3-3L3 8z"/><path d="M3 11c3 1 6-1 9 0s6-1 9 0"/></svg>' },
+            { key: 'wash_hand', name: 'Lavado a mano', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h18l-2 10a3 3 0 01-3 3H8a3 3 0 01-3-3L3 8z"/><path d="M12 4v4m-2-3l2-2 2 2"/><path d="M3 12c3 1 6-1 9 0s6-1 9 0"/></svg>' },
+            { key: 'no_bleach', name: 'No usar cloro / blanqueador', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 17H2L12 3z"/><line x1="5" y1="18" x2="19" y2="6"/></svg>' },
+            { key: 'dry_flat', name: 'Secado en plano horizontal', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>' },
+            { key: 'dry_shade', name: 'Secar a la sombra', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="4" y1="8" x2="8" y2="4"/><line x1="4" y1="12" x2="12" y2="4"/></svg>' },
+            { key: 'no_tumble', name: 'No usar secadora térmica', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="5"/><line x1="5" y1="19" x2="19" y2="5"/></svg>' },
+            { key: 'iron_low', name: 'Plancha suave (máx 110°C)', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h18a1 1 0 001-1c0-4-3-8-8-8H4a1 1 0 00-1 1v8z"/><circle cx="10" cy="14" r="1" fill="currentColor"/></svg>' },
+            { key: 'no_iron', name: 'No planchar elásticos / apliques', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h18a1 1 0 001-1c0-4-3-8-8-8H4a1 1 0 00-1 1v8z"/><line x1="4" y1="19" x2="20" y2="5"/></svg>' },
+            { key: 'no_dryclean', name: 'No lavar en seco', svg: '<svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><line x1="6" y1="18" x2="18" y2="6"/></svg>' },
+        ];
+
+        const symsHtml = syms.map(s => `
+            <label class="flex items-center gap-2 p-1.5 rounded-md hover:bg-slate-50 border border-slate-100 cursor-pointer transition text-[11px]">
+                <input type="checkbox" name="payload[\${newIdx}][symbols][]" value="\${s.key}" class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5">
+                <span class="text-slate-700">\${s.svg}</span>
+                <span class="text-slate-800 font-medium truncate">\${s.name}</span>
+            </label>
+        `).join('');
+
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 care-protocol-card';
+        card.dataset.index = newIdx;
+        card.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-xs text-indigo-900 uppercase tracking-wide">Protocolo de Fibra #\${newIdx + 1}</span>
+                <button type="button" class="text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer" onclick="this.closest('.care-protocol-card').remove()">Eliminar</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Tela / Fibra (Hub 4)</label>
+                    <select name="payload[\${newIdx}][fiber]" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-semibold text-xs focus:ring-1 focus:ring-indigo-500">
+                        \${fabricsOpts}
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Regla Resumen de Lavado</label>
+                    <input type="text" name="payload[\${newIdx}][rule]" value="Lavar con agua fría en ciclo delicado." class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" placeholder="Ej: Lavar con agua fría (< 30°C) en ciclo delicado">
+                </div>
+            </div>
+            <div>
+                <label class="block text-amber-900 font-bold mb-1">Advertencia Especial de Cuidado (Texto Libre)</label>
+                <textarea name="payload[\${newIdx}][warning]" rows="2" class="w-full px-3 py-1.5 border border-amber-300 bg-amber-50/50 rounded-lg text-xs text-amber-950 font-medium placeholder-amber-800/50" placeholder="Ej: Nunca usar secadora térmica ni blanqueadores clorados; secar a la sombra en superficie horizontal plana."></textarea>
+            </div>
+            <div>
+                <label class="block text-slate-800 font-bold mb-1.5">Simbología Oficial de Cuidado (Selecciona para mostrar en Storefront PDP)</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-2.5 bg-white border border-slate-200 rounded-lg">
+                    \${symsHtml}
+                </div>
+            </div>
+        `;
+        list.appendChild(card);
     };
 
     // ==========================================
@@ -6247,6 +6199,12 @@ $curatedGoogleFonts = [
 
         if (!sec || !sec.id) {
             console.error('[Store CMS] No se pudo encontrar la sección para editar:', secIdOrData);
+            return;
+        }
+
+        // Regla: Las vitrinas web se configuran en Ajustes del Hub 4 (Catálogo e Inventario).
+        if (sec.type === 'catalog_section' || sec.type === 'curated_products' || sec.type === 'vitrina_web') {
+            window.open(`/admin/inventario-catalogo?tab=sections&edit_section_id=${sec.id}`, '_blank');
             return;
         }
 

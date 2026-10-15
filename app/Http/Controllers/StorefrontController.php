@@ -479,7 +479,7 @@ class StorefrontController extends Controller
     public function product(string $slug)
     {
         $dbProduct = Product::query()
-            ->with(['variants.inventories', 'categories', 'supplierProducts.supplier'])
+            ->with(['variants.inventories', 'categories', 'supplierProducts.supplier', 'fabricRelation'])
             ->where('visible', true)
             ->where(function ($query) use ($slug) {
                 $query->where('slug', $slug)
@@ -566,9 +566,88 @@ class StorefrontController extends Controller
         $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $tracking = CmsTrackingSetting::current();
-        $sizeGuideDoc = CmsOfficialDocument::forDocument('torzo_size_guide');
-        $careProtocolDoc = CmsOfficialDocument::forDocument('care_protocol');
         $profecoDoc = CmsOfficialDocument::forDocument('profeco_sanitary');
+
+        // 1. Resolución estricta de Curva de Tallas Oficial de Marca / Proveedor (Hub 4)
+        // Regla: Imposible que una curva no esté asociada a una marca/proveedor. Si no existe, es null (sin fallback genérico).
+        $brandSizeCurve = null;
+        if (!empty($dbProduct->brand)) {
+            $brandModel = \App\Models\Brand::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($dbProduct->brand))])->first();
+            if ($brandModel) {
+                $brandSizeCurve = \App\Models\ApparelSizeCurve::with('activeSizes')
+                    ->where('brand_id', $brandModel->id)
+                    ->where('is_active', true)
+                    ->first();
+                if (!$brandSizeCurve && $brandModel->supplier_id) {
+                    $brandSizeCurve = \App\Models\ApparelSizeCurve::with('activeSizes')
+                        ->where('supplier_id', $brandModel->supplier_id)
+                        ->whereNull('brand_id')
+                        ->where('is_active', true)
+                        ->first();
+                }
+            }
+        }
+
+        if (!$brandSizeCurve) {
+            $supplierProduct = $dbProduct->supplierProducts->first();
+            if ($supplierProduct && $supplierProduct->supplier_id) {
+                $brandSizeCurve = \App\Models\ApparelSizeCurve::with('activeSizes')
+                    ->where('supplier_id', $supplierProduct->supplier_id)
+                    ->whereNull('brand_id')
+                    ->where('is_active', true)
+                    ->first();
+            }
+        }
+
+        if (!$brandSizeCurve) {
+            $metaSupplierName = data_get($dbProduct->meta, 'supplier') ?? data_get($dbProduct->meta, 'supplier_name');
+            if ($metaSupplierName) {
+                $supModel = \App\Models\Supplier::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($metaSupplierName))])->first();
+                if ($supModel) {
+                    $brandSizeCurve = \App\Models\ApparelSizeCurve::with('activeSizes')
+                        ->where('supplier_id', $supModel->id)
+                        ->whereNull('brand_id')
+                        ->where('is_active', true)
+                        ->first();
+                }
+            }
+        }
+
+        // 2. Resolución de Protocolo de Cuidado Textil sincronizado con Fibras de Hub 4
+        $careProtocol = null;
+        $careDocs = CmsOfficialDocument::forDocument('care_protocol');
+        $allCareProtocols = is_array($careDocs?->payload) ? $careDocs->payload : [];
+        $productFabricName = $dbProduct->fabricRelation?->name ?? $dbProduct->fabric ?? null;
+
+        if (!empty($allCareProtocols)) {
+            if ($productFabricName) {
+                $cleanProductFabric = strtolower(trim($productFabricName));
+                foreach ($allCareProtocols as $proto) {
+                    $pf = strtolower(trim($proto['fiber'] ?? ''));
+                    if ($pf !== '' && (str_contains($cleanProductFabric, $pf) || str_contains($pf, $cleanProductFabric))) {
+                        $careProtocol = $proto;
+                        break;
+                    }
+                }
+            }
+
+            if (!$careProtocol) {
+                $metaComp = strtolower(data_get($dbProduct->meta, 'fabric_composition', '') . ' ' . ($dbProduct->description ?? ''));
+                foreach ($allCareProtocols as $proto) {
+                    $pf = strtolower(trim($proto['fiber'] ?? ''));
+                    if ($pf !== '' && str_contains($metaComp, $pf)) {
+                        $careProtocol = $proto;
+                        break;
+                    }
+                }
+            }
+
+            if (!$careProtocol && !empty($allCareProtocols[0])) {
+                $careProtocol = $allCareProtocols[0];
+            }
+        }
+
+        $standardCareSymbols = CmsOfficialDocument::getStandardCareSymbols();
 
         $shippingRule = Cache::get('cms_shipping_rule', [
             'freeShippingThreshold' => 999.00,
@@ -660,8 +739,9 @@ class StorefrontController extends Controller
             'mobilePages' => $mobilePages,
             'footerPages' => $footerPages,
             'tracking' => $tracking,
-            'sizeGuideDoc' => $sizeGuideDoc,
-            'careProtocolDoc' => $careProtocolDoc,
+            'brandSizeCurve' => $brandSizeCurve,
+            'careProtocol' => $careProtocol,
+            'standardCareSymbols' => $standardCareSymbols,
             'profecoDoc' => $profecoDoc,
             'shippingRule' => $shippingRule,
             'announcements' => $announcements,

@@ -656,6 +656,133 @@
     letter-spacing: 0.05em;
   }
 
+  /* PDP Link Buttons & Info Modals */
+  .pdp-meta-link-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted, #71717a);
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+  }
+  .pdp-meta-link-btn:hover {
+    color: var(--text-primary, #09090b);
+  }
+  .pdp-composition-care-btn {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .pdp-composition-care-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  .pdp-info-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .pdp-info-modal.active {
+    display: flex;
+  }
+  .pdp-info-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .pdp-info-dialog {
+    position: relative;
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 580px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e2e8f0;
+    z-index: 10;
+    animation: pdpModalFadeIn 0.2s ease-out;
+  }
+  @keyframes pdpModalFadeIn {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .pdp-info-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .pdp-info-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pdp-info-subtitle {
+    font-size: 0.76rem;
+    color: #64748b;
+    margin-top: 3px;
+  }
+  .pdp-info-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .pdp-info-close:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+  }
+  .pdp-info-body {
+    padding: 22px;
+  }
+  .pdp-symbol-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+  }
+  .pdp-symbol-icon {
+    width: 22px;
+    height: 22px;
+    color: #4f46e5;
+    flex-shrink: 0;
+  }
+
   /* Sticky Mobile Bottom Add Bar */
   .pdp-sticky-bar {
     position: fixed;
@@ -1008,9 +1135,20 @@
       <div>
         <div class="pdp-section-heading">
           <span>Selecciona tu Talla</span>
-          <button type="button" style="background:none; border:none; color:var(--text-muted); font-size:0.75rem; text-decoration:underline; cursor:pointer;" onclick="toggleAccordion('accSizeGuide')">
-            Ver Medidas Torzo
-          </button>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            @if(!empty($brandSizeCurve) && $brandSizeCurve->activeSizes->count() > 0)
+              <button type="button" class="pdp-meta-link-btn" onclick="openPdpInfoModal('pdpSizeGuideModal')">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; margin-right:3px; vertical-align:-1px;"><path d="M21 6H3"/><path d="M7 6v4"/><path d="M12 6v2"/><path d="M17 6v4"/></svg>
+                Guía de tallas
+              </button>
+            @endif
+            @if(!empty($careProtocol))
+              <button type="button" class="pdp-meta-link-btn" onclick="openPdpInfoModal('pdpCareGuideModal')">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; margin-right:3px; vertical-align:-1px;"><path d="M3 8h18l-2 10a3 3 0 01-3 3H8a3 3 0 01-3-3L3 8z"/><path d="M3 11c3 1 6-1 9 0s6-1 9 0"/></svg>
+                Cuidados de la prenda
+              </button>
+            @endif
+          </div>
         </div>
 
         <div class="pdp-size-btn-group" id="pdpSizeGroup">
@@ -1084,9 +1222,17 @@
       </div>
 
       <!-- Ficha Técnica de Composición Textil -->
-      <div class="pdp-composition-box">
-        <strong style="text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; display: block; margin-bottom: 6px; color: var(--text-muted, #52525b);">Composición Textil Oficial</strong>
-        <p style="margin: 0; color: var(--text-primary, #27272a);">{{ $product['fabricComposition'] }}</p>
+      <div class="pdp-composition-box" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <strong style="text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; display: block; margin-bottom: 4px; color: var(--text-muted, #52525b);">Composición Textil Oficial</strong>
+          <p style="margin: 0; color: var(--text-primary, #27272a);">{{ $product['fabricComposition'] }}</p>
+        </div>
+        @if(!empty($careProtocol))
+          <button type="button" class="pdp-composition-care-btn" onclick="openPdpInfoModal('pdpCareGuideModal')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h18l-2 10a3 3 0 01-3 3H8a3 3 0 01-3-3L3 8z"/><path d="M3 11c3 1 6-1 9 0s6-1 9 0"/></svg>
+            <span>Cuidados de la prenda</span>
+          </button>
+        @endif
       </div>
 
     </div>
@@ -1106,64 +1252,7 @@
       </div>
     </div>
 
-    <!-- 2. Guía Oficial de Tallas Torzo -->
-    <div class="pdp-accordion-card" id="accSizeGuide">
-      <button type="button" class="pdp-accordion-header" onclick="toggleAccordion('accSizeGuide')">
-        <span>{{ $sizeGuideDoc->title ?? 'Guía Oficial de Tallas Torzo' }}</span>
-        <svg class="pdp-accordion-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="pdp-accordion-body">
-        @if(!empty($sizeGuideDoc?->body_html))
-          {!! $sizeGuideDoc->body_html !!}
-        @else
-          <p>Consulta las equivalencias anatómicas en centímetros para un calce ergonómico sin opresión:</p>
-          <div style="overflow-x: auto;">
-            <table class="torzo-size-table">
-              <thead>
-                <tr>
-                  <th>Talla</th>
-                  <th>Cintura (cm)</th>
-                  <th>Cadera (cm)</th>
-                  <th>Equivalencia Pantalón</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td><strong>CH (Chica)</strong></td><td>70 - 76 cm</td><td>84 - 90 cm</td><td>28 - 30</td></tr>
-                <tr><td><strong>M (Mediana)</strong></td><td>78 - 84 cm</td><td>92 - 98 cm</td><td>31 - 33</td></tr>
-                <tr><td><strong>G (Grande)</strong></td><td>86 - 92 cm</td><td>100 - 106 cm</td><td>34 - 36</td></tr>
-                <tr><td><strong>XG / XL</strong></td><td>94 - 102 cm</td><td>108 - 116 cm</td><td>38 - 40</td></tr>
-                <tr><td><strong>2XG / 2XL</strong></td><td>104 - 112 cm</td><td>118 - 126 cm</td><td>42 - 44</td></tr>
-                <tr><td><strong>3XG / 3XL</strong></td><td>114 - 124 cm</td><td>128 - 138 cm</td><td>46 - 48</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <small style="color: #71717a; display: block; margin-top: 10px;">Si estás entre dos tallas, te recomendamos elegir la talla mayor para mayor confort diario.</small>
-        @endif
-      </div>
-    </div>
-
-    <!-- 3. Protocolo de Cuidado de Ropa Delicada -->
-    <div class="pdp-accordion-card" id="accCare">
-      <button type="button" class="pdp-accordion-header" onclick="toggleAccordion('accCare')">
-        <span>{{ $careProtocolDoc->title ?? 'Protocolo de Lavado & Cuidado de Prendas' }}</span>
-        <svg class="pdp-accordion-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="pdp-accordion-body">
-        @if(!empty($careProtocolDoc?->body_html))
-          {!! $careProtocolDoc->body_html !!}
-        @else
-          <ul>
-            <li><strong>Temperatura de lavado:</strong> Lavar a mano o ciclo suave a máquina con agua fría (máximo 30°C).</li>
-            <li><strong>Detergente:</strong> Usar jabón líquido neutro sin blanqueadores de cloro.</li>
-            <li><strong>Elásticos y jacquards:</strong> No exprimir ni retorcer bruscamente para preservar la tensión anatómica.</li>
-            <li><strong>Secado:</strong> Secar extendido en plano horizontal a la sombra. Prohibido secadora térmica.</li>
-            <li><strong>Planchado:</strong> No planchar los elásticos ni apliques de goma.</li>
-          </ul>
-        @endif
-      </div>
-    </div>
-
-    <!-- 4. Aviso Sanitario y Normativo PROFECO -->
+    <!-- 2. Aviso Sanitario y Normativo PROFECO -->
     <div class="pdp-accordion-card" id="accProfeco">
       <button type="button" class="pdp-accordion-header" onclick="toggleAccordion('accProfeco')">
         <span>{{ $profecoDoc->title ?? 'Aviso Normativo y Sanitario PROFECO' }}</span>
@@ -1238,8 +1327,128 @@
         @endforeach
       </div>
     @endif
+<!-- MODAL 1: GUÍA DE TALLAS DESCENTRALIZADA DE MARCA / PROVEEDOR (HUB 4) -->
+@if(!empty($brandSizeCurve) && $brandSizeCurve->activeSizes->count() > 0)
+<div id="pdpSizeGuideModal" class="pdp-info-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="pdp-info-backdrop" onclick="closePdpInfoModal('pdpSizeGuideModal')"></div>
+  <div class="pdp-info-dialog">
+    <div class="pdp-info-header">
+      <div>
+        <h3 class="pdp-info-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3"/><path d="M7 6v4"/><path d="M12 6v2"/><path d="M17 6v4"/></svg>
+          Guía de tallas
+        </h3>
+        <div class="pdp-info-subtitle">
+          Curva oficial: <strong>{{ $brandSizeCurve->name }}</strong> · Marca: <strong>{{ $brandSizeCurve->brand?->name ?? $brandSizeCurve->supplier?->name ?? $product['brand'] }}</strong>
+        </div>
+      </div>
+      <button type="button" class="pdp-info-close" onclick="closePdpInfoModal('pdpSizeGuideModal')" aria-label="Cerrar guía de tallas">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="pdp-info-body">
+      @if(!empty($brandSizeCurve->description))
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0; margin-bottom: 14px;">
+          {{ $brandSizeCurve->description }}
+        </p>
+      @endif
+
+      <div style="overflow-x: auto;">
+        <table class="torzo-size-table">
+          <thead>
+            <tr>
+              <th>Talla</th>
+              <th>Descripción / Etiqueta</th>
+              <th>Cintura Mín</th>
+              <th>Cintura Máx</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($brandSizeCurve->activeSizes as $sz)
+              <tr>
+                <td><strong style="color: #0f172a; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace;">{{ $sz->code }}</strong></td>
+                <td>{{ $sz->label }}</td>
+                <td>{{ $sz->waist_min_cm ? $sz->waist_min_cm . ' cm' : '—' }}</td>
+                <td>{{ $sz->waist_max_cm ? $sz->waist_max_cm . ' cm' : '—' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.76rem; color: #475569; line-height: 1.45;">
+        💡 <strong>Recomendación de calce:</strong> Si tus medidas se encuentran en el límite superior de una talla, o prefieres un calce más relajado, te sugerimos elegir la talla inmediata siguiente.
+      </div>
+    </div>
   </div>
 </div>
+@endif
+
+<!-- MODAL 2: PROTOCOLO DE CUIDADOS DE LA PRENDA & TELAS/FIBRAS DE HUB 4 -->
+@if(!empty($careProtocol))
+<div id="pdpCareGuideModal" class="pdp-info-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="pdp-info-backdrop" onclick="closePdpInfoModal('pdpCareGuideModal')"></div>
+  <div class="pdp-info-dialog">
+    <div class="pdp-info-header">
+      <div>
+        <h3 class="pdp-info-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h18l-2 10a3 3 0 01-3 3H8a3 3 0 01-3-3L3 8z"/><path d="M3 11c3 1 6-1 9 0s6-1 9 0"/></svg>
+          Cuidados de la prenda
+        </h3>
+        <div class="pdp-info-subtitle">
+          Protocolo oficial de cuidado para: <strong>{{ $careProtocol['fiber'] ?? $product['fabricComposition'] }}</strong>
+        </div>
+      </div>
+      <button type="button" class="pdp-info-close" onclick="closePdpInfoModal('pdpCareGuideModal')" aria-label="Cerrar cuidados de la prenda">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="pdp-info-body">
+      @if(!empty($careProtocol['rule']))
+        <div style="font-size: 0.85rem; color: #1e293b; font-weight: 600; margin-bottom: 12px;">
+          {{ $careProtocol['rule'] }}
+        </div>
+      @endif
+
+      @if(!empty($careProtocol['warning']))
+        <div style="margin-bottom: 16px; padding: 12px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; font-size: 0.78rem; color: #92400e; line-height: 1.45;">
+          <strong>⚠️ Advertencia especial:</strong> {{ $careProtocol['warning'] }}
+        </div>
+      @endif
+
+      @php
+        $activeSymKeys = is_array($careProtocol['symbols'] ?? null) ? $careProtocol['symbols'] : [];
+        $symLookup = $standardCareSymbols ?? \App\Models\CmsOfficialDocument::getStandardCareSymbols();
+      @endphp
+
+      @if(!empty($activeSymKeys))
+        <strong style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; display: block; margin-bottom: 8px; color: #64748b;">
+          Simbología Oficial de Lavado y Cuidado
+        </strong>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 16px;">
+          @foreach($activeSymKeys as $sKey)
+            @if(isset($symLookup[$sKey]))
+              @php $symInfo = $symLookup[$sKey]; @endphp
+              <div class="pdp-symbol-card">
+                <span class="pdp-symbol-icon">{!! $symInfo['svg'] !!}</span>
+                <div>
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #0f172a;">{{ $symInfo['name'] }}</div>
+                  <div style="font-size: 0.7rem; color: #64748b;">{{ $symInfo['category'] }}</div>
+                </div>
+              </div>
+            @endif
+          @endforeach
+        </div>
+      @endif
+
+      <div style="padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.75rem; color: #475569; line-height: 1.45;">
+        🛡️ <strong>Preservación de elastanos:</strong> Los textiles con fibras elásticas y jacquards anatómicos mantienen su elasticidad original al evitar el uso de secadoras mecánicas y fuentes de calor directo.
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+
 @endsection
 
 @push('scripts')
@@ -1548,5 +1757,32 @@
       card.classList.toggle('open');
     }
   }
+
+  function openPdpInfoModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePdpInfoModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      ['pdpSizeGuideModal', 'pdpCareGuideModal'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m && m.classList.contains('active')) {
+          closePdpInfoModal(id);
+        }
+      });
+    }
+  });
 </script>
 @endpush

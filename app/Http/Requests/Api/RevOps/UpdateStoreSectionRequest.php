@@ -25,6 +25,12 @@ class UpdateStoreSectionRequest extends FormRequest
             'sort_order' => 'nullable|integer',
             'status' => 'nullable|string|in:active,draft,archived',
             'is_active' => 'nullable|boolean',
+            'query_rules' => 'nullable|array',
+            'is_new' => 'nullable|boolean',
+            'has_discount' => 'nullable|boolean',
+            'fabric_id' => 'nullable|integer',
+            'category_id' => 'nullable|integer',
+            'subcategory_id' => 'nullable|integer',
         ];
     }
 }

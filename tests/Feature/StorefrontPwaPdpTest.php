@@ -148,9 +148,8 @@ class StorefrontPwaPdpTest extends TestCase
         $response->assertSee('MXN $280.00');
         $response->assertSee('95% Modal Pima / 5% Spandex');
         $response->assertSee('AGREGAR AL CARRITO');
-        $response->assertSee('Guía Oficial de Tallas Torzo');
-        $response->assertSee('Protocolo de Lavado & Cuidado de Prendas');
         $response->assertSee('Aviso Normativo y Sanitario PROFECO');
+        $response->assertDontSee('Guía Oficial de Tallas Torzo');
         $response->assertSee('application/ld+json', false);
         $response->assertDontSee('openProductModal("' . $product->id . '");', false);
     }

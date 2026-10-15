@@ -7,9 +7,18 @@ use App\Models\SupplierMoqSheet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+use App\Models\User;
+
 class SupplierMoqSheetTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $user = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($user);
+    }
 
     public function test_can_get_moq_sheets_including_torzo_default(): void
     {

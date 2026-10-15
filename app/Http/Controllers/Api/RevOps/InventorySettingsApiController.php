@@ -656,6 +656,30 @@ class InventorySettingsApiController extends Controller
             $settings['description'] = trim($validated['description']);
         }
 
+        $queryRules = $validated['query_rules'] ?? [];
+        $queryRules['section'] = trim($validated['name']);
+        if (!empty($validated['slug'])) {
+            $queryRules['slug'] = trim($validated['slug']);
+        }
+        if (isset($validated['is_new'])) {
+            $queryRules['is_new'] = (bool) $validated['is_new'];
+        }
+        if (isset($validated['has_discount'])) {
+            $queryRules['has_discount'] = (bool) $validated['has_discount'];
+        }
+        if (isset($validated['fabric_id'])) {
+            $queryRules['fabric_id'] = !empty($validated['fabric_id']) ? (int) $validated['fabric_id'] : null;
+        }
+        if (isset($validated['category_id'])) {
+            $queryRules['category_id'] = !empty($validated['category_id']) ? (int) $validated['category_id'] : null;
+        }
+        if (isset($validated['subcategory_id'])) {
+            $queryRules['subcategory_id'] = !empty($validated['subcategory_id']) ? (int) $validated['subcategory_id'] : null;
+        }
+
+        $maxSort = CmsSection::max('sort_order') ?? 0;
+        $sortOrder = $validated['sort_order'] ?? ($maxSort + 1);
+
         $section = CmsSection::create([
             'name' => trim($validated['name']),
             'title' => !empty($validated['title']) ? trim($validated['title']) : strtoupper(trim($validated['name'])),
@@ -663,9 +687,9 @@ class InventorySettingsApiController extends Controller
             'universe' => $validated['universe'] ?? 'all',
             'type' => $validated['type'] ?? 'catalog_section',
             'badge' => $validated['badge'] ?? 'E-Commerce',
-            'query_rules' => ['section' => trim($validated['name']), 'slug' => $validated['slug'] ?? null],
+            'query_rules' => $queryRules,
             'settings' => $settings,
-            'sort_order' => $validated['sort_order'] ?? 0,
+            'sort_order' => $sortOrder,
             'status' => $status,
         ]);
 
@@ -682,18 +706,17 @@ class InventorySettingsApiController extends Controller
         $section = CmsSection::findOrFail($id);
 
         $validated = $request->validated();
+        $qr = $section->query_rules ?? [];
 
         if (!empty($validated['name'])) {
             $section->name = trim($validated['name']);
-            $section->query_rules = array_merge($section->query_rules ?? [], ['section' => $section->name]);
+            $qr['section'] = $section->name;
         }
         if (array_key_exists('slug', $validated)) {
             $settings = $section->settings ?? [];
             $settings['slug'] = $validated['slug'];
             $section->settings = $settings;
-            $qr = $section->query_rules ?? [];
             $qr['slug'] = $validated['slug'];
-            $section->query_rules = $qr;
         }
         if (array_key_exists('description', $validated)) {
             $section->subtitle = $validated['description'];
@@ -704,6 +727,26 @@ class InventorySettingsApiController extends Controller
         if (array_key_exists('is_active', $validated)) {
             $section->status = $validated['is_active'] ? 'active' : 'draft';
         }
+        if (array_key_exists('is_new', $validated)) {
+            $qr['is_new'] = (bool) $validated['is_new'];
+        }
+        if (array_key_exists('has_discount', $validated)) {
+            $qr['has_discount'] = (bool) $validated['has_discount'];
+        }
+        if (array_key_exists('fabric_id', $validated)) {
+            $qr['fabric_id'] = !empty($validated['fabric_id']) ? (int) $validated['fabric_id'] : null;
+        }
+        if (array_key_exists('category_id', $validated)) {
+            $qr['category_id'] = !empty($validated['category_id']) ? (int) $validated['category_id'] : null;
+        }
+        if (array_key_exists('subcategory_id', $validated)) {
+            $qr['subcategory_id'] = !empty($validated['subcategory_id']) ? (int) $validated['subcategory_id'] : null;
+        }
+        if (array_key_exists('query_rules', $validated) && is_array($validated['query_rules'])) {
+            $qr = array_merge($qr, $validated['query_rules']);
+        }
+        $section->query_rules = $qr;
+
         if (array_key_exists('title', $validated)) $section->title = $validated['title'];
         if (array_key_exists('subtitle', $validated)) $section->subtitle = $validated['subtitle'];
         if (array_key_exists('universe', $validated)) $section->universe = $validated['universe'];

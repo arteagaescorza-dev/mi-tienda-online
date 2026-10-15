@@ -95,6 +95,34 @@ erDiagram
    - Previsualización renderizada en tiempo real (`Live Preview`) reactiva instantáneamente a cualquier evento `input` o `change`, con alternador de vista Desktop y Mobile (375px) sin colisiones de scope entre modales.
    - Pre-población completa e inmediata de todos los campos al presionar "Editar" (`openEditSectionModal`), disparando de inmediato la previsualización renderizada.
 
+3. **Sincronización Bidireccional de Vitrinas de Catálogo (Hub 2 <-> Hub 4):**  
+   *Regla de Negocio & Flujo:*  
+   - Las secciones modulares del Home en Hub 2 actúan como repositorio y definen la posición espacial y ordenamiento (Drag & Drop) en el Storefront.
+   - La lógica de filtrado de productos (`query_rules`: novedades `is_new`, descuento `has_discount`, tela/fibra `fabric_id`, categoría `category_id`, subcategoría `subcategory_id`) y el ciclo de vida (crear, editar, activar, archivar, eliminar) se gestiona exclusivamente en los Ajustes del Hub 4 (Pestaña 7: Vitrinas Web).
+   - Toda vitrina creada o actualizada en Hub 4 se registra/sincroniza automáticamente en `cms_sections` (`type: 'catalog_section'`, `sort_order` secuencial al final).
+   - En la lista Drag & Drop de Hub 2, las vitrinas renderizan el badge `"Vitrina Web Hub 4"` y el botón "Editar Vitrina" conmuta abriendo en una **nueva pestaña** (`target="_blank"`) la URL directa del editor de Hub 4: `/admin/inventario-catalogo?tab=sections&edit_section_id={id}`.
+
+4. **Deprecación Total del Acordeón 1 (Banners Promocionales & Marquesinas):**  
+   *Regla de Negocio:*  
+   - La antigua sección "1. Banners promocionales y marquesinas superiores" ha sido eliminada por completo de Hub 2, dado que las secciones modulares del Home (Hero, Carruseles, Bloques CTA y Pop-ups) cubren íntegramente la gestión visual y comercial del Storefront.
+   - La estructura de Acordeones de Hub 2 se unifica en 3 secciones:  
+     1. Reglas de Flete & Envíos Courier (`COURIER_SHIPPING_RULES`)  
+     2. Protocolos de Cuidado Textil & Aviso Normativo PROFECO (`CARE_PROTOCOLS`, `PROFECO_NOTICE`)  
+     3. Pie de Página & Redes Oficiales (`STORE_FOOTER_CONFIG`)
+
+5. **Descentralización de Guías de Tallas & Botón PDP Dinámico:**  
+   *Regla de Negocio:*  
+   - Se elimina la guía de tallas rígida y estática centralizada en el CMS.  
+   - Las curvas de tallas se originan y gestionan en Hub 4 (`ApparelSizeCurve` / `ApparelSize`) vinculadas obligatoriamente a una Marca (`Brand`) o Proveedor (`Supplier`).
+   - Si una prenda no tiene curva asociada a su marca o proveedor, **no existe curva** (no se admiten fallbacks genéricos arbitrarios).
+   - En la PDP pública (`store.pwa.product-detail`), el botón se denomina estrictamente `"Guía de tallas"`. Al hacer clic, abre un modal interactivo (`#pdpSizeGuideModal`) que expone la matriz de medidas (`waist_min_cm`, `waist_max_cm`, etiquetas y códigos de talla) de la marca o proveedor correspondiente.
+
+6. **Protocolos de Cuidado Textil Sincronizados con Hub 4 & Matriz de Símbolos SVG:**  
+   *Regla de Negocio & UI/UX:*  
+   - Los protocolos de cuidado en Hub 2 se sincronizan directamente con las fibras dadas de alta en "Telas y Fibras" de Hub 4 (`ApparelFabric`).
+   - El editor en Hub 2 cuenta con: (a) un campo de texto libre para advertencias de cuidado (`warning`), y (b) una matriz de checkboxes con los 9 símbolos internacionales estandarizados de cuidado textil (con iconos SVG renderizados: lavado a mano, no usar cloro, secado en sombra, plancha tibia, etc.).
+   - En la PDP pública, se incorpora el botón `"Cuidados de la prenda"` (en la cabecera de tallas y en la ficha de composición textil). Al dar clic, conmuta al modal `#pdpCareGuideModal` donde el cliente visualiza el nombre de la fibra, el panel de advertencias y las etiquetas visuales con los iconos SVG correspondientes.
+
 
 ## Security & Data Privacy (DoD Compliance)
 - **CMS Form Validations**: Enforced UX rules, updating all `<textarea>` inputs in `store.blade.php` to include `resize: vertical !important;` styling.
