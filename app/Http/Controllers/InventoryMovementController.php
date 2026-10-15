@@ -18,7 +18,7 @@ class InventoryMovementController extends Controller
     {
         Gate::authorize('manage-inventory');
 
-        $validated = 
+        $validated = $request->validated();
 
         $movement = DB::transaction(function () use ($request, $inventory, $validated): InventoryMovement {
             $lockedInventory = Inventory::query()->lockForUpdate()->findOrFail($inventory->id);

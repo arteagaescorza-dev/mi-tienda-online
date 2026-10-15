@@ -82,6 +82,13 @@ class InventoryMovementTest extends TestCase
         $this->assertDatabaseHas('inventories', ['id' => $inventory->id, 'quantity' => 6]);
     }
 
+    public function test_admin_can_view_inventory_catalog(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+        $response = $this->actingAs($user)->get(route('portal.inventory'));
+        $response->assertOk();
+    }
+
     private function createInventory(int $quantity, int $reserved): Inventory
     {
         $variant = ProductVariant::factory()->for(Product::factory())->create();

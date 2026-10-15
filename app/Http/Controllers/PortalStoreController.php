@@ -89,6 +89,10 @@ class PortalStoreController extends Controller
                 'textColor' => '#09090b',
                 'mutedTextColor' => '#71717a',
                 'borderColor' => '#e4e4e7',
+                'typography_heading' => 'Plus Jakarta Sans',
+                'typography_subtitle' => 'Outfit',
+                'typography_body' => 'Plus Jakarta Sans',
+                'typography_accent' => 'Outfit',
                 'heroTitle' => 'Diseño, Comodidad y Firmeza sin Censura',
                 'heroSubtitle' => 'Textiles premium de modal y bambú diseñados para la máxima libertad de movimiento y soporte atlético.',
                 'heroCtaText' => 'Ver Colección Masculina',
@@ -111,6 +115,10 @@ class PortalStoreController extends Controller
                 'textColor' => '#1c1917',
                 'mutedTextColor' => '#78716c',
                 'borderColor' => '#fecdd3',
+                'typography_heading' => 'Playfair Display',
+                'typography_subtitle' => 'Outfit',
+                'typography_body' => 'Plus Jakarta Sans',
+                'typography_accent' => 'Cinzel',
                 'heroTitle' => 'Elegancia Sensorial y Suavidad para tu Piel',
                 'heroSubtitle' => 'Encajes finos, satín italiano y fórmulas limpias de cuidado personal pensadas para tu bienestar diario.',
                 'heroCtaText' => 'Explorar Colección Femenina',
@@ -133,6 +141,10 @@ class PortalStoreController extends Controller
                 'textColor' => '#0f172a',
                 'mutedTextColor' => '#64748b',
                 'borderColor' => '#e9d5ff',
+                'typography_heading' => 'Space Grotesk',
+                'typography_subtitle' => 'Outfit',
+                'typography_body' => 'Plus Jakarta Sans',
+                'typography_accent' => 'Space Grotesk',
                 'heroTitle' => 'Libertad de Expresión y Ajuste Seguro para Todo Cuerpo',
                 'heroSubtitle' => 'Prendas afirmativas confeccionadas con ingeniería textil transpirable de compresión médica segura.',
                 'heroCtaText' => 'Ver Binders y Accesorios',
@@ -155,6 +167,10 @@ class PortalStoreController extends Controller
                 'textColor' => '#09090b',
                 'mutedTextColor' => '#71717a',
                 'borderColor' => '#e4e4e7',
+                'typography_heading' => 'Plus Jakarta Sans',
+                'typography_subtitle' => 'Outfit',
+                'typography_body' => 'Plus Jakarta Sans',
+                'typography_accent' => 'Outfit',
                 'heroTitle' => 'El Ecosistema Completo de Bienestar y Estilo',
                 'heroSubtitle' => 'Catálogo unificado, suscripciones mensuales recurrentes y fórmulas de autocuidado para todas las identidades.',
                 'heroCtaText' => 'Descubrir Todo el Catálogo',
@@ -185,6 +201,10 @@ class PortalStoreController extends Controller
                     'textColor' => $c->text_color,
                     'mutedTextColor' => $c->muted_text_color,
                     'borderColor' => $c->border_color,
+                    'typography_heading' => $c->typography_heading,
+                    'typography_subtitle' => $c->typography_subtitle,
+                    'typography_body' => $c->typography_body,
+                    'typography_accent' => $c->typography_accent,
                     'heroTitle' => $c->hero_title,
                     'heroSubtitle' => $c->hero_subtitle,
                     'heroCtaText' => $c->hero_cta_text,
@@ -311,6 +331,32 @@ class PortalStoreController extends Controller
         $pages = CmsPage::orderBy('navbar_order')->get();
         $blogPosts = CmsBlogPost::orderByDesc('created_at')->get();
         $tracking = CmsTrackingSetting::current();
+
+        // Asegurar que todas las dimensiones del catálogo existan y estén configuradas como checkbox
+        $allCatalogDimensions = [
+            ['filter_key' => 'universe', 'label' => 'Universo', 'display_type' => 'checkbox', 'sort_order' => 1, 'is_visible' => true],
+            ['filter_key' => 'category', 'label' => 'Categoría', 'display_type' => 'checkbox', 'sort_order' => 2, 'is_visible' => true],
+            ['filter_key' => 'subcategory', 'label' => 'Subcategoría', 'display_type' => 'checkbox', 'sort_order' => 3, 'is_visible' => true],
+            ['filter_key' => 'brand', 'label' => 'Colección / Marca', 'display_type' => 'checkbox', 'sort_order' => 4, 'is_visible' => true],
+            ['filter_key' => 'supplier', 'label' => 'Proveedores & Distribuidores', 'display_type' => 'checkbox', 'sort_order' => 5, 'is_visible' => true],
+            ['filter_key' => 'size', 'label' => 'Talla Anatómica', 'display_type' => 'checkbox', 'sort_order' => 6, 'is_visible' => true],
+            ['filter_key' => 'color', 'label' => 'Color & Tornasoles', 'display_type' => 'checkbox', 'sort_order' => 7, 'is_visible' => true],
+            ['filter_key' => 'textile_family', 'label' => 'Familia Textil / Fibras', 'display_type' => 'checkbox', 'sort_order' => 8, 'is_visible' => true],
+            ['filter_key' => 'garment_type', 'label' => 'Silueta / Tipo de Prenda', 'display_type' => 'checkbox', 'sort_order' => 9, 'is_visible' => true],
+            ['filter_key' => 'style_tag', 'label' => 'Estilo & Ocasión', 'display_type' => 'checkbox', 'sort_order' => 10, 'is_visible' => true],
+            ['filter_key' => 'price', 'label' => 'Rango de Precio', 'display_type' => 'checkbox', 'sort_order' => 11, 'is_visible' => true],
+            ['filter_key' => 'discount', 'label' => 'Descuentos & Ofertas', 'display_type' => 'checkbox', 'sort_order' => 12, 'is_visible' => true],
+            ['filter_key' => 'volume', 'label' => 'Volúmenes de Perfumería', 'display_type' => 'checkbox', 'sort_order' => 13, 'is_visible' => true],
+            ['filter_key' => 'shade', 'label' => 'Tonos Cosméticos & Shading', 'display_type' => 'checkbox', 'sort_order' => 14, 'is_visible' => true],
+        ];
+        foreach ($allCatalogDimensions as $dim) {
+            $existingDim = CmsCatalogFilter::where('filter_key', $dim['filter_key'])->first();
+            if (!$existingDim) {
+                CmsCatalogFilter::create($dim);
+            } elseif ($existingDim->display_type !== 'checkbox') {
+                $existingDim->update(['display_type' => 'checkbox']);
+            }
+        }
         $catalogFilters = CmsCatalogFilter::orderBy('sort_order')->get();
         $suppliers = \App\Models\Supplier::where('status', '!=', 'archived')->select('id', 'name', 'legal_name')->get();
         if ($suppliers->isEmpty()) {
@@ -347,6 +393,8 @@ class PortalStoreController extends Controller
             'tracking' => $tracking,
             'catalogFilters' => $catalogFilters,
             'footerConfig' => $footerConfig,
+            'cmsMedia' => \App\Models\CmsMedia::latest()->get(),
+            'cmsMediaCount' => \App\Models\CmsMedia::count(),
         ]);
     }
 
@@ -530,6 +578,20 @@ class PortalStoreController extends Controller
             $config->border_color = $request->input('border_color') ?? $request->input('borderColor');
         }
 
+        // Tipografías de Vitrina (Google Fonts)
+        if ($request->filled('typography_heading')) {
+            $config->typography_heading = $request->input('typography_heading');
+        }
+        if ($request->filled('typography_subtitle')) {
+            $config->typography_subtitle = $request->input('typography_subtitle');
+        }
+        if ($request->filled('typography_body')) {
+            $config->typography_body = $request->input('typography_body');
+        }
+        if ($request->filled('typography_accent')) {
+            $config->typography_accent = $request->input('typography_accent');
+        }
+
         // Campos opcionales de Hero (conservados por retrocompatibilidad)
         if ($request->filled('hero_title') || $request->filled('heroTitle')) {
             $config->hero_title = $request->input('hero_title') ?? $request->input('heroTitle');
@@ -567,6 +629,10 @@ class PortalStoreController extends Controller
             'textColor' => $config->text_color,
             'mutedTextColor' => $config->muted_text_color,
             'borderColor' => $config->border_color,
+            'typography_heading' => $config->typography_heading,
+            'typography_subtitle' => $config->typography_subtitle,
+            'typography_body' => $config->typography_body,
+            'typography_accent' => $config->typography_accent,
             'heroTitle' => $config->hero_title,
             'heroSubtitle' => $config->hero_subtitle,
             'heroCtaText' => $config->hero_cta_text,
@@ -601,6 +667,30 @@ class PortalStoreController extends Controller
             $settings['background_image'] = '/uploads/sections/' . $filename;
         } elseif ($request->filled('background_image_url')) {
             $settings['background_image'] = $request->input('background_image_url');
+        }
+
+        // Manejo de video de fondo
+        if ($request->hasFile('background_video_file')) {
+            $file = $request->file('background_video_file');
+            $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sections'), $filename);
+            $settings['background_video'] = '/uploads/sections/' . $filename;
+        }
+
+        // Manejo de carrusel slides archivos
+        if ($request->hasFile('carousel_slide_files')) {
+            foreach ($request->file('carousel_slide_files') as $index => $file) {
+                if ($file) {
+                    $filename = 'carousel_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('uploads/sections'), $filename);
+                    $settings['carousel_slides'][$index]['image_url'] = '/uploads/sections/' . $filename;
+                }
+            }
+        }
+        
+        // Re-index carousel_slides just in case they were removed
+        if (isset($settings['carousel_slides']) && is_array($settings['carousel_slides'])) {
+            $settings['carousel_slides'] = array_values($settings['carousel_slides']);
         }
 
         $validated['settings'] = $settings;
@@ -665,6 +755,35 @@ class PortalStoreController extends Controller
             $mergedSettings['background_image'] = '/uploads/sections/' . $filename;
         } elseif ($request->filled('background_image_url')) {
             $mergedSettings['background_image'] = $request->input('background_image_url');
+        }
+
+        // Manejo de video de fondo
+        if ($request->hasFile('background_video_file')) {
+            $file = $request->file('background_video_file');
+            $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/sections'), $filename);
+            $mergedSettings['background_video'] = '/uploads/sections/' . $filename;
+        }
+
+        // Re-asignar slides
+        if (isset($newSettings['carousel_slides'])) {
+            $mergedSettings['carousel_slides'] = $newSettings['carousel_slides'];
+        }
+
+        // Manejo de carrusel slides archivos
+        if ($request->hasFile('carousel_slide_files')) {
+            foreach ($request->file('carousel_slide_files') as $index => $file) {
+                if ($file) {
+                    $filename = 'carousel_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('uploads/sections'), $filename);
+                    $mergedSettings['carousel_slides'][$index]['image_url'] = '/uploads/sections/' . $filename;
+                }
+            }
+        }
+        
+        // Re-index carousel_slides just in case they were removed
+        if (isset($mergedSettings['carousel_slides']) && is_array($mergedSettings['carousel_slides'])) {
+            $mergedSettings['carousel_slides'] = array_values($mergedSettings['carousel_slides']);
         }
 
         $validated['settings'] = $mergedSettings;
@@ -1138,6 +1257,7 @@ class PortalStoreController extends Controller
             if ($filter) {
                 $filter->update([
                     'label' => $data['label'] ?? $filter->label,
+                    'display_type' => $data['display_type'] ?? 'checkbox',
                     'sort_order' => isset($data['sort_order']) ? (int) $data['sort_order'] : $filter->sort_order,
                     'is_visible' => !empty($data['is_visible']),
                 ]);
@@ -1149,5 +1269,68 @@ class PortalStoreController extends Controller
         }
 
         return back()->with('success', 'Filtros del catálogo actualizados correctamente.');
+    }
+    /**
+     * API: Get CMS Media
+     */
+    public function apiGetMedia(Request $request)
+    {
+        Gate::authorize('manage-cms');
+        $media = \App\Models\CmsMedia::latest()->get();
+        return response()->json(['success' => true, 'media' => $media]);
+    }
+
+    /**
+     * API: Upload CMS Media
+     */
+    public function apiUploadMedia(Request $request)
+    {
+        Gate::authorize('manage-cms');
+        $request->validate([
+            'file' => 'required|file|max:10240', // max 10MB
+        ]);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType();
+            $size = $file->getSize();
+
+            $uniqueName = time() . '_' . uniqid() . '_' . $fileName;
+            $destPath = public_path('uploads/cms_media');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $uniqueName);
+
+            $media = \App\Models\CmsMedia::create([
+                'file_name' => $fileName,
+                'file_path' => '/uploads/cms_media/' . $uniqueName,
+                'mime_type' => $mimeType,
+                'size' => $size,
+            ]);
+
+            return response()->json(['success' => true, 'media' => $media]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
+    }
+
+    /**
+     * API: Delete CMS Media
+     */
+    public function apiDeleteMedia(Request $request, $id)
+    {
+        Gate::authorize('manage-cms');
+        $media = \App\Models\CmsMedia::findOrFail($id);
+        
+        $filePath = public_path(ltrim($media->file_path, '/'));
+        if (file_exists($filePath)) {
+            @unlink($filePath);
+        }
+        
+        $media->delete();
+        
+        return response()->json(['success' => true]);
     }
 }

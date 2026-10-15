@@ -111,6 +111,10 @@ class StorefrontController extends Controller
             'textColor' => $storefrontConfig->text_color,
             'mutedTextColor' => $storefrontConfig->muted_text_color,
             'borderColor' => $storefrontConfig->border_color,
+            'typography_heading' => $storefrontConfig->typography_heading ?? 'Plus Jakarta Sans',
+            'typography_subtitle' => $storefrontConfig->typography_subtitle ?? 'Outfit',
+            'typography_body' => $storefrontConfig->typography_body ?? 'Plus Jakarta Sans',
+            'typography_accent' => $storefrontConfig->typography_accent ?? 'Outfit',
             'customCss' => $storefrontConfig->custom_css,
             'customJs' => $storefrontConfig->custom_js,
         ], fn($val) => !is_null($val) && $val !== '');
@@ -184,6 +188,99 @@ class StorefrontController extends Controller
             }
         }
 
+        // Dimensiones Dinámicas del Catálogo Oficial
+        $dbColors = \Illuminate\Support\Facades\DB::table('apparel_colors')
+            ->where('is_active', true)
+            ->get();
+
+        $catalogColors = $dbColors->map(function ($c) {
+            $isGrad = in_array($c->color_type ?? '', ['gradient', 'iridescent']) || !empty($c->gradient_css);
+            return [
+                'key' => strtolower($c->name),
+                'name' => $c->name,
+                'hex' => $c->hex_code ?: '#0f172a',
+                'grad' => $isGrad ? $c->gradient_css : null,
+                'type' => $c->color_type ?: 'solid',
+                'border' => in_array(strtolower($c->name), ['blanco', 'white', 'hueso', 'perla']) || in_array(strtolower($c->hex_code ?? ''), ['#ffffff', '#fff', '#f8fafc', '#fafafa']),
+            ];
+        })->values()->all();
+
+        if (empty($catalogColors)) {
+            $catalogColors = collect($pwaProducts)
+                ->pluck('colors')
+                ->flatten(1)
+                ->unique('name')
+                ->values()
+                ->map(fn($c) => [
+                    'key' => strtolower($c['name']),
+                    'name' => $c['name'],
+                    'hex' => $c['hex'] ?? '#0f172a',
+                    'grad' => str_contains($c['hex'] ?? '', 'gradient') ? $c['hex'] : null,
+                    'type' => $c['type'] ?? 'solid',
+                    'border' => false,
+                ])->all();
+        }
+
+        $catalogBrands = collect($pwaProducts)
+            ->pluck('brand')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        $catalogFabrics = collect($pwaProducts)
+            ->pluck('fabric_type')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        if (empty($catalogFabrics)) {
+            $catalogFabrics = \App\Models\Product::where('visible', true)
+                ->pluck('fabric')
+                ->filter()
+                ->unique()
+                ->sort()
+                ->values()
+                ->all();
+        }
+
+        $catalogSizes = collect($pwaProducts)
+            ->pluck('sizes')
+            ->flatten()
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($catalogSizes)) {
+            $catalogSizes = \App\Models\ProductVariant::where('visible', true)
+                ->get()
+                ->map(fn($v) => data_get($v->attributes, 'size'))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+        }
+        $sizeOrder = ['CH' => 1, 'S' => 2, 'M' => 3, 'G' => 4, 'L' => 5, 'XL' => 6, 'XG' => 7, '2XL' => 8, 'XXL' => 9, '3XL' => 10, 'UNI' => 99];
+        usort($catalogSizes, fn($a, $b) => ($sizeOrder[$a] ?? 50) <=> ($sizeOrder[$b] ?? 50));
+
+        $catalogGarmentTypes = collect($pwaProducts)
+            ->pluck('garment_type')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($catalogGarmentTypes)) {
+            $catalogGarmentTypes = \App\Models\Category::whereNotNull('parent_id')
+                ->get()
+                ->map(fn($c) => ['key' => $c->slug, 'name' => $c->name])
+                ->all();
+        }
+
         return view('store.pwa.home', [
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
@@ -205,6 +302,12 @@ class StorefrontController extends Controller
             'categories' => \App\Models\Category::all(),
             'categoriesTree' => $this->getCategoriesTree(),
             'suppliers' => $this->getActiveSuppliers(),
+            'catalogFilters' => \App\Models\CmsCatalogFilter::orderBy('sort_order')->get(),
+            'catalogColors' => $catalogColors,
+            'catalogBrands' => $catalogBrands,
+            'catalogFabrics' => $catalogFabrics,
+            'catalogSizes' => $catalogSizes,
+            'catalogGarmentTypes' => $catalogGarmentTypes,
         ]);
     }
 

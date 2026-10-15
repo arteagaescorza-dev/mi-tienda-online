@@ -168,11 +168,25 @@
     activeUniverse: 'marte', // 'terra', 'marte', 'venus', 'tiresias'
     activeTab: 'home',       // 'home', 'explore', 'catalog'
     activeCategory: 'all',
+    activeBrand: 'all',
     activeSize: 'all',
     activeFabric: 'all',
     activeColor: 'all',
     activeVolume: 'all',
     activeShade: 'all',
+    activeUniverses: [],
+    activeCategories: [],
+    activeBrands: [],
+    activeSuppliers: [],
+    activeSizes: [],
+    activeFabrics: [],
+    activeColors: [],
+    activeVolumes: [],
+    activeShades: [],
+    activeGarmentTypes: [],
+    activeStyleTags: [],
+    activePrices: [],
+    activeDiscounts: [],
     searchQuery: '',         // Búsqueda en tiempo real (Regla 5)
     cart: [],
     savedForLater: [],       // Array de prendas guardadas para después
@@ -437,6 +451,19 @@
           return false;
         }
       }
+      // Filtro de Marcas Registradas (Brand)
+      if (Array.isArray(storeState.activeBrands) && storeState.activeBrands.length > 0) {
+        const prodBrand = (prod.brand || '').toLowerCase();
+        const matchesBrand = storeState.activeBrands.some(b => prodBrand.includes(b.toLowerCase()) || (prod.categoryName || '').toLowerCase().includes(b.toLowerCase()) || (prod.name || '').toLowerCase().includes(b.toLowerCase()));
+        if (!matchesBrand) return false;
+      } else if (storeState.activeBrand && storeState.activeBrand !== 'all') {
+        const bTarget = storeState.activeBrand.toLowerCase();
+        const prodBrand = (prod.brand || '').toLowerCase();
+        if (!prodBrand.includes(bTarget)) {
+          return false;
+        }
+      }
+
       // Filtro de Proveedor & Marcas (Regla 2)
       if (Array.isArray(storeState.activeSuppliers) && storeState.activeSuppliers.length > 0) {
         const prodSup = (prod.supplier || prod.brand || '').toLowerCase();
@@ -449,6 +476,57 @@
           return false;
         }
       }
+
+      // Filtro de Universos (Checkboxes)
+      if (Array.isArray(storeState.activeUniverses) && storeState.activeUniverses.length > 0) {
+        const matchesUniv = storeState.activeUniverses.some(u => {
+          if (u === 'terra') return true;
+          return Array.isArray(prod.universes) && prod.universes.includes(u);
+        });
+        if (!matchesUniv) return false;
+      }
+
+      // Filtro de Siluetas / Tipo de Prenda
+      if (Array.isArray(storeState.activeGarmentTypes) && storeState.activeGarmentTypes.length > 0) {
+        const pGt = (prod.garment_type || '').toLowerCase();
+        const pName = (prod.name || '').toLowerCase();
+        const matchesGt = storeState.activeGarmentTypes.some(gt => pGt.includes(gt.toLowerCase()) || pName.includes(gt.toLowerCase()));
+        if (!matchesGt) return false;
+      }
+
+      // Filtro de Estilo & Ocasión
+      if (Array.isArray(storeState.activeStyleTags) && storeState.activeStyleTags.length > 0) {
+        const pDesc = (prod.description || '').toLowerCase();
+        const pName = (prod.name || '').toLowerCase();
+        const matchesTag = storeState.activeStyleTags.some(t => pDesc.includes(t.toLowerCase()) || pName.includes(t.toLowerCase()));
+        if (!matchesTag) return false;
+      }
+
+      // Filtro de Rango de Precio
+      if (Array.isArray(storeState.activePrices) && storeState.activePrices.length > 0) {
+        const price = typeof prod.price === 'number' ? prod.price : parseFloat(prod.price || 0);
+        const matchesPrice = storeState.activePrices.some(r => {
+          if (r === 'under_300') return price < 300;
+          if (r === '300_599') return price >= 300 && price <= 599;
+          if (r === '600_999') return price >= 600 && price <= 999;
+          if (r === 'over_1000') return price >= 1000;
+          return true;
+        });
+        if (!matchesPrice) return false;
+      }
+
+      // Filtro de Descuentos & Ofertas
+      if (Array.isArray(storeState.activeDiscounts) && storeState.activeDiscounts.length > 0) {
+        const disc = parseFloat(prod.discount_pct || 0);
+        const matchesDisc = storeState.activeDiscounts.some(d => {
+          if (d === 'only_sale') return disc > 0;
+          if (d === 'min_15') return disc >= 15;
+          if (d === 'min_25') return disc >= 25;
+          return true;
+        });
+        if (!matchesDisc) return false;
+      }
+
       return true;
     });
   }
@@ -4954,22 +5032,34 @@
     const applyBtn = e.target.closest('[data-action="apply-filters"]');
     if (applyBtn) {
       e.preventDefault();
+      storeState.activeUniverses = Array.from(document.querySelectorAll('input[name="filter_universe"]:checked')).map(cb => cb.value);
       storeState.activeCategories = Array.from(document.querySelectorAll('input[name="filter_category"]:checked')).map(cb => cb.value);
+      storeState.activeBrands = Array.from(document.querySelectorAll('input[name="filter_brand"]:checked')).map(cb => cb.value);
       storeState.activeSuppliers = Array.from(document.querySelectorAll('input[name="filter_supplier"]:checked')).map(cb => cb.value);
       storeState.activeSizes = Array.from(document.querySelectorAll('input[name="filter_size"]:checked')).map(cb => cb.value);
       storeState.activeFabrics = Array.from(document.querySelectorAll('input[name="filter_fabric"]:checked')).map(cb => cb.value);
       storeState.activeColors = Array.from(document.querySelectorAll('input[name="filter_color"]:checked')).map(cb => cb.value);
       storeState.activeVolumes = Array.from(document.querySelectorAll('input[name="filter_volume"]:checked')).map(cb => cb.value);
       storeState.activeShades = Array.from(document.querySelectorAll('input[name="filter_shade"]:checked')).map(cb => cb.value);
+      storeState.activeGarmentTypes = Array.from(document.querySelectorAll('input[name="filter_garment_type"]:checked')).map(cb => cb.value);
+      storeState.activeStyleTags = Array.from(document.querySelectorAll('input[name="filter_style_tag"]:checked')).map(cb => cb.value);
+      storeState.activePrices = Array.from(document.querySelectorAll('input[name="filter_price"]:checked')).map(cb => cb.value);
+      storeState.activeDiscounts = Array.from(document.querySelectorAll('input[name="filter_discount"]:checked')).map(cb => cb.value);
 
       const pendingFacets = {
+        activeUniverses: storeState.activeUniverses,
         activeCategories: storeState.activeCategories,
+        activeBrands: storeState.activeBrands,
         activeSuppliers: storeState.activeSuppliers,
         activeSizes: storeState.activeSizes,
         activeFabrics: storeState.activeFabrics,
         activeColors: storeState.activeColors,
         activeVolumes: storeState.activeVolumes,
         activeShades: storeState.activeShades,
+        activeGarmentTypes: storeState.activeGarmentTypes,
+        activeStyleTags: storeState.activeStyleTags,
+        activePrices: storeState.activePrices,
+        activeDiscounts: storeState.activeDiscounts,
       };
       try {
         sessionStorage.setItem('multiverse_active_facets', JSON.stringify(pendingFacets));
@@ -4994,14 +5084,21 @@
     if (clearBtn) {
       e.preventDefault();
       document.querySelectorAll('.filter-facet-checkbox').forEach(cb => { cb.checked = false; });
+      storeState.activeUniverses = [];
       storeState.activeCategories = [];
+      storeState.activeBrands = [];
       storeState.activeSuppliers = [];
       storeState.activeSizes = [];
       storeState.activeFabrics = [];
       storeState.activeColors = [];
       storeState.activeVolumes = [];
       storeState.activeShades = [];
+      storeState.activeGarmentTypes = [];
+      storeState.activeStyleTags = [];
+      storeState.activePrices = [];
+      storeState.activeDiscounts = [];
       storeState.activeCategory = 'all';
+      storeState.activeBrand = 'all';
       storeState.activeSupplier = 'all';
       storeState.activeSize = 'all';
       storeState.activeFabric = 'all';
@@ -5839,24 +5936,36 @@
       const savedFacetsRaw = sessionStorage.getItem('multiverse_active_facets');
       if (savedFacetsRaw) {
         const f = JSON.parse(savedFacetsRaw);
+        if (Array.isArray(f.activeUniverses)) storeState.activeUniverses = f.activeUniverses;
         if (Array.isArray(f.activeCategories)) storeState.activeCategories = f.activeCategories;
+        if (Array.isArray(f.activeBrands)) storeState.activeBrands = f.activeBrands;
         if (Array.isArray(f.activeSuppliers)) storeState.activeSuppliers = f.activeSuppliers;
         if (Array.isArray(f.activeSizes)) storeState.activeSizes = f.activeSizes;
         if (Array.isArray(f.activeFabrics)) storeState.activeFabrics = f.activeFabrics;
         if (Array.isArray(f.activeColors)) storeState.activeColors = f.activeColors;
         if (Array.isArray(f.activeVolumes)) storeState.activeVolumes = f.activeVolumes;
         if (Array.isArray(f.activeShades)) storeState.activeShades = f.activeShades;
+        if (Array.isArray(f.activeGarmentTypes)) storeState.activeGarmentTypes = f.activeGarmentTypes;
+        if (Array.isArray(f.activeStyleTags)) storeState.activeStyleTags = f.activeStyleTags;
+        if (Array.isArray(f.activePrices)) storeState.activePrices = f.activePrices;
+        if (Array.isArray(f.activeDiscounts)) storeState.activeDiscounts = f.activeDiscounts;
 
         document.querySelectorAll('.filter-facet-checkbox').forEach(cb => {
           const type = cb.dataset.facetType;
           const val = cb.value;
+          if (type === 'universe' && storeState.activeUniverses.includes(val)) cb.checked = true;
           if (type === 'category' && storeState.activeCategories.includes(val)) cb.checked = true;
+          if (type === 'brand' && storeState.activeBrands.includes(val)) cb.checked = true;
           if (type === 'supplier' && storeState.activeSuppliers.includes(val)) cb.checked = true;
           if (type === 'size' && storeState.activeSizes.includes(val)) cb.checked = true;
           if (type === 'fabric' && storeState.activeFabrics.includes(val)) cb.checked = true;
           if (type === 'color' && storeState.activeColors.includes(val)) cb.checked = true;
           if (type === 'volume' && storeState.activeVolumes.includes(val)) cb.checked = true;
           if (type === 'shade' && storeState.activeShades.includes(val)) cb.checked = true;
+          if (type === 'garment_type' && storeState.activeGarmentTypes.includes(val)) cb.checked = true;
+          if (type === 'style_tag' && storeState.activeStyleTags.includes(val)) cb.checked = true;
+          if (type === 'price' && storeState.activePrices.includes(val)) cb.checked = true;
+          if (type === 'discount' && storeState.activeDiscounts.includes(val)) cb.checked = true;
         });
 
         if (document.getElementById('catalogProductsGrid')) {
@@ -5869,13 +5978,19 @@
     // Regla 6.35: Sincronización reactiva en tiempo real al conmutar cualquier checkbox de faceta
     document.addEventListener('change', (e) => {
       if (e.target.matches('.filter-facet-checkbox')) {
+        storeState.activeUniverses = Array.from(document.querySelectorAll('input[name="filter_universe"]:checked')).map(cb => cb.value);
         storeState.activeCategories = Array.from(document.querySelectorAll('input[name="filter_category"]:checked')).map(cb => cb.value);
+        storeState.activeBrands = Array.from(document.querySelectorAll('input[name="filter_brand"]:checked')).map(cb => cb.value);
         storeState.activeSuppliers = Array.from(document.querySelectorAll('input[name="filter_supplier"]:checked')).map(cb => cb.value);
         storeState.activeSizes = Array.from(document.querySelectorAll('input[name="filter_size"]:checked')).map(cb => cb.value);
         storeState.activeFabrics = Array.from(document.querySelectorAll('input[name="filter_fabric"]:checked')).map(cb => cb.value);
         storeState.activeColors = Array.from(document.querySelectorAll('input[name="filter_color"]:checked')).map(cb => cb.value);
         storeState.activeVolumes = Array.from(document.querySelectorAll('input[name="filter_volume"]:checked')).map(cb => cb.value);
         storeState.activeShades = Array.from(document.querySelectorAll('input[name="filter_shade"]:checked')).map(cb => cb.value);
+        storeState.activeGarmentTypes = Array.from(document.querySelectorAll('input[name="filter_garment_type"]:checked')).map(cb => cb.value);
+        storeState.activeStyleTags = Array.from(document.querySelectorAll('input[name="filter_style_tag"]:checked')).map(cb => cb.value);
+        storeState.activePrices = Array.from(document.querySelectorAll('input[name="filter_price"]:checked')).map(cb => cb.value);
+        storeState.activeDiscounts = Array.from(document.querySelectorAll('input[name="filter_discount"]:checked')).map(cb => cb.value);
 
         if (document.getElementById('catalogProductsGrid')) {
           renderProductsGrid('catalogProductsGrid');

@@ -81,8 +81,19 @@ erDiagram
 1. **Límite máximo de secciones modulares activas simultáneas en el Home Feed PWA:**  
    *Regla de Negocio:* El límite estricto es de **8 secciones** (diseño ultra-rápido y minimalista). Esto protege la hidratación DOM y maximiza la puntuación SEO de Web Vitals en dispositivos móviles de gama baja. El backend debe rechazar la creación o activación de una 9na sección simultánea.
 
-1. `[TODO: Definir regla exacta]` **Límite máximo de secciones modulares activas simultáneas en el Home Feed PWA.**  
-   *Nota de Auditoría Actual:* Tras auditar `PortalStoreController`, se confirma que **no existe** ningún límite codificado en backend para frenar la creación de nuevas `cms_sections`. Queda a nivel de negocio y UX decidir si imponemos un límite (ej. 12 secciones) para evitar un impacto severo en la hidratación DOM y SEO en móviles de gama baja.
+2. **Paridad Estructural Estricta y Previsualización en Tiempo Real en Secciones Modulares:**  
+   *Regla de Negocio & UI/UX:* Los botones de editar de las secciones modulares del Home (`store.blade.php`) abren un modal (`editSectionModal`) que contiene exactamente la misma estructura de edición que el modal de creación (`createSectionModal`). Esto incluye:
+   - Layout de 2 columnas de pantalla completa (`md:w-[700px]` para el formulario y columna interactiva de previsualización a la derecha).
+   - Bifurcador de modo inmediato (Visual Estructurado vs Código Custom Scoped).
+   - Bloque común de textos con tipografías Google Fonts independientes para títulos y subtítulos, colores hex y alineación con botones de icono (izquierda, centro, derecha).
+   - Motor Hero con soporte para Hero Fullpage vertical (`settings[full_width]`), **Hero 100% Horizontal** independiente con switch (`settings[full_width_horizontal]`), altura personalizada, efecto Parallax Scrolling (`backgroundAttachment = 'fixed'`), selección de fondo (imagen con Alt SEO vs video MP4 con autoplay/loop/muted), y capa de degradado overlay interactivo (RGBA).
+   - **Foco de Atención de la Imagen (Matriz de 9 Puntos):** Selector visual en cuadrícula de 9 celdas (`settings[image_focal_point]`) para fijar el anclaje `background-position` / `object-position` de la imagen o video (`left top`, `center top`, `right top`, `left center`, `center center`, `right center`, `left bottom`, `center bottom`, `right bottom`), asegurando que el sujeto permanezca enfocado al recortarse en vista mobile (375px) o ultrawide.
+   - **Conmutación de Botones en Hero vs Clic Integral:** Toggle switch para botones (`settings[hero_has_buttons]`). Si está habilitado, permite configurar botones CTA primario y secundario (fondo, texto, bordes y sombras). Si está deshabilitado, los botones se ocultan y toda la superficie del Hero opera como un hipervínculo navegable integral (`settings[hero_click_url]`, clase `.hero-full-click-link`).
+   - **Gestión de Espaciados Modulares (Márgenes Superior e Inferior):** Controles independientes (`settings[spacing_top]` y `settings[spacing_bottom]`) con input numérico, range slider (0-120px) y presets rápidos (`0px`, `12px`, `24px`, `36px`, `48px`). Por defecto, el Storefront elimina las brechas y espacios en blanco (`margin: 0px`, `padding: 0px`), permitiendo secciones adyacentes continuas y aplicando los espaciados personalizados de forma reactiva en Live Preview y en Storefront.
+   - Motor de Carrusel dinámico con modo general o por slide y gestión dinámica de slides.
+   - Motor de Pop-up y Bloque Personalizado / Código HTML inyectado.
+   - Previsualización renderizada en tiempo real (`Live Preview`) reactiva instantáneamente a cualquier evento `input` o `change`, con alternador de vista Desktop y Mobile (375px) sin colisiones de scope entre modales.
+   - Pre-población completa e inmediata de todos los campos al presionar "Editar" (`openEditSectionModal`), disparando de inmediato la previsualización renderizada.
 
 
 ## Security & Data Privacy (DoD Compliance)

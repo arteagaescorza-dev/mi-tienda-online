@@ -286,13 +286,22 @@ class CmsHub2Seeder extends Seeder
             CmsBlogPost::updateOrCreate(['slug' => $post['slug']], $post);
         }
 
-        // 6. Filtros del Catálogo
+        // 6. Filtros del Catálogo (Todas las dimensiones con control tipo checkbox)
         $filters = [
-            ['filter_key' => 'universe', 'label' => 'Universo', 'display_type' => 'pills', 'sort_order' => 1, 'is_visible' => true],
-            ['filter_key' => 'brand', 'label' => 'Colección / Marca', 'display_type' => 'checkbox', 'sort_order' => 2, 'is_visible' => true],
-            ['filter_key' => 'category', 'label' => 'Categoría', 'display_type' => 'checkbox', 'sort_order' => 3, 'is_visible' => true],
-            ['filter_key' => 'size', 'label' => 'Talla Anatómica', 'display_type' => 'pills', 'sort_order' => 4, 'is_visible' => true],
-            ['filter_key' => 'price', 'label' => 'Rango de Precio', 'display_type' => 'range', 'sort_order' => 5, 'is_visible' => true],
+            ['filter_key' => 'universe', 'label' => 'Universo', 'display_type' => 'checkbox', 'sort_order' => 1, 'is_visible' => true],
+            ['filter_key' => 'category', 'label' => 'Categoría', 'display_type' => 'checkbox', 'sort_order' => 2, 'is_visible' => true],
+            ['filter_key' => 'subcategory', 'label' => 'Subcategoría', 'display_type' => 'checkbox', 'sort_order' => 3, 'is_visible' => true],
+            ['filter_key' => 'brand', 'label' => 'Colección / Marca', 'display_type' => 'checkbox', 'sort_order' => 4, 'is_visible' => true],
+            ['filter_key' => 'supplier', 'label' => 'Proveedores & Distribuidores', 'display_type' => 'checkbox', 'sort_order' => 5, 'is_visible' => true],
+            ['filter_key' => 'size', 'label' => 'Talla Anatómica', 'display_type' => 'checkbox', 'sort_order' => 6, 'is_visible' => true],
+            ['filter_key' => 'color', 'label' => 'Color & Tornasoles', 'display_type' => 'checkbox', 'sort_order' => 7, 'is_visible' => true],
+            ['filter_key' => 'textile_family', 'label' => 'Familia Textil / Fibras', 'display_type' => 'checkbox', 'sort_order' => 8, 'is_visible' => true],
+            ['filter_key' => 'garment_type', 'label' => 'Silueta / Tipo de Prenda', 'display_type' => 'checkbox', 'sort_order' => 9, 'is_visible' => true],
+            ['filter_key' => 'style_tag', 'label' => 'Estilo & Ocasión', 'display_type' => 'checkbox', 'sort_order' => 10, 'is_visible' => true],
+            ['filter_key' => 'price', 'label' => 'Rango de Precio', 'display_type' => 'checkbox', 'sort_order' => 11, 'is_visible' => true],
+            ['filter_key' => 'discount', 'label' => 'Descuentos & Ofertas', 'display_type' => 'checkbox', 'sort_order' => 12, 'is_visible' => true],
+            ['filter_key' => 'volume', 'label' => 'Volúmenes de Perfumería', 'display_type' => 'checkbox', 'sort_order' => 13, 'is_visible' => true],
+            ['filter_key' => 'shade', 'label' => 'Tonos Cosméticos & Shading', 'display_type' => 'checkbox', 'sort_order' => 14, 'is_visible' => true],
         ];
 
         foreach ($filters as $filt) {

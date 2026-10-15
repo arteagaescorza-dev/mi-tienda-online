@@ -6,6 +6,25 @@
 @section('hub_status', '4 Vitrinas Activas')
 
 @section('content')
+@php
+$curatedGoogleFonts = [
+    'Outfit' => 'Outfit (Minimalista / Contemporánea / Lujo)',
+    'Plus Jakarta Sans' => 'Plus Jakarta Sans (Geométrica / Moderna / UI)',
+    'Inter' => 'Inter (Neo-grotesque / Ultra Limpia)',
+    'Montserrat' => 'Montserrat (Urbana / Versátil / Moda)',
+    'Poppins' => 'Poppins (Geométrica Fresca / Comercial)',
+    'Playfair Display' => 'Playfair Display (Serif de Lujo / Editorial)',
+    'Cinzel' => 'Cinzel (Serif Clásica / Joyería / Distinción)',
+    'Cormorant Garamond' => 'Cormorant Garamond (Sensual / Alta Costura)',
+    'Oswald' => 'Oswald (Condensada / Deportiva / Atlético)',
+    'Anton' => 'Anton (Streetwear Bold / Contundente)',
+    'Bebas Neue' => 'Bebas Neue (Display / Titulares Imponentes)',
+    'Space Grotesk' => 'Space Grotesk (Vanguardista / Techwear)',
+    'Syne' => 'Syne (Diseño de Autor / Vanguardia)',
+    'Merriweather' => 'Merriweather (Serif de Lectura / Suave)',
+    'Space Mono' => 'Space Mono (Monoespaciada / Técnica)',
+];
+@endphp
 <div id="storeAppRoot" class="w-full text-slate-800 font-sans antialiased" data-screen="store">
     <style>
         .tab-panel.hidden {
@@ -185,11 +204,25 @@
             <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 text-xs font-bold px-2 py-1 cursor-pointer">Cerrar</button>
         </div>
     @endif
-    @if(session('error'))
-        <div class="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                <span class="text-sm font-semibold">{{ session('error') }}</span>
+    @if(session('error') || $errors->any())
+        <div class="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-start justify-between shadow-xs">
+            <div class="flex flex-col gap-1">
+                @if(session('error'))
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <span class="text-sm font-semibold">{{ session('error') }}</span>
+                    </div>
+                @endif
+                @if($errors->any())
+                    <div class="flex items-start gap-2">
+                        <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <ul class="text-sm font-medium list-disc list-inside">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-900 text-xs font-bold px-2 py-1 cursor-pointer">Cerrar</button>
         </div>
@@ -269,6 +302,18 @@
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <span class="store-subnav-count">{{ $catalogFilters->count() ?? 0 }} Filtros</span>
+                </div>
+            </button>
+
+            <!-- TAB 6: GESTOR DE IMÁGENES (HUB 2) -->
+            <button class="store-subnav-btn" data-action="switch-store-tab" data-tab="media" onclick="window.switchStoreTab('media')" type="button">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span class="truncate">6. Gestor de Imágenes</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="store-subnav-count" id="cmsMediaTabCount">{{ $cmsMediaCount ?? 0 }} Fotos</span>
+                    <span class="section-help-btn" role="button" tabindex="0" aria-label="Ayuda Gestor de Imágenes" data-help-title="Gestor de Medios CMS (Hub 2)" data-help-desc="Almacén exclusivo de imágenes para banners, carruseles y contenido visual del CMS, independiente del catálogo de productos.">?</span>
                 </div>
             </button>
         </nav>
@@ -555,6 +600,59 @@
                                     <input type="color" name="border_color" class="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0" data-color-token="border" value="{{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }}">
                                     <input type="text" class="w-20 px-1.5 py-1 text-[10px] font-mono border border-slate-200 rounded bg-white" data-color-label="border" value="{{ $storefronts['marte']['borderColor'] ?? '#e2e8f0' }}">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. TIPOGRAFÍAS DE MARCA (GOOGLE FONTS) -->
+                    <div class="space-y-3 pt-3 border-t border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                4. Tipografías de Marca (Google Fonts)
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-medium">Headings, bajadas y acentos</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                            <!-- Tipografía Títulos (H1, H2, H3) -->
+                            <div class="p-2.5 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Títulos (H1, H2, H3)</label>
+                                <select name="typography_heading" id="vitrinaTypoHeading" class="w-full px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-md bg-white text-slate-800" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updateVitrinaFontPreview && window.updateVitrinaFontPreview();">
+                                    @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                        <option value="{{ $fKey }}" {{ ($storefronts['marte']['typography_heading'] ?? 'Outfit') === $fKey ? 'selected' : '' }}>{{ $fLabel }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tipografía Bajadas / Subtítulos -->
+                            <div class="p-2.5 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Bajadas / Subtítulos</label>
+                                <select name="typography_subtitle" id="vitrinaTypoSubtitle" class="w-full px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-md bg-white text-slate-800" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updateVitrinaFontPreview && window.updateVitrinaFontPreview();">
+                                    @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                        <option value="{{ $fKey }}" {{ ($storefronts['marte']['typography_subtitle'] ?? 'Outfit') === $fKey ? 'selected' : '' }}>{{ $fLabel }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tipografía Párrafos / Texto Base -->
+                            <div class="p-2.5 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Texto Base / Párrafos</label>
+                                <select name="typography_body" id="vitrinaTypoBody" class="w-full px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-md bg-white text-slate-800" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updateVitrinaFontPreview && window.updateVitrinaFontPreview();">
+                                    @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                        <option value="{{ $fKey }}" {{ ($storefronts['marte']['typography_body'] ?? 'Plus Jakarta Sans') === $fKey ? 'selected' : '' }}>{{ $fLabel }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tipografía Acentos / Badges / Botones -->
+                            <div class="p-2.5 border border-slate-200 rounded-lg bg-slate-50/50">
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Acentos / Badges / Botones</label>
+                                <select name="typography_accent" id="vitrinaTypoAccent" class="w-full px-2 py-1.5 text-xs font-medium border border-slate-200 rounded-md bg-white text-slate-800" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updateVitrinaFontPreview && window.updateVitrinaFontPreview();">
+                                    @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                        <option value="{{ $fKey }}" {{ ($storefronts['marte']['typography_accent'] ?? 'Plus Jakarta Sans') === $fKey ? 'selected' : '' }}>{{ $fLabel }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -1572,6 +1670,10 @@
                     </h3>
                     <p class="text-xs text-slate-500">Configura la visibilidad, nombres y orden jerárquico de los filtros de la tienda PWA.</p>
                 </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Filtros conformados por Checkbox</span>
+                </div>
             </div>
 
             <form method="POST" action="{{ route('portal.store.filters.update') }}" class="space-y-4 text-xs">
@@ -1601,7 +1703,11 @@
                                         <input type="text" name="filters[{{ $flt->id }}][label]" value="{{ $flt->label }}" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
                                     </td>
                                     <td class="py-2.5 px-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">{{ strtoupper($flt->display_type) }}</span>
+                                        <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-xs">
+                                            <svg class="w-2.5 h-2.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                            <span>CHECKBOX</span>
+                                        </div>
+                                        <input type="hidden" name="filters[{{ $flt->id }}][display_type]" value="checkbox">
                                     </td>
                                     <td class="py-2.5 px-3 text-center">
                                         <input type="number" name="filters[{{ $flt->id }}][sort_order]" value="{{ $flt->sort_order }}" class="filter-sort-input w-16 px-2 py-1 border border-slate-200 rounded-lg text-center text-xs">
@@ -1630,6 +1736,108 @@
     <!-- FIN SUBMÓDULO 8 -->
 
     <!-- ========================================================================= -->
+    <!-- SUBMÓDULO 6: GESTOR DE MEDIOS & IMÁGENES CMS (HUB 2)                      -->
+    <!-- ========================================================================= -->
+    <div id="storeMediaPanel" class="tab-panel hidden" style="display: none;">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm mb-6">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </span>
+                        <span>6. Gestor de Medios &amp; Galería Visual CMS (Hub 2)</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Biblioteca oficial de fotos y activos gráficos para banners, carruseles y vitrinas. Separado e independiente del catálogo de productos.
+                    </p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <!-- Buscador rápido en vivo -->
+                    <div class="relative">
+                        <input type="text" id="cmsMediaSearchInput" placeholder="Buscar por nombre..." oninput="window.filterCmsMediaGrid(this.value)" class="pl-8 pr-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-48 sm:w-60">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+
+                    <!-- Botón Subir Imágenes -->
+                    <label class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs cursor-pointer shadow-xs transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Subir Imágenes</span>
+                        <input type="file" id="cmsMediaPanelUploadInput" class="hidden" accept="image/*" multiple onchange="window.uploadCmsMediaFiles(this.files)">
+                    </label>
+
+                    <!-- Botón Refrescar -->
+                    <button type="button" onclick="window.loadCmsMedia()" class="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition cursor-pointer" title="Refrescar Galería">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Zona Drag & Drop -->
+            <div id="cmsMediaDropZone" class="border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/60 hover:bg-indigo-50/30 rounded-2xl p-6 mb-6 text-center transition cursor-pointer" onclick="document.getElementById('cmsMediaPanelUploadInput').click()">
+                <div class="flex flex-col items-center justify-center gap-2 pointer-events-none">
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    </div>
+                    <div class="text-xs font-semibold text-slate-700">Arrastra y suelta imágenes aquí, o <span class="text-indigo-600 font-bold underline">haz clic para explorar archivos</span></div>
+                    <div class="text-[11px] text-slate-400">Formatos JPG, PNG, WEBP, GIF hasta 10MB por archivo (soporta selección múltiple)</div>
+                </div>
+            </div>
+
+            <!-- Estado de carga / progreso -->
+            <div id="cmsMediaPanelUploading" class="hidden mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span class="text-xs font-bold text-indigo-900" id="cmsMediaUploadStatusText">Subiendo archivos al Gestor CMS...</span>
+                </div>
+            </div>
+
+            <!-- Grilla Principal de Medios -->
+            <div id="cmsMediaPanelGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                @forelse($cmsMedia as $item)
+                    <div class="cms-media-card bg-white border border-slate-200/90 hover:border-indigo-400 rounded-xl overflow-hidden shadow-2xs hover:shadow-md transition-all group relative flex flex-col" data-media-id="{{ $item->id }}" data-file-name="{{ strtolower($item->file_name) }}">
+                        <div class="aspect-square bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                            <img src="{{ asset(ltrim($item->file_path, '/')) }}" alt="{{ $item->file_name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
+                            <!-- Overlay de acciones en hover -->
+                            <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                                <button type="button" onclick="window.copyMediaUrl('{{ asset(ltrim($item->file_path, '/')) }}', this)" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-800 text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer w-full justify-center">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Copiar URL</span>
+                                </button>
+                                <a href="{{ asset(ltrim($item->file_path, '/')) }}" target="_blank" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 w-full justify-center text-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                    <span>Ver Original</span>
+                                </a>
+                                <button type="button" onclick="window.deleteCmsMedia({{ $item->id }}, this)" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer w-full justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <span>Eliminar</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+                            <span class="text-[11px] font-bold text-slate-800 truncate block" title="{{ $item->file_name }}">{{ $item->file_name }}</span>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                                <span>{{ $item->size ? round($item->size / 1024, 1) . ' KB' : 'Img' }}</span>
+                                <span>{{ $item->created_at ? $item->created_at->format('d/m/y') : '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div id="cmsMediaPanelEmpty" class="col-span-full py-16 text-center flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-700">Sin imágenes en el Gestor</h4>
+                        <p class="text-xs text-slate-400 mt-1 max-w-sm">Aún no has cargado fotos para tus banners y carruseles. Haz clic en "Subir Imágenes" o arrastra archivos arriba.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
     <!-- MODALES DE CONTROL OPERATIVO CMS                                          -->
     <!-- ========================================================================= -->
 
@@ -1642,7 +1850,7 @@
             <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-10 h-10 items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 shadow-md transition font-bold text-2xl cursor-pointer" data-action="close-modal" data-modal="createSectionModal">&times;</button>
 
             <!-- COLUMNA IZQUIERDA: CONFIGURACIONES -->
-            <div class="w-full md:w-[520px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
+            <div class="w-full md:w-[720px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -1687,35 +1895,7 @@
                             </select>
                         </div>
 
-                        <!-- CAMPOS COMUNES -->
-                        <div id="createCommonFieldsWrap" class="space-y-4 mb-4">
-                            <div class="grid grid-cols-1 gap-4">
-                                <div>
-                                    <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
-                                    <input type="text" name="title" id="inpCreateTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS">
-                                </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-700 mb-1">Badge / Kicker Superior</label>
-                                    <input type="text" name="badge" id="inpCreateBadge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
-                                <input type="text" name="subtitle" id="inpCreateSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido.">
-                            </div>
-                        </div>
-
-                        <!-- 1. MODO HERO -->
-                        <div id="createHeroWrap" class="space-y-4">
-                            <!-- BLOQUE MOTOR DE HERO DINÁMICO -->
-                            <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                                    <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
-                                        Motor de Hero Dinámico
-                                    </span>
-                                </div>
-
-                                <!-- 1. BIFURCADOR DE MODO -->
+<!-- 1. BIFURCADOR DE MODO -->
                                 <div>
                                     <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado</label>
                                     <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
@@ -1730,27 +1910,240 @@
                                     </div>
                                 </div>
 
-                                <!-- 2. ANCHO DE PANTALLA -->
+                                
+
+
+                        <!-- CONTENIDO Y ESTILOS DE TEXTO DEL HERO -->
+                        <div id="createCommonFieldsWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 mb-4">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Contenido y Estilos de Texto
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium">Textos, tipografías y alineación</span>
+                            </div>
+
+                            <!-- TÍTULO PRINCIPAL (H2) + TIPOGRAFÍA + COLOR -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
                                 <div>
-                                    <label class="block font-bold text-slate-700 mb-1">Ancho en Pantalla</label>
-                                    <input type="hidden" name="settings[full_width]" value="0">
-                                    <label class="flex items-center gap-2.5 cursor-pointer p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
-                                        <input type="checkbox" name="settings[full_width]" id="inpCreateFullWidth" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                                        <span class="font-bold text-slate-800 block text-xs">Full-Width</span>
+                                    <label class="block font-semibold text-slate-700 mb-1 text-xs">Título Público (H2)</label>
+                                    <input type="text" name="title" id="inpCreateTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Tipografía del Título</label>
+                                        <select name="settings[title_font]" id="inpCreateTitleFont" class="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg bg-white" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updatePreviewCreate && window.updatePreviewCreate()">
+                                            <option value="inherit">Heredar de Vitrina (Default)</option>
+                                            @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                                <option value="{{ $fKey }}">{{ $fLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color del Título</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" name="settings[title_color]" id="inpCreateTitleColor" value="#ffffff" class="w-8 h-7 p-0 border border-slate-200 rounded cursor-pointer shrink-0" oninput="document.getElementById('inpCreateTitleColorHex').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                                            <input type="text" id="inpCreateTitleColorHex" value="#ffffff" class="w-full px-2 py-1 text-xs font-mono border border-slate-200 rounded-lg" oninput="document.getElementById('inpCreateTitleColor').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BADGE / KICKER SUPERIOR -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                                <label class="block font-semibold text-slate-700 mb-1 text-xs">Badge / Kicker Superior</label>
+                                <input type="text" name="badge" id="inpCreateBadge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+                            </div>
+
+                            <!-- BAJADA / SUBTÍTULO + TIPOGRAFÍA + COLOR -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1 text-xs">Bajada / Subtítulo</label>
+                                    <input type="text" name="subtitle" id="inpCreateSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido." oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Tipografía de Bajada</label>
+                                        <select name="settings[subtitle_font]" id="inpCreateSubtitleFont" class="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg bg-white" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updatePreviewCreate && window.updatePreviewCreate()">
+                                            <option value="inherit">Heredar de Vitrina (Default)</option>
+                                            @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                                <option value="{{ $fKey }}">{{ $fLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color de Bajada</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" name="settings[subtitle_color]" id="inpCreateSubtitleColor" value="#e2e8f0" class="w-8 h-7 p-0 border border-slate-200 rounded cursor-pointer shrink-0" oninput="document.getElementById('inpCreateSubtitleColorHex').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                                            <input type="text" id="inpCreateSubtitleColorHex" value="#e2e8f0" class="w-full px-2 py-1 text-xs font-mono border border-slate-200 rounded-lg" oninput="document.getElementById('inpCreateSubtitleColor').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ALINEACIÓN DE TEXTO -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <span class="block font-semibold text-slate-800 text-xs">Alineación del Texto</span>
+                                    <span class="text-[10px] text-slate-500">Orientación de títulos, bajadas y botones</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-1 p-0.5 bg-slate-100 rounded-lg border border-slate-200 w-32" id="inpCreateTextAlignGroup">
+                                    <label class="relative flex items-center justify-center py-1.5 rounded-md cursor-pointer text-slate-500 transition">
+                                        <input type="radio" name="settings[text_align]" value="text-left" class="peer hidden" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded-md transition"></div>
+                                        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"/></svg>
+                                    </label>
+                                    <label class="relative flex items-center justify-center py-1.5 rounded-md cursor-pointer text-slate-500 transition">
+                                        <input type="radio" name="settings[text_align]" value="text-center" class="peer hidden" checked onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded-md transition"></div>
+                                        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"/></svg>
+                                    </label>
+                                    <label class="relative flex items-center justify-center py-1.5 rounded-md cursor-pointer text-slate-500 transition">
+                                        <input type="radio" name="settings[text_align]" value="text-right" class="peer hidden" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded-md transition"></div>
+                                        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M4 18h16"/></svg>
                                     </label>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- 3. IMAGEN DE FONDO -->
+                        <!-- 1. MODO HERO -->
+                        <div id="createHeroWrap" class="space-y-4">
+                            <!-- BLOQUE MOTOR DE HERO DINÁMICO -->
+                            <div id="createHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                    <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                        Motor de Hero Dinámico
+                                    </span>
+                                </div>
+
+                                <!-- 2. PANTALLA, ALTO Y PARALLAX SCROLLING -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    <div>
+                                        <input type="hidden" name="settings[full_width]" value="0">
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Hero Fullpage</span>
+                                                <span class="text-[10px] text-slate-500">100% de alto</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" name="settings[full_width]" id="inpCreateFullWidth" value="1" class="peer sr-only" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="hidden" name="settings[full_width_horizontal]" value="0">
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Ancho Completo</span>
+                                                <span class="text-[10px] text-slate-500">100% horizontal</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" name="settings[full_width_horizontal]" id="inpCreateFullWidthHorizontal" value="1" class="peer sr-only" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                                        <label class="block font-bold text-slate-800 text-xs mb-1">Alto Personalizado</label>
+                                        <div class="flex gap-2">
+                                            <input type="number" name="settings[hero_height_value]" id="inpCreateHeroHeightValue" placeholder="Ej: 400" class="w-2/3 px-2 py-1.5 border border-slate-200 rounded-lg text-xs" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                            <select name="settings[hero_height_unit]" id="inpCreateHeroHeightUnit" class="w-1/3 px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                                <option value="px">px</option>
+                                                <option value="vh">vh</option>
+                                                <option value="%">%</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="hidden" name="settings[parallax_scrolling]" value="0">
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Efecto Parallax</span>
+                                                <span class="text-[10px] text-slate-500">Scroll fijo dinámico</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" name="settings[parallax_scrolling]" id="inpCreateParallax" value="1" class="peer sr-only" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+<!-- 3. IMAGEN DE FONDO -->
                                 <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
-                                    <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo</label>
-                                    <div class="grid grid-cols-1 gap-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="block font-bold text-slate-800 text-xs">Tipo de Fondo</label>
+                                        <select name="settings[background_type]" id="createHeroBgType" class="px-2 py-1 text-xs font-semibold border border-slate-200 rounded-lg" onchange="window.toggleHeroBgType(this.value, 'create')">
+                                            <option value="image">Imagen</option>
+                                            <option value="video">Video</option>
+                                        </select>
+                                    </div>
+                                    <div id="createHeroBgImageWrap" class="grid grid-cols-1 gap-3">
                                         <div>
                                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
                                             <input type="file" name="background_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'createHeroBgPreview')">
                                         </div>
                                         <div>
-                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL Externa</label>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="block text-[11px] font-semibold text-slate-600">O Ingresar URL Externa</label>
+                                                <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal('createHeroBgUrl')">Seleccionar del Gestor</button>
+                                            </div>
                                             <input type="text" name="settings[background_image]" id="createHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'createHeroBgPreview')">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Alternativo (Alt SEO)</label>
+                                            <input type="text" name="settings[background_image_alt]" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Breve descripción de la imagen">
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <label class="block text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h2m14 0h2M12 3v2m0 14v2"/></svg>
+                                                    Foco de Atención de la Imagen (Punto Focal)
+                                                </label>
+                                                <span id="createHeroFocalPointLabel" class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                                                    Centro Centro (50% 50%)
+                                                </span>
+                                            </div>
+                                            <input type="hidden" name="settings[image_focal_point]" id="inpCreateHeroFocalPoint" value="center center">
+                                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-4">
+                                                <!-- MATRIZ 3x3 DE 9 CELDAS -->
+                                                <div id="createHeroFocalMatrix" class="w-24 h-24 p-1 bg-slate-200/90 border border-slate-300 rounded-xl grid grid-cols-3 gap-1 shadow-inner select-none shrink-0" role="radiogroup" aria-label="Punto focal de la imagen">
+                                                    <button type="button" data-focal="left top" onclick="window.setHeroFocalPoint('create', 'left top')" title="Izquierda Superior (0% 0%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="center top" onclick="window.setHeroFocalPoint('create', 'center top')" title="Centro Superior (50% 0%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="right top" onclick="window.setHeroFocalPoint('create', 'right top')" title="Derecha Superior (100% 0%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+
+                                                    <button type="button" data-focal="left center" onclick="window.setHeroFocalPoint('create', 'left center')" title="Izquierda Centro (0% 50%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="center center" onclick="window.setHeroFocalPoint('create', 'center center')" title="Centro Centro (50% 50%) - Predeterminado" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-indigo-600 border border-indigo-700 ring-2 ring-indigo-300 text-white transition cursor-pointer shadow-xs"><span class="w-2.5 h-2.5 rounded-full bg-white ring-2 ring-indigo-400 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="right center" onclick="window.setHeroFocalPoint('create', 'right center')" title="Derecha Centro (100% 50%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+
+                                                    <button type="button" data-focal="left bottom" onclick="window.setHeroFocalPoint('create', 'left bottom')" title="Izquierda Inferior (0% 100%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="center bottom" onclick="window.setHeroFocalPoint('create', 'center bottom')" title="Centro Inferior (50% 100%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="right bottom" onclick="window.setHeroFocalPoint('create', 'right bottom')" title="Derecha Inferior (100% 100%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 leading-snug">
+                                                    <span class="font-bold text-slate-700 block text-xs">Matriz de 9 Celdas</span>
+                                                    Haz clic en un cuadrante para anclar el punto visual clave al redimensionarse la imagen en pantallas móviles y monitores ultrawide.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="createHeroBgVideoWrap" class="hidden grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Video (MP4)</label>
+                                            <input type="file" name="background_video_file" accept="video/mp4,video/webm" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL de Video</label>
+                                            <input type="text" name="settings[background_video]" id="createHeroBgVideoUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.mp4">
+                                        </div>
+                                        <div class="flex gap-4 mt-2">
+                                            <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600"><input type="checkbox" name="settings[video_autoplay]" value="1" checked class="rounded border-slate-300 text-indigo-600"> Autoplay</label>
+                                            <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600"><input type="checkbox" name="settings[video_loop]" value="1" checked class="rounded border-slate-300 text-indigo-600"> Loop</label>
+                                            <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600"><input type="checkbox" name="settings[video_muted]" value="1" checked class="rounded border-slate-300 text-indigo-600"> Muted</label>
                                         </div>
                                     </div>
                                     <div id="createHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
@@ -1769,99 +2162,70 @@
                                     </label>
 
                                     <div id="createGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
-                                        <div class="grid grid-cols-2 gap-3 mb-3">
-    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
-        <div>
-            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
-            <div class="flex items-center gap-1.5">
-                <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
-                <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <input type="color" id="createGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorStart').value = this.value; window.updateHeroGradientPreview('create')">
+                    <input type="text" name="settings[gradient_color_start]" id="createGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('create')">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="range" name="settings[gradient_opacity_start]" id="createGradOpacityStart" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityStartVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+                    <span id="createGradOpacityStartVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">80%</span>
+                </div>
             </div>
         </div>
-        <div>
-            <label class="flex justify-between block text-[10px] font-semibold text-slate-600 mb-1">
-                <span>Opacidad Inicio</span>
-                <span id="createGradOpacityStartVal">80%</span>
-            </label>
-            <input type="range" name="settings[gradient_opacity_start]" id="createGradOpacityStart" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityStartVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
-        </div>
-    </div>
-    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
-        <div>
-            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
-            <div class="flex items-center gap-1.5">
-                <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
-                <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
+        <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <input type="color" id="createGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createGradColorEnd').value = this.value; window.updateHeroGradientPreview('create')">
+                    <input type="text" name="settings[gradient_color_end]" id="createGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('create')">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="range" name="settings[gradient_opacity_end]" id="createGradOpacityEnd" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityEndVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+                    <span id="createGradOpacityEndVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">80%</span>
+                </div>
             </div>
         </div>
-        <div>
-            <label class="flex justify-between block text-[10px] font-semibold text-slate-600 mb-1">
-                <span>Opacidad Fin</span>
-                <span id="createGradOpacityEndVal">80%</span>
-            </label>
-            <input type="range" name="settings[gradient_opacity_end]" id="createGradOpacityEnd" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createGradOpacityEndVal').textContent = this.value + '%'; window.updateHeroGradientPreview('create')">
+        <div class="col-span-2">
+            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección del Degradado</label>
+            <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
+                <option value="to bottom">Vertical</option>
+                <option value="to right">Horizontal</option>
+                <option value="135deg">Diagonal</option>
+                <option value="to top">Invertido</option>
+            </select>
         </div>
     </div>
-    <div class="col-span-2">
-        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección del Degradado</label>
-        <select name="settings[gradient_direction]" id="createGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('create')">
-            <option value="to bottom">Vertical</option>
-            <option value="to right">Horizontal</option>
-            <option value="135deg">Diagonal</option>
-            <option value="to top">Invertido</option>
-        </select>
-    </div>
+    <div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, rgba(15,23,42,0.8), rgba(30,27,75,0.8));"></div>
 </div>
-<div id="createGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
-                                    </div>
                                 </div>
 
-                                <!-- 5. ESTILOS DE TEXTO Y TIPOGRAFÍA -->
-                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-                                    <label class="block font-bold text-slate-800 text-xs">Estilos de Texto (Hero)</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Título</label>
-                                            <input type="color" name="settings[title_color]" id="inpCreateTitleColor" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
-                                        </div>
-                                        <div>
-                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Bajada</label>
-                                            <input type="color" name="settings[subtitle_color]" id="inpCreateSubtitleColor" value="#e2e8f0" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
-                                        </div>
-                                        <div>
-                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Alineación</label>
-                                            <div class="grid grid-cols-3 gap-1 p-0.5 bg-slate-100 rounded border border-slate-200" id="inpCreateTextAlignGroup">
-    <label class="relative flex items-center justify-center py-1 rounded cursor-pointer text-slate-500 transition">
-        <input type="radio" name="settings[text_align]" value="text-left" class="peer hidden" onchange="window.updatePreview()">
-        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded transition"></div>
-        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"/></svg>
-    </label>
-    <label class="relative flex items-center justify-center py-1 rounded cursor-pointer text-slate-500 transition">
-        <input type="radio" name="settings[text_align]" value="text-center" class="peer hidden" checked onchange="window.updatePreview()">
-        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded transition"></div>
-        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"/></svg>
-    </label>
-    <label class="relative flex items-center justify-center py-1 rounded cursor-pointer text-slate-500 transition">
-        <input type="radio" name="settings[text_align]" value="text-right" class="peer hidden" onchange="window.updatePreview()">
-        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded transition"></div>
-        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M4 18h16"/></svg>
-    </label>
-</div>
-                                        </div>
-                                        <div>
-                                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Tipografía</label>
-                                            <select name="settings[font_family]" id="inpCreateFontFamily" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded">
-                                                <option value="font-sans">Sans (Default)</option>
-                                                <option value="font-serif">Serif</option>
-                                                <option value="font-mono">Monospace</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <!-- 6. ACCIONES Y BOTONES DEL HERO -->
                                 <div id="createHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-                                    <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                        <div>
+                                            <span class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</span>
+                                            <span class="text-[10px] text-slate-500">Conmuta entre botones independientes o clic en todo el banner</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="hidden" name="settings[hero_has_buttons]" value="0">
+                                            <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-100 transition">
+                                                <span class="text-[11px] font-bold text-slate-700">Incluir Botones</span>
+                                                <div class="relative shrink-0">
+                                                    <input type="checkbox" name="settings[hero_has_buttons]" id="inpCreateHeroHasButtons" value="1" checked class="peer sr-only" onchange="window.toggleHeroButtonsMode && window.toggleHeroButtonsMode('create'); window.updatePreviewCreate && window.updatePreviewCreate()">
+                                                    <div class="block bg-slate-200 w-9 h-5 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                    <div class="dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- CONTENEDOR DE BOTONES (VISIBLE SI hero_has_buttons ESTÁ ACTIVO) -->
+                                    <div id="createHeroButtonsControls" class="space-y-3">
 
                                     <!-- Botón Primario -->
                                     <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
@@ -1873,8 +2237,28 @@
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
-                                                <div class="flex flex-col gap-1.5">
+                                                <div class="flex items-center gap-1.5">
                                                     <input type="text" name="settings[cta_primary_url]" id="createCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
+                                                    <select onchange="if(this.value){ document.getElementById('createCtaPrimaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                        <option value="">+ Insertar Ruta</option>
+                                                        <optgroup label="Secciones Modulares">
+                                                            @foreach($sections as $s)
+                                                                <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Páginas Institucionales">
+                                                            @foreach($pages as $p)
+                                                                <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Vitrinas Multiverso">
+                                                            <option value="/marte">/marte (Masculino)</option>
+                                                            <option value="/venus">/venus (Femenino)</option>
+                                                            <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                            <option value="/terra">/terra (Unisex)</option>
+                                                            <option value="/catalogo">/catalogo (General)</option>
+                                                        </optgroup>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-2 mt-1">
@@ -1885,6 +2269,29 @@
                                                 <div>
                                                     <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Texto</label>
                                                     <input type="color" name="settings[cta_primary_color]" id="inpCreateCtaPrimaryColor" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Borde</label>
+                                                    <input type="color" name="settings[cta_primary_border_color]" id="inpCreateCtaPrimaryBorderColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Grosor Borde</label>
+                                                    <select name="settings[cta_primary_border_width]" id="inpCreateCtaPrimaryBorderWidth" class="w-full px-2 py-1 border border-slate-200 rounded text-[11px] h-8 bg-white">
+                                                        <option value="border-0">Sin Borde</option>
+                                                        <option value="border">Fino (1px)</option>
+                                                        <option value="border-2">Medio (2px)</option>
+                                                        <option value="border-4">Grueso (4px)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-span-2">
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Sombra</label>
+                                                    <select name="settings[cta_primary_shadow]" id="inpCreateCtaPrimaryShadow" class="w-full px-2 py-1.5 border border-slate-200 rounded text-[11px] bg-white">
+                                                        <option value="">Sin Sombra</option>
+                                                        <option value="shadow-sm">Pequeña</option>
+                                                        <option value="shadow-md">Media</option>
+                                                        <option value="shadow-lg">Grande</option>
+                                                        <option value="shadow-xl">Extra Grande</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -1900,8 +2307,28 @@
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
-                                                <div class="flex flex-col gap-1.5">
+                                                <div class="flex items-center gap-1.5">
                                                     <input type="text" name="settings[cta_secondary_url]" id="createCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas">
+                                                    <select onchange="if(this.value){ document.getElementById('createCtaSecondaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                        <option value="">+ Insertar Ruta</option>
+                                                        <optgroup label="Secciones Modulares">
+                                                            @foreach($sections as $s)
+                                                                <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Páginas Institucionales">
+                                                            @foreach($pages as $p)
+                                                                <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Vitrinas Multiverso">
+                                                            <option value="/marte">/marte (Masculino)</option>
+                                                            <option value="/venus">/venus (Femenino)</option>
+                                                            <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                            <option value="/terra">/terra (Unisex)</option>
+                                                            <option value="/catalogo">/catalogo (General)</option>
+                                                        </optgroup>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-2 mt-1">
@@ -1913,6 +2340,67 @@
                                                     <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Texto</label>
                                                     <input type="color" name="settings[cta_secondary_color]" id="inpCreateCtaSecondaryColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
                                                 </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Borde</label>
+                                                    <input type="color" name="settings[cta_secondary_border_color]" id="inpCreateCtaSecondaryBorderColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Grosor Borde</label>
+                                                    <select name="settings[cta_secondary_border_width]" id="inpCreateCtaSecondaryBorderWidth" class="w-full px-2 py-1 border border-slate-200 rounded text-[11px] h-8 bg-white">
+                                                        <option value="border-0">Sin Borde</option>
+                                                        <option value="border">Fino (1px)</option>
+                                                        <option value="border-2">Medio (2px)</option>
+                                                        <option value="border-4">Grueso (4px)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-span-2">
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Sombra</label>
+                                                    <select name="settings[cta_secondary_shadow]" id="inpCreateCtaSecondaryShadow" class="w-full px-2 py-1.5 border border-slate-200 rounded text-[11px] bg-white">
+                                                        <option value="">Sin Sombra</option>
+                                                        <option value="shadow-sm">Pequeña</option>
+                                                        <option value="shadow-md">Media</option>
+                                                        <option value="shadow-lg">Grande</option>
+                                                        <option value="shadow-xl">Extra Grande</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+
+                                    <!-- CONTENEDOR DE CLIC EN TODO EL HERO (VISIBLE CUANDO hero_has_buttons ESTÁ DESACTIVADO) -->
+                                    <div id="createHeroFullClickWrap" class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-xl space-y-2 hidden">
+                                        <div class="flex items-center gap-2 text-amber-900 font-bold text-xs">
+                                            <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                                            <span>Enlace de Clic en Todo el Hero</span>
+                                        </div>
+                                        <p class="text-[11px] text-amber-800 leading-relaxed">
+                                            Al no incluir botones, cualquier clic sobre la imagen o el contenido del Hero redirigirá automáticamente a la siguiente ruta o URL seleccionada.
+                                        </p>
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">URL / Ruta de Destino</label>
+                                            <div class="flex items-center gap-1.5">
+                                                <input type="text" name="settings[hero_click_url]" id="createHeroClickUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono bg-white" placeholder="Ej: #section-2 o /catalogo" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                                <select onchange="if(this.value){ document.getElementById('createHeroClickUrl').value = this.value; this.value=''; window.updatePreviewCreate && window.updatePreviewCreate(); }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer shrink-0" title="Seleccionar una ruta de la tienda">
+                                                    <option value="">+ Insertar Ruta</option>
+                                                    <optgroup label="Secciones Modulares">
+                                                        @foreach($sections as $s)
+                                                            <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    <optgroup label="Páginas Institucionales">
+                                                        @foreach($pages as $p)
+                                                            <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    <optgroup label="Vitrinas Multiverso">
+                                                        <option value="/marte">/marte (Masculino)</option>
+                                                        <option value="/venus">/venus (Femenino)</option>
+                                                        <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                        <option value="/terra">/terra (Unisex)</option>
+                                                        <option value="/catalogo">/catalogo (General)</option>
+                                                    </optgroup>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -1922,23 +2410,81 @@
 
                         <!-- 2. MODO CAROUSEL -->
                         <div id="createCarouselWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
-                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
+    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+        <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
+        <label class="flex items-center gap-2 cursor-pointer bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
+            <input type="checkbox" id="createCarouselGlobalToggle" name="settings[carousel_global_content]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createCarouselGradientControlsWrap').style.display = this.checked ? 'block' : 'none'; window.updatePreviewCreate && window.updatePreviewCreate()">
+            <span class="text-[10px] text-slate-700 font-bold">Usar Título y Overlay General</span>
+        </label>
+    </div>
+    <div class="space-y-4">
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="createCarouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                <span class="text-xs text-slate-700 font-bold">Autoplay</span>
+            </label>
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-slate-700 font-bold">Tiempo (segundos):</label>
+                <input type="number" name="settings[autoplay_time]" id="createCarouselAutoplayTime" value="5" min="1" class="w-16 px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+            </div>
+        </div>
+
+        <!-- OVERLAY (Gradient) -->
+        <div id="createCarouselGradientControlsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+            <input type="hidden" name="settings[carousel_enable_gradient]" value="0">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="settings[carousel_enable_gradient]" id="createCarouselEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createCarouselGradientControls').style.display = this.checked ? 'block' : 'none'; window.updatePreviewCreate && window.updatePreviewCreate()">
+                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
+            </label>
+
+            <div id="createCarouselGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <input type="color" id="createCarGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createCarGradColorStart').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                                <input type="text" name="settings[carousel_gradient_color_start]" id="createCarGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createCarGradColorStartPicker').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
                             </div>
-                            <div class="space-y-2">
-                                <label class="block font-bold text-slate-700 mb-1 text-xs">Añadir Banners (Boceto)</label>
-                                <div class="p-6 bg-white border-2 border-dashed border-slate-300 rounded-xl text-center text-slate-500 text-xs hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition">
-                                    <div class="mb-2">
-                                        <svg class="mx-auto h-8 w-8 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                    </div>
-                                    + Subir Imágenes para Carrusel
-                                </div>
-                                <div class="flex items-center gap-2 mt-4">
-                                    <input type="checkbox" id="carouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                                    <label class="text-xs text-slate-700 font-bold cursor-pointer" for="carouselAutoPlay">Autoplay (Transición automática)</label>
-                                </div>
-                            </div>
+                            <input type="range" name="settings[carousel_gradient_opacity_start]" id="createCarGradOpacityStart" min="0" max="100" value="80" class="w-full" oninput="document.getElementById('createCarGradOpacityStartVal').textContent = this.value + '%'; window.updatePreviewCreate && window.updatePreviewCreate()">
+                            <div class="text-right text-[10px] text-slate-500 mt-1" id="createCarGradOpacityStartVal">80%</div>
                         </div>
+                    </div>
+                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <input type="color" id="createCarGradColorEndPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createCarGradColorEnd').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                                <input type="text" name="settings[carousel_gradient_color_end]" id="createCarGradColorEnd" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createCarGradColorEndPicker').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                            </div>
+                            <input type="range" name="settings[carousel_gradient_opacity_end]" id="createCarGradOpacityEnd" min="0" max="100" value="0" class="w-full" oninput="document.getElementById('createCarGradOpacityEndVal').textContent = this.value + '%'; window.updatePreviewCreate && window.updatePreviewCreate()">
+                            <div class="text-right text-[10px] text-slate-500 mt-1" id="createCarGradOpacityEndVal">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-600 mb-1">Direcci?n del Degradado</label>
+                    <select name="settings[carousel_gradient_direction]" id="createCarGradDirection" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                        <option value="to bottom">De Arriba hacia Abajo</option>
+                        <option value="to top">De Abajo hacia Arriba</option>
+                        <option value="to right">De Izquierda a Derecha</option>
+                        <option value="to left">De Derecha a Izquierda</option>
+                        <option value="to bottom right">Diagonal (Arr-Izq a Aba-Der)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <label class="block font-bold text-slate-700 text-xs">Slides</label>
+            <button type="button" class="px-2 py-1 bg-indigo-600 text-white text-[10px] rounded hover:bg-indigo-700 font-bold" onclick="window.addCarouselSlide('create')">+ Añadir Slide</button>
+        </div>
+        
+        <div id="createCarouselSlidesList" class="space-y-3">
+            <!-- Dynamic Slides go here -->
+        </div>
+    </div>
+</div>
 
                         <!-- 3. MODO POP UP -->
                         <div id="createPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
@@ -1952,7 +2498,7 @@
                                 </div>
                                 <div>
                                     <label class="block font-bold text-slate-700 mb-1 text-xs">Comportamiento de Cierre</label>
-                                    <select name="settings[popup_close_behavior]" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                    <select name="settings[popup_close_behavior]" id="createPopupCloseBehavior" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
                                         <option value="outside">Permitir cerrar al hacer clic fuera (Overlay)</option>
                                         <option value="button">Requerir acción (Solo Botón Cerrar)</option>
                                     </select>
@@ -1963,13 +2509,74 @@
                         <!-- 4. MODO BOTONES / BLOQUE PERSONALIZADO -->
                         <div id="createButtonsWrap" class="space-y-4 hidden">
                             <!-- EDITOR DE CÓDIGO CUSTOM -->
-                            <div id="createCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Bloque Custom / HTML Libre</span>
+                        </div>
+                        <div id="createCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Bloque Custom / HTML Libre</span>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1 text-xs">Ingresa tu código HTML / CSS</label>
+                                <textarea name="custom_html" id="createCustomHtml" rows="5" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<!-- Tu código HTML aquí -->&#10;<div class='flex gap-2 justify-center'>&#10;  <button class='btn'>Botón 1</button>&#10;</div>" oninput="window.updatePreviewCreate && window.updatePreviewCreate()"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 5. GESTIÓN DE ESPACIADOS ENTRE SECCIONES (TASK-SPACING-MODULAR) -->
+                        <div id="createSpacingWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                    <span>Espaciado Vertical de Sección (Márgenes)</span>
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium">Por defecto: 0px (Sin espacios)</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Espaciado Superior -->
+                                <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-lg space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <span>Margen Superior</span>
+                                        </label>
+                                        <div class="flex items-center gap-1">
+                                            <input type="number" id="inpCreateSpacingTop" name="settings[spacing_top]" min="0" max="160" step="1" value="0" class="w-14 px-1.5 py-0.5 text-center text-xs font-mono font-bold bg-white border border-slate-200 rounded" oninput="window.setSectionSpacing('create', 'top', this.value)">
+                                            <span class="text-[10px] text-slate-500 font-semibold">px</span>
+                                        </div>
+                                    </div>
+                                    <input type="range" id="rangeCreateSpacingTop" min="0" max="120" step="2" value="0" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg" oninput="window.setSectionSpacing('create', 'top', this.value)">
+                                    <!-- Presets rápidos -->
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[9px] text-slate-400 uppercase font-bold mr-0.5">Presets:</span>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'top', 0)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">0px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'top', 12)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">12px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'top', 24)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">24px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'top', 36)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">36px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'top', 48)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">48px</button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block font-semibold text-slate-300 mb-1 text-xs">Ingresa tu código HTML / CSS</label>
-                                    <textarea name="custom_html" rows="5" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<!-- Tu código HTML aquí -->&#10;<div class='flex gap-2 justify-center'>&#10;  <button class='btn'>Botón 1</button>&#10;</div>"></textarea>
+
+                                <!-- Espaciado Inferior -->
+                                <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-lg space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>Margen Inferior</span>
+                                        </label>
+                                        <div class="flex items-center gap-1">
+                                            <input type="number" id="inpCreateSpacingBottom" name="settings[spacing_bottom]" min="0" max="160" step="1" value="0" class="w-14 px-1.5 py-0.5 text-center text-xs font-mono font-bold bg-white border border-slate-200 rounded" oninput="window.setSectionSpacing('create', 'bottom', this.value)">
+                                            <span class="text-[10px] text-slate-500 font-semibold">px</span>
+                                        </div>
+                                    </div>
+                                    <input type="range" id="rangeCreateSpacingBottom" min="0" max="120" step="2" value="0" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg" oninput="window.setSectionSpacing('create', 'bottom', this.value)">
+                                    <!-- Presets rápidos -->
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[9px] text-slate-400 uppercase font-bold mr-0.5">Presets:</span>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'bottom', 0)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">0px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'bottom', 12)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">12px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'bottom', 24)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">24px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'bottom', 36)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">36px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('create', 'bottom', 48)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">48px</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1989,14 +2596,14 @@
             <!-- COLUMNA DERECHA: PREVIEW EN VIVO -->
             <div class="flex-1 bg-slate-100 p-0 sm:p-6 flex flex-col relative z-10">
                 <!-- Toggle de Dispositivo -->
-                <div class="absolute top-6 left-6 z-40 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200">
-                    <button type="button" class="preview-device-btn active px-3 py-1.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 cursor-pointer" data-device="desktop">Desktop</button>
-                    <button type="button" class="preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
+                <div class="absolute top-6 left-6 z-40 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200" id="createPreviewDeviceGroup">
+                    <button type="button" class="create-preview-device-btn active px-3 py-1.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 cursor-pointer" data-device="desktop">Desktop</button>
+                    <button type="button" class="create-preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
                 </div>
                 
                 <!-- Contenedor del Preview Visual -->
                 <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-16">
-                    <div id="livePreviewContainer" class="w-full h-[60vh] md:h-[65vh] 2xl:h-[70vh] lg:max-h-[600px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                    <div id="livePreviewContainer" class="w-full h-[50vh] md:h-[55vh] max-h-[500px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
                         <!-- Skeleton Header de la tienda -->
                         <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
                             <div class="w-24 h-6 bg-slate-200 rounded"></div>
@@ -2012,12 +2619,13 @@
                         <div id="livePreviewContent" class="w-full min-h-[250px] flex flex-col bg-white">
                             
                             <!-- 1. Hero / Sección Preview -->
-                            <div id="previewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-50 min-h-[150px] overflow-hidden transition-all duration-300">
+                            <div id="previewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-900 min-h-[250px] overflow-hidden transition-all duration-300">
+                                <video id="createPreviewHeroVideo" class="absolute inset-0 w-full h-full object-cover z-0 hidden" autoplay loop muted playsinline></video>
                                 <div id="previewOverlay" class="absolute inset-0 z-0 hidden"></div>
                                 <div class="relative z-10 max-w-2xl mx-auto space-y-4 w-full">
                                     <span id="previewBadge" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full uppercase tracking-widest hidden"></span>
-                                    <h2 id="previewTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Tu Título Aquí</h2>
-                                    <p id="previewSubtitle" class="text-slate-600 md:text-lg max-w-xl mx-auto hidden">Tu bajada o subtítulo aquí.</p>
+                                    <h2 id="previewTitle" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Tu Título Aquí</h2>
+                                    <p id="previewSubtitle" class="text-slate-300 md:text-lg max-w-xl mx-auto hidden">Tu bajada o subtítulo aquí.</p>
                                     
                                     <div id="previewActions" class="flex flex-wrap justify-center gap-3 pt-4 hidden">
                                         <button id="previewBtnPrimary" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-sm shadow-sm hidden transition-colors"></button>
@@ -2066,9 +2674,11 @@
                             <div id="previewButtonsArea" class="hidden w-full p-8 md:p-12 flex flex-col items-center text-center bg-white">
                                 <h2 class="preview-common-title text-2xl font-bold text-slate-900 mb-3"></h2>
                                 <p class="preview-common-subtitle text-slate-600 mb-8 max-w-lg mx-auto"></p>
-                                <div class="p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl w-full text-slate-400 text-xs flex items-center justify-center flex-col gap-2">
-                                    <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                    Área de Bloque Personalizado / Código HTML Inyectado
+                                <div id="createCustomHtmlPreviewContainer" class="w-full">
+                                    <div class="p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl w-full text-slate-400 text-xs flex items-center justify-center flex-col gap-2">
+                                        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                        Área de Bloque Personalizado / Código HTML Inyectado
+                                    </div>
                                 </div>
                             </div>
 
@@ -2086,18 +2696,42 @@
                     const createButtonsWrap = document.getElementById('createButtonsWrap');
 
                     function switchSectionType() {
+                        const createSectionType = document.getElementById('createSectionType');
                         if (!createSectionType) return;
                         const val = createSectionType.value;
-                        if(createHeroWrap) createHeroWrap.style.display = val === 'hero' ? 'block' : 'none';
-                        if(createCarouselWrap) createCarouselWrap.style.display = val === 'carousel' ? 'block' : 'none';
-                        if(createPopUpWrap) createPopUpWrap.style.display = val === 'pop_up' ? 'block' : 'none';
-                        if(createButtonsWrap) createButtonsWrap.style.display = val === 'buttons' ? 'block' : 'none';
+                        const isCustom = document.querySelector('input[name="settings[hero_mode]"]:checked')?.value === 'custom';
+                        
+                        const createHeroWrap = document.getElementById('createHeroWrap');
+                        const createCarouselWrap = document.getElementById('createCarouselWrap');
+                        const createPopUpWrap = document.getElementById('createPopUpWrap');
+                        const createButtonsWrap = document.getElementById('createButtonsWrap');
+                        const createCustomCodeWrap = document.getElementById('createCustomCodeWrap');
+                        const createCommonFieldsWrap = document.getElementById('createCommonFieldsWrap');
+                        const createSpacingWrap = document.getElementById('createSpacingWrap');
+
+                        if (isCustom) {
+                            if(createHeroWrap) createHeroWrap.style.display = 'none';
+                            if(createCarouselWrap) createCarouselWrap.style.display = 'none';
+                            if(createPopUpWrap) createPopUpWrap.style.display = 'none';
+                            if(createButtonsWrap) createButtonsWrap.style.display = 'none';
+                            if(createCommonFieldsWrap) createCommonFieldsWrap.style.display = 'none';
+                            if(createCustomCodeWrap) createCustomCodeWrap.style.display = 'block';
+                            if(createSpacingWrap) createSpacingWrap.style.display = 'block';
+                        } else {
+                            if(createCommonFieldsWrap) createCommonFieldsWrap.style.display = 'block';
+                            if(createCustomCodeWrap) createCustomCodeWrap.style.display = 'none';
+                            if(createHeroWrap) createHeroWrap.style.display = val === 'hero' ? 'block' : 'none';
+                            if(createCarouselWrap) createCarouselWrap.style.display = val === 'carousel' ? 'block' : 'none';
+                            if(createPopUpWrap) createPopUpWrap.style.display = val === 'pop_up' ? 'block' : 'none';
+                            if(createButtonsWrap) createButtonsWrap.style.display = val === 'buttons' ? 'block' : 'none';
+                            if(createSpacingWrap) createSpacingWrap.style.display = val === 'pop_up' ? 'none' : 'block';
+                        }
                     }
 
                     if (createSectionType) {
                         createSectionType.addEventListener('change', () => {
                             switchSectionType();
-                            if(typeof updatePreview === 'function') updatePreview();
+                            if(typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
                         });
                         switchSectionType(); // Init state
                     }
@@ -2131,7 +2765,8 @@
                     const inpCreateCtaSecondaryBg = document.getElementById('inpCreateCtaSecondaryBg');
                     const inpCreateCtaSecondaryColor = document.getElementById('inpCreateCtaSecondaryColor');
 
-                    function updatePreview() {
+                    window.updatePreviewCreate = function() {
+
                         const typeVal = createSectionType ? createSectionType.value : 'hero';
 
                         // Toggle preview areas
@@ -2140,32 +2775,56 @@
                         if (previewPopUpArea) previewPopUpArea.style.display = typeVal === 'pop_up' ? 'flex' : 'none';
                         if (previewButtonsArea) previewButtonsArea.style.display = typeVal === 'buttons' ? 'flex' : 'none';
 
+                        // Espaciado vertical (Márgenes superior e inferior en preview)
+                        const spTop = document.getElementById('inpCreateSpacingTop') ? (parseInt(document.getElementById('inpCreateSpacingTop').value, 10) || 0) : 0;
+                        const spBottom = document.getElementById('inpCreateSpacingBottom') ? (parseInt(document.getElementById('inpCreateSpacingBottom').value, 10) || 0) : 0;
+                        [previewHeroArea, previewCarouselArea, previewButtonsArea].forEach(area => {
+                            if (area) {
+                                area.style.marginTop = spTop + 'px';
+                                area.style.marginBottom = spBottom + 'px';
+                            }
+                        });
+
                         // Actualizar textos globales para las nuevas áreas
                         const defaultTitle = typeVal === 'buttons' ? 'Bloque Personalizado' : 'Tu Título Aquí';
-                        document.querySelectorAll('.preview-common-title').forEach(el => {
+                        document.querySelectorAll('#createSectionModal .preview-common-title').forEach(el => {
                             el.textContent = titleInput && titleInput.value ? titleInput.value : defaultTitle;
                         });
-                        document.querySelectorAll('.preview-common-subtitle').forEach(el => {
+                        document.querySelectorAll('#createSectionModal .preview-common-subtitle').forEach(el => {
                             el.textContent = subtitleInput && subtitleInput.value ? subtitleInput.value : 'Tu bajada o subtítulo aquí.';
                             el.style.display = subtitleInput && subtitleInput.value ? 'block' : 'none';
                         });
 
-                        // Textos (Legacy para Hero)
+                        // Textos y Tipografías Independientes para Hero
                         if (titleInput && previewTitle) {
                             previewTitle.textContent = titleInput.value || 'Tu Hero Principal';
-                            if (inpCreateTitleColor) {
+                            if (inpCreateTitleColor && inpCreateTitleColor.value) {
                                 previewTitle.style.color = inpCreateTitleColor.value;
                             } else {
                                 previewTitle.style.color = '';
+                            }
+                            const tFontInp = document.getElementById('inpCreateTitleFont');
+                            if (tFontInp && tFontInp.value && tFontInp.value !== 'inherit') {
+                                if (window.loadGoogleFont) window.loadGoogleFont(tFontInp.value);
+                                previewTitle.style.fontFamily = `'${tFontInp.value}', sans-serif`;
+                            } else {
+                                previewTitle.style.fontFamily = '';
                             }
                         }
                         if (subtitleInput && previewSubtitle) {
                             previewSubtitle.textContent = subtitleInput.value;
                             previewSubtitle.style.display = subtitleInput.value ? 'block' : 'none';
-                            if (inpCreateSubtitleColor) {
+                            if (inpCreateSubtitleColor && inpCreateSubtitleColor.value) {
                                 previewSubtitle.style.color = inpCreateSubtitleColor.value;
                             } else {
                                 previewSubtitle.style.color = '';
+                            }
+                            const sFontInp = document.getElementById('inpCreateSubtitleFont');
+                            if (sFontInp && sFontInp.value && sFontInp.value !== 'inherit') {
+                                if (window.loadGoogleFont) window.loadGoogleFont(sFontInp.value);
+                                previewSubtitle.style.fontFamily = `'${sFontInp.value}', sans-serif`;
+                            } else {
+                                previewSubtitle.style.fontFamily = '';
                             }
                         }
                         if (badgeInput && previewBadge) {
@@ -2173,41 +2832,64 @@
                             previewBadge.style.display = badgeInput.value ? 'inline-block' : 'none';
                         }
                         
-                        // Alineación y tipografía del contenedor de texto
-if (previewHeroArea) {
-    const inpAlign = document.querySelector('#createSectionModal:not(.hidden) input[name="settings[text_align]"]:checked') || 
-                     document.querySelector('#editSectionModal:not(.hidden) input[name="settings[text_align]"]:checked') ||
-                     document.querySelector('input[name="settings[text_align]"]:checked');
-    const alignVal = inpAlign ? inpAlign.value : 'text-center';
-    
-    const innerWrapper = previewHeroArea.querySelector('.relative.z-10');
-    
-    previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'items-center', 'items-start', 'items-end');
-    if (innerWrapper) innerWrapper.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
-    if (previewSubtitle) previewSubtitle.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
-    if (previewActions) previewActions.classList.remove('justify-center', 'justify-start', 'justify-end');
-    
-    if (alignVal === 'text-left') {
-        previewHeroArea.classList.add('text-left', 'items-start');
-        if (innerWrapper) innerWrapper.classList.add('ml-0', 'mr-auto');
-        if (previewSubtitle) previewSubtitle.classList.add('ml-0', 'mr-auto');
-        if (previewActions) previewActions.classList.add('justify-start');
-    } else if (alignVal === 'text-right') {
-        previewHeroArea.classList.add('text-right', 'items-end');
-        if (innerWrapper) innerWrapper.classList.add('ml-auto', 'mr-0');
-        if (previewSubtitle) previewSubtitle.classList.add('ml-auto', 'mr-0');
-        if (previewActions) previewActions.classList.add('justify-end');
-    } else {
-        previewHeroArea.classList.add('text-center', 'items-center');
-        if (innerWrapper) innerWrapper.classList.add('mx-auto');
-        if (previewSubtitle) previewSubtitle.classList.add('mx-auto');
-        if (previewActions) previewActions.classList.add('justify-center');
-    }
+                        // Alineación, altura y efecto Parallax del contenedor de texto
+                        if (previewHeroArea) {
+                            const inpAlign = document.querySelector('#createSectionModal input[name="settings[text_align]"]:checked');
+                            const alignVal = inpAlign ? inpAlign.value : 'text-center';
+                            
+                            const innerWrapper = previewHeroArea.querySelector('.relative.z-10');
+                            
+                            previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'items-center', 'items-start', 'items-end');
+                            if (innerWrapper) innerWrapper.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
+                            if (previewSubtitle) previewSubtitle.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
+                            if (previewActions) previewActions.classList.remove('justify-center', 'justify-start', 'justify-end');
+                            
+                            const isFullPage = document.getElementById('inpCreateFullWidth') && document.getElementById('inpCreateFullWidth').checked;
+                            const isFullWidthH = document.getElementById('inpCreateFullWidthHorizontal') && document.getElementById('inpCreateFullWidthHorizontal').checked;
+                            const heightVal = document.getElementById('inpCreateHeroHeightValue') ? document.getElementById('inpCreateHeroHeightValue').value : '';
+                            const heightUnit = document.getElementById('inpCreateHeroHeightUnit') ? document.getElementById('inpCreateHeroHeightUnit').value : 'px';
+                            const customHeight = heightVal ? heightVal + heightUnit : '';
+                            
+                            if (isFullPage) {
+                                previewHeroArea.style.minHeight = '400px';
+                            } else if (customHeight.trim() !== '') {
+                                previewHeroArea.style.minHeight = customHeight;
+                            } else {
+                                previewHeroArea.style.minHeight = '150px';
+                            }
 
-    const inpFont = document.getElementById('inpCreateFontFamily') || document.getElementById('editFontFamily');
-    previewHeroArea.classList.remove('font-sans', 'font-serif', 'font-mono');
-    if (inpFont) previewHeroArea.classList.add(inpFont.value);
-}
+                            if (isFullWidthH) {
+                                previewHeroArea.classList.add('w-full', '!rounded-none');
+                                previewHeroArea.classList.remove('rounded-xl');
+                            } else {
+                                previewHeroArea.classList.remove('!rounded-none');
+                            }
+
+                            // Efecto Parallax Scrolling
+                            const inpParallax = document.getElementById('inpCreateParallax');
+                            if (inpParallax && inpParallax.checked) {
+                                previewHeroArea.style.backgroundAttachment = 'fixed';
+                            } else {
+                                previewHeroArea.style.backgroundAttachment = 'scroll';
+                            }
+
+                            if (alignVal === 'text-left') {
+                                previewHeroArea.classList.add('text-left', 'items-start');
+                                if (innerWrapper) innerWrapper.classList.add('ml-0', 'mr-auto');
+                                if (previewSubtitle) previewSubtitle.classList.add('ml-0', 'mr-auto');
+                                if (previewActions) previewActions.classList.add('justify-start');
+                            } else if (alignVal === 'text-right') {
+                                previewHeroArea.classList.add('text-right', 'items-end');
+                                if (innerWrapper) innerWrapper.classList.add('ml-auto', 'mr-0');
+                                if (previewSubtitle) previewSubtitle.classList.add('ml-auto', 'mr-0');
+                                if (previewActions) previewActions.classList.add('justify-end');
+                            } else {
+                                previewHeroArea.classList.add('text-center', 'items-center');
+                                if (innerWrapper) innerWrapper.classList.add('mx-auto');
+                                if (previewSubtitle) previewSubtitle.classList.add('mx-auto');
+                                if (previewActions) previewActions.classList.add('justify-center');
+                            }
+                        }
 
                         // Botones
                         let hasBtn = false;
@@ -2218,7 +2900,17 @@ if (previewHeroArea) {
                                 hasBtn = true;
                                 if(inpCreateCtaPrimaryBg) previewBtnPrimary.style.backgroundColor = inpCreateCtaPrimaryBg.value;
                                 if(inpCreateCtaPrimaryColor) previewBtnPrimary.style.color = inpCreateCtaPrimaryColor.value;
-                                previewBtnPrimary.style.borderColor = inpCreateCtaPrimaryBg ? inpCreateCtaPrimaryBg.value : '';
+                                
+                                const bW = document.getElementById('inpCreateCtaPrimaryBorderWidth') ? document.getElementById('inpCreateCtaPrimaryBorderWidth').value : 'border-0';
+                                const bC = document.getElementById('inpCreateCtaPrimaryBorderColor') ? document.getElementById('inpCreateCtaPrimaryBorderColor').value : 'transparent';
+                                const shadow = document.getElementById('inpCreateCtaPrimaryShadow') ? document.getElementById('inpCreateCtaPrimaryShadow').value : '';
+                                
+                                previewBtnPrimary.className = `px-6 py-2.5 rounded-lg font-bold text-sm transition-colors ${bW} ${shadow}`;
+                                if(bW !== 'border-0') {
+                                    previewBtnPrimary.style.borderColor = bC;
+                                } else {
+                                    previewBtnPrimary.style.borderColor = 'transparent';
+                                }
                             }
                         } else {
                             if(previewBtnPrimary) previewBtnPrimary.style.display = 'none';
@@ -2231,14 +2923,51 @@ if (previewHeroArea) {
                                 hasBtn = true;
                                 if(inpCreateCtaSecondaryBg) previewBtnSecondary.style.backgroundColor = inpCreateCtaSecondaryBg.value;
                                 if(inpCreateCtaSecondaryColor) previewBtnSecondary.style.color = inpCreateCtaSecondaryColor.value;
-                                if(inpCreateCtaSecondaryColor) previewBtnSecondary.style.borderColor = inpCreateCtaSecondaryColor.value; // Assuming border is text color
+                                
+                                const bW2 = document.getElementById('inpCreateCtaSecondaryBorderWidth') ? document.getElementById('inpCreateCtaSecondaryBorderWidth').value : 'border-0';
+                                const bC2 = document.getElementById('inpCreateCtaSecondaryBorderColor') ? document.getElementById('inpCreateCtaSecondaryBorderColor').value : 'transparent';
+                                const shadow2 = document.getElementById('inpCreateCtaSecondaryShadow') ? document.getElementById('inpCreateCtaSecondaryShadow').value : '';
+                                
+                                previewBtnSecondary.className = `px-6 py-2.5 rounded-lg font-bold text-sm transition-colors ${bW2} ${shadow2}`;
+                                if(bW2 !== 'border-0') {
+                                    previewBtnSecondary.style.borderColor = bC2;
+                                } else {
+                                    previewBtnSecondary.style.borderColor = 'transparent';
+                                }
                             }
                         } else {
                             if(previewBtnSecondary) previewBtnSecondary.style.display = 'none';
                         }
                         
+                        const inpHasButtons = document.getElementById('inpCreateHeroHasButtons');
+                        const hasButtons = inpHasButtons ? inpHasButtons.checked : true;
+                        const clickUrlInp = document.getElementById('createHeroClickUrl');
+                        const heroClickUrl = clickUrlInp ? clickUrlInp.value.trim() : '';
+
                         if (previewActions) {
-                            previewActions.style.display = hasBtn ? 'flex' : 'none';
+                            previewActions.style.display = (hasButtons && hasBtn) ? 'flex' : 'none';
+                        }
+
+                        let clickBadge = document.getElementById('createPreviewHeroClickBadge');
+                        if (previewHeroArea) {
+                            const innerWrapper = previewHeroArea.querySelector('.relative.z-10');
+                            if (!hasButtons) {
+                                previewHeroArea.style.cursor = 'pointer';
+                                previewHeroArea.title = heroClickUrl ? ('Clic redirige a: ' + heroClickUrl) : 'Hero clicable en toda el área';
+                                if (!clickBadge) {
+                                    clickBadge = document.createElement('div');
+                                    clickBadge.id = 'createPreviewHeroClickBadge';
+                                    clickBadge.className = 'mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-200 border border-amber-400/40 rounded-full text-[11px] font-semibold backdrop-blur-xs relative z-10';
+                                    if (innerWrapper) innerWrapper.appendChild(clickBadge);
+                                    else previewHeroArea.appendChild(clickBadge);
+                                }
+                                clickBadge.style.display = 'inline-flex';
+                                clickBadge.innerHTML = `<svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg> Clic en todo el Hero ${heroClickUrl ? '→ ' + heroClickUrl : '(Sin URL asignada)'}`;
+                            } else {
+                                previewHeroArea.style.cursor = 'default';
+                                previewHeroArea.title = '';
+                                if (clickBadge) clickBadge.style.display = 'none';
+                            }
                         }
 
                         // Estilo Hero Completo
@@ -2246,34 +2975,190 @@ if (previewHeroArea) {
                             previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6', 'text-slate-900');
                             previewHeroArea.classList.add('bg-slate-900', 'min-h-[250px]', 'p-8');
                             
-                            if (window._currentHeroPreviewBg) {
-                                previewHeroArea.style.backgroundImage = window._currentHeroPreviewBg;
-                                previewHeroArea.classList.add('bg-cover', 'bg-center');
+                            const bgType = document.getElementById('createHeroBgType')?.value || 'image';
+                            const videoEl = document.getElementById('createPreviewHeroVideo');
+                            const videoFileInp = document.querySelector('#createSectionModal input[name="background_video_file"]');
+                            const videoUrlInp = document.getElementById('createHeroBgVideoUrl');
+                            const videoAutoplay = document.getElementById('createHeroVideoAutoplay')?.checked ?? true;
+                            const videoLoop = document.getElementById('createHeroVideoLoop')?.checked ?? true;
+                            const videoMuted = document.getElementById('createHeroVideoMuted')?.checked ?? true;
+
+                            const focalInpCreate = document.getElementById('inpCreateHeroFocalPoint');
+                            const focalValCreate = focalInpCreate && focalInpCreate.value ? focalInpCreate.value : 'center center';
+
+                            if (bgType === 'video' && videoEl) {
+                                let vidSrc = '';
+                                if (videoFileInp && videoFileInp.files && videoFileInp.files[0]) {
+                                    vidSrc = URL.createObjectURL(videoFileInp.files[0]);
+                                } else if (videoUrlInp && videoUrlInp.value) {
+                                    vidSrc = videoUrlInp.value;
+                                }
+                                if (vidSrc) {
+                                    if (videoEl.src !== vidSrc) videoEl.src = vidSrc;
+                                    videoEl.autoplay = videoAutoplay;
+                                    videoEl.loop = videoLoop;
+                                    videoEl.muted = videoMuted;
+                                    videoEl.style.objectPosition = focalValCreate;
+                                    videoEl.classList.remove('hidden');
+                                    videoEl.play().catch(() => {});
+                                    previewHeroArea.style.backgroundImage = 'none';
+                                } else {
+                                    videoEl.classList.add('hidden');
+                                    videoEl.pause();
+                                }
                             } else {
-                                previewHeroArea.style.backgroundImage = 'none';
+                                if (videoEl) {
+                                    videoEl.classList.add('hidden');
+                                    videoEl.pause();
+                                }
+                                if (window._currentHeroPreviewBg_create) {
+                                    previewHeroArea.style.backgroundImage = window._currentHeroPreviewBg_create;
+                                    previewHeroArea.classList.add('bg-cover');
+                                    previewHeroArea.classList.remove('bg-center');
+                                    previewHeroArea.style.setProperty('background-position', focalValCreate, 'important');
+                                } else {
+                                    previewHeroArea.style.backgroundImage = 'none';
+                                }
                             }
                         }
 
                         if (previewTitle) previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
                         if (previewSubtitle) previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
+
+                        // Renderizado de Carrusel en Vivo
+                        if (typeVal === 'carousel' && previewCarouselArea) {
+                            const isGlobalBtn = document.querySelector('#createSectionModal input[name="settings[carousel_global_content]"]');
+                            const isGlobal = isGlobalBtn ? isGlobalBtn.checked : true;
+                            const slides = document.querySelectorAll('#createCarouselSlidesList .slide-item');
+                            previewCarouselArea.innerHTML = '';
+                            previewCarouselArea.style.display = 'flex';
+                            previewCarouselArea.style.flexDirection = 'row';
+                            previewCarouselArea.style.overflowX = 'auto';
+                            previewCarouselArea.style.scrollSnapType = 'x mandatory';
+                            previewCarouselArea.style.gap = '0';
+                            previewCarouselArea.style.backgroundImage = 'none';
+
+                            if (slides.length === 0) {
+                                previewCarouselArea.innerHTML = '<div class="w-full flex-shrink-0 h-full flex flex-col items-center justify-center text-slate-400">Sin slides en carrusel</div>';
+                            } else {
+                                const globalTitle = document.querySelector('#createSectionModal input[name="title"]')?.value || 'Tu Título Aquí';
+                                const globalSubtitle = document.querySelector('#createSectionModal input[name="subtitle"]')?.value || '';
+                                const globalBadge = document.querySelector('#createSectionModal input[name="badge"]')?.value || '';
+                                
+                                const gGradEn = document.querySelector('#createSectionModal input[name="settings[carousel_enable_gradient]"]')?.checked;
+                                const gGradStart = document.querySelector('#createSectionModal input[name="settings[carousel_gradient_color_start]"]')?.value || '#0f172a';
+                                const gGradEnd = document.querySelector('#createSectionModal input[name="settings[carousel_gradient_color_end]"]')?.value || '#1e1b4b';
+
+                                slides.forEach((slide, idx) => {
+                                    const uInp = slide.querySelector('.slide-url');
+                                    const fileInp = slide.querySelector('input[type="file"]');
+                                    let bgSrc = '';
+                                    
+                                    if (fileInp && fileInp.files && fileInp.files[0]) {
+                                        bgSrc = URL.createObjectURL(fileInp.files[0]);
+                                    } else if (uInp && uInp.value) {
+                                        bgSrc = uInp.value;
+                                    }
+                                    
+                                    const sTitle = isGlobal ? globalTitle : (slide.querySelector('input[name$="\\[title\\]"]')?.value || '');
+                                    const sSub = isGlobal ? globalSubtitle : (slide.querySelector('input[name$="\\[subtitle\\]"]')?.value || '');
+                                    const sBadge = isGlobal ? globalBadge : (slide.querySelector('input[name$="\\[badge\\]"]')?.value || '');
+                                    
+                                    const sGradEn = isGlobal ? gGradEn : slide.querySelector('input[name$="\\[enable_gradient\\]"]')?.checked;
+                                    const sGradStart = isGlobal ? gGradStart : (slide.querySelector('input[name$="\\[gradient_color_start\\]"]')?.value || '#000');
+                                    const sGradEnd = isGlobal ? gGradEnd : (slide.querySelector('input[name$="\\[gradient_color_end\\]"]')?.value || '#000');
+                                    
+                                    const slideDiv = document.createElement('div');
+                                    slideDiv.className = 'w-full flex-shrink-0 h-full relative flex flex-col items-center justify-center overflow-hidden';
+                                    slideDiv.style.scrollSnapAlign = 'start';
+                                    
+                                    if (bgSrc) {
+                                        slideDiv.style.backgroundImage = 'url(' + bgSrc + ')';
+                                        slideDiv.style.backgroundSize = 'cover';
+                                        slideDiv.style.backgroundPosition = 'center';
+                                    }
+                                    
+                                    if (sGradEn) {
+                                        const overlay = document.createElement('div');
+                                        overlay.className = 'absolute inset-0 z-0';
+                                        overlay.style.background = 'linear-gradient(to bottom, ' + sGradStart + '80, ' + sGradEnd + '80)';
+                                        slideDiv.appendChild(overlay);
+                                    }
+                                    
+                                    const contentDiv = document.createElement('div');
+                                    contentDiv.className = 'relative z-10 text-center px-8 w-full';
+                                    
+                                    if (sBadge) {
+                                        contentDiv.innerHTML += '<div class="inline-block bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full mb-2 uppercase tracking-wide font-bold">' + sBadge + '</div>';
+                                    }
+                                    if (sTitle) {
+                                        contentDiv.innerHTML += '<h2 class="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">' + sTitle + '</h2>';
+                                    }
+                                    if (sSub) {
+                                        contentDiv.innerHTML += '<p class="text-white/90 mt-2 max-w-md mx-auto">' + sSub + '</p>';
+                                    }
+
+                                    const sBtnText = slide.querySelector('input[name$="\\[button_text\\]"]')?.value || '';
+                                    const sBtnBg = slide.querySelector('input[name$="\\[button_bg\\]"]')?.value || '#0f172a';
+                                    const sBtnColor = slide.querySelector('input[name$="\\[button_color\\]"]')?.value || '#ffffff';
+                                    const sBtnBorderColor = slide.querySelector('input[name$="\\[button_border_color\\]"]')?.value || '#0f172a';
+                                    const sBtnBorderWidth = slide.querySelector('select[name$="\\[button_border_width\\]"]')?.value || 'border-0';
+                                    const sBtnShadow = slide.querySelector('select[name$="\\[button_shadow\\]"]')?.value || '';
+
+                                    if (sBtnText) {
+                                        const btnClass = `inline-block px-5 py-2 mt-4 rounded-lg font-bold text-xs ${sBtnBorderWidth} ${sBtnShadow}`;
+                                        const btnStyle = `background-color: ${sBtnBg}; color: ${sBtnColor}; border-color: ${sBtnBorderColor};`;
+                                        contentDiv.innerHTML += `<a href="javascript:void(0)" class="${btnClass}" style="${btnStyle}">${sBtnText}</a>`;
+                                    }
+                                    
+                                    slideDiv.appendChild(contentDiv);
+                                    previewCarouselArea.appendChild(slideDiv);
+                                });
+                            }
+                        }
+
+                        // Renderizado de Código Custom / HTML Libre en Vivo
+                        const isCustom = document.querySelector('#createSectionModal input[name="settings[hero_mode]"]:checked')?.value === 'custom';
+                        const customHtmlInp = document.getElementById('createCustomHtml');
+                        const customPreviewContainer = document.getElementById('createCustomHtmlPreviewContainer');
+                        if (customPreviewContainer && customHtmlInp) {
+                            if (customHtmlInp.value && customHtmlInp.value.trim()) {
+                                customPreviewContainer.innerHTML = customHtmlInp.value;
+                            } else {
+                                customPreviewContainer.innerHTML = `
+                                    <div class="p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl w-full text-slate-400 text-xs flex items-center justify-center flex-col gap-2">
+                                        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                        Área de Bloque Personalizado / Código HTML Inyectado
+                                    </div>`;
+                            }
+                        }
+
+                        if (isCustom) {
+                            if (previewHeroArea) previewHeroArea.style.display = 'none';
+                            if (previewCarouselArea) previewCarouselArea.style.display = 'none';
+                            if (previewPopUpArea) previewPopUpArea.style.display = 'none';
+                            if (previewButtonsArea) previewButtonsArea.style.display = 'flex';
+                        }
                     }
 
-                    // Handlers para la imagen de fondo
+                    // Handlers para la imagen y video de fondo
                     const bgFileInput = document.querySelector('#createSectionModal input[name="background_image_file"]');
                     const bgUrlInput = document.getElementById('createHeroBgUrl');
+                    const videoFileInput = document.querySelector('#createSectionModal input[name="background_video_file"]');
+                    const videoUrlInput = document.getElementById('createHeroBgVideoUrl');
 
                     if (bgFileInput) {
                         bgFileInput.addEventListener('change', function(e) {
                             if (this.files && this.files[0]) {
                                 const reader = new FileReader();
                                 reader.onload = function(evt) {
-                                    window._currentHeroPreviewBg = `url('${evt.target.result}')`;
-                                    updatePreview();
+                                    window._currentHeroPreviewBg_create = `url('${evt.target.result}')`;
+                                    window.updatePreviewCreate();
                                 }
                                 reader.readAsDataURL(this.files[0]);
                             } else {
-                                window._currentHeroPreviewBg = '';
-                                updatePreview();
+                                window._currentHeroPreviewBg_create = '';
+                                window.updatePreviewCreate();
                             }
                         });
                     }
@@ -2281,42 +3166,47 @@ if (previewHeroArea) {
                     if (bgUrlInput) {
                         bgUrlInput.addEventListener('input', function(e) {
                             if (this.value) {
-                                window._currentHeroPreviewBg = `url('${this.value}')`;
+                                window._currentHeroPreviewBg_create = `url('${this.value}')`;
                             } else {
-                                window._currentHeroPreviewBg = '';
+                                window._currentHeroPreviewBg_create = '';
                             }
-                            updatePreview();
+                            window.updatePreviewCreate();
                         });
                     }
 
-                    // Attach event listeners para el resto de inputs
-                    const inputs = [
-                        titleInput, subtitleInput, badgeInput, ctaPrimaryInput, ctaSecondaryInput,
-                        inpCreateTitleColor, inpCreateSubtitleColor, inpCreateTextAlign, inpCreateFontFamily,
-                        inpCreateCtaPrimaryBg, inpCreateCtaPrimaryColor, inpCreateCtaSecondaryBg, inpCreateCtaSecondaryColor
-                    ];
-                    inputs.forEach(el => {
-                        if (el) el.addEventListener('input', updatePreview);
-                        if (el && el.tagName === 'SELECT') el.addEventListener('change', updatePreview);
-                    });
+                    if (videoFileInput) {
+                        videoFileInput.addEventListener('change', () => { window.updatePreviewCreate && window.updatePreviewCreate(); });
+                    }
+                    if (videoUrlInput) {
+                        videoUrlInput.addEventListener('input', () => { window.updatePreviewCreate && window.updatePreviewCreate(); });
+                    }
+
+                    // Attach universal event listeners para todos los inputs del modal de creación
+                    const createForm = document.getElementById('createSectionForm') || document.getElementById('createSectionModal');
+                    if (createForm) {
+                        createForm.addEventListener('input', () => { window.updatePreviewCreate && window.updatePreviewCreate(); });
+                        createForm.addEventListener('change', () => { window.updatePreviewCreate && window.updatePreviewCreate(); });
+                    }
 
                     // Device toggles
-                    document.querySelectorAll('.preview-device-btn').forEach(btn => {
+                    document.querySelectorAll('.create-preview-device-btn').forEach(btn => {
                         btn.addEventListener('click', (e) => {
-                            document.querySelectorAll('.preview-device-btn').forEach(b => {
+                            document.querySelectorAll('.create-preview-device-btn').forEach(b => {
                                 b.classList.remove('bg-indigo-50', 'text-indigo-700', 'active');
                                 b.classList.add('text-slate-500');
                             });
-                            e.target.classList.add('bg-indigo-50', 'text-indigo-700', 'active');
-                            e.target.classList.remove('text-slate-500');
+                            e.currentTarget.classList.add('bg-indigo-50', 'text-indigo-700', 'active');
+                            e.currentTarget.classList.remove('text-slate-500');
                             
                             const container = document.getElementById('livePreviewContainer');
-                            if (e.target.dataset.device === 'mobile') {
-                                container.style.maxWidth = '375px';
-                                container.classList.add('mx-auto');
-                            } else {
-                                container.style.maxWidth = '100%';
-                                container.classList.remove('mx-auto');
+                            if (container) {
+                                if (e.currentTarget.dataset.device === 'mobile') {
+                                    container.style.maxWidth = '375px';
+                                    container.classList.add('mx-auto');
+                                } else {
+                                    container.style.maxWidth = '100%';
+                                    container.classList.remove('mx-auto');
+                                }
                             }
                         });
                     });
@@ -2326,8 +3216,16 @@ if (previewHeroArea) {
                     const gradStartInput = document.getElementById('createGradColorStartPicker');
                     const gradEndInput = document.getElementById('createGradColorEndPicker');
                     const gradDirInput = document.getElementById('createGradDir');
-                    const gradOpacityInput = document.getElementById('createGradOpacity');
+                    const gradOpacityStartInput = document.getElementById('createGradOpacityStart');
+                    const gradOpacityEndInput = document.getElementById('createGradOpacityEnd');
                     const previewOverlay = document.getElementById('previewOverlay');
+
+                    function hexToRgba(hex, alpha) {
+                        let c = (hex || '#000000').replace('#', '');
+                        if (c.length === 3) c = c.split('').map(x => x + x).join('');
+                        const num = parseInt(c, 16) || 0;
+                        return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+                    }
 
                     function updateOverlay() {
                         if (gradEnableInput && gradEnableInput.checked && previewOverlay) {
@@ -2335,416 +3233,1459 @@ if (previewHeroArea) {
                             previewOverlay.className = "absolute inset-0 z-0";
                             
                             let dir = gradDirInput ? gradDirInput.value : 'to bottom';
-                            let start = gradStartInput ? gradStartInput.value : '#0f172a';
-                            let end = gradEndInput ? gradEndInput.value : '#1e1b4b';
-                            let opacity = gradOpacityInput ? gradOpacityInput.value / 100 : 0.8;
+                            let startHex = gradStartInput ? gradStartInput.value : '#0f172a';
+                            let endHex = gradEndInput ? gradEndInput.value : '#1e1b4b';
+                            let startOp = gradOpacityStartInput ? parseInt(gradOpacityStartInput.value, 10) / 100 : 0.8;
+                            let endOp = gradOpacityEndInput ? parseInt(gradOpacityEndInput.value, 10) / 100 : 0.8;
                             
-                            previewOverlay.style.background = `linear-gradient(${dir}, ${start}, ${end})`;
-                            previewOverlay.style.opacity = opacity;
+                            let startRgba = hexToRgba(startHex, startOp);
+                            let endRgba = hexToRgba(endHex, endOp);
+                            
+                            previewOverlay.style.background = `linear-gradient(${dir}, ${startRgba}, ${endRgba})`;
+                            previewOverlay.style.opacity = 1;
                         } else {
                             if (previewOverlay) previewOverlay.style.display = 'none';
                         }
                     }
 
-                    const gradInputs = [gradEnableInput, gradStartInput, gradEndInput, gradDirInput, gradOpacityInput];
+                    const gradInputs = [gradEnableInput, gradStartInput, gradEndInput, gradDirInput, gradOpacityStartInput, gradOpacityEndInput];
                     gradInputs.forEach(el => {
                         if (el) el.addEventListener('input', updateOverlay);
                         if (el) el.addEventListener('change', updateOverlay);
                     });
 
-                    const origUpdatePreview = updatePreview;
-                    updatePreview = function() {
+                    const origUpdatePreview = window.updatePreviewCreate;
+                    window.updatePreviewCreate = function() {
                         origUpdatePreview();
                         updateOverlay();
                     };
 
                     // Trigger initial paint
-                    setTimeout(updatePreview, 100);
+                    setTimeout(window.updatePreviewCreate, 100);
+                    document.querySelectorAll('#createSectionModal input[name="settings[text_align]"]').forEach(r => r.addEventListener('change', window.updatePreviewCreate));
                 });
             </script>
         </div>
     </div>
 
     <!-- 1B. MODAL EDITAR SECCIÓN EXISTENTE -->
-    <div id="editSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    <span>Editar Sección Modular</span>
-                </h3>
-                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer" data-action="close-modal" data-modal="editSectionModal">&times;</button>
-            </div>
+    <div id="editSectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-0 bg-slate-900/60 backdrop-blur-xs hidden" style="display: none;">
+        <div class="bg-white w-full h-full flex flex-col md:flex-row shadow-2xl overflow-hidden relative">
+            
+            <!-- Botón de cerrar general (Solo visible en Desktop, en mobile va en el header) -->
+            <button type="button" class="hidden md:flex absolute top-4 right-4 z-50 w-10 h-10 items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 shadow-md transition font-bold text-2xl cursor-pointer" data-action="close-modal" data-modal="editSectionModal">&times;</button>
 
-            <form method="POST" id="editSectionForm" action="" enctype="multipart/form-data" class="space-y-4 text-xs">
-                @csrf
-                @method('PUT')
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Vitrina Destino</label>
-                        <select name="universe" id="editUniverseSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="all">Todas las vitrinas (Global)</option>
-                            <option value="marte">Marte (Masculino)</option>
-                            <option value="venus">Venus (Femenino)</option>
-                            <option value="tiresias">Tiresias (Afirmativo)</option>
-                            <option value="terra">Terra (Unisex / Matriz)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Estado de la Sección</label>
-                        <select name="status" id="editStatusSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="active">Activa (Visible en tienda)</option>
-                            <option value="draft">Borrador (Oculta)</option>
-                            <option value="archived">Archivada (Desactivada)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección</label>
-                        <select name="type" id="editTypeSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
-                            <option value="curated_products">Prendas Destacadas / Colección</option>
-                            <option value="categories_grid">Cuadrícula de Categorías</option>
-                            <option value="family_showcase">Vitrina de Familias Textiles</option>
-                            <option value="tags_cloud">Nube de Tags / Estilos</option>
-                            <option value="subcategories_slider">Slider de Subcategorías</option>
-                            <option value="hero_carousel">Hero Principal de Vitrina</option>
-                            <option value="editorial_banner">Banner Editorial / Promoción</option>
-                            <option value="brand_pillars">Pilares de Marca (Garantías)</option>
-                            <option value="promo_modal">Modal Promocional / Pop-up</option>
-                            <option value="custom_html_css_js">Bloque Custom (HTML/CSS/JS)</option>
-                        </select>
-                    </div>
+            <!-- COLUMNA IZQUIERDA: CONFIGURACIONES -->
+            <div class="w-full md:w-[720px] shrink-0 p-4 md:p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 bg-white flex flex-col relative z-20 custom-scrollbar">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Editar Sección Modular</span>
+                    </h3>
+                    <button type="button" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer md:hidden" data-action="close-modal" data-modal="editSectionModal">&times;</button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nombre Interno</label>
-                        <input type="text" name="name" id="editNameInput" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Badge Superior</label>
-                        <input type="text" name="badge" id="editBadgeInput" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Título Público (H2)</label>
-                        <input type="text" name="title" id="editTitleInput" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Bajada / Subtítulo</label>
-                        <input type="text" name="subtitle" id="editSubtitleInput" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                    </div>
-                </div>
 
-                <!-- TAXONOMÍAS HUB 4 PARA EDICIÓN -->
-                <div id="editCatalogTaxonomies" class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                    <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Reglas de Catálogo (Hub 4)</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Categoría Principal</label>
-                            <select name="query_rules[category_id]" id="editCategoryId" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todas las categorías</option>
-                                @foreach($categories as $cat)
-                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Subcategoría</label>
-                            <select name="query_rules[subcategory_id]" id="editSubcategoryId" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todas las subcategorías</option>
-                                @foreach($subcategories as $scat)
-                                    <option value="{{ $scat->id }}">{{ $scat->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Proveedor</label>
-                            <select name="query_rules[supplier]" id="editSupplier" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todos los proveedores</option>
-                                @foreach($suppliers as $sup)
-                                    <option value="{{ $sup->trade_name ?? $sup->name }}">{{ $sup->trade_name ?? $sup->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Marca</label>
-                            <select name="query_rules[brand]" id="editBrand" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Todas las marcas</option>
-                                @foreach($brands as $br)
-                                    <option value="{{ $br }}">{{ $br }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Familia Textil</label>
-                            <select name="query_rules[family]" id="editFamily" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Cualquier fibra</option>
-                                @foreach($textileFamilies as $tf)
-                                    <option value="{{ $tf }}">{{ $tf }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Tipo de Prenda</label>
-                            <select name="query_rules[garment_type]" id="editGarmentType" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Cualquier tipo</option>
-                                @foreach($garmentTypes as $gt)
-                                    <option value="{{ $gt }}">{{ $gt }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Tag de Estilo</label>
-                            <select name="query_rules[tag]" id="editTag" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="">Cualquier estilo</option>
-                                @foreach($styleTags as $st)
-                                    <option value="{{ $st }}">{{ $st }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Filtro de Descuento</label>
-                            <select name="query_rules[discount]" id="editDiscount" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                @foreach($discountOptions as $dVal => $dLabel)
-                                    <option value="{{ $dVal }}">{{ $dLabel }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1">Límite de Prendas</label>
-                            <select name="query_rules[limit]" id="editLimit" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs">
-                                <option value="4">4 Prendas</option>
-                                <option value="8">8 Prendas</option>
-                                <option value="12">12 Prendas</option>
-                                <option value="16">16 Prendas</option>
-                                <option value="24">24 Prendas</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CÓDIGO CUSTOM Y MOTOR DE HERO PARA EDICIÓN -->
-                <div id="editContentOptions" class="space-y-4 hidden" style="display: none;">
+                <form method="POST" action="" id="editSectionForm" enctype="multipart/form-data" class="space-y-4 text-xs flex-1 flex flex-col">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="status" value="active">
                     
-                    <!-- BLOQUE MOTOR DE HERO DINÁMICO (EDICIÓN) -->
-                    <div id="editHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                Motor de Hero Dinámico &amp; Vitrina
-                            </span>
-                            <span class="text-[10px] text-slate-500 font-medium">Bifurcación Visual / Código &amp; Sangrado</span>
-                        </div>
-
-                        <!-- 1. BIFURCADOR DE MODO: ESTRUCTURADO VS CÓDIGO CUSTOM -->
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado del Hero</label>
-                            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
-                                <label id="editHeroModeStructuredLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition bg-white text-indigo-700 shadow-xs text-center">
-                                    <input type="radio" name="settings[hero_mode]" id="editHeroModeStructured" value="structured" checked class="hidden" onchange="window.toggleHeroModeEdit(this.value)">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
-                                    <span>Visual Estructurado</span>
-                                </label>
-                                <label id="editHeroModeCustomLbl" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg cursor-pointer transition text-slate-600 hover:text-slate-900 text-center">
-                                    <input type="radio" name="settings[hero_mode]" id="editHeroModeCustom" value="custom" class="hidden" onchange="window.toggleHeroModeEdit(this.value)">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                    <span>Código Custom</span>
-                                </label>
+                    <div class="flex-1 space-y-4">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Nombre Interno (Gestión CMS)</label>
+                                <input type="text" name="name" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Colección Verano Jocks">
                             </div>
-                            <p class="text-[11px] text-slate-500 mt-1">Conmuta de forma mutuamente excluyente qué contenido se renderiza en la tienda para evitar duplicados.</p>
-                        </div>
-
-                        <!-- 2. ANCHO DE PANTALLA: FULL WIDTH VS BOXED -->
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Ancho en Pantalla (Sangrado Edge-to-Edge)</label>
-                            <input type="hidden" name="settings[full_width]" value="0">
-                            <label class="flex items-center gap-2.5 cursor-pointer p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
-                                <input type="checkbox" name="settings[full_width]" id="editFullWidth" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                                <div>
-                                    <span class="font-bold text-slate-800 block text-xs">Abarcar 100% del Ancho de Pantalla (Full-Width)</span>
-                                    <span class="text-[11px] text-slate-500">Expande el hero de borde a borde rompiendo los límites del contenedor principal de la tienda.</span>
-                                </div>
-                            </label>
-                        </div>
-
-                        <!-- 3. IMAGEN DE FONDO (AMBOS MODOS) -->
-                        <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
-                            <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo (Background Image)</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
-                                    <input type="file" name="background_image_file" id="editHeroBgFile" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'editHeroBgPreview')">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL Externa</label>
-                                    <input type="text" name="settings[background_image]" id="editHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'editHeroBgPreview')">
-                                </div>
-                            </div>
-                            <div id="editHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
-                                <img src="" alt="Vista previa fondo" class="w-16 h-10 object-cover rounded shadow-xs bg-slate-200">
-                                <span class="text-[11px] text-slate-600 truncate flex-1 font-mono"></span>
-                                <button type="button" onclick="window.clearHeroBgPreview('editSectionModal', 'editHeroBgPreview', 'editHeroBgUrl')" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">Eliminar</button>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Vitrina Destino</label>
+                                <select name="universe" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                                    <option value="all">Todas las vitrinas (Global / Multiverso)</option>
+                                    <option value="marte">Marte (Masculino)</option>
+                                    <option value="venus">Venus (Femenino)</option>
+                                    <option value="tiresias">Tiresias (Afirmativo)</option>
+                                    <option value="terra">Terra (Unisex / Matriz)</option>
+                                </select>
                             </div>
                         </div>
 
-                        <!-- 4. CAPA DE DEGRADADOS OVERLAY (AMBOS MODOS) -->
-                        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-                            <input type="hidden" name="settings[enable_gradient]" value="0">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="settings[enable_gradient]" id="editEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editGradientControls').style.display = this.checked ? 'block' : 'none'">
-                                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado / Overlay sobre el Fondo</span>
-                            </label>
 
-                            <div id="editGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="color" id="editGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editGradColorStart').value = this.value; window.updateHeroGradientPreview('edit')">
-                                            <input type="text" name="settings[gradient_color_start]" id="editGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('edit')">
-                                        </div>
+
+                        <div id="editTypeWrap" class="mb-4">
+                            <label class="block font-semibold text-slate-700 mb-1">Tipo de Sección de Contenido</label>
+                            <select name="type" id="editSectionType" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="hero">Hero Principal de Vitrina</option>
+                                <option value="carousel">Carrusel de Banners Promocionales</option>
+                                <option value="pop_up">Modal Promocional / Pop-up Flotante</option>
+                                <option value="buttons">Botones CTA / Bloque Personalizado</option>
+                            </select>
+                        </div>
+
+<!-- 1. BIFURCADOR DE MODO -->
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Modo de Renderizado</label>
+                                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold">
+                                        <label id="editHeroModeStructuredLbl" class="flex items-center justify-center py-2 px-3 rounded-lg cursor-pointer transition bg-white text-indigo-700 shadow-xs text-center">
+                                            <input type="radio" name="settings[hero_mode]" value="structured" checked class="hidden" onchange="window.toggleHeroModeEdit(this.value)">
+                                            <span>Visual Estructurado</span>
+                                        </label>
+                                        <label id="editHeroModeCustomLbl" class="flex items-center justify-center py-2 px-3 rounded-lg cursor-pointer transition text-slate-600 hover:text-slate-900 text-center">
+                                            <input type="radio" name="settings[hero_mode]" value="custom" class="hidden" onchange="window.toggleHeroModeEdit(this.value)">
+                                            <span>Código Custom</span>
+                                        </label>
                                     </div>
+                                </div>
+
+                                
+
+
+                        <!-- CONTENIDO Y ESTILOS DE TEXTO DEL HERO -->
+                        <div id="editCommonFieldsWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 mb-4">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Contenido y Estilos de Texto
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium">Textos, tipografías y alineación</span>
+                            </div>
+
+                            <!-- TÍTULO PRINCIPAL (H2) + TIPOGRAFÍA + COLOR -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1 text-xs">Título Público (H2)</label>
+                                    <input type="text" name="title" id="inpEditTitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: BOXERS & JOCKS DEPORTIVOS" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
                                     <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="color" id="editGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editGradColorEnd').value = this.value; window.updateHeroGradientPreview('edit')">
-                                            <input type="text" name="settings[gradient_color_end]" id="editGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('edit')">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección</label>
-                                        <select name="settings[gradient_direction]" id="editGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('edit')">
-                                            <option value="to bottom">Vertical ↓</option>
-                                            <option value="to right">Horizontal →</option>
-                                            <option value="135deg">Diagonal ↘</option>
-                                            <option value="to top">Invertido ↑</option>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Tipografía del Título</label>
+                                        <select name="settings[title_font]" id="inpEditTitleFont" class="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg bg-white" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updatePreviewEdit && window.updatePreviewEdit()">
+                                            <option value="inherit">Heredar de Vitrina (Default)</option>
+                                            @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                                <option value="{{ $fKey }}">{{ $fLabel }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Opacidad: <span id="editGradOpacityVal">80%</span></label>
-                                        <input type="range" name="settings[gradient_opacity]" id="editGradOpacity" min="10" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('editGradOpacityVal').textContent = this.value + '%'; window.updateHeroGradientPreview('edit')">
-                                    </div>
-                                </div>
-
-                                <div id="editGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, #0f172a, #1e1b4b);"></div>
-                            </div>
-                        </div>
-
-                        <!-- 5. ACCIONES Y BOTONES DEL HERO (SOLO MODO ESTRUCTURADO) -->
-                        <div id="editHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-                            <label class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</label>
-
-                            <!-- Botón Primario -->
-                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-                                <span class="block font-bold text-indigo-700 text-[11px]">Botón Primario (Destacado)</span>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
-                                        <input type="text" name="settings[cta_primary_text]" id="editCtaPrimaryText" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: EXPLORAR CATÁLOGO">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color del Título</label>
                                         <div class="flex items-center gap-1.5">
-                                            <input type="text" name="settings[cta_primary_url]" id="editCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
-                                            <select onchange="if(this.value){ document.getElementById('editCtaPrimaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
-                                                <option value="">+ Insertar Ruta</option>
-                                                <optgroup label="Secciones Modulares">
-                                                    @foreach($sections as $s)
-                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Páginas Institucionales">
-                                                    @foreach($pages as $p)
-                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Vitrinas Multiverso">
-                                                    <option value="/marte">/marte (Masculino)</option>
-                                                    <option value="/venus">/venus (Femenino)</option>
-                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
-                                                    <option value="/terra">/terra (Unisex)</option>
-                                                    <option value="/catalogo">/catalogo (General)</option>
-                                                </optgroup>
-                                            </select>
+                                            <input type="color" name="settings[title_color]" id="inpEditTitleColor" value="#ffffff" class="w-8 h-7 p-0 border border-slate-200 rounded cursor-pointer shrink-0" oninput="document.getElementById('inpEditTitleColorHex').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                                            <input type="text" id="inpEditTitleColorHex" value="#ffffff" class="w-full px-2 py-1 text-xs font-mono border border-slate-200 rounded-lg" oninput="document.getElementById('inpEditTitleColor').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Botón Secundario -->
-                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-                                <span class="block font-bold text-slate-700 text-[11px]">Botón Secundario (Opcional)</span>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- BADGE / KICKER SUPERIOR -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                                <label class="block font-semibold text-slate-700 mb-1 text-xs">Badge / Kicker Superior</label>
+                                <input type="text" name="badge" id="inpEditBadge" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: LANZAMIENTO EXCLUSIVO" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+                            </div>
+
+                            <!-- BAJADA / SUBTÍTULO + TIPOGRAFÍA + COLOR -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1 text-xs">Bajada / Subtítulo</label>
+                                    <input type="text" name="subtitle" id="inpEditSubtitle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs" placeholder="Ej: Confeccionados con modal pima de secado ultra rápido." oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
                                     <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
-                                        <input type="text" name="settings[cta_secondary_text]" id="editCtaSecondaryText" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: GUÍA DE TALLAS TORZO">
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Tipografía de Bajada</label>
+                                        <select name="settings[subtitle_font]" id="inpEditSubtitleFont" class="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg bg-white" onchange="window.loadGoogleFont && window.loadGoogleFont(this.value); window.updatePreviewEdit && window.updatePreviewEdit()">
+                                            <option value="inherit">Heredar de Vitrina (Default)</option>
+                                            @foreach($curatedGoogleFonts as $fKey => $fLabel)
+                                                <option value="{{ $fKey }}">{{ $fLabel }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color de Bajada</label>
                                         <div class="flex items-center gap-1.5">
-                                            <input type="text" name="settings[cta_secondary_url]" id="editCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas o #section-3">
-                                            <select onchange="if(this.value){ document.getElementById('editCtaSecondaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
-                                                <option value="">+ Insertar Ruta</option>
-                                                <optgroup label="Secciones Modulares">
-                                                    @foreach($sections as $s)
-                                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Páginas Institucionales">
-                                                    @foreach($pages as $p)
-                                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
-                                                    @endforeach
-                                                </optgroup>
-                                                <optgroup label="Vitrinas Multiverso">
-                                                    <option value="/marte">/marte (Masculino)</option>
-                                                    <option value="/venus">/venus (Femenino)</option>
-                                                    <option value="/tiresias">/tiresias (Afirmativo)</option>
-                                                    <option value="/terra">/terra (Unisex)</option>
-                                                    <option value="/catalogo">/catalogo (General)</option>
-                                                </optgroup>
+                                            <input type="color" name="settings[subtitle_color]" id="inpEditSubtitleColor" value="#e2e8f0" class="w-8 h-7 p-0 border border-slate-200 rounded cursor-pointer shrink-0" oninput="document.getElementById('inpEditSubtitleColorHex').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                                            <input type="text" id="inpEditSubtitleColorHex" value="#e2e8f0" class="w-full px-2 py-1 text-xs font-mono border border-slate-200 rounded-lg" oninput="document.getElementById('inpEditSubtitleColor').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ALINEACIÓN DE TEXTO -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <span class="block font-semibold text-slate-800 text-xs">Alineación del Texto</span>
+                                    <span class="text-[10px] text-slate-500">Orientación de títulos, bajadas y botones</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-1 p-0.5 bg-slate-100 rounded-lg border border-slate-200 w-32" id="inpEditTextAlignGroup">
+                                    <label class="relative flex items-center justify-center py-1.5 rounded-md cursor-pointer text-slate-500 transition">
+                                        <input type="radio" name="settings[text_align]" value="text-left" class="peer hidden" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded-md transition"></div>
+                                        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"/></svg>
+                                    </label>
+                                    <label class="relative flex items-center justify-center py-1.5 rounded-md cursor-pointer text-slate-500 transition">
+                                        <input type="radio" name="settings[text_align]" value="text-center" class="peer hidden" checked onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded-md transition"></div>
+                                        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"/></svg>
+                                    </label>
+                                    <label class="relative flex items-center justify-center py-1.5 rounded-md cursor-pointer text-slate-500 transition">
+                                        <input type="radio" name="settings[text_align]" value="text-right" class="peer hidden" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                        <div class="peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 absolute inset-0 rounded-md transition"></div>
+                                        <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M4 18h16"/></svg>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 1. MODO HERO -->
+                        <div id="editHeroWrap" class="space-y-4">
+                            <!-- BLOQUE MOTOR DE HERO DINÁMICO -->
+                            <div id="editHeroEngineWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                    <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                        Motor de Hero Dinámico
+                                    </span>
+                                </div>
+
+                                <!-- 2. PANTALLA, ALTO Y PARALLAX SCROLLING -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    <div>
+                                        <input type="hidden" name="settings[full_width]" value="0">
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Hero Fullpage</span>
+                                                <span class="text-[10px] text-slate-500">100% de alto</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" name="settings[full_width]" id="inpEditFullWidth" value="1" class="peer sr-only" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="hidden" name="settings[full_width_horizontal]" value="0">
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Ancho Completo</span>
+                                                <span class="text-[10px] text-slate-500">100% horizontal</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" name="settings[full_width_horizontal]" id="inpEditFullWidthHorizontal" value="1" class="peer sr-only" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                                        <label class="block font-bold text-slate-800 text-xs mb-1">Alto Personalizado</label>
+                                        <div class="flex gap-2">
+                                            <input type="number" name="settings[hero_height_value]" id="inpEditHeroHeightValue" placeholder="Ej: 400" class="w-2/3 px-2 py-1.5 border border-slate-200 rounded-lg text-xs" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                            <select name="settings[hero_height_unit]" id="inpEditHeroHeightUnit" class="w-1/3 px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                                <option value="px">px</option>
+                                                <option value="vh">vh</option>
+                                                <option value="%">%</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="hidden" name="settings[parallax_scrolling]" value="0">
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Efecto Parallax</span>
+                                                <span class="text-[10px] text-slate-500">Scroll fijo dinámico</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" name="settings[parallax_scrolling]" id="inpEditParallax" value="1" class="peer sr-only" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+<!-- 3. IMAGEN DE FONDO -->
+                                <div class="space-y-2 p-3 bg-white border border-slate-200 rounded-xl">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="block font-bold text-slate-800 text-xs">Tipo de Fondo</label>
+                                        <select name="settings[background_type]" id="editHeroBgType" class="px-2 py-1 text-xs font-semibold border border-slate-200 rounded-lg" onchange="window.toggleHeroBgType(this.value, 'edit')">
+                                            <option value="image">Imagen</option>
+                                            <option value="video">Video</option>
+                                        </select>
+                                    </div>
+                                    <div id="editHeroBgImageWrap" class="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
+                                            <input type="file" name="background_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.previewHeroBgImage(this, 'editHeroBgPreview')">
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <label class="block text-[11px] font-semibold text-slate-600">O Ingresar URL Externa</label>
+                                                <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal('editHeroBgUrl')">Seleccionar del Gestor</button>
+                                            </div>
+                                            <input type="text" name="settings[background_image]" id="editHeroBgUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.webp" oninput="window.previewHeroBgUrl(this.value, 'editHeroBgPreview')">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Alternativo (Alt SEO)</label>
+                                            <input type="text" name="settings[background_image_alt]" id="editHeroBgAlt" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Breve descripción de la imagen">
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <label class="block text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h2m14 0h2M12 3v2m0 14v2"/></svg>
+                                                    Foco de Atención de la Imagen (Punto Focal)
+                                                </label>
+                                                <span id="editHeroFocalPointLabel" class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                                                    Centro Centro (50% 50%)
+                                                </span>
+                                            </div>
+                                            <input type="hidden" name="settings[image_focal_point]" id="inpEditHeroFocalPoint" value="center center">
+                                            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-4">
+                                                <!-- MATRIZ 3x3 DE 9 CELDAS -->
+                                                <div id="editHeroFocalMatrix" class="w-24 h-24 p-1 bg-slate-200/90 border border-slate-300 rounded-xl grid grid-cols-3 gap-1 shadow-inner select-none shrink-0" role="radiogroup" aria-label="Punto focal de la imagen">
+                                                    <button type="button" data-focal="left top" onclick="window.setHeroFocalPoint('edit', 'left top')" title="Izquierda Superior (0% 0%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="center top" onclick="window.setHeroFocalPoint('edit', 'center top')" title="Centro Superior (50% 0%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="right top" onclick="window.setHeroFocalPoint('edit', 'right top')" title="Derecha Superior (100% 0%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+
+                                                    <button type="button" data-focal="left center" onclick="window.setHeroFocalPoint('edit', 'left center')" title="Izquierda Centro (0% 50%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="center center" onclick="window.setHeroFocalPoint('edit', 'center center')" title="Centro Centro (50% 50%) - Predeterminado" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-indigo-600 border border-indigo-700 ring-2 ring-indigo-300 text-white transition cursor-pointer shadow-xs"><span class="w-2.5 h-2.5 rounded-full bg-white ring-2 ring-indigo-400 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="right center" onclick="window.setHeroFocalPoint('edit', 'right center')" title="Derecha Centro (100% 50%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+
+                                                    <button type="button" data-focal="left bottom" onclick="window.setHeroFocalPoint('edit', 'left bottom')" title="Izquierda Inferior (0% 100%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="center bottom" onclick="window.setHeroFocalPoint('edit', 'center bottom')" title="Centro Inferior (50% 100%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                    <button type="button" data-focal="right bottom" onclick="window.setHeroFocalPoint('edit', 'right bottom')" title="Derecha Inferior (100% 100%)" class="focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer"><span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span></button>
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 leading-snug">
+                                                    <span class="font-bold text-slate-700 block text-xs">Matriz de 9 Celdas</span>
+                                                    Haz clic en un cuadrante para anclar el punto visual clave al redimensionarse la imagen en pantallas móviles y monitores ultrawide.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="editHeroBgVideoWrap" class="hidden grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Video (MP4)</label>
+                                            <input type="file" name="background_video_file" accept="video/mp4,video/webm" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">O Ingresar URL de Video</label>
+                                            <input type="text" name="settings[background_video]" id="editHeroBgVideoUrl" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="https://ejemplo.com/hero-bg.mp4">
+                                        </div>
+                                        <div class="flex gap-4 mt-2">
+                                            <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600"><input type="checkbox" name="settings[video_autoplay]" id="editHeroVideoAutoplay" value="1" checked class="rounded border-slate-300 text-indigo-600"> Autoplay</label>
+                                            <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600"><input type="checkbox" name="settings[video_loop]" id="editHeroVideoLoop" value="1" checked class="rounded border-slate-300 text-indigo-600"> Loop</label>
+                                            <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600"><input type="checkbox" name="settings[video_muted]" id="editHeroVideoMuted" value="1" checked class="rounded border-slate-300 text-indigo-600"> Muted</label>
+                                        </div>
+                                    </div>
+                                    <div id="editHeroBgPreview" class="hidden mt-2 p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50 flex items-center gap-3">
+                                        <img src="" alt="Vista previa fondo" class="w-16 h-10 object-cover rounded shadow-xs bg-slate-200">
+                                        <span class="text-[11px] text-slate-600 truncate flex-1 font-mono"></span>
+                                        <button type="button" onclick="window.clearHeroBgPreview('editSectionModal', 'editHeroBgPreview', 'editHeroBgUrl')" class="text-rose-600 font-bold text-xs cursor-pointer">Eliminar</button>
+                                    </div>
+                                </div>
+
+                                <!-- 4. CAPA DE DEGRADADOS OVERLAY -->
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                    <input type="hidden" name="settings[enable_gradient]" value="0">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="settings[enable_gradient]" id="editEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editGradientControls').style.display = this.checked ? 'block' : 'none'">
+                                        <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
+                                    </label>
+
+                                    <div id="editGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <input type="color" id="editGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editGradColorStart').value = this.value; window.updateHeroGradientPreview('edit')">
+                    <input type="text" name="settings[gradient_color_start]" id="editGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editGradColorStartPicker').value = this.value; window.updateHeroGradientPreview('edit')">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="range" name="settings[gradient_opacity_start]" id="editGradOpacityStart" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('editGradOpacityStartVal').textContent = this.value + '%'; window.updateHeroGradientPreview('edit')">
+                    <span id="editGradOpacityStartVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">80%</span>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+            <div>
+                <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <input type="color" id="editGradColorEndPicker" value="#1e1b4b" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editGradColorEnd').value = this.value; window.updateHeroGradientPreview('edit')">
+                    <input type="text" name="settings[gradient_color_end]" id="editGradColorEnd" value="#1e1b4b" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editGradColorEndPicker').value = this.value; window.updateHeroGradientPreview('edit')">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="range" name="settings[gradient_opacity_end]" id="editGradOpacityEnd" min="0" max="100" value="80" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('editGradOpacityEndVal').textContent = this.value + '%'; window.updateHeroGradientPreview('edit')">
+                    <span id="editGradOpacityEndVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">80%</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-2">
+            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección del Degradado</label>
+            <select name="settings[gradient_direction]" id="editGradDir" class="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded" onchange="window.updateHeroGradientPreview('edit')">
+                <option value="to bottom">Vertical</option>
+                <option value="to right">Horizontal</option>
+                <option value="135deg">Diagonal</option>
+                <option value="to top">Invertido</option>
+            </select>
+        </div>
+    </div>
+    <div id="editGradPreviewBar" class="h-6 rounded-lg border border-slate-200 shadow-inner" style="background: linear-gradient(to bottom, rgba(15,23,42,0.8), rgba(30,27,75,0.8));"></div>
+</div>
+                                </div>
+
+
+                                <!-- 6. ACCIONES Y BOTONES DEL HERO -->
+                                <div id="editHeroButtonsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                        <div>
+                                            <span class="block font-bold text-slate-800 text-xs">Botones de Acción (Call to Action)</span>
+                                            <span class="text-[10px] text-slate-500">Conmuta entre botones independientes o clic en todo el banner</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="hidden" name="settings[hero_has_buttons]" value="0">
+                                            <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-100 transition">
+                                                <span class="text-[11px] font-bold text-slate-700">Incluir Botones</span>
+                                                <div class="relative shrink-0">
+                                                    <input type="checkbox" name="settings[hero_has_buttons]" id="inpEditHeroHasButtons" value="1" checked class="peer sr-only" onchange="window.toggleHeroButtonsMode && window.toggleHeroButtonsMode('edit'); window.updatePreviewEdit && window.updatePreviewEdit()">
+                                                    <div class="block bg-slate-200 w-9 h-5 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                    <div class="dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- CONTENEDOR DE BOTONES (VISIBLE SI hero_has_buttons ESTÁ ACTIVO) -->
+                                    <div id="editHeroButtonsControls" class="space-y-3">
+
+                                    <!-- Botón Primario -->
+                                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                        <span class="block font-bold text-indigo-700 text-[11px]">Botón Primario</span>
+                                        <div class="grid grid-cols-1 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                                <input type="text" name="settings[cta_primary_text]" id="inpEditCtaPrimary" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: EXPLORAR CATÁLOGO" value="EXPLORAR CATÁLOGO">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                                <div class="flex items-center gap-1.5">
+                                                    <input type="text" name="settings[cta_primary_url]" id="editCtaPrimaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: #section-2 o /catalogo">
+                                                    <select onchange="if(this.value){ document.getElementById('editCtaPrimaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                        <option value="">+ Insertar Ruta</option>
+                                                        <optgroup label="Secciones Modulares">
+                                                            @foreach($sections as $s)
+                                                                <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Páginas Institucionales">
+                                                            @foreach($pages as $p)
+                                                                <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Vitrinas Multiverso">
+                                                            <option value="/marte">/marte (Masculino)</option>
+                                                            <option value="/venus">/venus (Femenino)</option>
+                                                            <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                            <option value="/terra">/terra (Unisex)</option>
+                                                            <option value="/catalogo">/catalogo (General)</option>
+                                                        </optgroup>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Fondo</label>
+                                                    <input type="color" name="settings[cta_primary_bg]" id="inpEditCtaPrimaryBg" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Texto</label>
+                                                    <input type="color" name="settings[cta_primary_color]" id="inpEditCtaPrimaryColor" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Borde</label>
+                                                    <input type="color" name="settings[cta_primary_border_color]" id="inpEditCtaPrimaryBorderColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Grosor Borde</label>
+                                                    <select name="settings[cta_primary_border_width]" id="inpEditCtaPrimaryBorderWidth" class="w-full px-2 py-1 border border-slate-200 rounded text-[11px] h-8 bg-white">
+                                                        <option value="border-0">Sin Borde</option>
+                                                        <option value="border">Fino (1px)</option>
+                                                        <option value="border-2">Medio (2px)</option>
+                                                        <option value="border-4">Grueso (4px)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-span-2">
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Sombra</label>
+                                                    <select name="settings[cta_primary_shadow]" id="inpEditCtaPrimaryShadow" class="w-full px-2 py-1.5 border border-slate-200 rounded text-[11px] bg-white">
+                                                        <option value="">Sin Sombra</option>
+                                                        <option value="shadow-sm">Pequeña</option>
+                                                        <option value="shadow-md">Media</option>
+                                                        <option value="shadow-lg">Grande</option>
+                                                        <option value="shadow-xl">Extra Grande</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botón Secundario -->
+                                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                        <span class="block font-bold text-slate-700 text-[11px]">Botón Secundario</span>
+                                        <div class="grid grid-cols-1 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Texto del Botón</label>
+                                                <input type="text" name="settings[cta_secondary_text]" id="inpEditCtaSecondary" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="Ej: GUÍA DE TALLAS" value="">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">URL / Ruta de Destino</label>
+                                                <div class="flex items-center gap-1.5">
+                                                    <input type="text" name="settings[cta_secondary_url]" id="editCtaSecondaryUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" placeholder="Ej: /pagina/guia-tallas">
+                                                    <select onchange="if(this.value){ document.getElementById('editCtaSecondaryUrl').value = this.value; this.value=''; }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta de la tienda">
+                                                        <option value="">+ Insertar Ruta</option>
+                                                        <optgroup label="Secciones Modulares">
+                                                            @foreach($sections as $s)
+                                                                <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Páginas Institucionales">
+                                                            @foreach($pages as $p)
+                                                                <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        <optgroup label="Vitrinas Multiverso">
+                                                            <option value="/marte">/marte (Masculino)</option>
+                                                            <option value="/venus">/venus (Femenino)</option>
+                                                            <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                            <option value="/terra">/terra (Unisex)</option>
+                                                            <option value="/catalogo">/catalogo (General)</option>
+                                                        </optgroup>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Fondo</label>
+                                                    <input type="color" name="settings[cta_secondary_bg]" id="inpEditCtaSecondaryBg" value="#ffffff" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Texto</label>
+                                                    <input type="color" name="settings[cta_secondary_color]" id="inpEditCtaSecondaryColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Color Borde</label>
+                                                    <input type="color" name="settings[cta_secondary_border_color]" id="inpEditCtaSecondaryBorderColor" value="#0f172a" class="w-full h-8 p-0 border border-slate-200 rounded cursor-pointer">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Grosor Borde</label>
+                                                    <select name="settings[cta_secondary_border_width]" id="inpEditCtaSecondaryBorderWidth" class="w-full px-2 py-1 border border-slate-200 rounded text-[11px] h-8 bg-white">
+                                                        <option value="border-0">Sin Borde</option>
+                                                        <option value="border">Fino (1px)</option>
+                                                        <option value="border-2">Medio (2px)</option>
+                                                        <option value="border-4">Grueso (4px)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-span-2">
+                                                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Sombra</label>
+                                                    <select name="settings[cta_secondary_shadow]" id="inpEditCtaSecondaryShadow" class="w-full px-2 py-1.5 border border-slate-200 rounded text-[11px] bg-white">
+                                                        <option value="">Sin Sombra</option>
+                                                        <option value="shadow-sm">Pequeña</option>
+                                                        <option value="shadow-md">Media</option>
+                                                        <option value="shadow-lg">Grande</option>
+                                                        <option value="shadow-xl">Extra Grande</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+
+                                    <!-- CONTENEDOR DE CLIC EN TODO EL HERO (VISIBLE CUANDO hero_has_buttons ESTÁ DESACTIVADO) -->
+                                    <div id="editHeroFullClickWrap" class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-xl space-y-2 hidden">
+                                        <div class="flex items-center gap-2 text-amber-900 font-bold text-xs">
+                                            <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                                            <span>Enlace de Clic en Todo el Hero</span>
+                                        </div>
+                                        <p class="text-[11px] text-amber-800 leading-relaxed">
+                                            Al no incluir botones, cualquier clic sobre la imagen o el contenido del Hero redirigirá automáticamente a la siguiente ruta o URL seleccionada.
+                                        </p>
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">URL / Ruta de Destino</label>
+                                            <div class="flex items-center gap-1.5">
+                                                <input type="text" name="settings[hero_click_url]" id="editHeroClickUrl" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono bg-white" placeholder="Ej: #section-2 o /catalogo" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                                <select onchange="if(this.value){ document.getElementById('editHeroClickUrl').value = this.value; this.value=''; window.updatePreviewEdit && window.updatePreviewEdit(); }" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 font-semibold bg-white cursor-pointer shrink-0" title="Seleccionar una ruta de la tienda">
+                                                    <option value="">+ Insertar Ruta</option>
+                                                    <optgroup label="Secciones Modulares">
+                                                        @foreach($sections as $s)
+                                                            <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    <optgroup label="Páginas Institucionales">
+                                                        @foreach($pages as $p)
+                                                            <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    <optgroup label="Vitrinas Multiverso">
+                                                        <option value="/marte">/marte (Masculino)</option>
+                                                        <option value="/venus">/venus (Femenino)</option>
+                                                        <option value="/tiresias">/tiresias (Afirmativo)</option>
+                                                        <option value="/terra">/terra (Unisex)</option>
+                                                        <option value="/catalogo">/catalogo (General)</option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- EDITOR DE CÓDIGO CUSTOM (SCOPED) -->
-                    <div id="editCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
-                        <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Editor de Código Custom (Aislado)</span>
+                        <!-- 2. MODO CAROUSEL -->
+                        <div id="editCarouselWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
+    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+        <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
+        <label class="flex items-center gap-2 cursor-pointer bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
+            <input type="checkbox" id="editCarouselGlobalToggle" name="settings[carousel_global_content]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editCarouselGradientControlsWrap').style.display = this.checked ? 'block' : 'none'; window.updatePreviewEdit && window.updatePreviewEdit()">
+            <span class="text-[10px] text-slate-700 font-bold">Usar Título y Overlay General</span>
+        </label>
+    </div>
+    <div class="space-y-4">
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="editCarouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                <span class="text-xs text-slate-700 font-bold">Autoplay</span>
+            </label>
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-slate-700 font-bold">Tiempo (segundos):</label>
+                <input type="number" name="settings[autoplay_time]" id="editCarouselAutoplayTime" value="5" min="1" class="w-16 px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+            </div>
+        </div>
+
+        <!-- OVERLAY (Gradient) -->
+        <div id="editCarouselGradientControlsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+            <input type="hidden" name="settings[carousel_enable_gradient]" value="0">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="settings[carousel_enable_gradient]" id="editCarouselEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editCarouselGradientControls').style.display = this.checked ? 'block' : 'none'; window.updatePreviewEdit && window.updatePreviewEdit()">
+                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
+            </label>
+
+            <div id="editCarouselGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
                         <div>
-                            <label class="block font-semibold text-slate-300 mb-1">HTML Personalizado</label>
-                            <textarea style="resize: vertical !important;" name="custom_html" id="editCustomHtml" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <input type="color" id="editCarGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editCarGradColorStart').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                                <input type="text" name="settings[carousel_gradient_color_start]" id="editCarGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editCarGradColorStartPicker').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                            </div>
+                            <input type="range" name="settings[carousel_gradient_opacity_start]" id="editCarGradOpacityStart" min="0" max="100" value="80" class="w-full" oninput="document.getElementById('editCarGradOpacityStartVal').textContent = this.value + '%'; window.updatePreviewEdit && window.updatePreviewEdit()">
+                            <div class="text-right text-[10px] text-slate-500 mt-1" id="editCarGradOpacityStartVal">80%</div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-semibold text-slate-300 mb-1">CSS Scoped</label>
-                                <textarea style="resize: vertical !important;" name="custom_css" id="editCustomCss" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
+                    </div>
+                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <input type="color" id="editCarGradColorEndPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editCarGradColorEnd').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                                <input type="text" name="settings[carousel_gradient_color_end]" id="editCarGradColorEnd" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editCarGradColorEndPicker').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
                             </div>
-                            <div>
-                                <label class="block font-semibold text-slate-300 mb-1">JavaScript Custom</label>
-                                <textarea style="resize: vertical !important;" name="custom_js" id="editCustomJs" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg"></textarea>
-                            </div>
+                            <input type="range" name="settings[carousel_gradient_opacity_end]" id="editCarGradOpacityEnd" min="0" max="100" value="0" class="w-full" oninput="document.getElementById('editCarGradOpacityEndVal').textContent = this.value + '%'; window.updatePreviewEdit && window.updatePreviewEdit()">
+                            <div class="text-right text-[10px] text-slate-500 mt-1" id="editCarGradOpacityEndVal">0%</div>
                         </div>
                     </div>
                 </div>
-
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                    <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editSectionModal">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Guardar Cambios de Sección</span>
-                    </button>
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-600 mb-1">Direcci?n del Degradado</label>
+                    <select name="settings[carousel_gradient_direction]" id="editCarGradDirection" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                        <option value="to bottom">De Arriba hacia Abajo</option>
+                        <option value="to top">De Abajo hacia Arriba</option>
+                        <option value="to right">De Izquierda a Derecha</option>
+                        <option value="to left">De Derecha a Izquierda</option>
+                        <option value="to bottom right">Diagonal (Arr-Izq a Aba-Der)</option>
+                    </select>
                 </div>
-            </form>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <label class="block font-bold text-slate-700 text-xs">Slides</label>
+            <button type="button" class="px-2 py-1 bg-indigo-600 text-white text-[10px] rounded hover:bg-indigo-700 font-bold" onclick="window.addCarouselSlide('edit')">+ Añadir Slide</button>
+        </div>
+        
+        <div id="editCarouselSlidesList" class="space-y-3">
+            <!-- Dynamic Slides go here -->
+        </div>
+    </div>
+</div>
+
+                        <!-- 3. MODO POP UP -->
+                        <div id="editPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Pop-up</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Imagen del Modal (Opcional)</label>
+                                    <input type="file" name="settings[popup_image]" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Comportamiento de Cierre</label>
+                                    <select name="settings[popup_close_behavior]" id="editPopupCloseBehavior" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                        <option value="outside">Permitir cerrar al hacer clic fuera (Overlay)</option>
+                                        <option value="button">Requerir acción (Solo Botón Cerrar)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. MODO BOTONES / BLOQUE PERSONALIZADO -->
+                        <div id="editButtonsWrap" class="space-y-4 hidden">
+                            <!-- EDITOR DE CÓDIGO CUSTOM -->
+                        </div>
+                        <div id="editCustomCodeWrap" class="p-3 bg-slate-900 text-slate-200 border border-slate-800 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="block font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Bloque Custom / HTML Libre</span>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1 text-xs">Ingresa tu código HTML / CSS</label>
+                                <textarea name="custom_html" id="editCustomHtml" rows="5" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-100 font-mono text-[11px] rounded-lg" placeholder="<!-- Tu código HTML aquí -->&#10;<div class='flex gap-2 justify-center'>&#10;  <button class='btn'>Botón 1</button>&#10;</div>" oninput="window.updatePreviewEdit && window.updatePreviewEdit()"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 5. GESTIÓN DE ESPACIADOS ENTRE SECCIONES (TASK-SPACING-MODULAR) -->
+                        <div id="editSpacingWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                    <span>Espaciado Vertical de Sección (Márgenes)</span>
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium">Por defecto: 0px (Sin espacios)</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Espaciado Superior -->
+                                <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-lg space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <span>Margen Superior</span>
+                                        </label>
+                                        <div class="flex items-center gap-1">
+                                            <input type="number" id="inpEditSpacingTop" name="settings[spacing_top]" min="0" max="160" step="1" value="0" class="w-14 px-1.5 py-0.5 text-center text-xs font-mono font-bold bg-white border border-slate-200 rounded" oninput="window.setSectionSpacing('edit', 'top', this.value)">
+                                            <span class="text-[10px] text-slate-500 font-semibold">px</span>
+                                        </div>
+                                    </div>
+                                    <input type="range" id="rangeEditSpacingTop" min="0" max="120" step="2" value="0" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg" oninput="window.setSectionSpacing('edit', 'top', this.value)">
+                                    <!-- Presets rápidos -->
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[9px] text-slate-400 uppercase font-bold mr-0.5">Presets:</span>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'top', 0)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">0px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'top', 12)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">12px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'top', 24)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">24px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'top', 36)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">36px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'top', 48)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">48px</button>
+                                    </div>
+                                </div>
+
+                                <!-- Espaciado Inferior -->
+                                <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-lg space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>Margen Inferior</span>
+                                        </label>
+                                        <div class="flex items-center gap-1">
+                                            <input type="number" id="inpEditSpacingBottom" name="settings[spacing_bottom]" min="0" max="160" step="1" value="0" class="w-14 px-1.5 py-0.5 text-center text-xs font-mono font-bold bg-white border border-slate-200 rounded" oninput="window.setSectionSpacing('edit', 'bottom', this.value)">
+                                            <span class="text-[10px] text-slate-500 font-semibold">px</span>
+                                        </div>
+                                    </div>
+                                    <input type="range" id="rangeEditSpacingBottom" min="0" max="120" step="2" value="0" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg" oninput="window.setSectionSpacing('edit', 'bottom', this.value)">
+                                    <!-- Presets rápidos -->
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[9px] text-slate-400 uppercase font-bold mr-0.5">Presets:</span>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'bottom', 0)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">0px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'bottom', 12)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">12px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'bottom', 24)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">24px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'bottom', 36)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">36px</button>
+                                        <button type="button" onclick="window.setSectionSpacing('edit', 'bottom', 48)" class="px-1.5 py-0.5 bg-white border border-slate-200 hover:border-indigo-400 rounded text-[10px] font-semibold text-slate-600 hover:text-indigo-600 transition">48px</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer del Formulario Flotante en la parte inferior de la columna -->
+                    <div class="flex items-center justify-between gap-3 pt-4 pb-2 border-t border-slate-100 mt-auto bg-white sticky bottom-0 z-30">
+                        <button type="button" class="px-4 py-2 text-slate-600 font-semibold cursor-pointer" data-action="close-modal" data-modal="editSectionModal">Cancelar</button>
+                        <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg cursor-pointer flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Guardar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- COLUMNA DERECHA: PREVIEW EN VIVO -->
+            <div class="flex-1 bg-slate-100 p-0 sm:p-6 flex flex-col relative z-10">
+                <!-- Toggle de Dispositivo -->
+                <div class="absolute top-6 left-6 z-40 flex bg-white rounded-lg shadow-sm p-1 border border-slate-200" id="editPreviewDeviceGroup">
+                    <button type="button" class="edit-preview-device-btn active px-3 py-1.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 cursor-pointer" data-device="desktop">Desktop</button>
+                    <button type="button" class="edit-preview-device-btn px-3 py-1.5 rounded text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer" data-device="mobile">Mobile</button>
+                </div>
+                
+                <!-- Contenedor del Preview Visual -->
+                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden mt-16">
+                    <div id="editLivePreviewContainer" class="w-full h-[50vh] md:h-[55vh] max-h-[500px] bg-white rounded-xl shadow-md border border-slate-200 overflow-y-auto overflow-x-hidden transition-all duration-300 relative" style="max-width: 100%;">
+                        <!-- Skeleton Header de la tienda -->
+                        <div class="w-full border-b border-slate-100 p-4 flex items-center justify-between bg-white sticky top-0 z-30">
+                            <div class="w-24 h-6 bg-slate-200 rounded"></div>
+                            <div class="hidden md:flex gap-4">
+                                <div class="w-12 h-2 bg-slate-200 rounded"></div>
+                                <div class="w-12 h-2 bg-slate-200 rounded"></div>
+                                <div class="w-12 h-2 bg-slate-200 rounded"></div>
+                            </div>
+                            <div class="w-8 h-8 bg-slate-200 rounded-full md:hidden"></div>
+                        </div>
+                        
+                        <!-- Contenido Renderizado en Vivo -->
+                        <div id="editLivePreviewContent" class="w-full min-h-[250px] flex flex-col bg-white">
+                            
+                            <!-- 1. Hero / Sección Preview -->
+                            <div id="editPreviewHeroArea" class="w-full p-8 md:p-12 flex flex-col items-center justify-center text-center relative bg-slate-900 min-h-[250px] overflow-hidden transition-all duration-300">
+                                <video id="editPreviewHeroVideo" class="absolute inset-0 w-full h-full object-cover z-0 hidden" autoplay loop muted playsinline></video>
+                                <div id="editPreviewOverlay" class="absolute inset-0 z-0 hidden"></div>
+                                <div class="relative z-10 max-w-2xl mx-auto space-y-4 w-full">
+                                    <span id="editPreviewBadge" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full uppercase tracking-widest hidden"></span>
+                                    <h2 id="editPreviewTitle" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Tu Título Aquí</h2>
+                                    <p id="editPreviewSubtitle" class="text-slate-300 md:text-lg max-w-xl mx-auto hidden">Tu bajada o subtítulo aquí.</p>
+                                    
+                                    <div id="editPreviewActions" class="flex flex-wrap justify-center gap-3 pt-4 hidden">
+                                        <button id="editPreviewBtnPrimary" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-sm shadow-sm hidden transition-colors"></button>
+                                        <button id="editPreviewBtnSecondary" class="px-6 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-lg font-bold text-sm hidden transition-colors"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 2. Carrusel Preview -->
+                            <div id="editPreviewCarouselArea" class="hidden w-full h-[300px] bg-slate-100 relative flex flex-col items-center justify-center overflow-hidden">
+                                <div class="absolute inset-0 bg-slate-200/50"></div>
+                                <div class="relative z-10 text-center px-8">
+                                    <h2 class="preview-common-title text-2xl md:text-3xl font-bold text-slate-800 drop-shadow-sm"></h2>
+                                    <p class="preview-common-subtitle text-slate-600 mt-2 max-w-md mx-auto"></p>
+                                </div>
+                                <div class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </div>
+                                <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </div>
+                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-800"></div>
+                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
+                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Pop-up Preview -->
+                            <div id="editPreviewPopUpArea" class="hidden w-full min-h-[400px] bg-slate-800/40 relative flex items-center justify-center p-4">
+                                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform scale-95 transition-transform">
+                                    <div class="h-40 bg-slate-100 border-b border-slate-100 w-full flex items-center justify-center text-slate-400 text-xs relative">
+                                        <svg class="w-8 h-8 text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <button class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 bg-white/80 rounded-full p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                                    </div>
+                                    <div class="p-6 text-center">
+                                        <h2 class="preview-common-title text-xl font-bold text-slate-900 mb-2 leading-tight"></h2>
+                                        <p class="preview-common-subtitle text-sm text-slate-500 mb-6 leading-relaxed"></p>
+                                        <button class="w-full py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm">Acción Principal</button>
+                                        <button class="w-full py-2 mt-2 text-slate-400 text-xs font-semibold hover:text-slate-600 transition">Cerrar / No gracias</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Botones / Custom Preview -->
+                            <div id="editPreviewButtonsArea" class="hidden w-full p-8 md:p-12 flex flex-col items-center text-center bg-white">
+                                <h2 class="preview-common-title text-2xl font-bold text-slate-900 mb-3"></h2>
+                                <p class="preview-common-subtitle text-slate-600 mb-8 max-w-lg mx-auto"></p>
+                                <div id="editCustomHtmlPreviewContainer" class="w-full">
+                                    <div class="p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl w-full text-slate-400 text-xs flex items-center justify-center flex-col gap-2">
+                                        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                        Área de Bloque Personalizado / Código HTML Inyectado
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const editSectionType = document.getElementById('editSectionType');
+                    const editHeroWrap = document.getElementById('editHeroWrap');
+                    const editCarouselWrap = document.getElementById('editCarouselWrap');
+                    const editPopUpWrap = document.getElementById('editPopUpWrap');
+                    const editButtonsWrap = document.getElementById('editButtonsWrap');
+
+                    function switchSectionType() {
+                        if (!editSectionType) return;
+                        const val = editSectionType.value;
+                        const isCustom = document.querySelector('#editSectionModal input[name="settings[hero_mode]"]:checked')?.value === 'custom';
+                        const editCustomCodeWrap = document.getElementById('editCustomCodeWrap');
+                        const editCommonFieldsWrap = document.getElementById('editCommonFieldsWrap');
+                        const editSpacingWrap = document.getElementById('editSpacingWrap');
+
+                        if (isCustom) {
+                            if(editHeroWrap) editHeroWrap.style.display = 'none';
+                            if(editCarouselWrap) editCarouselWrap.style.display = 'none';
+                            if(editPopUpWrap) editPopUpWrap.style.display = 'none';
+                            if(editButtonsWrap) editButtonsWrap.style.display = 'none';
+                            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = 'none';
+                            if(editCustomCodeWrap) editCustomCodeWrap.style.display = 'block';
+                            if(editSpacingWrap) editSpacingWrap.style.display = 'block';
+                        } else {
+                            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = 'block';
+                            if(editCustomCodeWrap) editCustomCodeWrap.style.display = (val === 'buttons') ? 'block' : 'none';
+                            if(editHeroWrap) editHeroWrap.style.display = val === 'hero' ? 'block' : 'none';
+                            if(editCarouselWrap) editCarouselWrap.style.display = val === 'carousel' ? 'block' : 'none';
+                            if(editPopUpWrap) editPopUpWrap.style.display = val === 'pop_up' ? 'block' : 'none';
+                            if(editButtonsWrap) editButtonsWrap.style.display = val === 'buttons' ? 'block' : 'none';
+                            if(editSpacingWrap) editSpacingWrap.style.display = val === 'pop_up' ? 'none' : 'block';
+                        }
+                    }
+
+                    if (editSectionType) {
+                        editSectionType.addEventListener('change', () => {
+                            switchSectionType();
+                            if(typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+                        });
+                        switchSectionType(); // Init state
+                    }
+
+                    const titleInput = document.getElementById('inpEditTitle');
+                    const subtitleInput = document.getElementById('inpEditSubtitle');
+                    const badgeInput = document.getElementById('inpEditBadge');
+                    
+                    const previewTitle = document.getElementById('editPreviewTitle');
+                    const previewSubtitle = document.getElementById('editPreviewSubtitle');
+                    const previewBadge = document.getElementById('editPreviewBadge');
+                    
+                    const previewHeroArea = document.getElementById('editPreviewHeroArea');
+                    const previewCarouselArea = document.getElementById('editPreviewCarouselArea');
+                    const previewPopUpArea = document.getElementById('editPreviewPopUpArea');
+                    const previewButtonsArea = document.getElementById('editPreviewButtonsArea');
+                    
+                    const ctaPrimaryInput = document.getElementById('inpEditCtaPrimary');
+                    const ctaSecondaryInput = document.getElementById('inpEditCtaSecondary');
+                    
+                    const previewBtnPrimary = document.getElementById('editPreviewBtnPrimary');
+                    const previewBtnSecondary = document.getElementById('editPreviewBtnSecondary');
+                    const previewActions = document.getElementById('editPreviewActions');
+
+                    const inpEditTitleColor = document.getElementById('inpEditTitleColor');
+                    const inpEditSubtitleColor = document.getElementById('inpEditSubtitleColor');
+                    const inpEditTextAlign = document.getElementById('inpEditTextAlign');
+                    const inpEditFontFamily = document.getElementById('inpEditFontFamily');
+                    const inpEditCtaPrimaryBg = document.getElementById('inpEditCtaPrimaryBg');
+                    const inpEditCtaPrimaryColor = document.getElementById('inpEditCtaPrimaryColor');
+                    const inpEditCtaSecondaryBg = document.getElementById('inpEditCtaSecondaryBg');
+                    const inpEditCtaSecondaryColor = document.getElementById('inpEditCtaSecondaryColor');
+
+                    window.updatePreviewEdit = function() {
+
+                        const typeVal = editSectionType ? editSectionType.value : 'hero';
+
+                        // Toggle preview areas
+                        if (previewHeroArea) previewHeroArea.style.display = typeVal === 'hero' ? 'flex' : 'none';
+                        if (previewCarouselArea) previewCarouselArea.style.display = typeVal === 'carousel' ? 'flex' : 'none';
+                        if (previewPopUpArea) previewPopUpArea.style.display = typeVal === 'pop_up' ? 'flex' : 'none';
+                        if (previewButtonsArea) previewButtonsArea.style.display = typeVal === 'buttons' ? 'flex' : 'none';
+
+                        // Espaciado vertical (Márgenes superior e inferior en preview)
+                        const spTop = document.getElementById('inpEditSpacingTop') ? (parseInt(document.getElementById('inpEditSpacingTop').value, 10) || 0) : 0;
+                        const spBottom = document.getElementById('inpEditSpacingBottom') ? (parseInt(document.getElementById('inpEditSpacingBottom').value, 10) || 0) : 0;
+                        [previewHeroArea, previewCarouselArea, previewButtonsArea].forEach(area => {
+                            if (area) {
+                                area.style.marginTop = spTop + 'px';
+                                area.style.marginBottom = spBottom + 'px';
+                            }
+                        });
+
+                        // Actualizar textos globales para las nuevas áreas
+                        const defaultTitle = typeVal === 'buttons' ? 'Bloque Personalizado' : 'Tu Título Aquí';
+                        document.querySelectorAll('#editSectionModal .preview-common-title').forEach(el => {
+                            el.textContent = titleInput && titleInput.value ? titleInput.value : defaultTitle;
+                        });
+                        document.querySelectorAll('#editSectionModal .preview-common-subtitle').forEach(el => {
+                            el.textContent = subtitleInput && subtitleInput.value ? subtitleInput.value : 'Tu bajada o subtítulo aquí.';
+                            el.style.display = subtitleInput && subtitleInput.value ? 'block' : 'none';
+                        });
+
+                        // Textos y Tipografías Independientes para Hero
+                        if (titleInput && previewTitle) {
+                            previewTitle.textContent = titleInput.value || 'Tu Hero Principal';
+                            if (inpEditTitleColor && inpEditTitleColor.value) {
+                                previewTitle.style.color = inpEditTitleColor.value;
+                            } else {
+                                previewTitle.style.color = '';
+                            }
+                            const tFontInp = document.getElementById('inpEditTitleFont');
+                            if (tFontInp && tFontInp.value && tFontInp.value !== 'inherit') {
+                                if (window.loadGoogleFont) window.loadGoogleFont(tFontInp.value);
+                                previewTitle.style.fontFamily = `'${tFontInp.value}', sans-serif`;
+                            } else {
+                                previewTitle.style.fontFamily = '';
+                            }
+                        }
+                        if (subtitleInput && previewSubtitle) {
+                            previewSubtitle.textContent = subtitleInput.value;
+                            previewSubtitle.style.display = subtitleInput.value ? 'block' : 'none';
+                            if (inpEditSubtitleColor && inpEditSubtitleColor.value) {
+                                previewSubtitle.style.color = inpEditSubtitleColor.value;
+                            } else {
+                                previewSubtitle.style.color = '';
+                            }
+                            const sFontInp = document.getElementById('inpEditSubtitleFont');
+                            if (sFontInp && sFontInp.value && sFontInp.value !== 'inherit') {
+                                if (window.loadGoogleFont) window.loadGoogleFont(sFontInp.value);
+                                previewSubtitle.style.fontFamily = `'${sFontInp.value}', sans-serif`;
+                            } else {
+                                previewSubtitle.style.fontFamily = '';
+                            }
+                        }
+                        if (badgeInput && previewBadge) {
+                            previewBadge.textContent = badgeInput.value;
+                            previewBadge.style.display = badgeInput.value ? 'inline-block' : 'none';
+                        }
+                        
+                        // Alineación, altura y efecto Parallax del contenedor de texto
+                        if (previewHeroArea) {
+                            const inpAlign = document.querySelector('#editSectionModal input[name="settings[text_align]"]:checked');
+                            const alignVal = inpAlign ? inpAlign.value : 'text-center';
+                            
+                            const innerWrapper = previewHeroArea.querySelector('.relative.z-10');
+                            
+                            previewHeroArea.classList.remove('text-center', 'text-left', 'text-right', 'items-center', 'items-start', 'items-end');
+                            if (innerWrapper) innerWrapper.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
+                            if (previewSubtitle) previewSubtitle.classList.remove('mx-auto', 'ml-0', 'mr-auto', 'mr-0', 'ml-auto');
+                            if (previewActions) previewActions.classList.remove('justify-center', 'justify-start', 'justify-end');
+                            
+                            const isFullPage = document.getElementById('inpEditFullWidth') && document.getElementById('inpEditFullWidth').checked;
+                            const isFullWidthH = document.getElementById('inpEditFullWidthHorizontal') && document.getElementById('inpEditFullWidthHorizontal').checked;
+                            const heightVal = document.getElementById('inpEditHeroHeightValue') ? document.getElementById('inpEditHeroHeightValue').value : '';
+                            const heightUnit = document.getElementById('inpEditHeroHeightUnit') ? document.getElementById('inpEditHeroHeightUnit').value : 'px';
+                            const customHeight = heightVal ? heightVal + heightUnit : '';
+                            
+                            if (isFullPage) {
+                                previewHeroArea.style.minHeight = '400px';
+                            } else if (customHeight.trim() !== '') {
+                                previewHeroArea.style.minHeight = customHeight;
+                            } else {
+                                previewHeroArea.style.minHeight = '150px';
+                            }
+
+                            if (isFullWidthH) {
+                                previewHeroArea.classList.add('w-full', '!rounded-none');
+                                previewHeroArea.classList.remove('rounded-xl');
+                            } else {
+                                previewHeroArea.classList.remove('!rounded-none');
+                            }
+
+                            // Efecto Parallax Scrolling
+                            const inpParallax = document.getElementById('inpEditParallax');
+                            if (inpParallax && inpParallax.checked) {
+                                previewHeroArea.style.backgroundAttachment = 'fixed';
+                            } else {
+                                previewHeroArea.style.backgroundAttachment = 'scroll';
+                            }
+
+                            if (alignVal === 'text-left') {
+                                previewHeroArea.classList.add('text-left', 'items-start');
+                                if (innerWrapper) innerWrapper.classList.add('ml-0', 'mr-auto');
+                                if (previewSubtitle) previewSubtitle.classList.add('ml-0', 'mr-auto');
+                                if (previewActions) previewActions.classList.add('justify-start');
+                            } else if (alignVal === 'text-right') {
+                                previewHeroArea.classList.add('text-right', 'items-end');
+                                if (innerWrapper) innerWrapper.classList.add('ml-auto', 'mr-0');
+                                if (previewSubtitle) previewSubtitle.classList.add('ml-auto', 'mr-0');
+                                if (previewActions) previewActions.classList.add('justify-end');
+                            } else {
+                                previewHeroArea.classList.add('text-center', 'items-center');
+                                if (innerWrapper) innerWrapper.classList.add('mx-auto');
+                                if (previewSubtitle) previewSubtitle.classList.add('mx-auto');
+                                if (previewActions) previewActions.classList.add('justify-center');
+                            }
+                        }
+
+                        // Botones
+                        let hasBtn = false;
+                        if (ctaPrimaryInput && previewBtnPrimary) {
+                            previewBtnPrimary.textContent = ctaPrimaryInput.value;
+                            previewBtnPrimary.style.display = ctaPrimaryInput.value ? 'inline-block' : 'none';
+                            if(ctaPrimaryInput.value) {
+                                hasBtn = true;
+                                if(inpEditCtaPrimaryBg) previewBtnPrimary.style.backgroundColor = inpEditCtaPrimaryBg.value;
+                                if(inpEditCtaPrimaryColor) previewBtnPrimary.style.color = inpEditCtaPrimaryColor.value;
+                                
+                                const bW = document.getElementById('inpEditCtaPrimaryBorderWidth') ? document.getElementById('inpEditCtaPrimaryBorderWidth').value : 'border-0';
+                                const bC = document.getElementById('inpEditCtaPrimaryBorderColor') ? document.getElementById('inpEditCtaPrimaryBorderColor').value : 'transparent';
+                                const shadow = document.getElementById('inpEditCtaPrimaryShadow') ? document.getElementById('inpEditCtaPrimaryShadow').value : '';
+                                
+                                previewBtnPrimary.className = `px-6 py-2.5 rounded-lg font-bold text-sm transition-colors ${bW} ${shadow}`;
+                                if(bW !== 'border-0') {
+                                    previewBtnPrimary.style.borderColor = bC;
+                                } else {
+                                    previewBtnPrimary.style.borderColor = 'transparent';
+                                }
+                            }
+                        } else {
+                            if(previewBtnPrimary) previewBtnPrimary.style.display = 'none';
+                        }
+
+                        if (ctaSecondaryInput && previewBtnSecondary) {
+                            previewBtnSecondary.textContent = ctaSecondaryInput.value;
+                            previewBtnSecondary.style.display = ctaSecondaryInput.value ? 'inline-block' : 'none';
+                            if(ctaSecondaryInput.value) {
+                                hasBtn = true;
+                                if(inpEditCtaSecondaryBg) previewBtnSecondary.style.backgroundColor = inpEditCtaSecondaryBg.value;
+                                if(inpEditCtaSecondaryColor) previewBtnSecondary.style.color = inpEditCtaSecondaryColor.value;
+                                
+                                const bW2 = document.getElementById('inpEditCtaSecondaryBorderWidth') ? document.getElementById('inpEditCtaSecondaryBorderWidth').value : 'border-0';
+                                const bC2 = document.getElementById('inpEditCtaSecondaryBorderColor') ? document.getElementById('inpEditCtaSecondaryBorderColor').value : 'transparent';
+                                const shadow2 = document.getElementById('inpEditCtaSecondaryShadow') ? document.getElementById('inpEditCtaSecondaryShadow').value : '';
+                                
+                                previewBtnSecondary.className = `px-6 py-2.5 rounded-lg font-bold text-sm transition-colors ${bW2} ${shadow2}`;
+                                if(bW2 !== 'border-0') {
+                                    previewBtnSecondary.style.borderColor = bC2;
+                                } else {
+                                    previewBtnSecondary.style.borderColor = 'transparent';
+                                }
+                            }
+                        } else {
+                            if(previewBtnSecondary) previewBtnSecondary.style.display = 'none';
+                        }
+                        
+                        const inpHasButtons = document.getElementById('inpEditHeroHasButtons');
+                        const hasButtons = inpHasButtons ? inpHasButtons.checked : true;
+                        const clickUrlInp = document.getElementById('editHeroClickUrl');
+                        const heroClickUrl = clickUrlInp ? clickUrlInp.value.trim() : '';
+
+                        if (previewActions) {
+                            previewActions.style.display = (hasButtons && hasBtn) ? 'flex' : 'none';
+                        }
+
+                        let clickBadge = document.getElementById('editPreviewHeroClickBadge');
+                        if (previewHeroArea) {
+                            const innerWrapper = previewHeroArea.querySelector('.relative.z-10');
+                            if (!hasButtons) {
+                                previewHeroArea.style.cursor = 'pointer';
+                                previewHeroArea.title = heroClickUrl ? ('Clic redirige a: ' + heroClickUrl) : 'Hero clicable en toda el área';
+                                if (!clickBadge) {
+                                    clickBadge = document.createElement('div');
+                                    clickBadge.id = 'editPreviewHeroClickBadge';
+                                    clickBadge.className = 'mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-200 border border-amber-400/40 rounded-full text-[11px] font-semibold backdrop-blur-xs relative z-10';
+                                    if (innerWrapper) innerWrapper.appendChild(clickBadge);
+                                    else previewHeroArea.appendChild(clickBadge);
+                                }
+                                clickBadge.style.display = 'inline-flex';
+                                clickBadge.innerHTML = `<svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg> Clic en todo el Hero ${heroClickUrl ? '→ ' + heroClickUrl : '(Sin URL asignada)'}`;
+                            } else {
+                                previewHeroArea.style.cursor = 'default';
+                                previewHeroArea.title = '';
+                                if (clickBadge) clickBadge.style.display = 'none';
+                            }
+                        }
+
+                        // Estilo Hero Completo
+                        if (previewHeroArea) {
+                            previewHeroArea.classList.remove('bg-white', 'min-h-[150px]', 'border-b', 'border-slate-100', '!p-6', 'text-slate-900');
+                            previewHeroArea.classList.add('bg-slate-900', 'min-h-[250px]', 'p-8');
+                            
+                            const bgType = document.getElementById('editHeroBgType')?.value || 'image';
+                            const videoEl = document.getElementById('editPreviewHeroVideo');
+                            const videoFileInp = document.querySelector('#editSectionModal input[name="background_video_file"]');
+                            const videoUrlInp = document.getElementById('editHeroBgVideoUrl');
+                            const videoAutoplay = document.getElementById('editHeroVideoAutoplay')?.checked ?? true;
+                            const videoLoop = document.getElementById('editHeroVideoLoop')?.checked ?? true;
+                            const videoMuted = document.getElementById('editHeroVideoMuted')?.checked ?? true;
+
+                            const focalInpEdit = document.getElementById('inpEditHeroFocalPoint');
+                            const focalValEdit = focalInpEdit && focalInpEdit.value ? focalInpEdit.value : 'center center';
+
+                            if (bgType === 'video' && videoEl) {
+                                let vidSrc = '';
+                                if (videoFileInp && videoFileInp.files && videoFileInp.files[0]) {
+                                    vidSrc = URL.createObjectURL(videoFileInp.files[0]);
+                                } else if (videoUrlInp && videoUrlInp.value) {
+                                    vidSrc = videoUrlInp.value;
+                                }
+                                if (vidSrc) {
+                                    if (videoEl.src !== vidSrc) videoEl.src = vidSrc;
+                                    videoEl.autoplay = videoAutoplay;
+                                    videoEl.loop = videoLoop;
+                                    videoEl.muted = videoMuted;
+                                    videoEl.style.objectPosition = focalValEdit;
+                                    videoEl.classList.remove('hidden');
+                                    videoEl.play().catch(() => {});
+                                    previewHeroArea.style.backgroundImage = 'none';
+                                } else {
+                                    videoEl.classList.add('hidden');
+                                    videoEl.pause();
+                                }
+                            } else {
+                                if (videoEl) {
+                                    videoEl.classList.add('hidden');
+                                    videoEl.pause();
+                                }
+                                if (window._currentHeroPreviewBg_edit) {
+                                    previewHeroArea.style.backgroundImage = window._currentHeroPreviewBg_edit;
+                                    previewHeroArea.classList.add('bg-cover');
+                                    previewHeroArea.classList.remove('bg-center');
+                                    previewHeroArea.style.setProperty('background-position', focalValEdit, 'important');
+                                } else {
+                                    previewHeroArea.style.backgroundImage = 'none';
+                                }
+                            }
+                        }
+
+                        if (previewTitle) previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
+                        if (previewSubtitle) previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
+
+                        // Renderizado de Carrusel en Vivo
+                        if (typeVal === 'carousel' && previewCarouselArea) {
+                            const isGlobalBtn = document.querySelector('#editSectionModal input[name="settings[carousel_global_content]"]');
+                            const isGlobal = isGlobalBtn ? isGlobalBtn.checked : true;
+                            const slides = document.querySelectorAll('#editCarouselSlidesList .slide-item');
+                            previewCarouselArea.innerHTML = '';
+                            previewCarouselArea.style.display = 'flex';
+                            previewCarouselArea.style.flexDirection = 'row';
+                            previewCarouselArea.style.overflowX = 'auto';
+                            previewCarouselArea.style.scrollSnapType = 'x mandatory';
+                            previewCarouselArea.style.gap = '0';
+                            previewCarouselArea.style.backgroundImage = 'none';
+
+                            if (slides.length === 0) {
+                                previewCarouselArea.innerHTML = '<div class="w-full flex-shrink-0 h-full flex flex-col items-center justify-center text-slate-400">Sin slides en carrusel</div>';
+                            } else {
+                                const globalTitle = document.querySelector('#editSectionModal input[name="title"]')?.value || 'Tu Título Aquí';
+                                const globalSubtitle = document.querySelector('#editSectionModal input[name="subtitle"]')?.value || '';
+                                const globalBadge = document.querySelector('#editSectionModal input[name="badge"]')?.value || '';
+                                
+                                const gGradEn = document.querySelector('#editSectionModal input[name="settings[carousel_enable_gradient]"]')?.checked;
+                                const gGradStart = document.querySelector('#editSectionModal input[name="settings[carousel_gradient_color_start]"]')?.value || '#0f172a';
+                                const gGradEnd = document.querySelector('#editSectionModal input[name="settings[carousel_gradient_color_end]"]')?.value || '#1e1b4b';
+
+                                slides.forEach((slide, idx) => {
+                                    const uInp = slide.querySelector('.slide-url');
+                                    const fileInp = slide.querySelector('input[type="file"]');
+                                    let bgSrc = '';
+                                    
+                                    if (fileInp && fileInp.files && fileInp.files[0]) {
+                                        bgSrc = URL.createObjectURL(fileInp.files[0]);
+                                    } else if (uInp && uInp.value) {
+                                        bgSrc = uInp.value;
+                                    }
+                                    
+                                    const sTitle = isGlobal ? globalTitle : (slide.querySelector('input[name$="\\[title\\]"]')?.value || '');
+                                    const sSub = isGlobal ? globalSubtitle : (slide.querySelector('input[name$="\\[subtitle\\]"]')?.value || '');
+                                    const sBadge = isGlobal ? globalBadge : (slide.querySelector('input[name$="\\[badge\\]"]')?.value || '');
+                                    
+                                    const sGradEn = isGlobal ? gGradEn : slide.querySelector('input[name$="\\[enable_gradient\\]"]')?.checked;
+                                    const sGradStart = isGlobal ? gGradStart : (slide.querySelector('input[name$="\\[gradient_color_start\\]"]')?.value || '#000');
+                                    const sGradEnd = isGlobal ? gGradEnd : (slide.querySelector('input[name$="\\[gradient_color_end\\]"]')?.value || '#000');
+                                    
+                                    const slideDiv = document.createElement('div');
+                                    slideDiv.className = 'w-full flex-shrink-0 h-full relative flex flex-col items-center justify-center overflow-hidden';
+                                    slideDiv.style.scrollSnapAlign = 'start';
+                                    
+                                    if (bgSrc) {
+                                        slideDiv.style.backgroundImage = 'url(' + bgSrc + ')';
+                                        slideDiv.style.backgroundSize = 'cover';
+                                        slideDiv.style.backgroundPosition = 'center';
+                                    }
+                                    
+                                    if (sGradEn) {
+                                        const overlay = document.createElement('div');
+                                        overlay.className = 'absolute inset-0 z-0';
+                                        overlay.style.background = 'linear-gradient(to bottom, ' + sGradStart + '80, ' + sGradEnd + '80)';
+                                        slideDiv.appendChild(overlay);
+                                    }
+                                    
+                                    const contentDiv = document.createElement('div');
+                                    contentDiv.className = 'relative z-10 text-center px-8 w-full';
+                                    
+                                    if (sBadge) {
+                                        contentDiv.innerHTML += '<div class="inline-block bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full mb-2 uppercase tracking-wide font-bold">' + sBadge + '</div>';
+                                    }
+                                    if (sTitle) {
+                                        contentDiv.innerHTML += '<h2 class="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">' + sTitle + '</h2>';
+                                    }
+                                    if (sSub) {
+                                        contentDiv.innerHTML += '<p class="text-white/90 mt-2 max-w-md mx-auto">' + sSub + '</p>';
+                                    }
+
+                                    const sBtnText = slide.querySelector('input[name$="\\[button_text\\]"]')?.value || '';
+                                    const sBtnBg = slide.querySelector('input[name$="\\[button_bg\\]"]')?.value || '#0f172a';
+                                    const sBtnColor = slide.querySelector('input[name$="\\[button_color\\]"]')?.value || '#ffffff';
+                                    const sBtnBorderColor = slide.querySelector('input[name$="\\[button_border_color\\]"]')?.value || '#0f172a';
+                                    const sBtnBorderWidth = slide.querySelector('select[name$="\\[button_border_width\\]"]')?.value || 'border-0';
+                                    const sBtnShadow = slide.querySelector('select[name$="\\[button_shadow\\]"]')?.value || '';
+
+                                    if (sBtnText) {
+                                        const btnClass = `inline-block px-5 py-2 mt-4 rounded-lg font-bold text-xs ${sBtnBorderWidth} ${sBtnShadow}`;
+                                        const btnStyle = `background-color: ${sBtnBg}; color: ${sBtnColor}; border-color: ${sBtnBorderColor};`;
+                                        contentDiv.innerHTML += `<a href="javascript:void(0)" class="${btnClass}" style="${btnStyle}">${sBtnText}</a>`;
+                                    }
+                                    
+                                    slideDiv.appendChild(contentDiv);
+                                    previewCarouselArea.appendChild(slideDiv);
+                                });
+                            }
+                        }
+
+                        // Renderizado de Código Custom / HTML Libre en Vivo
+                        const isCustom = document.querySelector('#editSectionModal input[name="settings[hero_mode]"]:checked')?.value === 'custom';
+                        const customHtmlInp = document.getElementById('editCustomHtml');
+                        const customPreviewContainer = document.getElementById('editCustomHtmlPreviewContainer');
+                        if (customPreviewContainer && customHtmlInp) {
+                            if (customHtmlInp.value && customHtmlInp.value.trim()) {
+                                customPreviewContainer.innerHTML = customHtmlInp.value;
+                            } else {
+                                customPreviewContainer.innerHTML = `
+                                    <div class="p-8 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl w-full text-slate-400 text-xs flex items-center justify-center flex-col gap-2">
+                                        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                        Área de Bloque Personalizado / Código HTML Inyectado
+                                    </div>`;
+                            }
+                        }
+
+                        if (isCustom) {
+                            if (previewHeroArea) previewHeroArea.style.display = 'none';
+                            if (previewCarouselArea) previewCarouselArea.style.display = 'none';
+                            if (previewPopUpArea) previewPopUpArea.style.display = 'none';
+                            if (previewButtonsArea) previewButtonsArea.style.display = 'flex';
+                        }
+                    }
+
+                    // Handlers para la imagen y video de fondo
+                    const bgFileInput = document.querySelector('#editSectionModal input[name="background_image_file"]');
+                    const bgUrlInput = document.getElementById('editHeroBgUrl');
+                    const videoFileInput = document.querySelector('#editSectionModal input[name="background_video_file"]');
+                    const videoUrlInput = document.getElementById('editHeroBgVideoUrl');
+
+                    if (bgFileInput) {
+                        bgFileInput.addEventListener('change', function(e) {
+                            if (this.files && this.files[0]) {
+                                const reader = new FileReader();
+                                reader.onload = function(evt) {
+                                    window._currentHeroPreviewBg_edit = `url('${evt.target.result}')`;
+                                    window.updatePreviewEdit();
+                                }
+                                reader.readAsDataURL(this.files[0]);
+                            } else {
+                                window._currentHeroPreviewBg_edit = '';
+                                window.updatePreviewEdit();
+                            }
+                        });
+                    }
+
+                    if (bgUrlInput) {
+                        bgUrlInput.addEventListener('input', function(e) {
+                            if (this.value) {
+                                window._currentHeroPreviewBg_edit = `url('${this.value}')`;
+                            } else {
+                                window._currentHeroPreviewBg_edit = '';
+                            }
+                            window.updatePreviewEdit();
+                        });
+                    }
+
+                    if (videoFileInput) {
+                        videoFileInput.addEventListener('change', () => { window.updatePreviewEdit && window.updatePreviewEdit(); });
+                    }
+                    if (videoUrlInput) {
+                        videoUrlInput.addEventListener('input', () => { window.updatePreviewEdit && window.updatePreviewEdit(); });
+                    }
+
+                    // Attach universal event listeners para todos los inputs del modal de edición
+                    const editForm = document.getElementById('editSectionForm') || document.getElementById('editSectionModal');
+                    if (editForm) {
+                        editForm.addEventListener('input', () => { window.updatePreviewEdit && window.updatePreviewEdit(); });
+                        editForm.addEventListener('change', () => { window.updatePreviewEdit && window.updatePreviewEdit(); });
+                    }
+
+                    // Device toggles
+                    document.querySelectorAll('.edit-preview-device-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            document.querySelectorAll('.edit-preview-device-btn').forEach(b => {
+                                b.classList.remove('bg-indigo-50', 'text-indigo-700', 'active');
+                                b.classList.add('text-slate-500');
+                            });
+                            e.currentTarget.classList.add('bg-indigo-50', 'text-indigo-700', 'active');
+                            e.currentTarget.classList.remove('text-slate-500');
+                            
+                            const container = document.getElementById('editLivePreviewContainer');
+                            if (container) {
+                                if (e.currentTarget.dataset.device === 'mobile') {
+                                    container.style.maxWidth = '375px';
+                                    container.classList.add('mx-auto');
+                                } else {
+                                    container.style.maxWidth = '100%';
+                                    container.classList.remove('mx-auto');
+                                }
+                            }
+                        });
+                    });
+
+                    // Overlay / Degradado interactivo
+                    const gradEnableInput = document.getElementById('editEnableGradient');
+                    const gradStartInput = document.getElementById('editGradColorStartPicker');
+                    const gradEndInput = document.getElementById('editGradColorEndPicker');
+                    const gradDirInput = document.getElementById('editGradDir');
+                    const gradOpacityStartInput = document.getElementById('editGradOpacityStart');
+                    const gradOpacityEndInput = document.getElementById('editGradOpacityEnd');
+                    const previewOverlay = document.getElementById('editPreviewOverlay');
+
+                    function hexToRgba(hex, alpha) {
+                        let c = (hex || '#000000').replace('#', '');
+                        if (c.length === 3) c = c.split('').map(x => x + x).join('');
+                        const num = parseInt(c, 16) || 0;
+                        return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+                    }
+
+                    function updateOverlay() {
+                        if (gradEnableInput && gradEnableInput.checked && previewOverlay) {
+                            previewOverlay.style.display = 'block';
+                            previewOverlay.className = "absolute inset-0 z-0";
+                            
+                            let dir = gradDirInput ? gradDirInput.value : 'to bottom';
+                            let startHex = gradStartInput ? gradStartInput.value : '#0f172a';
+                            let endHex = gradEndInput ? gradEndInput.value : '#1e1b4b';
+                            let startOp = gradOpacityStartInput ? parseInt(gradOpacityStartInput.value, 10) / 100 : 0.8;
+                            let endOp = gradOpacityEndInput ? parseInt(gradOpacityEndInput.value, 10) / 100 : 0.8;
+                            
+                            let startRgba = hexToRgba(startHex, startOp);
+                            let endRgba = hexToRgba(endHex, endOp);
+                            
+                            previewOverlay.style.background = `linear-gradient(${dir}, ${startRgba}, ${endRgba})`;
+                            previewOverlay.style.opacity = 1;
+                        } else {
+                            if (previewOverlay) previewOverlay.style.display = 'none';
+                        }
+                    }
+
+                    const gradInputs = [gradEnableInput, gradStartInput, gradEndInput, gradDirInput, gradOpacityStartInput, gradOpacityEndInput];
+                    gradInputs.forEach(el => {
+                        if (el) el.addEventListener('input', updateOverlay);
+                        if (el) el.addEventListener('change', updateOverlay);
+                    });
+
+                    const origUpdatePreview = window.updatePreviewEdit;
+                    window.updatePreviewEdit = function() {
+                        origUpdatePreview();
+                        updateOverlay();
+                    };
+
+                    // Trigger initial paint
+                    setTimeout(window.updatePreviewEdit, 100);
+                    document.querySelectorAll('#editSectionModal input[name="settings[text_align]"]').forEach(r => r.addEventListener('change', window.updatePreviewEdit));
+                });
+            </script>
         </div>
     </div>
 
@@ -2910,7 +4851,10 @@ if (previewHeroArea) {
                         <div id="create_page_custom_images_wrap" class="space-y-2 mt-2">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imagen Principal</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block font-semibold text-slate-700 text-[11px]">Imagen Principal</label>
+                                        <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal('create_page_image_url')">Seleccionar del Gestor</button>
+                                    </div>
                                     <input type="text" name="image_url" id="create_page_image_url" oninput="window.updatePageModalPreview('create')" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="https://... o /uploads/...">
                                 </div>
                                 <div>
@@ -3172,7 +5116,10 @@ if (previewHeroArea) {
                         <div id="edit_page_custom_images_wrap" class="space-y-2 mt-2">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block font-semibold text-slate-700 text-[11px] mb-1">Imagen Principal</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block font-semibold text-slate-700 text-[11px]">Imagen Principal</label>
+                                        <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal('edit_page_image_url')">Seleccionar del Gestor</button>
+                                    </div>
                                     <input type="text" id="edit_page_image_url" name="image_url" oninput="window.updatePageModalPreview('edit')" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs" placeholder="https://... o /uploads/...">
                                 </div>
                                 <div>
@@ -3404,6 +5351,46 @@ if (previewHeroArea) {
         @csrf
     </form>
 </div>
+<!-- CMS MEDIA MODAL (GESTOR DE IMÁGENES) -->
+<div id="cmsMediaModal" class="fixed inset-0 z-[100] hidden">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="window.closeCmsMediaModal()"></div>
+    <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 class="text-base font-bold text-slate-800 flex items-center">
+                    <svg class="w-5 h-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Gestor de Imágenes Hub 2
+                </h3>
+                <div class="flex items-center gap-3">
+                    <label class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors">
+                        Subir Imagen
+                        <input type="file" id="cmsMediaUploadInput" class="hidden" accept="image/*" onchange="window.uploadCmsMedia(this)">
+                    </label>
+                    <button type="button" class="text-slate-400 hover:text-rose-500 transition-colors" onclick="window.closeCmsMediaModal()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 bg-slate-50/50">
+                <div id="cmsMediaGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <!-- Images will be rendered here via JS -->
+                </div>
+                <div id="cmsMediaLoading" class="hidden flex flex-col items-center justify-center py-10">
+                    <svg class="w-8 h-8 text-indigo-500 animate-spin mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span class="text-xs font-semibold text-slate-500">Cargando...</span>
+                </div>
+                <div id="cmsMediaEmpty" class="hidden flex flex-col items-center justify-center py-12 text-center">
+                    <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-sm font-semibold text-slate-600 block">No hay imágenes en el gestor</span>
+                    <span class="text-xs text-slate-400 mt-1 block">Sube una nueva imagen para comenzar.</span>
+                </div>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-100 bg-white flex justify-end">
+                <button type="button" class="px-4 py-2 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-300 transition-colors" onclick="window.closeCmsMediaModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -3418,6 +5405,53 @@ if (previewHeroArea) {
     const storefrontsData = @json($storefronts);
     const sectionsData = @json($sections->keyBy('id'));
     let activeUniverse = '{{ $activeUniverse ?? "marte" }}';
+
+    // Helper reactivo para carga dinámica de Google Fonts en el CMS
+    window.loadGoogleFont = function(fontFamily) {
+        if (!fontFamily || typeof fontFamily !== 'string') return;
+        const fontName = fontFamily.trim();
+        if (['inherit', 'inherit / vitrina', 'sans-serif', 'font-sans', 'font-serif', 'font-mono'].includes(fontName.toLowerCase())) return;
+        const fontId = 'gfont-' + fontName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        if (document.getElementById(fontId)) return;
+        const link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g, '+')}:wght@300;400;500;600;700;800;900&display=swap`;
+        document.head.appendChild(link);
+    };
+
+    window.updateVitrinaFontPreview = function() {
+        const headingFont = document.getElementById('vitrinaTypoHeading')?.value;
+        const subFont = document.getElementById('vitrinaTypoSubtitle')?.value;
+        const bodyFont = document.getElementById('vitrinaTypoBody')?.value;
+        const accentFont = document.getElementById('vitrinaTypoAccent')?.value;
+
+        const previewFrame = document.querySelector('[data-storefront-preview-frame]');
+        if (!previewFrame) return;
+
+        if (headingFont) {
+            if (window.loadGoogleFont) window.loadGoogleFont(headingFont);
+            previewFrame.querySelectorAll('[data-preview-title], [data-preview-product-title], h1, h2, h3').forEach(el => {
+                el.style.fontFamily = `'${headingFont}', sans-serif`;
+            });
+        }
+        if (subFont) {
+            if (window.loadGoogleFont) window.loadGoogleFont(subFont);
+            previewFrame.querySelectorAll('[data-preview-sub], .preview-sub, [data-preview-product-tag], p').forEach(el => {
+                el.style.fontFamily = `'${subFont}', sans-serif`;
+            });
+        }
+        if (bodyFont) {
+            if (window.loadGoogleFont) window.loadGoogleFont(bodyFont);
+            previewFrame.style.fontFamily = `'${bodyFont}', sans-serif`;
+        }
+        if (accentFont) {
+            if (window.loadGoogleFont) window.loadGoogleFont(accentFont);
+            previewFrame.querySelectorAll('[data-preview-cta], [data-preview-product-btn], [data-preview-badge], [data-preview-kicker-badge], [data-preview-product-price]').forEach(el => {
+                el.style.fontFamily = `'${accentFont}', sans-serif`;
+            });
+        }
+    };
 
     // ==========================================
     // 1. GESTIÓN GLOBAL DE MODALES (FAIL-SAFE)
@@ -3443,14 +5477,15 @@ if (previewHeroArea) {
     };
 
     // ==========================================
-    // 2. GESTIÓN DE SUBNAV TABS (5 PESTAÑAS PRINCIPALES)
+    // 2. GESTIÓN DE SUBNAV TABS (6 PESTAÑAS PRINCIPALES)
     // ==========================================
     const tabPanelIds = {
         'visual': 'storeVisualPanel',
         'content_rules': 'storeContentRulesPanel',
         'pages': 'storePagesPanel',
         'tracking': 'storeTrackingPanel',
-        'filters': 'storeFiltersPanel'
+        'filters': 'storeFiltersPanel',
+        'media': 'storeMediaPanel'
     };
 
     // Mapeo retrocompatible para enlaces a subsecciones dentro del acordeón unificado
@@ -3541,6 +5576,10 @@ if (previewHeroArea) {
                 if (chevron) chevron.classList.add('rotate-180');
                 sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
+        }
+
+        if (activeTabKey === 'media') {
+            if (typeof window.loadCmsMedia === 'function') window.loadCmsMedia();
         }
 
         try {
@@ -3634,6 +5673,10 @@ if (previewHeroArea) {
                     </div>
                 `).join('');
             }
+        }
+
+        if (typeof window.updateVitrinaFontPreview === 'function') {
+            window.updateVitrinaFontPreview();
         }
     };
 
@@ -3729,6 +5772,21 @@ if (previewHeroArea) {
             const val = tokensMap[token];
             if (picker) picker.value = val;
             if (label) label.value = val;
+        });
+
+        // 4.4 Tipografías de Vitrina (Google Fonts)
+        const typoHeading = document.getElementById('vitrinaTypoHeading');
+        const typoSubtitle = document.getElementById('vitrinaTypoSubtitle');
+        const typoBody = document.getElementById('vitrinaTypoBody');
+        const typoAccent = document.getElementById('vitrinaTypoAccent');
+
+        if (typoHeading) typoHeading.value = data.typography_heading || 'Outfit';
+        if (typoSubtitle) typoSubtitle.value = data.typography_subtitle || 'Outfit';
+        if (typoBody) typoBody.value = data.typography_body || 'Plus Jakarta Sans';
+        if (typoAccent) typoAccent.value = data.typography_accent || 'Plus Jakarta Sans';
+
+        [data.typography_heading, data.typography_subtitle, data.typography_body, data.typography_accent].forEach(f => {
+            if (f && window.loadGoogleFont) window.loadGoogleFont(f);
         });
 
         // 5. Actualizar Live Preview Frame
@@ -3970,75 +6028,82 @@ if (previewHeroArea) {
         window.openStoreModal('editPageModal');
     };
 
+    
     window.toggleHeroModeCreate = function(mode) {
-    const lblStruct = document.getElementById('createHeroModeStructuredLbl');
-    const lblCustom = document.getElementById('createHeroModeCustomLbl');
-    
-    const bgImgWrap = document.getElementById('createHeroBgUrl')?.closest('div.space-y-2');
-    const gradientWrap = document.getElementById('createEnableGradient')?.closest('div.p-3');
-    const fullWidthWrap = document.getElementById('inpCreateFullWidth')?.closest('div');
-    const textStyleWrap = document.getElementById('inpCreateTextAlign')?.closest('.p-3') || document.getElementById('inpCreateTextAlignGroup')?.closest('.p-3');
-    const buttonsWrap = document.getElementById('createHeroButtonsWrap');
-    
-    const customCodeWrap = document.getElementById('createCustomCodeWrap');
-    
-    const isCustom = mode === 'custom';
-    
-    if (lblCustom) lblCustom.className = isCustom ? 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-    if (lblStruct) lblStruct.className = isCustom ? 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-    
-    const structuredWrappers = [bgImgWrap, gradientWrap, fullWidthWrap, textStyleWrap, buttonsWrap];
-    structuredWrappers.forEach(w => {
-        if (w) w.style.display = isCustom ? 'none' : 'block';
-    });
-    
-    if (customCodeWrap) {
+        const isCustom = mode === 'custom';
+        const lblStruct = document.getElementById('createHeroModeStructuredLbl');
+        const lblCustom = document.getElementById('createHeroModeCustomLbl');
+        if (lblCustom) lblCustom.className = isCustom ? 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+        if (lblStruct) lblStruct.className = isCustom ? 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+        
+        const commonFields = document.getElementById('createCommonFieldsWrap');
+        const heroWrap = document.getElementById('createHeroWrap');
+        const carouselWrap = document.getElementById('createCarouselWrap');
+        const popUpWrap = document.getElementById('createPopUpWrap');
+        const buttonsWrap = document.getElementById('createButtonsWrap');
+        const customCodeWrap = document.getElementById('createCustomCodeWrap');
+        const spacingWrap = document.getElementById('createSpacingWrap');
+        
         if (isCustom) {
-            customCodeWrap.classList.remove('hidden');
-            customCodeWrap.style.display = 'block';
+            if(commonFields) commonFields.style.display = 'none';
+            if(heroWrap) heroWrap.style.display = 'none';
+            if(carouselWrap) carouselWrap.style.display = 'none';
+            if(popUpWrap) popUpWrap.style.display = 'none';
+            if(buttonsWrap) buttonsWrap.style.display = 'none';
+            if(customCodeWrap) customCodeWrap.style.display = 'block';
+            if(spacingWrap) spacingWrap.style.display = 'block';
         } else {
-            customCodeWrap.classList.add('hidden');
-            customCodeWrap.style.display = 'none';
+            if(commonFields) commonFields.style.display = 'block';
+            if(customCodeWrap) customCodeWrap.style.display = 'none';
+            // Trigger switchSectionType to restore the correct wrap
+            if(typeof switchSectionType === 'function') {
+                switchSectionType();
+            } else {
+                const type = document.getElementById('createSectionType')?.value;
+                if(heroWrap) heroWrap.style.display = type === 'hero' ? 'block' : 'none';
+                if(carouselWrap) carouselWrap.style.display = type === 'carousel' ? 'block' : 'none';
+                if(popUpWrap) popUpWrap.style.display = type === 'pop_up' ? 'block' : 'none';
+                if(buttonsWrap) buttonsWrap.style.display = type === 'buttons' ? 'block' : 'none';
+                if(spacingWrap) spacingWrap.style.display = type === 'pop_up' ? 'none' : 'block';
+            }
         }
-    }
-};
+    };
 
     window.toggleHeroModeEdit = function(mode) {
-    const lblStruct = document.getElementById('editHeroModeStructuredLbl');
-    const lblCustom = document.getElementById('editHeroModeCustomLbl');
-    const radioStruct = document.getElementById('editHeroModeStructured');
-    const radioCustom = document.getElementById('editHeroModeCustom');
-    
-    const bgImgWrap = document.getElementById('editHeroBgFile')?.closest('div.space-y-2');
-    const gradientWrap = document.getElementById('editEnableGradient')?.closest('div.p-3');
-    const fullWidthWrap = document.getElementById('editFullWidth')?.closest('div');
-    const textStyleWrap = document.getElementById('editTextAlign')?.closest('.p-3') || document.getElementById('editTextAlignGroup')?.closest('.p-3');
-    const buttonsWrap = document.getElementById('editHeroButtonsWrap');
-    const customCodeWrap = document.getElementById('editCustomCodeWrap');
-    
-    const isCustom = mode === 'custom';
-    
-    if (radioCustom && isCustom) radioCustom.checked = true;
-    if (radioStruct && !isCustom) radioStruct.checked = true;
-    
-    if (lblCustom) lblCustom.className = isCustom ? 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
-    if (lblStruct) lblStruct.className = isCustom ? 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
-    
-    const structuredWrappers = [bgImgWrap, gradientWrap, fullWidthWrap, textStyleWrap, buttonsWrap];
-    structuredWrappers.forEach(w => {
-        if (w) w.style.display = isCustom ? 'none' : 'block';
-    });
-    
-    if (customCodeWrap) {
+        const isCustom = mode === 'custom';
+        const lblStruct = document.getElementById('editHeroModeStructuredLbl');
+        const lblCustom = document.getElementById('editHeroModeCustomLbl');
+        if (lblCustom) lblCustom.className = isCustom ? 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold';
+        if (lblStruct) lblStruct.className = isCustom ? 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 text-center cursor-pointer transition font-semibold' : 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-xs text-center cursor-pointer transition font-semibold';
+        
+        const commonFields = document.getElementById('editCommonFieldsWrap');
+        const heroWrap = document.getElementById('editHeroWrap');
+        const carouselWrap = document.getElementById('editCarouselWrap');
+        const popUpWrap = document.getElementById('editPopUpWrap');
+        const buttonsWrap = document.getElementById('editButtonsWrap');
+        const customCodeWrap = document.getElementById('editCustomCodeWrap');
+        const spacingWrap = document.getElementById('editSpacingWrap');
+        
         if (isCustom) {
-            customCodeWrap.classList.remove('hidden');
-            customCodeWrap.style.display = 'block';
+            if(commonFields) commonFields.style.display = 'none';
+            if(heroWrap) heroWrap.style.display = 'none';
+            if(carouselWrap) carouselWrap.style.display = 'none';
+            if(popUpWrap) popUpWrap.style.display = 'none';
+            if(buttonsWrap) buttonsWrap.style.display = 'none';
+            if(customCodeWrap) customCodeWrap.style.display = 'block';
+            if(spacingWrap) spacingWrap.style.display = 'block';
         } else {
-            customCodeWrap.classList.add('hidden');
-            customCodeWrap.style.display = 'none';
+            if(commonFields) commonFields.style.display = 'block';
+            if(customCodeWrap) customCodeWrap.style.display = 'none';
+            const type = document.getElementById('editSectionType')?.value;
+            if(heroWrap) heroWrap.style.display = type === 'hero' ? 'block' : 'none';
+            if(carouselWrap) carouselWrap.style.display = type === 'carousel' ? 'block' : 'none';
+            if(popUpWrap) popUpWrap.style.display = type === 'pop_up' ? 'block' : 'none';
+            if(buttonsWrap) buttonsWrap.style.display = type === 'buttons' ? 'block' : 'none';
+            if(spacingWrap) spacingWrap.style.display = type === 'pop_up' ? 'none' : 'block';
         }
-    }
-};
+    };
+
 
     window.previewHeroBgImage = function(fileInput, previewContainerId) {
         if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
@@ -4099,52 +6164,64 @@ if (previewHeroArea) {
     const dir = document.getElementById(prefix + 'GradDir')?.value || 'to bottom';
     const opStartStr = document.getElementById(prefix + 'GradOpacityStart')?.value || '80';
     const opEndStr = document.getElementById(prefix + 'GradOpacityEnd')?.value || '80';
-    
     function hexToRgba(hex, alpha) {
         let c = (hex || '#000000').replace('#', '');
         if (c.length === 3) c = c.split('').map(x => x + x).join('');
         const num = parseInt(c, 16) || 0;
         return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
     }
-
     const startRgba = hexToRgba(startHex, parseInt(opStartStr, 10) / 100);
     const endRgba = hexToRgba(endHex, parseInt(opEndStr, 10) / 100);
-
     const bar = document.getElementById(prefix + 'GradPreviewBar');
     if (bar) {
         bar.style.background = `linear-gradient(${dir}, ${startRgba}, ${endRgba})`;
     }
+    if (prefix === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+    if (prefix === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
 };
 
 
 
-    window.toggleEditTypePanels = function(typeVal) {
-        const contentTypes = ['hero_carousel', 'editorial_banner', 'brand_pillars', 'promo_modal', 'custom_html_css_js'];
-        const editCatTax = document.getElementById('editCatalogTaxonomies');
-        const editContOpt = document.getElementById('editContentOptions');
-        const editHeroWrap = document.getElementById('editHeroEngineWrap');
+            window.toggleEditTypePanels = function(typeVal) {
+        const isCustom = document.querySelector('#editSectionForm input[name="settings[hero_mode]"]:checked')?.value === 'custom';
+        
+        const editHeroWrap = document.getElementById('editHeroWrap');
+        const editCarouselWrap = document.getElementById('editCarouselWrap');
+        const editPopUpWrap = document.getElementById('editPopUpWrap');
+        const editButtonsWrap = document.getElementById('editButtonsWrap');
+        const editCustomCodeWrap = document.getElementById('editCustomCodeWrap');
+        const editCommonFieldsWrap = document.getElementById('editCommonFieldsWrap');
+        const editSpacingWrap = document.getElementById('editSpacingWrap');
 
-        if (contentTypes.includes(typeVal)) {
-            if (editCatTax) { editCatTax.classList.add('hidden'); editCatTax.style.display = 'none'; }
-            if (editContOpt) { editContOpt.classList.remove('hidden'); editContOpt.style.display = 'block'; }
-            if (editHeroWrap) {
-                if (typeVal === 'hero_carousel') {
-                    editHeroWrap.classList.remove('hidden');
-                    editHeroWrap.style.display = 'block';
-                } else {
-                    editHeroWrap.classList.add('hidden');
-                    editHeroWrap.style.display = 'none';
-                }
-            }
+        if(isCustom) {
+            if(editHeroWrap) editHeroWrap.style.display = 'none';
+            if(editCarouselWrap) editCarouselWrap.style.display = 'none';
+            if(editPopUpWrap) editPopUpWrap.style.display = 'none';
+            if(editButtonsWrap) editButtonsWrap.style.display = 'none';
+            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = 'none';
+            if(editCustomCodeWrap) editCustomCodeWrap.style.display = 'block';
+            if(editSpacingWrap) editSpacingWrap.style.display = 'block';
         } else {
-            if (editCatTax) { editCatTax.classList.remove('hidden'); editCatTax.style.display = 'block'; }
-            if (editContOpt) { editContOpt.classList.add('hidden'); editContOpt.style.display = 'none'; }
-            if (editHeroWrap) { editHeroWrap.classList.add('hidden'); editHeroWrap.style.display = 'none'; }
+            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = 'block';
+            if(editCustomCodeWrap) editCustomCodeWrap.style.display = 'none';
+            if(editHeroWrap) editHeroWrap.style.display = typeVal === 'hero' ? 'block' : 'none';
+            if(editCarouselWrap) editCarouselWrap.style.display = typeVal === 'carousel' ? 'block' : 'none';
+            if(editPopUpWrap) editPopUpWrap.style.display = typeVal === 'pop_up' ? 'block' : 'none';
+            if(editButtonsWrap) editButtonsWrap.style.display = typeVal === 'buttons' ? 'block' : 'none';
+            if(editSpacingWrap) editSpacingWrap.style.display = typeVal === 'pop_up' ? 'none' : 'block';
         }
     };
 
     window.openCreateSectionModal = function() {
         window.openStoreModal('createSectionModal');
+        if (typeof window.setHeroFocalPoint === 'function') {
+            const curFocal = document.getElementById('inpCreateHeroFocalPoint')?.value || 'center center';
+            window.setHeroFocalPoint('create', curFocal, false);
+        }
+        if (typeof window.setSectionSpacing === 'function') {
+            window.setSectionSpacing('create', 'top', 0, false);
+            window.setSectionSpacing('create', 'bottom', 0, false);
+        }
     };
 
     window.openEditSectionModal = function(secIdOrData) {
@@ -4176,28 +6253,28 @@ if (previewHeroArea) {
         const form = document.getElementById('editSectionForm');
         if (form) form.action = `/admin/tienda-cms/secciones/${sec.id}`;
 
-        const universeSel = document.getElementById('editUniverseSelect');
+        const universeSel = document.querySelector('#editSectionForm select[name="universe"]');
         if (universeSel) universeSel.value = sec.universe || 'all';
 
-        const statusSel = document.getElementById('editStatusSelect');
+        const statusSel = document.querySelector('#editSectionForm [name="status"]');
         if (statusSel) statusSel.value = sec.status || 'active';
 
-        const typeSel = document.getElementById('editTypeSelect');
+        const typeSel = document.getElementById('editSectionType');
         if (typeSel) {
-            typeSel.value = sec.type || 'curated_products';
+            typeSel.value = sec.type || 'hero';
             window.toggleEditTypePanels(typeSel.value);
         }
 
-        const nameInp = document.getElementById('editNameInput');
+        const nameInp = document.querySelector('#editSectionForm input[name="name"]');
         if (nameInp) nameInp.value = sec.name || '';
 
-        const badgeInp = document.getElementById('editBadgeInput');
+        const badgeInp = document.getElementById('inpEditBadge');
         if (badgeInp) badgeInp.value = sec.badge || '';
 
-        const titleInp = document.getElementById('editTitleInput');
+        const titleInp = document.getElementById('inpEditTitle');
         if (titleInp) titleInp.value = sec.title || '';
 
-        const subtitleInp = document.getElementById('editSubtitleInput');
+        const subtitleInp = document.getElementById('inpEditSubtitle');
         if (subtitleInp) subtitleInp.value = sec.subtitle || '';
 
         // Taxonomías
@@ -4237,7 +6314,7 @@ if (previewHeroArea) {
         if (limSel) limSel.value = qr.limit || 8;
 
         // Código custom
-        const htmlArea = document.getElementById('editCustomHtml');
+        const htmlArea = document.querySelector('#editSectionForm textarea[name="custom_html"]');
         if (htmlArea) htmlArea.value = sec.custom_html || '';
 
         const cssArea = document.getElementById('editCustomCss');
@@ -4253,21 +6330,67 @@ if (previewHeroArea) {
         }
 
         const heroMode = st.hero_mode || (!sec.title && sec.custom_html ? 'custom' : 'structured');
+        const hmRadio = document.querySelector(`#editSectionModal input[name="settings[hero_mode]"][value="${heroMode}"]`);
+        if (hmRadio) hmRadio.checked = true;
         window.toggleHeroModeEdit(heroMode);
 
-        const editFullWidth = document.getElementById('editFullWidth');
+        const editFullWidth = document.getElementById('inpEditFullWidth');
         if (editFullWidth) editFullWidth.checked = (st.full_width === 1 || st.full_width === '1' || st.full_width === true);
+        
+        const editFullWidthH = document.getElementById('inpEditFullWidthHorizontal');
+        if (editFullWidthH) editFullWidthH.checked = (st.full_width_horizontal === 1 || st.full_width_horizontal === '1' || st.full_width_horizontal === true);
+        
+        const editHeroHeightValue = document.getElementById('inpEditHeroHeightValue');
+        const editHeroHeightUnit = document.getElementById('inpEditHeroHeightUnit');
+        if (editHeroHeightValue && editHeroHeightUnit) {
+            editHeroHeightValue.value = st.hero_height_value || '';
+            editHeroHeightUnit.value = st.hero_height_unit || 'px';
+        }
+
+        // Tipo de fondo (Imagen vs Video)
+        const bgType = st.background_type || 'image';
+        const editHeroBgType = document.getElementById('editHeroBgType');
+        if (editHeroBgType) {
+            editHeroBgType.value = bgType;
+            window.toggleHeroBgType(bgType, 'edit');
+        }
 
         const editHeroBgUrl = document.getElementById('editHeroBgUrl');
         if (editHeroBgUrl) {
             editHeroBgUrl.value = st.background_image || '';
             if (st.background_image) {
                 window.previewHeroBgUrl(st.background_image, 'editHeroBgPreview');
+                window._currentHeroPreviewBg_edit = `url('${st.background_image}')`;
             } else {
                 window.clearHeroBgPreview('editSectionModal', 'editHeroBgPreview', 'editHeroBgUrl');
+                window._currentHeroPreviewBg_edit = '';
             }
         }
+        const editHeroBgAlt = document.getElementById('editHeroBgAlt');
+        if (editHeroBgAlt) {
+            editHeroBgAlt.value = st.background_image_alt || '';
+        }
 
+        // Punto focal de la imagen
+        const focalPoint = st.image_focal_point || 'center center';
+        if (typeof window.setHeroFocalPoint === 'function') {
+            window.setHeroFocalPoint('edit', focalPoint, false);
+        }
+
+        // Fondo Video
+        const editHeroBgVideoUrl = document.getElementById('editHeroBgVideoUrl');
+        if (editHeroBgVideoUrl) editHeroBgVideoUrl.value = st.background_video || '';
+
+        const editHeroVideoAutoplay = document.getElementById('editHeroVideoAutoplay');
+        if (editHeroVideoAutoplay) editHeroVideoAutoplay.checked = (st.video_autoplay === undefined || st.video_autoplay == 1 || st.video_autoplay === true);
+
+        const editHeroVideoLoop = document.getElementById('editHeroVideoLoop');
+        if (editHeroVideoLoop) editHeroVideoLoop.checked = (st.video_loop === undefined || st.video_loop == 1 || st.video_loop === true);
+
+        const editHeroVideoMuted = document.getElementById('editHeroVideoMuted');
+        if (editHeroVideoMuted) editHeroVideoMuted.checked = (st.video_muted === undefined || st.video_muted == 1 || st.video_muted === true);
+
+        // Degradado Overlay del Hero
         const editEnableGrad = document.getElementById('editEnableGradient');
         const editGradControls = document.getElementById('editGradientControls');
         const hasGrad = (st.enable_gradient === 1 || st.enable_gradient === '1' || st.enable_gradient === true);
@@ -4288,33 +6411,156 @@ if (previewHeroArea) {
         if (editGradDir) editGradDir.value = st.gradient_direction || 'to bottom';
 
         const opStartVal = (st.gradient_opacity_start !== undefined) ? st.gradient_opacity_start : (st.gradient_opacity || 80);
-const opEndVal = (st.gradient_opacity_end !== undefined) ? st.gradient_opacity_end : (st.gradient_opacity || 80);
+        const opEndVal = (st.gradient_opacity_end !== undefined) ? st.gradient_opacity_end : (st.gradient_opacity || 80);
 
-const editGradOpacityStart = document.getElementById('editGradOpacityStart');
-const editGradOpacityStartVal = document.getElementById('editGradOpacityStartVal');
-if (editGradOpacityStart) editGradOpacityStart.value = opStartVal;
-if (editGradOpacityStartVal) editGradOpacityStartVal.textContent = opStartVal + '%';
+        const editGradOpacityStart = document.getElementById('editGradOpacityStart');
+        const editGradOpacityStartVal = document.getElementById('editGradOpacityStartVal');
+        if (editGradOpacityStart) editGradOpacityStart.value = opStartVal;
+        if (editGradOpacityStartVal) editGradOpacityStartVal.textContent = opStartVal + '%';
 
-const editGradOpacityEnd = document.getElementById('editGradOpacityEnd');
-const editGradOpacityEndVal = document.getElementById('editGradOpacityEndVal');
-if (editGradOpacityEnd) editGradOpacityEnd.value = opEndVal;
-if (editGradOpacityEndVal) editGradOpacityEndVal.textContent = opEndVal + '%';
+        const editGradOpacityEnd = document.getElementById('editGradOpacityEnd');
+        const editGradOpacityEndVal = document.getElementById('editGradOpacityEndVal');
+        if (editGradOpacityEnd) editGradOpacityEnd.value = opEndVal;
+        if (editGradOpacityEndVal) editGradOpacityEndVal.textContent = opEndVal + '%';
         window.updateHeroGradientPreview('edit');
 
-        // Botones CTA
-        const ctaPriText = document.getElementById('editCtaPrimaryText');
+        // Carousel Config & Slides
+        const editCarouselGlobalToggle = document.getElementById('editCarouselGlobalToggle');
+        if (editCarouselGlobalToggle) {
+            const hasGlobal = (st.carousel_global_content === undefined || st.carousel_global_content === 1 || st.carousel_global_content === '1' || st.carousel_global_content === true);
+            editCarouselGlobalToggle.checked = hasGlobal;
+            const gradWrap = document.getElementById('editCarouselGradientControlsWrap');
+            if (gradWrap) gradWrap.style.display = hasGlobal ? 'block' : 'none';
+        }
+
+        const editCarouselAutoPlay = document.getElementById('editCarouselAutoPlay');
+        if (editCarouselAutoPlay) editCarouselAutoPlay.checked = (st.autoplay === undefined || st.autoplay == 1 || st.autoplay === true);
+
+        const editCarouselAutoplayTime = document.getElementById('editCarouselAutoplayTime');
+        if (editCarouselAutoplayTime) editCarouselAutoplayTime.value = st.autoplay_time || 5;
+
+        const editCarouselEnableGradient = document.getElementById('editCarouselEnableGradient');
+        const hasCarGrad = (st.carousel_enable_gradient == 1 || st.carousel_enable_gradient === true);
+        if (editCarouselEnableGradient) editCarouselEnableGradient.checked = hasCarGrad;
+        const carGradControls = document.getElementById('editCarouselGradientControls');
+        if (carGradControls) carGradControls.style.display = hasCarGrad ? 'block' : 'none';
+
+        const editCarGradColorStart = document.getElementById('editCarGradColorStart');
+        const editCarGradColorStartPicker = document.getElementById('editCarGradColorStartPicker');
+        if (editCarGradColorStart) editCarGradColorStart.value = st.carousel_gradient_color_start || '#0f172a';
+        if (editCarGradColorStartPicker) editCarGradColorStartPicker.value = st.carousel_gradient_color_start || '#0f172a';
+
+        const editCarGradOpacityStart = document.getElementById('editCarGradOpacityStart');
+        const editCarGradOpacityStartVal = document.getElementById('editCarGradOpacityStartVal');
+        const carOpStart = st.carousel_gradient_opacity_start !== undefined ? st.carousel_gradient_opacity_start : 80;
+        if (editCarGradOpacityStart) editCarGradOpacityStart.value = carOpStart;
+        if (editCarGradOpacityStartVal) editCarGradOpacityStartVal.textContent = carOpStart + '%';
+
+        const editCarGradColorEnd = document.getElementById('editCarGradColorEnd');
+        const editCarGradColorEndPicker = document.getElementById('editCarGradColorEndPicker');
+        if (editCarGradColorEnd) editCarGradColorEnd.value = st.carousel_gradient_color_end || '#1e1b4b';
+        if (editCarGradColorEndPicker) editCarGradColorEndPicker.value = st.carousel_gradient_color_end || '#1e1b4b';
+
+        const editCarGradOpacityEnd = document.getElementById('editCarGradOpacityEnd');
+        const editCarGradOpacityEndVal = document.getElementById('editCarGradOpacityEndVal');
+        const carOpEnd = st.carousel_gradient_opacity_end !== undefined ? st.carousel_gradient_opacity_end : 0;
+        if (editCarGradOpacityEnd) editCarGradOpacityEnd.value = carOpEnd;
+        if (editCarGradOpacityEndVal) editCarGradOpacityEndVal.textContent = carOpEnd + '%';
+
+        const editCarGradDirection = document.getElementById('editCarGradDirection');
+        if (editCarGradDirection) editCarGradDirection.value = st.carousel_gradient_direction || 'to bottom';
+
+        const editCarouselSlidesList = document.getElementById('editCarouselSlidesList');
+        if (editCarouselSlidesList) {
+            editCarouselSlidesList.innerHTML = '';
+            window.slideCounters.edit = 0;
+            if (st.carousel_slides && Array.isArray(st.carousel_slides)) {
+                st.carousel_slides.forEach(slide => {
+                    window.addCarouselSlide('edit', slide);
+                });
+            }
+        }
+
+        // Pop-up Config
+        const editPopupCloseBehavior = document.getElementById('editPopupCloseBehavior');
+        if (editPopupCloseBehavior) editPopupCloseBehavior.value = st.popup_close_behavior || 'outside';
+
+        // Botones CTA vs Clic en Todo el Hero
+        const editHasButtons = document.getElementById('inpEditHeroHasButtons');
+        if (editHasButtons) {
+            const hasBtns = (st.hero_has_buttons === undefined || st.hero_has_buttons === 1 || st.hero_has_buttons === '1' || st.hero_has_buttons === true);
+            editHasButtons.checked = hasBtns;
+            window.toggleHeroButtonsMode && window.toggleHeroButtonsMode('edit');
+        }
+
+        const editHeroClickUrl = document.getElementById('editHeroClickUrl');
+        if (editHeroClickUrl) editHeroClickUrl.value = st.hero_click_url || '';
+
+        const ctaPriText = document.getElementById('inpEditCtaPrimary');
         if (ctaPriText) ctaPriText.value = st.cta_primary_text || st.cta_text || qr.cta_text || '';
 
         const ctaPriUrl = document.getElementById('editCtaPrimaryUrl');
         if (ctaPriUrl) ctaPriUrl.value = st.cta_primary_url || st.cta_url || qr.cta_url || '';
+        
+        if (document.getElementById('inpEditCtaPrimaryBg')) document.getElementById('inpEditCtaPrimaryBg').value = st.cta_primary_bg || '#0f172a';
+        if (document.getElementById('inpEditCtaPrimaryColor')) document.getElementById('inpEditCtaPrimaryColor').value = st.cta_primary_color || '#ffffff';
+        if (document.getElementById('inpEditCtaPrimaryBorderColor')) document.getElementById('inpEditCtaPrimaryBorderColor').value = st.cta_primary_border_color || '#0f172a';
+        if (document.getElementById('inpEditCtaPrimaryBorderWidth')) document.getElementById('inpEditCtaPrimaryBorderWidth').value = st.cta_primary_border_width || 'border-0';
+        if (document.getElementById('inpEditCtaPrimaryShadow')) document.getElementById('inpEditCtaPrimaryShadow').value = st.cta_primary_shadow || '';
 
-        const ctaSecText = document.getElementById('editCtaSecondaryText');
+        const ctaSecText = document.getElementById('inpEditCtaSecondary');
         if (ctaSecText) ctaSecText.value = st.cta_secondary_text || 'GUÍA DE TALLAS TORZO';
 
         const ctaSecUrl = document.getElementById('editCtaSecondaryUrl');
         if (ctaSecUrl) ctaSecUrl.value = st.cta_secondary_url || '';
+        
+        if (document.getElementById('inpEditCtaSecondaryBg')) document.getElementById('inpEditCtaSecondaryBg').value = st.cta_secondary_bg || '#ffffff';
+        if (document.getElementById('inpEditCtaSecondaryColor')) document.getElementById('inpEditCtaSecondaryColor').value = st.cta_secondary_color || '#0f172a';
+        if (document.getElementById('inpEditCtaSecondaryBorderColor')) document.getElementById('inpEditCtaSecondaryBorderColor').value = st.cta_secondary_border_color || '#0f172a';
+        if (document.getElementById('inpEditCtaSecondaryBorderWidth')) document.getElementById('inpEditCtaSecondaryBorderWidth').value = st.cta_secondary_border_width || 'border-0';
+        if (document.getElementById('inpEditCtaSecondaryShadow')) document.getElementById('inpEditCtaSecondaryShadow').value = st.cta_secondary_shadow || '';
+
+        // Estilos de Texto, Tipografías Independientes y Parallax Scrolling
+        const editTitleColor = document.getElementById('inpEditTitleColor');
+        const editTitleColorHex = document.getElementById('inpEditTitleColorHex');
+        if (editTitleColor) editTitleColor.value = st.title_color || '#ffffff';
+        if (editTitleColorHex) editTitleColorHex.value = st.title_color || '#ffffff';
+
+        const editTitleFont = document.getElementById('inpEditTitleFont');
+        if (editTitleFont) {
+            editTitleFont.value = st.title_font || st.font_family || 'inherit';
+            if (st.title_font && window.loadGoogleFont) window.loadGoogleFont(st.title_font);
+        }
+
+        const editSubtitleColor = document.getElementById('inpEditSubtitleColor');
+        const editSubtitleColorHex = document.getElementById('inpEditSubtitleColorHex');
+        if (editSubtitleColor) editSubtitleColor.value = st.subtitle_color || '#e2e8f0';
+        if (editSubtitleColorHex) editSubtitleColorHex.value = st.subtitle_color || '#e2e8f0';
+
+        const editSubtitleFont = document.getElementById('inpEditSubtitleFont');
+        if (editSubtitleFont) {
+            editSubtitleFont.value = st.subtitle_font || 'inherit';
+            if (st.subtitle_font && window.loadGoogleFont) window.loadGoogleFont(st.subtitle_font);
+        }
+
+        const alignVal = st.text_align || 'text-center';
+        const alignRadio = document.querySelector(`#editSectionModal input[name="settings[text_align]"][value="${alignVal}"]`);
+        if (alignRadio) alignRadio.checked = true;
+
+        const editParallax = document.getElementById('inpEditParallax');
+        if (editParallax) {
+            editParallax.checked = (st.parallax_scrolling === 1 || st.parallax_scrolling === '1' || st.parallax_scrolling === true);
+        }
+
+        const spTop = (st.spacing_top !== undefined && st.spacing_top !== '') ? parseInt(st.spacing_top, 10) : 0;
+        const spBottom = (st.spacing_bottom !== undefined && st.spacing_bottom !== '') ? parseInt(st.spacing_bottom, 10) : 0;
+        if (typeof window.setSectionSpacing === 'function') {
+            window.setSectionSpacing('edit', 'top', spTop, false);
+            window.setSectionSpacing('edit', 'bottom', spBottom, false);
+        }
 
         window.openStoreModal('editSectionModal');
+        if(typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
     };
 
     window.archiveStoreSection = function(secId, secName) {
@@ -4459,7 +6705,7 @@ if (editGradOpacityEndVal) editGradOpacityEndVal.textContent = opEndVal + '%';
         window.switchStoreUniverse(initialUniverse);
 
         // Listener en select de tipo en Modal Editar
-        const editTypeSelect = document.getElementById('editTypeSelect');
+        const editTypeSelect = document.getElementById('editSectionType');
         if (editTypeSelect) {
             editTypeSelect.addEventListener('change', function() {
                 window.toggleEditTypePanels(this.value);
@@ -5027,6 +7273,532 @@ if (editGradOpacityEndVal) editGradOpacityEndVal.textContent = opEndVal + '%';
     } else {
         initStoreCMS();
     }
+
+// --- NEW CAROUSEL JS ---
+window.slideCounters = {
+    create: 0,
+    edit: 0
+};
+
+window.addCarouselSlide = function(mode, data = null) {
+    const list = document.getElementById(mode + 'CarouselSlidesList');
+    if (!list) return;
+
+    const index = window.slideCounters[mode]++;
+    const prefix = `settings[carousel_slides][${index}]`;
+    const filePrefix = `carousel_slide_files[${index}]`;
+
+    const html = `
+        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3 relative slide-item">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="font-bold text-xs text-slate-700">Slide ${index + 1}</span>
+                <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold" onclick="this.closest('.slide-item').remove(); window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">Eliminar</button>
+            </div>
+            
+            <div class="space-y-2">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Imagen (Subir Local)</label>
+                    <input type="file" name="${filePrefix}" accept="image/*" class="w-full text-xs" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-[11px] font-semibold text-slate-600">Imagen (URL Externa)</label>
+                        <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal(this.parentElement.nextElementSibling)">Seleccionar del Gestor</button>
+                    </div>
+                    <input type="text" name="${prefix}[image_url]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs slide-url" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.image_url || '') : ''}">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Alternativo (Alt SEO)</label>
+                    <input type="text" name="${prefix}[alt_text]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.alt_text || '') : ''}">
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Título del Slide</label>
+                        <input type="text" name="${prefix}[title]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.title || '') : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subtitle</label>
+                        <input type="text" name="${prefix}[subtitle]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.subtitle || '') : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Badge</label>
+                        <input type="text" name="${prefix}[badge]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.badge || '') : ''}">
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-2 mt-2 slide-gradient-controls">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="${prefix}[enable_gradient]" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3 h-3" ${data && data.enable_gradient ? 'checked' : ''} onchange="this.closest('.slide-gradient-controls').querySelector('.grad-settings').style.display = this.checked ? 'block' : 'none'; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <span class="font-bold text-slate-800 text-[10px]">Habilitar Overlay Degradado</span>
+                    </label>
+                    <div class="grad-settings space-y-2 pt-2 border-t border-slate-200" style="${data && data.enable_gradient ? 'block' : 'display: none;'}">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] font-semibold text-slate-500 mb-1">Color & Op. Inicio</label>
+                                <div class="flex items-center gap-1 mb-1">
+                                    <input type="color" class="w-5 h-5 p-0 border border-slate-200 rounded cursor-pointer" oninput="this.nextElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_start || '#0f172a') : '#0f172a'}">
+                                    <input type="text" name="${prefix}[gradient_color_start]" class="w-full px-1 py-0.5 text-[9px] font-mono border border-slate-200 rounded" oninput="this.previousElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_start || '#0f172a') : '#0f172a'}">
+                                </div>
+                                <input type="range" name="${prefix}[gradient_opacity_start]" min="0" max="100" class="w-full" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_opacity_start !== undefined ? data.gradient_opacity_start : '80') : '80'}">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-semibold text-slate-500 mb-1">Color & Op. Fin</label>
+                                <div class="flex items-center gap-1 mb-1">
+                                    <input type="color" class="w-5 h-5 p-0 border border-slate-200 rounded cursor-pointer" oninput="this.nextElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_end || '#0f172a') : '#0f172a'}">
+                                    <input type="text" name="${prefix}[gradient_color_end]" class="w-full px-1 py-0.5 text-[9px] font-mono border border-slate-200 rounded" oninput="this.previousElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_end || '#0f172a') : '#0f172a'}">
+                                </div>
+                                <input type="range" name="${prefix}[gradient_opacity_end]" min="0" max="100" class="w-full" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_opacity_end !== undefined ? data.gradient_opacity_end : '0') : '0'}">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-semibold text-slate-500 mb-1">Dirección</label>
+                            <select name="${prefix}[gradient_direction]" class="w-full px-1 py-1 border border-slate-200 rounded text-[9px]" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                                <option value="to bottom" ${data && data.gradient_direction === 'to bottom' ? 'selected' : ''}>Arriba hacia Abajo</option>
+                                <option value="to top" ${data && data.gradient_direction === 'to top' ? 'selected' : ''}>Abajo hacia Arriba</option>
+                                <option value="to right" ${data && data.gradient_direction === 'to right' ? 'selected' : ''}>Izquierda a Derecha</option>
+                                <option value="to left" ${data && data.gradient_direction === 'to left' ? 'selected' : ''}>Derecha a Izquierda</option>
+                                <option value="to bottom right" ${data && data.gradient_direction === 'to bottom right' ? 'selected' : ''}>Diagonal</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Botón (Opcional)</label>
+                        <input type="text" name="${prefix}[button_text]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.button_text || '') : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">URL Enlace</label>
+                        <div class="flex items-center gap-1.5">
+                            <input type="text" name="${prefix}[button_url]" id="slideUrl${index}" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.button_url || '') : ''}">
+                            <select onchange="if(this.value){ document.getElementById('slideUrl'+${index}).value = this.value; this.value=''; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}(); }" class="px-2 py-1 border border-slate-200 rounded text-[10px] text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta">
+                                <option value="">+ Ruta</option>
+                                <optgroup label="Secciones Modulares">
+                                    @foreach($sections as $s)
+                                        <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
+                                    @endforeach
+                                </optgroup>
+                                <optgroup label="Páginas Institucionales">
+                                    @foreach($pages as $p)
+                                        <option value="/pagina/{{ $p->slug }}">/pagina/{{ $p->slug }} ({{ $p->title }})</option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Comportamiento del Enlace</label>
+                    <select name="${prefix}[link_target]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <option value="button" ${data && data.link_target === 'button' ? 'selected' : ''}>Solo en el Botón</option>
+                        <option value="image" ${data && data.link_target === 'image' ? 'selected' : ''}>En toda la Imagen</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Fondo Botón</label>
+                        <input type="color" name="${prefix}[button_bg]" value="${data ? (data.button_bg || '#0f172a') : '#0f172a'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Texto Botón</label>
+                        <input type="color" name="${prefix}[button_color]" value="${data ? (data.button_color || '#ffffff') : '#ffffff'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Borde</label>
+                        <input type="color" name="${prefix}[button_border_color]" value="${data ? (data.button_border_color || '#0f172a') : '#0f172a'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Grosor Borde</label>
+                        <select name="${prefix}[button_border_width]" class="w-full px-1 py-1 border border-slate-200 rounded text-[10px]" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                            <option value="border-0" ${data && data.button_border_width === 'border-0' ? 'selected' : ''}>Sin Borde (0px)</option>
+                            <option value="border" ${data && data.button_border_width === 'border' ? 'selected' : ''}>Fino (1px)</option>
+                            <option value="border-2" ${data && data.button_border_width === 'border-2' ? 'selected' : ''}>Medio (2px)</option>
+                            <option value="border-4" ${data && data.button_border_width === 'border-4' ? 'selected' : ''}>Grueso (4px)</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Sombra Botón</label>
+                        <select name="${prefix}[button_shadow]" class="w-full px-1 py-1 border border-slate-200 rounded text-[10px]" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                            <option value="" ${!data || !data.button_shadow ? 'selected' : ''}>Sin Sombra</option>
+                            <option value="shadow-sm" ${data && data.button_shadow === 'shadow-sm' ? 'selected' : ''}>Pequeña</option>
+                            <option value="shadow-md" ${data && data.button_shadow === 'shadow-md' ? 'selected' : ''}>Media</option>
+                            <option value="shadow-lg" ${data && data.button_shadow === 'shadow-lg' ? 'selected' : ''}>Grande</option>
+                            <option value="shadow-xl" ${data && data.button_shadow === 'shadow-xl' ? 'selected' : ''}>Extra Grande</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    list.insertAdjacentHTML('beforeend', html);
+    window.updatePreviewCreate && window.updatePreviewCreate();
+    window.updatePreviewEdit && window.updatePreviewEdit();
+};
+
+window.toggleHeroBgType = function(type, mode) {
+    const imgWrap = document.getElementById(mode + 'HeroBgImageWrap');
+    const vidWrap = document.getElementById(mode + 'HeroBgVideoWrap');
+    if (type === 'image') {
+        if(imgWrap) imgWrap.classList.remove('hidden');
+        if(vidWrap) vidWrap.classList.add('hidden');
+    } else {
+        if(imgWrap) imgWrap.classList.add('hidden');
+        if(vidWrap) vidWrap.classList.remove('hidden');
+    }
+};
+
+window.toggleHeroButtonsMode = function(mode) {
+    const hasButtonsInp = document.getElementById(mode === 'create' ? 'inpCreateHeroHasButtons' : 'inpEditHeroHasButtons');
+    const controls = document.getElementById(mode === 'create' ? 'createHeroButtonsControls' : 'editHeroButtonsControls');
+    const fullClickWrap = document.getElementById(mode === 'create' ? 'createHeroFullClickWrap' : 'editHeroFullClickWrap');
+    if (!hasButtonsInp || !controls || !fullClickWrap) return;
+    const isChecked = hasButtonsInp.checked;
+    controls.style.display = isChecked ? 'block' : 'none';
+    fullClickWrap.style.display = isChecked ? 'none' : 'block';
+};
+
+window.setHeroFocalPoint = function(mode, focalVal, triggerPreview = true) {
+    if (!focalVal) focalVal = 'center center';
+    const input = document.getElementById(mode === 'create' ? 'inpCreateHeroFocalPoint' : 'inpEditHeroFocalPoint');
+    if (input) input.value = focalVal;
+
+    const labelMap = {
+        'left top': 'Izquierda Superior (0% 0%)',
+        'center top': 'Centro Superior (50% 0%)',
+        'right top': 'Derecha Superior (100% 0%)',
+        'left center': 'Izquierda al Centro (0% 50%)',
+        'center center': 'Centro Centro (50% 50%)',
+        'right center': 'Derecha al Centro (100% 50%)',
+        'left bottom': 'Izquierda Inferior (0% 100%)',
+        'center bottom': 'Centro Inferior (50% 100%)',
+        'right bottom': 'Derecha Inferior (100% 100%)'
+    };
+
+    const labelEl = document.getElementById(mode + 'HeroFocalPointLabel');
+    if (labelEl) {
+        labelEl.textContent = labelMap[focalVal] || focalVal;
+    }
+
+    const matrix = document.getElementById(mode + 'HeroFocalMatrix');
+    if (matrix) {
+        matrix.querySelectorAll('button').forEach(btn => {
+            const isMatch = btn.getAttribute('data-focal') === focalVal;
+            if (isMatch) {
+                btn.className = 'focal-cell aspect-square flex items-center justify-center rounded-md bg-indigo-600 border border-indigo-700 ring-2 ring-indigo-300 text-white transition cursor-pointer shadow-xs';
+                btn.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-white ring-2 ring-indigo-400 pointer-events-none"></span>';
+                btn.setAttribute('aria-checked', 'true');
+            } else {
+                btn.className = 'focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer';
+                btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-300 pointer-events-none"></span>';
+                btn.setAttribute('aria-checked', 'false');
+            }
+        });
+    }
+
+    if (triggerPreview) {
+        if (mode === 'create' && typeof window.updatePreviewCreate === 'function') {
+            window.updatePreviewCreate();
+        } else if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') {
+            window.updatePreviewEdit();
+        }
+    }
+};
+
+window.setSectionSpacing = function(mode, direction, val, triggerPreview = true) {
+    const num = Math.max(0, parseInt(val, 10) || 0);
+    const prefix = mode === 'edit' ? 'Edit' : 'Create';
+    const capitalizedDir = direction === 'top' ? 'Top' : 'Bottom';
+    
+    const inp = document.getElementById('inp' + prefix + 'Spacing' + capitalizedDir);
+    const range = document.getElementById('range' + prefix + 'Spacing' + capitalizedDir);
+    
+    if (inp) inp.value = num;
+    if (range) range.value = Math.min(120, num);
+    
+    if (triggerPreview) {
+        if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') {
+            window.updatePreviewEdit();
+        } else if (mode === 'create' && typeof window.updatePreviewCreate === 'function') {
+            window.updatePreviewCreate();
+        }
+    }
+};
+
+// --- CMS MEDIA MANAGER JS (HUB 2) ---
+let targetCmsMediaInput = null;
+
+window.openCmsMediaModal = function(inputId) {
+    let inputEl = null;
+    if (typeof inputId === 'string') {
+        inputEl = document.getElementById(inputId);
+    } else {
+        inputEl = inputId;
+    }
+    
+    if (inputEl) {
+        targetCmsMediaInput = inputEl;
+        const modal = document.getElementById('cmsMediaModal');
+        if (modal) modal.classList.remove('hidden');
+        window.loadCmsMedia();
+    }
+};
+
+window.closeCmsMediaModal = function() {
+    const modal = document.getElementById('cmsMediaModal');
+    if (modal) modal.classList.add('hidden');
+    targetCmsMediaInput = null;
+};
+
+window.copyMediaUrl = function(url, btn) {
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+        const span = btn ? btn.querySelector('span') : null;
+        const originalText = span ? span.textContent : '';
+        if (span) span.textContent = '¡Copiado! ✓';
+        if (btn) btn.classList.add('!bg-emerald-600', '!text-white');
+        setTimeout(() => {
+            if (span) span.textContent = originalText;
+            if (btn) btn.classList.remove('!bg-emerald-600', '!text-white');
+        }, 1800);
+    }).catch(() => {
+        prompt('Copia el enlace de la imagen:', url);
+    });
+};
+
+window.deleteCmsMedia = function(id, btn) {
+    if (!id) return;
+    if (!confirm('¿Seguro que deseas eliminar esta imagen del Gestor de Medios CMS? Esta acción no se puede deshacer.')) return;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                      || document.querySelector('input[name="_token"]')?.value;
+
+    fetch(`/admin/tienda-cms/media/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.loadCmsMedia();
+        } else {
+            alert('Error al eliminar: ' + (data.message || 'Error del servidor'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error de red al intentar eliminar la imagen.');
+    });
+};
+
+window.filterCmsMediaGrid = function(query) {
+    const q = (query || '').toLowerCase().trim();
+    document.querySelectorAll('#cmsMediaPanelGrid .cms-media-card').forEach(card => {
+        const fileName = (card.getAttribute('data-file-name') || '').toLowerCase();
+        if (!q || fileName.includes(q)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+};
+
+window.loadCmsMedia = function() {
+    const modalGrid = document.getElementById('cmsMediaGrid');
+    const panelGrid = document.getElementById('cmsMediaPanelGrid');
+    const loading = document.getElementById('cmsMediaLoading');
+    const emptyModal = document.getElementById('cmsMediaEmpty');
+    const tabCount = document.getElementById('cmsMediaTabCount');
+
+    if (loading) loading.classList.remove('hidden');
+    if (emptyModal) emptyModal.classList.add('hidden');
+
+    fetch('/admin/tienda-cms/media', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (loading) loading.classList.add('hidden');
+        if (data.success && data.media) {
+            const count = data.media.length;
+            if (tabCount) tabCount.textContent = `${count} Fotos`;
+
+            // 1. Renderizar en el modal (Picker para crear/editar sección)
+            if (modalGrid) {
+                modalGrid.innerHTML = '';
+                if (count === 0 && emptyModal) {
+                    emptyModal.classList.remove('hidden');
+                } else {
+                    data.media.forEach(media => {
+                        modalGrid.insertAdjacentHTML('beforeend', `
+                            <div class="relative group aspect-square bg-slate-200 rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-indigo-500 hover:ring-2 hover:ring-indigo-200 transition-all" onclick="window.selectCmsMedia('${media.file_path}')">
+                                <img src="${media.file_path}" alt="${media.file_name}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2">
+                                    <span class="text-white text-[10px] font-bold text-center break-all px-1 bg-black/50 rounded line-clamp-2">${media.file_name}</span>
+                                    <span class="text-white text-[10px] font-bold mt-1 bg-indigo-600 px-2 py-0.5 rounded shadow">Seleccionar</span>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+            }
+
+            // 2. Renderizar en la pestaña principal (Submódulo 6: Gestor de Medios)
+            if (panelGrid) {
+                panelGrid.innerHTML = '';
+                if (count === 0) {
+                    panelGrid.innerHTML = `
+                        <div id="cmsMediaPanelEmpty" class="col-span-full py-16 text-center flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <h4 class="text-sm font-bold text-slate-700">Sin imágenes en el Gestor</h4>
+                            <p class="text-xs text-slate-400 mt-1 max-w-sm">Aún no has cargado fotos para tus banners y carruseles. Haz clic en "Subir Imágenes" o arrastra archivos arriba.</p>
+                        </div>
+                    `;
+                } else {
+                    data.media.forEach(item => {
+                        const sizeKb = item.size ? (item.size / 1024).toFixed(1) + ' KB' : 'Img';
+                        const createdStr = item.created_at ? new Date(item.created_at).toLocaleDateString() : '';
+                        panelGrid.insertAdjacentHTML('beforeend', `
+                            <div class="cms-media-card bg-white border border-slate-200/90 hover:border-indigo-400 rounded-xl overflow-hidden shadow-2xs hover:shadow-md transition-all group relative flex flex-col" data-media-id="${item.id}" data-file-name="${(item.file_name || '').toLowerCase()}">
+                                <div class="aspect-square bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                                    <img src="${item.file_path}" alt="${item.file_name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
+                                    <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                                        <button type="button" onclick="window.copyMediaUrl('${item.file_path}', this)" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-800 text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer w-full justify-center">
+                                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                            <span>Copiar URL</span>
+                                        </button>
+                                        <a href="${item.file_path}" target="_blank" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 w-full justify-center text-center">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                            <span>Ver Original</span>
+                                        </a>
+                                        <button type="button" onclick="window.deleteCmsMedia(${item.id}, this)" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer w-full justify-center">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            <span>Eliminar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="p-2.5 bg-white flex-1 flex flex-col justify-between">
+                                    <span class="text-[11px] font-bold text-slate-800 truncate block" title="${item.file_name}">${item.file_name}</span>
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+                                        <span>${sizeKb}</span>
+                                        <span>${createdStr}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+            }
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (loading) loading.classList.add('hidden');
+    });
+};
+
+window.selectCmsMedia = function(url) {
+    if (targetCmsMediaInput) {
+        targetCmsMediaInput.value = url;
+        targetCmsMediaInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    window.closeCmsMediaModal();
+};
+
+window.uploadCmsMedia = function(input) {
+    if (!input.files || input.files.length === 0) return;
+    window.uploadCmsMediaFiles(input.files);
+    input.value = '';
+};
+
+window.uploadCmsMediaFiles = function(files) {
+    if (!files || files.length === 0) return;
+    const progressEl = document.getElementById('cmsMediaPanelUploading');
+    const statusText = document.getElementById('cmsMediaUploadStatusText');
+    if (progressEl) progressEl.classList.remove('hidden');
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                      || document.querySelector('input[name="_token"]')?.value;
+
+    const fileList = Array.from(files);
+
+    const uploadNext = (index) => {
+        if (index >= fileList.length) {
+            if (progressEl) progressEl.classList.add('hidden');
+            window.loadCmsMedia();
+            return;
+        }
+
+        if (statusText) statusText.textContent = `Subiendo archivo ${index + 1} de ${fileList.length} (${fileList[index].name})...`;
+
+        const formData = new FormData();
+        formData.append('file', fileList[index]);
+        if (csrfToken) formData.append('_token', csrfToken);
+
+        fetch('/admin/tienda-cms/media', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            uploadNext(index + 1);
+        })
+        .catch(err => {
+            console.error(err);
+            uploadNext(index + 1);
+        });
+    };
+
+    uploadNext(0);
+};
+
+// Drag & drop listener
+const dropZone = document.getElementById('cmsMediaDropZone');
+if (dropZone) {
+    ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('border-indigo-600', 'bg-indigo-50/70');
+        });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('border-indigo-600', 'bg-indigo-50/70');
+        });
+    });
+    dropZone.addEventListener('drop', (e) => {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            window.uploadCmsMediaFiles(e.dataTransfer.files);
+        }
+    });
+}
+// --- END CMS MEDIA MANAGER JS ---
+
 })();
 </script>
 @endpush
+<!-- 1B. MODAL EDITAR SECCI�N EXISTENTE -->
+
+
+
+
+
+
+
+
+
+
+

@@ -14,6 +14,9 @@ class ReorderSectionsRequest extends FormRequest
 
     public function rules(): array
     {
-        return [];
+        return [
+            'order' => 'required|array',
+            'order.*' => 'required|integer',
+        ];
     }
 }

@@ -6,17 +6,28 @@
     
     @if(isset($sections) && $sections->isNotEmpty())
       @foreach($sections as $sec)
-        @if($sec->type === 'hero_carousel')
+        @php
+          $secSettings = is_array($sec->settings) ? $sec->settings : (json_decode($sec->settings ?? '{}', true) ?: []);
+          $secSpacingTop = isset($secSettings['spacing_top']) && $secSettings['spacing_top'] !== '' ? (int)$secSettings['spacing_top'] : 0;
+          $secSpacingBottom = isset($secSettings['spacing_bottom']) && $secSettings['spacing_bottom'] !== '' ? (int)$secSettings['spacing_bottom'] : 0;
+          $secSpacingStyle = "margin-top: {$secSpacingTop}px !important; margin-bottom: {$secSpacingBottom}px !important;";
+        @endphp
+        @if(in_array($sec->type, ['hero_carousel', 'hero', 'carousel']))
           @php
-            $settings = is_array($sec->settings) ? $sec->settings : (json_decode($sec->settings ?? '{}', true) ?: []);
+            $settings = $secSettings;
+            $isCarousel = $sec->type === 'carousel' || $sec->type === 'hero_carousel';
             $heroMode = $settings['hero_mode'] ?? (!empty($sec->custom_html) && empty($sec->title) ? 'custom' : 'structured');
             $isFullWidth = !empty($settings['full_width']);
+            $isFullWidthH = !empty($settings['full_width_horizontal']);
+            $heroHasButtons = !isset($settings['hero_has_buttons']) || $settings['hero_has_buttons'] == '1' || $settings['hero_has_buttons'] === true || $settings['hero_has_buttons'] === 1;
+            $heroClickUrl = $settings['hero_click_url'] ?? '';
             $bgImage = $settings['background_image'] ?? null;
             $enableGradient = !empty($settings['enable_gradient']);
             $gradStart = $settings['gradient_color_start'] ?? '#0f172a';
             $gradEnd = $settings['gradient_color_end'] ?? '#1e1b4b';
             $gradDir = $settings['gradient_direction'] ?? 'to bottom';
-            $gradOpacity = isset($settings['gradient_opacity']) ? ((int)$settings['gradient_opacity'] / 100) : 0.85;
+            $gradOpacityStart = isset($settings['gradient_opacity_start']) ? ((int)$settings['gradient_opacity_start'] / 100) : 0.85;
+            $gradOpacityEnd = isset($settings['gradient_opacity_end']) ? ((int)$settings['gradient_opacity_end'] / 100) : 0.85;
 
             $hexToRgba = function ($hex, $alpha = 1.0) {
                 $hex = ltrim((string)$hex, '#');
@@ -34,26 +45,37 @@
                 return sprintf('rgba(%d, %d, %d, %s)', $r, $g, $b, rtrim(rtrim(sprintf('%.2f', $alpha), '0'), '.'));
             };
 
+            $imageFocalPoint = !empty($settings['image_focal_point']) ? trim($settings['image_focal_point']) : 'center center';
             $bgImageUrl = !empty($bgImage) ? asset(ltrim($bgImage, '/')) : null;
             $cssDeclarations = [];
 
             if (!empty($bgImageUrl) && $enableGradient) {
-                $overlayAlpha = min(0.70, max(0.15, $gradOpacity * 0.65));
-                $rgbaStart = $hexToRgba($gradStart, $overlayAlpha);
-                $rgbaEnd = $hexToRgba($gradEnd, $overlayAlpha);
+                $rgbaStart = $hexToRgba($gradStart, $gradOpacityStart);
+                $rgbaEnd = $hexToRgba($gradEnd, $gradOpacityEnd);
                 $cssDeclarations[] = "background-image: linear-gradient({$gradDir}, {$rgbaStart}, {$rgbaEnd}), url('{$bgImageUrl}') !important";
                 $cssDeclarations[] = "background-size: cover, cover !important";
-                $cssDeclarations[] = "background-position: center, center !important";
+                $cssDeclarations[] = "background-position: center, {$imageFocalPoint} !important";
                 $cssDeclarations[] = "background-repeat: no-repeat, no-repeat !important";
             } elseif (!empty($bgImageUrl)) {
                 $cssDeclarations[] = "background-image: url('{$bgImageUrl}') !important";
                 $cssDeclarations[] = "background-size: cover !important";
-                $cssDeclarations[] = "background-position: center !important";
+                $cssDeclarations[] = "background-position: {$imageFocalPoint} !important";
                 $cssDeclarations[] = "background-repeat: no-repeat !important";
             } elseif ($enableGradient) {
-                $cssDeclarations[] = "background-image: linear-gradient({$gradDir}, {$gradStart}, {$gradEnd}) !important";
+                $rgbaStart = $hexToRgba($gradStart, $gradOpacityStart);
+                $rgbaEnd = $hexToRgba($gradEnd, $gradOpacityEnd);
+                $cssDeclarations[] = "background-image: linear-gradient({$gradDir}, {$rgbaStart}, {$rgbaEnd}) !important";
                 $cssDeclarations[] = "background-size: cover !important";
                 $cssDeclarations[] = "background-position: center !important";
+            }
+            if (!empty($settings['parallax_scrolling'])) {
+                $cssDeclarations[] = "background-attachment: fixed !important";
+            }
+            if (!empty($settings['hero_height_value'])) {
+                $hHeightVal = trim($settings['hero_height_value']);
+                $hHeightUnit = trim($settings['hero_height_unit'] ?? 'px');
+                $cssDeclarations[] = "min-height: {$hHeightVal}{$hHeightUnit} !important";
+                $cssDeclarations[] = "height: {$hHeightVal}{$hHeightUnit} !important";
             }
             $heroBgStyle = !empty($cssDeclarations) ? implode('; ', $cssDeclarations) . ';' : '';
 
@@ -64,10 +86,13 @@
           @endphp
 
           <!-- Hero Carousel / Editorial Banner -->
-          <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-full-width' : '' }}" data-section-id="{{ $sec->id }}">
+          <section id="section-{{ $sec->id }}" class="hero-editorial-section {{ $isFullWidth ? 'hero-fullpage-v' : '' }} {{ $isFullWidthH ? 'hero-full-width-h' : '' }} {{ ($isFullWidth && $isFullWidthH) ? 'hero-full-width' : '' }}" style="{{ $secSpacingStyle }} padding-top: 0 !important; padding-bottom: 0 !important;" data-section-id="{{ $sec->id }}">
             @if($heroMode === 'custom')
               {{-- MODO CÓDIGO PERSONALIZADO (AISLADO, NO DUPLICA EL HERO) --}}
-              <div class="hero-custom-container" style="{!! $heroBgStyle !!}">
+              <div class="hero-custom-container" style="{!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+                @if(!$heroHasButtons && !empty($heroClickUrl))
+                  <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
+                @endif
                 @if(!empty($sec->custom_css))
                   <style>{!! $sec->custom_css !!}</style>
                 @endif
@@ -80,7 +105,156 @@
               </div>
             @else
               {{-- MODO VISUAL ESTRUCTURADO (FORMULARIO DINÁMICO) --}}
-              <div class="hero-banner-card" style="{!! $heroBgStyle !!}">
+              <div class="hero-banner-card" style="{!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" aria-label="{{ $settings['background_image_alt'] ?? '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+                @if(!$heroHasButtons && !empty($heroClickUrl))
+                  <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
+                @endif
+                @if(!$isCarousel && ($settings['background_type'] ?? 'image') === 'video' && !empty($settings['background_video']))
+                  <video src="{{ asset(ltrim($settings['background_video'], '/')) }}" 
+                         style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: {{ $imageFocalPoint }}; z-index: 0;" 
+                         {{ !empty($settings['video_autoplay']) ? 'autoplay' : '' }} 
+                         {{ !empty($settings['video_loop']) ? 'loop' : '' }} 
+                         {{ !empty($settings['video_muted']) ? 'muted' : '' }} 
+                         playsinline></video>
+                  @if($enableGradient)
+                    @php
+                      $rgbaStart = $hexToRgba($gradStart, $gradOpacityStart);
+                      $rgbaEnd = $hexToRgba($gradEnd, $gradOpacityEnd);
+                    @endphp
+                    <div style="position: absolute; inset: 0; z-index: 1; background-image: linear-gradient({{ $gradDir }}, {{ $rgbaStart }}, {{ $rgbaEnd }});"></div>
+                  @endif
+                @endif
+                
+                @if($isCarousel && !empty($settings['carousel_slides']))
+                  @php
+                      $globalContent = !isset($settings['carousel_global_content']) || $settings['carousel_global_content'] == 1;
+                      $cGradStart = $settings['carousel_gradient_color_start'] ?? '#0f172a';
+                      $cGradEnd = $settings['carousel_gradient_color_end'] ?? '#1e1b4b';
+                      $cGradDir = $settings['carousel_gradient_direction'] ?? 'to bottom';
+                      $cGradOpStart = isset($settings['carousel_gradient_opacity_start']) ? ((int)$settings['carousel_gradient_opacity_start'] / 100) : 0.85;
+                      $cGradOpEnd = isset($settings['carousel_gradient_opacity_end']) ? ((int)$settings['carousel_gradient_opacity_end'] / 100) : 0.85;
+                      $cRgbaStart = $hexToRgba($cGradStart, $cGradOpStart);
+                      $cRgbaEnd = $hexToRgba($cGradEnd, $cGradOpEnd);
+                      
+                      $globalGradientStr = !empty($settings['carousel_enable_gradient']) 
+                          ? "linear-gradient({$cGradDir}, {$cRgbaStart}, {$cRgbaEnd}), " 
+                          : "";
+                          
+                      $carouselId = 'carousel-' . $sec->id . '-' . uniqid();
+                  @endphp
+                  <div id="{{ $carouselId }}" class="carousel-container absolute inset-0 z-0" data-autoplay="{{ $settings['autoplay_time'] ?? 5 }}" style="width: 100%; height: 100%; display: flex; transition: transform 0.5s ease-in-out;">
+                      @foreach($settings['carousel_slides'] as $slide)
+                          @php
+                              $slideGradientStr = $globalGradientStr;
+                              if (!$globalContent) {
+                                  $sGradStart = $slide['gradient_color_start'] ?? '#0f172a';
+                                  $sGradEnd = $slide['gradient_color_end'] ?? '#1e1b4b';
+                                  $sGradDir = $slide['gradient_direction'] ?? 'to bottom';
+                                  $sGradOpStart = isset($slide['gradient_opacity_start']) ? ((int)$slide['gradient_opacity_start'] / 100) : 0.85;
+                                  $sGradOpEnd = isset($slide['gradient_opacity_end']) ? ((int)$slide['gradient_opacity_end'] / 100) : 0.85;
+                                  $sRgbaStart = $hexToRgba($sGradStart, $sGradOpStart);
+                                  $sRgbaEnd = $hexToRgba($sGradEnd, $sGradOpEnd);
+                                  $slideGradientStr = !empty($slide['enable_gradient']) 
+                                      ? "linear-gradient({$sGradDir}, {$sRgbaStart}, {$sRgbaEnd}), " 
+                                      : "";
+                              }
+                          @endphp
+                          <div class="carousel-slide" style="min-width: 100%; height: 100%; position: relative;">
+                              <div style="position: absolute; inset: 0; background-image: {!! $slideGradientStr !!}url('{{ asset(ltrim($slide['image_url'] ?? '', '/')) }}'); background-size: cover; background-position: {{ !empty($slide['image_focal_point']) ? $slide['image_focal_point'] : 'center' }};" aria-label="{{ $slide['alt_text'] ?? '' }}"></div>
+                              
+                              @if(!$globalContent)
+                                  <div style="position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+                                      @if(!empty($slide['badge']))
+                                        <div class="hero-tag-pill">
+                                          <span class="hero-pulse-dot"></span>
+                                          <span id="heroBrandTag">{{ $slide['badge'] }}</span>
+                                        </div>
+                                      @endif
+                                      @if(!empty($slide['title']))
+                                        <h1 class="hero-title">{{ $slide['title'] }}</h1>
+                                      @endif
+                                      @if(!empty($slide['subtitle']))
+                                        <p class="hero-desc">{{ $slide['subtitle'] }}</p>
+                                      @endif
+                                  </div>
+                              @endif
+
+                              @if(!empty($slide['button_text']))
+                                  @php
+                                      $bWidthVal = $slide['button_border_width'] ?? 'border-0';
+                                      $bPx = '0';
+                                      if ($bWidthVal === 'border') $bPx = '1';
+                                      elseif ($bWidthVal === 'border-2') $bPx = '2';
+                                      elseif ($bWidthVal === 'border-4') $bPx = '4';
+                                  @endphp
+                                  @if(($slide['link_target'] ?? 'button') === 'image')
+                                      <a href="{{ $slide['button_url'] ?? '#' }}" style="position: absolute; inset: 0; z-index: 2;"></a>
+                                  @endif
+                                  <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 3;">
+                                      <a href="{{ $slide['button_url'] ?? '#' }}" style="
+                                          display: inline-block;
+                                          padding: 10px 20px;
+                                          background-color: {{ $slide['button_bg'] ?? '#0f172a' }};
+                                          color: {{ $slide['button_color'] ?? '#ffffff' }};
+                                          border: {{ $bPx }}px solid {{ $slide['button_border_color'] ?? '#0f172a' }};
+                                          text-decoration: none;
+                                          font-weight: bold;
+                                          border-radius: 4px;
+                                          {{ !empty($slide['button_shadow']) ? 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);' : '' }}
+                                      ">{{ $slide['button_text'] }}</a>
+                                  </div>
+                              @endif
+                          </div>
+                      @endforeach
+                  </div>
+                  <script>
+                      (function() {
+                          const container = document.getElementById('{{ $carouselId }}');
+                          if (!container) return;
+                          const slides = container.querySelectorAll('.carousel-slide');
+                          if (slides.length > 1) {
+                              let current = 0;
+                              const time = parseInt(container.getAttribute('data-autoplay')) * 1000;
+                              setInterval(() => {
+                                  current = (current + 1) % slides.length;
+                                  container.style.transform = `translateX(-${current * 100}%)`;
+                              }, time > 0 ? time : 5000);
+                          }
+                      })();
+                  </script>
+                @endif
+                
+                @php
+                  $globalContent = !isset($settings['carousel_global_content']) || $settings['carousel_global_content'] == 1;
+                  $titleColor = $settings['title_color'] ?? '';
+                  $titleFont = $settings['title_font'] ?? $settings['font_family'] ?? '';
+                  $subtitleColor = $settings['subtitle_color'] ?? '';
+                  $subtitleFont = $settings['subtitle_font'] ?? '';
+                  $textAlign = $settings['text_align'] ?? 'text-center';
+                  
+                  $alignCss = 'text-center';
+                  $flexAlign = 'center';
+                  if ($textAlign === 'text-left') {
+                      $alignCss = 'text-left';
+                      $flexAlign = 'flex-start';
+                  } elseif ($textAlign === 'text-right') {
+                      $alignCss = 'text-right';
+                      $flexAlign = 'flex-end';
+                  }
+
+                  $titleStyle = '';
+                  if (!empty($titleColor)) $titleStyle .= "color: {$titleColor} !important; ";
+                  if (!empty($titleFont) && !in_array(strtolower($titleFont), ['inherit', 'inherit / vitrina', 'font-sans', 'font-serif', 'font-mono'])) {
+                      $titleStyle .= "font-family: '{$titleFont}', sans-serif !important; ";
+                  }
+
+                  $subtitleStyle = '';
+                  if (!empty($subtitleColor)) $subtitleStyle .= "color: {$subtitleColor} !important; ";
+                  if (!empty($subtitleFont) && !in_array(strtolower($subtitleFont), ['inherit', 'inherit / vitrina', 'font-sans', 'font-serif', 'font-mono'])) {
+                      $subtitleStyle .= "font-family: '{$subtitleFont}', sans-serif !important; ";
+                  }
+                @endphp
+                <div style="position: relative; z-index: 10; width: 100%; display: flex; flex-direction: column; align-items: {{ $flexAlign }}; text-align: {{ str_replace('text-', '', $alignCss) }}; {{ $isCarousel ? 'pointer-events: none;' : '' }} {{ $isCarousel && !$globalContent ? 'display: none;' : '' }}">
                 @if(!empty($sec->badge) || !empty($currentStorefront['heroTag']))
                   <div class="hero-tag-pill">
                     <span class="hero-pulse-dot"></span>
@@ -88,22 +262,43 @@
                   </div>
                 @endif
 
-                <h1 class="hero-title">{{ $sec->title ?? $currentStorefront['heroTitle'] ?? 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA' }}</h1>
+                <h1 class="hero-title" style="{{ $titleStyle }}">{{ $sec->title ?? $currentStorefront['heroTitle'] ?? 'MODA CONTEMPORÁNEA & ROPA INTERIOR ERGONÓMICA' }}</h1>
 
                 @if(!empty($sec->subtitle) || !empty($currentStorefront['heroSubtitle']))
-                  <p class="hero-desc">
+                  <p class="hero-desc" style="{{ $subtitleStyle }}">
                     {{ $sec->subtitle ?? $currentStorefront['heroSubtitle'] ?? 'Diseño textil anatómico con modal pima, costuras planas y microfibras de alta transpirabilidad. Envíos express a todo México.' }}
                   </p>
                 @endif
 
-                <div class="hero-actions-row">
+                @if($heroHasButtons)
+                <div class="hero-actions-row" style="justify-content: {{ $flexAlign }};">
+                  @php
+                    $primaryBg = $settings['cta_primary_bg'] ?? '';
+                    $primaryColor = $settings['cta_primary_color'] ?? '';
+                    $primaryBorderWidth = $settings['cta_primary_border_width'] ?? 'border-0';
+                    $primaryBorderColor = $settings['cta_primary_border_color'] ?? '';
+                    $primaryShadow = $settings['cta_primary_shadow'] ?? '';
+                    $bPx = '0';
+                    if ($primaryBorderWidth === 'border') $bPx = '1';
+                    elseif ($primaryBorderWidth === 'border-2') $bPx = '2';
+                    elseif ($primaryBorderWidth === 'border-4') $bPx = '4';
+                    
+                    $primaryStyle = '';
+                    if (!empty($primaryBg)) $primaryStyle .= "background-color: {$primaryBg} !important; ";
+                    if (!empty($primaryColor)) $primaryStyle .= "color: {$primaryColor} !important; ";
+                    if (!empty($primaryBorderColor) && $bPx !== '0') $primaryStyle .= "border: {$bPx}px solid {$primaryBorderColor} !important; ";
+                    if ($primaryShadow === 'shadow-sm') $primaryStyle .= "box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important; ";
+                    elseif ($primaryShadow === 'shadow-md') $primaryStyle .= "box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; ";
+                    elseif ($primaryShadow === 'shadow-lg') $primaryStyle .= "box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; ";
+                    elseif ($primaryShadow === 'shadow-xl') $primaryStyle .= "box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1) !important; ";
+                  @endphp
                   @if(!empty($ctaPrimaryUrl))
-                    <a href="{{ $ctaPrimaryUrl }}" class="btn-hero-primary" style="text-decoration: none;">
+                    <a href="{{ $ctaPrimaryUrl }}" class="btn-hero-primary" style="text-decoration: none; {{ $primaryStyle }}">
                       <span>{{ $ctaPrimaryText }}</span>
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </a>
                   @else
-                    <button type="button" class="btn-hero-primary" data-action="switch-dock-tab" data-dock-tab="catalog">
+                    <button type="button" class="btn-hero-primary" data-action="switch-dock-tab" data-dock-tab="catalog" style="{{ $primaryStyle }}">
                       <span>{{ $ctaPrimaryText }}</span>
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </button>
@@ -119,12 +314,14 @@
                     </button>
                   @endif
                 </div>
+                @endif
+                </div>
               </div>
             @endif
           </section>
         @elseif($sec->type === 'brand_pillars')
           <!-- Pilares de Marca & Beneficios (Courier Exclusivo) -->
-          <section id="section-{{ $sec->id }}" class="brand-pillars-bar" data-section-id="{{ $sec->id }}">
+          <section id="section-{{ $sec->id }}" class="brand-pillars-bar" style="{{ $secSpacingStyle }}" data-section-id="{{ $sec->id }}">
             <div class="pillar-item-card">
               <div class="pillar-icon-box">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -164,9 +361,9 @@
               <script>{!! $sec->custom_js !!}</script>
             @endif
           </section>
-        @elseif($sec->type === 'editorial_banner')
+        @elseif(in_array($sec->type, ['editorial_banner', 'carousel']))
           <!-- Banner Promocional de Campañas Dir A (Convenios & Aliados Hub 7 TASK-STR-04) -->
-          <section id="section-{{ $sec->id }}" class="lead-magnet-banner-card" data-section-id="{{ $sec->id }}" data-card-id="leadMagnetHomeCard_{{ $sec->id }}">
+          <section id="section-{{ $sec->id }}" class="lead-magnet-banner-card" style="{{ $secSpacingStyle }}" data-section-id="{{ $sec->id }}" data-card-id="leadMagnetHomeCard_{{ $sec->id }}">
             <div class="lead-magnet-content">
               <div class="lead-magnet-tag-row">
                 <span class="lead-magnet-tag">{{ $sec->badge ?? 'CONVENIOS MULTIVERSO // HUB 7' }}</span>
@@ -207,7 +404,7 @@
           @php
             $sectionProducts = $sec->resolved_products ?? $products;
           @endphp
-          <section id="section-{{ $sec->id }}" style="margin-bottom: 32px;" data-section-id="{{ $sec->id }}" data-section-type="{{ $sec->type }}">
+          <section id="section-{{ $sec->id }}" style="{{ $secSpacingStyle }}" data-section-id="{{ $sec->id }}" data-section-type="{{ $sec->type }}">
             <div class="catalog-section-header">
               <div>
                 <h2 class="section-headline">{{ $sec->title ?? 'PRENDAS DESTACADAS' }}</h2>
@@ -313,7 +510,7 @@
           @php
             $sliderProducts = $sec->resolved_products ?? $products;
           @endphp
-          <section id="section-{{ $sec->id }}" style="margin-bottom: 32px;" data-section-id="{{ $sec->id }}" data-section-type="subcategories_slider">
+          <section id="section-{{ $sec->id }}" style="{{ $secSpacingStyle }}" data-section-id="{{ $sec->id }}" data-section-type="subcategories_slider">
             <div class="catalog-section-header">
               <div>
                 <h2 class="section-headline">{{ $sec->title ?? 'EXPLORAR COLECCIÓN' }}</h2>
@@ -395,7 +592,7 @@
               <script>{!! $sec->custom_js !!}</script>
             @endif
           </section>
-        @elseif($sec->type === 'promo_modal')
+        @elseif(in_array($sec->type, ['promo_modal', 'pop_up']))
           <!-- Modal Promocional CMS (TASK-H2-12) -->
           <div id="promoModal_{{ $sec->id }}" class="promo-modal-backdrop" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;">
             <div style="background: #ffffff; border-radius: 12px; max-width: 480px; width: 100%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative; border: 1px solid #e4e4e7;">
@@ -436,9 +633,9 @@
               }
             });
           </script>
-        @elseif($sec->type === 'custom_html_css_js')
+        @elseif(in_array($sec->type, ['custom_html_css_js', 'buttons']))
           <!-- Bloque Custom Operativo (HTML/CSS/JS Scoped) -->
-          <section id="section-{{ $sec->id }}" class="custom-cms-section" data-section-id="{{ $sec->id }}" style="margin-bottom: 32px;">
+          <section id="section-{{ $sec->id }}" class="custom-cms-section" data-section-id="{{ $sec->id }}" style="{{ $secSpacingStyle }}">
             @if(!empty($sec->custom_css))
               <style>{!! $sec->custom_css !!}</style>
             @endif
@@ -453,7 +650,7 @@
       @endforeach
     @else
       <!-- Hero Carousel / Editorial Banner (Fallback) -->
-      <section class="hero-editorial-section">
+      <section class="hero-editorial-section" style="margin-top: 0px !important; margin-bottom: 0px !important; padding-top: 0 !important; padding-bottom: 0 !important;">
         <div class="hero-banner-card">
           <div class="hero-tag-pill">
             <span class="hero-pulse-dot"></span>
@@ -476,7 +673,7 @@
       </section>
 
       <!-- Pilares de Marca & Beneficios (Fallback) -->
-      <section class="brand-pillars-bar">
+      <section class="brand-pillars-bar" style="margin-top: 0px !important; margin-bottom: 0px !important;">
         <div class="pillar-item-card">
           <div class="pillar-icon-box">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -509,7 +706,7 @@
       </section>
 
       <!-- Banner Promocional de Campañas Dir A (Fallback) -->
-      <section class="lead-magnet-banner-card" id="leadMagnetHomeCard">
+      <section class="lead-magnet-banner-card" id="leadMagnetHomeCard" style="margin-top: 0px !important; margin-bottom: 0px !important;">
         <div class="lead-magnet-content">
           <div class="lead-magnet-tag-row">
             <span class="lead-magnet-tag">CONVENIOS MULTIVERSO // HUB 7</span>
@@ -527,7 +724,7 @@
       </section>
 
       <!-- Feed de Prendas Destacadas (Fallback) -->
-      <section style="margin-bottom: 32px;">
+      <section style="margin-top: 0px !important; margin-bottom: 0px !important;">
         <div class="catalog-section-header">
           <div>
             <h2 class="section-headline">PRENDAS DESTACADAS</h2>

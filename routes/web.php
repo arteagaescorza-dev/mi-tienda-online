@@ -102,6 +102,9 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::delete('/admin/tienda-cms/blog/{post}', [PortalStoreController::class, 'destroyBlogPost'])->name('portal.store.blog.destroy');
 	Route::post('/admin/tienda-cms/tracking', [PortalStoreController::class, 'updateTracking'])->name('portal.store.tracking.update');
 	Route::post('/admin/tienda-cms/filtros', [PortalStoreController::class, 'updateFilters'])->name('portal.store.filters.update');
+	Route::get('/admin/tienda-cms/media', [PortalStoreController::class, 'apiGetMedia'])->name('portal.store.media.get');
+	Route::post('/admin/tienda-cms/media', [PortalStoreController::class, 'apiUploadMedia'])->name('portal.store.media.upload');
+	Route::delete('/admin/tienda-cms/media/{id}', [PortalStoreController::class, 'apiDeleteMedia'])->name('portal.store.media.delete');
 
 	// Hub 7: Convenios & Aliados
 	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');

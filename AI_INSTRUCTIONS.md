@@ -34,6 +34,7 @@ La interfaz debe proyectar lujo minimalista, claridad operativa y cero fricción
 * **Contraste WCAG AA:** Usa blanco brillante sobre fondos oscuros, jamás grises que dificulten la lectura[cite: 2].
 * **Ergonomía UI:** Uso exclusivo de iconografía SVG (cero emojis informales)[cite: 2]. Restricción de redimensionamiento (`resize: vertical !important`) en todo `textarea`[cite: 2].
 * **Aislamiento DOM:** Los modales deben declararse en el nivel raíz (`depth = 2`) bajo `#storeAppRoot`[cite: 2]. Los filtros deben ser drawers laterales (`left: 0 !important`), nunca acordeones invasivos en el grid de productos[cite: 2].
+* **Paridad Estructural y Live Preview en Modales CMS:** En los constructores visuales (como las secciones modulares del Home en Hub 2), el modal de edición (`editSectionModal`) debe replicar exactamente la estructura del modal de creación (`createSectionModal`) con layout de 2 columnas ensanchado (`md:w-[700px]`). Todos los cambios (tipografías Google Fonts, hero con video MP4/parallax/degradados, carrusel dinámico, pop-up y custom HTML) deben renderizarse en tiempo real (`Live Preview`) para desktop y móvil, y pre-poblarse al 100% de manera inmediata al abrir la edición (`openEditSectionModal`).
 
 ### 6. BUCLE DE DOCUMENTACIÓN CONTINUA Y TRÍPTICO DOCUMENTAL (DOC-AS-CODE)
 Tu trabajo NO termina cuando el código funciona. Eres el Guardián de la Documentación. Tienes la obligación de actualizar el ecosistema usando tus permisos de escritura:

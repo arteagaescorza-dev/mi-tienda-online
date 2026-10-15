@@ -116,10 +116,12 @@ class User extends Authenticatable
             'dashboard'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'portal'],
             'store'           => ['admin', 'superadmin', 'sales', 'marketing', 'portal'],
             'crm'             => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
+            'marketing'       => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
             'inventory'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'portal'],
             'finance'         => ['admin', 'superadmin', 'finance', 'finanzas', 'portal'],
             'logistics'       => ['admin', 'superadmin', 'finance', 'warehouse', 'logistics', 'operator', 'portal'],
             'allies'          => ['admin', 'superadmin', 'finance', 'sales', 'marketing', 'portal'],
+            'governance'      => ['admin', 'superadmin', 'portal'],
             'vendor_extranet' => ['admin', 'superadmin', 'vendor', 'purchases', 'portal'],
             'ally_extranet'   => ['admin', 'superadmin', 'ally', 'marketing', 'sales', 'portal'],
         ];
