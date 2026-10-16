@@ -431,6 +431,7 @@ class PortalStoreController extends Controller
             'footerConfig' => $footerConfig,
             'cmsMedia' => \App\Models\CmsMedia::latest()->get(),
             'cmsMediaCount' => \App\Models\CmsMedia::count(),
+            'approvedAllyCampaigns' => \App\Models\AllyCampaignDirA::with('ally')->where('status', 'active')->get(),
         ]);
     }
 
@@ -718,6 +719,21 @@ class PortalStoreController extends Controller
             $settings['background_video'] = '/uploads/sections/' . $filename;
         }
 
+        // Manejo de imagen de popup
+        if ($request->hasFile('popup_image_file')) {
+            $file = $request->file('popup_image_file');
+            $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($sectionsUploadDir, $filename);
+            $settings['popup_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->hasFile('settings.popup_image')) {
+            $file = $request->file('settings.popup_image');
+            $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($sectionsUploadDir, $filename);
+            $settings['popup_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->filled('popup_image_url')) {
+            $settings['popup_image'] = $request->input('popup_image_url');
+        }
+
         // Manejo de carrusel slides archivos
         if ($request->hasFile('carousel_slide_files')) {
             foreach ($request->file('carousel_slide_files') as $index => $file) {
@@ -809,6 +825,21 @@ class PortalStoreController extends Controller
             $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $file->move($sectionsUploadDir, $filename);
             $mergedSettings['background_video'] = '/uploads/sections/' . $filename;
+        }
+
+        // Manejo de imagen de popup
+        if ($request->hasFile('popup_image_file')) {
+            $file = $request->file('popup_image_file');
+            $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($sectionsUploadDir, $filename);
+            $mergedSettings['popup_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->hasFile('settings.popup_image')) {
+            $file = $request->file('settings.popup_image');
+            $filename = 'popup_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($sectionsUploadDir, $filename);
+            $mergedSettings['popup_image'] = '/uploads/sections/' . $filename;
+        } elseif ($request->filled('popup_image_url')) {
+            $mergedSettings['popup_image'] = $request->input('popup_image_url');
         }
 
         // Re-asignar slides

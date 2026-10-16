@@ -28,6 +28,8 @@ class StoreSectionRequest extends FormRequest
             'query_rules' => 'nullable|array',
             'background_image_file' => 'nullable|image|max:5120',
             'background_image_url' => 'nullable|string',
+            'popup_image_file' => 'nullable|image|max:5120',
+            'popup_image_url' => 'nullable|string',
         ];
     }
 }

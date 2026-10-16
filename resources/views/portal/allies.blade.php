@@ -258,6 +258,20 @@
                             <h4 class="text-sm font-bold text-slate-900">{{ $camp['title'] }}</h4>
                             <p class="text-xs text-slate-500 mt-1">{{ $camp['allyName'] }}</p>
                             <p class="text-xs text-slate-600 mt-2 bg-white p-2 rounded border border-slate-200">{{ $camp['benefit'] }}</p>
+                            @if(($camp['status'] ?? 'active') === 'pending_approval')
+                                <div class="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 uppercase">Solicitud Pendiente</span>
+                                        <span class="text-[10px] text-slate-500">Póster adjunto</span>
+                                    </div>
+                                    <form action="{{ route('portal.allies.campaign.approve', $camp['id']) }}" method="POST" class="space-y-1.5">
+                                        @csrf
+                                        <label class="block text-[10px] font-bold text-slate-700">Descuento / Beneficio Pactado:</label>
+                                        <input type="text" name="benefit" value="{{ $camp['benefit'] }}" class="w-full text-xs border border-slate-300 rounded px-2 py-1 bg-white" placeholder="Ej. 20% en coctelería o acceso preferente">
+                                        <button type="submit" class="w-full py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition">Aprobar y Habilitar para Pop-up</button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
                         <div class="mt-3 pt-2 border-t border-slate-200/80 text-[11px] text-slate-400 font-mono">
                             Vigencia: {{ $camp['startDate'] }} al {{ $camp['endDate'] }}
@@ -466,6 +480,10 @@
                     <p class="text-xs text-slate-500 font-mono mt-0.5">Token Criptográfico: {{ $selectedAlly['portalToken'] ?? 'tok_demo' }}</p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold" onclick="document.getElementById('modalNewAllyCampaign').classList.remove('hidden');" type="button">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>+ Registrar Evento / Beneficio</span>
+                    </button>
                     <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer" data-action="export-door-list-csv" data-ally-id="{{ $selectedAlly['id'] ?? 1 }}" type="button">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <span>Descargar CSV Taquilla</span>
@@ -512,6 +530,60 @@
         @csrf
         <input type="hidden" name="settlement_type" id="settlementTypeInput" value="spei_transfer">
     </form>
+
+    <!-- Modal para que el Aliado Registre un Nuevo Evento / Beneficio con Póster Oficial -->
+    <div id="modalNewAllyCampaign" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Nuevo Evento o Beneficio de Aliado</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 font-bold" onclick="document.getElementById('modalNewAllyCampaign').classList.add('hidden');">&times;</button>
+            </div>
+            <form action="{{ !empty($selectedAlly['portalToken']) ? route('portal.ally.extranet.campaign.submit', $selectedAlly['portalToken']) : '#' }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nombre del Evento, Beneficio o Servicio *</label>
+                    <input type="text" name="title" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white" placeholder="Ej. Fiesta Paradiso / 20% Spa Masajes / Suscripción Contenido">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Universo Afín *</label>
+                        <select name="universe" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-2 bg-slate-50 font-semibold">
+                            <option value="marte">Marte (Masculino)</option>
+                            <option value="venus">Venus (Femenino / Lencería)</option>
+                            <option value="tiresias">Tiresias (Afirmativo)</option>
+                            <option value="terra">Terra (Global)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Póster Oficial (Imagen) *</label>
+                        <input type="file" name="banner_image" accept="image/*" required class="w-full text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Beneficio o Descuento Propuesto *</label>
+                    <input type="text" name="benefit" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white" placeholder="Ej. 15% OFF en taquilla y cóctel de bienvenida">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Instrucciones de Canje</label>
+                    <textarea name="instructions" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-slate-50" placeholder="Ej. Presentar el voucher digital al ingresar"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Fecha Inicio</label>
+                        <input type="date" name="start_date" value="{{ date('Y-m-d') }}" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Fecha Fin</label>
+                        <input type="date" name="end_date" value="{{ date('Y-m-d', strtotime('+2 months')) }}" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-slate-50">
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" class="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-800" onclick="document.getElementById('modalNewAllyCampaign').classList.add('hidden');">Cancelar</button>
+                    <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold">Enviar Solicitud con Póster</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 {{-- SCRIPT REACTIVO OPERATIVO PARA CONVENIOS Y ALIADOS (VANILLA JS LIGERO) --}}

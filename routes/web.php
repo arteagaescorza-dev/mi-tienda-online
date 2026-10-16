@@ -108,6 +108,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 
 	// Hub 7: Convenios & Aliados
 	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');
+	Route::post('/admin/convenios/campanas/{id}/aprobar', [PortalAlliesController::class, 'approveCampaign'])->name('portal.allies.campaign.approve');
 	Route::post('/admin/convenios/aliados/{ally}/liquidar', [PortalAlliesController::class, 'executeSettlement'])->name('portal.allies.settlement.execute');
 	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv');
 });
@@ -121,6 +122,7 @@ Route::middleware(['auth', 'entity.isolation:vendor'])->group(function () {
 });
 
 Route::get('/portal/aliado/{token?}', [PortalAlliesController::class, 'partnerPortal'])->name('portal.ally.extranet');
+Route::post('/portal/aliado/{token}/campanas', [PortalAlliesController::class, 'submitCampaign'])->name('portal.ally.extranet.campaign.submit');
 Route::post('/portal/aliado/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.ally.extranet.validate');
 Route::get('/portal/aliado/{token}/export-csv', [PortalAlliesController::class, 'exportDoorListCsvByToken'])->name('portal.ally.extranet.export.csv');
 

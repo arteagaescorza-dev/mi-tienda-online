@@ -3158,6 +3158,9 @@
       panel.style.display = match ? 'block' : 'none';
     });
     renderAccountSheetContent();
+    if (tabKey === 'discounts') {
+      fetchAccountDiscounts();
+    }
     if (tabKey === 'settings') {
       if (typeof renderAccountPushPreferences === 'function') {
         renderAccountPushPreferences();
@@ -4021,6 +4024,28 @@
     showToastNotification('Dirección eliminada.');
   }
 
+  let REAL_CUSTOMER_DISCOUNTS = [];
+
+  async function fetchAccountDiscounts() {
+    let session = {};
+    try { session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}'); } catch(e){}
+    const email = session.email || '';
+    const phone = session.phone || session.whatsapp || '';
+    if (!email && !phone) return;
+
+    try {
+      const res = await fetch(`/api/v1/store/account/discounts?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`);
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.discounts)) {
+        REAL_CUSTOMER_DISCOUNTS = data.discounts;
+        renderAccountDiscounts();
+      }
+    } catch(err) {
+      console.warn('[Discounts] Error al sincronizar descuentos del cliente:', err);
+    }
+  }
+  window.fetchAccountDiscounts = fetchAccountDiscounts;
+
   function renderAccountDiscounts() {
     const listEl = document.getElementById('accountDiscountsList');
     const kpiSavedEl = document.getElementById('kpiTotalDiscountsSaved');
@@ -4099,11 +4124,17 @@
       `;
     }
 
+    let allDiscounts = [...PARTNER_DISCOUNTS];
+    if (REAL_CUSTOMER_DISCOUNTS && REAL_CUSTOMER_DISCOUNTS.length > 0) {
+      const existingCodes = new Set(REAL_CUSTOMER_DISCOUNTS.map(d => d.code));
+      allDiscounts = [...REAL_CUSTOMER_DISCOUNTS, ...PARTNER_DISCOUNTS.filter(d => !existingCodes.has(d.code))];
+    }
+
     let totalSaved = 0;
     let activeCount = 0;
     let redeemedCount = 0;
 
-    PARTNER_DISCOUNTS.forEach(d => {
+    allDiscounts.forEach(d => {
       if (d.redeemed) {
         totalSaved += (d.savedAmount || 0);
         redeemedCount++;
@@ -4118,7 +4149,7 @@
     const countAllEl = document.getElementById('countDiscountsAll');
     const countActiveEl = document.getElementById('countDiscountsActive');
     const countRedeemedEl = document.getElementById('countDiscountsRedeemed');
-    if (countAllEl) countAllEl.textContent = PARTNER_DISCOUNTS.length;
+    if (countAllEl) countAllEl.textContent = allDiscounts.length;
     if (countActiveEl) countActiveEl.textContent = activeCount;
     if (countRedeemedEl) countRedeemedEl.textContent = redeemedCount;
 
@@ -4128,7 +4159,7 @@
       btn.classList.toggle('active', btn.dataset.filter === accountState.discountsFilter);
     });
 
-    const filteredDiscounts = PARTNER_DISCOUNTS.filter(d => {
+    const filteredDiscounts = allDiscounts.filter(d => {
       if (accountState.discountsFilter === 'active') return !d.redeemed;
       if (accountState.discountsFilter === 'redeemed') return d.redeemed;
       return true;
@@ -6085,6 +6116,118 @@
     window.renderAccountPushPreferences = renderAccountPushPreferences;
     window.sendSimulatedPush = sendSimulatedPush;
     window.logoutBuyerSession = logoutBuyerSession;
+
+    window.closeStorePopup = function(secId) {
+      const m = document.getElementById('promoModal_' + secId);
+      if (m) m.style.display = 'none';
+    };
+
+    window.handleStorePopupSubmit = async function(event, secId) {
+      event.preventDefault();
+      const form = document.getElementById('popupSubscribeForm_' + secId);
+      const submitBtn = document.getElementById('popupSubmitBtn_' + secId);
+      if (!form) return;
+
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Procesando...';
+      }
+
+      try {
+        const res = await fetch('/api/v1/marketing/popup/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showToastNotification(data.message || 'Error al procesar suscripción.');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Reintentar';
+          }
+          return;
+        }
+
+        // 1. Guardar o actualizar sesión de usuario con 2FA WhatsApp en localStorage
+        let session = {};
+        try {
+          session = JSON.parse(localStorage.getItem('multiverse_customer_session') || '{}');
+        } catch(e) {}
+
+        session.name = data.lead?.name || payload.name;
+        session.email = data.lead?.email || payload.email;
+        session.phone = data.lead?.phone || payload.whatsapp;
+        session.whatsapp = payload.whatsapp;
+        session.twoFactorEnrolled = true;
+        session.twoFactorMethod = 'whatsapp';
+        session.leadId = data.lead?.id;
+        localStorage.setItem('multiverse_customer_session', JSON.stringify(session));
+
+        // 2. Si es preventa, redireccionar de inmediato
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+          return;
+        }
+
+        // 3. Si se generó código de cupón / voucher
+        if (data.voucher_code) {
+          const formContainer = document.getElementById('popupFormContainer_' + secId);
+          const successContainer = document.getElementById('popupSuccessContainer_' + secId);
+          const voucherDisplay = document.getElementById('popupVoucherDisplay_' + secId);
+          const successMsg = document.getElementById('popupSuccessMsg_' + secId);
+          const copyBtn = document.getElementById('popupCopyBtn_' + secId);
+          const applyBtn = document.getElementById('popupApplyBtn_' + secId);
+
+          if (formContainer) formContainer.style.display = 'none';
+          if (successContainer) successContainer.style.display = 'flex';
+          if (voucherDisplay) voucherDisplay.textContent = data.voucher_code;
+          if (successMsg) successMsg.textContent = data.discount_message || 'Tu código único ha sido generado y guardado en tu cuenta.';
+
+          if (copyBtn) {
+            copyBtn.onclick = function() {
+              navigator.clipboard.writeText(data.voucher_code);
+              copyBtn.textContent = 'Copiado';
+              setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 2000);
+            };
+          }
+
+          if (applyBtn) {
+            applyBtn.onclick = function() {
+              if (typeof applyDiscountCoupon === 'function') {
+                applyDiscountCoupon(data.voucher_code);
+              }
+              window.closeStorePopup(secId);
+            };
+          }
+
+          // Agregar a descuentos del cliente y sincronizar
+          if (typeof fetchAccountDiscounts === 'function') {
+            fetchAccountDiscounts();
+          }
+        } else {
+          // Newsletter u otro sin cupón
+          showToastNotification(data.discount_message || 'Gracias por suscribirte al newsletter.');
+          window.closeStorePopup(secId);
+        }
+      } catch (err) {
+        console.error('[Popup Subscription] Error:', err);
+        showToastNotification('Ocurrió un error al procesar la solicitud.');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Reintentar';
+        }
+      }
+    };
   }
 
   if (document.readyState === 'loading') {

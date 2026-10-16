@@ -31,7 +31,7 @@ class LeadController extends Controller
     {
         Gate::authorize('manage-marketing');
 
-        $data = 
+        $data = $request->validated();
 
         $data['status'] = $data['status'] ?? Lead::STATUS_NEW;
 
@@ -50,7 +50,7 @@ class LeadController extends Controller
     {
         Gate::authorize('manage-marketing');
 
-        $data = 
+        $data = $request->validated();
 
         $lead->status = $data['status'];
         $lead->save();

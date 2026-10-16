@@ -821,25 +821,134 @@
             @endif
           </section>
         @elseif(in_array($sec->type, ['promo_modal', 'pop_up']))
-          <!-- Modal Promocional CMS (TASK-H2-12) -->
-          <div id="promoModal_{{ $sec->id }}" class="promo-modal-backdrop" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;">
-            <div style="background: #ffffff; border-radius: 12px; max-width: 480px; width: 100%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative; border: 1px solid #e4e4e7;">
-              <button type="button" onclick="document.getElementById('promoModal_{{ $sec->id }}').style.display='none'" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #71717a; line-height: 1;">&times;</button>
-              @if(!empty($sec->badge))
-                <div style="font-size: 0.7rem; font-weight: 700; color: #4f46e5; text-transform: uppercase; margin-bottom: 6px;">{{ $sec->badge }}</div>
+          @php
+            $st = $sec->settings ?? [];
+            if (is_string($st)) {
+              $st = json_decode($st, true) ?? [];
+            }
+            $popupAction = $st['popup_action'] ?? 'ally_discount';
+            $allyCampaignId = $st['popup_ally_campaign_id'] ?? null;
+            $allyCampaign = null;
+            if ($popupAction === 'ally_discount' && $allyCampaignId) {
+              $allyCampaign = \App\Models\AllyCampaignDirA::with('ally')->find($allyCampaignId);
+            }
+            
+            $allyImgSource = $st['popup_ally_image_source'] ?? 'ally_poster';
+            $bgImage = '';
+            if ($popupAction === 'ally_discount' && $allyImgSource === 'ally_poster' && $allyCampaign && !empty($allyCampaign->banner_image)) {
+              $bgImage = $allyCampaign->banner_image;
+            } else {
+              $bgImage = $st['popup_image'] ?? ($st['popup_image_url'] ?? ($sec->image_url ?? ''));
+            }
+            
+            $focalPoint = $st['popup_image_focal_point'] ?? 'center center';
+            $enableGrad = !isset($st['popup_enable_gradient']) || $st['popup_enable_gradient'] == '1' || $st['popup_enable_gradient'] === 1 || $st['popup_enable_gradient'] === true;
+            $gradStart = $st['popup_gradient_color_start'] ?? '#0f172a';
+            $gradEnd = $st['popup_gradient_color_end'] ?? '#000000';
+            $gradDir = $st['popup_gradient_direction'] ?? 'to bottom';
+            $opStart = ($st['popup_gradient_opacity_start'] ?? 85) / 100;
+            $opEnd = ($st['popup_gradient_opacity_end'] ?? 95) / 100;
+            
+            $hexToRgb = function($hex) {
+              $hex = str_replace('#', '', $hex);
+              if (strlen($hex) == 3) {
+                $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+              }
+              $r = hexdec(substr($hex, 0, 2));
+              $g = hexdec(substr($hex, 2, 2));
+              $b = hexdec(substr($hex, 4, 2));
+              return "$r, $g, $b";
+            };
+            $rgbStart = $hexToRgb($gradStart);
+            $rgbEnd = $hexToRgb($gradEnd);
+            $gradientCss = "linear-gradient({$gradDir}, rgba({$rgbStart}, {$opStart}) 0%, rgba({$rgbEnd}, {$opEnd}) 100%)";
+            
+            $closeBehavior = $st['popup_close_behavior'] ?? 'outside';
+            $delaySeconds = (int)($st['popup_delay_seconds'] ?? 3);
+            $frequency = $st['popup_frequency'] ?? 'once_per_session';
+            $ctaText = $st['popup_cta_text'] ?? ($popupAction === 'presale' ? 'Acceder a la Preventa' : ($popupAction === 'newsletter' ? 'Suscribirme' : 'Obtener mi Descuento'));
+            $displayTitle = !empty($sec->title) ? $sec->title : ($allyCampaign->title ?? 'Beneficio Exclusivo');
+            $displaySubtitle = !empty($sec->subtitle) ? $sec->subtitle : ($allyCampaign->benefit ?? 'Regístrate para recibir tu código único y guardarlo en tu cuenta.');
+            $displayBadge = !empty($sec->badge) ? $sec->badge : ($allyCampaign ? 'ALIANZA CON ' . strtoupper($allyCampaign->ally->name ?? 'OFICIAL') : 'BENEFICIO EXCLUSIVO');
+          @endphp
+
+          <!-- Modal Pop-Up Full Background CMS (Hub 2 / Hub 7 / Hub 3) -->
+          <div id="promoModal_{{ $sec->id }}" class="promo-modal-backdrop" data-close-behavior="{{ $closeBehavior }}" data-delay="{{ $delaySeconds }}" data-frequency="{{ $frequency }}" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 16px;">
+            <div class="popup-modal-card" style="position: relative; width: 100%; max-width: 440px; min-height: 480px; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; flex-direction: column; justify-content: flex-end; color: #ffffff; background-color: #0f172a;">
+              <!-- Background Image -->
+              @if(!empty($bgImage))
+                <div style="position: absolute; inset: 0; background-image: url('{{ asset($bgImage) }}'); background-size: cover; background-repeat: no-repeat; background-position: {{ $focalPoint }}; z-index: 1;"></div>
               @endif
-              <h3 style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: #09090b; margin: 0 0 8px;">{{ $sec->title }}</h3>
-              @if(!empty($sec->subtitle))
-                <p style="font-size: 0.85rem; color: #71717a; margin-bottom: 16px;">{{ $sec->subtitle }}</p>
+              <!-- Gradient Overlay -->
+              @if($enableGrad)
+                <div style="position: absolute; inset: 0; background: {{ $gradientCss }}; z-index: 2;"></div>
               @endif
-              @if(!empty($sec->custom_html))
-                <div style="margin-bottom: 16px;">{!! $sec->custom_html !!}</div>
-              @endif
-              <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                <button type="button" onclick="document.getElementById('promoModal_{{ $sec->id }}').style.display='none'" class="btn-hero-secondary" style="padding: 8px 16px; font-size: 0.8rem;">CERRAR</button>
-                @if(!empty($sec->settings['cta_url']))
-                  <a href="{{ $sec->settings['cta_url'] }}" class="btn-hero-primary" style="padding: 8px 16px; font-size: 0.8rem; text-decoration: none;">{{ $sec->settings['cta_text'] ?? 'VER PROMOCIÓN' }}</a>
+              
+              <!-- Close Button -->
+              <button type="button" onclick="window.closeStorePopup('{{ $sec->id }}')" style="position: absolute; top: 14px; right: 14px; z-index: 10; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; color: #ffffff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: background 0.2s;">&times;</button>
+              
+              <!-- Content Floating on top -->
+              <div style="position: relative; z-index: 5; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+                @if(!empty($displayBadge))
+                  <span style="align-self: flex-start; padding: 3px 10px; border-radius: 9999px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(99, 102, 241, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #ffffff;">
+                    {{ $displayBadge }}
+                  </span>
                 @endif
+                
+                <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                  {{ $displayTitle }}
+                </h3>
+                
+                @if(!empty($displaySubtitle))
+                  <p style="margin: 0; font-size: 0.8rem; color: #e2e8f0; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">
+                    {{ $displaySubtitle }}
+                  </p>
+                @endif
+                
+                <!-- Form Container -->
+                <div id="popupFormContainer_{{ $sec->id }}" style="margin-top: 6px;">
+                  <form id="popupSubscribeForm_{{ $sec->id }}" onsubmit="window.handleStorePopupSubmit(event, '{{ $sec->id }}')" style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="hidden" name="section_id" value="{{ $sec->id }}">
+                    <input type="hidden" name="popup_action" value="{{ $popupAction }}">
+                    <input type="hidden" name="ally_campaign_id" value="{{ $allyCampaignId ?? '' }}">
+                    <input type="hidden" name="universe" value="{{ $activeUniverse ?? 'marte' }}">
+                    
+                    <input type="text" name="name" required placeholder="Tu Nombre Completo" style="width: 100%; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.3); color: #0f172a; outline: none; box-sizing: border-box;">
+                    
+                    <div style="display: flex; gap: 6px;">
+                      <span style="padding: 8px 10px; font-size: 0.75rem; font-weight: 700; background: #059669; color: #ffffff; border-radius: 8px; display: flex; align-items: center; gap: 4px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 6.46 17.5 2 12.04 2M12.05 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.69 12.05 3.69C16.6 3.69 20.28 7.37 20.28 11.92C20.28 16.46 16.6 20.15 12.05 20.15Z"/></svg>
+                        +52 (2FA)
+                      </span>
+                      <input type="tel" name="whatsapp" required pattern="[0-9]{10}" maxlength="10" placeholder="WhatsApp (10 dígitos)" style="flex: 1; min-width: 0; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.3); color: #0f172a; outline: none; box-sizing: border-box;">
+                    </div>
+                    
+                    <input type="email" name="email" required placeholder="Correo Electrónico" style="width: 100%; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.3); color: #0f172a; outline: none; box-sizing: border-box;">
+                    
+                    <button type="submit" id="popupSubmitBtn_{{ $sec->id }}" style="width: 100%; padding: 10px; background: #4f46e5; color: #ffffff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);">
+                      {{ $ctaText }}
+                    </button>
+                    
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.65rem; color: #cbd5e1; text-align: center; margin-top: 2px;">
+                      <svg width="10" height="10" fill="none" stroke="#34d399" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      <span>Código único de un solo uso &bull; Cuenta creada con 2FA WhatsApp</span>
+                    </div>
+                  </form>
+                </div>
+                
+                <!-- Success State Container (Hidden initially) -->
+                <div id="popupSuccessContainer_{{ $sec->id }}" style="display: none; flex-direction: column; gap: 10px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 16px; text-align: center;">
+                  <div style="font-size: 0.72rem; font-weight: 800; color: #34d399; text-transform: uppercase;">Cuenta Creada & Beneficio Desbloqueado</div>
+                  <div id="popupVoucherDisplay_{{ $sec->id }}" style="font-family: monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.1em; color: #ffffff; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; border: 1px dashed #6366f1;">
+                    ------
+                  </div>
+                  <div id="popupSuccessMsg_{{ $sec->id }}" style="font-size: 0.75rem; color: #e2e8f0; line-height: 1.35;"></div>
+                  <div style="display: flex; gap: 6px; margin-top: 4px;">
+                    <button type="button" id="popupCopyBtn_{{ $sec->id }}" style="flex: 1; padding: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Copiar</button>
+                    <button type="button" id="popupApplyBtn_{{ $sec->id }}" style="flex: 1; padding: 8px; background: #059669; border: none; color: #ffffff; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Aplicar al Carrito</button>
+                  </div>
+                  <button type="button" onclick="window.closeStorePopup('{{ $sec->id }}')" style="background: none; border: none; color: #94a3b8; font-size: 0.7rem; cursor: pointer; text-decoration: underline; margin-top: 2px;">Cerrar ventana</button>
+                </div>
               </div>
             </div>
             @if(!empty($sec->custom_css))
@@ -851,13 +960,39 @@
           </div>
           <script>
             document.addEventListener('DOMContentLoaded', function() {
-              var modalKey = 'promo_seen_{{ $sec->id }}';
-              if (!sessionStorage.getItem(modalKey)) {
+              var modalId = 'promoModal_{{ $sec->id }}';
+              var m = document.getElementById(modalId);
+              if (!m) return;
+              
+              var freq = m.dataset.frequency || 'once_per_session';
+              var modalKey = 'store_popup_seen_{{ $sec->id }}';
+              var shouldShow = true;
+              
+              if (freq === 'once_per_session' && sessionStorage.getItem(modalKey)) {
+                shouldShow = false;
+              } else if (freq === 'once_per_day') {
+                var lastSeen = localStorage.getItem(modalKey);
+                if (lastSeen && (Date.now() - parseInt(lastSeen, 10)) < 86400000) {
+                  shouldShow = false;
+                }
+              }
+              
+              if (shouldShow) {
+                var delay = (parseInt(m.dataset.delay, 10) || 3) * 1000;
                 setTimeout(function() {
-                  var m = document.getElementById('promoModal_{{ $sec->id }}');
-                  if (m) m.style.display = 'flex';
-                }, 1200);
-                sessionStorage.setItem(modalKey, '1');
+                  m.style.display = 'flex';
+                  if (freq === 'once_per_session') sessionStorage.setItem(modalKey, '1');
+                  if (freq === 'once_per_day') localStorage.setItem(modalKey, Date.now().toString());
+                }, delay);
+              }
+              
+              var closeBehavior = m.dataset.closeBehavior || 'outside';
+              if (closeBehavior === 'outside') {
+                m.addEventListener('click', function(ev) {
+                  if (ev.target === m) {
+                    m.style.display = 'none';
+                  }
+                });
               }
             });
           </script>

@@ -189,6 +189,7 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::post('/campaigns/{id}/toggle', [MarketingApiController::class, 'toggleCampaign']);
         Route::post('/lead-magnet/capture', [MarketingApiController::class, 'captureLead']);
         Route::post('/chatbot/message', [MarketingApiController::class, 'sendChatbotMessage']);
+        Route::post('/popup/subscribe', [MarketingApiController::class, 'subscribePopup']);
     });
 
     // 4. FINANZAS & CONCILIACIÓN (HUB 5) - PROTEGIDO CON PRIVACIDAD FINANCIERA (TASK-RBAC-03)
@@ -290,6 +291,7 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         // Portal del Comprador, Tracking Courier y Suscripciones MRR (Slice 1.5 / TASK-STR-04 / TASK-STR-05)
         Route::get('/account/orders', [StorefrontApiController::class, 'orders']);
         Route::get('/account/tracking/{folio}', [StorefrontApiController::class, 'tracking']);
+        Route::get('/account/discounts', [MarketingApiController::class, 'getCustomerDiscounts']);
         Route::get('/account/subscriptions', [StorefrontApiController::class, 'subscriptions']);
         Route::post('/account/subscriptions/{id}/pause', [StorefrontApiController::class, 'pauseSubscription']);
         Route::post('/account/subscriptions/{id}/resume', [StorefrontApiController::class, 'resumeSubscription']);

@@ -21,7 +21,7 @@ class PortalAlliesController extends Controller
     /**
      * Display the Allies Directory, Campaigns Dir A, Attribution Dir B and Clearing House.
      */
-    public function index(PortalAlliesIndexRequest $request)
+    public function index(Request $request)
     {
         Gate::authorize('manage-b2b');
 
@@ -300,7 +300,7 @@ class PortalAlliesController extends Controller
     {
         Gate::authorize('manage-b2b');
 
-        $validated = 
+        $validated = $request->validated();
 
         $type = $validated['settlement_type'] ?? 'spei_transfer';
 
@@ -414,5 +414,91 @@ class PortalAlliesController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Submit an event or benefit campaign from the Ally Extranet with official poster.
+     */
+    public function submitCampaign(Request $request, $token)
+    {
+        $ally = Ally::where('portal_token', $token)->firstOrFail();
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:150',
+            'benefit' => 'required|string|max:200',
+            'instructions' => 'nullable|string',
+            'universe' => 'nullable|string|max:30',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'banner_image' => 'nullable|image|max:5120',
+        ]);
+
+        $posterUrl = null;
+        if ($request->hasFile('banner_image')) {
+            $file = $request->file('banner_image');
+            $fileName = time() . '_' . uniqid() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
+            $destPath = public_path('uploads/allies_posters');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $fileName);
+            $posterUrl = '/uploads/allies_posters/' . $fileName;
+        }
+
+        $slug = \Illuminate\Support\Str::slug($validated['title']) . '-' . rand(100, 999);
+
+        $campaign = AllyCampaignDirA::create([
+            'ally_id' => $ally->id,
+            'title' => $validated['title'],
+            'slug' => $slug,
+            'universe' => $validated['universe'] ?? $ally->universe ?? 'marte',
+            'benefit' => $validated['benefit'],
+            'instructions' => $validated['instructions'] ?? 'Presentar voucher oficial en taquilla o acceso digital',
+            'display_format' => 'popup_modal',
+            'status' => 'pending_approval',
+            'start_date' => $validated['start_date'] ?? now(),
+            'end_date' => $validated['end_date'] ?? now()->addMonths(2),
+            'banner_image' => $posterUrl ?? '/uploads/allies_posters/default_poster.webp',
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Evento y póster oficial enviados a revisión con Marketing exitosamente.',
+                'campaign' => $campaign,
+            ]);
+        }
+
+        return back()->with('success', 'Evento y póster oficial enviados a revisión con Marketing exitosamente.');
+    }
+
+    /**
+     * Marketing approves an ally campaign and activates it for pop-ups.
+     */
+    public function approveCampaign(Request $request, $id)
+    {
+        Gate::authorize('manage-b2b');
+
+        $campaign = AllyCampaignDirA::findOrFail($id);
+
+        $validated = $request->validate([
+            'benefit' => 'nullable|string|max:200',
+            'status' => 'nullable|string|in:active,ended,pending_approval',
+        ]);
+
+        $campaign->update([
+            'status' => $validated['status'] ?? 'active',
+            'benefit' => !empty($validated['benefit']) ? $validated['benefit'] : $campaign->benefit,
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Campaña de aliado aprobada y activada para pop-ups de tienda.',
+                'campaign' => $campaign,
+            ]);
+        }
+
+        return back()->with('success', "Campaña '{$campaign->title}' aprobada y disponible para el creador de pop-ups en Hub 2.");
     }
 }

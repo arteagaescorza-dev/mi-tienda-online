@@ -23,4 +23,9 @@ class Coupon extends Model
         'is_active' => 'boolean',
         'expires_at' => 'datetime',
     ];
+
+    public function getDiscountAmountAttribute(): float
+    {
+        return (float) ($this->discount_value ?? 0);
+    }
 }

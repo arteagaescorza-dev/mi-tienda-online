@@ -20,6 +20,11 @@ class LeadInteraction extends Model
         'created_at' => 'datetime',
     ];
 
+    public function getMetadataAttribute(): array
+    {
+        return is_array($this->payload) ? $this->payload : [];
+    }
+
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class);

@@ -2371,22 +2371,203 @@ $curatedGoogleFonts = [
                             </div>
                         </div>
 
-                        <!-- 3. MODO POP UP -->
+                        <!-- 3. MODO POP UP FULLSTACK (Hub 2 / Hub 7 / Hub 3 / Meta CAPI) -->
                         <div id="createPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
                             <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Pop-up</span>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    Configurador de Pop-up y Captura de Leads (CAPI Score 9.8)
+                                </span>
                             </div>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Imagen del Modal (Opcional)</label>
-                                    <input type="file" name="settings[popup_image]" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+
+                            <!-- Selector de Accion Principal -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                <label class="block font-bold text-slate-800 text-xs">Acción Principal del Pop-up</label>
+                                <select name="settings[popup_action]" id="createPopupAction" class="w-full px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg bg-slate-50 focus:bg-white" onchange="window.handlePopupActionChange('create')">
+                                    <option value="ally_discount">2.1 Suscripción con Código de Descuento de Aliado (Convenio Hub 7)</option>
+                                    <option value="newsletter">2.2 Suscripción para Actualizaciones de Newsletter (Sin Cupón)</option>
+                                    <option value="store_discount">2.3 Suscripción para Obtener Cupón Directo de Tienda</option>
+                                    <option value="presale">2.4 Acceder a una Preventa Exclusiva (Redirección Inmediata)</option>
+                                </select>
+                                <span class="block text-[10px] text-slate-500">
+                                    Todos los registros crean una cuenta de comprador en Hub 3 con verificación 2FA por WhatsApp y sincronizan eventos con Meta CAPI.
+                                </span>
+                            </div>
+
+                            <!-- Sub-bloque 2.1: Campanas de Aliados Aprobadas en Hub 7 -->
+                            <div id="createPopupAllyBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                                    <label class="block font-bold text-slate-800 text-xs">Evento o Beneficio del Aliado (Hub 7)</label>
+                                    <a href="/admin/convenios" target="_blank" class="text-[10px] font-bold text-indigo-600 hover:underline">Ver Alianzas en Hub 7 &rarr;</a>
                                 </div>
                                 <div>
-                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Comportamiento de Cierre</label>
-                                    <select name="settings[popup_close_behavior]" id="createPopupCloseBehavior" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
-                                        <option value="outside">Permitir cerrar al hacer clic fuera (Overlay)</option>
-                                        <option value="button">Requerir acción (Solo Botón Cerrar)</option>
+                                    <select name="settings[popup_ally_campaign_id]" id="createPopupAllyCampaignId" class="w-full px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg" onchange="window.handlePopupAllyCampaignChange('create')">
+                                        @if(isset($approvedAllyCampaigns) && count($approvedAllyCampaigns) > 0)
+                                            <option value="">-- Seleccionar Campaña Aprobada --</option>
+                                            @foreach($approvedAllyCampaigns as $camp)
+                                                <option value="{{ $camp->id }}" data-banner="{{ $camp->banner_image }}" data-title="{{ $camp->title }}" data-benefit="{{ $camp->benefit }}" data-ally="{{ $camp->ally->name ?? 'Aliado' }}">
+                                                    {{ $camp->ally->name ?? 'Aliado' }} - {{ $camp->title }} ({{ $camp->benefit }})
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            <option value="">(No hay eventos aprobados en Hub 7 - Crea uno en Convenios)</option>
+                                        @endif
                                     </select>
+                                </div>
+
+                                <!-- Conmutador entre Poster Oficial del Aliado o Cargar Imagen -->
+                                <div class="pt-1">
+                                    <label class="block font-bold text-slate-700 text-[11px] mb-1.5">Origen de la Imagen del Pop-up</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 text-xs font-semibold text-slate-700">
+                                            <input type="radio" name="settings[popup_ally_image_source]" value="ally_poster" checked class="text-indigo-600 focus:ring-indigo-500" onchange="window.handlePopupImageSourceToggle('create')">
+                                            <span>Póster Oficial del Aliado</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 text-xs font-semibold text-slate-700">
+                                            <input type="radio" name="settings[popup_ally_image_source]" value="custom" class="text-indigo-600 focus:ring-indigo-500" onchange="window.handlePopupImageSourceToggle('create')">
+                                            <span>Cargar Imagen en Creador</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-bloque 2.3: Configuracion de Cupon de Tienda -->
+                            <div id="createPopupStoreDiscountBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3 hidden">
+                                <label class="block font-bold text-slate-800 text-xs">Parámetros del Descuento de Tienda (Cupón Único)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Monto / Valor</label>
+                                        <input type="number" name="settings[popup_store_discount_value]" id="createPopupStoreDiscountValue" value="15" min="1" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold" oninput="window.renderPopUpLivePreview('create')">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Tipo de Descuento</label>
+                                        <select name="settings[popup_store_discount_type]" id="createPopupStoreDiscountType" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold" onchange="window.renderPopUpLivePreview('create')">
+                                            <option value="percent">Porcentaje (%)</option>
+                                            <option value="fixed">Monto Fijo ($ MXN)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Compra Mínima ($ MXN)</label>
+                                        <input type="number" name="settings[popup_min_order]" id="createPopupMinOrder" value="499" min="0" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Días de Vigencia</label>
+                                        <input type="number" name="settings[popup_days_valid]" id="createPopupDaysValid" value="30" min="1" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-bloque 2.4: URL de Preventa -->
+                            <div id="createPopupPresaleBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-2 hidden">
+                                <label class="block font-bold text-slate-800 text-xs">URL del Producto o Colección en Preventa</label>
+                                <input type="text" name="settings[popup_presale_url]" id="createPopupPresaleUrl" placeholder="/producto/binder-pro-v2" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono">
+                                <span class="block text-[10px] text-slate-500">Al completar el formulario, el usuario será redirigido inmediatamente a este destino con sus datos guardados en Hub 3.</span>
+                            </div>
+
+                            <!-- Imagen y Matriz de Punto Focal 3x3 -->
+                            <div id="createPopupCustomImageBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo del Pop-up</label>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
+                                    <input type="file" name="popup_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block text-[11px] font-semibold text-slate-600">O Ingresar URL / Gestor Multimedia</label>
+                                        <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal('createPopupImageUrl')">Seleccionar del Gestor</button>
+                                    </div>
+                                    <input type="text" name="settings[popup_image_url]" id="createPopupImageUrl" placeholder="https://ejemplo.com/poster-evento.webp" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" oninput="window.renderPopUpLivePreview('create')">
+                                </div>
+
+                                <!-- Matriz 3x3 de Punto Focal -->
+                                <div class="pt-1">
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Matriz de Punto Focal de la Imagen</label>
+                                    <input type="hidden" name="settings[popup_image_focal_point]" id="inpCreatePopupFocalPoint" value="center center">
+                                    <div id="createPopupFocalMatrix" class="grid grid-cols-3 gap-1 w-36 mx-auto p-1 bg-slate-100 border border-slate-200 rounded-lg">
+                                        <button type="button" data-point="top left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'top left', this)">TL</button>
+                                        <button type="button" data-point="top center" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'top center', this)">TC</button>
+                                        <button type="button" data-point="top right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'top right', this)">TR</button>
+                                        <button type="button" data-point="center left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'center left', this)">CL</button>
+                                        <button type="button" data-point="center center" class="h-7 text-[10px] font-bold rounded border border-indigo-600 bg-indigo-600 text-white transition" onclick="window.setPopupFocalPoint('create', 'center center', this)">CC</button>
+                                        <button type="button" data-point="center right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'center right', this)">CR</button>
+                                        <button type="button" data-point="bottom left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'bottom left', this)">BL</button>
+                                        <button type="button" data-point="bottom center" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'bottom center', this)">BC</button>
+                                        <button type="button" data-point="bottom right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'bottom right', this)">BR</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Capa de Degradado Overlay para Pop-up -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="settings[popup_enable_gradient]" id="createPopupEnableGradient" value="1" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.renderPopUpLivePreview('create')">
+                                    <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
+                                </label>
+
+                                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
+                                        <div class="flex items-center gap-1.5 mb-2">
+                                            <input type="color" id="createPopupGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createPopupGradColorStart').value = this.value; window.renderPopUpLivePreview('create')">
+                                            <input type="text" name="settings[popup_gradient_color_start]" id="createPopupGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createPopupGradColorStartPicker').value = this.value; window.renderPopUpLivePreview('create')">
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="range" name="settings[popup_gradient_opacity_start]" id="createPopupGradOpacityStart" min="0" max="100" value="85" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createPopupGradOpacityStartVal').textContent = this.value + '%'; window.renderPopUpLivePreview('create')">
+                                            <span id="createPopupGradOpacityStartVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">85%</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
+                                        <div class="flex items-center gap-1.5 mb-2">
+                                            <input type="color" id="createPopupGradColorEndPicker" value="#000000" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createPopupGradColorEnd').value = this.value; window.renderPopUpLivePreview('create')">
+                                            <input type="text" name="settings[popup_gradient_color_end]" id="createPopupGradColorEnd" value="#000000" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createPopupGradColorEndPicker').value = this.value; window.renderPopUpLivePreview('create')">
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="range" name="settings[popup_gradient_opacity_end]" id="createPopupGradOpacityEnd" min="0" max="100" value="95" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('createPopupGradOpacityEndVal').textContent = this.value + '%'; window.renderPopUpLivePreview('create')">
+                                            <span id="createPopupGradOpacityEndVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">95%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección del Degradado</label>
+                                    <select name="settings[popup_gradient_direction]" id="createPopupGradDir" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg" onchange="window.renderPopUpLivePreview('create')">
+                                        <option value="to bottom">De Arriba hacia Abajo (Vertical Standard)</option>
+                                        <option value="to top">De Abajo hacia Arriba</option>
+                                        <option value="to right">De Izquierda a Derecha</option>
+                                        <option value="to left">De Derecha a Izquierda</option>
+                                        <option value="to bottom right">Diagonal (Superior Izq a Inferior Der)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Boton CTA y Comportamiento -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Texto del Botón de Suscripción (CTA)</label>
+                                    <input type="text" name="settings[popup_cta_text]" id="createPopupCtaText" placeholder="Ej: Obtener mi Descuento Único" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold" oninput="window.renderPopUpLivePreview('create')">
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1 text-[11px]">Comportamiento de Cierre</label>
+                                        <select name="settings[popup_close_behavior]" id="createPopupCloseBehavior" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                            <option value="outside">Permitir cerrar clic fuera (Overlay)</option>
+                                            <option value="button">Solo botón cerrar (&times;)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1 text-[11px]">Retardo al Cargar (Seg)</label>
+                                        <input type="number" name="settings[popup_delay_seconds]" id="createPopupDelaySeconds" value="3" min="0" max="60" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1 text-[11px]">Frecuencia</label>
+                                        <select name="settings[popup_frequency]" id="createPopupFrequency" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                            <option value="once_per_session">Una vez por sesión</option>
+                                            <option value="once_per_day">Una vez al día</option>
+                                            <option value="always">Cada recarga (Testing)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2522,18 +2703,42 @@ $curatedGoogleFonts = [
                             <!-- 2. Carrusel Preview -->
                             <div id="previewCarouselArea" class="hidden w-full h-[320px] min-h-[320px] bg-slate-900 relative overflow-hidden"></div>
 
-                            <!-- 3. Pop-up Preview -->
-                            <div id="previewPopUpArea" class="hidden w-full min-h-[400px] bg-slate-800/40 relative flex items-center justify-center p-4">
-                                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform scale-95 transition-transform">
-                                    <div class="h-40 bg-slate-100 border-b border-slate-100 w-full flex items-center justify-center text-slate-400 text-xs relative">
-                                        <svg class="w-8 h-8 text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        <button class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 bg-white/80 rounded-full p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                                    </div>
-                                    <div class="p-6 text-center">
-                                        <h2 class="preview-common-title text-xl font-bold text-slate-900 mb-2 leading-tight"></h2>
-                                        <p class="preview-common-subtitle text-sm text-slate-500 mb-6 leading-relaxed"></p>
-                                        <button class="w-full py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm">Acción Principal</button>
-                                        <button class="w-full py-2 mt-2 text-slate-400 text-xs font-semibold hover:text-slate-600 transition">Cerrar / No gracias</button>
+                            <!-- 3. Pop-up Preview (Full Image + Gradient Overlay + Floating Content) -->
+                            <div id="previewPopUpArea" class="hidden w-full min-h-[500px] bg-slate-900/60 backdrop-blur-xs relative flex items-center justify-center p-4">
+                                <div id="createPopupCardPreview" class="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col justify-end p-5 min-h-[460px] text-white bg-slate-900 transition-all">
+                                    <!-- Background Layer with focal point -->
+                                    <div id="createPopupBgLayer" class="absolute inset-0 bg-cover bg-no-repeat transition-all" style="background-position: center center; background-image: none;"></div>
+                                    <!-- Gradient Overlay Layer -->
+                                    <div id="createPopupOverlayLayer" class="absolute inset-0 transition-opacity" style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(0, 0, 0, 0.95) 100%);"></div>
+                                    <!-- Simulated Close Button -->
+                                    <button type="button" class="absolute top-3 right-3 z-20 w-7 h-7 rounded-full bg-black/40 text-white/80 flex items-center justify-center backdrop-blur-xs text-xs font-bold pointer-events-none">&times;</button>
+                                    <!-- Floating Content on top of image -->
+                                    <div class="relative z-10 flex flex-col gap-2.5">
+                                        <div id="createPopupBadgePreview" class="self-start px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-500/80 backdrop-blur-xs text-white border border-white/20">
+                                            BENEFICIO EXCLUSIVO
+                                        </div>
+                                        <h3 id="createPopupTitlePreview" class="text-xl font-black leading-tight text-white drop-shadow-md">
+                                            Descuento Especial
+                                        </h3>
+                                        <p id="createPopupSubtitlePreview" class="text-xs text-slate-200 drop-shadow-sm leading-relaxed">
+                                            Suscríbete con tu WhatsApp para recibir tu código único y guardarlo en tu cuenta.
+                                        </p>
+                                        <!-- Simulated Form -->
+                                        <div class="space-y-2 pt-1">
+                                            <input type="text" placeholder="Tu Nombre Completo" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
+                                            <div class="flex gap-1.5">
+                                                <span class="px-2 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white flex items-center gap-1">+52 (2FA)</span>
+                                                <input type="tel" placeholder="WhatsApp (10 dígitos)" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
+                                            </div>
+                                            <input type="email" placeholder="Correo Electrónico" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
+                                            <button type="button" id="createPopupCtaBtnPreview" class="w-full py-2 bg-indigo-600 text-white font-bold text-xs rounded-lg shadow-md pointer-events-none uppercase tracking-wide">
+                                                Obtener Código Único
+                                            </button>
+                                            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-300 text-center">
+                                                <svg class="w-2.5 h-2.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                <span>Código único de un solo uso &bull; WhatsApp verificado para 2FA</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2597,6 +2802,11 @@ $curatedGoogleFonts = [
                                 const slidesList = document.getElementById('createCarouselSlidesList');
                                 if (slidesList && slidesList.querySelectorAll('.slide-item').length === 0 && typeof window.addCarouselSlide === 'function') {
                                     window.addCarouselSlide('create');
+                                }
+                            }
+                            if (val === 'pop_up') {
+                                if (typeof window.handlePopupActionChange === 'function') {
+                                    window.handlePopupActionChange('create');
                                 }
                             }
                         }
@@ -2903,6 +3113,13 @@ $curatedGoogleFonts = [
                         if (typeVal === 'carousel' && previewCarouselArea) {
                             if (typeof window.renderCarouselLivePreview === 'function') {
                                 window.renderCarouselLivePreview('create');
+                            }
+                        }
+
+                        // Renderizado de Pop-up en Vivo (Imagen Completa, Overlay y 2FA)
+                        if (typeVal === 'pop_up' && previewPopUpArea) {
+                            if (typeof window.renderPopUpLivePreview === 'function') {
+                                window.renderPopUpLivePreview('create');
                             }
                         }
 
@@ -3708,22 +3925,203 @@ $curatedGoogleFonts = [
                             </div>
                         </div>
 
-                        <!-- 3. MODO POP UP -->
+                        <!-- 3. MODO POP UP FULLSTACK (Hub 2 / Hub 7 / Hub 3 / Meta CAPI) -->
                         <div id="editPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
                             <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Pop-up</span>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    Configurador de Pop-up y Captura de Leads (CAPI Score 9.8)
+                                </span>
                             </div>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Imagen del Modal (Opcional)</label>
-                                    <input type="file" name="settings[popup_image]" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+
+                            <!-- Selector de Accion Principal -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                <label class="block font-bold text-slate-800 text-xs">Acción Principal del Pop-up</label>
+                                <select name="settings[popup_action]" id="editPopupAction" class="w-full px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg bg-slate-50 focus:bg-white" onchange="window.handlePopupActionChange('edit')">
+                                    <option value="ally_discount">2.1 Suscripción con Código de Descuento de Aliado (Convenio Hub 7)</option>
+                                    <option value="newsletter">2.2 Suscripción para Actualizaciones de Newsletter (Sin Cupón)</option>
+                                    <option value="store_discount">2.3 Suscripción para Obtener Cupón Directo de Tienda</option>
+                                    <option value="presale">2.4 Acceder a una Preventa Exclusiva (Redirección Inmediata)</option>
+                                </select>
+                                <span class="block text-[10px] text-slate-500">
+                                    Todos los registros crean una cuenta de comprador en Hub 3 con verificación 2FA por WhatsApp y sincronizan eventos con Meta CAPI.
+                                </span>
+                            </div>
+
+                            <!-- Sub-bloque 2.1: Campanas de Aliados Aprobadas en Hub 7 -->
+                            <div id="editPopupAllyBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                                    <label class="block font-bold text-slate-800 text-xs">Evento o Beneficio del Aliado (Hub 7)</label>
+                                    <a href="/admin/convenios" target="_blank" class="text-[10px] font-bold text-indigo-600 hover:underline">Ver Alianzas en Hub 7 &rarr;</a>
                                 </div>
                                 <div>
-                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Comportamiento de Cierre</label>
-                                    <select name="settings[popup_close_behavior]" id="editPopupCloseBehavior" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
-                                        <option value="outside">Permitir cerrar al hacer clic fuera (Overlay)</option>
-                                        <option value="button">Requerir acción (Solo Botón Cerrar)</option>
+                                    <select name="settings[popup_ally_campaign_id]" id="editPopupAllyCampaignId" class="w-full px-3 py-2 text-xs font-semibold border border-slate-200 rounded-lg" onchange="window.handlePopupAllyCampaignChange('edit')">
+                                        @if(isset($approvedAllyCampaigns) && count($approvedAllyCampaigns) > 0)
+                                            <option value="">-- Seleccionar Campaña Aprobada --</option>
+                                            @foreach($approvedAllyCampaigns as $camp)
+                                                <option value="{{ $camp->id }}" data-banner="{{ $camp->banner_image }}" data-title="{{ $camp->title }}" data-benefit="{{ $camp->benefit }}" data-ally="{{ $camp->ally->name ?? 'Aliado' }}">
+                                                    {{ $camp->ally->name ?? 'Aliado' }} - {{ $camp->title }} ({{ $camp->benefit }})
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            <option value="">(No hay eventos aprobados en Hub 7 - Crea uno en Convenios)</option>
+                                        @endif
                                     </select>
+                                </div>
+
+                                <!-- Conmutador entre Poster Oficial del Aliado o Cargar Imagen -->
+                                <div class="pt-1">
+                                    <label class="block font-bold text-slate-700 text-[11px] mb-1.5">Origen de la Imagen del Pop-up</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 text-xs font-semibold text-slate-700">
+                                            <input type="radio" name="settings[popup_ally_image_source]" value="ally_poster" checked class="text-indigo-600 focus:ring-indigo-500" onchange="window.handlePopupImageSourceToggle('edit')">
+                                            <span>Póster Oficial del Aliado</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 text-xs font-semibold text-slate-700">
+                                            <input type="radio" name="settings[popup_ally_image_source]" value="custom" class="text-indigo-600 focus:ring-indigo-500" onchange="window.handlePopupImageSourceToggle('edit')">
+                                            <span>Cargar Imagen en Creador</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-bloque 2.3: Configuracion de Cupon de Tienda -->
+                            <div id="editPopupStoreDiscountBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3 hidden">
+                                <label class="block font-bold text-slate-800 text-xs">Parámetros del Descuento de Tienda (Cupón Único)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Monto / Valor</label>
+                                        <input type="number" name="settings[popup_store_discount_value]" id="editPopupStoreDiscountValue" value="15" min="1" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold" oninput="window.renderPopUpLivePreview('edit')">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Tipo de Descuento</label>
+                                        <select name="settings[popup_store_discount_type]" id="editPopupStoreDiscountType" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold" onchange="window.renderPopUpLivePreview('edit')">
+                                            <option value="percent">Porcentaje (%)</option>
+                                            <option value="fixed">Monto Fijo ($ MXN)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Compra Mínima ($ MXN)</label>
+                                        <input type="number" name="settings[popup_min_order]" id="editPopupMinOrder" value="499" min="0" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Días de Vigencia</label>
+                                        <input type="number" name="settings[popup_days_valid]" id="editPopupDaysValid" value="30" min="1" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-bloque 2.4: URL de Preventa -->
+                            <div id="editPopupPresaleBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-2 hidden">
+                                <label class="block font-bold text-slate-800 text-xs">URL del Producto o Colección en Preventa</label>
+                                <input type="text" name="settings[popup_presale_url]" id="editPopupPresaleUrl" placeholder="/producto/binder-pro-v2" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono">
+                                <span class="block text-[10px] text-slate-500">Al completar el formulario, el usuario será redirigido inmediatamente a este destino con sus datos guardados en Hub 3.</span>
+                            </div>
+
+                            <!-- Imagen y Matriz de Punto Focal 3x3 -->
+                            <div id="editPopupCustomImageBlock" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <label class="block font-bold text-slate-800 text-xs">Imagen de Fondo del Pop-up</label>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subir Archivo Local</label>
+                                    <input type="file" name="popup_image_file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block text-[11px] font-semibold text-slate-600">O Ingresar URL / Gestor Multimedia</label>
+                                        <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal('editPopupImageUrl')">Seleccionar del Gestor</button>
+                                    </div>
+                                    <input type="text" name="settings[popup_image_url]" id="editPopupImageUrl" placeholder="https://ejemplo.com/poster-evento.webp" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono" oninput="window.renderPopUpLivePreview('edit')">
+                                </div>
+
+                                <!-- Matriz 3x3 de Punto Focal -->
+                                <div class="pt-1">
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Matriz de Punto Focal de la Imagen</label>
+                                    <input type="hidden" name="settings[popup_image_focal_point]" id="inpEditPopupFocalPoint" value="center center">
+                                    <div id="editPopupFocalMatrix" class="grid grid-cols-3 gap-1 w-36 mx-auto p-1 bg-slate-100 border border-slate-200 rounded-lg">
+                                        <button type="button" data-point="top left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'top left', this)">TL</button>
+                                        <button type="button" data-point="top center" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'top center', this)">TC</button>
+                                        <button type="button" data-point="top right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'top right', this)">TR</button>
+                                        <button type="button" data-point="center left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'center left', this)">CL</button>
+                                        <button type="button" data-point="center center" class="h-7 text-[10px] font-bold rounded border border-indigo-600 bg-indigo-600 text-white transition" onclick="window.setPopupFocalPoint('edit', 'center center', this)">CC</button>
+                                        <button type="button" data-point="center right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'center right', this)">CR</button>
+                                        <button type="button" data-point="bottom left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'bottom left', this)">BL</button>
+                                        <button type="button" data-point="bottom center" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'bottom center', this)">BC</button>
+                                        <button type="button" data-point="bottom right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'bottom right', this)">BR</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Capa de Degradado Overlay para Pop-up -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="settings[popup_enable_gradient]" id="editPopupEnableGradient" value="1" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.renderPopUpLivePreview('edit')">
+                                    <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
+                                </label>
+
+                                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
+                                        <div class="flex items-center gap-1.5 mb-2">
+                                            <input type="color" id="editPopupGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editPopupGradColorStart').value = this.value; window.renderPopUpLivePreview('edit')">
+                                            <input type="text" name="settings[popup_gradient_color_start]" id="editPopupGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editPopupGradColorStartPicker').value = this.value; window.renderPopUpLivePreview('edit')">
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="range" name="settings[popup_gradient_opacity_start]" id="editPopupGradOpacityStart" min="0" max="100" value="85" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('editPopupGradOpacityStartVal').textContent = this.value + '%'; window.renderPopUpLivePreview('edit')">
+                                            <span id="editPopupGradOpacityStartVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">85%</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
+                                        <div class="flex items-center gap-1.5 mb-2">
+                                            <input type="color" id="editPopupGradColorEndPicker" value="#000000" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editPopupGradColorEnd').value = this.value; window.renderPopUpLivePreview('edit')">
+                                            <input type="text" name="settings[popup_gradient_color_end]" id="editPopupGradColorEnd" value="#000000" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editPopupGradColorEndPicker').value = this.value; window.renderPopUpLivePreview('edit')">
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="range" name="settings[popup_gradient_opacity_end]" id="editPopupGradOpacityEnd" min="0" max="100" value="95" class="w-full cursor-pointer accent-indigo-600" oninput="document.getElementById('editPopupGradOpacityEndVal').textContent = this.value + '%'; window.renderPopUpLivePreview('edit')">
+                                            <span id="editPopupGradOpacityEndVal" class="text-[10px] font-semibold text-slate-600 w-8 text-right">95%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-600 mb-1">Dirección del Degradado</label>
+                                    <select name="settings[popup_gradient_direction]" id="editPopupGradDir" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg" onchange="window.renderPopUpLivePreview('edit')">
+                                        <option value="to bottom">De Arriba hacia Abajo (Vertical Standard)</option>
+                                        <option value="to top">De Abajo hacia Arriba</option>
+                                        <option value="to right">De Izquierda a Derecha</option>
+                                        <option value="to left">De Derecha a Izquierda</option>
+                                        <option value="to bottom right">Diagonal (Superior Izq a Inferior Der)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Boton CTA y Comportamiento -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1 text-xs">Texto del Botón de Suscripción (CTA)</label>
+                                    <input type="text" name="settings[popup_cta_text]" id="editPopupCtaText" placeholder="Ej: Obtener mi Descuento Único" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold" oninput="window.renderPopUpLivePreview('edit')">
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1 text-[11px]">Comportamiento de Cierre</label>
+                                        <select name="settings[popup_close_behavior]" id="editPopupCloseBehavior" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                            <option value="outside">Permitir cerrar clic fuera (Overlay)</option>
+                                            <option value="button">Solo botón cerrar (&times;)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1 text-[11px]">Retardo al Cargar (Seg)</label>
+                                        <input type="number" name="settings[popup_delay_seconds]" id="editPopupDelaySeconds" value="3" min="0" max="60" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1 text-[11px]">Frecuencia</label>
+                                        <select name="settings[popup_frequency]" id="editPopupFrequency" class="w-full px-2 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg">
+                                            <option value="once_per_session">Una vez por sesión</option>
+                                            <option value="once_per_day">Una vez al día</option>
+                                            <option value="always">Cada recarga (Testing)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3859,18 +4257,42 @@ $curatedGoogleFonts = [
                             <!-- 2. Carrusel Preview -->
                             <div id="editPreviewCarouselArea" class="hidden w-full h-[320px] min-h-[320px] bg-slate-900 relative overflow-hidden"></div>
 
-                            <!-- 3. Pop-up Preview -->
-                            <div id="editPreviewPopUpArea" class="hidden w-full min-h-[400px] bg-slate-800/40 relative flex items-center justify-center p-4">
-                                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform scale-95 transition-transform">
-                                    <div class="h-40 bg-slate-100 border-b border-slate-100 w-full flex items-center justify-center text-slate-400 text-xs relative">
-                                        <svg class="w-8 h-8 text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        <button class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 bg-white/80 rounded-full p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                                    </div>
-                                    <div class="p-6 text-center">
-                                        <h2 class="preview-common-title text-xl font-bold text-slate-900 mb-2 leading-tight"></h2>
-                                        <p class="preview-common-subtitle text-sm text-slate-500 mb-6 leading-relaxed"></p>
-                                        <button class="w-full py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm">Acción Principal</button>
-                                        <button class="w-full py-2 mt-2 text-slate-400 text-xs font-semibold hover:text-slate-600 transition">Cerrar / No gracias</button>
+                            <!-- 3. Pop-up Preview (Full Image + Gradient Overlay + Floating Content) -->
+                            <div id="editPreviewPopUpArea" class="hidden w-full min-h-[500px] bg-slate-900/60 backdrop-blur-xs relative flex items-center justify-center p-4">
+                                <div id="editPopupCardPreview" class="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col justify-end p-5 min-h-[460px] text-white bg-slate-900 transition-all">
+                                    <!-- Background Layer with focal point -->
+                                    <div id="editPopupBgLayer" class="absolute inset-0 bg-cover bg-no-repeat transition-all" style="background-position: center center; background-image: none;"></div>
+                                    <!-- Gradient Overlay Layer -->
+                                    <div id="editPopupOverlayLayer" class="absolute inset-0 transition-opacity" style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(0, 0, 0, 0.95) 100%);"></div>
+                                    <!-- Simulated Close Button -->
+                                    <button type="button" class="absolute top-3 right-3 z-20 w-7 h-7 rounded-full bg-black/40 text-white/80 flex items-center justify-center backdrop-blur-xs text-xs font-bold pointer-events-none">&times;</button>
+                                    <!-- Floating Content on top of image -->
+                                    <div class="relative z-10 flex flex-col gap-2.5">
+                                        <div id="editPopupBadgePreview" class="self-start px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-500/80 backdrop-blur-xs text-white border border-white/20">
+                                            BENEFICIO EXCLUSIVO
+                                        </div>
+                                        <h3 id="editPopupTitlePreview" class="text-xl font-black leading-tight text-white drop-shadow-md">
+                                            Descuento Especial
+                                        </h3>
+                                        <p id="editPopupSubtitlePreview" class="text-xs text-slate-200 drop-shadow-sm leading-relaxed">
+                                            Suscríbete con tu WhatsApp para recibir tu código único y guardarlo en tu cuenta.
+                                        </p>
+                                        <!-- Simulated Form -->
+                                        <div class="space-y-2 pt-1">
+                                            <input type="text" placeholder="Tu Nombre Completo" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
+                                            <div class="flex gap-1.5">
+                                                <span class="px-2 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white flex items-center gap-1">+52 (2FA)</span>
+                                                <input type="tel" placeholder="WhatsApp (10 dígitos)" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
+                                            </div>
+                                            <input type="email" placeholder="Correo Electrónico" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
+                                            <button type="button" id="editPopupCtaBtnPreview" class="w-full py-2 bg-indigo-600 text-white font-bold text-xs rounded-lg shadow-md pointer-events-none uppercase tracking-wide">
+                                                Obtener Código Único
+                                            </button>
+                                            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-300 text-center">
+                                                <svg class="w-2.5 h-2.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                <span>Código único de un solo uso &bull; WhatsApp verificado para 2FA</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -4234,6 +4656,13 @@ $curatedGoogleFonts = [
                         if (typeVal === 'carousel' && previewCarouselArea) {
                             if (typeof window.renderCarouselLivePreview === 'function') {
                                 window.renderCarouselLivePreview('edit');
+                            }
+                        }
+
+                        // Renderizado de Pop-up en Vivo (Imagen Completa, Overlay y 2FA)
+                        if (typeVal === 'pop_up' && previewPopUpArea) {
+                            if (typeof window.renderPopUpLivePreview === 'function') {
+                                window.renderPopUpLivePreview('edit');
                             }
                         }
 
@@ -5975,6 +6404,11 @@ $curatedGoogleFonts = [
             if(editPopUpWrap) editPopUpWrap.style.display = typeVal === 'pop_up' ? 'block' : 'none';
             if(editButtonsWrap) editButtonsWrap.style.display = typeVal === 'buttons' ? 'block' : 'none';
             if(editSpacingWrap) editSpacingWrap.style.display = typeVal === 'pop_up' ? 'none' : 'block';
+            if(typeVal === 'pop_up') {
+                if (typeof window.handlePopupActionChange === 'function') {
+                    window.handlePopupActionChange('edit');
+                }
+            }
         }
     };
 
@@ -6242,9 +6676,97 @@ $curatedGoogleFonts = [
             }
         }
 
-        // Pop-up Config
+        // Pop-up Config (Hub 2 / Hub 7 / Hub 3)
+        const editPopupAction = document.getElementById('editPopupAction');
+        if (editPopupAction) editPopupAction.value = st.popup_action || 'ally_discount';
+
+        const editPopupAllyCampaignId = document.getElementById('editPopupAllyCampaignId');
+        if (editPopupAllyCampaignId) editPopupAllyCampaignId.value = st.popup_ally_campaign_id || '';
+
+        const editAllyImgSource = st.popup_ally_image_source || 'ally_poster';
+        const editAllyImgSourceRadio = document.querySelector(`#editSectionModal input[name="settings[popup_ally_image_source]"][value="${editAllyImgSource}"]`);
+        if (editAllyImgSourceRadio) editAllyImgSourceRadio.checked = true;
+
+        const editPopupStoreDiscVal = document.getElementById('editPopupStoreDiscountValue');
+        if (editPopupStoreDiscVal) editPopupStoreDiscVal.value = st.popup_store_discount_value || 15;
+
+        const editPopupStoreDiscType = document.getElementById('editPopupStoreDiscountType');
+        if (editPopupStoreDiscType) editPopupStoreDiscType.value = st.popup_store_discount_type || 'percent';
+
+        const editPopupMinOrder = document.getElementById('editPopupMinOrder');
+        if (editPopupMinOrder) editPopupMinOrder.value = st.popup_min_order || 499;
+
+        const editPopupDaysValid = document.getElementById('editPopupDaysValid');
+        if (editPopupDaysValid) editPopupDaysValid.value = st.popup_days_valid || 30;
+
+        const editPopupPresaleUrl = document.getElementById('editPopupPresaleUrl');
+        if (editPopupPresaleUrl) editPopupPresaleUrl.value = st.popup_presale_url || '';
+
+        const editPopupImageUrl = document.getElementById('editPopupImageUrl');
+        if (editPopupImageUrl) {
+            editPopupImageUrl.value = st.popup_image || st.popup_image_url || '';
+            window._currentPopupPreviewBg_edit = st.popup_image || st.popup_image_url || '';
+        }
+
+        const editPopupFocalPoint = st.popup_image_focal_point || 'center center';
+        const editFocalInp = document.getElementById('inpEditPopupFocalPoint');
+        if (editFocalInp) editFocalInp.value = editPopupFocalPoint;
+
+        const focalMatrixEdit = document.getElementById('editPopupFocalMatrix');
+        if (focalMatrixEdit) {
+            focalMatrixEdit.querySelectorAll('button').forEach(b => {
+                const isMatch = b.dataset.point === editPopupFocalPoint;
+                b.className = isMatch ? 'h-7 text-[10px] font-bold rounded border border-indigo-600 bg-indigo-600 text-white transition' : 'h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition';
+            });
+        }
+
+        const editPopupEnableGrad = document.getElementById('editPopupEnableGradient');
+        if (editPopupEnableGrad) {
+            editPopupEnableGrad.checked = (st.popup_enable_gradient === undefined || st.popup_enable_gradient == 1 || st.popup_enable_gradient === '1' || st.popup_enable_gradient === true);
+        }
+
+        const editPopupGradColorStart = document.getElementById('editPopupGradColorStart');
+        const editPopupGradColorStartPicker = document.getElementById('editPopupGradColorStartPicker');
+        if (editPopupGradColorStart) editPopupGradColorStart.value = st.popup_gradient_color_start || '#0f172a';
+        if (editPopupGradColorStartPicker) editPopupGradColorStartPicker.value = st.popup_gradient_color_start || '#0f172a';
+
+        const editPopupGradColorEnd = document.getElementById('editPopupGradColorEnd');
+        const editPopupGradColorEndPicker = document.getElementById('editPopupGradColorEndPicker');
+        if (editPopupGradColorEnd) editPopupGradColorEnd.value = st.popup_gradient_color_end || '#000000';
+        if (editPopupGradColorEndPicker) editPopupGradColorEndPicker.value = st.popup_gradient_color_end || '#000000';
+
+        const editPopupGradOpacityStart = document.getElementById('editPopupGradOpacityStart');
+        if (editPopupGradOpacityStart) {
+            editPopupGradOpacityStart.value = st.popup_gradient_opacity_start || 85;
+            const startValEl = document.getElementById('editPopupGradOpacityStartVal');
+            if (startValEl) startValEl.textContent = editPopupGradOpacityStart.value + '%';
+        }
+
+        const editPopupGradOpacityEnd = document.getElementById('editPopupGradOpacityEnd');
+        if (editPopupGradOpacityEnd) {
+            editPopupGradOpacityEnd.value = st.popup_gradient_opacity_end || 95;
+            const endValEl = document.getElementById('editPopupGradOpacityEndVal');
+            if (endValEl) endValEl.textContent = editPopupGradOpacityEnd.value + '%';
+        }
+
+        const editPopupGradDir = document.getElementById('editPopupGradDir');
+        if (editPopupGradDir) editPopupGradDir.value = st.popup_gradient_direction || 'to bottom';
+
+        const editPopupCtaText = document.getElementById('editPopupCtaText');
+        if (editPopupCtaText) editPopupCtaText.value = st.popup_cta_text || '';
+
+        const editPopupDelay = document.getElementById('editPopupDelaySeconds');
+        if (editPopupDelay) editPopupDelay.value = st.popup_delay_seconds || 3;
+
+        const editPopupFrequency = document.getElementById('editPopupFrequency');
+        if (editPopupFrequency) editPopupFrequency.value = st.popup_frequency || 'once_per_session';
+
         const editPopupCloseBehavior = document.getElementById('editPopupCloseBehavior');
         if (editPopupCloseBehavior) editPopupCloseBehavior.value = st.popup_close_behavior || 'outside';
+
+        if (typeof window.handlePopupActionChange === 'function') {
+            window.handlePopupActionChange('edit');
+        }
 
         // Botones CTA vs Clic en Todo el Hero
         const editHasButtons = document.getElementById('inpEditHeroHasButtons');
@@ -7907,6 +8429,203 @@ window.setSectionSpacing = function(mode, direction, val, triggerPreview = true)
         }
     }
 };
+
+// --- POP-UP CREATOR & LIVE PREVIEW JS (HUB 2 / HUB 7 / HUB 3) ---
+window._currentPopupPreviewBg_create = '';
+window._currentPopupPreviewBg_edit = '';
+
+window.handlePopupActionChange = function(mode) {
+    const actionEl = document.getElementById(mode + 'PopupAction');
+    const action = actionEl ? actionEl.value : 'ally_discount';
+    
+    const allyBlock = document.getElementById(mode + 'PopupAllyBlock');
+    const storeDiscBlock = document.getElementById(mode + 'PopupStoreDiscountBlock');
+    const presaleBlock = document.getElementById(mode + 'PopupPresaleBlock');
+    const customImageBlock = document.getElementById(mode + 'PopupCustomImageBlock');
+    const ctaTextInp = document.getElementById(mode + 'PopupCtaText');
+    
+    if (allyBlock) allyBlock.style.display = (action === 'ally_discount') ? 'block' : 'none';
+    if (storeDiscBlock) storeDiscBlock.style.display = (action === 'store_discount') ? 'block' : 'none';
+    if (presaleBlock) presaleBlock.style.display = (action === 'presale') ? 'block' : 'none';
+    
+    if (action === 'ally_discount') {
+        const allyImgSource = document.querySelector(`#${mode}SectionModal input[name="settings[popup_ally_image_source]"]:checked`);
+        const isCustomImg = allyImgSource && allyImgSource.value === 'custom';
+        if (customImageBlock) customImageBlock.style.display = isCustomImg ? 'block' : 'none';
+        if (ctaTextInp && !ctaTextInp.value) ctaTextInp.placeholder = 'Obtener Descuento de Aliado';
+    } else {
+        if (customImageBlock) customImageBlock.style.display = 'block';
+        if (action === 'newsletter' && ctaTextInp && !ctaTextInp.value) ctaTextInp.placeholder = 'Suscribirme al Newsletter';
+        if (action === 'store_discount' && ctaTextInp && !ctaTextInp.value) ctaTextInp.placeholder = 'Obtener mi Cupón de Descuento';
+        if (action === 'presale' && ctaTextInp && !ctaTextInp.value) ctaTextInp.placeholder = 'Acceder a la Preventa';
+    }
+    
+    window.renderPopUpLivePreview(mode);
+};
+
+window.handlePopupAllyCampaignChange = function(mode) {
+    const campSel = document.getElementById(mode + 'PopupAllyCampaignId');
+    if (!campSel) return;
+    const opt = campSel.options[campSel.selectedIndex];
+    if (opt && opt.dataset) {
+        const titleInp = document.getElementById(mode === 'create' ? 'inpCreateTitle' : 'inpEditTitle');
+        const subtitleInp = document.getElementById(mode === 'create' ? 'inpCreateSubtitle' : 'inpEditSubtitle');
+        const badgeInp = document.getElementById(mode === 'create' ? 'inpCreateBadge' : 'inpEditBadge');
+        if (titleInp && (!titleInp.value || titleInp.dataset.autofilled === '1')) {
+            titleInp.value = opt.dataset.title || '';
+            titleInp.dataset.autofilled = '1';
+        }
+        if (subtitleInp && (!subtitleInp.value || subtitleInp.dataset.autofilled === '1')) {
+            subtitleInp.value = opt.dataset.benefit || '';
+            subtitleInp.dataset.autofilled = '1';
+        }
+        if (badgeInp && (!badgeInp.value || badgeInp.dataset.autofilled === '1')) {
+            badgeInp.value = 'ALIANZA ' + (opt.dataset.ally || 'OFICIAL').toUpperCase();
+            badgeInp.dataset.autofilled = '1';
+        }
+    }
+    window.renderPopUpLivePreview(mode);
+};
+
+window.handlePopupImageSourceToggle = function(mode) {
+    const radio = document.querySelector(`#${mode}SectionModal input[name="settings[popup_ally_image_source]"]:checked`);
+    const isCustom = radio && radio.value === 'custom';
+    const customImageBlock = document.getElementById(mode + 'PopupCustomImageBlock');
+    if (customImageBlock) customImageBlock.style.display = isCustom ? 'block' : 'none';
+    window.renderPopUpLivePreview(mode);
+};
+
+window.setPopupFocalPoint = function(mode, point, btn) {
+    const hiddenInp = document.getElementById(mode === 'create' ? 'inpCreatePopupFocalPoint' : 'inpEditPopupFocalPoint');
+    if (hiddenInp) hiddenInp.value = point;
+    const matrixEl = document.getElementById(mode + 'PopupFocalMatrix');
+    if (matrixEl) {
+        matrixEl.querySelectorAll('button').forEach(b => {
+            const isMatch = b.dataset.point === point;
+            b.className = isMatch ? 'h-7 text-[10px] font-bold rounded border border-indigo-600 bg-indigo-600 text-white transition' : 'h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition';
+        });
+    }
+    window.renderPopUpLivePreview(mode);
+};
+
+window.renderPopUpLivePreview = function(mode) {
+    const modalPrefix = mode === 'create' ? 'create' : 'edit';
+    const bgLayer = document.getElementById(modalPrefix + 'PopupBgLayer');
+    const overlayLayer = document.getElementById(modalPrefix + 'PopupOverlayLayer');
+    const badgeEl = document.getElementById(modalPrefix + 'PopupBadgePreview');
+    const titleEl = document.getElementById(modalPrefix + 'PopupTitlePreview');
+    const subtitleEl = document.getElementById(modalPrefix + 'PopupSubtitlePreview');
+    const ctaBtn = document.getElementById(modalPrefix + 'PopupCtaBtnPreview');
+    
+    if (!bgLayer) return;
+    
+    const actionEl = document.getElementById(modalPrefix + 'PopupAction');
+    const action = actionEl ? actionEl.value : 'ally_discount';
+    
+    // 1. Image Resolution
+    let imageUrl = '';
+    const allyImgSourceRadio = document.querySelector(`#${mode}SectionModal input[name="settings[popup_ally_image_source]"]:checked`);
+    const isAllyPoster = !allyImgSourceRadio || allyImgSourceRadio.value === 'ally_poster';
+    
+    if (action === 'ally_discount' && isAllyPoster) {
+        const campSel = document.getElementById(modalPrefix + 'PopupAllyCampaignId');
+        if (campSel && campSel.selectedIndex >= 0) {
+            const opt = campSel.options[campSel.selectedIndex];
+            imageUrl = opt ? (opt.dataset.banner || '') : '';
+        }
+    } else {
+        const customUrlInp = document.getElementById(modalPrefix + 'PopupImageUrl');
+        if (customUrlInp && customUrlInp.value) {
+            imageUrl = customUrlInp.value;
+        } else if (window['_currentPopupPreviewBg_' + mode]) {
+            imageUrl = window['_currentPopupPreviewBg_' + mode];
+        }
+    }
+    
+    if (imageUrl) {
+        bgLayer.style.backgroundImage = imageUrl.startsWith('url(') ? imageUrl : `url('${imageUrl}')`;
+    } else {
+        bgLayer.style.backgroundImage = 'none';
+        bgLayer.style.backgroundColor = '#1e1b4b';
+    }
+    
+    // Focal Point
+    const focalInp = document.getElementById(mode === 'create' ? 'inpCreatePopupFocalPoint' : 'inpEditPopupFocalPoint');
+    const focalPoint = focalInp && focalInp.value ? focalInp.value : 'center center';
+    bgLayer.style.backgroundPosition = focalPoint;
+    
+    // 2. Overlay Gradient
+    const enableGrad = document.getElementById(modalPrefix + 'PopupEnableGradient')?.checked ?? true;
+    if (enableGrad && overlayLayer) {
+        const colStart = document.getElementById(modalPrefix + 'PopupGradColorStart')?.value || '#0f172a';
+        const opStart = (parseInt(document.getElementById(modalPrefix + 'PopupGradOpacityStart')?.value, 10) || 85) / 100;
+        const colEnd = document.getElementById(modalPrefix + 'PopupGradColorEnd')?.value || '#000000';
+        const opEnd = (parseInt(document.getElementById(modalPrefix + 'PopupGradOpacityEnd')?.value, 10) || 95) / 100;
+        const dir = document.getElementById(modalPrefix + 'PopupGradDir')?.value || 'to bottom';
+        
+        function hexToRgba(hex, alpha) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+        }
+        
+        overlayLayer.style.display = 'block';
+        overlayLayer.style.background = `linear-gradient(${dir}, ${hexToRgba(colStart, opStart)} 0%, ${hexToRgba(colEnd, opEnd)} 100%)`;
+    } else if (overlayLayer) {
+        overlayLayer.style.display = 'none';
+    }
+    
+    // 3. Texts
+    const titleInp = document.getElementById(mode === 'create' ? 'inpCreateTitle' : 'inpEditTitle');
+    const subtitleInp = document.getElementById(mode === 'create' ? 'inpCreateSubtitle' : 'inpEditSubtitle');
+    const badgeInp = document.getElementById(mode === 'create' ? 'inpCreateBadge' : 'inpEditBadge');
+    
+    if (titleEl) titleEl.textContent = titleInp && titleInp.value ? titleInp.value : 'Descuento Exclusivo';
+    if (subtitleEl) subtitleEl.textContent = subtitleInp && subtitleInp.value ? subtitleInp.value : 'Suscríbete con tu WhatsApp para recibir tu código único.';
+    if (badgeEl) {
+        if (badgeInp && badgeInp.value) {
+            badgeEl.textContent = badgeInp.value;
+            badgeEl.style.display = 'inline-block';
+        } else {
+            badgeEl.style.display = 'none';
+        }
+    }
+    
+    // CTA Button
+    const ctaInp = document.getElementById(modalPrefix + 'PopupCtaText');
+    if (ctaBtn) {
+        if (ctaInp && ctaInp.value) {
+            ctaBtn.textContent = ctaInp.value;
+        } else if (action === 'ally_discount') {
+            ctaBtn.textContent = 'Obtener Descuento de Aliado';
+        } else if (action === 'newsletter') {
+            ctaBtn.textContent = 'Suscribirme al Newsletter';
+        } else if (action === 'store_discount') {
+            ctaBtn.textContent = 'Obtener mi Cupón de Descuento';
+        } else if (action === 'presale') {
+            ctaBtn.textContent = 'Acceder a la Preventa';
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    ['create', 'edit'].forEach(mode => {
+        const fileInput = document.querySelector(`#${mode}SectionModal input[name="popup_image_file"]`);
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        window['_currentPopupPreviewBg_' + mode] = evt.target.result;
+                        window.renderPopUpLivePreview(mode);
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+});
 
 // --- CMS MEDIA MANAGER JS (HUB 2) ---
 let targetCmsMediaInput = null;

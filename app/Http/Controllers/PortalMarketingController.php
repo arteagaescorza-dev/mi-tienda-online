@@ -225,7 +225,7 @@ class PortalMarketingController extends Controller
     public function storeCoupon(PortalMarketingStoreCouponRequest $request)
     {
         Gate::authorize('manage-marketing');
-        $validated = 
+        $validated = $request->validated();
 
         Coupon::create($validated);
 

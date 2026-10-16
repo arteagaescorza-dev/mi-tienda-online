@@ -80,4 +80,61 @@ class MarketingApiController extends Controller
 
         return response()->json($result);
     }
+
+    /**
+     * Procesa la suscripción a un Pop-up CMS con alta de Lead, 2FA WhatsApp, Meta CAPI y emisión de código único.
+     */
+    public function subscribePopup(Request $request, \App\Services\RevOps\PopupSubscriptionService $popupService): JsonResponse
+    {
+        if ($request->has('whatsapp') && !$request->has('phone')) {
+            $request->merge(['phone' => $request->input('whatsapp')]);
+        }
+
+        $validated = $request->validate([
+            'section_id' => 'nullable|integer',
+            'name' => 'required|string|max:120',
+            'phone' => 'required|string|max:30',
+            'email' => 'required|email|max:150',
+            'universe' => 'nullable|string|in:terra,marte,venus,tiresias',
+            'popup_action' => 'nullable|string|in:ally_discount,newsletter,store_discount,presale',
+            'ally_campaign_id' => 'nullable|integer',
+            'store_discount_value' => 'nullable|numeric',
+            'store_discount_type' => 'nullable|string',
+            'min_order' => 'nullable|numeric',
+            'days_valid' => 'nullable|integer',
+            'presale_url' => 'nullable|string',
+        ]);
+
+        try {
+            $result = $popupService->subscribe($validated);
+            return response()->json($result);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar la suscripción: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Consulta los descuentos vigentes del cliente para "Mi Cuenta -> Descuentos".
+     */
+    public function getCustomerDiscounts(Request $request, \App\Services\RevOps\PopupSubscriptionService $popupService): JsonResponse
+    {
+        $email = $request->query('email', auth()->user()?->email);
+        $phone = $request->query('phone', auth()->user()?->phone);
+
+        $discounts = $popupService->getCustomerDiscounts($email, $phone);
+
+        return response()->json([
+            'success' => true,
+            'discounts' => $discounts,
+        ]);
+    }
 }
+
