@@ -1091,7 +1091,7 @@ $curatedGoogleFonts = [
                             <p class="text-slate-600 text-[11px] mt-1">{{ $c['rule'] }}</p>
                             @if(!empty($c['warning']))
                                 <span class="text-[10px] text-amber-900 font-semibold block bg-amber-50 p-1.5 rounded border border-amber-200 mt-2">
-                                    ⚠️ Advertencia: {{ $c['warning'] }}
+                                    Advertencia: {{ $c['warning'] }}
                                 </span>
                             @endif
                             @if(!empty($cSymbols))
@@ -1232,22 +1232,13 @@ $curatedGoogleFonts = [
                     </div>
 
                     <!-- Grid 3: Switches de Elementos Opcionales -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-teal-300 transition">
                             <input type="hidden" name="payload[show_revops_link]" value="0">
                             <input type="checkbox" name="payload[show_revops_link]" value="1" {{ !empty($footerConfig['show_revops_link']) ? 'checked' : '' }} class="mt-0.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
                             <div>
                                 <strong class="text-slate-800 font-semibold block">Mostrar Acceso a Consola RevOps</strong>
                                 <span class="text-[11px] text-slate-500 block mt-0.5">Muestra la tarjeta de acceso rápido al Panel de Administración en la cuarta columna del footer.</span>
-                            </div>
-                        </label>
-
-                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-teal-300 transition">
-                            <input type="hidden" name="payload[show_zero_emojis_badge]" value="0">
-                            <input type="checkbox" name="payload[show_zero_emojis_badge]" value="1" {{ !empty($footerConfig['show_zero_emojis_badge']) ? 'checked' : '' }} class="mt-0.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
-                            <div>
-                                <strong class="text-slate-800 font-semibold block">Mostrar Badge Política Cero Emojis</strong>
-                                <span class="text-[11px] text-slate-500 block mt-0.5">Renderiza la etiqueta &ldquo;Política Estricta Cero Emojis // Vectorial Only&rdquo; en el sub-footer legal.</span>
                             </div>
                         </label>
                     </div>
@@ -1298,6 +1289,7 @@ $curatedGoogleFonts = [
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-slate-700">Estado de la Cinta Superior:</span>
                         <label class="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                            <input type="hidden" name="announcement_active" value="0">
                             <input type="checkbox" name="announcement_active" value="1" {{ ($announcementActive ?? true) ? 'checked' : '' }} class="rounded text-indigo-600">
                             <span class="font-semibold">Activar Marquesina en Storefront</span>
                         </label>
@@ -1323,12 +1315,13 @@ $curatedGoogleFonts = [
                         <div class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-lg text-xs">
                             <span class="w-5 text-slate-400 font-bold font-mono text-[11px] text-center">#{{ $idx + 1 }}</span>
                             <div class="flex-1">
-                                <input type="text" name="announcements[{{ $idx }}][text]" value="{{ $an['text'] ?? '' }}" placeholder="Texto del aviso (Ej: ENVÍO GRATIS EN COMPRAS +$999)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded text-xs bg-white" required>
+                                <input type="text" name="announcements[{{ $idx }}][text]" value="{{ $an['text'] ?? '' }}" placeholder="Texto del aviso (Ej: ENVÍO GRATIS EN COMPRAS +$999)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded text-xs bg-white">
                             </div>
                             <div class="w-1/3">
                                 <input type="text" name="announcements[{{ $idx }}][link]" value="{{ $an['link'] ?? '' }}" placeholder="URL enlace (Opcional, ej: /ofertas)" class="w-full px-2.5 py-1.5 border border-slate-200 rounded text-xs bg-white">
                             </div>
                             <label class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 px-2 cursor-pointer">
+                                <input type="hidden" name="announcements[{{ $idx }}][active]" value="0">
                                 <input type="checkbox" name="announcements[{{ $idx }}][active]" value="1" {{ ($an['active'] ?? true) ? 'checked' : '' }} class="rounded text-indigo-600">
                                 <span>Activo</span>
                             </label>
@@ -2296,81 +2289,87 @@ $curatedGoogleFonts = [
 
                         <!-- 2. MODO CAROUSEL -->
                         <div id="createCarouselWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
-    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-        <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
-        <label class="flex items-center gap-2 cursor-pointer bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
-            <input type="checkbox" id="createCarouselGlobalToggle" name="settings[carousel_global_content]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createCarouselGradientControlsWrap').style.display = this.checked ? 'block' : 'none'; window.updatePreviewCreate && window.updatePreviewCreate()">
-            <span class="text-[10px] text-slate-700 font-bold">Usar Título y Overlay General</span>
-        </label>
-    </div>
-    <div class="space-y-4">
-        <div class="flex items-center gap-4">
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" id="createCarouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
-                <span class="text-xs text-slate-700 font-bold">Autoplay</span>
-            </label>
-            <div class="flex items-center gap-2">
-                <label class="text-xs text-slate-700 font-bold">Tiempo (segundos):</label>
-                <input type="number" name="settings[autoplay_time]" id="createCarouselAutoplayTime" value="5" min="1" class="w-16 px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
-            </div>
-        </div>
-
-        <!-- OVERLAY (Gradient) -->
-        <div id="createCarouselGradientControlsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-            <input type="hidden" name="settings[carousel_enable_gradient]" value="0">
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="settings[carousel_enable_gradient]" id="createCarouselEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('createCarouselGradientControls').style.display = this.checked ? 'block' : 'none'; window.updatePreviewCreate && window.updatePreviewCreate()">
-                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
-            </label>
-
-            <div id="createCarouselGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
-                            <div class="flex items-center gap-1.5 mb-2">
-                                <input type="color" id="createCarGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createCarGradColorStart').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
-                                <input type="text" name="settings[carousel_gradient_color_start]" id="createCarGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createCarGradColorStartPicker').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
+                            <input type="hidden" name="settings[carousel_global_content]" value="0">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
+                                <span class="text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full font-semibold">Contenido integrado por Slide</span>
                             </div>
-                            <input type="range" name="settings[carousel_gradient_opacity_start]" id="createCarGradOpacityStart" min="0" max="100" value="80" class="w-full" oninput="document.getElementById('createCarGradOpacityStartVal').textContent = this.value + '%'; window.updatePreviewCreate && window.updatePreviewCreate()">
-                            <div class="text-right text-[10px] text-slate-500 mt-1" id="createCarGradOpacityStartVal">80%</div>
-                        </div>
-                    </div>
-                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
-                            <div class="flex items-center gap-1.5 mb-2">
-                                <input type="color" id="createCarGradColorEndPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createCarGradColorEnd').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
-                                <input type="text" name="settings[carousel_gradient_color_end]" id="createCarGradColorEnd" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createCarGradColorEndPicker').value = this.value; window.updatePreviewCreate && window.updatePreviewCreate()">
-                            </div>
-                            <input type="range" name="settings[carousel_gradient_opacity_end]" id="createCarGradOpacityEnd" min="0" max="100" value="0" class="w-full" oninput="document.getElementById('createCarGradOpacityEndVal').textContent = this.value + '%'; window.updatePreviewCreate && window.updatePreviewCreate()">
-                            <div class="text-right text-[10px] text-slate-500 mt-1" id="createCarGradOpacityEndVal">0%</div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-semibold text-slate-600 mb-1">Direcci?n del Degradado</label>
-                    <select name="settings[carousel_gradient_direction]" id="createCarGradDirection" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
-                        <option value="to bottom">De Arriba hacia Abajo</option>
-                        <option value="to top">De Abajo hacia Arriba</option>
-                        <option value="to right">De Izquierda a Derecha</option>
-                        <option value="to left">De Derecha a Izquierda</option>
-                        <option value="to bottom right">Diagonal (Arr-Izq a Aba-Der)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+                            <div class="space-y-4">
+                                <!-- PANTALLA, ALTO PERSONALIZADO Y EFECTO REVELADO DEL CARRUSEL -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    <div>
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Full Page</span>
+                                                <span class="text-[10px] text-slate-500">100% de alto</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" id="inpCreateCarouselFullWidth" value="1" class="peer sr-only" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('create')">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Ancho Completo</span>
+                                                <span class="text-[10px] text-slate-500">100% horizontal</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" id="inpCreateCarouselFullWidthHorizontal" value="1" class="peer sr-only" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('create')">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                                        <label class="block font-bold text-slate-800 text-xs mb-1">Alto Personalizado</label>
+                                        <div class="flex gap-1.5">
+                                            <input type="number" id="inpCreateCarouselHeightValue" placeholder="Ej: 440" class="w-2/3 px-2 py-1.5 border border-slate-200 rounded-lg text-xs" oninput="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('create')">
+                                            <select id="inpCreateCarouselHeightUnit" class="w-1/3 px-1.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold bg-white" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('create')">
+                                                <option value="px">px</option>
+                                                <option value="vh">vh</option>
+                                                <option value="%">%</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                            <div>
+                                                <span class="font-bold text-slate-800 block text-xs">Efecto Revelado (Cortina)</span>
+                                                <span class="text-[10px] text-slate-500">Revela imagen de fondo</span>
+                                            </div>
+                                            <div class="relative shrink-0 ml-2">
+                                                <input type="checkbox" id="inpCreateCarouselParallax" value="1" class="peer sr-only" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('create')">
+                                                <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
 
-        <div class="flex items-center justify-between">
-            <label class="block font-bold text-slate-700 text-xs">Slides</label>
-            <button type="button" class="px-2 py-1 bg-indigo-600 text-white text-[10px] rounded hover:bg-indigo-700 font-bold" onclick="window.addCarouselSlide('create')">+ Añadir Slide</button>
-        </div>
-        
-        <div id="createCarouselSlidesList" class="space-y-3">
-            <!-- Dynamic Slides go here -->
-        </div>
-    </div>
-</div>
+                                <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="createCarouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                        <span class="text-xs text-slate-700 font-bold">Autoplay Animado</span>
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-xs text-slate-600 font-semibold">Intervalo (seg):</label>
+                                        <input type="number" name="settings[autoplay_time]" id="createCarouselAutoplayTime" value="5" min="1" max="60" class="w-16 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-center" oninput="window.updatePreviewCreate && window.updatePreviewCreate()">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between pt-1">
+                                    <label class="block font-bold text-slate-700 text-xs uppercase tracking-wider">Slides del Carrusel</label>
+                                    <button type="button" class="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 font-bold shadow-xs cursor-pointer transition" onclick="window.addCarouselSlide('create')">+ Añadir Slide</button>
+                                </div>
+                                
+                                <div id="createCarouselSlidesList" class="space-y-3">
+                                    <!-- Dynamic Slides go here -->
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- 3. MODO POP UP -->
                         <div id="createPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
@@ -2521,24 +2520,7 @@ $curatedGoogleFonts = [
                             </div>
                             
                             <!-- 2. Carrusel Preview -->
-                            <div id="previewCarouselArea" class="hidden w-full h-[300px] bg-slate-100 relative flex flex-col items-center justify-center overflow-hidden">
-                                <div class="absolute inset-0 bg-slate-200/50"></div>
-                                <div class="relative z-10 text-center px-8">
-                                    <h2 class="preview-common-title text-2xl md:text-3xl font-bold text-slate-800 drop-shadow-sm"></h2>
-                                    <p class="preview-common-subtitle text-slate-600 mt-2 max-w-md mx-auto"></p>
-                                </div>
-                                <div class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
-                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                </div>
-                                <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
-                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </div>
-                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-800"></div>
-                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
-                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
-                                </div>
-                            </div>
+                            <div id="previewCarouselArea" class="hidden w-full h-[320px] min-h-[320px] bg-slate-900 relative overflow-hidden"></div>
 
                             <!-- 3. Pop-up Preview -->
                             <div id="previewPopUpArea" class="hidden w-full min-h-[400px] bg-slate-800/40 relative flex items-center justify-center p-4">
@@ -2604,13 +2586,19 @@ $curatedGoogleFonts = [
                             if(createCustomCodeWrap) createCustomCodeWrap.style.display = 'block';
                             if(createSpacingWrap) createSpacingWrap.style.display = 'block';
                         } else {
-                            if(createCommonFieldsWrap) createCommonFieldsWrap.style.display = 'block';
+                            if(createCommonFieldsWrap) createCommonFieldsWrap.style.display = (val === 'carousel') ? 'none' : 'block';
                             if(createCustomCodeWrap) createCustomCodeWrap.style.display = 'none';
                             if(createHeroWrap) createHeroWrap.style.display = val === 'hero' ? 'block' : 'none';
                             if(createCarouselWrap) createCarouselWrap.style.display = val === 'carousel' ? 'block' : 'none';
                             if(createPopUpWrap) createPopUpWrap.style.display = val === 'pop_up' ? 'block' : 'none';
                             if(createButtonsWrap) createButtonsWrap.style.display = val === 'buttons' ? 'block' : 'none';
                             if(createSpacingWrap) createSpacingWrap.style.display = val === 'pop_up' ? 'none' : 'block';
+                            if (val === 'carousel') {
+                                const slidesList = document.getElementById('createCarouselSlidesList');
+                                if (slidesList && slidesList.querySelectorAll('.slide-item').length === 0 && typeof window.addCarouselSlide === 'function') {
+                                    window.addCarouselSlide('create');
+                                }
+                            }
                         }
                     }
 
@@ -2911,95 +2899,10 @@ $curatedGoogleFonts = [
                         if (previewTitle) previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
                         if (previewSubtitle) previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
 
-                        // Renderizado de Carrusel en Vivo
+                        // Renderizado de Carrusel en Vivo (Viewport Animado Completo)
                         if (typeVal === 'carousel' && previewCarouselArea) {
-                            const isGlobalBtn = document.querySelector('#createSectionModal input[name="settings[carousel_global_content]"]');
-                            const isGlobal = isGlobalBtn ? isGlobalBtn.checked : true;
-                            const slides = document.querySelectorAll('#createCarouselSlidesList .slide-item');
-                            previewCarouselArea.innerHTML = '';
-                            previewCarouselArea.style.display = 'flex';
-                            previewCarouselArea.style.flexDirection = 'row';
-                            previewCarouselArea.style.overflowX = 'auto';
-                            previewCarouselArea.style.scrollSnapType = 'x mandatory';
-                            previewCarouselArea.style.gap = '0';
-                            previewCarouselArea.style.backgroundImage = 'none';
-
-                            if (slides.length === 0) {
-                                previewCarouselArea.innerHTML = '<div class="w-full flex-shrink-0 h-full flex flex-col items-center justify-center text-slate-400">Sin slides en carrusel</div>';
-                            } else {
-                                const globalTitle = document.querySelector('#createSectionModal input[name="title"]')?.value || 'Tu Título Aquí';
-                                const globalSubtitle = document.querySelector('#createSectionModal input[name="subtitle"]')?.value || '';
-                                const globalBadge = document.querySelector('#createSectionModal input[name="badge"]')?.value || '';
-                                
-                                const gGradEn = document.querySelector('#createSectionModal input[name="settings[carousel_enable_gradient]"]')?.checked;
-                                const gGradStart = document.querySelector('#createSectionModal input[name="settings[carousel_gradient_color_start]"]')?.value || '#0f172a';
-                                const gGradEnd = document.querySelector('#createSectionModal input[name="settings[carousel_gradient_color_end]"]')?.value || '#1e1b4b';
-
-                                slides.forEach((slide, idx) => {
-                                    const uInp = slide.querySelector('.slide-url');
-                                    const fileInp = slide.querySelector('input[type="file"]');
-                                    let bgSrc = '';
-                                    
-                                    if (fileInp && fileInp.files && fileInp.files[0]) {
-                                        bgSrc = URL.createObjectURL(fileInp.files[0]);
-                                    } else if (uInp && uInp.value) {
-                                        bgSrc = uInp.value;
-                                    }
-                                    
-                                    const sTitle = isGlobal ? globalTitle : (slide.querySelector('input[name$="\\[title\\]"]')?.value || '');
-                                    const sSub = isGlobal ? globalSubtitle : (slide.querySelector('input[name$="\\[subtitle\\]"]')?.value || '');
-                                    const sBadge = isGlobal ? globalBadge : (slide.querySelector('input[name$="\\[badge\\]"]')?.value || '');
-                                    
-                                    const sGradEn = isGlobal ? gGradEn : slide.querySelector('input[name$="\\[enable_gradient\\]"]')?.checked;
-                                    const sGradStart = isGlobal ? gGradStart : (slide.querySelector('input[name$="\\[gradient_color_start\\]"]')?.value || '#000');
-                                    const sGradEnd = isGlobal ? gGradEnd : (slide.querySelector('input[name$="\\[gradient_color_end\\]"]')?.value || '#000');
-                                    
-                                    const slideDiv = document.createElement('div');
-                                    slideDiv.className = 'w-full flex-shrink-0 h-full relative flex flex-col items-center justify-center overflow-hidden';
-                                    slideDiv.style.scrollSnapAlign = 'start';
-                                    
-                                    if (bgSrc) {
-                                        slideDiv.style.backgroundImage = 'url(' + bgSrc + ')';
-                                        slideDiv.style.backgroundSize = 'cover';
-                                        slideDiv.style.backgroundPosition = 'center';
-                                    }
-                                    
-                                    if (sGradEn) {
-                                        const overlay = document.createElement('div');
-                                        overlay.className = 'absolute inset-0 z-0';
-                                        overlay.style.background = 'linear-gradient(to bottom, ' + sGradStart + '80, ' + sGradEnd + '80)';
-                                        slideDiv.appendChild(overlay);
-                                    }
-                                    
-                                    const contentDiv = document.createElement('div');
-                                    contentDiv.className = 'relative z-10 text-center px-8 w-full';
-                                    
-                                    if (sBadge) {
-                                        contentDiv.innerHTML += '<div class="inline-block bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full mb-2 uppercase tracking-wide font-bold">' + sBadge + '</div>';
-                                    }
-                                    if (sTitle) {
-                                        contentDiv.innerHTML += '<h2 class="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">' + sTitle + '</h2>';
-                                    }
-                                    if (sSub) {
-                                        contentDiv.innerHTML += '<p class="text-white/90 mt-2 max-w-md mx-auto">' + sSub + '</p>';
-                                    }
-
-                                    const sBtnText = slide.querySelector('input[name$="\\[button_text\\]"]')?.value || '';
-                                    const sBtnBg = slide.querySelector('input[name$="\\[button_bg\\]"]')?.value || '#0f172a';
-                                    const sBtnColor = slide.querySelector('input[name$="\\[button_color\\]"]')?.value || '#ffffff';
-                                    const sBtnBorderColor = slide.querySelector('input[name$="\\[button_border_color\\]"]')?.value || '#0f172a';
-                                    const sBtnBorderWidth = slide.querySelector('select[name$="\\[button_border_width\\]"]')?.value || 'border-0';
-                                    const sBtnShadow = slide.querySelector('select[name$="\\[button_shadow\\]"]')?.value || '';
-
-                                    if (sBtnText) {
-                                        const btnClass = `inline-block px-5 py-2 mt-4 rounded-lg font-bold text-xs ${sBtnBorderWidth} ${sBtnShadow}`;
-                                        const btnStyle = `background-color: ${sBtnBg}; color: ${sBtnColor}; border-color: ${sBtnBorderColor};`;
-                                        contentDiv.innerHTML += `<a href="javascript:void(0)" class="${btnClass}" style="${btnStyle}">${sBtnText}</a>`;
-                                    }
-                                    
-                                    slideDiv.appendChild(contentDiv);
-                                    previewCarouselArea.appendChild(slideDiv);
-                                });
+                            if (typeof window.renderCarouselLivePreview === 'function') {
+                                window.renderCarouselLivePreview('create');
                             }
                         }
 
@@ -3723,81 +3626,87 @@ $curatedGoogleFonts = [
 
                         <!-- 2. MODO CAROUSEL -->
                         <div id="editCarouselWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
-    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-        <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
-        <label class="flex items-center gap-2 cursor-pointer bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
-            <input type="checkbox" id="editCarouselGlobalToggle" name="settings[carousel_global_content]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editCarouselGradientControlsWrap').style.display = this.checked ? 'block' : 'none'; window.updatePreviewEdit && window.updatePreviewEdit()">
-            <span class="text-[10px] text-slate-700 font-bold">Usar Título y Overlay General</span>
-        </label>
-    </div>
-    <div class="space-y-4">
-        <div class="flex items-center gap-4">
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" id="editCarouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
-                <span class="text-xs text-slate-700 font-bold">Autoplay</span>
-            </label>
-            <div class="flex items-center gap-2">
-                <label class="text-xs text-slate-700 font-bold">Tiempo (segundos):</label>
-                <input type="number" name="settings[autoplay_time]" id="editCarouselAutoplayTime" value="5" min="1" class="w-16 px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
-            </div>
-        </div>
-
-        <!-- OVERLAY (Gradient) -->
-        <div id="editCarouselGradientControlsWrap" class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
-            <input type="hidden" name="settings[carousel_enable_gradient]" value="0">
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="settings[carousel_enable_gradient]" id="editCarouselEnableGradient" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="document.getElementById('editCarouselGradientControls').style.display = this.checked ? 'block' : 'none'; window.updatePreviewEdit && window.updatePreviewEdit()">
-                <span class="font-bold text-slate-800 text-xs">Habilitar Capa de Degradado Overlay</span>
-            </label>
-
-            <div id="editCarouselGradientControls" style="display: none;" class="space-y-3 pt-2 border-t border-slate-100">
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Inicio & Opacidad</label>
-                            <div class="flex items-center gap-1.5 mb-2">
-                                <input type="color" id="editCarGradColorStartPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editCarGradColorStart').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
-                                <input type="text" name="settings[carousel_gradient_color_start]" id="editCarGradColorStart" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editCarGradColorStartPicker').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
+                            <input type="hidden" name="settings[carousel_global_content]" value="0">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5 uppercase tracking-wider">Configuración de Carrusel</span>
+                                <span class="text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full font-semibold">Contenido integrado por Slide</span>
                             </div>
-                            <input type="range" name="settings[carousel_gradient_opacity_start]" id="editCarGradOpacityStart" min="0" max="100" value="80" class="w-full" oninput="document.getElementById('editCarGradOpacityStartVal').textContent = this.value + '%'; window.updatePreviewEdit && window.updatePreviewEdit()">
-                            <div class="text-right text-[10px] text-slate-500 mt-1" id="editCarGradOpacityStartVal">80%</div>
-                        </div>
-                    </div>
-                    <div class="space-y-2 p-2 bg-slate-50 border border-slate-100 rounded">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Fin & Opacidad</label>
-                            <div class="flex items-center gap-1.5 mb-2">
-                                <input type="color" id="editCarGradColorEndPicker" value="#0f172a" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editCarGradColorEnd').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
-                                <input type="text" name="settings[carousel_gradient_color_end]" id="editCarGradColorEnd" value="#0f172a" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editCarGradColorEndPicker').value = this.value; window.updatePreviewEdit && window.updatePreviewEdit()">
-                            </div>
-                            <input type="range" name="settings[carousel_gradient_opacity_end]" id="editCarGradOpacityEnd" min="0" max="100" value="0" class="w-full" oninput="document.getElementById('editCarGradOpacityEndVal').textContent = this.value + '%'; window.updatePreviewEdit && window.updatePreviewEdit()">
-                            <div class="text-right text-[10px] text-slate-500 mt-1" id="editCarGradOpacityEndVal">0%</div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-semibold text-slate-600 mb-1">Direcci?n del Degradado</label>
-                    <select name="settings[carousel_gradient_direction]" id="editCarGradDirection" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
-                        <option value="to bottom">De Arriba hacia Abajo</option>
-                        <option value="to top">De Abajo hacia Arriba</option>
-                        <option value="to right">De Izquierda a Derecha</option>
-                        <option value="to left">De Derecha a Izquierda</option>
-                        <option value="to bottom right">Diagonal (Arr-Izq a Aba-Der)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+                            <div class="space-y-4">
+                                <!-- PANTALLA, ALTO PERSONALIZADO Y EFECTO REVELADO DEL CARRUSEL -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                     <div>
+                                         <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                             <div>
+                                                 <span class="font-bold text-slate-800 block text-xs">Full Page</span>
+                                                 <span class="text-[10px] text-slate-500">100% de alto</span>
+                                             </div>
+                                             <div class="relative shrink-0 ml-2">
+                                                 <input type="checkbox" id="inpEditCarouselFullWidth" value="1" class="peer sr-only" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('edit')">
+                                                 <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                 <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                             </div>
+                                         </label>
+                                     </div>
+                                     <div>
+                                         <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                             <div>
+                                                 <span class="font-bold text-slate-800 block text-xs">Ancho Completo</span>
+                                                 <span class="text-[10px] text-slate-500">100% horizontal</span>
+                                             </div>
+                                             <div class="relative shrink-0 ml-2">
+                                                 <input type="checkbox" id="inpEditCarouselFullWidthHorizontal" value="1" class="peer sr-only" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('edit')">
+                                                 <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                 <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                             </div>
+                                         </label>
+                                     </div>
+                                     <div class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                                        <label class="block font-bold text-slate-800 text-xs mb-1">Alto Personalizado</label>
+                                        <div class="flex gap-1.5">
+                                            <input type="number" id="inpEditCarouselHeightValue" placeholder="Ej: 440" class="w-2/3 px-2 py-1.5 border border-slate-200 rounded-lg text-xs" oninput="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('edit')">
+                                            <select id="inpEditCarouselHeightUnit" class="w-1/3 px-1.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold bg-white" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('edit')">
+                                                <option value="px">px</option>
+                                                <option value="vh">vh</option>
+                                                <option value="%">%</option>
+                                            </select>
+                                        </div>
+                                     </div>
+                                     <div>
+                                         <label class="flex items-center justify-between cursor-pointer p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm h-full">
+                                             <div>
+                                                 <span class="font-bold text-slate-800 block text-xs">Efecto Revelado (Cortina)</span>
+                                                 <span class="text-[10px] text-slate-500">Revela imagen de fondo</span>
+                                             </div>
+                                             <div class="relative shrink-0 ml-2">
+                                                 <input type="checkbox" id="inpEditCarouselParallax" value="1" class="peer sr-only" onchange="window.syncCarouselLayoutSettings && window.syncCarouselLayoutSettings('edit')">
+                                                 <div class="block bg-slate-200 w-10 h-6 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                                                 <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-4"></div>
+                                             </div>
+                                         </label>
+                                     </div>
+                                 </div>
 
-        <div class="flex items-center justify-between">
-            <label class="block font-bold text-slate-700 text-xs">Slides</label>
-            <button type="button" class="px-2 py-1 bg-indigo-600 text-white text-[10px] rounded hover:bg-indigo-700 font-bold" onclick="window.addCarouselSlide('edit')">+ Añadir Slide</button>
-        </div>
-        
-        <div id="editCarouselSlidesList" class="space-y-3">
-            <!-- Dynamic Slides go here -->
-        </div>
-    </div>
-</div>
+                                <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="editCarouselAutoPlay" name="settings[autoplay]" checked value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                        <span class="text-xs text-slate-700 font-bold">Autoplay Animado</span>
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-xs text-slate-600 font-semibold">Intervalo (seg):</label>
+                                        <input type="number" name="settings[autoplay_time]" id="editCarouselAutoplayTime" value="5" min="1" max="60" class="w-16 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-center" oninput="window.updatePreviewEdit && window.updatePreviewEdit()">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between pt-1">
+                                    <label class="block font-bold text-slate-700 text-xs uppercase tracking-wider">Slides del Carrusel</label>
+                                    <button type="button" class="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 font-bold shadow-xs cursor-pointer transition" onclick="window.addCarouselSlide('edit')">+ Añadir Slide</button>
+                                </div>
+                                
+                                <div id="editCarouselSlidesList" class="space-y-3">
+                                    <!-- Dynamic Slides go here -->
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- 3. MODO POP UP -->
                         <div id="editPopUpWrap" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 hidden">
@@ -3948,24 +3857,7 @@ $curatedGoogleFonts = [
                             </div>
                             
                             <!-- 2. Carrusel Preview -->
-                            <div id="editPreviewCarouselArea" class="hidden w-full h-[300px] bg-slate-100 relative flex flex-col items-center justify-center overflow-hidden">
-                                <div class="absolute inset-0 bg-slate-200/50"></div>
-                                <div class="relative z-10 text-center px-8">
-                                    <h2 class="preview-common-title text-2xl md:text-3xl font-bold text-slate-800 drop-shadow-sm"></h2>
-                                    <p class="preview-common-subtitle text-slate-600 mt-2 max-w-md mx-auto"></p>
-                                </div>
-                                <div class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
-                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                </div>
-                                <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full flex items-center justify-center shadow cursor-not-allowed">
-                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </div>
-                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-800"></div>
-                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
-                                    <div class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-slate-400"></div>
-                                </div>
-                            </div>
+                            <div id="editPreviewCarouselArea" class="hidden w-full h-[320px] min-h-[320px] bg-slate-900 relative overflow-hidden"></div>
 
                             <!-- 3. Pop-up Preview -->
                             <div id="editPreviewPopUpArea" class="hidden w-full min-h-[400px] bg-slate-800/40 relative flex items-center justify-center p-4">
@@ -4025,13 +3917,19 @@ $curatedGoogleFonts = [
                             if(editCustomCodeWrap) editCustomCodeWrap.style.display = 'block';
                             if(editSpacingWrap) editSpacingWrap.style.display = 'block';
                         } else {
-                            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = 'block';
+                            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = (val === 'carousel') ? 'none' : 'block';
                             if(editCustomCodeWrap) editCustomCodeWrap.style.display = (val === 'buttons') ? 'block' : 'none';
                             if(editHeroWrap) editHeroWrap.style.display = val === 'hero' ? 'block' : 'none';
                             if(editCarouselWrap) editCarouselWrap.style.display = val === 'carousel' ? 'block' : 'none';
                             if(editPopUpWrap) editPopUpWrap.style.display = val === 'pop_up' ? 'block' : 'none';
                             if(editButtonsWrap) editButtonsWrap.style.display = val === 'buttons' ? 'block' : 'none';
                             if(editSpacingWrap) editSpacingWrap.style.display = val === 'pop_up' ? 'none' : 'block';
+                            if (val === 'carousel') {
+                                const slidesList = document.getElementById('editCarouselSlidesList');
+                                if (slidesList && slidesList.querySelectorAll('.slide-item').length === 0 && typeof window.addCarouselSlide === 'function') {
+                                    window.addCarouselSlide('edit');
+                                }
+                            }
                         }
                     }
 
@@ -4332,95 +4230,10 @@ $curatedGoogleFonts = [
                         if (previewTitle) previewTitle.className = 'text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md relative z-10';
                         if (previewSubtitle) previewSubtitle.className = 'md:text-base max-w-xl mx-auto mt-4 drop-shadow-sm block relative z-10';
 
-                        // Renderizado de Carrusel en Vivo
+                        // Renderizado de Carrusel en Vivo (Viewport Animado Completo)
                         if (typeVal === 'carousel' && previewCarouselArea) {
-                            const isGlobalBtn = document.querySelector('#editSectionModal input[name="settings[carousel_global_content]"]');
-                            const isGlobal = isGlobalBtn ? isGlobalBtn.checked : true;
-                            const slides = document.querySelectorAll('#editCarouselSlidesList .slide-item');
-                            previewCarouselArea.innerHTML = '';
-                            previewCarouselArea.style.display = 'flex';
-                            previewCarouselArea.style.flexDirection = 'row';
-                            previewCarouselArea.style.overflowX = 'auto';
-                            previewCarouselArea.style.scrollSnapType = 'x mandatory';
-                            previewCarouselArea.style.gap = '0';
-                            previewCarouselArea.style.backgroundImage = 'none';
-
-                            if (slides.length === 0) {
-                                previewCarouselArea.innerHTML = '<div class="w-full flex-shrink-0 h-full flex flex-col items-center justify-center text-slate-400">Sin slides en carrusel</div>';
-                            } else {
-                                const globalTitle = document.querySelector('#editSectionModal input[name="title"]')?.value || 'Tu Título Aquí';
-                                const globalSubtitle = document.querySelector('#editSectionModal input[name="subtitle"]')?.value || '';
-                                const globalBadge = document.querySelector('#editSectionModal input[name="badge"]')?.value || '';
-                                
-                                const gGradEn = document.querySelector('#editSectionModal input[name="settings[carousel_enable_gradient]"]')?.checked;
-                                const gGradStart = document.querySelector('#editSectionModal input[name="settings[carousel_gradient_color_start]"]')?.value || '#0f172a';
-                                const gGradEnd = document.querySelector('#editSectionModal input[name="settings[carousel_gradient_color_end]"]')?.value || '#1e1b4b';
-
-                                slides.forEach((slide, idx) => {
-                                    const uInp = slide.querySelector('.slide-url');
-                                    const fileInp = slide.querySelector('input[type="file"]');
-                                    let bgSrc = '';
-                                    
-                                    if (fileInp && fileInp.files && fileInp.files[0]) {
-                                        bgSrc = URL.createObjectURL(fileInp.files[0]);
-                                    } else if (uInp && uInp.value) {
-                                        bgSrc = uInp.value;
-                                    }
-                                    
-                                    const sTitle = isGlobal ? globalTitle : (slide.querySelector('input[name$="\\[title\\]"]')?.value || '');
-                                    const sSub = isGlobal ? globalSubtitle : (slide.querySelector('input[name$="\\[subtitle\\]"]')?.value || '');
-                                    const sBadge = isGlobal ? globalBadge : (slide.querySelector('input[name$="\\[badge\\]"]')?.value || '');
-                                    
-                                    const sGradEn = isGlobal ? gGradEn : slide.querySelector('input[name$="\\[enable_gradient\\]"]')?.checked;
-                                    const sGradStart = isGlobal ? gGradStart : (slide.querySelector('input[name$="\\[gradient_color_start\\]"]')?.value || '#000');
-                                    const sGradEnd = isGlobal ? gGradEnd : (slide.querySelector('input[name$="\\[gradient_color_end\\]"]')?.value || '#000');
-                                    
-                                    const slideDiv = document.createElement('div');
-                                    slideDiv.className = 'w-full flex-shrink-0 h-full relative flex flex-col items-center justify-center overflow-hidden';
-                                    slideDiv.style.scrollSnapAlign = 'start';
-                                    
-                                    if (bgSrc) {
-                                        slideDiv.style.backgroundImage = 'url(' + bgSrc + ')';
-                                        slideDiv.style.backgroundSize = 'cover';
-                                        slideDiv.style.backgroundPosition = 'center';
-                                    }
-                                    
-                                    if (sGradEn) {
-                                        const overlay = document.createElement('div');
-                                        overlay.className = 'absolute inset-0 z-0';
-                                        overlay.style.background = 'linear-gradient(to bottom, ' + sGradStart + '80, ' + sGradEnd + '80)';
-                                        slideDiv.appendChild(overlay);
-                                    }
-                                    
-                                    const contentDiv = document.createElement('div');
-                                    contentDiv.className = 'relative z-10 text-center px-8 w-full';
-                                    
-                                    if (sBadge) {
-                                        contentDiv.innerHTML += '<div class="inline-block bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full mb-2 uppercase tracking-wide font-bold">' + sBadge + '</div>';
-                                    }
-                                    if (sTitle) {
-                                        contentDiv.innerHTML += '<h2 class="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">' + sTitle + '</h2>';
-                                    }
-                                    if (sSub) {
-                                        contentDiv.innerHTML += '<p class="text-white/90 mt-2 max-w-md mx-auto">' + sSub + '</p>';
-                                    }
-
-                                    const sBtnText = slide.querySelector('input[name$="\\[button_text\\]"]')?.value || '';
-                                    const sBtnBg = slide.querySelector('input[name$="\\[button_bg\\]"]')?.value || '#0f172a';
-                                    const sBtnColor = slide.querySelector('input[name$="\\[button_color\\]"]')?.value || '#ffffff';
-                                    const sBtnBorderColor = slide.querySelector('input[name$="\\[button_border_color\\]"]')?.value || '#0f172a';
-                                    const sBtnBorderWidth = slide.querySelector('select[name$="\\[button_border_width\\]"]')?.value || 'border-0';
-                                    const sBtnShadow = slide.querySelector('select[name$="\\[button_shadow\\]"]')?.value || '';
-
-                                    if (sBtnText) {
-                                        const btnClass = `inline-block px-5 py-2 mt-4 rounded-lg font-bold text-xs ${sBtnBorderWidth} ${sBtnShadow}`;
-                                        const btnStyle = `background-color: ${sBtnBg}; color: ${sBtnColor}; border-color: ${sBtnBorderColor};`;
-                                        contentDiv.innerHTML += `<a href="javascript:void(0)" class="${btnClass}" style="${btnStyle}">${sBtnText}</a>`;
-                                    }
-                                    
-                                    slideDiv.appendChild(contentDiv);
-                                    previewCarouselArea.appendChild(slideDiv);
-                                });
+                            if (typeof window.renderCarouselLivePreview === 'function') {
+                                window.renderCarouselLivePreview('edit');
                             }
                         }
 
@@ -6005,18 +5818,19 @@ $curatedGoogleFonts = [
             if(customCodeWrap) customCodeWrap.style.display = 'block';
             if(spacingWrap) spacingWrap.style.display = 'block';
         } else {
-            if(commonFields) commonFields.style.display = 'block';
+            const type = document.getElementById('createSectionType')?.value;
+            if(commonFields) commonFields.style.display = (type === 'carousel') ? 'none' : 'block';
             if(customCodeWrap) customCodeWrap.style.display = 'none';
-            // Trigger switchSectionType to restore the correct wrap
-            if(typeof switchSectionType === 'function') {
-                switchSectionType();
-            } else {
-                const type = document.getElementById('createSectionType')?.value;
-                if(heroWrap) heroWrap.style.display = type === 'hero' ? 'block' : 'none';
-                if(carouselWrap) carouselWrap.style.display = type === 'carousel' ? 'block' : 'none';
-                if(popUpWrap) popUpWrap.style.display = type === 'pop_up' ? 'block' : 'none';
-                if(buttonsWrap) buttonsWrap.style.display = type === 'buttons' ? 'block' : 'none';
-                if(spacingWrap) spacingWrap.style.display = type === 'pop_up' ? 'none' : 'block';
+            if(heroWrap) heroWrap.style.display = type === 'hero' ? 'block' : 'none';
+            if(carouselWrap) carouselWrap.style.display = type === 'carousel' ? 'block' : 'none';
+            if(popUpWrap) popUpWrap.style.display = type === 'pop_up' ? 'block' : 'none';
+            if(buttonsWrap) buttonsWrap.style.display = type === 'buttons' ? 'block' : 'none';
+            if(spacingWrap) spacingWrap.style.display = type === 'pop_up' ? 'none' : 'block';
+            if (type === 'carousel') {
+                const slidesList = document.getElementById('createCarouselSlidesList');
+                if (slidesList && slidesList.querySelectorAll('.slide-item').length === 0 && typeof window.addCarouselSlide === 'function') {
+                    window.addCarouselSlide('create');
+                }
             }
         }
     };
@@ -6045,9 +5859,9 @@ $curatedGoogleFonts = [
             if(customCodeWrap) customCodeWrap.style.display = 'block';
             if(spacingWrap) spacingWrap.style.display = 'block';
         } else {
-            if(commonFields) commonFields.style.display = 'block';
-            if(customCodeWrap) customCodeWrap.style.display = 'none';
             const type = document.getElementById('editSectionType')?.value;
+            if(commonFields) commonFields.style.display = (type === 'carousel') ? 'none' : 'block';
+            if(customCodeWrap) customCodeWrap.style.display = 'none';
             if(heroWrap) heroWrap.style.display = type === 'hero' ? 'block' : 'none';
             if(carouselWrap) carouselWrap.style.display = type === 'carousel' ? 'block' : 'none';
             if(popUpWrap) popUpWrap.style.display = type === 'pop_up' ? 'block' : 'none';
@@ -6154,7 +5968,7 @@ $curatedGoogleFonts = [
             if(editCustomCodeWrap) editCustomCodeWrap.style.display = 'block';
             if(editSpacingWrap) editSpacingWrap.style.display = 'block';
         } else {
-            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = 'block';
+            if(editCommonFieldsWrap) editCommonFieldsWrap.style.display = (typeVal === 'carousel') ? 'none' : 'block';
             if(editCustomCodeWrap) editCustomCodeWrap.style.display = 'none';
             if(editHeroWrap) editHeroWrap.style.display = typeVal === 'hero' ? 'block' : 'none';
             if(editCarouselWrap) editCarouselWrap.style.display = typeVal === 'carousel' ? 'block' : 'none';
@@ -6292,17 +6106,29 @@ $curatedGoogleFonts = [
         if (hmRadio) hmRadio.checked = true;
         window.toggleHeroModeEdit(heroMode);
 
+        const isFullWidthBool = (st.full_width === 1 || st.full_width === '1' || st.full_width === true);
         const editFullWidth = document.getElementById('inpEditFullWidth');
-        if (editFullWidth) editFullWidth.checked = (st.full_width === 1 || st.full_width === '1' || st.full_width === true);
+        if (editFullWidth) editFullWidth.checked = isFullWidthBool;
+        const editCarouselFullWidth = document.getElementById('inpEditCarouselFullWidth');
+        if (editCarouselFullWidth) editCarouselFullWidth.checked = isFullWidthBool;
         
+        const isFullWidthHBool = (st.full_width_horizontal === 1 || st.full_width_horizontal === '1' || st.full_width_horizontal === true);
         const editFullWidthH = document.getElementById('inpEditFullWidthHorizontal');
-        if (editFullWidthH) editFullWidthH.checked = (st.full_width_horizontal === 1 || st.full_width_horizontal === '1' || st.full_width_horizontal === true);
+        if (editFullWidthH) editFullWidthH.checked = isFullWidthHBool;
+        const editCarouselFullWidthH = document.getElementById('inpEditCarouselFullWidthHorizontal');
+        if (editCarouselFullWidthH) editCarouselFullWidthH.checked = isFullWidthHBool;
         
         const editHeroHeightValue = document.getElementById('inpEditHeroHeightValue');
         const editHeroHeightUnit = document.getElementById('inpEditHeroHeightUnit');
         if (editHeroHeightValue && editHeroHeightUnit) {
             editHeroHeightValue.value = st.hero_height_value || '';
             editHeroHeightUnit.value = st.hero_height_unit || 'px';
+        }
+        const editCarouselHeightValue = document.getElementById('inpEditCarouselHeightValue');
+        const editCarouselHeightUnit = document.getElementById('inpEditCarouselHeightUnit');
+        if (editCarouselHeightValue && editCarouselHeightUnit) {
+            editCarouselHeightValue.value = st.hero_height_value || '';
+            editCarouselHeightUnit.value = st.hero_height_unit || 'px';
         }
 
         // Tipo de fondo (Imagen vs Video)
@@ -6382,59 +6208,36 @@ $curatedGoogleFonts = [
         if (editGradOpacityEndVal) editGradOpacityEndVal.textContent = opEndVal + '%';
         window.updateHeroGradientPreview('edit');
 
-        // Carousel Config & Slides
-        const editCarouselGlobalToggle = document.getElementById('editCarouselGlobalToggle');
-        if (editCarouselGlobalToggle) {
-            const hasGlobal = (st.carousel_global_content === undefined || st.carousel_global_content === 1 || st.carousel_global_content === '1' || st.carousel_global_content === true);
-            editCarouselGlobalToggle.checked = hasGlobal;
-            const gradWrap = document.getElementById('editCarouselGradientControlsWrap');
-            if (gradWrap) gradWrap.style.display = hasGlobal ? 'block' : 'none';
-        }
-
+        // Carousel Config & Slides (Contenido integrado por Slide)
         const editCarouselAutoPlay = document.getElementById('editCarouselAutoPlay');
         if (editCarouselAutoPlay) editCarouselAutoPlay.checked = (st.autoplay === undefined || st.autoplay == 1 || st.autoplay === true);
 
         const editCarouselAutoplayTime = document.getElementById('editCarouselAutoplayTime');
         if (editCarouselAutoplayTime) editCarouselAutoplayTime.value = st.autoplay_time || 5;
 
-        const editCarouselEnableGradient = document.getElementById('editCarouselEnableGradient');
-        const hasCarGrad = (st.carousel_enable_gradient == 1 || st.carousel_enable_gradient === true);
-        if (editCarouselEnableGradient) editCarouselEnableGradient.checked = hasCarGrad;
-        const carGradControls = document.getElementById('editCarouselGradientControls');
-        if (carGradControls) carGradControls.style.display = hasCarGrad ? 'block' : 'none';
-
-        const editCarGradColorStart = document.getElementById('editCarGradColorStart');
-        const editCarGradColorStartPicker = document.getElementById('editCarGradColorStartPicker');
-        if (editCarGradColorStart) editCarGradColorStart.value = st.carousel_gradient_color_start || '#0f172a';
-        if (editCarGradColorStartPicker) editCarGradColorStartPicker.value = st.carousel_gradient_color_start || '#0f172a';
-
-        const editCarGradOpacityStart = document.getElementById('editCarGradOpacityStart');
-        const editCarGradOpacityStartVal = document.getElementById('editCarGradOpacityStartVal');
-        const carOpStart = st.carousel_gradient_opacity_start !== undefined ? st.carousel_gradient_opacity_start : 80;
-        if (editCarGradOpacityStart) editCarGradOpacityStart.value = carOpStart;
-        if (editCarGradOpacityStartVal) editCarGradOpacityStartVal.textContent = carOpStart + '%';
-
-        const editCarGradColorEnd = document.getElementById('editCarGradColorEnd');
-        const editCarGradColorEndPicker = document.getElementById('editCarGradColorEndPicker');
-        if (editCarGradColorEnd) editCarGradColorEnd.value = st.carousel_gradient_color_end || '#1e1b4b';
-        if (editCarGradColorEndPicker) editCarGradColorEndPicker.value = st.carousel_gradient_color_end || '#1e1b4b';
-
-        const editCarGradOpacityEnd = document.getElementById('editCarGradOpacityEnd');
-        const editCarGradOpacityEndVal = document.getElementById('editCarGradOpacityEndVal');
-        const carOpEnd = st.carousel_gradient_opacity_end !== undefined ? st.carousel_gradient_opacity_end : 0;
-        if (editCarGradOpacityEnd) editCarGradOpacityEnd.value = carOpEnd;
-        if (editCarGradOpacityEndVal) editCarGradOpacityEndVal.textContent = carOpEnd + '%';
-
-        const editCarGradDirection = document.getElementById('editCarGradDirection');
-        if (editCarGradDirection) editCarGradDirection.value = st.carousel_gradient_direction || 'to bottom';
+        if (window._carouselPreviewState && window._carouselPreviewState.edit) {
+            window._carouselPreviewState.edit.activeIdx = 0;
+        }
 
         const editCarouselSlidesList = document.getElementById('editCarouselSlidesList');
         if (editCarouselSlidesList) {
             editCarouselSlidesList.innerHTML = '';
             window.slideCounters.edit = 0;
-            if (st.carousel_slides && Array.isArray(st.carousel_slides)) {
-                st.carousel_slides.forEach(slide => {
-                    window.addCarouselSlide('edit', slide);
+            if (st.carousel_slides && Array.isArray(st.carousel_slides) && st.carousel_slides.length > 0) {
+                st.carousel_slides.forEach((slide, idx) => {
+                    const hydratedSlide = Object.assign({}, slide);
+                    if (idx === 0) {
+                        if (!hydratedSlide.title && sec.title) hydratedSlide.title = sec.title;
+                        if (!hydratedSlide.subtitle && sec.subtitle) hydratedSlide.subtitle = sec.subtitle;
+                        if (!hydratedSlide.badge && sec.badge) hydratedSlide.badge = sec.badge;
+                    }
+                    window.addCarouselSlide('edit', hydratedSlide);
+                });
+            } else if ((sec.type || '') === 'carousel') {
+                window.addCarouselSlide('edit', {
+                    title: sec.title || '',
+                    subtitle: sec.subtitle || '',
+                    badge: sec.badge || ''
                 });
             }
         }
@@ -6505,9 +6308,14 @@ $curatedGoogleFonts = [
         const alignRadio = document.querySelector(`#editSectionModal input[name="settings[text_align]"][value="${alignVal}"]`);
         if (alignRadio) alignRadio.checked = true;
 
+        const isParallaxBool = (st.parallax_scrolling === 1 || st.parallax_scrolling === '1' || st.parallax_scrolling === true || st.reveal_effect === 1 || st.reveal_effect === '1');
         const editParallax = document.getElementById('inpEditParallax');
         if (editParallax) {
-            editParallax.checked = (st.parallax_scrolling === 1 || st.parallax_scrolling === '1' || st.parallax_scrolling === true);
+            editParallax.checked = isParallaxBool;
+        }
+        const editCarouselParallax = document.getElementById('inpEditCarouselParallax');
+        if (editCarouselParallax) {
+            editCarouselParallax.checked = isParallaxBool;
         }
 
         const spTop = (st.spacing_top !== undefined && st.spacing_top !== '') ? parseInt(st.spacing_top, 10) : 0;
@@ -7232,10 +7040,537 @@ $curatedGoogleFonts = [
         initStoreCMS();
     }
 
-// --- NEW CAROUSEL JS ---
+// --- NEW CAROUSEL JS (FULL ANIMATED VIEWPORT + INTEGRATED SLIDES) ---
 window.slideCounters = {
     create: 0,
     edit: 0
+};
+
+window._carouselPreviewState = {
+    create: { activeIdx: 0 },
+    edit: { activeIdx: 0 }
+};
+
+window._carouselPreviewTimers = {
+    create: null,
+    edit: null
+};
+
+window.focusCarouselSlidePreview = function(el, mode) {
+    const slideItem = el ? el.closest('.slide-item') : null;
+    if (!slideItem) return;
+    const list = document.getElementById(mode + 'CarouselSlidesList');
+    if (!list) return;
+    const items = Array.from(list.querySelectorAll('.slide-item'));
+    const idx = items.indexOf(slideItem);
+    if (idx !== -1 && window._carouselPreviewState[mode]) {
+        window._carouselPreviewState[mode].activeIdx = idx;
+    }
+};
+
+window.handleSlideFileSelect = function(fileInput, mode) {
+    const slideItem = fileInput ? fileInput.closest('.slide-item') : null;
+    if (!slideItem) return;
+    window.focusCarouselSlidePreview(fileInput, mode);
+
+    const thumbWrap = slideItem.querySelector('.slide-img-thumb');
+    const thumbImg = slideItem.querySelector('.slide-img-thumb img');
+    const thumbLabel = slideItem.querySelector('.slide-img-thumb-label');
+
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const blobUrl = URL.createObjectURL(file);
+        slideItem.dataset.localPreviewSrc = blobUrl;
+
+        if (thumbWrap && thumbImg) {
+            thumbImg.src = blobUrl;
+            if (thumbLabel) thumbLabel.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            thumbWrap.classList.remove('hidden');
+            thumbWrap.style.display = 'flex';
+        }
+
+        if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+        if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            if (evt.target && evt.target.result) {
+                slideItem.dataset.localPreviewSrc = evt.target.result;
+                if (thumbImg) thumbImg.src = evt.target.result;
+                if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+                if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+            }
+        };
+        reader.readAsDataURL(file);
+    } else {
+        delete slideItem.dataset.localPreviewSrc;
+        const urlInp = slideItem.querySelector('.slide-url');
+        if (urlInp && urlInp.value && thumbWrap && thumbImg) {
+            thumbImg.src = urlInp.value;
+            if (thumbLabel) thumbLabel.textContent = urlInp.value;
+            thumbWrap.classList.remove('hidden');
+            thumbWrap.style.display = 'flex';
+        } else if (thumbWrap) {
+            thumbWrap.classList.add('hidden');
+            thumbWrap.style.display = 'none';
+        }
+        if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+        if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+    }
+};
+
+window.handleSlideUrlInput = function(urlInput, mode) {
+    const slideItem = urlInput ? urlInput.closest('.slide-item') : null;
+    if (!slideItem) return;
+    window.focusCarouselSlidePreview(urlInput, mode);
+
+    if (!slideItem.dataset.localPreviewSrc) {
+        const thumbWrap = slideItem.querySelector('.slide-img-thumb');
+        const thumbImg = slideItem.querySelector('.slide-img-thumb img');
+        const thumbLabel = slideItem.querySelector('.slide-img-thumb-label');
+        const val = (urlInput.value || '').trim();
+        if (val && thumbWrap && thumbImg) {
+            thumbImg.src = val;
+            if (thumbLabel) thumbLabel.textContent = val;
+            thumbWrap.classList.remove('hidden');
+            thumbWrap.style.display = 'flex';
+        } else if (thumbWrap) {
+            thumbWrap.classList.add('hidden');
+            thumbWrap.style.display = 'none';
+        }
+    }
+
+    if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+    if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+};
+
+window.clearSlideImage = function(btn, mode) {
+    const slideItem = btn ? btn.closest('.slide-item') : null;
+    if (!slideItem) return;
+    delete slideItem.dataset.localPreviewSrc;
+    const fileInp = slideItem.querySelector('input[type="file"]');
+    if (fileInp) fileInp.value = '';
+    const urlInp = slideItem.querySelector('.slide-url');
+    if (urlInp) urlInp.value = '';
+    const thumbWrap = slideItem.querySelector('.slide-img-thumb');
+    if (thumbWrap) {
+        thumbWrap.classList.add('hidden');
+        thumbWrap.style.display = 'none';
+    }
+    if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+    if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+};
+
+window.setCarouselPreviewSlide = function(mode, idx) {
+    const areaId = mode === 'edit' ? 'editPreviewCarouselArea' : 'previewCarouselArea';
+    const area = document.getElementById(areaId);
+    if (!area) return;
+    const track = area.querySelector('.carousel-live-track');
+    const slides = area.querySelectorAll('.carousel-live-slide');
+    if (!track || slides.length === 0) return;
+
+    const total = slides.length;
+    const prevIdx = (window._carouselPreviewState[mode] && window._carouselPreviewState[mode].activeIdx) || 0;
+    const normalizedIdx = ((idx % total) + total) % total;
+    window._carouselPreviewState[mode].activeIdx = normalizedIdx;
+
+    const cap = mode === 'edit' ? 'Edit' : 'Create';
+    const isReveal = document.getElementById('inp' + cap + 'CarouselParallax')?.checked;
+
+    if (isReveal && slides.length > 1) {
+        if (prevIdx !== normalizedIdx) {
+            const currentSlide = slides[prevIdx];
+            const targetSlide = slides[normalizedIdx];
+            const isNext = normalizedIdx > prevIdx || (prevIdx === total - 1 && normalizedIdx === 0);
+
+            targetSlide.style.zIndex = '1';
+            targetSlide.style.visibility = 'visible';
+            targetSlide.style.clipPath = 'none';
+
+            currentSlide.style.zIndex = '3';
+            currentSlide.style.visibility = 'visible';
+            currentSlide.style.clipPath = 'inset(0 0 0 0)';
+            void currentSlide.offsetHeight;
+
+            currentSlide.style.transition = 'clip-path 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+            currentSlide.style.clipPath = isNext ? 'inset(0 100% 0 0)' : 'inset(0 0 0 100%)';
+
+            setTimeout(() => {
+                targetSlide.style.zIndex = '2';
+                currentSlide.style.zIndex = '0';
+                currentSlide.style.visibility = 'hidden';
+                currentSlide.style.clipPath = 'none';
+                currentSlide.style.transition = 'none';
+                slides.forEach((s, sI) => {
+                    if (sI !== normalizedIdx) {
+                        s.style.zIndex = '0';
+                        s.style.visibility = 'hidden';
+                    }
+                });
+            }, 620);
+        }
+    } else {
+        track.style.transform = `translateX(-${normalizedIdx * 100}%)`;
+    }
+
+    area.querySelectorAll('.carousel-live-dot').forEach((dot, dIdx) => {
+        if (dIdx === normalizedIdx) {
+            dot.style.width = '22px';
+            dot.style.backgroundColor = '#ffffff';
+            dot.style.opacity = '1';
+        } else {
+            dot.style.width = '8px';
+            dot.style.backgroundColor = 'rgba(255,255,255,0.5)';
+            dot.style.opacity = '0.8';
+        }
+    });
+
+    const counterBadge = area.querySelector('.carousel-live-counter');
+    if (counterBadge) {
+        counterBadge.textContent = `Slide ${normalizedIdx + 1} / ${total}`;
+    }
+};
+
+window.stepCarouselPreviewSlide = function(mode, delta) {
+    const cur = (window._carouselPreviewState[mode] && window._carouselPreviewState[mode].activeIdx) || 0;
+    window.setCarouselPreviewSlide(mode, cur + delta);
+};
+
+window.syncCarouselLayoutSettings = function(mode) {
+    const cap = mode === 'edit' ? 'Edit' : 'Create';
+    const cFull = document.getElementById('inp' + cap + 'CarouselFullWidth');
+    const hFull = document.getElementById('inp' + cap + 'FullWidth');
+    const cFullH = document.getElementById('inp' + cap + 'CarouselFullWidthHorizontal');
+    const hFullH = document.getElementById('inp' + cap + 'FullWidthHorizontal');
+
+    if (cFull && hFull) hFull.checked = cFull.checked;
+    if (cFullH && hFullH) hFullH.checked = cFullH.checked;
+
+    const cHeightVal = document.getElementById('inp' + cap + 'CarouselHeightValue');
+    const hHeightVal = document.getElementById('inp' + cap + 'HeroHeightValue');
+    if (cHeightVal && hHeightVal) hHeightVal.value = cHeightVal.value;
+
+    const cHeightUnit = document.getElementById('inp' + cap + 'CarouselHeightUnit');
+    const hHeightUnit = document.getElementById('inp' + cap + 'HeroHeightUnit');
+    if (cHeightUnit && hHeightUnit) hHeightUnit.value = cHeightUnit.value;
+
+    const cParallax = document.getElementById('inp' + cap + 'CarouselParallax');
+    const hParallax = document.getElementById('inp' + cap + 'Parallax');
+    if (cParallax && hParallax) hParallax.checked = cParallax.checked;
+
+    if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+    if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+};
+
+window.SLIDE_FOCAL_LABELS = {
+    'left top': 'Izquierda Superior (0% 0%)',
+    'center top': 'Centro Superior (50% 0%)',
+    'right top': 'Derecha Superior (100% 0%)',
+    'left center': 'Izquierda Centro (0% 50%)',
+    'center center': 'Centro Centro (50% 50%)',
+    'right center': 'Derecha Centro (100% 50%)',
+    'left bottom': 'Izquierda Inferior (0% 100%)',
+    'center bottom': 'Centro Inferior (50% 100%)',
+    'right bottom': 'Derecha Inferior (100% 100%)'
+};
+
+window.setSlideFocalPoint = function(btn, focalValue, mode) {
+    const slideItem = btn ? btn.closest('.slide-item') : null;
+    if (!slideItem) return;
+    window.focusCarouselSlidePreview(btn, mode);
+
+    const hiddenInput = slideItem.querySelector('.slide-focal-input');
+    if (hiddenInput) hiddenInput.value = focalValue;
+
+    const labelEl = slideItem.querySelector('.slide-focal-label');
+    if (labelEl) {
+        labelEl.textContent = window.SLIDE_FOCAL_LABELS[focalValue] || 'Centro Centro (50% 50%)';
+    }
+
+    const matrix = slideItem.querySelector('.slide-focal-matrix');
+    if (matrix) {
+        matrix.querySelectorAll('.focal-cell').forEach(cell => {
+            const isSelected = cell.getAttribute('data-focal') === focalValue;
+            const dot = cell.querySelector('span');
+            if (isSelected) {
+                cell.className = 'focal-cell aspect-square flex items-center justify-center rounded-md bg-indigo-600 border border-indigo-700 ring-2 ring-indigo-300 text-white transition cursor-pointer shadow-xs';
+                if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-white ring-2 ring-indigo-400 pointer-events-none';
+            } else {
+                cell.className = 'focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer';
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-300 pointer-events-none';
+            }
+        });
+    }
+
+    if (mode === 'create' && typeof window.updatePreviewCreate === 'function') window.updatePreviewCreate();
+    if (mode === 'edit' && typeof window.updatePreviewEdit === 'function') window.updatePreviewEdit();
+};
+
+window.renderCarouselLivePreview = function(mode) {
+    const areaId = mode === 'edit' ? 'editPreviewCarouselArea' : 'previewCarouselArea';
+    const previewCarouselArea = document.getElementById(areaId);
+    if (!previewCarouselArea) return;
+
+    if (window._carouselPreviewTimers[mode]) {
+        clearInterval(window._carouselPreviewTimers[mode]);
+        window._carouselPreviewTimers[mode] = null;
+    }
+
+    const cap = mode === 'edit' ? 'Edit' : 'Create';
+    const isFullPage = document.getElementById('inp' + cap + 'CarouselFullWidth')?.checked || document.getElementById('inp' + cap + 'FullWidth')?.checked || false;
+    const isFullWidthH = document.getElementById('inp' + cap + 'CarouselFullWidthHorizontal')?.checked || document.getElementById('inp' + cap + 'FullWidthHorizontal')?.checked || false;
+    const customHeightVal = (document.getElementById('inp' + cap + 'CarouselHeightValue')?.value || document.getElementById('inp' + cap + 'HeroHeightValue')?.value || '').trim();
+    const customHeightUnit = document.getElementById('inp' + cap + 'CarouselHeightUnit')?.value || document.getElementById('inp' + cap + 'HeroHeightUnit')?.value || 'px';
+    const isParallax = document.getElementById('inp' + cap + 'CarouselParallax')?.checked || document.getElementById('inp' + cap + 'Parallax')?.checked || false;
+
+    let previewHeightCss = '320px';
+    if (isFullPage) {
+        previewHeightCss = '420px';
+    } else if (customHeightVal !== '' && !isNaN(parseInt(customHeightVal, 10))) {
+        const numH = parseInt(customHeightVal, 10);
+        if (customHeightUnit === 'px') {
+            previewHeightCss = Math.max(180, Math.min(520, numH)) + 'px';
+        } else if (customHeightUnit === 'vh') {
+            previewHeightCss = Math.max(180, Math.min(520, Math.round(numH * 4.2))) + 'px';
+        }
+    }
+
+    const slides = document.querySelectorAll('#' + mode + 'CarouselSlidesList .slide-item');
+    previewCarouselArea.innerHTML = '';
+    previewCarouselArea.style.display = 'block';
+    previewCarouselArea.style.position = 'relative';
+    previewCarouselArea.style.width = '100%';
+    previewCarouselArea.style.height = previewHeightCss;
+    previewCarouselArea.style.minHeight = previewHeightCss;
+    previewCarouselArea.style.borderRadius = isFullWidthH ? '0px' : '';
+    previewCarouselArea.style.overflow = 'hidden';
+    previewCarouselArea.style.backgroundColor = '#0f172a';
+    previewCarouselArea.style.backgroundImage = 'none';
+
+    if (slides.length === 0) {
+        previewCarouselArea.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; gap: 8px; padding: 24px; text-align: center;">
+                <svg style="width: 36px; height: 36px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #cbd5e1;">Sin slides en el carrusel</span>
+                <span style="font-size: 11px; color: #64748b;">Haz clic en "+ Añadir Slide" para agregar imágenes y contenido.</span>
+            </div>
+        `;
+        return;
+    }
+
+    function hexToRgba(hex, alpha) {
+        let c = (hex || '#0f172a').replace('#', '').trim();
+        if (c.length === 3) c = c.split('').map(x => x + x).join('');
+        const num = parseInt(c, 16);
+        if (isNaN(num)) return `rgba(15, 23, 42, ${alpha})`;
+        return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+    }
+
+    if (!window._carouselPreviewState[mode]) {
+        window._carouselPreviewState[mode] = { activeIdx: 0 };
+    }
+    if (window._carouselPreviewState[mode].activeIdx >= slides.length) {
+        window._carouselPreviewState[mode].activeIdx = Math.max(0, slides.length - 1);
+    }
+    const activeIdx = window._carouselPreviewState[mode].activeIdx;
+
+    const isReveal = isParallax;
+    const track = document.createElement('div');
+    track.className = 'carousel-live-track';
+    if (isReveal) {
+        track.style.cssText = 'position: relative; width: 100%; height: 100%; overflow: hidden;';
+    } else {
+        track.style.cssText = `display: flex; width: 100%; height: 100%; transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); transform: translateX(-${activeIdx * 100}%); will-change: transform;`;
+    }
+
+    slides.forEach((slide, idx) => {
+        const uInp = slide.querySelector('.slide-url');
+        const fileInp = slide.querySelector('input[type="file"]');
+        let bgSrc = '';
+
+        if (slide.dataset.localPreviewSrc) {
+            bgSrc = slide.dataset.localPreviewSrc;
+        } else if (fileInp && fileInp.files && fileInp.files[0]) {
+            bgSrc = URL.createObjectURL(fileInp.files[0]);
+            slide.dataset.localPreviewSrc = bgSrc;
+        } else if (uInp && uInp.value && uInp.value.trim()) {
+            bgSrc = uInp.value.trim();
+        }
+
+        const sFocal = slide.querySelector('input[name$="[image_focal_point]"]')?.value || 'center center';
+        const sTitle = slide.querySelector('input[name$="[title]"]')?.value || '';
+        const sSub = slide.querySelector('input[name$="[subtitle]"]')?.value || '';
+        const sBadge = slide.querySelector('input[name$="[badge]"]')?.value || '';
+        const sTitleColor = slide.querySelector('input[name$="[title_color]"]')?.value || '#ffffff';
+        const sSubColor = slide.querySelector('input[name$="[subtitle_color]"]')?.value || '#e2e8f0';
+        const sAlign = slide.querySelector('select[name$="[text_align]"]')?.value || 'text-center';
+
+        const sGradEn = slide.querySelector('input[name$="[enable_gradient]"]')?.checked;
+        const sGradStart = slide.querySelector('input[name$="[gradient_color_start]"]')?.value || '#0f172a';
+        const sGradEnd = slide.querySelector('input[name$="[gradient_color_end]"]')?.value || '#0f172a';
+        const sOpStart = parseInt(slide.querySelector('input[name$="[gradient_opacity_start]"]')?.value ?? '80', 10) / 100;
+        const sOpEnd = parseInt(slide.querySelector('input[name$="[gradient_opacity_end]"]')?.value ?? '0', 10) / 100;
+        const sGradDir = slide.querySelector('select[name$="[gradient_direction]"]')?.value || 'to bottom';
+
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'carousel-live-slide';
+        if (isReveal) {
+            slideDiv.style.cssText = `position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; background-color: #0f172a; z-index: ${idx === activeIdx ? '2' : '0'}; visibility: ${idx === activeIdx ? 'visible' : 'hidden'};`;
+        } else {
+            slideDiv.style.cssText = 'flex: 0 0 100%; min-width: 100%; width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; background-color: #0f172a;';
+        }
+
+        if (bgSrc) {
+            const imgEl = document.createElement('img');
+            imgEl.src = bgSrc;
+            imgEl.alt = slide.querySelector('input[name$="[alt_text]"]')?.value || ('Slide ' + (idx + 1));
+            imgEl.style.cssText = `position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: ${sFocal}; z-index: 0; pointer-events: none; display: block;`;
+            slideDiv.appendChild(imgEl);
+        } else {
+            const emptyBg = document.createElement('div');
+            emptyBg.style.cssText = 'position: absolute; inset: 0; z-index: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); color: #475569;';
+            emptyBg.innerHTML = `<svg style="width: 32px; height: 32px; opacity: 0.45; margin-bottom: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size: 10px; font-weight: 600; color: #64748b;">Slide ${idx + 1}: Sube o selecciona una imagen</span>`;
+            slideDiv.appendChild(emptyBg);
+        }
+
+        if (sGradEn) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(${sGradDir}, ${hexToRgba(sGradStart, isNaN(sOpStart) ? 0.8 : sOpStart)}, ${hexToRgba(sGradEnd, isNaN(sOpEnd) ? 0 : sOpEnd)});`;
+            slideDiv.appendChild(overlay);
+        }
+
+        let alignItems = 'center';
+        let textAlign = 'center';
+        if (sAlign === 'text-left') {
+            alignItems = 'flex-start';
+            textAlign = 'left';
+        } else if (sAlign === 'text-right') {
+            alignItems = 'flex-end';
+            textAlign = 'right';
+        }
+
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = `position: relative; z-index: 2; padding: 24px 44px; width: 100%; display: flex; flex-direction: column; align-items: ${alignItems}; text-align: ${textAlign}; pointer-events: none;`;
+
+        if (sBadge) {
+            const badgeEl = document.createElement('div');
+            badgeEl.style.cssText = 'display: inline-block; background: rgba(79, 70, 229, 0.9); color: #ffffff; font-size: 10px; padding: 3px 10px; border-radius: 9999px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;';
+            badgeEl.textContent = sBadge;
+            contentDiv.appendChild(badgeEl);
+        }
+        if (sTitle) {
+            const titleEl = document.createElement('h2');
+            titleEl.style.cssText = `font-size: 24px; line-height: 1.2; font-weight: 800; color: ${sTitleColor}; text-shadow: 0 2px 10px rgba(0,0,0,0.35); margin: 0; max-width: 540px;`;
+            titleEl.textContent = sTitle;
+            contentDiv.appendChild(titleEl);
+        }
+        if (sSub) {
+            const subEl = document.createElement('p');
+            subEl.style.cssText = `font-size: 13px; line-height: 1.45; color: ${sSubColor}; margin-top: 8px; max-width: 460px; text-shadow: 0 1px 4px rgba(0,0,0,0.3);`;
+            subEl.textContent = sSub;
+            contentDiv.appendChild(subEl);
+        }
+
+        const sBtnText = slide.querySelector('input[name$="[button_text]"]')?.value || '';
+        const sBtnBg = slide.querySelector('input[name$="[button_bg]"]')?.value || '#0f172a';
+        const sBtnColor = slide.querySelector('input[name$="[button_color]"]')?.value || '#ffffff';
+        const sBtnBorderColor = slide.querySelector('input[name$="[button_border_color]"]')?.value || '#0f172a';
+        const sBtnBorderWidth = slide.querySelector('select[name$="[button_border_width]"]')?.value || 'border-0';
+        const sBtnShadow = slide.querySelector('select[name$="[button_shadow]"]')?.value || '';
+
+        if (sBtnText) {
+            let borderPx = '0px';
+            if (sBtnBorderWidth === 'border') borderPx = '1px';
+            else if (sBtnBorderWidth === 'border-2') borderPx = '2px';
+            else if (sBtnBorderWidth === 'border-4') borderPx = '4px';
+
+            let shadowCss = 'none';
+            if (sBtnShadow === 'shadow-sm') shadowCss = '0 1px 3px rgba(0,0,0,0.25)';
+            else if (sBtnShadow === 'shadow-md') shadowCss = '0 4px 8px rgba(0,0,0,0.3)';
+            else if (sBtnShadow === 'shadow-lg') shadowCss = '0 10px 15px rgba(0,0,0,0.35)';
+            else if (sBtnShadow === 'shadow-xl') shadowCss = '0 20px 25px rgba(0,0,0,0.4)';
+
+            const btnEl = document.createElement('span');
+            btnEl.style.cssText = `display: inline-block; margin-top: 14px; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 12px; background-color: ${sBtnBg}; color: ${sBtnColor}; border: ${borderPx} solid ${sBtnBorderColor}; box-shadow: ${shadowCss};`;
+            btnEl.textContent = sBtnText;
+            contentDiv.appendChild(btnEl);
+        }
+
+        slideDiv.appendChild(contentDiv);
+        track.appendChild(slideDiv);
+    });
+
+    previewCarouselArea.appendChild(track);
+
+    // Top-right badge: Slide counter + Autoplay state + Layout badges
+    const autoPlayCheck = document.getElementById(mode + 'CarouselAutoPlay');
+    const autoPlayTimeInp = document.getElementById(mode + 'CarouselAutoplayTime');
+    const isAutoplay = autoPlayCheck ? autoPlayCheck.checked : true;
+    const autoplaySec = Math.max(1, parseInt(autoPlayTimeInp ? autoPlayTimeInp.value : '5', 10) || 5);
+
+    const statusWrap = document.createElement('div');
+    statusWrap.style.cssText = 'position: absolute; top: 10px; right: 12px; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 5px; pointer-events: none;';
+    statusWrap.innerHTML = `
+        <span class="carousel-live-counter" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); color: #ffffff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.15);">Slide ${activeIdx + 1} / ${slides.length}</span>
+        ${isAutoplay && slides.length > 1 ? `<span style="background: rgba(79, 70, 229, 0.85); color: #ffffff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;">Autoplay ${autoplaySec}s</span>` : ''}
+        ${isFullPage ? `<span style="background: rgba(16, 185, 129, 0.85); color: #ffffff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;">Full Page</span>` : ''}
+        ${isFullWidthH ? `<span style="background: rgba(14, 165, 233, 0.85); color: #ffffff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;">100% Ancho</span>` : ''}
+        ${isParallax ? `<span style="background: rgba(147, 51, 234, 0.85); color: #ffffff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;">Cortina Revelado</span>` : ''}
+    `;
+    previewCarouselArea.appendChild(statusWrap);
+
+    // Navigation Arrows & Pagination Dots
+    if (slides.length > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.title = 'Slide anterior';
+        prevBtn.style.cssText = 'position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 20; width: 32px; height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.65); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;';
+        prevBtn.innerHTML = '<svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>';
+        prevBtn.onclick = function(e) {
+            e.preventDefault();
+            window.stepCarouselPreviewSlide(mode, -1);
+        };
+        previewCarouselArea.appendChild(prevBtn);
+
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.title = 'Siguiente slide';
+        nextBtn.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 20; width: 32px; height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.65); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;';
+        nextBtn.innerHTML = '<svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>';
+        nextBtn.onclick = function(e) {
+            e.preventDefault();
+            window.stepCarouselPreviewSlide(mode, 1);
+        };
+        previewCarouselArea.appendChild(nextBtn);
+    }
+
+    const dotsWrap = document.createElement('div');
+    dotsWrap.style.cssText = 'position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 6px; background: rgba(15, 23, 42, 0.45); padding: 4px 10px; border-radius: 9999px; backdrop-filter: blur(4px);';
+    slides.forEach((_, idx) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'carousel-live-dot';
+        const isCurrent = idx === activeIdx;
+        dot.style.cssText = `height: 8px; width: ${isCurrent ? '22px' : '8px'}; border-radius: 9999px; background-color: ${isCurrent ? '#ffffff' : 'rgba(255,255,255,0.5)'}; border: none; cursor: pointer; transition: all 0.3s ease; padding: 0;`;
+        dot.onclick = function(e) {
+            e.preventDefault();
+            window.setCarouselPreviewSlide(mode, idx);
+        };
+        dotsWrap.appendChild(dot);
+    });
+    previewCarouselArea.appendChild(dotsWrap);
+
+    if (isAutoplay && slides.length > 1) {
+        window._carouselPreviewTimers[mode] = setInterval(() => {
+            const modalEl = document.getElementById(mode === 'edit' ? 'editSectionModal' : 'createSectionModal');
+            if (!modalEl || modalEl.classList.contains('hidden')) {
+                clearInterval(window._carouselPreviewTimers[mode]);
+                window._carouselPreviewTimers[mode] = null;
+                return;
+            }
+            window.stepCarouselPreviewSlide(mode, 1);
+        }, autoplaySec * 1000);
+    }
 };
 
 window.addCarouselSlide = function(mode, data = null) {
@@ -7245,72 +7580,155 @@ window.addCarouselSlide = function(mode, data = null) {
     const index = window.slideCounters[mode]++;
     const prefix = `settings[carousel_slides][${index}]`;
     const filePrefix = `carousel_slide_files[${index}]`;
+    const updateFn = `window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}`;
+    const hasInitialImg = data && data.image_url && String(data.image_url).trim() !== '';
+    const initialImgUrl = hasInitialImg ? String(data.image_url).trim() : '';
+    const focalVal = data && data.image_focal_point ? String(data.image_focal_point).trim() : 'center center';
+    const focalLabel = (window.SLIDE_FOCAL_LABELS && window.SLIDE_FOCAL_LABELS[focalVal]) ? window.SLIDE_FOCAL_LABELS[focalVal] : 'Centro Centro (50% 50%)';
+    const titleColorVal = data && data.title_color ? data.title_color : '#ffffff';
+    const subColorVal = data && data.subtitle_color ? data.subtitle_color : '#e2e8f0';
+    const textAlignVal = data && data.text_align ? data.text_align : 'text-center';
+
+    const focalPositions = [
+        'left top', 'center top', 'right top',
+        'left center', 'center center', 'right center',
+        'left bottom', 'center bottom', 'right bottom'
+    ];
+    const focalCellsHtml = focalPositions.map(pos => {
+        const isSel = pos === focalVal;
+        const btnCls = isSel
+            ? 'focal-cell aspect-square flex items-center justify-center rounded-md bg-indigo-600 border border-indigo-700 ring-2 ring-indigo-300 text-white transition cursor-pointer shadow-xs'
+            : 'focal-cell aspect-square flex items-center justify-center rounded-md bg-white border border-slate-200 hover:bg-indigo-50 transition cursor-pointer';
+        const dotCls = isSel
+            ? 'w-2.5 h-2.5 rounded-full bg-white ring-2 ring-indigo-400 pointer-events-none'
+            : 'w-2 h-2 rounded-full bg-slate-300 pointer-events-none';
+        const titleTxt = (window.SLIDE_FOCAL_LABELS && window.SLIDE_FOCAL_LABELS[pos]) || pos;
+        return `<button type="button" data-focal="${pos}" onclick="event.stopPropagation(); window.setSlideFocalPoint(this, '${pos}', '${mode}')" title="${titleTxt}" class="${btnCls}"><span class="${dotCls}"></span></button>`;
+    }).join('');
 
     const html = `
-        <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3 relative slide-item">
+        <div class="p-3.5 bg-white border border-slate-200 rounded-xl space-y-3 relative slide-item shadow-2xs" onclick="window.focusCarouselSlidePreview(this, '${mode}')">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                <span class="font-bold text-xs text-slate-700">Slide ${index + 1}</span>
-                <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold" onclick="this.closest('.slide-item').remove(); window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">Eliminar</button>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-extrabold uppercase">Slide ${index + 1}</span>
+                    <button type="button" class="text-[10px] text-indigo-600 hover:underline font-semibold cursor-pointer" onclick="event.stopPropagation(); window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}();">Ver en Preview</button>
+                </div>
+                <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold cursor-pointer" onclick="event.stopPropagation(); this.closest('.slide-item').remove(); ${updateFn} && ${updateFn}()">Eliminar</button>
             </div>
             
-            <div class="space-y-2">
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Imagen (Subir Local)</label>
-                    <input type="file" name="${filePrefix}" accept="image/*" class="w-full text-xs" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-[11px] font-semibold text-slate-600">Imagen (URL Externa)</label>
-                        <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline" onclick="window.openCmsMediaModal(this.parentElement.nextElementSibling)">Seleccionar del Gestor</button>
-                    </div>
-                    <input type="text" name="${prefix}[image_url]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs slide-url" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.image_url || '') : ''}">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Alternativo (Alt SEO)</label>
-                    <input type="text" name="${prefix}[alt_text]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.alt_text || '') : ''}">
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <div class="col-span-2">
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Título del Slide</label>
-                        <input type="text" name="${prefix}[title]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.title || '') : ''}">
+            <div class="space-y-2.5">
+                <!-- Imagen del Slide + Matriz de Punto Focal -->
+                <div class="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg space-y-2.5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Imagen del Slide (Subir Archivo)</label>
+                        <input type="file" name="${filePrefix}" accept="image/*" class="w-full text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="window.handleSlideFileSelect(this, '${mode}')">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subtitle</label>
-                        <input type="text" name="${prefix}[subtitle]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.subtitle || '') : ''}">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-[11px] font-semibold text-slate-600">O URL / Gestor de Medios</label>
+                            <button type="button" class="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer" onclick="window.openCmsMediaModal(this.parentElement.nextElementSibling)">Seleccionar del Gestor</button>
+                        </div>
+                        <input type="text" name="${prefix}[image_url]" class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs slide-url" placeholder="/uploads/sections/... o https://..." oninput="window.handleSlideUrlInput(this, '${mode}')" value="${initialImgUrl}">
+                    </div>
+                    <!-- Miniatura de Confirmación de Imagen Cargada -->
+                    <div class="slide-img-thumb ${hasInitialImg ? 'flex' : 'hidden'} items-center justify-between gap-2 p-1.5 bg-white border border-indigo-200 rounded-lg" style="${hasInitialImg ? 'display: flex;' : 'display: none;'}">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <img src="${initialImgUrl}" alt="Preview" class="w-12 h-8 object-cover rounded border border-slate-200 flex-shrink-0 bg-slate-900">
+                            <span class="slide-img-thumb-label text-[10px] text-slate-600 font-mono truncate">${initialImgUrl || 'Imagen seleccionada'}</span>
+                        </div>
+                        <button type="button" class="text-[10px] text-rose-600 font-bold hover:underline px-1.5 flex-shrink-0 cursor-pointer" onclick="window.clearSlideImage(this, '${mode}')">Quitar</button>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Badge</label>
-                        <input type="text" name="${prefix}[badge]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.badge || '') : ''}">
+                        <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Texto Alternativo (Alt SEO)</label>
+                        <input type="text" name="${prefix}[alt_text]" class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs" placeholder="Descripción de la imagen para SEO" oninput="${updateFn} && ${updateFn}()" value="${data ? (data.alt_text || '') : ''}">
+                    </div>
+                    <!-- MATRIZ 3x3 DE PUNTO FOCAL DEL SLIDE -->
+                    <div class="pt-1 border-t border-slate-200/80">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h2m14 0h2M12 3v2m0 14v2"/></svg>
+                                Matriz de Punto Focal de la Imagen
+                            </label>
+                            <span class="slide-focal-label text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${focalLabel}</span>
+                        </div>
+                        <input type="hidden" name="${prefix}[image_focal_point]" class="slide-focal-input" value="${focalVal}">
+                        <div class="p-2 bg-white border border-slate-200 rounded-xl flex items-center gap-3">
+                            <div class="slide-focal-matrix w-20 h-20 p-1 bg-slate-200/90 border border-slate-300 rounded-xl grid grid-cols-3 gap-1 shadow-inner select-none shrink-0" role="radiogroup" aria-label="Punto focal de la imagen del slide">
+                                ${focalCellsHtml}
+                            </div>
+                            <div class="text-[10px] text-slate-500 leading-snug">
+                                <span class="font-bold text-slate-700 block text-[11px]">Foco Visual (9 Celdas)</span>
+                                Selecciona el cuadrante clave de este slide para mantener el encuadre óptimo en móvil y escritorio.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-2 mt-2 slide-gradient-controls">
+                <!-- Contenido y Estilos de Texto Integrados en el Slide -->
+                <div class="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg space-y-2">
+                    <span class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Contenido y Textos del Slide</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="col-span-2">
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Título del Slide</label>
+                            <input type="text" name="${prefix}[title]" class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs font-semibold" placeholder="Ej: Nueva Colección Verano" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.title || '') : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subtítulo / Bajada</label>
+                            <input type="text" name="${prefix}[subtitle]" class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs" placeholder="Subtítulo opcional" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.subtitle || '') : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Badge Superior</label>
+                            <input type="text" name="${prefix}[badge]" class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs" placeholder="Ej: NUEVO" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.badge || '') : ''}">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 pt-1">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Color Título</label>
+                            <input type="color" name="${prefix}[title_color]" value="${titleColorVal}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Color Subtítulo</label>
+                            <input type="color" name="${prefix}[subtitle_color]" value="${subColorVal}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Alineación</label>
+                            <select name="${prefix}[text_align]" class="w-full px-1.5 py-1 bg-white border border-slate-200 rounded text-[10px] font-semibold" onchange="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
+                                <option value="text-left" ${textAlignVal === 'text-left' ? 'selected' : ''}>Izquierda</option>
+                                <option value="text-center" ${textAlignVal === 'text-center' ? 'selected' : ''}>Centro</option>
+                                <option value="text-right" ${textAlignVal === 'text-right' ? 'selected' : ''}>Derecha</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overlay Degradado del Slide -->
+                <div class="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg space-y-2 slide-gradient-controls">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="${prefix}[enable_gradient]" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3 h-3" ${data && data.enable_gradient ? 'checked' : ''} onchange="this.closest('.slide-gradient-controls').querySelector('.grad-settings').style.display = this.checked ? 'block' : 'none'; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
-                        <span class="font-bold text-slate-800 text-[10px]">Habilitar Overlay Degradado</span>
+                        <input type="checkbox" name="${prefix}[enable_gradient]" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" ${data && data.enable_gradient ? 'checked' : ''} onchange="this.closest('.slide-gradient-controls').querySelector('.grad-settings').style.display = this.checked ? 'block' : 'none'; window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
+                        <span class="font-bold text-slate-800 text-[11px]">Habilitar Overlay Degradado en este Slide</span>
                     </label>
-                    <div class="grad-settings space-y-2 pt-2 border-t border-slate-200" style="${data && data.enable_gradient ? 'block' : 'display: none;'}">
+                    <div class="grad-settings space-y-2 pt-2 border-t border-slate-200" style="${data && data.enable_gradient ? 'display: block;' : 'display: none;'}">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[9px] font-semibold text-slate-500 mb-1">Color & Op. Inicio</label>
                                 <div class="flex items-center gap-1 mb-1">
-                                    <input type="color" class="w-5 h-5 p-0 border border-slate-200 rounded cursor-pointer" oninput="this.nextElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_start || '#0f172a') : '#0f172a'}">
-                                    <input type="text" name="${prefix}[gradient_color_start]" class="w-full px-1 py-0.5 text-[9px] font-mono border border-slate-200 rounded" oninput="this.previousElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_start || '#0f172a') : '#0f172a'}">
+                                    <input type="color" class="w-5 h-5 p-0 border border-slate-200 rounded cursor-pointer" oninput="this.nextElementSibling.value = this.value; window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.gradient_color_start || '#0f172a') : '#0f172a'}">
+                                    <input type="text" name="${prefix}[gradient_color_start]" class="w-full px-1 py-0.5 text-[9px] font-mono bg-white border border-slate-200 rounded" oninput="this.previousElementSibling.value = this.value; window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.gradient_color_start || '#0f172a') : '#0f172a'}">
                                 </div>
-                                <input type="range" name="${prefix}[gradient_opacity_start]" min="0" max="100" class="w-full" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_opacity_start !== undefined ? data.gradient_opacity_start : '80') : '80'}">
+                                <input type="range" name="${prefix}[gradient_opacity_start]" min="0" max="100" class="w-full" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.gradient_opacity_start !== undefined ? data.gradient_opacity_start : '80') : '80'}">
                             </div>
                             <div>
                                 <label class="block text-[9px] font-semibold text-slate-500 mb-1">Color & Op. Fin</label>
                                 <div class="flex items-center gap-1 mb-1">
-                                    <input type="color" class="w-5 h-5 p-0 border border-slate-200 rounded cursor-pointer" oninput="this.nextElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_end || '#0f172a') : '#0f172a'}">
-                                    <input type="text" name="${prefix}[gradient_color_end]" class="w-full px-1 py-0.5 text-[9px] font-mono border border-slate-200 rounded" oninput="this.previousElementSibling.value = this.value; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_color_end || '#0f172a') : '#0f172a'}">
+                                    <input type="color" class="w-5 h-5 p-0 border border-slate-200 rounded cursor-pointer" oninput="this.nextElementSibling.value = this.value; window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.gradient_color_end || '#0f172a') : '#0f172a'}">
+                                    <input type="text" name="${prefix}[gradient_color_end]" class="w-full px-1 py-0.5 text-[9px] font-mono bg-white border border-slate-200 rounded" oninput="this.previousElementSibling.value = this.value; window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.gradient_color_end || '#0f172a') : '#0f172a'}">
                                 </div>
-                                <input type="range" name="${prefix}[gradient_opacity_end]" min="0" max="100" class="w-full" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.gradient_opacity_end !== undefined ? data.gradient_opacity_end : '0') : '0'}">
+                                <input type="range" name="${prefix}[gradient_opacity_end]" min="0" max="100" class="w-full" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.gradient_opacity_end !== undefined ? data.gradient_opacity_end : '20') : '20'}">
                             </div>
                         </div>
                         <div>
                             <label class="block text-[9px] font-semibold text-slate-500 mb-1">Dirección</label>
-                            <select name="${prefix}[gradient_direction]" class="w-full px-1 py-1 border border-slate-200 rounded text-[9px]" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                            <select name="${prefix}[gradient_direction]" class="w-full px-1.5 py-1 bg-white border border-slate-200 rounded text-[10px]" onchange="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
                                 <option value="to bottom" ${data && data.gradient_direction === 'to bottom' ? 'selected' : ''}>Arriba hacia Abajo</option>
                                 <option value="to top" ${data && data.gradient_direction === 'to top' ? 'selected' : ''}>Abajo hacia Arriba</option>
                                 <option value="to right" ${data && data.gradient_direction === 'to right' ? 'selected' : ''}>Izquierda a Derecha</option>
@@ -7321,17 +7739,25 @@ window.addCarouselSlide = function(mode, data = null) {
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-2 mt-2">
+                <!-- Botón y Enlace del Slide -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Botón (Opcional)</label>
-                        <input type="text" name="${prefix}[button_text]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.button_text || '') : ''}">
+                        <input type="text" name="${prefix}[button_text]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" placeholder="Ej: Ver Colección" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()" value="${data ? (data.button_text || '') : ''}">
                     </div>
                     <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Comportamiento del Enlace</label>
+                        <select name="${prefix}[link_target]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-white" onchange="${updateFn} && ${updateFn}()">
+                            <option value="button" ${data && data.link_target === 'button' ? 'selected' : ''}>Solo en el Botón</option>
+                            <option value="image" ${data && data.link_target === 'image' ? 'selected' : ''}>En toda la Imagen</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">URL Enlace</label>
                         <div class="flex items-center gap-1.5">
-                            <input type="text" name="${prefix}[button_url]" id="slideUrl${index}" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" oninput="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()" value="${data ? (data.button_url || '') : ''}">
-                            <select onchange="if(this.value){ document.getElementById('slideUrl'+${index}).value = this.value; this.value=''; window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}(); }" class="px-2 py-1 border border-slate-200 rounded text-[10px] text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta">
-                                <option value="">+ Ruta</option>
+                            <input type="text" name="${prefix}[button_url]" id="slideUrl_${mode}_${index}" class="flex-1 min-w-0 px-2.5 py-1 border border-slate-200 rounded text-xs font-mono" placeholder="Ej: /catalogo o #section-2" oninput="${updateFn} && ${updateFn}()" value="${data ? (data.button_url || '') : ''}">
+                            <select onchange="if(this.value){ document.getElementById('slideUrl_${mode}_${index}').value = this.value; this.value=''; ${updateFn} && ${updateFn}(); }" class="w-32 shrink-0 px-2 py-1 border border-slate-200 rounded text-[10px] text-slate-600 font-semibold bg-white cursor-pointer" title="Seleccionar una ruta">
+                                <option value="">+ Insertar Ruta</option>
                                 <optgroup label="Secciones Modulares">
                                     @foreach($sections as $s)
                                         <option value="#section-{{ $s->id }}">#section-{{ $s->id }} ({{ $s->name }})</option>
@@ -7346,31 +7772,23 @@ window.addCarouselSlide = function(mode, data = null) {
                         </div>
                     </div>
                 </div>
-                
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Comportamiento del Enlace</label>
-                    <select name="${prefix}[link_target]" class="w-full px-2 py-1 border border-slate-200 rounded text-xs" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
-                        <option value="button" ${data && data.link_target === 'button' ? 'selected' : ''}>Solo en el Botón</option>
-                        <option value="image" ${data && data.link_target === 'image' ? 'selected' : ''}>En toda la Imagen</option>
-                    </select>
-                </div>
 
                 <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-600 mb-1">Fondo Botón</label>
-                        <input type="color" name="${prefix}[button_bg]" value="${data ? (data.button_bg || '#0f172a') : '#0f172a'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <input type="color" name="${prefix}[button_bg]" value="${data ? (data.button_bg || '#0f172a') : '#0f172a'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-600 mb-1">Texto Botón</label>
-                        <input type="color" name="${prefix}[button_color]" value="${data ? (data.button_color || '#ffffff') : '#ffffff'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <input type="color" name="${prefix}[button_color]" value="${data ? (data.button_color || '#ffffff') : '#ffffff'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-600 mb-1">Color Borde</label>
-                        <input type="color" name="${prefix}[button_border_color]" value="${data ? (data.button_border_color || '#0f172a') : '#0f172a'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <input type="color" name="${prefix}[button_border_color]" value="${data ? (data.button_border_color || '#0f172a') : '#0f172a'}" class="w-full h-6 p-0 border border-slate-200 rounded cursor-pointer" oninput="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-600 mb-1">Grosor Borde</label>
-                        <select name="${prefix}[button_border_width]" class="w-full px-1 py-1 border border-slate-200 rounded text-[10px]" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <select name="${prefix}[button_border_width]" class="w-full px-1 py-1 border border-slate-200 rounded text-[10px]" onchange="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
                             <option value="border-0" ${data && data.button_border_width === 'border-0' ? 'selected' : ''}>Sin Borde (0px)</option>
                             <option value="border" ${data && data.button_border_width === 'border' ? 'selected' : ''}>Fino (1px)</option>
                             <option value="border-2" ${data && data.button_border_width === 'border-2' ? 'selected' : ''}>Medio (2px)</option>
@@ -7379,7 +7797,7 @@ window.addCarouselSlide = function(mode, data = null) {
                     </div>
                     <div class="col-span-2">
                         <label class="block text-[10px] font-semibold text-slate-600 mb-1">Sombra Botón</label>
-                        <select name="${prefix}[button_shadow]" class="w-full px-1 py-1 border border-slate-200 rounded text-[10px]" onchange="window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)} && window.updatePreview${mode.charAt(0).toUpperCase() + mode.slice(1)}()">
+                        <select name="${prefix}[button_shadow]" class="w-full px-1 py-1 border border-slate-200 rounded text-[10px]" onchange="window.focusCarouselSlidePreview(this, '${mode}'); ${updateFn} && ${updateFn}()">
                             <option value="" ${!data || !data.button_shadow ? 'selected' : ''}>Sin Sombra</option>
                             <option value="shadow-sm" ${data && data.button_shadow === 'shadow-sm' ? 'selected' : ''}>Pequeña</option>
                             <option value="shadow-md" ${data && data.button_shadow === 'shadow-md' ? 'selected' : ''}>Media</option>
@@ -7393,6 +7811,10 @@ window.addCarouselSlide = function(mode, data = null) {
     `;
 
     list.insertAdjacentHTML('beforeend', html);
+    const totalNow = list.querySelectorAll('.slide-item').length;
+    if (window._carouselPreviewState[mode]) {
+        window._carouselPreviewState[mode].activeIdx = Math.max(0, totalNow - 1);
+    }
     window.updatePreviewCreate && window.updatePreviewCreate();
     window.updatePreviewEdit && window.updatePreviewEdit();
 };
@@ -7516,7 +7938,7 @@ window.copyMediaUrl = function(url, btn) {
     navigator.clipboard.writeText(url).then(() => {
         const span = btn ? btn.querySelector('span') : null;
         const originalText = span ? span.textContent : '';
-        if (span) span.textContent = '¡Copiado! ✓';
+        if (span) span.textContent = '¡Copiado!';
         if (btn) btn.classList.add('!bg-emerald-600', '!text-white');
         setTimeout(() => {
             if (span) span.textContent = originalText;

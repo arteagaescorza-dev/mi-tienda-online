@@ -368,9 +368,10 @@
       margin-top: 0;
       margin-bottom: 0;
     }
-    /* Soporte para Ancho Completo Horizontal (100% solo horizontal) */
+    /* Soporte para Ancho Completo Horizontal (100% solo horizontal) y Full Page */
     .hero-editorial-section.hero-full-width,
-    .hero-editorial-section.hero-full-width-h {
+    .hero-editorial-section.hero-full-width-h,
+    .hero-editorial-section.hero-fullpage-v {
       width: 100vw !important;
       position: relative !important;
       left: 50% !important;
@@ -387,27 +388,31 @@
       margin-bottom: 0 !important;
     }
     .hero-editorial-section.hero-full-width .hero-banner-card,
-    .hero-editorial-section.hero-full-width-h .hero-banner-card {
+    .hero-editorial-section.hero-full-width-h .hero-banner-card,
+    .hero-editorial-section.hero-fullpage-v .hero-banner-card {
       border-radius: 0 !important;
       width: 100% !important;
       max-width: 100vw !important;
       box-sizing: border-box !important;
-      padding-left: max(20px, calc((100vw - 1280px) / 2 + 24px)) !important;
-      padding-right: max(20px, calc((100vw - 1280px) / 2 + 24px)) !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
     }
     .hero-editorial-section.hero-full-width .hero-custom-container,
-    .hero-editorial-section.hero-full-width-h .hero-custom-container {
+    .hero-editorial-section.hero-full-width-h .hero-custom-container,
+    .hero-editorial-section.hero-fullpage-v .hero-custom-container {
       width: 100% !important;
       max-width: 100vw !important;
       box-sizing: border-box !important;
+      border-radius: 0 !important;
     }
 
-    /* Soporte para Hero Fullpage Vertical (100% de alto de pantalla) */
+    /* Soporte para Hero y Carrusel Fullpage (100% de alto de pantalla) */
     .hero-editorial-section.hero-fullpage-v .hero-banner-card,
-    .hero-editorial-section.hero-fullpage-v .hero-custom-container,
-    .hero-editorial-section.hero-full-width .hero-banner-card,
-    .hero-editorial-section.hero-full-width .hero-custom-container {
-      min-height: calc(100vh - 64px) !important;
+    .hero-editorial-section.hero-fullpage-v .hero-custom-container {
+      min-height: calc(100vh - 56px) !important;
+      height: calc(100vh - 56px) !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
@@ -594,21 +599,27 @@
 
     <!-- Marquesina Superior de Avisos Dinámica (Hub 2) -->
     @php
+      $isMarqueeActive = isset($announcementActive)
+        ? filter_var($announcementActive, FILTER_VALIDATE_BOOLEAN)
+        : filter_var(\Illuminate\Support\Facades\Cache::get('cms_announcement_active', true), FILTER_VALIDATE_BOOLEAN);
       $activeAnnouncements = collect($announcements ?? [])
-        ->filter(fn($item) => is_array($item) && ($item['active'] ?? true) && !empty($item['text']))
+        ->filter(fn($item) => is_array($item) && filter_var($item['active'] ?? true, FILTER_VALIDATE_BOOLEAN) && !empty(trim((string)($item['text'] ?? ''))))
         ->values();
     @endphp
-    @if($activeAnnouncements->isNotEmpty())
+    @if($isMarqueeActive && $activeAnnouncements->isNotEmpty())
       <div class="minimal-marquee-bar" aria-label="Avisos importantes de la tienda">
         <div class="marquee-track">
           @for($i = 0; $i < 2; $i++)
             @foreach($activeAnnouncements as $announcement)
-              @if(!empty($announcement['url']))
-                <a href="{{ $announcement['url'] }}" style="color: inherit; text-decoration: none;">
-                  <span>{{ strtoupper($announcement['text']) }}</span>
+              @php
+                $anUrl = trim((string)($announcement['link'] ?? ($announcement['url'] ?? '')));
+              @endphp
+              @if(!empty($anUrl) && $anUrl !== '#')
+                <a href="{{ $anUrl }}" style="color: inherit; text-decoration: none;">
+                  <span>{{ mb_strtoupper($announcement['text']) }}</span>
                 </a>
               @else
-                <span>{{ strtoupper($announcement['text']) }}</span>
+                <span>{{ mb_strtoupper($announcement['text']) }}</span>
               @endif
               <span class="marquee-sep">/</span>
             @endforeach
@@ -792,9 +803,6 @@
 
       <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap-2; font-size: 0.7rem; color: #71717a;">
         <span>{{ $footerConfig['copyright_text'] ?? '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.' }} <a href="/privacidad" style="color: inherit; text-decoration: underline; margin-left: 8px;">Aviso de Privacidad</a> <a href="/cookies" style="color: inherit; text-decoration: underline; margin-left: 8px;">Política de Cookies</a></span>
-        @if(filter_var($footerConfig['show_zero_emojis_badge'] ?? true, FILTER_VALIDATE_BOOLEAN))
-          <span>Política Estricta Cero Emojis // Vectorial Only</span>
-        @endif
       </div>
     </div>
   </footer>

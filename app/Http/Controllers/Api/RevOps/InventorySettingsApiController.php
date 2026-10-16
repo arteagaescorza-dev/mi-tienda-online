@@ -648,7 +648,10 @@ class InventorySettingsApiController extends Controller
 
         $status = $validated['status'] ?? ($request->has('is_active') ? ($request->boolean('is_active') ? 'active' : 'draft') : 'active');
         $subtitle = $validated['subtitle'] ?? ($validated['description'] ?? null);
-        $settings = [];
+        $settings = [
+            'spacing_top' => 12,
+            'spacing_bottom' => 12,
+        ];
         if (!empty($validated['slug'])) {
             $settings['slug'] = trim($validated['slug']);
         }

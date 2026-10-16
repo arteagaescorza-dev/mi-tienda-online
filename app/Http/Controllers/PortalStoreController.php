@@ -225,8 +225,20 @@ class PortalStoreController extends Controller
             ['id' => 2, 'text' => 'Entrega personal segura en Metro Chabacano CDMX (Líneas 2 y 9) sin costo adicional', 'link' => '/chabacano', 'badge' => 'Punto Físico', 'active' => true],
             ['id' => 3, 'text' => 'Nueva Colección Modal Velvet: Máxima suavidad, transpirabilidad y cero rozaduras', 'link' => '/catalogo?tag=velvet', 'badge' => 'Lanzamiento', 'active' => true]
         ];
-        $announcements = Cache::get('cms_announcements', $defaultAnnouncements);
-        $announcementActive = Cache::get('cms_announcement_active', true);
+        $annDoc = CmsOfficialDocument::getByCode('STORE_ANNOUNCEMENTS_CONFIG');
+        $announcements = Cache::get('cms_announcements');
+        if (!is_array($announcements) || empty($announcements)) {
+            if (is_array($annDoc) && !empty($annDoc['items']) && is_array($annDoc['items'])) {
+                $announcements = $annDoc['items'];
+            } else {
+                $announcements = $defaultAnnouncements;
+            }
+            Cache::forever('cms_announcements', $announcements);
+        }
+        $announcementActive = Cache::has('cms_announcement_active')
+            ? (bool) Cache::get('cms_announcement_active')
+            : (is_array($annDoc) && array_key_exists('active', $annDoc) ? (bool) $annDoc['active'] : true);
+        Cache::forever('cms_announcement_active', $announcementActive);
 
         // 4. Hero Banners & Carruseles
         $defaultBanners = [
@@ -683,11 +695,16 @@ class PortalStoreController extends Controller
 
         $settings = $request->input('settings', []);
 
+        $sectionsUploadDir = public_path('uploads/sections');
+        if (!file_exists($sectionsUploadDir)) {
+            @mkdir($sectionsUploadDir, 0755, true);
+        }
+
         // Manejo de imagen de fondo subida
         if ($request->hasFile('background_image_file')) {
             $file = $request->file('background_image_file');
             $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/sections'), $filename);
+            $file->move($sectionsUploadDir, $filename);
             $settings['background_image'] = '/uploads/sections/' . $filename;
         } elseif ($request->filled('background_image_url')) {
             $settings['background_image'] = $request->input('background_image_url');
@@ -697,7 +714,7 @@ class PortalStoreController extends Controller
         if ($request->hasFile('background_video_file')) {
             $file = $request->file('background_video_file');
             $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/sections'), $filename);
+            $file->move($sectionsUploadDir, $filename);
             $settings['background_video'] = '/uploads/sections/' . $filename;
         }
 
@@ -706,7 +723,7 @@ class PortalStoreController extends Controller
             foreach ($request->file('carousel_slide_files') as $index => $file) {
                 if ($file) {
                     $filename = 'carousel_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $file->move(public_path('uploads/sections'), $filename);
+                    $file->move($sectionsUploadDir, $filename);
                     $settings['carousel_slides'][$index]['image_url'] = '/uploads/sections/' . $filename;
                 }
             }
@@ -771,11 +788,16 @@ class PortalStoreController extends Controller
         $newSettings = $request->input('settings', []);
         $mergedSettings = array_merge($currentSettings, $newSettings);
 
+        $sectionsUploadDir = public_path('uploads/sections');
+        if (!file_exists($sectionsUploadDir)) {
+            @mkdir($sectionsUploadDir, 0755, true);
+        }
+
         // Manejo de imagen de fondo subida
         if ($request->hasFile('background_image_file')) {
             $file = $request->file('background_image_file');
             $filename = 'hero_bg_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/sections'), $filename);
+            $file->move($sectionsUploadDir, $filename);
             $mergedSettings['background_image'] = '/uploads/sections/' . $filename;
         } elseif ($request->filled('background_image_url')) {
             $mergedSettings['background_image'] = $request->input('background_image_url');
@@ -785,7 +807,7 @@ class PortalStoreController extends Controller
         if ($request->hasFile('background_video_file')) {
             $file = $request->file('background_video_file');
             $filename = 'hero_vid_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/sections'), $filename);
+            $file->move($sectionsUploadDir, $filename);
             $mergedSettings['background_video'] = '/uploads/sections/' . $filename;
         }
 
@@ -799,7 +821,7 @@ class PortalStoreController extends Controller
             foreach ($request->file('carousel_slide_files') as $index => $file) {
                 if ($file) {
                     $filename = 'carousel_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $file->move(public_path('uploads/sections'), $filename);
+                    $file->move($sectionsUploadDir, $filename);
                     $mergedSettings['carousel_slides'][$index]['image_url'] = '/uploads/sections/' . $filename;
                 }
             }
@@ -1161,12 +1183,14 @@ class PortalStoreController extends Controller
             foreach ($rawAnnouncements as $index => $item) {
                 $text = trim(is_array($item) ? ($item['text'] ?? '') : (string) $item);
                 if ($text !== '') {
+                    $linkVal = is_array($item) ? trim((string) ($item['link'] ?? ($item['url'] ?? ''))) : '';
                     $announcementsList[] = [
-                        'id' => $index + 1,
+                        'id' => count($announcementsList) + 1,
                         'text' => $text,
-                        'link' => is_array($item) ? ($item['link'] ?? '#') : '#',
+                        'link' => $linkVal,
+                        'url' => $linkVal,
                         'badge' => is_array($item) ? ($item['badge'] ?? 'INFO') : 'INFO',
-                        'active' => is_array($item) ? filter_var($item['active'] ?? true, FILTER_VALIDATE_BOOLEAN) : true,
+                        'active' => is_array($item) ? filter_var($item['active'] ?? false, FILTER_VALIDATE_BOOLEAN) : true,
                     ];
                 }
             }
@@ -1174,19 +1198,36 @@ class PortalStoreController extends Controller
 
         if (empty($announcementsList)) {
             $announcementsList = [
-                ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'link' => '#', 'badge' => 'LOGÍSTICA', 'active' => true],
-                ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'link' => '#', 'badge' => 'FINANZAS', 'active' => true],
-                ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'link' => '#', 'badge' => 'INVENTARIO', 'active' => true],
-                ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'link' => '#', 'badge' => 'PROMO', 'active' => true],
-                ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'link' => '#', 'badge' => 'SOPORTE', 'active' => true],
+                ['id' => 1, 'text' => 'Envío gratis nacional en compras mayores a $999 MXN con paqueterías líderes', 'link' => '/catalogo', 'url' => '/catalogo', 'badge' => 'Envío Gratis', 'active' => true],
+                ['id' => 2, 'text' => 'Entrega personal segura en Metro Chabacano CDMX (Líneas 2 y 9) sin costo adicional', 'link' => '/chabacano', 'url' => '/chabacano', 'badge' => 'Punto Físico', 'active' => true],
+                ['id' => 3, 'text' => 'Nueva Colección Modal Velvet: Máxima suavidad, transpirabilidad y cero rozaduras', 'link' => '/catalogo?tag=velvet', 'url' => '/catalogo?tag=velvet', 'badge' => 'Lanzamiento', 'active' => true],
             ];
         }
 
+        $announcementActive = filter_var($request->input('announcement_active', true), FILTER_VALIDATE_BOOLEAN);
+
         Cache::forever('cms_announcements', $announcementsList);
-        Cache::forever('cms_announcement_active', $request->boolean('announcement_active', true));
+        Cache::forever('cms_announcement_active', $announcementActive);
+
+        CmsOfficialDocument::updateOrCreate(
+            ['code' => 'STORE_ANNOUNCEMENTS_CONFIG'],
+            [
+                'title' => 'Cinta Banner Superior (Marquesina)',
+                'version' => 'v1.0',
+                'is_active' => true,
+                'payload' => [
+                    'active' => $announcementActive,
+                    'items' => $announcementsList,
+                ],
+            ]
+        );
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'announcements' => $announcementsList]);
+            return response()->json([
+                'success' => true,
+                'announcement_active' => $announcementActive,
+                'announcements' => $announcementsList,
+            ]);
         }
 
         return back()->with('success', 'Cinta banner de anuncios del navbar actualizada exitosamente.');
@@ -1324,7 +1365,8 @@ class PortalStoreController extends Controller
             $mimeType = $file->getMimeType();
             $size = $file->getSize();
 
-            $uniqueName = time() . '_' . uniqid() . '_' . $fileName;
+            $safeName = preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName);
+            $uniqueName = time() . '_' . uniqid() . '_' . $safeName;
             $destPath = public_path('uploads/cms_media');
             if (!file_exists($destPath)) {
                 @mkdir($destPath, 0755, true);

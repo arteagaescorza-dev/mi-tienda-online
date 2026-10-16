@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'api/*',
+            'admin/tienda-cms/*',
         ]);
 
         $middleware->alias([
@@ -27,4 +28,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Tu sesión se actualizó. Intenta de nuevo.'], 419);
+            }
+
+            return redirect()->back()->withInput($request->except(['_token', 'password']))
+                ->with('error', 'El token del formulario expiró por inactividad y fue renovado automáticamente. Por favor vuelve a guardar.');
+        });
     })->create();

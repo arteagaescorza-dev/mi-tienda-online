@@ -369,4 +369,257 @@ class Hub2Hub4VitrinaAndPdpIntegrationTest extends TestCase
         $resPoli->assertSee('Advertencia especial poliester.');
         $resPoli->assertDontSee('Cuidado especial para prendas elásticas de Licra.');
     }
+
+    /**
+     * 8. Vitrinas have automatic 12px top and bottom spacing and the internal
+     * "Política Cero Emojis" badge is not shown in Storefront or Hub 2 UI.
+     */
+    public function test_vitrinas_have_automatic_12px_top_and_bottom_spacing_and_no_zero_emojis_badge(): void
+    {
+        CmsSection::create([
+            'name' => 'Vitrina Destacados',
+            'title' => 'PRENDAS DESTACADAS',
+            'type' => 'catalog_section',
+            'universe' => 'all',
+            'status' => 'active',
+            'sort_order' => 1,
+            'settings' => [],
+        ]);
+
+        $homeRes = $this->get('/');
+        $homeRes->assertStatus(200);
+        $homeRes->assertSee('margin-top: 12px !important; margin-bottom: 12px !important; padding-top: 12px !important; padding-bottom: 12px !important;', false);
+        $homeRes->assertDontSee('Política Estricta Cero Emojis');
+
+        $hubRes = $this->actingAs($this->portalUser)->get(route('portal.store'));
+        $hubRes->assertStatus(200);
+        $hubRes->assertDontSee('Mostrar Badge Política Cero Emojis');
+    }
+
+    /**
+     * 9. Navbar Marquee (Cinta Banner Superior) syncs active messages, links, and active toggle
+     * between Hub 2 and Storefront (including when cache is cleared).
+     */
+    public function test_navbar_marquee_banner_syncs_messages_links_and_active_toggle_between_hub2_and_storefront(): void
+    {
+        $res = $this->actingAs($this->portalUser)
+            ->post(route('portal.store.announcements.update'), [
+                'announcement_active' => '1',
+                'announcements' => [
+                    ['text' => 'Envío express nacional hoy', 'link' => '/catalogo', 'active' => '1'],
+                    ['text' => 'Aviso desactivado oculto', 'link' => '/oculto', 'active' => '0'],
+                ],
+            ]);
+
+        $res->assertRedirect();
+
+        // Clear cache to verify DB persistence fallback (STORE_ANNOUNCEMENTS_CONFIG) also works
+        \Illuminate\Support\Facades\Cache::forget('cms_announcements');
+        \Illuminate\Support\Facades\Cache::forget('cms_announcement_active');
+
+        $storeRes = $this->get('/');
+        $storeRes->assertStatus(200);
+        $storeRes->assertSee('ENVÍO EXPRESS NACIONAL HOY');
+        $storeRes->assertSee('href="/catalogo"', false);
+        $storeRes->assertDontSee('AVISO DESACTIVADO OCULTO');
+
+        // Now disable the entire marquee bar
+        $this->actingAs($this->portalUser)
+            ->post(route('portal.store.announcements.update'), [
+                'announcement_active' => '0',
+                'announcements' => [
+                    ['text' => 'Envío express nacional hoy', 'link' => '/catalogo', 'active' => '1'],
+                ],
+            ])
+            ->assertRedirect();
+
+        $storeDisabledRes = $this->get('/');
+        $storeDisabledRes->assertStatus(200);
+        $storeDisabledRes->assertDontSee('class="minimal-marquee-bar"', false);
+    }
+
+    /**
+     * 10. Explore pages (Páginas de Explorar) creation, update, and reordering succeed
+     * without 419 or validation mismatch errors.
+     */
+    public function test_explore_pages_create_update_and_reorder_succeed_without_419_or_validation_mismatch(): void
+    {
+        $createRes = $this->actingAs($this->portalUser)
+            ->post(route('portal.store.pages.store'), [
+                'title' => 'Colección Verano',
+                'slug' => 'coleccion-verano',
+                'filter_universe' => 'marte',
+                'filter_category' => 'trajes-de-bano',
+                'overlay_color_start' => '#0f172a',
+                'overlay_color_end' => '#1e1b4b',
+                'overlay_opacity_start' => 30,
+                'overlay_opacity_end' => 85,
+                'show_in_navbar' => '1',
+                'show_in_mobile' => '1',
+                'status' => 'active',
+            ]);
+
+        $createRes->assertRedirect();
+        $page = \App\Models\CmsPage::where('slug', 'coleccion-verano')->first();
+        $this->assertNotNull($page);
+        $this->assertEquals('Colección Verano', $page->title);
+
+        $updateRes = $this->actingAs($this->portalUser)
+            ->put(route('portal.store.pages.update', $page->id), [
+                'title' => 'Colección Verano 2026 Editada',
+                'slug' => 'coleccion-verano-2026',
+                'filter_universe' => 'venus',
+                'filter_category' => 'lenceria',
+                'content_html' => '<p>Contenido actualizado de explorar</p>',
+                'show_in_navbar' => '1',
+                'show_in_mobile' => '1',
+                'status' => 'active',
+            ]);
+
+        $updateRes->assertRedirect();
+        $page->refresh();
+        $this->assertEquals('Colección Verano 2026 Editada', $page->title);
+        $this->assertEquals('coleccion-verano-2026', $page->slug);
+        $this->assertEquals('venus', $page->filter_universe);
+        $this->assertEquals('lenceria', $page->filter_category);
+    }
+
+    /**
+     * 11. Carousel section integrates content per slide (no redundant global carousel toggle)
+     * and renders full-bleed animated carousel with slides, images, arrows, and pagination dots.
+     */
+    public function test_carousel_section_per_slide_config_and_animated_rendering(): void
+    {
+        $hubRes = $this->actingAs($this->portalUser)->get(route('portal.store'));
+        $hubRes->assertStatus(200);
+        $hubRes->assertDontSee('id="createCarouselGlobalToggle"', false);
+        $hubRes->assertDontSee('id="editCarouselGlobalToggle"', false);
+        $hubRes->assertSee('window.renderCarouselLivePreview', false);
+        $hubRes->assertSee('window.handleSlideFileSelect', false);
+        $hubRes->assertSee('window.setSlideFocalPoint', false);
+        $hubRes->assertSee('window.syncCarouselLayoutSettings', false);
+        $hubRes->assertSee('id="inpCreateCarouselFullWidth"', false);
+        $hubRes->assertSee('id="inpCreateCarouselFullWidthHorizontal"', false);
+        $hubRes->assertSee('id="inpCreateCarouselHeightValue"', false);
+        $hubRes->assertSee('id="inpCreateCarouselParallax"', false);
+        $hubRes->assertSee('Efecto Revelado (Cortina)', false);
+
+        \App\Models\CmsSection::create([
+            'name' => 'Carrusel Principal Marte',
+            'type' => 'carousel',
+            'universe' => 'marte',
+            'status' => 'active',
+            'sort_order' => 1,
+            'settings' => [
+                'hero_mode' => 'structured',
+                'carousel_global_content' => '0',
+                'carousel_autoplay' => '1',
+                'autoplay_time' => 4,
+                'full_width' => '1',
+                'full_width_horizontal' => '1',
+                'parallax_scrolling' => '1',
+                'hero_height_value' => 480,
+                'hero_height_unit' => 'px',
+                'carousel_slides' => [
+                    [
+                        'title' => 'SLIDE UNO COLECCIÓN INVIERNO',
+                        'subtitle' => 'Textiles ergonómicos de primera calidad',
+                        'badge' => 'NUEVO LANZAMIENTO',
+                        'title_color' => '#ffffff',
+                        'subtitle_color' => '#e2e8f0',
+                        'text_align' => 'text-center',
+                        'image_url' => '/uploads/cms_media/test_slide_1.jpg',
+                        'image_focal_point' => 'left top',
+                        'enable_gradient' => '1',
+                        'gradient_color_start' => '#0f172a',
+                        'gradient_color_end' => '#1e1b4b',
+                        'gradient_opacity_start' => 60,
+                        'gradient_opacity_end' => 85,
+                        'gradient_direction' => 'to bottom',
+                        'button_text' => 'VER COLECCIÓN 1',
+                        'button_url' => '/catalogo',
+                        'button_bg' => '#ffffff',
+                        'button_color' => '#0f172a',
+                    ],
+                    [
+                        'title' => 'SLIDE DOS EDICIÓN LIMITADA',
+                        'subtitle' => 'Microfibra transpirable sin costuras',
+                        'badge' => 'EXCLUSIVO ONLINE',
+                        'title_color' => '#f8fafc',
+                        'subtitle_color' => '#cbd5e1',
+                        'text_align' => 'text-left',
+                        'image_url' => '/uploads/cms_media/test_slide_2.jpg',
+                        'image_focal_point' => 'right bottom',
+                        'enable_gradient' => '1',
+                        'button_text' => 'EXPLORAR AHORA',
+                        'button_url' => '/catalogo',
+                    ],
+                ],
+            ],
+        ]);
+
+        $storeRes = $this->get('/?universe=marte');
+        $storeRes->assertStatus(200);
+        $storeRes->assertSee('store-carousel-viewport', false);
+        $storeRes->assertSee('hero-full-width', false);
+        $storeRes->assertSee('data-parallax="1"', false);
+        $storeRes->assertSee('carousel-slide-content', false);
+        $storeRes->assertSee('object-position: left top;', false);
+        $storeRes->assertSee('object-position: right bottom;', false);
+        $storeRes->assertSee('SLIDE UNO COLECCIÓN INVIERNO');
+        $storeRes->assertSee('SLIDE DOS EDICIÓN LIMITADA');
+        $storeRes->assertSee('VER COLECCIÓN 1');
+        $storeRes->assertSee('EXPLORAR AHORA');
+        $storeRes->assertSee('test_slide_1.jpg', false);
+        $storeRes->assertSee('test_slide_2.jpg', false);
+        $storeRes->assertSee('data-carousel-prev=', false);
+        $storeRes->assertSee('data-carousel-next=', false);
+        $storeRes->assertSee('data-carousel-dots=', false);
+    }
+
+    /**
+     * 12. Carousel Ancho Completo (Horizontal) is strictly decoupled from Full Page (Vertical).
+     * When Ancho Completo is active without Full Page, it breaks out to 100vw but respects the custom height.
+     */
+    public function test_carousel_ancho_completo_horizontal_does_not_force_fullpage_vertical(): void
+    {
+        $section = \App\Models\CmsSection::create([
+            'name' => 'Carrusel Horizontal Venus',
+            'type' => 'carousel',
+            'universe' => 'venus',
+            'status' => 'active',
+            'sort_order' => 1,
+            'settings' => [
+                'hero_mode' => 'structured',
+                'full_width' => '0',
+                'full_width_horizontal' => '1',
+                'hero_height_value' => 520,
+                'hero_height_unit' => 'px',
+                'carousel_slides' => [
+                    [
+                        'title' => 'VENUS HORIZONTAL ONLY',
+                        'image_url' => '/uploads/cms_media/venus_h.jpg',
+                    ],
+                ],
+            ],
+        ]);
+
+        $storeRes = $this->get('/?universo=venus');
+        $storeRes->assertStatus(200);
+
+        $html = $storeRes->getContent();
+        preg_match('/<section id="section-' . $section->id . '" class="([^"]+)"/', $html, $matches);
+        $this->assertNotEmpty($matches, 'Section tag was not found in response');
+        $classList = array_filter(explode(' ', $matches[1]));
+
+        $this->assertContains('hero-editorial-section', $classList);
+        $this->assertContains('hero-full-width-h', $classList);
+        $this->assertNotContains('hero-fullpage-v', $classList);
+        $this->assertNotContains('hero-full-width', $classList);
+
+        $storeRes->assertSee('min-height: 520px !important; height: 520px !important;', false);
+        $storeRes->assertSee('VENUS HORIZONTAL ONLY');
+    }
 }
+
+

@@ -72,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
             return $user && $user->canAccessHub('governance');
         });
 
-        // Compartir footerConfig globalmente en el layout Storefront PWA
+        // Compartir footerConfig y estado de marquesina globalmente en el layout Storefront PWA
         \Illuminate\Support\Facades\View::composer('layouts.store-pwa', function ($view) {
             $defaultFooterConfig = [
                 'brand_summary' => 'Plataforma contemporánea de moda íntima, streetwear y autocuidado. Envíos nacionales directos vía paquetería express con empaque 100% neutro y precinto higiénico.',
@@ -83,7 +83,6 @@ class AppServiceProvider extends ServiceProvider
                 'payments_badge_text' => 'Pagos 100% seguros con Tarjeta, SPEI y OXXO Pay',
                 'copyright_text' => '(C) 2026 MULTIVERSO STORE. Todos los derechos reservados.',
                 'show_revops_link' => true,
-                'show_zero_emojis_badge' => true,
             ];
             try {
                 $footerConfig = \App\Models\CmsOfficialDocument::getByCode('STORE_FOOTER_CONFIG', $defaultFooterConfig);
@@ -91,6 +90,22 @@ class AppServiceProvider extends ServiceProvider
                 $footerConfig = $defaultFooterConfig;
             }
             $view->with('footerConfig', $footerConfig ?? $defaultFooterConfig);
+
+            $viewData = $view->getData();
+            if (!array_key_exists('announcementActive', $viewData)) {
+                $announcementActive = \Illuminate\Support\Facades\Cache::get('cms_announcement_active');
+                if ($announcementActive === null) {
+                    try {
+                        $annDoc = \App\Models\CmsOfficialDocument::getByCode('STORE_ANNOUNCEMENTS_CONFIG');
+                        $announcementActive = is_array($annDoc) && array_key_exists('active', $annDoc)
+                            ? (bool) $annDoc['active']
+                            : true;
+                    } catch (\Throwable $e) {
+                        $announcementActive = true;
+                    }
+                }
+                $view->with('announcementActive', (bool) $announcementActive);
+            }
         });
     }
 }

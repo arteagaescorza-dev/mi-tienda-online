@@ -1415,7 +1415,7 @@
 
       @if(!empty($careProtocol['warning']))
         <div style="margin-bottom: 16px; padding: 12px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; font-size: 0.78rem; color: #92400e; line-height: 1.45;">
-          <strong>⚠️ Advertencia especial:</strong> {{ $careProtocol['warning'] }}
+          <strong>Advertencia especial:</strong> {{ $careProtocol['warning'] }}
         </div>
       @endif
 
@@ -1445,7 +1445,7 @@
       @endif
 
       <div style="padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.75rem; color: #475569; line-height: 1.45;">
-        🛡️ <strong>Preservación de elastanos:</strong> Los textiles con fibras elásticas y jacquards anatómicos mantienen su elasticidad original al evitar el uso de secadoras mecánicas y fuentes de calor directo.
+        <strong>Preservación de elastanos:</strong> Los textiles con fibras elásticas y jacquards anatómicos mantienen su elasticidad original al evitar el uso de secadoras mecánicas y fuentes de calor directo.
       </div>
     </div>
   </div>

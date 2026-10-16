@@ -128,15 +128,21 @@ class StorefrontController extends Controller
             'status' => 'active',
         ]);
 
-        $announcements = Cache::get('cms_announcements', [
-            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI BBVA', 'active' => true],
-            ['id' => 3, 'text' => 'EMPAQUE 100% DISCRETO', 'active' => true],
-            ['id' => 4, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
-            ['id' => 5, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
-            ['id' => 6, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 7, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
-        ]);
+        $annDoc = CmsOfficialDocument::getByCode('STORE_ANNOUNCEMENTS_CONFIG');
+        $announcements = Cache::get('cms_announcements');
+        if (!is_array($announcements) || empty($announcements)) {
+            $announcements = (is_array($annDoc) && !empty($annDoc['items']) && is_array($annDoc['items']))
+                ? $annDoc['items']
+                : [
+                    ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+                    ['id' => 2, 'text' => 'TRANSFERENCIAS SPEI BBVA', 'active' => true],
+                    ['id' => 3, 'text' => 'EMPAQUE 100% DISCRETO', 'active' => true],
+                    ['id' => 4, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+                    ['id' => 5, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+                    ['id' => 6, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+                    ['id' => 7, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+                ];
+        }
 
         $sections = CmsSection::active()
             ->forUniverse($activeUniverse)
@@ -664,13 +670,19 @@ class StorefrontController extends Controller
             'status' => 'active',
         ]);
 
-        $announcements = Cache::get('cms_announcements', [
-            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
-            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
-            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
-        ]);
+        $annDoc = CmsOfficialDocument::getByCode('STORE_ANNOUNCEMENTS_CONFIG');
+        $announcements = Cache::get('cms_announcements');
+        if (!is_array($announcements) || empty($announcements)) {
+            $announcements = (is_array($annDoc) && !empty($annDoc['items']) && is_array($annDoc['items']))
+                ? $annDoc['items']
+                : [
+                    ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+                    ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+                    ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+                    ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+                    ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+                ];
+        }
 
         // Cálculo de stock y preparación de variantes
         $variants = $dbProduct->variants;
@@ -809,13 +821,19 @@ class StorefrontController extends Controller
         $mobilePages = CmsPage::inMobileNavbar()->get();
         $footerPages = CmsPage::inFooter()->get();
         $tracking = CmsTrackingSetting::current();
-        $announcements = Cache::get('cms_announcements', [
-            ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
-            ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
-            ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
-            ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
-            ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
-        ]);
+        $annDoc = CmsOfficialDocument::getByCode('STORE_ANNOUNCEMENTS_CONFIG');
+        $announcements = Cache::get('cms_announcements');
+        if (!is_array($announcements) || empty($announcements)) {
+            $announcements = (is_array($annDoc) && !empty($annDoc['items']) && is_array($annDoc['items']))
+                ? $annDoc['items']
+                : [
+                    ['id' => 1, 'text' => 'ENVÍOS EXPRESS A TODO MÉXICO', 'active' => true],
+                    ['id' => 2, 'text' => 'PAGOS 100% SEGUROS CON TARJETA & OXXO', 'active' => true],
+                    ['id' => 3, 'text' => 'STOCK FÍSICO CON ENTREGA INMEDIATA', 'active' => true],
+                    ['id' => 4, 'text' => 'ENVÍO GRATIS EN COMPRAS MAYORES A $999', 'active' => true],
+                    ['id' => 5, 'text' => 'CONCIERGE & ATENCIÓN EXCLUSIVA EN LÍNEA', 'active' => true],
+                ];
+        }
 
         return view('store.pwa.page', [
             'page' => $page,

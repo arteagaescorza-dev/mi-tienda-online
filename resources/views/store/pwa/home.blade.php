@@ -8,9 +8,12 @@
       @foreach($sections as $sec)
         @php
           $secSettings = is_array($sec->settings) ? $sec->settings : (json_decode($sec->settings ?? '{}', true) ?: []);
-          $secSpacingTop = isset($secSettings['spacing_top']) && $secSettings['spacing_top'] !== '' ? (int)$secSettings['spacing_top'] : 0;
-          $secSpacingBottom = isset($secSettings['spacing_bottom']) && $secSettings['spacing_bottom'] !== '' ? (int)$secSettings['spacing_bottom'] : 0;
-          $secSpacingStyle = "margin-top: {$secSpacingTop}px !important; margin-bottom: {$secSpacingBottom}px !important;";
+          $isVitrinaSec = in_array($sec->type, ['curated_products', 'categories_grid', 'family_showcase', 'tags_cloud', 'catalog_section', 'featured_products', 'catalog_grid', 'subcategories_slider']);
+          $secSpacingTop = $isVitrinaSec ? 12 : (isset($secSettings['spacing_top']) && $secSettings['spacing_top'] !== '' ? (int)$secSettings['spacing_top'] : 0);
+          $secSpacingBottom = $isVitrinaSec ? 12 : (isset($secSettings['spacing_bottom']) && $secSettings['spacing_bottom'] !== '' ? (int)$secSettings['spacing_bottom'] : 0);
+          $secSpacingStyle = $isVitrinaSec
+              ? "margin-top: 12px !important; margin-bottom: 12px !important; padding-top: 12px !important; padding-bottom: 12px !important;"
+              : "margin-top: {$secSpacingTop}px !important; margin-bottom: {$secSpacingBottom}px !important;";
         @endphp
         @if(in_array($sec->type, ['hero_carousel', 'hero', 'carousel']))
           @php
@@ -68,7 +71,7 @@
                 $cssDeclarations[] = "background-size: cover !important";
                 $cssDeclarations[] = "background-position: center !important";
             }
-            if (!empty($settings['parallax_scrolling'])) {
+            if (!empty($settings['parallax_scrolling']) && !$isCarousel) {
                 $cssDeclarations[] = "background-attachment: fixed !important";
             }
             if (!empty($settings['hero_height_value'])) {
@@ -105,8 +108,8 @@
               </div>
             @else
               {{-- MODO VISUAL ESTRUCTURADO (FORMULARIO DINÁMICO) --}}
-              <div class="hero-banner-card" style="{!! $heroBgStyle !!} {{ (!$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" aria-label="{{ $settings['background_image_alt'] ?? '' }}" @if(!$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
-                @if(!$heroHasButtons && !empty($heroClickUrl))
+              <div class="hero-banner-card" style="{!! $heroBgStyle !!} {{ $isCarousel ? 'position: relative !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important;' : '' }} {{ ($isCarousel && empty($settings['hero_height_value']) && !$isFullWidth) ? 'min-height: 440px;' : '' }} {{ ($isCarousel && $isFullWidth) ? 'min-height: calc(100vh - 56px) !important; height: calc(100vh - 56px) !important;' : '' }} {{ (!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) ? 'cursor: pointer;' : '' }}" aria-label="{{ $settings['background_image_alt'] ?? '' }}" @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl)) onclick="if(!event.target.closest('a, button')) { window.location.href='{{ $heroClickUrl }}'; }" @endif>
+                @if(!$isCarousel && !$heroHasButtons && !empty($heroClickUrl))
                   <a href="{{ $heroClickUrl }}" class="hero-full-click-link" style="position: absolute; inset: 0; z-index: 15; width: 100%; height: 100%; text-decoration: none;" aria-label="{{ $sec->title ?? 'Hero' }}"></a>
                 @endif
                 @if(!$isCarousel && ($settings['background_type'] ?? 'image') === 'video' && !empty($settings['background_video']))
@@ -127,105 +130,330 @@
                 
                 @if($isCarousel && !empty($settings['carousel_slides']))
                   @php
-                      $globalContent = !isset($settings['carousel_global_content']) || $settings['carousel_global_content'] == 1;
-                      $cGradStart = $settings['carousel_gradient_color_start'] ?? '#0f172a';
-                      $cGradEnd = $settings['carousel_gradient_color_end'] ?? '#1e1b4b';
-                      $cGradDir = $settings['carousel_gradient_direction'] ?? 'to bottom';
-                      $cGradOpStart = isset($settings['carousel_gradient_opacity_start']) ? ((int)$settings['carousel_gradient_opacity_start'] / 100) : 0.85;
-                      $cGradOpEnd = isset($settings['carousel_gradient_opacity_end']) ? ((int)$settings['carousel_gradient_opacity_end'] / 100) : 0.85;
-                      $cRgbaStart = $hexToRgba($cGradStart, $cGradOpStart);
-                      $cRgbaEnd = $hexToRgba($cGradEnd, $cGradOpEnd);
-                      
-                      $globalGradientStr = !empty($settings['carousel_enable_gradient']) 
-                          ? "linear-gradient({$cGradDir}, {$cRgbaStart}, {$cRgbaEnd}), " 
-                          : "";
-                          
+                      $slidesList = array_values(is_array($settings['carousel_slides']) ? $settings['carousel_slides'] : []);
                       $carouselId = 'carousel-' . $sec->id . '-' . uniqid();
+                      $autoplaySeconds = isset($settings['autoplay_time']) && (int)$settings['autoplay_time'] > 0 ? (int)$settings['autoplay_time'] : 5;
+                      $autoplayEnabled = (!isset($settings['autoplay']) && !isset($settings['carousel_autoplay'])) || !empty($settings['autoplay']) || !empty($settings['carousel_autoplay']);
+                      $isCarouselParallax = !empty($settings['parallax_scrolling']);
+
+                      $resolveSlideImg = function ($rawUrl) {
+                          $rawUrl = trim((string)$rawUrl);
+                          if ($rawUrl === '') return '';
+                          if (preg_match('/^(https?:\/\/|data:|blob:)/i', $rawUrl)) {
+                              return $rawUrl;
+                          }
+                          return asset(ltrim($rawUrl, '/'));
+                      };
                   @endphp
-                  <div id="{{ $carouselId }}" class="carousel-container absolute inset-0 z-0" data-autoplay="{{ $settings['autoplay_time'] ?? 5 }}" style="width: 100%; height: 100%; display: flex; transition: transform 0.5s ease-in-out;">
-                      @foreach($settings['carousel_slides'] as $slide)
-                          @php
-                              $slideGradientStr = $globalGradientStr;
-                              if (!$globalContent) {
+                  <div id="{{ $carouselId }}-viewport" class="store-carousel-viewport" data-parallax="{{ $isCarouselParallax ? '1' : '0' }}" style="position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; overflow: hidden;">
+                      <div id="{{ $carouselId }}" class="carousel-container" data-autoplay="{{ $autoplaySeconds }}" data-autoplay-enabled="{{ $autoplayEnabled ? '1' : '0' }}" style="width: 100%; height: 100%; {{ $isCarouselParallax ? 'position: relative; overflow: hidden;' : 'display: flex; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform;' }}">
+                          @foreach($slidesList as $sIdx => $slide)
+                              @php
+                                  $slideImgSrc = $resolveSlideImg($slide['image_url'] ?? '');
+                                  $slideFocal = !empty($slide['image_focal_point']) ? trim($slide['image_focal_point']) : 'center center';
+
+                                  $sEnableGrad = !isset($slide['enable_gradient']) || !empty($slide['enable_gradient']);
                                   $sGradStart = $slide['gradient_color_start'] ?? '#0f172a';
                                   $sGradEnd = $slide['gradient_color_end'] ?? '#1e1b4b';
                                   $sGradDir = $slide['gradient_direction'] ?? 'to bottom';
-                                  $sGradOpStart = isset($slide['gradient_opacity_start']) ? ((int)$slide['gradient_opacity_start'] / 100) : 0.85;
+                                  $sGradOpStart = isset($slide['gradient_opacity_start']) ? ((int)$slide['gradient_opacity_start'] / 100) : 0.65;
                                   $sGradOpEnd = isset($slide['gradient_opacity_end']) ? ((int)$slide['gradient_opacity_end'] / 100) : 0.85;
                                   $sRgbaStart = $hexToRgba($sGradStart, $sGradOpStart);
                                   $sRgbaEnd = $hexToRgba($sGradEnd, $sGradOpEnd);
-                                  $slideGradientStr = !empty($slide['enable_gradient']) 
-                                      ? "linear-gradient({$sGradDir}, {$sRgbaStart}, {$sRgbaEnd}), " 
-                                      : "";
-                              }
-                          @endphp
-                          <div class="carousel-slide" style="min-width: 100%; height: 100%; position: relative;">
-                              <div style="position: absolute; inset: 0; background-image: {!! $slideGradientStr !!}url('{{ asset(ltrim($slide['image_url'] ?? '', '/')) }}'); background-size: cover; background-position: {{ !empty($slide['image_focal_point']) ? $slide['image_focal_point'] : 'center' }};" aria-label="{{ $slide['alt_text'] ?? '' }}"></div>
-                              
-                              @if(!$globalContent)
-                                  <div style="position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+
+                                  $sAlignRaw = $slide['text_align'] ?? 'text-center';
+                                  $sFlexAlign = 'center';
+                                  $sTextAlign = 'center';
+                                  if ($sAlignRaw === 'text-left') {
+                                      $sFlexAlign = 'flex-start';
+                                      $sTextAlign = 'left';
+                                  } elseif ($sAlignRaw === 'text-right') {
+                                      $sFlexAlign = 'flex-end';
+                                      $sTextAlign = 'right';
+                                  }
+
+                                  $sTitleColor = !empty($slide['title_color']) ? $slide['title_color'] : '#ffffff';
+                                  $sSubColor = !empty($slide['subtitle_color']) ? $slide['subtitle_color'] : '#e2e8f0';
+
+                                  $bWidthVal = $slide['button_border_width'] ?? 'border-0';
+                                  $bPx = '0';
+                                  if ($bWidthVal === 'border') $bPx = '1';
+                                  elseif ($bWidthVal === 'border-2') $bPx = '2';
+                                  elseif ($bWidthVal === 'border-4') $bPx = '4';
+
+                                  $sBtnShadow = '';
+                                  $rawShadow = $slide['button_shadow'] ?? '';
+                                  if ($rawShadow === 'shadow-sm') $sBtnShadow = 'box-shadow: 0 1px 2px 0 rgba(0,0,0,0.12);';
+                                  elseif ($rawShadow === 'shadow-md') $sBtnShadow = 'box-shadow: 0 4px 10px -1px rgba(0,0,0,0.22);';
+                                  elseif ($rawShadow === 'shadow-lg') $sBtnShadow = 'box-shadow: 0 10px 20px -3px rgba(0,0,0,0.3);';
+                                  elseif ($rawShadow === 'shadow-xl') $sBtnShadow = 'box-shadow: 0 20px 28px -5px rgba(0,0,0,0.4);';
+                              @endphp
+                              <div class="carousel-slide" data-slide-index="{{ $sIdx }}" style="{{ $isCarouselParallax ? 'position: absolute; inset: 0; width: 100%; height: 100%; z-index: ' . ($sIdx === 0 ? '2' : '0') . '; visibility: ' . ($sIdx === 0 ? 'visible' : 'hidden') . '; will-change: clip-path;' : 'flex: 0 0 100%; min-width: 100%; width: 100%; height: 100%; position: relative;' }} overflow: hidden; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 36px max(24px, calc((100vw - 1280px) / 2 + 24px));">
+                                  @if(!empty($slideImgSrc))
+                                      <img src="{{ $slideImgSrc }}" class="carousel-slide-bg-img" alt="{{ $slide['alt_text'] ?? ($slide['title'] ?? 'Slide ' . ($sIdx + 1)) }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: {{ $slideFocal }}; z-index: 0; pointer-events: none; display: block;" loading="{{ $sIdx === 0 ? 'eager' : 'lazy' }}">
+                                  @else
+                                      <div style="position: absolute; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #09090b 100%); z-index: 0;"></div>
+                                  @endif
+
+                                  @if($sEnableGrad)
+                                      <div style="position: absolute; inset: 0; z-index: 1; background-image: linear-gradient({{ $sGradDir }}, {{ $sRgbaStart }}, {{ $sRgbaEnd }}); pointer-events: none;"></div>
+                                  @endif
+
+                                  @if(($slide['link_target'] ?? 'button') === 'image' && !empty($slide['button_url']))
+                                      <a href="{{ $slide['button_url'] }}" style="position: absolute; inset: 0; z-index: 12; text-decoration: none;" aria-label="{{ $slide['title'] ?? 'Ver colección' }}"></a>
+                                  @endif
+
+                                  <div class="carousel-slide-content" style="position: relative; z-index: 10; width: 100%; max-width: 960px; display: flex; flex-direction: column; align-items: {{ $sFlexAlign }}; text-align: {{ $sTextAlign }}; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s ease;">
                                       @if(!empty($slide['badge']))
-                                        <div class="hero-tag-pill">
+                                        <div class="hero-tag-pill" style="margin-bottom: 12px;">
                                           <span class="hero-pulse-dot"></span>
-                                          <span id="heroBrandTag">{{ $slide['badge'] }}</span>
+                                          <span>{{ $slide['badge'] }}</span>
                                         </div>
                                       @endif
                                       @if(!empty($slide['title']))
-                                        <h1 class="hero-title">{{ $slide['title'] }}</h1>
+                                        <h2 class="hero-title" style="color: {{ $sTitleColor }} !important; margin-bottom: 10px;">{{ $slide['title'] }}</h2>
                                       @endif
                                       @if(!empty($slide['subtitle']))
-                                        <p class="hero-desc">{{ $slide['subtitle'] }}</p>
+                                        <p class="hero-desc" style="color: {{ $sSubColor }} !important; margin-bottom: 20px;">{{ $slide['subtitle'] }}</p>
+                                      @endif
+
+                                      @if(!empty($slide['button_text']))
+                                        <div style="margin-top: 6px; pointer-events: auto; position: relative; z-index: 14;">
+                                            <a href="{{ $slide['button_url'] ?? '#' }}" class="btn-hero-primary" style="
+                                                display: inline-flex;
+                                                align-items: center;
+                                                gap: 8px;
+                                                padding: 12px 24px;
+                                                background-color: {{ $slide['button_bg'] ?? '#ffffff' }} !important;
+                                                color: {{ $slide['button_color'] ?? '#0f172a' }} !important;
+                                                border: {{ $bPx }}px solid {{ $slide['button_border_color'] ?? '#ffffff' }} !important;
+                                                text-decoration: none;
+                                                font-weight: 800;
+                                                font-size: 12px;
+                                                letter-spacing: 0.08em;
+                                                text-transform: uppercase;
+                                                border-radius: 9999px;
+                                                transition: transform 0.2s ease, opacity 0.2s ease;
+                                                {{ $sBtnShadow }}
+                                            ">
+                                                <span>{{ $slide['button_text'] }}</span>
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                            </a>
+                                        </div>
                                       @endif
                                   </div>
-                              @endif
+                              </div>
+                          @endforeach
+                      </div>
 
-                              @if(!empty($slide['button_text']))
-                                  @php
-                                      $bWidthVal = $slide['button_border_width'] ?? 'border-0';
-                                      $bPx = '0';
-                                      if ($bWidthVal === 'border') $bPx = '1';
-                                      elseif ($bWidthVal === 'border-2') $bPx = '2';
-                                      elseif ($bWidthVal === 'border-4') $bPx = '4';
-                                  @endphp
-                                  @if(($slide['link_target'] ?? 'button') === 'image')
-                                      <a href="{{ $slide['button_url'] ?? '#' }}" style="position: absolute; inset: 0; z-index: 2;"></a>
-                                  @endif
-                                  <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 3;">
-                                      <a href="{{ $slide['button_url'] ?? '#' }}" style="
-                                          display: inline-block;
-                                          padding: 10px 20px;
-                                          background-color: {{ $slide['button_bg'] ?? '#0f172a' }};
-                                          color: {{ $slide['button_color'] ?? '#ffffff' }};
-                                          border: {{ $bPx }}px solid {{ $slide['button_border_color'] ?? '#0f172a' }};
-                                          text-decoration: none;
-                                          font-weight: bold;
-                                          border-radius: 4px;
-                                          {{ !empty($slide['button_shadow']) ? 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);' : '' }}
-                                      ">{{ $slide['button_text'] }}</a>
-                                  </div>
-                              @endif
+                      @if(count($slidesList) > 1)
+                          <button type="button" data-carousel-prev="{{ $carouselId }}" aria-label="Slide anterior" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); z-index: 20; width: 40px; height: 40px; border-radius: 9999px; background: rgba(9, 9, 11, 0.55); color: #ffffff; border: 1px solid rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(6px); transition: background 0.2s ease;">
+                              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
+                          </button>
+                          <button type="button" data-carousel-next="{{ $carouselId }}" aria-label="Siguiente slide" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 20; width: 40px; height: 40px; border-radius: 9999px; background: rgba(9, 9, 11, 0.55); color: #ffffff; border: 1px solid rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(6px); transition: background 0.2s ease;">
+                              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+                          </button>
+                          <div data-carousel-dots="{{ $carouselId }}" style="position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 9999px; background: rgba(9, 9, 11, 0.45); backdrop-filter: blur(6px);">
+                              @foreach($slidesList as $sIdx => $slide)
+                                  <button type="button" data-carousel-dot="{{ $sIdx }}" aria-label="Ir al slide {{ $sIdx + 1 }}" style="height: 8px; width: {{ $sIdx === 0 ? '24px' : '8px' }}; border-radius: 9999px; border: none; padding: 0; cursor: pointer; background: {{ $sIdx === 0 ? '#ffffff' : 'rgba(255,255,255,0.45)' }}; transition: all 0.3s ease;"></button>
+                              @endforeach
                           </div>
-                      @endforeach
+                      @endif
                   </div>
                   <script>
                       (function() {
                           const container = document.getElementById('{{ $carouselId }}');
-                          if (!container) return;
+                          const viewport = document.getElementById('{{ $carouselId }}-viewport');
+                          if (!container || !viewport) return;
+
+                          const isRevealMode = viewport.getAttribute('data-parallax') === '1';
                           const slides = container.querySelectorAll('.carousel-slide');
-                          if (slides.length > 1) {
-                              let current = 0;
-                              const time = parseInt(container.getAttribute('data-autoplay')) * 1000;
-                              setInterval(() => {
-                                  current = (current + 1) % slides.length;
-                                  container.style.transform = `translateX(-${current * 100}%)`;
-                              }, time > 0 ? time : 5000);
+                          const total = slides.length;
+                          if (total <= 1) return;
+
+                          let current = 0;
+                          let timer = null;
+                          let isAnimating = false;
+                          const autoplayEnabled = container.getAttribute('data-autoplay-enabled') === '1';
+                          const intervalMs = Math.max(1500, (parseInt(container.getAttribute('data-autoplay')) || 5) * 1000);
+                          const dotsWrap = viewport.querySelector('[data-carousel-dots="{{ $carouselId }}"]');
+                          const dots = dotsWrap ? dotsWrap.querySelectorAll('[data-carousel-dot]') : [];
+                          const prevBtn = viewport.querySelector('[data-carousel-prev="{{ $carouselId }}"]');
+                          const nextBtn = viewport.querySelector('[data-carousel-next="{{ $carouselId }}"]');
+
+                          // Inicialización de capas para Efecto Revelado (Cortina)
+                          if (isRevealMode) {
+                              slides.forEach(function(s, idx) {
+                                  s.style.position = 'absolute';
+                                  s.style.inset = '0';
+                                  s.style.width = '100%';
+                                  s.style.height = '100%';
+                                  s.style.zIndex = idx === 0 ? '2' : '0';
+                                  s.style.visibility = idx === 0 ? 'visible' : 'hidden';
+                                  s.style.opacity = '1';
+                                  s.style.clipPath = 'none';
+                              });
                           }
+
+                          function goToSlide(targetIdx, direction) {
+                              if (isAnimating) return;
+                              targetIdx = ((targetIdx % total) + total) % total;
+                              if (targetIdx === current && isRevealMode) return;
+
+                              if (!direction) {
+                                  direction = targetIdx > current ? 'next' : 'prev';
+                                  if (current === total - 1 && targetIdx === 0) direction = 'next';
+                                  if (current === 0 && targetIdx === total - 1) direction = 'prev';
+                              }
+
+                              if (isRevealMode) {
+                                  isAnimating = true;
+                                  const currentSlide = slides[current];
+                                  const targetSlide = slides[targetIdx];
+
+                                  // Preparar slide destino debajo en z-index 1
+                                  targetSlide.style.zIndex = '1';
+                                  targetSlide.style.visibility = 'visible';
+                                  targetSlide.style.opacity = '1';
+                                  targetSlide.style.clipPath = 'none';
+                                  targetSlide.style.transition = 'none';
+
+                                  // Slide actual por encima en z-index 3
+                                  currentSlide.style.zIndex = '3';
+                                  currentSlide.style.visibility = 'visible';
+                                  currentSlide.style.clipPath = 'inset(0 0 0 0)';
+                                  currentSlide.style.transition = 'none';
+
+                                  const curContent = currentSlide.querySelector('.carousel-slide-content');
+                                  const tgtContent = targetSlide.querySelector('.carousel-slide-content');
+
+                                  // Forzar reflow para registrar estado inicial
+                                  void currentSlide.offsetHeight;
+
+                                  currentSlide.style.transition = 'clip-path 0.75s cubic-bezier(0.25, 1, 0.5, 1)';
+                                  if (direction === 'next') {
+                                      currentSlide.style.clipPath = 'inset(0 100% 0 0)';
+                                  } else {
+                                      currentSlide.style.clipPath = 'inset(0 0 0 100%)';
+                                  }
+
+                                  if (curContent) {
+                                      curContent.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                                      curContent.style.opacity = '0';
+                                      curContent.style.transform = direction === 'next' ? 'translateX(-24px)' : 'translateX(24px)';
+                                  }
+                                  if (tgtContent) {
+                                      tgtContent.style.opacity = '0';
+                                      tgtContent.style.transform = direction === 'next' ? 'translateX(24px)' : 'translateX(-24px)';
+                                      setTimeout(function() {
+                                          tgtContent.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+                                          tgtContent.style.opacity = '1';
+                                          tgtContent.style.transform = 'translateX(0)';
+                                      }, 80);
+                                  }
+
+                                  setTimeout(function() {
+                                      targetSlide.style.zIndex = '2';
+                                      currentSlide.style.zIndex = '0';
+                                      currentSlide.style.visibility = 'hidden';
+                                      currentSlide.style.clipPath = 'none';
+                                      currentSlide.style.transition = 'none';
+                                      if (curContent) {
+                                          curContent.style.opacity = '1';
+                                          curContent.style.transform = 'none';
+                                          curContent.style.transition = 'none';
+                                      }
+                                      slides.forEach(function(s, idx) {
+                                          if (idx !== targetIdx) {
+                                              s.style.zIndex = '0';
+                                              s.style.visibility = 'hidden';
+                                          }
+                                      });
+                                      current = targetIdx;
+                                      isAnimating = false;
+                                  }, 760);
+                              } else {
+                                  current = targetIdx;
+                                  container.style.transform = 'translateX(-' + (current * 100) + '%)';
+                              }
+
+                              dots.forEach(function(dot, dIdx) {
+                                  if (dIdx === targetIdx) {
+                                      dot.style.width = '24px';
+                                      dot.style.background = '#ffffff';
+                                  } else {
+                                      dot.style.width = '8px';
+                                      dot.style.background = 'rgba(255,255,255,0.45)';
+                                  }
+                              });
+                          }
+
+                          function startAutoplay() {
+                              stopAutoplay();
+                              if (!autoplayEnabled) return;
+                              timer = setInterval(function() {
+                                  goToSlide(current + 1, 'next');
+                              }, intervalMs);
+                          }
+
+                          function stopAutoplay() {
+                              if (timer) {
+                                  clearInterval(timer);
+                                  timer = null;
+                              }
+                          }
+
+                          if (prevBtn) {
+                              prevBtn.addEventListener('click', function(e) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  goToSlide(current - 1, 'prev');
+                                  startAutoplay();
+                              });
+                          }
+                          if (nextBtn) {
+                              nextBtn.addEventListener('click', function(e) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  goToSlide(current + 1, 'next');
+                                  startAutoplay();
+                              });
+                          }
+                          dots.forEach(function(dot) {
+                              dot.addEventListener('click', function(e) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const targetIdx = parseInt(dot.getAttribute('data-carousel-dot')) || 0;
+                                  goToSlide(targetIdx, targetIdx >= current ? 'next' : 'prev');
+                                  startAutoplay();
+                              });
+                          });
+
+                          let touchStartX = 0;
+                          viewport.addEventListener('touchstart', function(e) {
+                              if (e.touches && e.touches.length > 0) {
+                                  touchStartX = e.touches[0].clientX;
+                              }
+                          }, { passive: true });
+                          viewport.addEventListener('touchend', function(e) {
+                              if (!e.changedTouches || e.changedTouches.length === 0) return;
+                              const diffX = e.changedTouches[0].clientX - touchStartX;
+                              if (Math.abs(diffX) > 40) {
+                                  if (diffX < 0) goToSlide(current + 1, 'next');
+                                  else goToSlide(current - 1, 'prev');
+                                  startAutoplay();
+                              }
+                          }, { passive: true });
+
+                          viewport.addEventListener('mouseenter', stopAutoplay);
+                          viewport.addEventListener('mouseleave', startAutoplay);
+
+                          startAutoplay();
                       })();
                   </script>
                 @endif
                 
                 @php
-                  $globalContent = !isset($settings['carousel_global_content']) || $settings['carousel_global_content'] == 1;
                   $titleColor = $settings['title_color'] ?? '';
                   $titleFont = $settings['title_font'] ?? $settings['font_family'] ?? '';
                   $subtitleColor = $settings['subtitle_color'] ?? '';
@@ -254,7 +482,7 @@
                       $subtitleStyle .= "font-family: '{$subtitleFont}', sans-serif !important; ";
                   }
                 @endphp
-                <div style="position: relative; z-index: 10; width: 100%; display: flex; flex-direction: column; align-items: {{ $flexAlign }}; text-align: {{ str_replace('text-', '', $alignCss) }}; {{ $isCarousel ? 'pointer-events: none;' : '' }} {{ $isCarousel && !$globalContent ? 'display: none;' : '' }}">
+                <div style="position: relative; z-index: 10; width: 100%; display: flex; flex-direction: column; align-items: {{ $flexAlign }}; text-align: {{ str_replace('text-', '', $alignCss) }}; {{ $isCarousel ? 'display: none !important;' : '' }}">
                 @if(!empty($sec->badge) || !empty($currentStorefront['heroTag']))
                   <div class="hero-tag-pill">
                     <span class="hero-pulse-dot"></span>
@@ -724,7 +952,7 @@
       </section>
 
       <!-- Feed de Prendas Destacadas (Fallback) -->
-      <section style="margin-top: 0px !important; margin-bottom: 0px !important;">
+      <section style="margin-top: 12px !important; margin-bottom: 12px !important; padding-top: 12px !important; padding-bottom: 12px !important;">
         <div class="catalog-section-header">
           <div>
             <h2 class="section-headline">PRENDAS DESTACADAS</h2>
