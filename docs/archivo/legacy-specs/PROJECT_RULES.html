@@ -418,8 +418,8 @@
   <div class="rule-item avoid-break">
     <div class="rule-number">3</div>
     <div class="rule-content">
-      <strong>Regla 3.3 (Inamovible de Sistema): Sincronización Automática, Reactiva y Omnicanal del Catálogo (Hub 4 &harr; Hub 2 &harr; Storefront)</strong>
-      Axioma inamovible de la arquitectura de la plataforma: cualquier cambio realizado en familias, categorías, subcategorías, colores (sólidos, tornasoles, multicolores o degradados) y curvas de tallas —en Ajustes de Hub 4, Workstation de Alta, Drawer de Edición Rápida o bandeja de Scraping— <strong>DEBE sincronizarse y propagarse automáticamente</strong> entre Hub 4, Hub 2 (CMS & Storefront Controller), la base de datos relacional (tablas pivote y <code>meta</code>) y el Storefront PWA. Queda terminantemente prohibido que productos queden desvinculados de su categoría oficial, con colores faltantes o cayendo por defecto a la talla unitaria ('UNI') existiendo curvas activas.
+      <strong>Regla 3.3 (Inamovible de Sistema): Sincronización Automática, Reactiva y Omnicanal de Toda la Información del Producto (Hub 4 &harr; Hub 2 &harr; Storefront)</strong>
+      Axioma inamovible de la arquitectura de la plataforma: <strong>toda la información del producto sin excepción</strong> —familias, categorías, subcategorías, colores, curvas de tallas, precios (PVP, costo, descuentos), existencias en Kardex e inventario de variantes, descripciones comerciales, telas y marcas— <strong>DEBE sincronizarse y propagarse automáticamente</strong> entre Hub 4, Hub 2 (CMS & Storefront Controller), la base de datos relacional y el Storefront PWA. Las modificaciones de precios y stock actualizan de forma inmediata variantes y Kardex; las PDP priorizan dinámicamente las telas curadas (<code>$product->fabric</code>) y ninguna prenda textil cae a 'UNI' existiendo curvas activas.
     </div>
   </div>
 </div>

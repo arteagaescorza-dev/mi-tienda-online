@@ -244,6 +244,13 @@ class ProductCatalogSyncService
                     'cost' => $product->cost,
                     'attributes' => ['size' => strtoupper($cleanSz)],
                 ]);
+            } else {
+                if ($variant->price != $product->price || $variant->cost != $product->cost) {
+                    $variant->update([
+                        'price' => $product->price,
+                        'cost' => $product->cost,
+                    ]);
+                }
             }
 
             $inv = Inventory::query()->lockForUpdate()->firstOrCreate(
@@ -292,10 +299,124 @@ class ProductCatalogSyncService
     }
 
     /**
+     * Sincronización de precios, costos, márgenes e inventario.
+     */
+    public function syncProductPricesAndStock(Product $product, array $attributes = []): void
+    {
+        $meta = (array) ($product->meta ?? []);
+        $updated = false;
+
+        $pvp = isset($attributes['pvp']) || isset($attributes['price'])
+            ? (float) ($attributes['pvp'] ?? $attributes['price'])
+            : (float) $product->price;
+
+        $cost = isset($attributes['cost'])
+            ? (float) $attributes['cost']
+            : (float) $product->cost;
+
+        if ($product->price != $pvp || $product->cost != $cost) {
+            $product->price = $pvp;
+            $product->cost = $cost;
+            $updated = true;
+        }
+
+        $regularPrice = isset($attributes['regular_price']) ? (float) $attributes['regular_price'] : (float) data_get($meta, 'regular_price', $pvp);
+        $discountPct = isset($attributes['discount_pct']) ? (float) $attributes['discount_pct'] : (float) data_get($meta, 'discount_pct', 0);
+        $effectivePrice = $discountPct > 0 ? round($pvp * (1 - ($discountPct / 100)), 2) : $pvp;
+        $cpp = isset($attributes['cpp']) || isset($attributes['weighted_average_cost'])
+            ? (float) ($attributes['cpp'] ?? $attributes['weighted_average_cost'])
+            : (float) data_get($meta, 'weighted_average_cost', $cost);
+
+        $meta['regular_price'] = $regularPrice;
+        $meta['discount_pct'] = $discountPct;
+        $meta['effective_price'] = $effectivePrice;
+        $meta['weighted_average_cost'] = $cpp;
+
+        // Calcular existencias físicas y disponibles en tiempo real desde variantes
+        $product->load('variants.inventories');
+        $totalPhysical = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('quantity'));
+        $totalReserved = (int) $product->variants->sum(fn ($v) => $v->inventories->sum('reserved'));
+        $totalAvailable = max(0, $totalPhysical - $totalReserved);
+
+        $meta['local_stock'] = $totalPhysical;
+        $meta['physical_stock'] = $totalPhysical;
+        $meta['available_stock'] = $totalAvailable;
+
+        $product->meta = $meta;
+        if ($updated || $product->isDirty('meta')) {
+            $product->saveQuietly();
+        }
+
+        // Sincronizar precio y costo en todas las variantes existentes
+        foreach ($product->variants as $variant) {
+            if ($variant->price != $pvp || $variant->cost != $cost) {
+                $variant->update([
+                    'price' => $pvp,
+                    'cost' => $cost,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Sincronización de descripción, atributos textiles y metadatos comerciales.
+     */
+    public function syncProductContent(Product $product, array $attributes = []): void
+    {
+        $meta = (array) ($product->meta ?? []);
+        $updated = false;
+
+        if (array_key_exists('description', $attributes) && $product->description !== $attributes['description']) {
+            $product->description = (string) $attributes['description'];
+            $updated = true;
+        }
+
+        if (array_key_exists('title', $attributes) && !empty($attributes['title']) && $product->title !== $attributes['title']) {
+            $product->title = (string) $attributes['title'];
+            $updated = true;
+        } elseif (array_key_exists('name', $attributes) && !empty($attributes['name']) && $product->title !== $attributes['name']) {
+            $product->title = (string) $attributes['name'];
+            $updated = true;
+        }
+
+        if (array_key_exists('brand', $attributes) && !empty($attributes['brand']) && $product->brand !== $attributes['brand']) {
+            $product->brand = (string) $attributes['brand'];
+            $meta['brand'] = $product->brand;
+            $updated = true;
+        }
+
+        $fabricName = $attributes['fabric'] ?? ($attributes['fabric_type'] ?? null);
+        if (!empty($fabricName)) {
+            $product->fabric = $fabricName;
+            $meta['fabric'] = $fabricName;
+            $meta['fabric_type'] = $fabricName;
+            if (!empty($attributes['fabric_id'])) {
+                $product->fabric_id = (int) $attributes['fabric_id'];
+                $meta['fabric_id'] = (int) $attributes['fabric_id'];
+            }
+            $updated = true;
+        }
+
+        if (array_key_exists('bullet_points', $attributes)) {
+            $meta['bullet_points'] = (array) $attributes['bullet_points'];
+        }
+        if (array_key_exists('seo_tags', $attributes)) {
+            $meta['seo_tags'] = (array) $attributes['seo_tags'];
+        }
+
+        $product->meta = $meta;
+        if ($updated || $product->isDirty('meta')) {
+            $product->saveQuietly();
+        }
+    }
+
+    /**
      * Sincronización integral de un producto.
      */
     public function syncProduct(Product $product, array $attributes = []): Product
     {
+        $this->syncProductContent($product, $attributes);
+
         $this->syncProductCategories(
             $product,
             $attributes['category'] ?? null,
@@ -313,6 +434,8 @@ class ProductCatalogSyncService
             $product,
             $attributes['sizes'] ?? null
         );
+
+        $this->syncProductPricesAndStock($product, $attributes);
 
         return $product->fresh(['categories', 'variants.inventories']);
     }
@@ -403,6 +526,50 @@ class ProductCatalogSyncService
                 $newSizes[$code] = $currentSizes[$code] ?? 0;
             }
             $this->syncProductSizesAndCurve($p, $newSizes);
+        }
+    }
+
+    /**
+     * Propaga la actualización de una tela a todos los productos asociados.
+     */
+    public function propagateFabricUpdate(\App\Models\ApparelFabric $fabric, string $oldName): void
+    {
+        $products = Product::where('fabric_id', $fabric->id)
+            ->orWhere('fabric', $oldName)
+            ->orWhere('meta->fabric', $oldName)
+            ->orWhere('meta->fabric_type', $oldName)
+            ->get();
+
+        foreach ($products as $p) {
+            $meta = (array) ($p->meta ?? []);
+            $meta['fabric'] = $fabric->name;
+            $meta['fabric_type'] = $fabric->name;
+            $meta['fabric_id'] = $fabric->id;
+            if (!empty($fabric->description)) {
+                $meta['fabric_composition'] = $fabric->description;
+            }
+            $p->fabric = $fabric->name;
+            $p->fabric_id = $fabric->id;
+            $p->meta = $meta;
+            $p->saveQuietly();
+        }
+    }
+
+    /**
+     * Propaga la actualización de una marca comercial a todos los productos asociados.
+     */
+    public function propagateBrandUpdate(\App\Models\Brand $brand, string $oldName): void
+    {
+        $products = Product::where('brand', $oldName)
+            ->orWhere('meta->brand', $oldName)
+            ->get();
+
+        foreach ($products as $p) {
+            $meta = (array) ($p->meta ?? []);
+            $meta['brand'] = $brand->name;
+            $p->brand = $brand->name;
+            $p->meta = $meta;
+            $p->saveQuietly();
         }
     }
 }

@@ -441,6 +441,7 @@ class InventorySettingsApiController extends Controller
 
         $validated = $request->validated();
 
+        $oldName = $fabric->name;
         if (!empty($validated['name'])) {
             $fabric->name = trim($validated['name']);
             $fabric->slug = Str::slug($fabric->name);
@@ -452,6 +453,8 @@ class InventorySettingsApiController extends Controller
             $fabric->is_active = (bool) $validated['is_active'];
         }
         $fabric->save();
+
+        app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateFabricUpdate($fabric, $oldName);
 
         return response()->json([
             'status' => 'success',

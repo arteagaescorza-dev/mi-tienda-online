@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\ApparelColor;
+use App\Models\ApparelFabric;
 use App\Models\ApparelSize;
 use App\Models\ApparelSizeCurve;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -283,5 +285,171 @@ class Hub4ToStorefrontSyncTest extends TestCase
         $product->refresh();
         $this->assertEquals('Naranja Neón Intenso', data_get($product->meta, 'color_name'));
         $this->assertEquals('#ff7700', data_get($product->meta, 'color_hex'));
+    }
+
+    public function test_price_inventory_stock_description_and_fabric_syncs_to_variants_and_storefront(): void
+    {
+        $product = Product::create([
+            'sku' => 'SKU-FULL-SYNC',
+            'title' => 'Bóxer Ergonómico Active',
+            'slug' => 'boxer-ergonomico-active',
+            'brand' => 'Torzo Sexywear',
+            'price' => 199.00,
+            'cost' => 80.00,
+            'type' => 'physical',
+            'visible' => true,
+            'description' => 'Descripción inicial genérica.',
+            'fabric' => 'Algodón Peinado 100%',
+            'meta' => [
+                'category' => 'Boxers',
+                'fabric' => 'Algodón Peinado 100%',
+                'sizes' => ['ch' => 2, 'm' => 4],
+            ],
+        ]);
+
+        // Crear variantes iniciales
+        $variantCh = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'SKU-FULL-SYNC-CH',
+            'price' => 199.00,
+            'cost' => 80.00,
+            'attributes' => ['size' => 'CH'],
+        ]);
+        \App\Models\Inventory::create([
+            'variant_id' => $variantCh->id,
+            'location' => 'warehouse-1',
+            'quantity' => 2,
+            'reserved' => 0,
+            'type' => 'physical',
+        ]);
+
+        // Actualizar producto desde Hub 4 con nuevo precio, costo, descripción, tela y cantidades
+        $response = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/products/{$product->sku}/update-complete", [
+            'name' => 'Bóxer Ergonómico Active Pro',
+            'category' => 'Boxers',
+            'brand' => 'Torzo Sexywear',
+            'pvp' => 349.00,
+            'cost' => 135.00,
+            'discount_pct' => 10,
+            'description' => 'Prenda deportiva de alto rendimiento confeccionada en microfibra transpirable con copa ergonómica.',
+            'fabric_type' => 'Microfibra Spandex 88/12',
+            'sizes' => [
+                'ch' => 7,
+                'm' => 12,
+            ],
+        ]);
+
+        $response->assertOk();
+
+        $product->refresh();
+
+        // 1. Verificar persistencia de precio, costo, tela y descripción en Product
+        $this->assertEquals(349.00, (float) $product->price);
+        $this->assertEquals(135.00, (float) $product->cost);
+        $this->assertEquals('Microfibra Spandex 88/12', $product->fabric);
+        $this->assertStringContainsString('microfibra transpirable', $product->description);
+
+        // 2. Verificar sincronización en variantes (precio y costo sincronizados)
+        $variantCh->refresh();
+        $this->assertEquals(349.00, (float) $variantCh->price);
+        $this->assertEquals(135.00, (float) $variantCh->cost);
+
+        // 3. Verificar inventarios actualizados (7 en CH, 12 en M = 19 total)
+        $chInv = \App\Models\Inventory::where('variant_id', $variantCh->id)->first();
+        $this->assertEquals(7, (int) $chInv->quantity);
+
+        $variantM = ProductVariant::where('product_id', $product->id)->where('sku', 'SKU-FULL-SYNC-M')->first();
+        $this->assertNotNull($variantM);
+        $this->assertEquals(349.00, (float) $variantM->price);
+        $mInv = \App\Models\Inventory::where('variant_id', $variantM->id)->first();
+        $this->assertEquals(12, (int) $mInv->quantity);
+
+        // 4. Verificar Storefront Catalog
+        $storefrontController = app(\App\Http\Controllers\StorefrontController::class);
+        $pwaProducts = $storefrontController->getPwaStoreProducts();
+        $card = collect($pwaProducts)->firstWhere('sku', 'SKU-FULL-SYNC');
+
+        $this->assertNotNull($card);
+        $this->assertEquals(349.00, (float) $card['price']);
+        $this->assertEquals(19, (int) $card['availableStock']);
+        $this->assertEquals('Microfibra Spandex 88/12', $card['fabric_type']);
+        $this->assertStringContainsString('microfibra transpirable', $card['description']);
+
+        // 5. Verificar PDP
+        $pdpService = app(StorefrontCatalogService::class);
+        $pdp = $pdpService->getProductDetailPayload('SKU-FULL-SYNC');
+        $this->assertNotNull($pdp);
+        $this->assertEquals(349.00, (float) $pdp['price']);
+        $this->assertEquals(19, (int) $pdp['total_available_stock']);
+        $this->assertEquals('Microfibra Spandex 88/12', $pdp['fabric']);
+        $this->assertStringContainsString('Microfibra Spandex 88/12', $pdp['fabric_composition']);
+        $this->assertStringContainsString('microfibra transpirable', $pdp['description']);
+    }
+
+    public function test_fabric_and_brand_update_in_settings_propagates_to_all_linked_products(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'Fabricante Textil MX',
+            'trade_name' => 'Fabricante Textil',
+            'contact_name' => 'Juan Perez',
+            'email' => 'taller@textil.mx',
+            'phone' => '5551234567',
+            'status' => 'active',
+        ]);
+
+        $brand = Brand::create([
+            'name' => 'Torzo Clásico',
+            'slug' => 'torzo-clasico',
+            'supplier_id' => $supplier->id,
+            'is_active' => true,
+        ]);
+
+        $fabric = ApparelFabric::create([
+            'name' => 'Modal Seda',
+            'slug' => 'modal-seda',
+            'description' => '90% Modal Seda / 10% Elastano',
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'sku' => 'SKU-PROP-FAB-BRD',
+            'title' => 'Bikini Seda',
+            'slug' => 'bikini-seda',
+            'brand' => 'Torzo Clásico',
+            'fabric' => 'Modal Seda',
+            'fabric_id' => $fabric->id,
+            'price' => 250.00,
+            'cost' => 100.00,
+            'type' => 'dropship',
+            'visible' => true,
+            'meta' => [
+                'brand' => 'Torzo Clásico',
+                'fabric' => 'Modal Seda',
+                'fabric_type' => 'Modal Seda',
+            ],
+        ]);
+
+        // 1. Actualizar tela en configuración
+        $resFabric = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/settings/fabrics/{$fabric->id}", [
+            'name' => 'Modal Seda Satinado',
+            'description' => '95% Modal Seda Satinado / 5% Spandex Ultra Soft',
+            'is_active' => true,
+        ]);
+        $resFabric->assertOk();
+
+        // 2. Actualizar marca en configuración
+        $resBrand = $this->actingAs($this->adminUser)->putJson("/api/v1/inventory/settings/brands/{$brand->id}", [
+            'name' => 'Torzo Black Label',
+            'supplier_id' => $supplier->id,
+            'is_active' => true,
+        ]);
+        $resBrand->assertOk();
+
+        // 3. Verificar que el producto reflejó ambos cambios automáticamente
+        $product->refresh();
+        $this->assertEquals('Modal Seda Satinado', $product->fabric);
+        $this->assertEquals('Modal Seda Satinado', data_get($product->meta, 'fabric'));
+        $this->assertEquals('Torzo Black Label', $product->brand);
+        $this->assertEquals('Torzo Black Label', data_get($product->meta, 'brand'));
     }
 }

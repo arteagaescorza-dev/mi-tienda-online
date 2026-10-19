@@ -270,6 +270,10 @@ class BrandApiController extends Controller
             }
         }
 
+        if ($oldName !== $brand->name) {
+            app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateBrandUpdate($brand, $oldName);
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => "Marca '{$brand->name}' actualizada correctamente.",

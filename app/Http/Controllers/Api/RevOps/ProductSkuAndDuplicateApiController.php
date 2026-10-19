@@ -604,6 +604,13 @@ class ProductSkuAndDuplicateApiController extends Controller
                             'cost' => $cost,
                             'attributes' => ['size' => strtoupper($cleanSz)],
                         ]);
+                    } else {
+                        if ($variant->price != $pvp || $variant->cost != $cost) {
+                            $variant->update([
+                                'price' => $pvp,
+                                'cost' => $cost,
+                            ]);
+                        }
                     }
 
                     $inv = Inventory::query()->lockForUpdate()->firstOrCreate(

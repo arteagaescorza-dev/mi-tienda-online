@@ -136,8 +136,11 @@ class StorefrontCatalogService
         $image = str_replace('/./', '/', $image);
         $images = data_get($product->meta, 'images', [$image]);
 
-        $fabricComposition = data_get($product->meta, 'fabric_composition')
-            ?: '95% Modal Pima peruano / 5% Elastano (Spandex) de alta recuperación. Elástico jacquard de 45mm.';
+        $fabricComposition = $product->fabric
+            ?: (data_get($product->meta, 'fabric_composition')
+            ?: (data_get($product->meta, 'fabric')
+            ?: (data_get($product->meta, 'fabric_type')
+            ?: '95% Modal Pima peruano / 5% Elastano (Spandex) de alta recuperación. Elástico jacquard de 45mm.')));
 
         return [
             'id' => (string) $product->id,
@@ -149,6 +152,7 @@ class StorefrontCatalogService
             'category_name' => $categoryName,
             'price' => (float) $product->price,
             'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
+            'fabric' => (string) ($product->fabric ?: data_get($product->meta, 'fabric', '')),
             'fabric_composition' => $fabricComposition,
             'stock_type' => $totalAvailable > 0 ? 'ready' : 'on_demand',
             'stock_label' => $totalAvailable > 0 ? 'Stock Físico' : 'Bajo Pedido',
