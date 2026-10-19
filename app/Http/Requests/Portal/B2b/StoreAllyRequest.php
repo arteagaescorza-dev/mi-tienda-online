@@ -36,3 +36,4 @@ class StoreAllyRequest extends FormRequest
         ];
     }
 }
+

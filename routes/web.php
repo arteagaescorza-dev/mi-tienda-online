@@ -43,6 +43,7 @@ use App\Http\Controllers\PortalStoreController;
 use App\Http\Controllers\PortalAlliesController;
 
 Route::middleware(['auth', 'role:portal'])->group(function () {
+	Route::get('/admin', fn () => redirect()->route('portal.dashboard'));
 	Route::get('/admin/dashboard', [StorefrontController::class, 'portalDashboard'])->name('portal.dashboard');
 	Route::get('/admin/tienda-cms', [PortalStoreController::class, 'index'])->name('portal.store');
 	Route::get('/admin/marketing', [PortalMarketingController::class, 'index'])->name('portal.marketing');
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	Route::get('/admin/convenios', [PortalAlliesController::class, 'index'])->name('portal.allies');
 	Route::get('/admin/gobernanza', [\App\Http\Controllers\PortalGovernanceController::class, 'index'])->name('portal.governance');
 	Route::post('/admin/gobernanza/entorno', [\App\Http\Controllers\PortalGovernanceController::class, 'updateEnvironment'])->name('portal.governance.environment.update');
+	Route::get('/admin/modulos/{module}', [StorefrontController::class, 'portalModule'])->name('portal.module');
 	Route::get('/admin/proveedores/colores', [SupplierColorMappingController::class, 'index'])->name('portal.suppliers.colors');
 	Route::post('/admin/inventario/{inventory}/movimientos', [InventoryMovementController::class, 'store'])->name('portal.inventory.movements.store');
 	Route::post('/admin/proveedores/{supplier}/sincronizar', [SupplierSyncController::class, 'store'])->name('portal.suppliers.sync');
@@ -66,6 +68,15 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 
 	Route::middleware('financial.privacy')->group(function () {
 		Route::get('/admin/finanzas', [\App\Http\Controllers\PortalFinanceController::class, 'index'])->name('portal.finance');
+		Route::post('/admin/finanzas/payouts/{payoutBatch}/conciliar', [\App\Http\Controllers\PortalFinanceController::class, 'reconcilePayoutBatch'])->name('portal.finance.payouts.reconcile');
+		Route::post('/admin/finanzas/suscripciones/{subscription}/reintentar', [\App\Http\Controllers\PortalFinanceController::class, 'retrySubscriptionDunning'])->name('portal.finance.subscriptions.retry');
+		Route::post('/admin/finanzas/cuentas/{vendorBill}/pagar', [\App\Http\Controllers\PortalFinanceController::class, 'payVendorBill'])->name('portal.finance.vendor_bills.pay');
+		Route::post('/admin/finanzas/auditoria-envios/cargar', [\App\Http\Controllers\PortalFinanceController::class, 'uploadShippingInvoiceReport'])->name('portal.finance.shipping_audit.upload');
+		Route::post('/admin/finanzas/auditoria-envios/{reconciliation}/reclamar', [\App\Http\Controllers\PortalFinanceController::class, 'fileShippingClaim'])->name('portal.finance.shipping_audit.claim');
+		Route::post('/portal/finance/shipping-audit/{reconciliation}/claim', [\App\Http\Controllers\PortalFinanceController::class, 'fileShippingClaim']);
+		Route::post('/admin/finanzas/cotejo-3-vias/verificar', [\App\Http\Controllers\PortalFinanceController::class, 'verifyThreeWayMatching'])->name('portal.finance.three_way_matching.verify');
+		Route::post('/admin/finanzas/cotejo-3-vias/{id}/nota-debito', [\App\Http\Controllers\PortalFinanceController::class, 'issueDebitNoteWeb'])->name('portal.finance.three_way_matching.debit_note');
+		Route::post('/admin/finanzas/cotejo-3-vias/{id}/autorizar-spei', [\App\Http\Controllers\PortalFinanceController::class, 'authorizeSpeiPayoutWeb'])->name('portal.finance.three_way_matching.authorize_spei');
 	});
 	Route::post('/admin/marketing/cupones', [PortalMarketingController::class, 'storeCoupon'])->name('portal.marketing.coupons.store');
 	Route::post('/admin/marketing/cupones/{coupon}/toggle', [PortalMarketingController::class, 'toggleCoupon'])->name('portal.marketing.coupons.toggle');

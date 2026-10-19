@@ -114,13 +114,13 @@ class User extends Authenticatable
         }
 
         $hubAccessMap = [
-            'dashboard'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'portal'],
+            'dashboard'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'marketing', 'packer', 'picker', 'portal'],
             'store'           => ['admin', 'superadmin', 'sales', 'marketing', 'portal'],
             'crm'             => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
             'marketing'       => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
-            'inventory'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'portal'],
+            'inventory'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'packer', 'picker', 'portal'],
             'finance'         => ['admin', 'superadmin', 'finance', 'finanzas', 'portal'],
-            'logistics'       => ['admin', 'superadmin', 'finance', 'warehouse', 'logistics', 'operator', 'portal'],
+            'logistics'       => ['admin', 'superadmin', 'finance', 'warehouse', 'logistics', 'operator', 'packer', 'picker', 'portal'],
             'allies'          => ['admin', 'superadmin', 'finance', 'sales', 'marketing', 'portal'],
             'governance'      => ['admin', 'superadmin', 'portal'],
             'vendor_extranet' => ['admin', 'superadmin', 'vendor', 'purchases', 'portal'],

@@ -9,6 +9,10 @@ class PortalAlliesPartnerPortalRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        if ($this->route('token')) {
+            return true;
+        }
+
         return Gate::allows('manage-b2b');
     }
 

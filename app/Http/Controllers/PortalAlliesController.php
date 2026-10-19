@@ -27,6 +27,15 @@ class PortalAlliesController extends Controller
     {
         Gate::authorize('manage-b2b');
 
+        $data = $this->getAlliesData($request);
+
+        return view('portal.allies', array_merge($data, [
+            'initialMode' => 'admin',
+        ]));
+    }
+
+    protected function getAlliesData(?Request $request = null): array
+    {
         if (Ally::count() === 0) {
             (new \Database\Seeders\AlliesSeeder())->run();
         }
@@ -185,7 +194,7 @@ class PortalAlliesController extends Controller
         $totalCommissionsDebit = array_sum(array_column(array_column($alliesList, 'stats'), 'commissionEarned'));
         $totalNetBalance = $totalLeadsCredit - $totalCommissionsDebit;
 
-        $selectedAllyId = $request->query('ally_id');
+        $selectedAllyId = $request ? $request->query('ally_id') : request()->query('ally_id');
         $selectedAlly = null;
         if ($selectedAllyId) {
             foreach ($alliesList as $ally) {
@@ -231,7 +240,7 @@ class PortalAlliesController extends Controller
             ];
         }
 
-        return view('portal.allies', [
+        return [
             'alliesList' => $alliesList,
             'campaignsDirA' => $campaignsDirA,
             'pendingCampaigns' => $pendingCampaigns,
@@ -242,8 +251,7 @@ class PortalAlliesController extends Controller
             'totalCommissionsDebit' => $totalCommissionsDebit,
             'totalNetBalance' => $totalNetBalance,
             'selectedAlly' => $selectedAlly,
-            'initialMode' => 'admin',
-        ]);
+        ];
     }
 
     /**
@@ -251,7 +259,9 @@ class PortalAlliesController extends Controller
      */
     public function partnerPortal(PortalAlliesPartnerPortalRequest $request, $token = null)
     {
-        Gate::authorize('manage-b2b');
+        if (!$token) {
+            Gate::authorize('manage-b2b');
+        }
 
         $allies = Ally::with(['campaignsDirA', 'couponsDirB', 'leadCaptures', 'settlements'])->get();
         $selectedAllyModel = null;
@@ -264,8 +274,7 @@ class PortalAlliesController extends Controller
             $selectedAllyModel = $allies->first();
         }
 
-        $indexResponse = $this->index($request);
-        $indexData = $indexResponse->getData();
+        $indexData = $this->getAlliesData($request);
 
         if ($selectedAllyModel) {
             foreach ($indexData['alliesList'] as $a) {
