@@ -4176,7 +4176,7 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <div class="text-sm font-bold text-slate-800" x-text="selectedProduct?.name"></div>
-                        <div class="text-xs text-slate-500" x-text="(drawerBrand || 'Sin Marca') + ' • ' + (selectedProduct?.category || 'General')"></div>
+                        <div class="text-xs text-slate-500" x-text="(drawerBrand || 'Sin Marca') + ' • ' + (drawerCategory || selectedProduct?.category || 'General') + (drawerSubcategory ? (' / ' + drawerSubcategory) : '')"></div>
                     </div>
                     <button 
                         @click="drawerOpen = false" 
@@ -4302,8 +4302,11 @@
                                                         @change="drawerImageColorMap[imgUrl] = $event.target.value"
                                                         class="flex-1 p-1 text-xs bg-slate-50 border border-slate-200 rounded font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                     >
+                                                        <template x-if="(drawerImageColorMap[imgUrl] || drawerColorName) && !(apparelColors || []).some(c => c.name.toLowerCase() === (drawerImageColorMap[imgUrl] || drawerColorName || '').toLowerCase())">
+                                                            <option :value="drawerImageColorMap[imgUrl] || drawerColorName" x-text="drawerImageColorMap[imgUrl] || drawerColorName" selected></option>
+                                                        </template>
                                                         <template x-for="col in apparelColors" :key="col.id">
-                                                            <option :value="col.name" x-text="col.name"></option>
+                                                            <option :value="col.name" x-text="col.name" :selected="(drawerImageColorMap[imgUrl] || drawerColorName) === col.name"></option>
                                                         </template>
                                                     </select>
                                                     <button 
@@ -4374,6 +4377,67 @@
                                             <option :value="p.id" :selected="String(drawerSupplierId) === String(p.id)" x-text="p.tradeName || p.name"></option>
                                         </template>
                                     </select>
+                                </div>
+
+                                <!-- Fila: Familia / Categoría y Subcategoría (Regla de Sincronización Automática) -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                                <span>Familia / Categoría</span>
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openQuickCategoryModal('category', 'drawer')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta categoría in situ"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Cat</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="drawerCategory" 
+                                            @change="onDrawerCategoryChange()"
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                            <template x-if="drawerCategory && !(categoriesTree || []).some(c => c.name.toLowerCase() === (drawerCategory || '').toLowerCase())">
+                                                <option :value="drawerCategory" selected x-text="drawerCategory"></option>
+                                            </template>
+                                            <template x-for="cat in (categoriesTree || [])" :key="cat.id">
+                                                <option :value="cat.name" :selected="drawerCategory === cat.name" x-text="cat.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                                                <span>Subcategoría</span>
+                                            </label>
+                                            <button 
+                                                type="button" 
+                                                @click="openQuickCategoryModal('subcategory', 'drawer')" 
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                                title="Dar de alta subcategoría in situ"
+                                            >
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>+ Sub</span>
+                                            </button>
+                                        </div>
+                                        <select 
+                                            x-model="drawerSubcategory" 
+                                            class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                            <option value="">-- Sin Subcategoría --</option>
+                                            <template x-if="drawerSubcategory && !getDrawerSubcategories().some(sc => sc.name.toLowerCase() === (drawerSubcategory || '').toLowerCase())">
+                                                <option :value="drawerSubcategory" selected x-text="drawerSubcategory"></option>
+                                            </template>
+                                            <template x-for="sub in getDrawerSubcategories()" :key="sub.id">
+                                                <option :value="sub.name" :selected="drawerSubcategory === sub.name" x-text="sub.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <!-- Fila: Marca y Sección Web -->

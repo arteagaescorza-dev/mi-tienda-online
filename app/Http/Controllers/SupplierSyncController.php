@@ -16,7 +16,7 @@ class SupplierSyncController extends Controller
     {
         Gate::authorize('manage-b2b');
 
-        $validated = 
+        $validated = $request->validated();
 
         $synced = $syncService->sync($supplier, $validated['products']);
 

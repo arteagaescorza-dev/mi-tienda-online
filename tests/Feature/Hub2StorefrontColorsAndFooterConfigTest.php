@@ -213,3 +213,4 @@ class Hub2StorefrontColorsAndFooterConfigTest extends TestCase
         $this->assertStringContainsString('Convenios con Aliados', $content);
     }
 }
+

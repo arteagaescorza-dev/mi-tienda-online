@@ -13,6 +13,8 @@ class UpdateFabricRequest extends FormRequest
 
     public function rules(): array
     {
+        $id = $this->route('id') ?? $this->route('fabric');
+
         return [
             'name' => 'sometimes|required|string|max:80|unique:apparel_fabrics,name,' . $id,
             'description' => 'nullable|string|max:500',

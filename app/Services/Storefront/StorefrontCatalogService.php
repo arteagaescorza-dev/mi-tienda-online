@@ -117,7 +117,19 @@ class StorefrontCatalogService
 
         $sizes = $variantList->pluck('size')->unique()->values()->all();
         if (empty($sizes)) {
-            $sizes = ['CH', 'M', 'G', 'XG'];
+            $metaSizes = data_get($product->meta, 'sizes', []);
+            if (is_array($metaSizes) && !empty($metaSizes)) {
+                $sizes = array_map(fn($s) => strtoupper(trim((string) $s)), array_keys($metaSizes));
+            }
+        }
+        if (empty($sizes)) {
+            $curve = (new \App\Services\Catalog\ProductCatalogSyncService())->resolveSizeCurveForProduct($product);
+            if ($curve && $curve->sizes->isNotEmpty()) {
+                $sizes = $curve->sizes->pluck('code')->map(fn($s) => strtoupper(trim((string) $s)))->all();
+            }
+        }
+        if (empty($sizes)) {
+            $sizes = ['CH', 'M', 'G', 'XL', '2XL', '3XL'];
         }
 
         $image = data_get($product->meta, 'image') ?: (data_get($product->meta, 'images.0') ?: '/user-avatar.png');

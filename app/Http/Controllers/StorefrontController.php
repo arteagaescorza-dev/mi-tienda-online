@@ -2009,6 +2009,7 @@ class StorefrontController extends Controller
             str_contains($name, 'galaxia') || str_contains($name, 'holo') => 'linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%)',
             str_contains($name, 'aurora') || str_contains($name, 'boreal') => 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #6366f1 100%)',
             str_contains($name, 'tornasol') => 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
+            str_contains($name, 'tricolor') => 'linear-gradient(135deg, #15803d 0%, #15803d 33%, #ffffff 33%, #ffffff 66%, #b91c1c 66%, #b91c1c 100%)',
             str_contains($name, 'negro') || str_contains($name, 'black') => '#0f172a',
             str_contains($name, 'blanco') || str_contains($name, 'white') => '#ffffff',
             str_contains($name, 'azul') || str_contains($name, 'blue') || str_contains($name, 'marino') => '#1e3a8a',
@@ -2304,6 +2305,14 @@ class StorefrontController extends Controller
                     if (is_array($metaSizes) && !empty($metaSizes)) {
                         foreach (array_keys($metaSizes) as $ms) {
                             $sizes[] = strtoupper(trim((string) $ms));
+                        }
+                    }
+                }
+                if (empty($sizes)) {
+                    $curve = (new \App\Services\Catalog\ProductCatalogSyncService())->resolveSizeCurveForProduct($product);
+                    if ($curve && $curve->sizes->isNotEmpty()) {
+                        foreach ($curve->sizes as $cs) {
+                            $sizes[] = strtoupper(trim((string) $cs->code));
                         }
                     }
                 }

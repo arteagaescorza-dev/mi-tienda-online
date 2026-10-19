@@ -945,14 +945,9 @@ class InventoryApiController extends Controller
                 ]);
             }
 
-            // Vincular a categoría oficial
-            if (!empty($productMeta['category'])) {
-                $catModel = \App\Models\Category::firstOrCreate(
-                    ['name' => trim($productMeta['category'])],
-                    ['slug' => \Illuminate\Support\Str::slug(trim($productMeta['category'])), 'is_active' => true]
-                );
-                $product->categories()->syncWithoutDetaching([$catModel->id]);
-            }
+            // Sincronización integral y automática en tiempo real (Familias, Categorías, Colores, Curvas de Tallas)
+            $syncService = app(\App\Services\Catalog\ProductCatalogSyncService::class);
+            $syncService->syncProduct($product, $productMeta);
 
             return response()->json([
                 'success' => true,

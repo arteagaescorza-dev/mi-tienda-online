@@ -13,6 +13,8 @@ class UpdateColorRequest extends FormRequest
 
     public function rules(): array
     {
+        $id = $this->route('id') ?? $this->route('color');
+
         return [
             'name' => 'sometimes|required|string|max:80|unique:apparel_colors,name,' . $id,
             'hex_code' => 'nullable|string|max:250',

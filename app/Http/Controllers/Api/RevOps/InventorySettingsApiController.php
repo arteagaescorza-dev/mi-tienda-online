@@ -74,6 +74,7 @@ class InventorySettingsApiController extends Controller
         $validated = $request->validated();
 
         $curve = $this->dimensionService->updateCurve($id, $validated);
+        app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateCurveUpdate($curve);
 
         return response()->json([
             'status' => 'success',
@@ -138,6 +139,10 @@ class InventorySettingsApiController extends Controller
         $validated = $request->validated();
 
         $size = $this->dimensionService->addSizeToCurve($curveId, $validated);
+        $curve = \App\Models\ApparelSizeCurve::find($curveId);
+        if ($curve) {
+            app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateCurveUpdate($curve);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -152,6 +157,10 @@ class InventorySettingsApiController extends Controller
         $validated = $request->validated();
 
         $size = $this->dimensionService->updateSize($sizeId, $validated);
+        $curve = \App\Models\ApparelSizeCurve::find($size->size_curve_id);
+        if ($curve) {
+            app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateCurveUpdate($curve);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -164,6 +173,10 @@ class InventorySettingsApiController extends Controller
     {
         Gate::authorize('manage-catalog');
         $size = $this->dimensionService->toggleActiveSize($sizeId);
+        $curve = \App\Models\ApparelSizeCurve::find($size->size_curve_id);
+        if ($curve) {
+            app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateCurveUpdate($curve);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -175,7 +188,15 @@ class InventorySettingsApiController extends Controller
     public function destroySize(int $sizeId): JsonResponse
     {
         Gate::authorize('manage-catalog');
+        $targetSize = \App\Models\ApparelSize::find($sizeId);
+        $curveId = $targetSize?->size_curve_id;
         $this->dimensionService->deleteSize($sizeId);
+        if ($curveId) {
+            $curve = \App\Models\ApparelSizeCurve::find($curveId);
+            if ($curve) {
+                app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateCurveUpdate($curve);
+            }
+        }
 
         return response()->json([
             'status' => 'success',
@@ -310,7 +331,10 @@ class InventorySettingsApiController extends Controller
         Gate::authorize('manage-catalog');
         $validated = $request->validated();
 
+        $cat = \App\Models\Category::findOrFail($id);
+        $oldName = $cat->name;
         $category = $this->dimensionService->updateCategory($id, $validated);
+        app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateCategoryUpdate($category, $oldName);
 
         return response()->json([
             'status' => 'success',
@@ -511,6 +535,18 @@ class InventorySettingsApiController extends Controller
             );
             $colors = ApparelColor::orderBy('name')->get();
         }
+        if (!$colors->contains(fn($c) => strtolower($c->name) === 'tricolor')) {
+            ApparelColor::firstOrCreate(
+                ['name' => 'Tricolor'],
+                [
+                    'color_type' => 'gradient',
+                    'hex_code' => '#15803d',
+                    'gradient_css' => 'linear-gradient(135deg, #15803d 0%, #15803d 33%, #ffffff 33%, #ffffff 66%, #b91c1c 66%, #b91c1c 100%)',
+                    'is_active' => true,
+                ]
+            );
+            $colors = ApparelColor::orderBy('name')->get();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -567,6 +603,7 @@ class InventorySettingsApiController extends Controller
 
         $validated = $request->validated();
 
+        $oldName = $color->name;
         if (!empty($validated['name'])) $color->name = trim($validated['name']);
         
         $rawHex = $request->input('hex_code', $request->input('hex'));
@@ -583,6 +620,8 @@ class InventorySettingsApiController extends Controller
         if ($request->has('gradient_css')) $color->gradient_css = $request->input('gradient_css');
         if (isset($validated['is_active'])) $color->is_active = (bool) $validated['is_active'];
         $color->save();
+
+        app(\App\Services\Catalog\ProductCatalogSyncService::class)->propagateColorUpdate($color, $oldName);
 
         return response()->json([
             'status' => 'success',

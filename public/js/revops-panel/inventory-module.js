@@ -286,12 +286,14 @@ function hybridInventoryModule() {
         isEditingCategory: false,
         categoryEditState: { isEditing: false, editingId: null, form: { name: '', description: '', parent_id: '', is_active: true } },
 
-        // Regla 3: Alta in situ de Categoría y Subcategoría (Workstation & Curaduría)
+        // Regla 3: Alta in situ de Categoría y Subcategoría (Workstation & Curaduría & Drawer)
         quickCategoryModalOpen: false,
         quickCategoryType: 'category', // 'category' | 'subcategory'
-        quickCategoryContext: 'newProduct', // 'newProduct' | 'curating'
+        quickCategoryContext: 'newProduct', // 'newProduct' | 'curating' | 'drawer'
         quickCategoryParentName: '',
         quickCategoryForm: { name: '', description: '', parent_id: null },
+        drawerCategory: '',
+        drawerSubcategory: '',
 
         // Regla 2: Inputs para URLs de imágenes manuales
         curatingNewImageUrl: '',
@@ -9486,9 +9488,14 @@ function hybridInventoryModule() {
             };
 
             if (type === 'subcategory') {
-                const currentCatName = context === 'newProduct' 
-                    ? (this.newProduct ? this.newProduct.category : '') 
-                    : (this.curatingItem ? this.curatingItem.suggestedCategory : '');
+                let currentCatName = '';
+                if (context === 'newProduct') {
+                    currentCatName = this.newProduct ? this.newProduct.category : '';
+                } else if (context === 'curating') {
+                    currentCatName = this.curatingItem ? this.curatingItem.suggestedCategory : '';
+                } else if (context === 'drawer') {
+                    currentCatName = this.drawerCategory || (this.selectedProduct ? this.selectedProduct.category : '');
+                }
 
                 this.quickCategoryParentName = currentCatName || 'Categoría Principal';
                 const parentCat = (this.categoriesTree || []).find(c => 
@@ -9502,6 +9509,18 @@ function hybridInventoryModule() {
             }
 
             this.quickCategoryModalOpen = true;
+        },
+
+        onDrawerCategoryChange() {
+            this.drawerSubcategory = '';
+        },
+
+        getDrawerSubcategories() {
+            if (!this.drawerCategory) return [];
+            const parent = (this.categoriesTree || []).find(c => 
+                String(c.name).toLowerCase().trim() === String(this.drawerCategory).toLowerCase().trim()
+            );
+            return parent && Array.isArray(parent.children) ? parent.children : [];
         },
 
         async saveQuickCategory() {
@@ -9565,6 +9584,13 @@ function hybridInventoryModule() {
                         this.curatingItem.suggestedCategory = createdCat.name;
                     } else {
                         this.curatingItem.suggestedSubcategory = createdCat.name;
+                    }
+                } else if (this.quickCategoryContext === 'drawer') {
+                    if (this.quickCategoryType === 'category') {
+                        this.drawerCategory = createdCat.name;
+                        this.onDrawerCategoryChange();
+                    } else {
+                        this.drawerSubcategory = createdCat.name;
                     }
                 }
 
@@ -11812,6 +11838,8 @@ function hybridInventoryModule() {
             this.drawerWebsiteSection = product.websiteSection || product.website_section || 'basicos';
             this.drawerIsPublished = product.isPublished !== undefined ? product.isPublished : (product.is_published !== undefined ? product.is_published : true);
             this.drawerDescription = product.description || '';
+            this.drawerCategory = product.category || (product.meta && product.meta.category) || 'General';
+            this.drawerSubcategory = product.subcategory || (product.meta && product.meta.subcategory) || '';
 
             // Regla 6.47: Identificar proveedor y marcas vinculadas fielmente
             const supId = product.supplier_id || product.supplierId || product.meta?.supplier_id;
@@ -13496,6 +13524,8 @@ function hybridInventoryModule() {
             this.selectedProduct.websiteSection = this.drawerWebsiteSection;
             this.selectedProduct.isPublished = this.drawerIsPublished;
             this.selectedProduct.description = this.drawerDescription;
+            this.selectedProduct.category = this.drawerCategory;
+            this.selectedProduct.subcategory = this.drawerSubcategory;
             this.selectedProduct.brand = this.drawerBrand;
             this.selectedProduct.supplier_id = this.drawerSupplierId;
             if (this.drawerSupplierName) {
@@ -13532,6 +13562,8 @@ function hybridInventoryModule() {
             try {
                 const payload = {
                     name: this.selectedProduct.name,
+                    category: this.drawerCategory,
+                    subcategory: this.drawerSubcategory,
                     brand: this.drawerBrand,
                     supplier_id: this.drawerSupplierId,
                     provider: this.drawerSupplierName || undefined,

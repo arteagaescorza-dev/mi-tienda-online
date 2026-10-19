@@ -334,69 +334,9 @@ class ProductSkuAndDuplicateApiController extends Controller
                 'meta' => $meta,
             ]);
 
-            // Vincular automáticamente a la categoría si existe
-            if (!empty($validated['category'])) {
-                $categoryModel = \App\Models\Category::firstOrCreate(
-                    ['name' => trim($validated['category'])],
-                    ['slug' => Str::slug(trim($validated['category'])), 'is_active' => true]
-                );
-                $product->categories()->syncWithoutDetaching([$categoryModel->id]);
-            }
-
-            if (!empty($sizes) && is_array($sizes)) {
-                foreach ($sizes as $szKey => $qty) {
-                    if (is_array($qty)) {
-                        $cleanSz = strtolower(trim((string) ($qty['name'] ?? $qty['size'] ?? $szKey)));
-                        $targetQty = max(0, (int) ($qty['stock'] ?? $qty['quantity'] ?? 0));
-                    } else {
-                        $cleanSz = strtolower(trim((string) $szKey));
-                        $targetQty = max(0, (int) $qty);
-                    }
-
-                    $variant = ProductVariant::create([
-                        'product_id' => $product->id,
-                        'sku' => $product->sku . '-' . strtoupper($cleanSz),
-                        'price' => $pvp,
-                        'cost' => $cost,
-                        'attributes' => ['size' => strtoupper($cleanSz)],
-                    ]);
-
-                    $inv = Inventory::create([
-                        'variant_id' => $variant->id,
-                        'location' => $validated['location'] ?? 'warehouse-1',
-                        'quantity' => $targetQty,
-                        'reserved' => 0,
-                        'type' => 'physical',
-                    ]);
-
-                    if ($targetQty > 0) {
-                        InventoryMovement::create([
-                            'inventory_id' => $inv->id,
-                            'user_id' => auth()->id(),
-                            'quantity' => $targetQty,
-                            'quantity_before' => 0,
-                            'quantity_after' => $targetQty,
-                            'reason' => "Alta de catalogo inicial para SKU {$product->sku} talla {$cleanSz}",
-                        ]);
-                    }
-                }
-            } else {
-                $variant = ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => $product->sku . '-STD',
-                    'price' => $pvp,
-                    'cost' => $cost,
-                    'attributes' => ['size' => 'STD'],
-                ]);
-
-                Inventory::create([
-                    'variant_id' => $variant->id,
-                    'location' => $validated['location'] ?? 'warehouse-1',
-                    'quantity' => 0,
-                    'reserved' => 0,
-                    'type' => 'physical',
-                ]);
-            }
+            // Sincronización integral y automática en tiempo real (Familias, Categorías, Colores, Curvas de Tallas)
+            $syncService = app(\App\Services\Catalog\ProductCatalogSyncService::class);
+            $syncService->syncProduct($product, array_merge($validated, ['sizes' => $sizes]));
 
             $successMsg = $isDraft 
                 ? "Producto {$cleanSku} pre-guardado como borrador (pendiente de aprobación)."
@@ -641,6 +581,10 @@ class ProductSkuAndDuplicateApiController extends Controller
                     'meta' => $newMeta,
                 ]);
             }
+
+            // Sincronización integral y automática en tiempo real (Familias, Categorías, Colores, Curvas de Tallas)
+            $syncService = app(\App\Services\Catalog\ProductCatalogSyncService::class);
+            $syncService->syncProduct($product, $validated);
 
             if (! empty($validated['sizes']) && is_array($validated['sizes'])) {
                 $product->load('variants.inventories');
