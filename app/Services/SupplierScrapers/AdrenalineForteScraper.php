@@ -16,6 +16,10 @@ class AdrenalineForteScraper
         $maxPages = 20;
 
         while ($page <= $maxPages) {
+            if (app()->environment('local', 'development') && ! app()->runningUnitTests()) {
+                sleep(random_int(3, 5));
+            }
+
             $response = Http::timeout(30)
                 ->withHeaders([
                     'Accept' => 'application/json, text/plain, */*',

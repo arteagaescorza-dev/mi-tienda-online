@@ -11936,11 +11936,12 @@
                                                     <td class="py-2.5 px-3 text-slate-600">
                                                         <div class="flex items-center gap-1 mb-1">
                                                             <select 
-                                                                :value="prov.scrape_frequency || prov.frequency || 'every_6_hours'"
+                                                                :value="prov.scrape_frequency || prov.frequency || 'every_3_days'"
                                                                 @change="updateSupplierFrequency(prov.dbId || prov.id, $event.target.value)"
                                                                 class="text-[11px] bg-white border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-800 shadow-2xs hover:border-indigo-400 focus:ring-1 focus:ring-indigo-500 cursor-pointer transition"
-                                                                title="Ajustar tiempo de actualización de scraping (Regla 3)"
+                                                                title="Ajustar tiempo de actualización de scraping (Política Oficial: Cada 3 días)"
                                                             >
+                                                                <option value="every_3_days">Cada 3 días (72 hrs - Política Oficial)</option>
                                                                 <option value="every_1_hour">Cada 1 hr</option>
                                                                 <option value="every_2_hours">Cada 2 hrs</option>
                                                                 <option value="every_6_hours">Cada 6 hrs</option>

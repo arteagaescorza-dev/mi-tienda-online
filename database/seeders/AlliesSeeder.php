@@ -38,6 +38,8 @@ class AlliesSeeder extends Seeder
                 'clearing_balance' => -4280.00,
                 'status' => 'active',
                 'notes' => 'Festival Circuit mensual en Frontón México. Convenio de 20% OFF en cover a cambio de registro CAPI.',
+                'allowed_discount_types' => ['cover', 'cover_2x1', 'vip_access'],
+                'max_discount_pct' => 20.00,
             ]
         );
 
@@ -61,6 +63,8 @@ class AlliesSeeder extends Seeder
                 'clearing_balance' => -2150.00,
                 'status' => 'active',
                 'notes' => 'Top Creator OnlyFans y embajador de jocks y arneses Marte.',
+                'allowed_discount_types' => ['store_discount', 'vip_access'],
+                'max_discount_pct' => 25.00,
             ]
         );
 
@@ -84,6 +88,8 @@ class AlliesSeeder extends Seeder
                 'clearing_balance' => 1450.00,
                 'status' => 'active',
                 'notes' => 'Sauna premium en Zona Rosa. Trago de cortesía en taquilla para clientes de Marte.',
+                'allowed_discount_types' => ['free_drink', 'cover_2x1'],
+                'max_discount_pct' => 15.00,
             ]
         );
 
@@ -107,6 +113,8 @@ class AlliesSeeder extends Seeder
                 'clearing_balance' => -1890.00,
                 'status' => 'active',
                 'notes' => 'Colectivo ballroom y comunidad trans. Promoción de binders afirmativos y patrocinios de categorías.',
+                'allowed_discount_types' => ['cover_2x1', 'store_discount'],
+                'max_discount_pct' => 20.00,
             ]
         );
 
@@ -130,6 +138,8 @@ class AlliesSeeder extends Seeder
                 'clearing_balance' => -3100.00,
                 'status' => 'active',
                 'notes' => 'Spa facial y boutique de lencería de autor en Roma Norte.',
+                'allowed_discount_types' => ['store_discount', 'free_drink'],
+                'max_discount_pct' => 20.00,
             ]
         );
 

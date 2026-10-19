@@ -14,12 +14,13 @@ use Illuminate\Support\Facades\Http;
 
 class SyncSupplierProducts extends Command
 {
-    protected $signature = 'supplier:scrape {supplier_id?}';
+    protected $signature = 'supplier:scrape {supplier_id?} {--force : Forzar ejecución ignorando el intervalo de 3 días}';
     protected $description = 'Sincroniza productos desde proveedores dropship por scraping.';
 
     public function handle(SupplierCatalogSyncService $syncService): int
     {
         $supplierId = $this->argument('supplier_id');
+        $force = (bool) $this->option('force');
         $suppliers = $supplierId
             ? Supplier::where('id', $supplierId)->get()
             : Supplier::where('type', 'dropship_scrape')->get();
@@ -31,6 +32,25 @@ class SyncSupplierProducts extends Command
 
         foreach ($suppliers as $supplier) {
             $this->info("Procesando proveedor: {$supplier->name} ({$supplier->id})");
+
+            // POLÍTICA DE SCRAPING: Solo se escrapea 1 vez cada 3 días salvo forzado explícito
+            if (! $force) {
+                $lastSyncRun = SupplierSyncRun::where('supplier_id', $supplier->id)
+                    ->where('status', 'success')
+                    ->latest('finished_at')
+                    ->first();
+                $lastChecked = SupplierProduct::where('supplier_id', $supplier->id)
+                    ->max('last_checked_at');
+
+                $threeDaysAgo = now()->subDays(3);
+                $lastRunDate = $lastSyncRun?->finished_at ?? ($lastChecked ? \Carbon\Carbon::parse($lastChecked) : null);
+
+                if ($lastRunDate && $lastRunDate->gt($threeDaysAgo)) {
+                    $this->info("  Proveedor {$supplier->name} omitido: Política oficial de scraping permite 1 consulta cada 3 días. Última ejecución: {$lastRunDate->toDateTimeString()}. Usa --force para ejecutar inmediatamente.");
+                    continue;
+                }
+            }
+
             $run = SupplierSyncRun::create([
                 'supplier_id' => $supplier->id,
                 'status' => 'running',
@@ -57,6 +77,15 @@ class SyncSupplierProducts extends Command
         return self::SUCCESS;
     }
 
+    protected function devThrottle(string $context = 'consulta'): void
+    {
+        if (app()->environment('local', 'development') && ! app()->runningUnitTests()) {
+            $delay = random_int(3, 5);
+            $this->line("    [Rate Limit Dev] Esperando {$delay}s antes de la {$context} para proteger reputación de IP...");
+            sleep($delay);
+        }
+    }
+
     protected function runExistingProducts(Supplier $supplier): int
     {
         $count = 0;
@@ -66,6 +95,7 @@ class SyncSupplierProducts extends Command
                 continue;
             }
 
+            $this->devThrottle("consulta de SKU {$supplierProduct->supplier_sku}");
             $this->info("  Scraping SKU {$supplierProduct->supplier_sku}");
 
             $response = Http::timeout(20)->get($supplierProduct->supplier_url);

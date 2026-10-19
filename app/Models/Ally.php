@@ -12,6 +12,14 @@ class Ally extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'allowed_discount_types' => 'array',
+        'max_discount_pct' => 'float',
+        'commission_rate' => 'float',
+        'lead_acquisition_cost' => 'float',
+        'clearing_balance' => 'float',
+    ];
+
     public function campaignsDirA(): HasMany
     {
         return $this->hasMany(AllyCampaignDirA::class);

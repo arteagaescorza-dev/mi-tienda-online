@@ -110,6 +110,9 @@ Route::middleware(['auth', 'role:portal'])->group(function () {
 	// Hub 7: Convenios & Aliados
 	Route::post('/admin/convenios/canje/validar', [PortalAlliesController::class, 'validateTicket'])->name('portal.allies.ticket.validate');
 	Route::post('/admin/convenios/campanas/{id}/aprobar', [PortalAlliesController::class, 'approveCampaign'])->name('portal.allies.campaign.approve');
+	Route::post('/admin/convenios/campanas/{id}/rechazar', [PortalAlliesController::class, 'rejectCampaign'])->name('portal.allies.campaign.reject');
+	Route::post('/admin/convenios/aliados', [PortalAlliesController::class, 'storeAlly'])->name('portal.allies.store');
+	Route::put('/admin/convenios/aliados/{ally}', [PortalAlliesController::class, 'updateAlly'])->name('portal.allies.update');
 	Route::post('/admin/convenios/aliados/{ally}/liquidar', [PortalAlliesController::class, 'executeSettlement'])->name('portal.allies.settlement.execute');
 	Route::get('/admin/convenios/aliados/{ally}/export-csv', [PortalAlliesController::class, 'exportDoorListCsv'])->name('portal.allies.export.csv');
 });

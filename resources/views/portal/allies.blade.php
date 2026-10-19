@@ -65,41 +65,49 @@
                 <button class="section-help-btn" type="button" aria-label="Ayuda Directorio" data-help-title="Directorio de Aliados" data-help-desc="Alianzas comunitarias, comisiones pactadas, tarifas por lead y balances individuales.">?</button>
             </button>
 
-            <!-- TAB 2: CAMPAÑAS DIR A -->
+            <!-- TAB 2: BANDEJA DE SOLICITUDES DE EVENTOS -->
+            <button class="allies-subnav-btn" data-action="switch-allies-tab" data-tab="requests" type="button">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>2. Solicitudes de Eventos &amp; Convenios</span>
+                <span class="allies-subnav-count {{ count($pendingCampaigns) > 0 ? 'bg-amber-500 text-white font-bold' : '' }}">{{ count($pendingCampaigns) }}</span>
+                <button class="section-help-btn" type="button" aria-label="Ayuda Solicitudes" data-help-title="Bandeja de Solicitudes de Eventos" data-help-desc="Propuestas de eventos y convenios enviadas por aliados desde su extranet para revisión y aprobación por Superadministrador.">?</button>
+            </button>
+
+            <!-- TAB 3: CAMPAÑAS DIR A -->
             <button class="allies-subnav-btn" data-action="switch-allies-tab" data-tab="campaigns_a" type="button">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 11 4-7"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8c.9 0 1.8-.7 2-1.6l1.6-7.4"/></svg>
-                <span>2. Campañas Dir A (Lead Magnet CAPI)</span>
+                <span>3. Campañas Dir A (Lead Magnet CAPI)</span>
                 <span class="allies-subnav-count">{{ count($campaignsDirA) }}</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Campañas Dir A" data-help-title="Campañas Dir A" data-help-desc="Promociones en web a cambio de registros de prospectos que nutren el CRM y elevan el EMQ de Meta CAPI.">?</button>
             </button>
 
-            <!-- TAB 3: ATRIBUCIÓN DIR B -->
+            <!-- TAB 4: ATRIBUCIÓN DIR B -->
             <button class="allies-subnav-btn" data-action="switch-allies-tab" data-tab="attribution_b" type="button">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <span>3. Atribución Dir B (Cupones UTM)</span>
+                <span>4. Atribución Dir B (Cupones UTM)</span>
                 <span class="allies-subnav-count">{{ count($couponsDirB) }}</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Atribución Dir B" data-help-title="Atribución Dir B" data-help-desc="Ventas referidas por aliados mediante cupones deterministas y enlaces tokenizados con comisión.">?</button>
             </button>
 
-            <!-- TAB 4: CÁMARA DE COMPENSACIÓN -->
+            <!-- TAB 5: CÁMARA DE COMPENSACIÓN -->
             <button class="allies-subnav-btn" data-action="switch-allies-tab" data-tab="clearing" type="button">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                <span>4. Cámara de Compensación</span>
+                <span>5. Cámara de Compensación</span>
                 <span class="allies-subnav-count font-mono">${{ number_format(abs($totalNetBalance), 0) }} MXN</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Cámara de Compensación" data-help-title="Cámara de Compensación" data-help-desc="Cruce contable: (Leads Dir A x Tarifa) - Comisiones Dir B. Liquidación vía SPEI, Especie o Patrocinio.">?</button>
             </button>
 
-            <!-- TAB 5: PREVISUALIZAR PARTNER PORTAL -->
+            <!-- TAB 6: PREVISUALIZAR PARTNER PORTAL -->
             <button class="allies-subnav-btn" data-action="switch-allies-tab" data-tab="partner_portal" type="button">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/></svg>
-                <span>5. Previsualizar Partner Portal</span>
+                <span>6. Previsualizar Partner Portal</span>
                 <button class="section-help-btn" type="button" aria-label="Ayuda Partner Portal" data-help-title="Partner Portal" data-help-desc="Extranet segura tokenizada para aliados con validador de taquilla y exportación CSV.">?</button>
             </button>
 
-            <!-- TAB 6: EXTRANET PROVEEDORES B2B -->
+            <!-- TAB 7: EXTRANET PROVEEDORES B2B -->
             <a href="{{ route('portal.vendor.extranet') }}" class="allies-subnav-btn flex items-center gap-2 text-indigo-700 hover:text-indigo-900 transition" title="Ir a la Extranet B2B de Proveedores & Fabricantes">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                <span>6. Extranet Proveedores B2B</span>
+                <span>7. Extranet Proveedores B2B</span>
             </a>
         </nav>
     </div>
@@ -178,6 +186,10 @@
                     <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-universe" data-universe="marte" type="button">Marte</button>
                     <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-universe" data-universe="venus" type="button">Venus</button>
                     <button class="px-2.5 py-1 text-xs rounded font-semibold bg-white text-slate-600 border border-slate-200 cursor-pointer" data-action="filter-allies-universe" data-universe="tiresias" type="button">Tiresias</button>
+                    <button type="button" class="px-3 py-1 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer ml-auto sm:ml-2" onclick="window.dispatchEvent(new CustomEvent('open-module-settings'))" title="Dar de alta nuevo aliado y configurar acuerdos comerciales (Engranaje Navbar)">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span>+ Alta de Aliado</span>
+                    </button>
                 </div>
             </div>
 
@@ -207,6 +219,24 @@
                                 </div>
                             </div>
 
+                            <div class="mt-2.5 pt-2 border-t border-slate-200/70 text-[11px]">
+                                <span class="text-slate-400 font-bold uppercase block text-[9px] mb-1">Descuentos Autorizados Portal:</span>
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($ally['allowedDiscountTypes'] ?? ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'] as $dt)
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white text-slate-700 border border-slate-200 shadow-2xs">
+                                            {{ match($dt) {
+                                                'cover' => 'Cover Libre',
+                                                'cover_2x1' => 'Cover 2x1',
+                                                'free_drink' => 'Trago Cortesía',
+                                                'store_discount' => 'Tienda ' . ($ally['maxDiscountPct'] ?? 20) . '%',
+                                                'vip_access' => 'VIP',
+                                                default => ucfirst(str_replace('_', ' ', $dt))
+                                            } }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="mt-3 p-2.5 bg-white border border-slate-200/80 rounded-xl flex items-center justify-between text-xs">
                                 <span class="text-slate-500 font-medium">Saldo Cámara:</span>
                                 <span class="font-mono font-bold text-xs {{ $ally['clearingBalance'] >= 0 ? 'text-emerald-700' : 'text-amber-700' }}">
@@ -215,21 +245,199 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 pt-3 border-t border-slate-200/70 flex items-center justify-between gap-2">
+                        <div class="mt-4 pt-3 border-t border-slate-200/70 flex items-center justify-between gap-1.5">
                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $ally['contactWhatsapp']) }}" target="_blank" class="px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors flex items-center gap-1" style="text-decoration:none;">
                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                                 <span>WhatsApp</span>
                             </a>
-                            <button class="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-2xs cursor-pointer" data-action="open-partner-portal-for-ally" data-ally-id="{{ $ally['id'] }}" type="button">
-                                Ver Extranet
-                            </button>
+                            <div class="flex items-center gap-1">
+                                <button class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg transition-colors cursor-pointer" data-action="edit-ally-btn" data-ally="{{ json_encode($ally) }}" type="button" title="Editar acuerdos comerciales de este aliado">
+                                    Editar
+                                </button>
+                                <button class="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-2xs cursor-pointer" data-action="open-partner-portal-for-ally" data-ally-id="{{ $ally['id'] }}" type="button">
+                                    Ver Extranet
+                                </button>
+                            </div>
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
 
-        <!-- SUBMÓDULO 2: CAMPAÑAS DIR A & LEAD MAGNET CAPI (TASK-ALY-02) -->
+        <!-- SUBMÓDULO 2: BANDEJA DE SOLICITUDES DE EVENTOS & CONVENIOS -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-6 hidden" id="alliesRequestsPanel">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 mb-4 gap-3">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span>Bandeja de Solicitudes de Eventos &amp; Convenios</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Recepción y dictamen de eventos y promociones creados por los aliados comerciales para convenio.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ count($pendingCampaigns) > 0 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                        {{ count($pendingCampaigns) }} Pendientes de Autorización
+                    </span>
+                </div>
+            </div>
+
+            <!-- Caja de Política Oficial -->
+            <div class="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl mb-5 flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div class="text-xs text-amber-900 leading-relaxed">
+                    <strong class="font-bold block text-amber-950">POLÍTICA DE ALIADOS &amp; GOBERNANZA COMERCIAL:</strong>
+                    Los aliados comerciales <strong>únicamente tienen facultades para solicitar</strong> la dada de alta de su evento o promoción. 
+                    Queda estrictamente prohibida la publicación directa no supervisada. Toda solicitud enviada permanece en estado <span class="font-semibold underline">Pendiente de Autorización</span> hasta que un <strong>Superadministrador</strong> la valide y apruebe en esta bandeja.
+                    Al aprobarse, se sincroniza <strong>inmediata y automáticamente</strong> con la página de convenios de explorar del Storefront y con el generador de Pop-ups en Hub 2.
+                </div>
+            </div>
+
+            @if(empty($pendingCampaigns))
+                <div class="text-center py-10 bg-slate-50 border border-dashed border-slate-300 rounded-2xl mb-6">
+                    <svg class="w-10 h-10 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h4 class="text-sm font-bold text-slate-700">Bandeja al día: No hay solicitudes pendientes</h4>
+                    <p class="text-xs text-slate-500 mt-1">Todas las solicitudes de eventos y convenios de los aliados han sido dictaminadas.</p>
+                </div>
+            @else
+                <div class="space-y-4 mb-6">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Solicitudes Pendientes de Aprobación ({{ count($pendingCampaigns) }})</span>
+                    </h4>
+
+                    @foreach($pendingCampaigns as $req)
+                        <div class="p-5 bg-amber-50/40 border border-amber-200 rounded-2xl flex flex-col lg:flex-row gap-5 hover:border-amber-400 transition-all shadow-xs">
+                            <!-- Flyer / Poster Oficial -->
+                            <div class="w-full lg:w-44 shrink-0 flex flex-col items-center justify-center bg-slate-900 rounded-xl overflow-hidden relative group min-h-[160px]">
+                                @if(!empty($req['bannerImage']) && $req['bannerImage'] !== 'default_campaign.webp')
+                                    <img src="{{ $req['bannerImage'] }}" alt="{{ $req['title'] }}" class="w-full h-44 object-cover object-center group-hover:scale-105 transition-transform duration-300">
+                                @else
+                                    <div class="p-4 text-center">
+                                        <svg class="w-8 h-8 text-slate-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span class="text-[10px] text-slate-400 block font-mono">Póster Oficial</span>
+                                    </div>
+                                @endif
+                                <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-black/70 text-amber-300 backdrop-blur-xs font-mono">
+                                    {{ $req['universe'] }}
+                                </span>
+                            </div>
+
+                            <!-- Detalles de la solicitud -->
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 font-mono">
+                                                {{ $req['allyCategoryLabel'] }}
+                                            </span>
+                                            <span class="text-xs font-bold text-slate-700">{{ $req['allyName'] }}</span>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 uppercase">
+                                            Solicitud Pendiente &bull; {{ $req['createdAt'] }}
+                                        </span>
+                                    </div>
+
+                                    <h4 class="text-base font-bold text-slate-900">{{ $req['title'] }}</h4>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 text-xs">
+                                        <div class="p-2.5 bg-white border border-slate-200 rounded-xl">
+                                            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Beneficio / Descuento Propuesto:</span>
+                                            <p class="font-semibold text-slate-800">{{ $req['benefit'] }}</p>
+                                            <span class="inline-block mt-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-mono">
+                                                Tipo: {{ match($req['discountType']) {
+                                                    'cover' => 'Cover Libre',
+                                                    'cover_2x1' => 'Cover 2x1',
+                                                    'free_drink' => 'Trago Cortesía',
+                                                    'store_discount' => '% Descuento Tienda',
+                                                    'vip_access' => 'Acceso VIP',
+                                                    default => $req['discountType']
+                                                } }}
+                                            </span>
+                                        </div>
+                                        <div class="p-2.5 bg-white border border-slate-200 rounded-xl">
+                                            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Instrucciones de Canje en Puerta:</span>
+                                            <p class="text-slate-600 text-xs">{{ $req['instructions'] ?: 'Presentar voucher digital en taquilla' }}</p>
+                                            <span class="text-[10px] text-slate-400 font-mono block mt-1">Vigencia: {{ $req['startDate'] }} &rarr; {{ $req['endDate'] }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Formulario de dictamen -->
+                                <div class="mt-4 pt-3 border-t border-amber-200/80 flex flex-col md:flex-row items-center justify-between gap-3">
+                                    <form action="{{ route('portal.allies.campaign.approve', $req['id']) }}" method="POST" class="w-full md:flex-1 flex flex-wrap items-center gap-2">
+                                        @csrf
+                                        <div class="flex-1 min-w-[200px]">
+                                            <input type="text" name="benefit" value="{{ $req['benefit'] }}" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-emerald-600" title="Ajustar beneficio final si es necesario">
+                                        </div>
+                                        <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-2xs transition flex items-center gap-1 cursor-pointer">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                            <span>Aprobar &amp; Sincronizar Tienda</span>
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('portal.allies.campaign.reject', $req['id']) }}" method="POST" class="shrink-0" onsubmit="return confirm('¿Confirmas el rechazo de esta solicitud de evento?');">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                            Rechazar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- Historial de Todas las Campañas de Aliados (Aprobadas / Finalizadas / Rechazadas) -->
+            <div class="border-t border-slate-100 pt-5 mt-6">
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Historial General de Eventos &amp; Acuerdos Comercializados</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/50">
+                                <th class="p-2.5 font-semibold">Evento / Campaña</th>
+                                <th class="p-2.5 font-semibold">Aliado</th>
+                                <th class="p-2.5 font-semibold">Universo</th>
+                                <th class="p-2.5 font-semibold">Beneficio Pactado</th>
+                                <th class="p-2.5 font-semibold">Leads CAPI</th>
+                                <th class="p-2.5 font-semibold">Vigencia</th>
+                                <th class="p-2.5 font-semibold text-right">Estatus Tienda</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($campaignsDirA as $camp)
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="p-2.5 font-bold text-slate-900">
+                                        {{ $camp['title'] }}
+                                        @if(!empty($camp['rejectionReason']))
+                                            <span class="text-[10px] text-rose-600 block font-normal">Motivo rechazo: {{ $camp['rejectionReason'] }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="p-2.5 text-slate-700 font-medium">{{ $camp['allyName'] }}</td>
+                                    <td class="p-2.5 uppercase font-mono text-[10px] text-slate-500">{{ $camp['universe'] }}</td>
+                                    <td class="p-2.5 text-slate-700">{{ $camp['benefit'] }}</td>
+                                    <td class="p-2.5 font-mono font-bold text-indigo-700">{{ $camp['leadsCount'] }} leads</td>
+                                    <td class="p-2.5 text-slate-500 font-mono text-[11px]">{{ $camp['startDate'] }} &rarr; {{ $camp['endDate'] }}</td>
+                                    <td class="p-2.5 text-right font-sans">
+                                        @if($camp['status'] === 'active')
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Aprobada &bull; Sincronizada</span>
+                                        @elseif($camp['status'] === 'pending_approval')
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pendiente Aprobación</span>
+                                        @elseif($camp['status'] === 'rejected')
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Rechazada</span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">{{ ucfirst($camp['status']) }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBMÓDULO 3: CAMPAÑAS DIR A & LEAD MAGNET CAPI (TASK-ALY-02) -->
         <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-6" id="alliesCampaignsPanel">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 mb-4 gap-3">
                 <div>
@@ -356,7 +564,7 @@
                                     <span class="px-2 py-1 bg-slate-900 text-white rounded text-xs font-bold">{{ $c['couponCode'] }}</span>
                                 </td>
                                 <td class="p-3 font-sans font-semibold text-slate-800">
-                                    @php($allyMatch = collect($alliesList)->firstWhere('id', $c['allyId']))
+                                    @php $allyMatch = collect($alliesList)->firstWhere('id', $c['allyId']); @endphp
                                     {{ $allyMatch['name'] ?? 'Aliado #' . $c['allyId'] }}
                                 </td>
                                 <td class="p-3 text-slate-700">{{ $c['discountPct'] }}% OFF</td>
@@ -513,7 +721,7 @@
             </div>
 
             <!-- Enlace de Difusión & UTM -->
-            <div class="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs mb-5">
                 <div>
                     <span class="font-bold text-indigo-950 block">Enlace de Difusión con Atribución Automática:</span>
                     <code class="text-indigo-800 font-mono text-[11px]">https://mitienda.com/?utm_source={{ $selectedAlly['code'] ?? 'GENERAL' }}&amp;coupon={{ !empty($couponsDirB) && isset($couponsDirB[0]['couponCode']) ? $couponsDirB[0]['couponCode'] : 'PARADISO15' }}</code>
@@ -521,6 +729,100 @@
                 <button class="button button-light text-xs py-1.5 px-3 bg-white text-indigo-900 border-indigo-200 rounded-lg shrink-0 cursor-pointer" data-action="copy-ally-link" type="button">
                     Copiar Enlace
                 </button>
+            </div>
+
+            <!-- Acuerdos y Beneficios Autorizados para este Aliado -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-slate-900 block">Acuerdos Comerciales &amp; Tipos de Descuentos Autorizados:</span>
+                    <span class="text-[10px] text-slate-500 font-mono">ID Aliado: #{{ $selectedAlly['id'] }}</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                    @foreach($selectedAlly['allowedDiscountTypes'] ?? ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'] as $dt)
+                        <span class="px-2 py-1 rounded-md text-[11px] font-bold bg-white text-indigo-900 border border-indigo-200 shadow-2xs">
+                            {{ match($dt) {
+                                'cover' => 'Cover Libre / Entrada Gratuita',
+                                'cover_2x1' => 'Cover 2x1 en Taquilla',
+                                'free_drink' => 'Trago o Cóctel Cortesía',
+                                'store_discount' => 'Descuento en Tienda (Hasta ' . ($selectedAlly['maxDiscountPct'] ?? 20) . '%)',
+                                'vip_access' => 'Acceso Preferente / VIP',
+                                default => ucfirst(str_replace('_', ' ', $dt))
+                            } }}
+                        </span>
+                    @endforeach
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    Solo podrás solicitar convenios para los tipos de beneficios configurados en tu acuerdo comercial.
+                    Comisión en ventas referidas (Dir B): <strong class="text-slate-800 font-mono">{{ $selectedAlly['commissionRate'] }}%</strong> &bull;
+                    Crédito por Lead (Dir A): <strong class="text-slate-800 font-mono">${{ number_format($selectedAlly['leadAcquisitionCost'], 2) }} MXN</strong>.
+                </p>
+            </div>
+
+            <!-- Mis Solicitudes de Eventos & Estado de Aprobación -->
+            <div class="pt-5 border-t border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Mis Solicitudes de Eventos &amp; Estado de Aprobación</h4>
+                        <p class="text-[11px] text-slate-500">Historial de solicitudes creadas desde este portal para autorización comercial.</p>
+                    </div>
+                    <button class="button button-light text-xs py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold" onclick="document.getElementById('modalNewAllyCampaign').classList.remove('hidden');" type="button">
+                        + Solicitar Evento
+                    </button>
+                </div>
+
+                @php
+                $myCampaigns = collect($campaignsDirA)->where('allyId', $selectedAlly['id'])->values();
+                @endphp
+
+                @if($myCampaigns->isEmpty())
+                    <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Aún no has enviado solicitudes de eventos o beneficios para este aliado.</p>
+                        <button class="mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer" onclick="document.getElementById('modalNewAllyCampaign').classList.remove('hidden');" type="button">Crear Primera Solicitud &rarr;</button>
+                    </div>
+                @else
+                    <div class="space-y-3">
+                        @foreach($myCampaigns as $c)
+                            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-3">
+                                    @if(!empty($c['bannerImage']) && $c['bannerImage'] !== 'default_campaign.webp')
+                                        <img src="{{ $c['bannerImage'] }}" alt="{{ $c['title'] }}" class="w-12 h-14 object-cover rounded-lg shrink-0 border border-slate-200">
+                                    @else
+                                        <div class="w-12 h-14 bg-slate-200 rounded-lg shrink-0 flex items-center justify-center text-slate-400">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <h5 class="font-bold text-slate-900">{{ $c['title'] }}</h5>
+                                        <p class="text-[11px] text-slate-600 font-medium">{{ $c['benefit'] }}</p>
+                                        <span class="text-[10px] text-slate-400 font-mono">Vigencia: {{ $c['startDate'] }} al {{ $c['endDate'] }}</span>
+                                    </div>
+                                </div>
+                                <div class="sm:text-right shrink-0">
+                                    @if($c['status'] === 'active')
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 block">
+                                            Aprobado &amp; Publicado en Tienda
+                                        </span>
+                                    @elseif($c['status'] === 'pending_approval')
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 block">
+                                            En Revisión por Equipo Comercial
+                                        </span>
+                                    @elseif($c['status'] === 'rejected')
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200 block">
+                                            Rechazado
+                                        </span>
+                                        @if(!empty($c['rejectionReason']))
+                                            <span class="text-[10px] text-rose-600 block mt-0.5">{{ $c['rejectionReason'] }}</span>
+                                        @endif
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 block">
+                                            {{ ucfirst($c['status']) }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -560,8 +862,31 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Beneficio o Descuento Propuesto *</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Descuento / Beneficio Autorizado *</label>
+                    <select name="discount_type" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 font-semibold focus:bg-white">
+                        @php
+                            $allowed = $selectedAlly['allowedDiscountTypes'] ?? ['cover', 'cover_2x1', 'free_drink', 'store_discount', 'vip_access'];
+                            $typeLabels = [
+                                'cover' => 'Cover / Acceso Libre (100% cortesía)',
+                                'cover_2x1' => 'Cover 2x1 en Puerta',
+                                'free_drink' => 'Trago o Cóctel de Cortesía',
+                                'store_discount' => '% Descuento en Tienda Online (Tope ' . ($selectedAlly['maxDiscountPct'] ?? 20) . '%)',
+                                'vip_access' => 'Acceso VIP / Pulsera Exclusiva',
+                                'service_promo' => 'Promoción Especial en Servicio'
+                            ];
+                        @endphp
+                        @foreach($allowed as $dtKey)
+                            <option value="{{ $dtKey }}">{{ $typeLabels[$dtKey] ?? ucfirst(str_replace('_', ' ', $dtKey)) }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[10px] text-slate-500 mt-1">Solo puedes solicitar convenios dentro de los tipos de beneficios autorizados en tu acuerdo comercial.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Descripción del Beneficio o Descuento Propuesto *</label>
                     <input type="text" name="benefit" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:bg-white" placeholder="Ej. 15% OFF en taquilla y cóctel de bienvenida">
+                </div>
+                <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-900 leading-relaxed">
+                    <strong>POLÍTICA DE ALIADOS:</strong> Los socios únicamente son capaces de solicitar la dada de alta de su evento o promoción. Al enviar, la solicitud quedará en estado <span class="font-bold underline">Pendiente de Autorización</span> hasta ser validada por el Superadministrador en Hub 7.
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Instrucciones de Canje</label>
@@ -586,16 +911,496 @@
     </div>
 </div>
 
+{{-- MODAL DE CONFIGURACIÓN DEL MÓDULO (ENGRANAJE NAVBAR) - GESTIÓN DE ACUERDOS COMERCIALES Y DIRECTORIO DE ALIADOS --}}
+@php
+    $currentUser = auth()->user();
+    $isSuperadmin = $currentUser && in_array($currentUser->role, ['superadmin', 'admin', 'portal', 'all_roles'], true);
+@endphp
+
+<div id="alliesModuleSettingsModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 hidden">
+    <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+        <!-- Modal Header -->
+        <div class="p-5 sm:p-6 bg-slate-900 text-white flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base font-bold text-white tracking-wide">Configuración de Acuerdos Comerciales &amp; Directorio de Aliados (Hub 7)</h3>
+                        @if($isSuperadmin)
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-950 uppercase font-mono">Superadministrador</span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white uppercase font-mono">Restringido</span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">Gestión de alta manual de socios, condiciones de compensación Dir A &amp; B y tipos de descuentos autorizados.</p>
+                </div>
+            </div>
+            <button type="button" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition cursor-pointer" onclick="document.getElementById('alliesModuleSettingsModal').classList.add('hidden');">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        @if(!$isSuperadmin)
+            <!-- Vista restringida para usuarios sin rol superadministrador -->
+            <div class="p-8 text-center bg-rose-50 border-t border-rose-100 flex-1 flex flex-col items-center justify-center">
+                <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m4-8a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                </div>
+                <h4 class="text-base font-bold text-rose-950 mb-1">Acceso Exclusivo para Rol Superadministrador</h4>
+                <p class="text-xs text-rose-700 max-w-md mx-auto leading-relaxed">
+                    El directorio de aliados comerciales, asignación de tarifas de compensación y políticas de descuentos solo están disponibles desde el engranaje del navbar para usuarios con rango de <strong>Superadministrador</strong>.
+                </p>
+                <button type="button" class="mt-5 px-5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition cursor-pointer" onclick="document.getElementById('alliesModuleSettingsModal').classList.add('hidden');">
+                    Entendido, Cerrar
+                </button>
+            </div>
+        @else
+            <!-- Subtabs de Configuración -->
+            <div class="bg-slate-100 border-b border-slate-200 px-6 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <button type="button" id="tabBtnAllyForm" class="py-3 px-4 text-xs font-bold border-b-2 border-indigo-600 text-indigo-700 cursor-pointer flex items-center gap-1.5" onclick="window.switchAllySettingsTab('form')">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span id="tabLabelAllyForm">1. Alta / Edición de Aliado Comercial</span>
+                    </button>
+                    <button type="button" id="tabBtnAllyList" class="py-3 px-4 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer flex items-center gap-1.5" onclick="window.switchAllySettingsTab('list')">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        <span>2. Directorio &amp; Acuerdos Vigentes ({{ count($alliesList) }})</span>
+                    </button>
+                </div>
+                <span class="text-[11px] font-mono text-slate-500 hidden sm:inline">Políticas Inmutables B2B</span>
+            </div>
+
+            <!-- Contenido con scroll -->
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+                <!-- PANEL 1: Formulario Alta / Edición (Funciona igual que alta manual de proveedores de Hub 4) -->
+                <div id="panelAllySettingsForm">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-5">
+                        <div class="flex items-center gap-2">
+                            <span id="allyFormModeBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                Modo: Alta de Nuevo Aliado
+                            </span>
+                            <span class="text-xs text-slate-400">Igual que dar de alta a proveedores manualmente en Hub 4</span>
+                        </div>
+                        <button type="button" id="btnResetAllyForm" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer underline" onclick="window.resetAllyForm()">
+                            + Dar de alta otro socio
+                        </button>
+                    </div>
+
+                    <form id="allyMasterForm" action="{{ route('portal.allies.store') }}" method="POST" class="space-y-6">
+                        @csrf
+                        <input type="hidden" name="_method" id="allyFormMethod" value="POST">
+                        <input type="hidden" id="allyEditId" value="">
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Columna Izquierda: Datos del Aliado -->
+                            <div class="space-y-4 bg-slate-50/60 p-4 rounded-2xl border border-slate-200/80">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    <span>Datos Generales de la Entidad</span>
+                                </h4>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial del Aliado *</label>
+                                    <input type="text" name="name" id="allyFormName" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-indigo-600" placeholder="Ej. Club Sauna Paraíso / DJ Velvet / Circuit Festival">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Código de Aliado</label>
+                                        <input type="text" name="code" id="allyFormCode" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono uppercase" placeholder="Ej. AL-PARADISO (Opcional)">
+                                        <span class="text-[10px] text-slate-400">Se autogenera si se deja vacío</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Universo Afín *</label>
+                                        <select name="universe" id="allyFormUniverse" required class="w-full text-xs border border-slate-300 rounded-lg px-2 py-2 bg-white font-semibold">
+                                            <option value="marte">Marte (Masculino)</option>
+                                            <option value="venus">Venus (Femenino / Lencería)</option>
+                                            <option value="tiresias">Tiresias (Afirmativo)</option>
+                                            <option value="terra">Terra (Global)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Aliado / Categoría *</label>
+                                    <select name="category" id="allyFormCategory" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-semibold focus:outline-none focus:border-indigo-600">
+                                        <option value="sauna">Sauna &amp; Baños de Vapor</option>
+                                        <option value="spa">Spa &amp; Masajes Wellness</option>
+                                        <option value="content_creator">Creador de Contenido / OnlyFans / Influencer</option>
+                                        <option value="party_producer">Productor de Fiestas / Festival Circuit</option>
+                                        <option value="drag_ballroom">Colectivo Drag &amp; Ballroom Culture</option>
+                                        <option value="gym_fitness">Fitness &amp; Gimnasio Especializado</option>
+                                        <option value="bar_nightclub">Bar / Nightclub / Discoteca</option>
+                                        <option value="barbershop">Barbería &amp; Grooming</option>
+                                        <option value="other">Otro Establecimiento o Alianza</option>
+                                    </select>
+                                    <span class="text-[10px] text-slate-500 mt-0.5 block">Define el giro del socio para segmentación de acuerdos y vitrinas.</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de Contacto</label>
+                                        <input type="text" name="contact_name" id="allyFormContactName" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Ej. Roberto Sánchez">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp de Contacto</label>
+                                        <input type="text" name="contact_whatsapp" id="allyFormContactWhatsapp" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono" placeholder="+52 55 1234 5678">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Email Notificaciones</label>
+                                        <input type="email" name="contact_email" id="allyFormContactEmail" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="contacto@aliado.com">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Redes / Handle Social</label>
+                                        <input type="text" name="social_handle" id="allyFormSocialHandle" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white font-mono" placeholder="@usuario_oficial">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Notas Comerciales / Acuerdo de Alianza</label>
+                                    <textarea name="notes" id="allyFormNotes" rows="2" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white" placeholder="Detalles particulares del convenio, acuerdos verbales o requerimientos especiales."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Columna Derecha: Reglas de Compensación & Descuentos -->
+                            <div class="space-y-4 bg-slate-50/60 p-4 rounded-2xl border border-slate-200/80">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Reglas de Compensación &amp; Descuentos Autorizados</span>
+                                </h4>
+
+                                <!-- Regla Dirección A -->
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-xs font-bold text-indigo-900">Tarifa Crédito por Lead CAPI (Dirección A):</label>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">Web &rarr; Aliado</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-500 font-mono">MXN $</span>
+                                        <input type="number" step="0.01" min="0" name="lead_acquisition_cost" id="allyFormLeadAcquisitionCost" value="20.00" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-slate-50 font-mono font-bold focus:bg-white">
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 leading-tight">Monto que el aliado abona en créditos al recibir prospectos calificados con voucher emitido desde el pop-up o vitrina de convenios.</p>
+                                </div>
+
+                                <!-- Regla Dirección B -->
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-xs font-bold text-indigo-900">Comisión por Ventas Referidas (Dirección B):</label>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">Aliado &rarr; Web</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <select name="commission_type" id="allyFormCommissionType" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-slate-50 font-semibold">
+                                                <option value="percentage">Porcentaje (%)</option>
+                                                <option value="fixed">Monto Fijo ($ MXN)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <input type="number" step="0.01" min="0" name="commission_rate" id="allyFormCommissionRate" value="10.00" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-slate-50 font-mono font-bold focus:bg-white" placeholder="10.00">
+                                        </div>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 leading-tight">Comisión devengada a favor del aliado por cada orden efectiva pagada en tienda con su cupón determinista UTM.</p>
+                                </div>
+
+                                <!-- Tipos de Descuentos que el Aliado Puede Configurar desde su Portal -->
+                                <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-xs font-bold text-slate-900">Tipos de Descuentos Autorizados en su Portal:</label>
+                                        <span class="text-[10px] text-slate-400">Restricción activa</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                            <input type="checkbox" name="allowed_discount_types[]" value="cover" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                            <span class="text-slate-700 font-medium">Cover Libre (100%)</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                            <input type="checkbox" name="allowed_discount_types[]" value="cover_2x1" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                            <span class="text-slate-700 font-medium">Cover 2x1 en Puerta</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                            <input type="checkbox" name="allowed_discount_types[]" value="free_drink" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                            <span class="text-slate-700 font-medium">Trago de Cortesía</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                            <input type="checkbox" name="allowed_discount_types[]" value="store_discount" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                            <span class="text-slate-700 font-medium">% Descuento Tienda</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                            <input type="checkbox" name="allowed_discount_types[]" value="vip_access" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                            <span class="text-slate-700 font-medium">Acceso VIP / Pulsera</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer">
+                                            <input type="checkbox" name="allowed_discount_types[]" value="service_promo" class="rounded text-indigo-600 focus:ring-0 ally-dt-checkbox" checked>
+                                            <span class="text-slate-700 font-medium">Promo en Servicio</span>
+                                        </label>
+                                    </div>
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+                                        <label class="text-[11px] font-bold text-slate-700 shrink-0">Tope Máx. Descuento Tienda (%):</label>
+                                        <input type="number" step="0.5" min="0" max="100" name="max_discount_pct" id="allyFormMaxDiscountPct" value="20.00" class="w-24 text-xs border border-slate-300 rounded px-2 py-1 bg-slate-50 font-mono font-bold text-right">
+                                    </div>
+                                </div>
+
+                                <!-- Datos Bancarios & Estatus -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Banco Receptor (SPEI)</label>
+                                        <input type="text" name="bank_name" id="allyFormBankName" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white" placeholder="Ej. BBVA">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Estatus</label>
+                                        <select name="status" id="allyFormStatus" class="w-full text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white font-semibold">
+                                            <option value="active">Activo (Habilitado)</option>
+                                            <option value="inactive">Inactivo</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Cuenta CLABE Interbancaria (18 dígitos)</label>
+                                    <input type="text" maxlength="18" name="bank_clabe" id="allyFormBankClabe" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white font-mono" placeholder="012180000000000000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+                            <button type="button" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 cursor-pointer" onclick="document.getElementById('alliesModuleSettingsModal').classList.add('hidden');">
+                                Cancelar
+                            </button>
+                            <button type="submit" id="allyFormSubmitBtn" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span id="allyFormSubmitBtnLabel">Guardar Acuerdo Comercial &amp; Alta de Aliado</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PANEL 2: Directorio & Acuerdos Activos (Resumen y Edición Rápida) -->
+                <div id="panelAllySettingsList" class="hidden space-y-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Directorio de Acuerdos Comerciales Registrados</h4>
+                            <p class="text-xs text-slate-500">Selecciona cualquier aliado para editar sus condiciones, porcentajes o tipos de descuentos.</p>
+                        </div>
+                        <button type="button" class="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg cursor-pointer" onclick="window.resetAllyForm(); window.switchAllySettingsTab('form');">
+                            + Nuevo Aliado
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider bg-slate-50/70">
+                                    <th class="p-3 font-semibold">Aliado &amp; Código</th>
+                                    <th class="p-3 font-semibold">Giro / Universo</th>
+                                    <th class="p-3 font-semibold">Reglas Compensación</th>
+                                    <th class="p-3 font-semibold">Descuentos Autorizados</th>
+                                    <th class="p-3 font-semibold">Saldo Cámara</th>
+                                    <th class="p-3 font-semibold text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach($alliesList as $al)
+                                    <tr class="hover:bg-slate-50/60 transition-colors">
+                                        <td class="p-3">
+                                            <strong class="text-slate-900 block">{{ $al['name'] }}</strong>
+                                            <span class="text-[10px] text-slate-400 font-mono">{{ $al['code'] }} &bull; {{ $al['socialHandle'] }}</span>
+                                        </td>
+                                        <td class="p-3">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">{{ $al['categoryLabel'] }}</span>
+                                            <span class="text-[10px] text-slate-400 font-mono uppercase block mt-0.5">{{ $al['universe'] }}</span>
+                                        </td>
+                                        <td class="p-3 font-mono text-[11px]">
+                                            <span class="text-indigo-700 font-bold block">Dir A: ${{ number_format($al['leadAcquisitionCost'], 2) }} /lead</span>
+                                            <span class="text-slate-700 font-medium block">Dir B: {{ $al['commissionRate'] }}% ventas</span>
+                                        </td>
+                                        <td class="p-3">
+                                            <div class="flex flex-wrap gap-1 max-w-[200px]">
+                                                @foreach($al['allowedDiscountTypes'] ?? [] as $dt)
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                                        {{ match($dt) {
+                                                            'cover' => 'Cover',
+                                                            'cover_2x1' => '2x1',
+                                                            'free_drink' => 'Trago',
+                                                            'store_discount' => 'Tienda',
+                                                            'vip_access' => 'VIP',
+                                                            default => $dt
+                                                        } }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        </td>
+                                        <td class="p-3 font-mono font-bold text-xs {{ $al['clearingBalance'] >= 0 ? 'text-emerald-700' : 'text-amber-700' }}">
+                                            ${{ number_format($al['clearingBalance'], 2) }}
+                                        </td>
+                                        <td class="p-3 text-right">
+                                            <button type="button" class="px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition cursor-pointer" data-action="edit-ally-btn" data-ally="{{ json_encode($al) }}">
+                                                Editar Acuerdos
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+</div>
+
 {{-- SCRIPT REACTIVO OPERATIVO PARA CONVENIOS Y ALIADOS (VANILLA JS LIGERO) --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const panels = {
         'directory': document.getElementById('alliesDirectoryPanel'),
+        'requests': document.getElementById('alliesRequestsPanel'),
         'campaigns_a': document.getElementById('alliesCampaignsPanel'),
         'attribution_b': document.getElementById('alliesAttributionPanel'),
         'clearing': document.getElementById('alliesClearingPanel'),
         'partner_portal': document.getElementById('alliesPartnerPortalPanel')
     };
+
+    // Subtabs de configuración de módulo (Engranaje)
+    window.switchAllySettingsTab = function(target) {
+        const formPanel = document.getElementById('panelAllySettingsForm');
+        const listPanel = document.getElementById('panelAllySettingsList');
+        const btnForm = document.getElementById('tabBtnAllyForm');
+        const btnList = document.getElementById('tabBtnAllyList');
+
+        if (!formPanel || !listPanel) return;
+
+        if (target === 'list') {
+            formPanel.classList.add('hidden');
+            listPanel.classList.remove('hidden');
+            if (btnList) {
+                btnList.classList.add('border-indigo-600', 'text-indigo-700');
+                btnList.classList.remove('border-transparent', 'text-slate-500');
+            }
+            if (btnForm) {
+                btnForm.classList.remove('border-indigo-600', 'text-indigo-700');
+                btnForm.classList.add('border-transparent', 'text-slate-500');
+            }
+        } else {
+            listPanel.classList.add('hidden');
+            formPanel.classList.remove('hidden');
+            if (btnForm) {
+                btnForm.classList.add('border-indigo-600', 'text-indigo-700');
+                btnForm.classList.remove('border-transparent', 'text-slate-500');
+            }
+            if (btnList) {
+                btnList.classList.remove('border-indigo-600', 'text-indigo-700');
+                btnList.classList.add('border-transparent', 'text-slate-500');
+            }
+        }
+    };
+
+    window.populateAllyFormForEdit = function(ally) {
+        const form = document.getElementById('allyMasterForm');
+        if (!form) return;
+
+        form.action = `/admin/convenios/aliados/${ally.id}`;
+        const methodInput = document.getElementById('allyFormMethod');
+        if (methodInput) methodInput.value = 'PUT';
+        
+        const editIdInput = document.getElementById('allyEditId');
+        if (editIdInput) editIdInput.value = ally.id;
+
+        const modeBadge = document.getElementById('allyFormModeBadge');
+        if (modeBadge) modeBadge.textContent = 'Modo: Editando a ' + (ally.name || 'Aliado');
+
+        const tabLabel = document.getElementById('tabLabelAllyForm');
+        if (tabLabel) tabLabel.textContent = '1. Editando Acuerdos: ' + (ally.name || 'Aliado');
+
+        const submitBtnLabel = document.getElementById('allyFormSubmitBtnLabel');
+        if (submitBtnLabel) submitBtnLabel.textContent = 'Actualizar Acuerdos Comerciales';
+
+        if (document.getElementById('allyFormName')) document.getElementById('allyFormName').value = ally.name || '';
+        if (document.getElementById('allyFormCode')) document.getElementById('allyFormCode').value = ally.code || '';
+        if (document.getElementById('allyFormUniverse')) document.getElementById('allyFormUniverse').value = ally.universe || 'marte';
+        if (document.getElementById('allyFormCategory')) document.getElementById('allyFormCategory').value = ally.category || 'other';
+        if (document.getElementById('allyFormContactName')) document.getElementById('allyFormContactName').value = ally.contactName || '';
+        if (document.getElementById('allyFormContactWhatsapp')) document.getElementById('allyFormContactWhatsapp').value = ally.contactWhatsapp || '';
+        if (document.getElementById('allyFormContactEmail')) document.getElementById('allyFormContactEmail').value = ally.contactEmail || '';
+        if (document.getElementById('allyFormSocialHandle')) document.getElementById('allyFormSocialHandle').value = ally.socialHandle || '';
+        if (document.getElementById('allyFormNotes')) document.getElementById('allyFormNotes').value = ally.notes || '';
+
+        if (document.getElementById('allyFormLeadAcquisitionCost')) document.getElementById('allyFormLeadAcquisitionCost').value = ally.leadAcquisitionCost ?? 20.00;
+        if (document.getElementById('allyFormCommissionType')) document.getElementById('allyFormCommissionType').value = ally.commissionType || 'percentage';
+        if (document.getElementById('allyFormCommissionRate')) document.getElementById('allyFormCommissionRate').value = ally.commissionRate ?? 10.00;
+        if (document.getElementById('allyFormMaxDiscountPct')) document.getElementById('allyFormMaxDiscountPct').value = ally.maxDiscountPct ?? 20.00;
+        if (document.getElementById('allyFormBankName')) document.getElementById('allyFormBankName').value = ally.bankName || '';
+        if (document.getElementById('allyFormBankClabe')) document.getElementById('allyFormBankClabe').value = ally.bankClabe || '';
+        if (document.getElementById('allyFormStatus')) document.getElementById('allyFormStatus').value = ally.status || 'active';
+
+        const allowed = Array.isArray(ally.allowedDiscountTypes) ? ally.allowedDiscountTypes : [];
+        document.querySelectorAll('.ally-dt-checkbox').forEach(cb => {
+            cb.checked = allowed.includes(cb.value);
+        });
+    };
+
+    window.resetAllyForm = function() {
+        const form = document.getElementById('allyMasterForm');
+        if (!form) return;
+
+        form.action = '{{ route("portal.allies.store") }}';
+        const methodInput = document.getElementById('allyFormMethod');
+        if (methodInput) methodInput.value = 'POST';
+
+        const editIdInput = document.getElementById('allyEditId');
+        if (editIdInput) editIdInput.value = '';
+
+        const modeBadge = document.getElementById('allyFormModeBadge');
+        if (modeBadge) modeBadge.textContent = 'Modo: Alta de Nuevo Aliado';
+
+        const tabLabel = document.getElementById('tabLabelAllyForm');
+        if (tabLabel) tabLabel.textContent = '1. Alta / Edición de Aliado Comercial';
+
+        const submitBtnLabel = document.getElementById('allyFormSubmitBtnLabel');
+        if (submitBtnLabel) submitBtnLabel.textContent = 'Guardar Acuerdo Comercial & Alta de Aliado';
+
+        form.reset();
+        document.querySelectorAll('.ally-dt-checkbox').forEach(cb => {
+            cb.checked = true;
+        });
+    };
+
+    function openAlliesSettingsModal() {
+        const modal = document.getElementById('alliesModuleSettingsModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+    function closeAlliesSettingsModal() {
+        const modal = document.getElementById('alliesModuleSettingsModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+    window.openAlliesSettingsModal = openAlliesSettingsModal;
+    window.closeAlliesSettingsModal = closeAlliesSettingsModal;
+
+    window.addEventListener('open-module-settings', openAlliesSettingsModal);
+    window.addEventListener('open-allies-settings-modal', openAlliesSettingsModal);
+
+    document.querySelectorAll('[data-action="edit-ally-btn"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const raw = this.getAttribute('data-ally');
+            if (!raw) return;
+            try {
+                const ally = JSON.parse(raw);
+                window.populateAllyFormForEdit(ally);
+                window.switchAllySettingsTab('form');
+                openAlliesSettingsModal();
+            } catch(e) {
+                console.error('Error parsing ally json', e);
+            }
+        });
+    });
 
     const tabButtons = document.querySelectorAll('[data-action="switch-allies-tab"]');
     const modeButtons = document.querySelectorAll('[data-action="switch-allies-mode"]');

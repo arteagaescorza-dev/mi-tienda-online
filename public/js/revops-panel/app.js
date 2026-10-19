@@ -16606,6 +16606,14 @@ function openUniversalHubSettingsFullscreen(hubKey = null) {
     return;
   }
 
+  // Si estamos en Hub 7 (Convenios & Aliados B2B), delegar al modal exclusivo de acuerdos comerciales
+  const isAlliesRoute = window.location.pathname.toLowerCase().includes('/convenios') || window.location.pathname.toLowerCase().includes('/allies');
+  const alliesSettingsModal = document.getElementById('alliesModuleSettingsModal');
+  if (isAlliesRoute && alliesSettingsModal) {
+    alliesSettingsModal.classList.remove('hidden');
+    return;
+  }
+
   const hubFs = document.getElementById('hub-settings-fullscreen');
   if (!hubFs) return;
 

@@ -10,6 +10,10 @@ class TorzoScraper
 
     public function fetchCatalog(): array
     {
+        if (app()->environment('local', 'development') && ! app()->runningUnitTests()) {
+            sleep(random_int(3, 5));
+        }
+
         $response = Http::timeout(30)
             ->withHeaders([
                 'Accept' => 'application/json, text/plain, */*',

@@ -895,6 +895,24 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
   2. *Pantalla Extranet del Aliado (Partner Portal)*
   3. *Pantalla Extranet del Proveedor / Fabricante (B2B Supplier Extranet Portal)* accesible vía `route('portal.vendor.extranet')`.
 
+#### Regla 12.7.3: Gobernanza del Directorio de Aliados y Acuerdos Comerciales desde el Engranaje del Navbar (Superadministrador)
+* **Ubicación Exclusiva en Engranaje Navbar:** El alta, edición y configuración del directorio de socios aliados y sus acuerdos comerciales reside formalmente en el botón de engranaje del navbar superior (`open-module-settings`). Este panel está disponible exclusivamente cuando se navega dentro del Hub 7 y su acceso está estrictamente restringido a usuarios con rango de **Superadministrador** (`superadmin`). Funciona de manera idéntica y homologada al alta manual de proveedores de Hub 4.
+* **Campos y Acuerdos Gobernables:**
+  1. **Datos Generales:** Nombre comercial, código de aliado (auto-generado si se omite), giro/categoría de socio comercial (sauna, spa, creador de contenido / OnlyFans, productor de fiestas / festival circuit, colectivo drag & ballroom, fitness gym, bar/nightclub, etc.), universo afín (`marte`, `venus`, `tiresias`, `terra`), contacto, WhatsApp, email, redes/handle social y notas de alianza.
+  2. **Reglas de Compensación Dirección A (Web &rarr; Aliado):** Tarifa contable de crédito por prospecto calificado CAPI (`lead_acquisition_cost`), acreditada al aliado cuando un usuario genera un voucher desde pop-ups o vitrinas.
+  3. **Reglas de Compensación Dirección B (Aliado &rarr; Web):** Tipo de comisión (`percentage` o `fixed`) y tasa (`commission_rate`) devengada a favor del aliado por cada orden efectiva liquidada en tienda con su cupón UTM determinista.
+  4. **Tipos de Descuentos Autorizados:** Matriz de selección de beneficios que el aliado tiene permitido configurar desde su portal (`cover` libre, `cover_2x1`, `free_drink` trago cortesía, `store_discount` % descuento en tienda, `vip_access` acceso VIP, `service_promo` promoción en servicios) y tope máximo de descuento en tienda (`max_discount_pct`, por defecto 20.00%).
+  5. **Datos Bancarios de Liquidación:** Banco receptor y cuenta CLABE de 18 dígitos para dispersiones en Cámara de Compensación.
+
+#### Regla 12.7.4: Política de Solicitud Exclusiva de Eventos por Aliados y Sincronización Automática e Inmutable
+* **Facultad Restringida del Aliado (Solicitud Exclusiva):** Los aliados comerciales **únicamente son capaces de solicitar** la dada de alta de su evento o promoción con los que quieren convenir con nosotros. Tienen estrictamente prohibida la publicación directa o desatendida.
+* **Bandeja de Entrada en Hub 7:** Toda solicitud enviada desde la extranet del aliado (`POST /aliado/extranet/{token}/campana`) se inserta con estado `pending_approval` y recae en la *Bandeja de Solicitudes de Eventos & Convenios* del Hub 7, con su póster oficial, universo, beneficio propuesto e instrucciones de canje.
+* **Sincronización Automática e Inmutable:** Tras la revisión y aprobación por el Superadministrador (`POST /admin/convenios/campanas/{id}/aprobar`), la campaña conmuta a `active` y se propaga **inmediata, veraz y automáticamente** a la página de convenios de explorar del Storefront (`/pagina/convenios`) y al generador de Pop-ups de suscripción en Hub 2. Queda terminantemente prohibido que la información no sea actual, fidedigna o que contenga datos inventados.
+
+#### Regla 12.7.5: Política Oficial de Scraping: Intervalo de 3 Días y Throttling en Desarrollo
+* **Frecuencia Oficial de Scraping (Cada 3 Días):** El scraping de catálogos mayoristas de proveedores dropship (`supplier:scrape`) se ejecuta como máximo 1 vez cada 3 días (`every_3_days` / 72 horas) por proveedor, persistiendo la fecha en `suppliers.last_scraped_at` y `supplier_sync_runs`. El comando omite automáticamente proveedores consultados dentro de dicha ventana salvo que se invoque el flag explícito `--force`.
+* **Throttling en Entorno de Desarrollo (3 a 5 Segundos):** En entornos `local` o `development`, toda consulta HTTP de extracción debe inyectar una pausa aleatoria obligatoria de 3 a 5 segundos (`sleep(random_int(3, 5))`) entre peticiones sucesivas para evitar penalizaciones de reputación de IP con Google, bloqueos de firewall y saturación de enrutadores locales.
+
 ---
 
 ## Resumen de Cumplimiento Inmediato
@@ -987,6 +1005,9 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Segregación Hub 1 RBAC**| Almacén vs Compras (12.6.1) | Sub-área Carlos Almacén (DHL 14:00, rampa ciega) vs Elena Compras (discrepancias, MOQs, acuerdos) |
 | **Gobernanza Sidebar** | Preservación de Hub 5 Finanzas (12.7.1) | Navegación estable en el DOM sin mutilación de enlaces; control por capa de permisos RBAC |
 | **Extranet Proveedores** | Portal Unificado en Hub 7 (12.7.2) | Residencia de Extranet B2B de Proveedores en Hub 7 conmutando con Aliados y RevOps Admin |
+| **Hub 7 Directorio Aliados** | Configuración Engranaje Navbar (12.7.3) | Alta manual de aliados, Dir A (leads CAPI), Dir B (comisiones %) y descuentos autorizados exclusiva en engranaje para Superadmin |
+| **Hub 7 Política Solicitud** | Solicitud Exclusiva de Aliados (12.7.4) | Aliados solo solicitan eventos; bandeja de autorización y sincronización automática Hub 7 <-> Hub 2 <-> Storefront |
+| **Política Scraping 3 Días** | Frecuencia 72h & Delay Dev 3-5s (12.7.5) | 1 corrida cada 3 días salvo `--force`; delay 3-5s en entorno local para protección de IP |
 | **Sincronización Automática Catálogo** | Sincronización Reactiva Omnicanal (3.3) | Principio Inamovible: actualización automática de categorías, colores, tallas y variantes entre Hub 4, Hub 2 y Storefront |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |

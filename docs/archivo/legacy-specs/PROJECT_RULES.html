@@ -1469,6 +1469,27 @@
       Centralización de toda extranet de terceros en Hub 7, con conmutador de 3 modos: Administración RevOps, Portal de Aliados Comerciales y Extranet B2B de Proveedores y Fabricantes.
     </div>
   </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">25</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.3: Gobernanza del Directorio de Aliados y Acuerdos Comerciales desde el Engranaje del Navbar (Superadministrador)</strong>
+      Alta manual de socios, condiciones de compensación Dir A (crédito CAPI) y Dir B (comisiones %) y tipos de descuentos autorizados exclusiva desde el engranaje del navbar para Superadministrador.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">26</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.4: Política de Solicitud Exclusiva de Eventos por Aliados y Sincronización Automática e Inmutable</strong>
+      Los socios comerciales únicamente solicitan alta de eventos en su portal; recaen en bandeja de revisión y al aprobarse se sincronizan automática e inmediatamente en Storefront y Pop-ups de Hub 2.
+    </div>
+  </div>
+  <div class="rule-item avoid-break">
+    <div class="rule-number">27</div>
+    <div class="rule-content">
+      <strong>Regla 12.7.5: Política Oficial de Scraping: Frecuencia de 3 Días y Delay en Desarrollo</strong>
+      Extracción restringida a 1 corrida cada 3 días (72 hrs) por proveedor dropship salvo flag <code>--force</code>, con pausa obligatoria de 3 a 5 segundos en entorno de desarrollo para salvaguardar la reputación de IP.
+    </div>
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -1822,6 +1843,21 @@
       <td><strong>Extranet Proveedores</strong></td>
       <td>Portal Unificado en Hub 7 (12.7.2)</td>
       <td>Residencia de Extranet B2B de Proveedores en Hub 7 conmutando con Aliados y RevOps Admin.</td>
+    </tr>
+    <tr>
+      <td><strong>Hub 7 Directorio Aliados</strong></td>
+      <td>Configuración Engranaje Navbar (12.7.3)</td>
+      <td>Alta manual de aliados, Dir A (leads CAPI), Dir B (comisiones %) y descuentos autorizados exclusiva en engranaje para Superadmin.</td>
+    </tr>
+    <tr>
+      <td><strong>Hub 7 Política Solicitud</strong></td>
+      <td>Solicitud Exclusiva de Aliados (12.7.4)</td>
+      <td>Aliados solo solicitan eventos; bandeja de autorización y sincronización automática Hub 7 <-> Hub 2 <-> Storefront.</td>
+    </tr>
+    <tr>
+      <td><strong>Política Scraping 3 Días</strong></td>
+      <td>Frecuencia 72h & Delay Dev 3-5s (12.7.5)</td>
+      <td>1 corrida cada 3 días salvo <code>--force</code>; delay 3-5s en entorno local para protección de reputación de IP.</td>
     </tr>
     <tr>
       <td><strong>Sincronización Automática Catálogo</strong></td>
