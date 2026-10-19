@@ -15,6 +15,7 @@ Nunca asumas flujos ni inventes reglas. Tu obligación antes de proponer código
 * **`legacy-specs/BACKEND_INTEGRATION_SPEC.md`**: Es el contrato técnico base. Contiene los esquemas de la base de datos (DDL), Modelos Eloquent y Endpoints RESTful[cite: 6, 7].
 * **`legacy-specs/PENDING_TASKS.md`**: Repositorio oficial del backlog. Aquí reside la deuda técnica y requerimientos futuros (ej. TASK-XXX-NN)[cite: 7].
 * **`modules/*.md`, `product/*.md`, `security/*.md`, `standards/*.md`**: Directorios para las micro-especificaciones técnicas modulares, roadmaps y matrices estandarizadas[cite: 7].
+* **Principio Inamovible de Sincronización Automática Omnicanal (Hub 4 <-> Hub 2 <-> Storefront):** No es negociable ni opcional. Cualquier cambio en familias, categorías, subcategorías, colores (sólidos, tornasoles, degradados) y curvas de tallas —en Ajustes de Hub 4, Workstation, Drawer de Edición Rápida o Scraping— DEBE propagarse y sincronizarse automáticamente y en tiempo real en todo el ecosistema (Hub 4, Hub 2 CMS, base de datos relacional y Storefront PWA). Jamás permitir que productos queden desvinculados de sus categorías oficiales, con muestras cromáticas faltantes, sin variantes generadas o cayendo a 'UNI' por omisión.
 
 ### 3. PROTOCOLO DE INGENIERÍA INVERSA (CERO ALUCINACIONES)
 Gran parte de este proyecto ya está programado. Antes de crear o modificar un archivo, DEBES:

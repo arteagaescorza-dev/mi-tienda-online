@@ -55,6 +55,13 @@ Ninguna tarea de la plataforma se considera "Completada" sin que su arquitectura
 ### Regla 3.2: Desacoplamiento de Contenido Editorial
 La configuración de marca, los 8 tokens cromáticos de estilo, los banners promocionales, los textos de presentación y las páginas dinámicas se configuran por vitrina en **Hub 2 (Tienda & CMS Multiverso)**, manteniendo independencia absoluta del inventario transaccional.
 
+### Regla 3.3 (Inamovible de Sistema): Sincronización Automática, Reactiva y Omnicanal del Catálogo (Hub 4 <-> Hub 2 <-> Storefront)
+* **Principio Inamovible de Arquitectura:** Esta directiva no es una regla negociable ni secundaria, sino un axioma inamovible de la arquitectura de la plataforma. Todo cambio realizado en familias, categorías, subcategorías, colores (sólidos, tornasoles, multicolores o degradados) y curvas de tallas —ya sea desde el panel de Ajustes de Hub 4, el Workstation de Alta de Producto, el Drawer de Edición Rápida, o la bandeja de curaduría de Scraping— **DEBE sincronizarse y propagarse automáticamente, de inmediato y sin intervención manual** entre Hub 4, Hub 2 (CMS & Storefront Controller), la base de datos relacional y el Storefront PWA.
+* **Gobernanza de Categorías y Familias:** Al asignar, actualizar o crear categorías o subcategorías en un producto o en la configuración global, el sistema sincroniza simultáneamente la tabla pivote `category_product`, el campo JSON `meta` (`category`, `subcategory`, `family`) y los endpoints del catálogo PWA (`getPwaStoreProducts`). Queda estrictamente prohibido que un producto guardado quede desvinculado de su taxonomía oficial o que el drawer no envíe/persista la categoría y subcategoría seleccionadas.
+* **Gobernanza de Colores y Swatches:** Todo color nuevo asignado a una prenda se registra automáticamente en `apparel_colors` (con soporte para degradados y tornasoles). Toda edición en la configuración de colores propaga en tiempo real los nuevos nombres y valores cromáticos a las prendas vinculadas, viéndose reflejado de forma inmediata en las tarjetas de producto y en la página de producto (PDP).
+* **Gobernanza de Curvas de Tallas (Cero Fallback a 'UNI'):** Todo producto debe resolver y mapear su curva de tallas activa (por marca, proveedor, ámbito o curva por defecto del sistema) poblando `meta.sizes` y generando las variantes correspondientes en `ProductVariant` con existencias iniciales. Queda estrictamente prohibido que prendas de vestir con curvas asignadas o bajo demanda (dropship) caigan por omisión a la talla unitaria ('UNI') en las tarjetas del Storefront o en la PDP.
+* **Propagación Reactiva en Cascada:** Al editar o renombrar una categoría, color o curva en los Ajustes de Inventario (`InventorySettingsApiController`), el servicio `ProductCatalogSyncService` ejecuta la propagación a todos los productos y variantes dependientes.
+
 ---
 
 ## 4. Reglas de Interconexión Cross-Hub & Flujos de Trabajo (Sin Roles)
@@ -977,6 +984,7 @@ Cualquier nuevo requerimiento, punto ciego detectado, incidencia o tarea pendien
 | **Segregación Hub 1 RBAC**| Almacén vs Compras (12.6.1) | Sub-área Carlos Almacén (DHL 14:00, rampa ciega) vs Elena Compras (discrepancias, MOQs, acuerdos) |
 | **Gobernanza Sidebar** | Preservación de Hub 5 Finanzas (12.7.1) | Navegación estable en el DOM sin mutilación de enlaces; control por capa de permisos RBAC |
 | **Extranet Proveedores** | Portal Unificado en Hub 7 (12.7.2) | Residencia de Extranet B2B de Proveedores en Hub 7 conmutando con Aliados y RevOps Admin |
+| **Sincronización Automática Catálogo** | Sincronización Reactiva Omnicanal (3.3) | Principio Inamovible: actualización automática de categorías, colores, tallas y variantes entre Hub 4, Hub 2 y Storefront |
 | **Documentación** | Tríptico Documental & Compilación PDF | Markdown + HTML estilizado + PDF vía Chrome headless |
 | **Git** | Commits Atómicos Semánticos | Mensajes estructurados con ID de tarea formal |
 
