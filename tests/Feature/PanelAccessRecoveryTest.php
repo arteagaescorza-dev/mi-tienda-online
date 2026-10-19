@@ -20,6 +20,15 @@ class PanelAccessRecoveryTest extends TestCase
         $adminRedirect->assertRedirect(route('login'));
     }
 
+    public function test_vendor_session_on_dashboard(): void
+    {
+        $user = User::factory()->create(['role' => 'portal']);
+        $response = $this->actingAs($user)
+            ->withSession(['active_role' => 'vendor'])
+            ->get('/admin/dashboard');
+        $response->assertOk();
+    }
+
     public function test_superadmin_can_access_all_panel_hubs(): void
     {
         $superadmin = User::factory()->create([

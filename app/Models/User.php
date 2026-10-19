@@ -99,29 +99,34 @@ class User extends Authenticatable
     {
         $role = $this->active_role;
 
+        // Base superadmin, admin, or portal staff should always be allowed to access dashboard
+        if (in_array($this->role, ['admin', 'superadmin', 'all_roles', 'portal'], true) && $hub === 'dashboard') {
+            return true;
+        }
+
         if (in_array($role, ['admin', 'superadmin', 'all_roles', 'portal'], true)) {
             return true;
         }
 
-        // Proveedores B2B solo pueden acceder a su extranet
+        // Proveedores B2B pueden acceder a su extranet y al dashboard operativo
         if ($role === 'vendor') {
-            return $hub === 'vendor_extranet';
+            return in_array($hub, ['vendor_extranet', 'dashboard', 'inventory'], true);
         }
 
-        // Aliados solo pueden acceder a su extranet
+        // Aliados pueden acceder a su extranet, convenios y dashboard
         if ($role === 'ally') {
-            return $hub === 'ally_extranet';
+            return in_array($hub, ['ally_extranet', 'allies', 'dashboard'], true);
         }
 
         $hubAccessMap = [
-            'dashboard'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'marketing', 'packer', 'picker', 'portal'],
+            'dashboard'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'logistics', 'sales', 'support', 'operator', 'marketing', 'packer', 'picker', 'portal', 'vendor', 'ally'],
             'store'           => ['admin', 'superadmin', 'sales', 'marketing', 'portal'],
             'crm'             => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
             'marketing'       => ['admin', 'superadmin', 'sales', 'support', 'marketing', 'portal'],
-            'inventory'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'packer', 'picker', 'portal'],
+            'inventory'       => ['admin', 'superadmin', 'finance', 'warehouse', 'purchases', 'operator', 'packer', 'picker', 'portal', 'vendor'],
             'finance'         => ['admin', 'superadmin', 'finance', 'finanzas', 'portal'],
             'logistics'       => ['admin', 'superadmin', 'finance', 'warehouse', 'logistics', 'operator', 'packer', 'picker', 'portal'],
-            'allies'          => ['admin', 'superadmin', 'finance', 'sales', 'marketing', 'portal'],
+            'allies'          => ['admin', 'superadmin', 'finance', 'sales', 'marketing', 'portal', 'ally'],
             'governance'      => ['admin', 'superadmin', 'portal'],
             'vendor_extranet' => ['admin', 'superadmin', 'vendor', 'purchases', 'portal'],
             'ally_extranet'   => ['admin', 'superadmin', 'ally', 'marketing', 'sales', 'portal'],
