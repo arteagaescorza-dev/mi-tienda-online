@@ -2296,7 +2296,7 @@
     window.__STORE_CSRF_TOKEN__ = "{{ csrf_token() }}";
     window.__AUTO_OPEN_PRODUCT_ID__ = @json($autoOpenProductId ?? null);
   </script>
-  <script src="{{ asset('js/storefront/store-pwa.js') }}"></script>
+  <script src="{{ asset('js/storefront/store-pwa.js') }}?v={{ file_exists(public_path('js/storefront/store-pwa.js')) ? filemtime(public_path('js/storefront/store-pwa.js')) : time() }}"></script>
   @if(!empty($autoOpenProductId))
     <script>
       document.addEventListener('DOMContentLoaded', function() {

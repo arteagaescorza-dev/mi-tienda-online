@@ -385,24 +385,26 @@
         }
       }
       // Filtro de Categoría (Árbol y Checkboxes)
-      const matchesCatFilter = (targetCat, prodCat, prodCatName) => {
+      const matchesCatFilter = (targetCat, prodCat, prodCatName, prodName) => {
         if (!targetCat || targetCat === 'all') return true;
         const t = String(targetCat).toLowerCase().trim();
         const c = String(prodCat || '').toLowerCase().trim();
         const cn = String(prodCatName || '').toLowerCase().trim();
+        const pn = String(prodName || '').toLowerCase().trim();
         if (t === c || t === cn) return true;
         const norm = s => s.replace(/s$/, '').replace(/es$/, '');
-        if (norm(t) === norm(c) || norm(t) === norm(cn)) return true;
-        if (c.includes(t) || t.includes(c) || cn.includes(t) || t.includes(cn)) return true;
+        const nt = norm(t);
+        if (nt === norm(c) || nt === norm(cn) || nt === norm(pn)) return true;
+        if (c.includes(t) || t.includes(c) || cn.includes(t) || t.includes(cn) || pn.includes(nt) || pn.includes(t)) return true;
         return false;
       };
 
       if (Array.isArray(storeState.activeCategories) && storeState.activeCategories.length > 0) {
-        if (!storeState.activeCategories.some(cat => matchesCatFilter(cat, prod.category, prod.categoryName))) {
+        if (!storeState.activeCategories.some(cat => matchesCatFilter(cat, prod.category, prod.categoryName, prod.name))) {
           return false;
         }
       } else if (storeState.activeCategory && storeState.activeCategory !== 'all') {
-        if (!matchesCatFilter(storeState.activeCategory, prod.category, prod.categoryName)) {
+        if (!matchesCatFilter(storeState.activeCategory, prod.category, prod.categoryName, prod.name)) {
           return false;
         }
       }
@@ -5275,12 +5277,12 @@
 
   function openCatalogWithCategory(category, universe, supplier, tags) {
     let targetUniverse = universe;
-    if (!targetUniverse || targetUniverse === 'all') {
-      targetUniverse = 'terra';
-    } else if (targetUniverse === 'dama') {
+    if (targetUniverse === 'dama') {
       targetUniverse = 'venus';
     } else if (targetUniverse === 'caballero') {
       targetUniverse = 'marte';
+    } else if (!targetUniverse || targetUniverse === 'all') {
+      targetUniverse = storeState.activeUniverse || 'marte';
     }
 
     storeState.activeUniverse = targetUniverse;

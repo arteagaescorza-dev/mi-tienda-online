@@ -2227,18 +2227,43 @@ class StorefrontController extends Controller
                     $availableStock = $totalStock;
                 }
 
-                $brandUpper = strtoupper((string) ($product->brand ?: data_get($product->meta, 'category', '')));
+                // Detección precisa de categoría analizando relaciones de categorías, meta, subcategoría y título
+                $metaCategory = (string) data_get($product->meta, 'category', '');
+                $metaSubcategory = (string) data_get($product->meta, 'subcategory', '');
+                $categoryText = strtoupper(trim(
+                    $product->categories->pluck('name')->merge($product->categories->pluck('slug'))->implode(' ')
+                    . ' ' . $metaCategory
+                    . ' ' . $metaSubcategory
+                    . ' ' . $product->title
+                ));
+
                 $categorySlug = 'jocks';
-                if (str_contains($brandUpper, 'BOXER') || str_contains($brandUpper, 'BRIEF')) {
+                $categoryName = 'Jockstraps';
+
+                if (str_contains($categoryText, 'BOXER') || str_contains($categoryText, 'BRIEF')) {
                     $categorySlug = 'boxers';
-                } elseif (str_contains($brandUpper, 'TANGA')) {
+                    $categoryName = 'Boxers';
+                } elseif (str_contains($categoryText, 'TANGA')) {
                     $categorySlug = 'tangas';
-                } elseif (str_contains($brandUpper, 'BIKINI')) {
+                    $categoryName = 'Tangas';
+                } elseif (str_contains($categoryText, 'BIKINI')) {
                     $categorySlug = 'bikinis';
-                } elseif (str_contains($brandUpper, 'TANK') || str_contains($brandUpper, 'SHIRT')) {
+                    $categoryName = 'Bikinis';
+                } elseif (str_contains($categoryText, 'TANK') || str_contains($categoryText, 'SHIRT') || str_contains($categoryText, 'TOP')) {
                     $categorySlug = 'tanktops';
-                } elseif (str_contains($brandUpper, 'SWIM')) {
+                    $categoryName = 'Tank Tops';
+                } elseif (str_contains($categoryText, 'SWIM') || str_contains($categoryText, 'BAÑO')) {
                     $categorySlug = 'swimwear';
+                    $categoryName = 'Trajes de Baño';
+                } elseif (str_contains($categoryText, 'JOCK')) {
+                    $categorySlug = 'jocks';
+                    $categoryName = 'Jockstraps';
+                } elseif ($product->categories->isNotEmpty()) {
+                    $categorySlug = $product->categories->first()->slug;
+                    $categoryName = $product->categories->first()->name;
+                } elseif (!empty($metaCategory)) {
+                    $categorySlug = \Illuminate\Support\Str::slug($metaCategory);
+                    $categoryName = $metaCategory;
                 }
 
                 $universes = ['marte', 'terra'];
@@ -2294,7 +2319,7 @@ class StorefrontController extends Controller
                     'name' => $product->title,
                     'slug' => $product->slug,
                     'category' => $categorySlug,
-                    'categoryName' => $product->brand ?: (data_get($product->meta, 'category', 'Prenda')),
+                    'categoryName' => $categoryName,
                     'price' => (float) $product->price,
                     'price_formatted' => 'MXN $' . number_format((float) $product->price, 2),
                     'universes' => $universes,

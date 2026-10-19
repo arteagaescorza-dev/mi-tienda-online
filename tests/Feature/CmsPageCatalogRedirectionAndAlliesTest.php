@@ -112,4 +112,28 @@ class CmsPageCatalogRedirectionAndAlliesTest extends TestCase
         ]);
         $updateResp->assertSessionHas('error');
     }
+
+    public function test_get_pwa_store_products_correctly_categorizes_tangas_and_boxers()
+    {
+        $product = \App\Models\Product::create([
+            'sku' => 'TEST-TNG-001',
+            'title' => 'Tanga Ergonómica Microfibra',
+            'slug' => 'tanga-ergonomica-microfibra',
+            'brand' => 'Mazho',
+            'price' => 199.00,
+            'visible' => true,
+            'meta' => [
+                'category' => 'Tangas',
+                'universes' => ['marte', 'terra'],
+            ],
+        ]);
+
+        $controller = new \App\Http\Controllers\StorefrontController();
+        $products = $controller->getPwaStoreProducts();
+
+        $tangaItem = collect($products)->firstWhere('sku', 'TEST-TNG-001');
+        $this->assertNotNull($tangaItem);
+        $this->assertEquals('tangas', $tangaItem['category']);
+        $this->assertEquals('Tangas', $tangaItem['categoryName']);
+    }
 }
