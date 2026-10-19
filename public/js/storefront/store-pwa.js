@@ -8,6 +8,21 @@
 (function() {
   'use strict';
 
+  if (typeof window !== 'undefined') {
+    window.closeStorePopup = function(secId) {
+      const m = document.getElementById('promoModal_' + secId);
+      if (m) {
+        m.style.setProperty('display', 'none', 'important');
+        m.classList.remove('active');
+        m.setAttribute('aria-hidden', 'true');
+      }
+      try {
+        sessionStorage.setItem('store_popup_seen_' + secId, '1');
+        localStorage.setItem('store_popup_closed_' + secId, Date.now().toString());
+      } catch (e) {}
+    };
+  }
+
   // Configuración de Identidad y Metadatos por Universo
   const UNIVERSE_META = Object.assign({
     marte: {
@@ -370,12 +385,24 @@
         }
       }
       // Filtro de Categoría (Árbol y Checkboxes)
+      const matchesCatFilter = (targetCat, prodCat, prodCatName) => {
+        if (!targetCat || targetCat === 'all') return true;
+        const t = String(targetCat).toLowerCase().trim();
+        const c = String(prodCat || '').toLowerCase().trim();
+        const cn = String(prodCatName || '').toLowerCase().trim();
+        if (t === c || t === cn) return true;
+        const norm = s => s.replace(/s$/, '').replace(/es$/, '');
+        if (norm(t) === norm(c) || norm(t) === norm(cn)) return true;
+        if (c.includes(t) || t.includes(c) || cn.includes(t) || t.includes(cn)) return true;
+        return false;
+      };
+
       if (Array.isArray(storeState.activeCategories) && storeState.activeCategories.length > 0) {
-        if (!storeState.activeCategories.includes(prod.category)) {
+        if (!storeState.activeCategories.some(cat => matchesCatFilter(cat, prod.category, prod.categoryName))) {
           return false;
         }
       } else if (storeState.activeCategory && storeState.activeCategory !== 'all') {
-        if (prod.category !== storeState.activeCategory) {
+        if (!matchesCatFilter(storeState.activeCategory, prod.category, prod.categoryName)) {
           return false;
         }
       }
@@ -5246,29 +5273,92 @@
       return;
     }
 
-    const exploreFilterBtn = e.target.closest('[data-action="explore-filter-catalog"]');
-    if (exploreFilterBtn) {
-      e.preventDefault();
-      const universe = exploreFilterBtn.dataset.universe;
-      const category = exploreFilterBtn.dataset.category;
-      if (universe && universe !== 'all' && universe !== storeState.activeUniverse) {
-        let targetUrl = '/productos?universo=' + encodeURIComponent(universe);
-        if (category && category !== 'all') {
-          targetUrl += '&categoria=' + encodeURIComponent(category);
-        }
-        window.location.href = targetUrl;
-        return;
-      }
-      if (category && category !== 'all') {
-        storeState.activeCategory = category;
-        document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
-          p.classList.toggle('active', p.dataset.category === storeState.activeCategory);
-        });
-      }
-      switchDockTab('catalog');
-      renderProductsGrid('catalogProductsGrid');
-      return;
+  function openCatalogWithCategory(category, universe, supplier, tags) {
+    let targetUniverse = universe;
+    if (!targetUniverse || targetUniverse === 'all') {
+      targetUniverse = 'terra';
+    } else if (targetUniverse === 'dama') {
+      targetUniverse = 'venus';
+    } else if (targetUniverse === 'caballero') {
+      targetUniverse = 'marte';
     }
+
+    storeState.activeUniverse = targetUniverse;
+    document.querySelectorAll('.universe-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.universe === targetUniverse);
+    });
+    document.querySelectorAll('.zara-filter-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.universe === targetUniverse);
+    });
+
+    const norm = s => (s || '').toLowerCase().trim().replace(/s$/, '').replace(/es$/, '');
+
+    if (category && category !== 'all') {
+      storeState.activeCategory = category;
+      storeState.activeCategories = [category];
+      document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
+        const pCat = p.dataset.category || '';
+        p.classList.toggle('active', pCat === category || norm(pCat) === norm(category));
+      });
+      document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
+        const val = cb.getAttribute('data-val') || cb.value || '';
+        cb.checked = (val === category || norm(val) === norm(category));
+      });
+    } else {
+      storeState.activeCategory = 'all';
+      storeState.activeCategories = [];
+      document.querySelectorAll('[data-action="filter-category"]').forEach(p => {
+        p.classList.remove('active');
+      });
+      document.querySelectorAll('.filter-cat-checkbox, input[name="filter_category"]').forEach(cb => {
+        cb.checked = false;
+      });
+    }
+
+    if (supplier && supplier !== 'all') {
+      storeState.activeSupplier = supplier;
+      storeState.activeSuppliers = [supplier];
+      document.querySelectorAll('.filter-brand-checkbox, input[name="filter_brand"]').forEach(cb => {
+        const val = cb.getAttribute('data-val') || cb.value || '';
+        cb.checked = (val.toLowerCase() === supplier.toLowerCase());
+      });
+    }
+
+    if (tags) {
+      storeState.searchQuery = tags;
+    }
+
+    switchDockTab('catalog');
+    renderProductsGrid('catalogProductsGrid');
+
+    setTimeout(() => {
+      const catalogGridEl = document.getElementById('catalogProductsGrid') || document.getElementById('viewCatalog');
+      if (catalogGridEl) {
+        catalogGridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+
+    try {
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set('tab', 'catalog');
+      if (category && category !== 'all') queryParams.set('categoria', category);
+      if (universe && universe !== 'all') queryParams.set('universo', universe);
+      if (supplier && supplier !== 'all') queryParams.set('proveedor', supplier);
+      if (tags) queryParams.set('tags', tags);
+      window.history.pushState(null, '', '?' + queryParams.toString());
+    } catch (err) {}
+  }
+
+  const exploreFilterBtn = e.target.closest('[data-action="explore-filter-catalog"]');
+  if (exploreFilterBtn) {
+    e.preventDefault();
+    const universe = exploreFilterBtn.dataset.universe;
+    const category = exploreFilterBtn.dataset.category;
+    const supplier = exploreFilterBtn.dataset.supplier;
+    const tags = exploreFilterBtn.dataset.tags;
+    openCatalogWithCategory(category, universe, supplier, tags);
+    return;
+  }
 
     // 21. Apertura y Cierre de Checkout
     const openChkBtn = e.target.closest('[data-action="open-checkout"]');
@@ -6031,9 +6121,22 @@
     });
 
     try {
-      const tabParam = new URLSearchParams(window.location.search).get('tab');
-      if (tabParam && ['home', 'explore', 'catalog'].includes(tabParam)) {
-        switchDockTab(tabParam);
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      const catParam = urlParams.get('categoria') || urlParams.get('category');
+      const uniParam = urlParams.get('universo') || urlParams.get('universe');
+      const supParam = urlParams.get('proveedor') || urlParams.get('supplier');
+      const tagParam = urlParams.get('tags') || urlParams.get('tag');
+
+      if (catParam || supParam || tagParam || (tabParam && ['home', 'explore', 'catalog'].includes(tabParam))) {
+        if (catParam || supParam || tagParam) {
+          openCatalogWithCategory(catParam || 'all', uniParam || 'all', supParam, tagParam);
+        } else if (tabParam) {
+          switchDockTab(tabParam);
+          if (tabParam === 'catalog') {
+            renderProductsGrid('catalogProductsGrid');
+          }
+        }
       }
     } catch (e) {}
 
@@ -6062,6 +6165,7 @@
     window.submitLeadMagnet = submitLeadMagnet;
     window.switchUniverse = switchUniverse;
     window.switchDockTab = switchDockTab;
+    window.openCatalogWithCategory = openCatalogWithCategory;
     window.toggleSearchBar = toggleSearchBar;
     window.handleLiveSearch = handleLiveSearch;
     window.openDrawer = openDrawer;

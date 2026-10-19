@@ -1402,7 +1402,11 @@ $curatedGoogleFonts = [
                                     </div>
                                 </td>
                                 <td class="py-3 px-3 text-center">
-                                    @if(!empty($pg->filter_universe) || !empty($pg->filter_category))
+                                    @if(in_array($pg->slug, ['aliados', 'convenios', 'convenios-con-aliados']))
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            REPOSITORIO AUTO HUB 7
+                                        </span>
+                                    @elseif(!empty($pg->filter_universe) || !empty($pg->filter_category))
                                         <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
                                             {{ strtoupper($pg->filter_universe ?? 'TODOS') }} {{ !empty($pg->filter_category) ? '// ' . strtoupper($pg->filter_category) : '' }}
                                         </span>
@@ -1423,35 +1427,42 @@ $curatedGoogleFonts = [
                                     <div class="flex items-center justify-end gap-1.5">
                                         <a href="{{ url('/pagina/' . $pg->slug) }}" target="_blank" class="px-2 py-1 text-slate-600 hover:text-slate-900 text-[11px] font-semibold border border-slate-200 rounded">Ver</a>
                                         
-                                        <!-- Botón Editar (Modal depth=2) -->
-                                        <button type="button" class="px-2 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded text-[11px] font-semibold cursor-pointer border border-amber-200" onclick='window.openEditPageModal(@json($pg))'>
-                                            Editar
-                                        </button>
-
-                                        <!-- Botón Pausar / Activar -->
-                                        <form method="POST" action="{{ route('portal.store.pages.toggle-status', $pg->id) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" class="px-2 py-1 text-[11px] font-semibold rounded border cursor-pointer {{ $pg->status === 'active' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' }}">
-                                                {{ $pg->status === 'active' ? 'Pausar' : 'Activar' }}
+                                        @if(in_array($pg->slug, ['aliados', 'convenios', 'convenios-con-aliados']))
+                                            <!-- Página del Sistema Hub 7 Auto: Sin configuración manual -->
+                                            <a href="/admin/convenios" target="_blank" class="px-2 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded text-[11px] font-bold border border-indigo-200" title="Gestionar convenios y eventos en Hub 7">
+                                                Convenios Hub 7 &rarr;
+                                            </a>
+                                        @else
+                                            <!-- Botón Editar (Modal depth=2) -->
+                                            <button type="button" class="px-2 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded text-[11px] font-semibold cursor-pointer border border-amber-200" onclick='window.openEditPageModal(@json($pg))'>
+                                                Editar
                                             </button>
-                                        </form>
 
-                                        <!-- Botón Archivar -->
-                                        @if($pg->status !== 'archived')
-                                            <form method="POST" action="{{ route('portal.store.pages.archive', $pg->id) }}" class="inline">
+                                            <!-- Botón Pausar / Activar -->
+                                            <form method="POST" action="{{ route('portal.store.pages.toggle-status', $pg->id) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" class="px-2 py-1 text-[11px] font-semibold rounded bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 cursor-pointer" onclick="return confirm('¿Archivar esta página CMS?')">
-                                                    Archivar
+                                                <button type="submit" class="px-2 py-1 text-[11px] font-semibold rounded border cursor-pointer {{ $pg->status === 'active' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' }}">
+                                                    {{ $pg->status === 'active' ? 'Pausar' : 'Activar' }}
                                                 </button>
                                             </form>
-                                        @endif
 
-                                        <!-- Botón Eliminar -->
-                                        <form method="POST" action="{{ route('portal.store.pages.destroy', $pg->id) }}" onsubmit="return confirm('¿Eliminar esta página CMS definitivamente?')" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer border border-rose-200 rounded bg-rose-50 hover:bg-rose-100">Eliminar</button>
-                                        </form>
+                                            <!-- Botón Archivar -->
+                                            @if($pg->status !== 'archived')
+                                                <form method="POST" action="{{ route('portal.store.pages.archive', $pg->id) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="px-2 py-1 text-[11px] font-semibold rounded bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 cursor-pointer" onclick="return confirm('¿Archivar esta página CMS?')">
+                                                        Archivar
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            <!-- Botón Eliminar -->
+                                            <form method="POST" action="{{ route('portal.store.pages.destroy', $pg->id) }}" onsubmit="return confirm('¿Eliminar esta página CMS definitivamente?')" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="px-2 py-1 text-rose-600 hover:text-rose-800 text-[11px] font-semibold cursor-pointer border border-rose-200 rounded bg-rose-50 hover:bg-rose-100">Eliminar</button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -2390,7 +2401,7 @@ $curatedGoogleFonts = [
                                     <option value="presale">2.4 Acceder a una Preventa Exclusiva (Redirección Inmediata)</option>
                                 </select>
                                 <span class="block text-[10px] text-slate-500">
-                                    Todos los registros crean una cuenta de comprador en Hub 3 con verificación 2FA por WhatsApp y sincronizan eventos con Meta CAPI.
+                                    Todos los registros crean una cuenta de comprador en Hub 3 con envío instantáneo a WhatsApp y sincronizan eventos con Meta CAPI.
                                 </span>
                             </div>
 
@@ -2493,6 +2504,27 @@ $curatedGoogleFonts = [
                                         <button type="button" data-point="bottom left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'bottom left', this)">BL</button>
                                         <button type="button" data-point="bottom center" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'bottom center', this)">BC</button>
                                         <button type="button" data-point="bottom right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('create', 'bottom right', this)">BR</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Colores de Título y Subtítulo del Pop-up -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <label class="block font-bold text-slate-800 text-xs">Colores de Texto del Pop-up</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-semibold text-slate-600">Color del Título</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="createPopupTitleColorPicker" value="#ffffff" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createPopupTitleColor').value = this.value; window.renderPopUpLivePreview('create')">
+                                            <input type="text" name="settings[popup_title_color]" id="createPopupTitleColor" value="#ffffff" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createPopupTitleColorPicker').value = this.value; window.renderPopUpLivePreview('create')">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-semibold text-slate-600">Color de Bajada / Subtítulo</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="createPopupSubtitleColorPicker" value="#e2e8f0" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('createPopupSubtitleColor').value = this.value; window.renderPopUpLivePreview('create')">
+                                            <input type="text" name="settings[popup_subtitle_color]" id="createPopupSubtitleColor" value="#e2e8f0" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('createPopupSubtitleColorPicker').value = this.value; window.renderPopUpLivePreview('create')">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2727,7 +2759,7 @@ $curatedGoogleFonts = [
                                         <div class="space-y-2 pt-1">
                                             <input type="text" placeholder="Tu Nombre Completo" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
                                             <div class="flex gap-1.5">
-                                                <span class="px-2 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white flex items-center gap-1">+52 (2FA)</span>
+                                                <span class="px-2 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white flex items-center gap-1">+52</span>
                                                 <input type="tel" placeholder="WhatsApp (10 dígitos)" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
                                             </div>
                                             <input type="email" placeholder="Correo Electrónico" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
@@ -2736,7 +2768,7 @@ $curatedGoogleFonts = [
                                             </button>
                                             <div class="flex items-center justify-center gap-1 text-[9px] text-slate-300 text-center">
                                                 <svg class="w-2.5 h-2.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                                <span>Código único de un solo uso &bull; WhatsApp verificado para 2FA</span>
+                                                <span>Código único de un solo uso &bull; Envío instantáneo a WhatsApp</span>
                                             </div>
                                         </div>
                                     </div>
@@ -3944,7 +3976,7 @@ $curatedGoogleFonts = [
                                     <option value="presale">2.4 Acceder a una Preventa Exclusiva (Redirección Inmediata)</option>
                                 </select>
                                 <span class="block text-[10px] text-slate-500">
-                                    Todos los registros crean una cuenta de comprador en Hub 3 con verificación 2FA por WhatsApp y sincronizan eventos con Meta CAPI.
+                                    Todos los registros crean una cuenta de comprador en Hub 3 con envío instantáneo a WhatsApp y sincronizan eventos con Meta CAPI.
                                 </span>
                             </div>
 
@@ -4047,6 +4079,27 @@ $curatedGoogleFonts = [
                                         <button type="button" data-point="bottom left" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'bottom left', this)">BL</button>
                                         <button type="button" data-point="bottom center" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'bottom center', this)">BC</button>
                                         <button type="button" data-point="bottom right" class="h-7 text-[10px] font-bold rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition" onclick="window.setPopupFocalPoint('edit', 'bottom right', this)">BR</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Colores de Título y Subtítulo del Pop-up -->
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl space-y-3">
+                                <label class="block font-bold text-slate-800 text-xs">Colores de Texto del Pop-up</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-semibold text-slate-600">Color del Título</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="editPopupTitleColorPicker" value="#ffffff" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editPopupTitleColor').value = this.value; window.renderPopUpLivePreview('edit')">
+                                            <input type="text" name="settings[popup_title_color]" id="editPopupTitleColor" value="#ffffff" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editPopupTitleColorPicker').value = this.value; window.renderPopUpLivePreview('edit')">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-semibold text-slate-600">Color de Bajada / Subtítulo</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="color" id="editPopupSubtitleColorPicker" value="#e2e8f0" class="w-7 h-7 p-0 border border-slate-200 rounded cursor-pointer" oninput="document.getElementById('editPopupSubtitleColor').value = this.value; window.renderPopUpLivePreview('edit')">
+                                            <input type="text" name="settings[popup_subtitle_color]" id="editPopupSubtitleColor" value="#e2e8f0" class="w-full px-2 py-1 text-[11px] font-mono border border-slate-200 rounded" oninput="document.getElementById('editPopupSubtitleColorPicker').value = this.value; window.renderPopUpLivePreview('edit')">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -4281,7 +4334,7 @@ $curatedGoogleFonts = [
                                         <div class="space-y-2 pt-1">
                                             <input type="text" placeholder="Tu Nombre Completo" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
                                             <div class="flex gap-1.5">
-                                                <span class="px-2 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white flex items-center gap-1">+52 (2FA)</span>
+                                                <span class="px-2 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white flex items-center gap-1">+52</span>
                                                 <input type="tel" placeholder="WhatsApp (10 dígitos)" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
                                             </div>
                                             <input type="email" placeholder="Correo Electrónico" class="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/90 text-slate-800 placeholder-slate-400 border border-white/20 pointer-events-none" disabled>
@@ -4290,7 +4343,7 @@ $curatedGoogleFonts = [
                                             </button>
                                             <div class="flex items-center justify-center gap-1 text-[9px] text-slate-300 text-center">
                                                 <svg class="w-2.5 h-2.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                                <span>Código único de un solo uso &bull; WhatsApp verificado para 2FA</span>
+                                                <span>Código único de un solo uso &bull; Envío instantáneo a WhatsApp</span>
                                             </div>
                                         </div>
                                     </div>
@@ -6134,6 +6187,10 @@ $curatedGoogleFonts = [
 
     window.openEditPageModal = function(page) {
         if (!page) return;
+        if (page.slug === 'aliados' || page.slug === 'convenios' || page.slug === 'convenios-con-aliados') {
+            alert('Esta página es el repositorio automático de eventos y convenios con aliados de Hub 7. Se sincroniza automáticamente con los eventos aprobados.');
+            return;
+        }
         const form = document.getElementById('editPageForm');
         if (form) {
             form.action = `/admin/tienda-cms/paginas/${page.id}`;
@@ -6763,6 +6820,16 @@ $curatedGoogleFonts = [
 
         const editPopupCloseBehavior = document.getElementById('editPopupCloseBehavior');
         if (editPopupCloseBehavior) editPopupCloseBehavior.value = st.popup_close_behavior || 'outside';
+
+        const editPopupTitleColor = document.getElementById('editPopupTitleColor');
+        const editPopupTitleColorPicker = document.getElementById('editPopupTitleColorPicker');
+        if (editPopupTitleColor) editPopupTitleColor.value = st.popup_title_color || '#ffffff';
+        if (editPopupTitleColorPicker) editPopupTitleColorPicker.value = st.popup_title_color || '#ffffff';
+
+        const editPopupSubtitleColor = document.getElementById('editPopupSubtitleColor');
+        const editPopupSubtitleColorPicker = document.getElementById('editPopupSubtitleColorPicker');
+        if (editPopupSubtitleColor) editPopupSubtitleColor.value = st.popup_subtitle_color || '#e2e8f0';
+        if (editPopupSubtitleColorPicker) editPopupSubtitleColorPicker.value = st.popup_subtitle_color || '#e2e8f0';
 
         if (typeof window.handlePopupActionChange === 'function') {
             window.handlePopupActionChange('edit');
@@ -8576,13 +8643,25 @@ window.renderPopUpLivePreview = function(mode) {
         overlayLayer.style.display = 'none';
     }
     
-    // 3. Texts
+    // 3. Texts and Colors
     const titleInp = document.getElementById(mode === 'create' ? 'inpCreateTitle' : 'inpEditTitle');
     const subtitleInp = document.getElementById(mode === 'create' ? 'inpCreateSubtitle' : 'inpEditSubtitle');
     const badgeInp = document.getElementById(mode === 'create' ? 'inpCreateBadge' : 'inpEditBadge');
     
-    if (titleEl) titleEl.textContent = titleInp && titleInp.value ? titleInp.value : 'Descuento Exclusivo';
-    if (subtitleEl) subtitleEl.textContent = subtitleInp && subtitleInp.value ? subtitleInp.value : 'Suscríbete con tu WhatsApp para recibir tu código único.';
+    const titleColorInp = document.getElementById(modalPrefix + 'PopupTitleColor');
+    const titleColor = titleColorInp && titleColorInp.value ? titleColorInp.value : '#ffffff';
+
+    const subtitleColorInp = document.getElementById(modalPrefix + 'PopupSubtitleColor');
+    const subtitleColor = subtitleColorInp && subtitleColorInp.value ? subtitleColorInp.value : '#e2e8f0';
+
+    if (titleEl) {
+        titleEl.textContent = titleInp && titleInp.value ? titleInp.value : 'Descuento Exclusivo';
+        titleEl.style.setProperty('color', titleColor, 'important');
+    }
+    if (subtitleEl) {
+        subtitleEl.textContent = subtitleInp && subtitleInp.value ? subtitleInp.value : 'Suscríbete con tu WhatsApp para recibir tu código único.';
+        subtitleEl.style.setProperty('color', subtitleColor, 'important');
+    }
     if (badgeEl) {
         if (badgeInp && badgeInp.value) {
             badgeEl.textContent = badgeInp.value;

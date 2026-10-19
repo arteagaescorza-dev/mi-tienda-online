@@ -795,7 +795,17 @@ class StorefrontController extends Controller
     }
 
     /**
-     * Página institucional CMS sincronizada en el Navbar/Footer.
+     * Dispatcher reactivo de catálogo filtrado (/catalogo).
+     */
+    public function catalog(Request $request)
+    {
+        $query = $request->query();
+        $query['tab'] = 'catalog';
+        return redirect()->route('store.home', $query);
+    }
+
+    /**
+     * Página institucional CMS sincronizada en el Navbar/Footer o Repositorio de Convenios/Catálogo Filtrado.
      */
     public function cmsPage(string $slug)
     {
@@ -805,6 +815,19 @@ class StorefrontController extends Controller
         }
 
         $page = CmsPage::active()->where('slug', $slug)->firstOrFail();
+
+        // Si la página fue configurada con filtros de catálogo (ej. Tanga, Boxers, etc.), guiar reactivamente al catálogo filtrado
+        if ($page->hasCatalogFilters()) {
+            return redirect()->route('store.home', $page->getCatalogParams($activeUniverse));
+        }
+
+        $allyCampaigns = collect();
+        if (in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($page->title), 'aliados') || str_contains(strtolower($page->title), 'convenios')) {
+            $allyCampaigns = \App\Models\AllyCampaignDirA::with('ally')
+                ->where('status', 'active')
+                ->orderByRaw('COALESCE(start_date, created_at) DESC')
+                ->get();
+        }
 
         $storefrontConfig = CmsStorefrontConfig::forUniverse($activeUniverse);
         $currentStorefront = [
@@ -837,6 +860,7 @@ class StorefrontController extends Controller
 
         return view('store.pwa.page', [
             'page' => $page,
+            'allyCampaigns' => $allyCampaigns,
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,
             'navbarPages' => $navbarPages,

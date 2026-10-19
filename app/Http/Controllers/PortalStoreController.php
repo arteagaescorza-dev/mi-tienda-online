@@ -1073,6 +1073,9 @@ class PortalStoreController extends Controller
     public function updatePage(\App\Http\Requests\Portal\Store\UpdatePageRequest $request, CmsPage $page)
     {
         Gate::authorize('manage-cms');
+        if (in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados'])) {
+            return back()->with('error', 'La página de convenios con aliados es un repositorio automático sincronizado con Hub 7 y no admite configuración manual.');
+        }
         if ($request->filled('content') && ! $request->filled('content_html')) {
             $request->merge(['content_html' => $request->input('content')]);
         }
@@ -1177,6 +1180,9 @@ class PortalStoreController extends Controller
     public function archivePage(CmsPage $page)
     {
         Gate::authorize('manage-cms');
+        if (in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados'])) {
+            return back()->with('error', 'La página de convenios con aliados es un repositorio automático sincronizado con Hub 7 y no puede ser archivada.');
+        }
         $page->update(['status' => 'archived']);
 
         if (request()->wantsJson()) {
@@ -1192,6 +1198,9 @@ class PortalStoreController extends Controller
     public function destroyPage(CmsPage $page)
     {
         Gate::authorize('manage-cms');
+        if (in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados'])) {
+            return back()->with('error', 'La página de convenios con aliados es un repositorio automático sincronizado con Hub 7 y no puede ser eliminada.');
+        }
         $page->delete();
 
         if (request()->wantsJson()) {

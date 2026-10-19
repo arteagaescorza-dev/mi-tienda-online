@@ -174,6 +174,20 @@ class CmsPage extends Model
             $images = array_values(array_unique(array_filter($images)));
         }
 
+        // Si es la página de convenios/aliados, extraer posters de eventos activos en Hub 7
+        if (empty($images) && in_array($this->slug, ['aliados', 'convenios', 'convenios-con-aliados'])) {
+            $campaignBanners = \App\Models\AllyCampaignDirA::where('status', 'active')
+                ->whereNotNull('banner_image')
+                ->where('banner_image', '!=', '')
+                ->orderBy('created_at', 'desc')
+                ->limit(6)
+                ->pluck('banner_image')
+                ->toArray();
+            if (!empty($campaignBanners)) {
+                $images = array_values(array_unique(array_filter($campaignBanners)));
+            }
+        }
+
         // Si no es modo catálogo o no arrojó imágenes, usar galería manual o image_url principal
         if (empty($images)) {
             if (!empty($this->gallery_images) && is_array($this->gallery_images)) {
@@ -185,5 +199,80 @@ class CmsPage extends Model
         }
 
         return $images;
+    }
+
+    /**
+     * Determina si la página tiene configuración reactiva de catálogo.
+     */
+    public function hasCatalogFilters(): bool
+    {
+        if (in_array($this->slug, ['aliados', 'convenios', 'convenios-con-aliados'])) {
+            return false;
+        }
+
+        return (!empty($this->filter_category) && $this->filter_category !== 'all')
+            || (!empty($this->filter_universe) && $this->filter_universe !== 'all')
+            || (!empty($this->filter_supplier) && $this->filter_supplier !== 'all')
+            || !empty($this->filter_tags)
+            || ($this->image_source_mode === 'catalog');
+    }
+
+    /**
+     * Obtiene la categoría efectiva (manual o inferida de slug/título para prendas conocidas).
+     */
+    public function getEffectiveCategory(): ?string
+    {
+        if (!empty($this->filter_category) && $this->filter_category !== 'all') {
+            return $this->filter_category;
+        }
+
+        $knownCategories = ['tanga', 'tangas', 'boxer', 'boxers', 'jock', 'jocks', 'jockstrap', 'jockstraps', 'bikini', 'bikinis', 'tanktop', 'tanktops', 'tank-top', 'swimwear'];
+        $slug = strtolower($this->slug ?? '');
+        $title = strtolower($this->title ?? '');
+
+        foreach ($knownCategories as $cat) {
+            if ($slug === $cat || str_contains($slug, $cat) || str_contains($title, $cat)) {
+                return $cat;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Parámetros de consulta reactivos para guiar al catálogo filtrado.
+     */
+    public function getCatalogParams(?string $fallbackUniverse = null): array
+    {
+        $params = ['tab' => 'catalog'];
+
+        $cat = $this->getEffectiveCategory();
+        if (!empty($cat)) {
+            $params['categoria'] = $cat;
+        }
+
+        if (!empty($this->filter_universe) && $this->filter_universe !== 'all') {
+            $params['universo'] = $this->filter_universe;
+        } elseif ($fallbackUniverse && $fallbackUniverse !== 'all' && $fallbackUniverse !== 'terra') {
+            $params['universo'] = $fallbackUniverse;
+        }
+
+        if (!empty($this->filter_supplier) && $this->filter_supplier !== 'all') {
+            $params['proveedor'] = $this->filter_supplier;
+        }
+
+        if (!empty($this->filter_tags)) {
+            $params['tags'] = $this->filter_tags;
+        }
+
+        return $params;
+    }
+
+    /**
+     * Genera la URL canónica hacia el catálogo con los filtros aplicados.
+     */
+    public function getCatalogUrl(?string $fallbackUniverse = null): string
+    {
+        return route('store.catalog', $this->getCatalogParams($fallbackUniverse));
     }
 }

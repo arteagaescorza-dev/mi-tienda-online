@@ -870,11 +870,13 @@
             $displayTitle = !empty($sec->title) ? $sec->title : ($allyCampaign->title ?? 'Beneficio Exclusivo');
             $displaySubtitle = !empty($sec->subtitle) ? $sec->subtitle : ($allyCampaign->benefit ?? 'Regístrate para recibir tu código único y guardarlo en tu cuenta.');
             $displayBadge = !empty($sec->badge) ? $sec->badge : ($allyCampaign ? 'ALIANZA CON ' . strtoupper($allyCampaign->ally->name ?? 'OFICIAL') : 'BENEFICIO EXCLUSIVO');
+            $titleColor = $st['popup_title_color'] ?? ($settings['title_color'] ?? '#ffffff');
+            $subtitleColor = $st['popup_subtitle_color'] ?? ($settings['subtitle_color'] ?? '#e2e8f0');
           @endphp
 
           <!-- Modal Pop-Up Full Background CMS (Hub 2 / Hub 7 / Hub 3) -->
-          <div id="promoModal_{{ $sec->id }}" class="promo-modal-backdrop" data-close-behavior="{{ $closeBehavior }}" data-delay="{{ $delaySeconds }}" data-frequency="{{ $frequency }}" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 16px;">
-            <div class="popup-modal-card" style="position: relative; width: 100%; max-width: 440px; min-height: 480px; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; flex-direction: column; justify-content: flex-end; color: #ffffff; background-color: #0f172a;">
+          <div id="promoModal_{{ $sec->id }}" class="promo-modal-backdrop" data-close-behavior="{{ $closeBehavior }}" data-delay="{{ $delaySeconds }}" data-frequency="{{ $frequency }}" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 16px;">
+            <div class="popup-modal-card" onclick="event.stopPropagation();" style="position: relative; width: 100%; max-width: 440px; min-height: 480px; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; flex-direction: column; justify-content: flex-end; color: #ffffff; background-color: #0f172a;">
               <!-- Background Image -->
               @if(!empty($bgImage))
                 <div style="position: absolute; inset: 0; background-image: url('{{ asset($bgImage) }}'); background-size: cover; background-repeat: no-repeat; background-position: {{ $focalPoint }}; z-index: 1;"></div>
@@ -885,7 +887,7 @@
               @endif
               
               <!-- Close Button -->
-              <button type="button" onclick="window.closeStorePopup('{{ $sec->id }}')" style="position: absolute; top: 14px; right: 14px; z-index: 10; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; color: #ffffff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: background 0.2s;">&times;</button>
+              <button type="button" class="btn-popup-close-x" onclick="event.stopPropagation(); window.closeStorePopup('{{ $sec->id }}');" onmousedown="event.stopPropagation(); window.closeStorePopup('{{ $sec->id }}');" ontouchstart="event.stopPropagation(); window.closeStorePopup('{{ $sec->id }}');" style="position: absolute; top: 14px; right: 14px; z-index: 999999; pointer-events: auto !important; background: rgba(0,0,0,0.65); border: 1.5px solid rgba(255,255,255,0.4); width: 36px; height: 36px; border-radius: 50%; color: #ffffff; font-size: 1.4rem; font-weight: bold; cursor: pointer !important; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.4);" aria-label="Cerrar ventana emergente">&times;</button>
               
               <!-- Content Floating on top -->
               <div style="position: relative; z-index: 5; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
@@ -895,12 +897,12 @@
                   </span>
                 @endif
                 
-                <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                <h3 style="margin: 0; color: {{ $titleColor }} !important; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,0.6);">
                   {{ $displayTitle }}
                 </h3>
                 
                 @if(!empty($displaySubtitle))
-                  <p style="margin: 0; font-size: 0.8rem; color: #e2e8f0; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">
+                  <p style="margin: 0; color: {{ $subtitleColor }} !important; font-size: 0.8rem; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">
                     {{ $displaySubtitle }}
                   </p>
                 @endif
@@ -918,7 +920,7 @@
                     <div style="display: flex; gap: 6px;">
                       <span style="padding: 8px 10px; font-size: 0.75rem; font-weight: 700; background: #059669; color: #ffffff; border-radius: 8px; display: flex; align-items: center; gap: 4px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 6.46 17.5 2 12.04 2M12.05 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.69 12.05 3.69C16.6 3.69 20.28 7.37 20.28 11.92C20.28 16.46 16.6 20.15 12.05 20.15Z"/></svg>
-                        +52 (2FA)
+                        +52
                       </span>
                       <input type="tel" name="whatsapp" required pattern="[0-9]{10}" maxlength="10" placeholder="WhatsApp (10 dígitos)" style="flex: 1; min-width: 0; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.3); color: #0f172a; outline: none; box-sizing: border-box;">
                     </div>
@@ -931,7 +933,7 @@
                     
                     <div style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.65rem; color: #cbd5e1; text-align: center; margin-top: 2px;">
                       <svg width="10" height="10" fill="none" stroke="#34d399" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                      <span>Código único de un solo uso &bull; Cuenta creada con 2FA WhatsApp</span>
+                      <span>Código único de un solo uso &bull; Envío instantáneo a WhatsApp</span>
                     </div>
                   </form>
                 </div>
@@ -947,7 +949,7 @@
                     <button type="button" id="popupCopyBtn_{{ $sec->id }}" style="flex: 1; padding: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Copiar</button>
                     <button type="button" id="popupApplyBtn_{{ $sec->id }}" style="flex: 1; padding: 8px; background: #059669; border: none; color: #ffffff; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Aplicar al Carrito</button>
                   </div>
-                  <button type="button" onclick="window.closeStorePopup('{{ $sec->id }}')" style="background: none; border: none; color: #94a3b8; font-size: 0.7rem; cursor: pointer; text-decoration: underline; margin-top: 2px;">Cerrar ventana</button>
+                  <button type="button" onclick="event.stopPropagation(); window.closeStorePopup('{{ $sec->id }}');" style="background: none; border: none; color: #94a3b8; font-size: 0.7rem; cursor: pointer; text-decoration: underline; margin-top: 2px;">Cerrar ventana</button>
                 </div>
               </div>
             </div>
@@ -959,6 +961,19 @@
             @endif
           </div>
           <script>
+            window.closeStorePopup = window.closeStorePopup || function(secId) {
+              var m = document.getElementById('promoModal_' + secId);
+              if (m) {
+                m.style.setProperty('display', 'none', 'important');
+                m.classList.remove('active');
+                m.setAttribute('aria-hidden', 'true');
+              }
+              try {
+                sessionStorage.setItem('store_popup_seen_' + secId, '1');
+                localStorage.setItem('store_popup_closed_' + secId, Date.now().toString());
+              } catch(e) {}
+            };
+
             document.addEventListener('DOMContentLoaded', function() {
               var modalId = 'promoModal_{{ $sec->id }}';
               var m = document.getElementById(modalId);
@@ -990,8 +1005,17 @@
               if (closeBehavior === 'outside') {
                 m.addEventListener('click', function(ev) {
                   if (ev.target === m) {
-                    m.style.display = 'none';
+                    window.closeStorePopup('{{ $sec->id }}');
                   }
+                });
+              }
+
+              var closeBtn = m.querySelector('.btn-popup-close-x');
+              if (closeBtn) {
+                closeBtn.addEventListener('click', function(ev) {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  window.closeStorePopup('{{ $sec->id }}');
                 });
               }
             });
@@ -1302,20 +1326,24 @@
     <div class="explore-buttons-grid">
       @forelse($explorePages ?? [] as $ep)
         @php
-          $hasFilters = !empty($ep->filter_universe) || !empty($ep->filter_category);
+          $hasFilters = $ep->hasCatalogFilters();
           $overlayCss = $ep->getOverlayGradientCss();
           $resolvedImages = $ep->getResolvedImages();
           $textColor = $ep->getTextColor();
           $hasCarousel = count($resolvedImages) > 1;
+          $catalogTargetUrl = $ep->getCatalogUrl($activeUniverse);
+          $effectiveCategory = $ep->getEffectiveCategory();
         @endphp
 
         @if($hasFilters)
-          <button type="button" 
-                  class="explore-button-card"
-                  data-action="explore-filter-catalog"
-                  data-universe="{{ $ep->filter_universe }}"
-                  data-category="{{ $ep->filter_category }}"
-                  title="{{ $ep->title }}">
+          <a href="{{ $catalogTargetUrl }}" 
+             class="explore-button-card"
+             data-action="explore-filter-catalog"
+             data-universe="{{ $ep->filter_universe ?? 'all' }}"
+             data-category="{{ $effectiveCategory ?? '' }}"
+             data-supplier="{{ $ep->filter_supplier ?? '' }}"
+             data-tags="{{ $ep->filter_tags ?? '' }}"
+             title="{{ $ep->title }}">
         @else
           <a href="{{ url('/pagina/' . $ep->slug) }}" 
              class="explore-button-card"
@@ -1350,7 +1378,11 @@
           <div class="explore-card-top">
             @if($hasFilters)
               <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
-                {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($ep->filter_category) ? '// ' . strtoupper($ep->filter_category) : '' }}
+                {{ strtoupper($ep->filter_universe ?? 'CATÁLOGO') }} {{ !empty($effectiveCategory) ? '// ' . strtoupper($effectiveCategory) : '' }}
+              </span>
+            @elseif(in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios'))
+              <span style="background: rgba(79, 70, 229, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
+                CONVENIOS // EVENTOS HUB 7
               </span>
             @else
               <span style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.25);">
@@ -1359,13 +1391,12 @@
             @endif
 
             @if($hasFilters)
-              <a href="{{ url('/pagina/' . $ep->slug) }}" 
-                 onclick="event.stopPropagation();" 
-                 style="pointer-events: auto; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; border-radius: 9999px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s;"
-                 title="Leer artículo editorial"
-                 aria-label="Leer artículo editorial">
+              <span class="explore-card-corner-link" 
+                 style="background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: {{ $textColor }}; border-radius: 9999px; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s;"
+                 title="Ver catálogo de {{ $ep->title }}"
+                 aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-              </a>
+              </span>
             @endif
           </div>
 
@@ -1385,6 +1416,9 @@
                 @if($hasFilters)
                   <span>Ver Catálogo</span>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                @elseif(in_array($ep->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($ep->title), 'aliados') || str_contains(strtolower($ep->title), 'convenios'))
+                  <span>Ver Convenios & Eventos</span>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 @else
                   <span>Ver Página</span>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1393,11 +1427,7 @@
             </div>
           </div>
 
-        @if($hasFilters)
-          </button>
-        @else
           </a>
-        @endif
       @empty
         <div style="grid-column: 1 / -1; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle);">
           <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">No hay páginas de exploración configuradas aún. Créalas desde el Hub 2 en la sección "Páginas de Explorar".</p>
