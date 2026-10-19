@@ -821,8 +821,9 @@ class StorefrontController extends Controller
             return redirect()->route('store.home', $page->getCatalogParams($activeUniverse));
         }
 
+        $isAlliesPage = in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($page->title), 'aliados') || str_contains(strtolower($page->title), 'convenios');
         $allyCampaigns = collect();
-        if (in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || str_contains(strtolower($page->title), 'aliados') || str_contains(strtolower($page->title), 'convenios')) {
+        if ($isAlliesPage) {
             $allyCampaigns = \App\Models\AllyCampaignDirA::with('ally')
                 ->where('status', 'active')
                 ->orderByRaw('COALESCE(start_date, created_at) DESC')
@@ -860,6 +861,7 @@ class StorefrontController extends Controller
 
         return view('store.pwa.page', [
             'page' => $page,
+            'isAlliesPage' => $isAlliesPage,
             'allyCampaigns' => $allyCampaigns,
             'activeUniverse' => $activeUniverse,
             'currentStorefront' => $currentStorefront,

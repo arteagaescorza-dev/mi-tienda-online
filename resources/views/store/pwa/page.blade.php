@@ -108,7 +108,7 @@
 @endpush
 
 @section('content')
-<div class="cms-page-wrapper" style="{{ in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados']) ? 'max-width: 1100px;' : '' }}">
+<div class="cms-page-wrapper" style="{{ ($isAlliesPage ?? false) ? 'max-width: 1100px;' : '' }}">
   
   <nav class="cms-breadcrumb-nav" aria-label="Navegación institucional">
     <a href="{{ route('store.home', ['universo' => $activeUniverse]) }}">INICIO</a>
@@ -116,7 +116,7 @@
     <span style="color: var(--text-primary); font-weight: 600;">{{ $page->title }}</span>
   </nav>
 
-  @if(in_array($page->slug, ['aliados', 'convenios', 'convenios-con-aliados']) || !empty($allyCampaigns))
+  @if($isAlliesPage ?? false)
     {{-- REPOSITORIO AUTOMÁTICO DE CONVENIOS & EVENTOS HUB 7 (SIN CONFIGURACIÓN MANUAL) --}}
     <div class="allies-repository-header" style="text-align: center; margin-bottom: 32px; padding: 24px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 20px; color: #ffffff; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);">
       <span style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(99, 102, 241, 0.25); border: 1px solid rgba(99, 102, 241, 0.4); color: #a5b4fc; margin-bottom: 12px;">
